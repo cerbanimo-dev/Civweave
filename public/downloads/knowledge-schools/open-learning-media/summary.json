@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-10-19T10:47:09Z",
-  "records": 202,
-  "mesh_redistributable": 154,
-  "download_candidates": 325,
+  "built_at": "2026-10-26T11:06:48Z",
+  "records": 198,
+  "mesh_redistributable": 152,
+  "download_candidates": 339,
   "providers": {
     "internet-archive": {
       "records": 7,
@@ -11,9 +11,9 @@
       "download_candidates": 15
     },
     "peertube": {
-      "records": 144,
-      "mesh_redistributable": 103,
-      "download_candidates": 259
+      "records": 140,
+      "mesh_redistributable": 101,
+      "download_candidates": 273
     },
     "wikimedia-commons": {
       "records": 51,
@@ -65,18 +65,18 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 5,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 4
+        "wikimedia-commons": 5,
+        "peertube": 3
       },
       "top_titles": [
-        "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "S12 E28: U.S. Government Shutdown & Police Chases: 11/2/25: Last Week Tonight with John Oliver",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Democracy in the Dark: Protecting Your Digital Rights",
         "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
@@ -86,55 +86,55 @@
       "school_slug": "science",
       "required": true,
       "records": 15,
-      "mesh_redistributable": 5,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 15
       },
       "top_titles": [
         "HongKong-PuiChing: Synthetic Biology (Educational Song) (2026) [English]",
+        "REC-CHENNAI: THULIR'S Journey Through Biology, an educational booklet (2026) [Sign Language]",
         "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
-        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
         "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "MammothEdu-East: BioCall Podcast 3 - AI and Synthetic Biology (2026) [Chinese]",
         "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
         "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
-        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
-        "DNA polymorphism | Molecular basis of inheritance | Biology | Khan Academy"
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 12,
-      "mesh_redistributable": 9,
+      "records": 13,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 10,
+        "peertube": 11,
         "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "Coulomb's law | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
         "Electric current Grade 12 Physics NCERT Khan Academy (IN accent)",
         "Electric potential from multiple charges ｜ Grade 12 ｜ Physics ｜ NCERT ｜ Khan Academy (IN accent)",
         "Lenz's law | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
         "Fundamental and Derived quantities | Units and Measurements | Grade 11 | Physics | Khan Academy",
         "Projectile on an incline | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
         "Elastic and inelastic collisions | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
-        "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
-        "Physics Of Crystals by LesBrown"
+        "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)"
       ]
     },
     "chemistry-foundations": {
       "name": "Chemistry Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 23,
-      "mesh_redistributable": 21,
+      "records": 20,
+      "mesh_redistributable": 18,
       "providers": {
         "wikimedia-commons": 7,
-        "peertube": 15,
+        "peertube": 12,
         "internet-archive": 1
       },
       "top_titles": [
@@ -147,7 +147,7 @@
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
-        "Concentration cell | Grade 12 | Chemistry | NCERT | Khan Academy (IN accent)"
+        "Free radical reactions | Grade 11 | Chemistry | NCERT | Khan Academy (IN accent)"
       ]
     },
     "astronomy-space": {
@@ -157,16 +157,16 @@
       "records": 8,
       "mesh_redistributable": 7,
       "providers": {
-        "peertube": 6,
-        "wikimedia-commons": 2
+        "peertube": 7,
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
+        "Stars and Galaxies | The Universe | Middle School | Science | Khan Academy",
         "Solar System explained by simpleshow foundation",
-        "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
-        "The Planet Song - 8 Planets of the Solar System Song for Kids | KidsLearningTube",
         "The Solar System Song",
         "The solar system ｜ Science ｜ Khan Academy (IN accent)",
+        "The Planet Song - 8 Planets of the Solar System Song for Kids | KidsLearningTube",
         "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Animation Using Constraints Example Solar System"
       ]
@@ -175,10 +175,10 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 8,
+      "mesh_redistributable": 8,
       "providers": {
-        "peertube": 9
+        "peertube": 8
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
@@ -188,7 +188,6 @@
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -255,7 +254,7 @@
       "school_slug": "philosophy-and-religion",
       "required": true,
       "records": 3,
-      "mesh_redistributable": 2,
+      "mesh_redistributable": 3,
       "providers": {
         "wikimedia-commons": 1,
         "peertube": 2
@@ -263,7 +262,7 @@
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "The Philosophy of Antifa",
-        "The Philosophy of William James"
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
@@ -329,16 +328,19 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "wikimedia-commons": 4
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
@@ -360,18 +362,17 @@
       "name": "Cooking & Food Safety",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "EU Health and Food Safety - Audit and Non-Audit work explained",
         "HunanU: AptAbt: Aptamer-based antibiotic biosensor for ensuring food safety (2025) - Team Presentation [English]",
         "\" COOKING TERMS AND WHAT THEY MEAN \" 1949 KITCHEN / HOME ECONOMICS TEACHING FILM GG24515",
         "Gear Up for Food Safety",
-        "UM-Macau: PoreGlow: Safeguarding Food Safety Against Live Listeria (2026) - Project Promotion",
         "Food Safety During Power Outages",
         "Food Safety Video"
       ]
@@ -421,16 +422,15 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
-        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
-        "Karnaugh Map - Sum of Products Explained"
+        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard"
       ]
     },
     "woodworking-basics": {
@@ -497,10 +497,10 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 8,
+      "mesh_redistributable": 8,
       "providers": {
-        "peertube": 9
+        "peertube": 8
       },
       "top_titles": [
         "Lecture 1： Probability and Counting ｜ Statistics 110",
@@ -509,7 +509,6 @@
         "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
         "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
         "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
-        "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot",
         "Lecture 28： Inequalities ｜ Statistics 110"
       ]
@@ -535,13 +534,14 @@
       "name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 1,
+      "records": 4,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 3
+        "peertube": 4
       },
       "top_titles": [
         "Civil Rights and the 1950s: Crash Course US History #39",
+        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
       ]
@@ -584,8 +584,8 @@
         "peertube": 2
       },
       "top_titles": [
-        "Fly Like a Butterfly- Kids Yoga and Mindfulness with @yogapalooza",
-        "Inner Smile Guided Meditation for Happiness & Relaxation"
+        "Inner Smile Guided Meditation for Happiness & Relaxation",
+        "Fly Like a Butterfly- Kids Yoga and Mindfulness with @yogapalooza"
       ]
     },
     "communication-conflict": {
@@ -606,40 +606,36 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 1,
+      "records": 2,
       "mesh_redistributable": 0,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
-        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935",
+        "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705"
       ]
     },
     "gardening-plants": {
       "name": "Gardening & Plant Care",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
-      "providers": {
-        "peertube": 1
-      },
-      "top_titles": [
-        "Gardening with a disability #125"
-      ]
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
     },
     "entrepreneurship-small-business": {
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 3,
+      "records": 4,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4,
+        "peertube": 3,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "Entrepreneurship by design",
@@ -675,25 +671,25 @@
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
+        "English Grammar — Present Continuous — Teaching Ideas — 1",
         "English Grammar — Present Continuous — Teaching Ideas — 2",
         "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
         "English Grammar — Present Perfect — Teaching Ideas — 2",
-        "English Grammar — Present Simple — Teaching Ideas — 1",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-        "Jobs Song for Kids | What Do You Do? | Occupations | Kindergarten, Preschool, ESL | Fun Kids English",
-        "English Grammar — Present Continuous — Structure"
+        "English Grammar — Present Continuous — Structure",
+        "English Grammar — Present Perfect — Structure — 2"
       ]
     }
   },
-  "failures": 5,
-  "records_before_relevance_gate": 1144,
-  "records_before_pedagogy_gate": 525,
-  "records_before_selection_gate": 293,
-  "rejected_by_relevance_gate": 619,
-  "rejected_by_pedagogy_gate": 232,
-  "rejected_by_selection_gate": 63,
+  "failures": 0,
+  "records_before_relevance_gate": 1147,
+  "records_before_pedagogy_gate": 520,
+  "records_before_selection_gate": 285,
+  "rejected_by_relevance_gate": 627,
+  "rejected_by_pedagogy_gate": 235,
+  "rejected_by_selection_gate": 58,
   "topic_stats": {
     "world-history": {
       "name": "World History",
@@ -738,18 +734,18 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 5,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 4
+        "wikimedia-commons": 5,
+        "peertube": 3
       },
       "top_titles": [
-        "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "S12 E28: U.S. Government Shutdown & Police Chases: 11/2/25: Last Week Tonight with John Oliver",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
+        "Democracy in the Dark: Protecting Your Digital Rights",
         "Houses of History - Explore the story of Parliament and democracy",
         "An introduction to Parliament"
       ]
@@ -759,55 +755,55 @@
       "school_slug": "science",
       "required": true,
       "records": 15,
-      "mesh_redistributable": 5,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 15
       },
       "top_titles": [
         "HongKong-PuiChing: Synthetic Biology (Educational Song) (2026) [English]",
+        "REC-CHENNAI: THULIR'S Journey Through Biology, an educational booklet (2026) [Sign Language]",
         "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
-        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
         "The Cell High School Biology",
         "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
         "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "MammothEdu-East: BioCall Podcast 3 - AI and Synthetic Biology (2026) [Chinese]",
         "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
         "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
-        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
-        "DNA polymorphism | Molecular basis of inheritance | Biology | Khan Academy"
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 12,
-      "mesh_redistributable": 9,
+      "records": 13,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 10,
+        "peertube": 11,
         "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "Coulomb's law | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
         "Electric current Grade 12 Physics NCERT Khan Academy (IN accent)",
         "Electric potential from multiple charges ｜ Grade 12 ｜ Physics ｜ NCERT ｜ Khan Academy (IN accent)",
         "Lenz's law | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
         "Fundamental and Derived quantities | Units and Measurements | Grade 11 | Physics | Khan Academy",
         "Projectile on an incline | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
         "Elastic and inelastic collisions | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
-        "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
-        "Physics Of Crystals by LesBrown"
+        "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)"
       ]
     },
     "chemistry-foundations": {
       "name": "Chemistry Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 23,
-      "mesh_redistributable": 21,
+      "records": 20,
+      "mesh_redistributable": 18,
       "providers": {
         "wikimedia-commons": 7,
-        "peertube": 15,
+        "peertube": 12,
         "internet-archive": 1
       },
       "top_titles": [
@@ -820,7 +816,7 @@
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
-        "Concentration cell | Grade 12 | Chemistry | NCERT | Khan Academy (IN accent)"
+        "Free radical reactions | Grade 11 | Chemistry | NCERT | Khan Academy (IN accent)"
       ]
     },
     "astronomy-space": {
@@ -830,16 +826,16 @@
       "records": 8,
       "mesh_redistributable": 7,
       "providers": {
-        "peertube": 6,
-        "wikimedia-commons": 2
+        "peertube": 7,
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
+        "Stars and Galaxies | The Universe | Middle School | Science | Khan Academy",
         "Solar System explained by simpleshow foundation",
-        "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
-        "The Planet Song - 8 Planets of the Solar System Song for Kids | KidsLearningTube",
         "The Solar System Song",
         "The solar system ｜ Science ｜ Khan Academy (IN accent)",
+        "The Planet Song - 8 Planets of the Solar System Song for Kids | KidsLearningTube",
         "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Animation Using Constraints Example Solar System"
       ]
@@ -848,10 +844,10 @@
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 8,
+      "mesh_redistributable": 8,
       "providers": {
-        "peertube": 9
+        "peertube": 8
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
@@ -861,7 +857,6 @@
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
-        "Vartika: Inside nowadays Mathematics (Part 4)",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -928,7 +923,7 @@
       "school_slug": "philosophy-and-religion",
       "required": true,
       "records": 3,
-      "mesh_redistributable": 2,
+      "mesh_redistributable": 3,
       "providers": {
         "wikimedia-commons": 1,
         "peertube": 2
@@ -936,7 +931,7 @@
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "The Philosophy of Antifa",
-        "The Philosophy of William James"
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy"
       ]
     },
     "vibe-coding": {
@@ -1002,16 +997,19 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "wikimedia-commons": 4
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
@@ -1033,18 +1031,17 @@
       "name": "Cooking & Food Safety",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "EU Health and Food Safety - Audit and Non-Audit work explained",
         "HunanU: AptAbt: Aptamer-based antibiotic biosensor for ensuring food safety (2025) - Team Presentation [English]",
         "\" COOKING TERMS AND WHAT THEY MEAN \" 1949 KITCHEN / HOME ECONOMICS TEACHING FILM GG24515",
         "Gear Up for Food Safety",
-        "UM-Macau: PoreGlow: Safeguarding Food Safety Against Live Listeria (2026) - Project Promotion",
         "Food Safety During Power Outages",
         "Food Safety Video"
       ]
@@ -1094,16 +1091,15 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
-        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
-        "Karnaugh Map - Sum of Products Explained"
+        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard"
       ]
     },
     "woodworking-basics": {
@@ -1170,10 +1166,10 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 8,
+      "mesh_redistributable": 8,
       "providers": {
-        "peertube": 9
+        "peertube": 8
       },
       "top_titles": [
         "Lecture 1： Probability and Counting ｜ Statistics 110",
@@ -1182,7 +1178,6 @@
         "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
         "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
         "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
-        "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot",
         "Lecture 28： Inequalities ｜ Statistics 110"
       ]
@@ -1208,13 +1203,14 @@
       "name": "Law & Rights Basics",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 1,
+      "records": 4,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 3
+        "peertube": 4
       },
       "top_titles": [
         "Civil Rights and the 1950s: Crash Course US History #39",
+        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
         "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
       ]
@@ -1257,8 +1253,8 @@
         "peertube": 2
       },
       "top_titles": [
-        "Fly Like a Butterfly- Kids Yoga and Mindfulness with @yogapalooza",
-        "Inner Smile Guided Meditation for Happiness & Relaxation"
+        "Inner Smile Guided Meditation for Happiness & Relaxation",
+        "Fly Like a Butterfly- Kids Yoga and Mindfulness with @yogapalooza"
       ]
     },
     "communication-conflict": {
@@ -1279,40 +1275,36 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 1,
+      "records": 2,
       "mesh_redistributable": 0,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
-        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935",
+        "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705"
       ]
     },
     "gardening-plants": {
       "name": "Gardening & Plant Care",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
-      "providers": {
-        "peertube": 1
-      },
-      "top_titles": [
-        "Gardening with a disability #125"
-      ]
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
     },
     "entrepreneurship-small-business": {
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 3,
+      "records": 4,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4,
+        "peertube": 3,
         "wikimedia-commons": 1
       },
       "top_titles": [
-        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "Entrepreneurship by design",
@@ -1348,15 +1340,15 @@
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
+        "English Grammar — Present Continuous — Teaching Ideas — 1",
         "English Grammar — Present Continuous — Teaching Ideas — 2",
         "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
         "English Grammar — Present Perfect — Teaching Ideas — 2",
-        "English Grammar — Present Simple — Teaching Ideas — 1",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
-        "Jobs Song for Kids | What Do You Do? | Occupations | Kindergarten, Preschool, ESL | Fun Kids English",
-        "English Grammar — Present Continuous — Structure"
+        "English Grammar — Present Continuous — Structure",
+        "English Grammar — Present Perfect — Structure — 2"
       ]
     }
   },
@@ -1418,7 +1410,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 15,
+      "records": 17,
       "available": true
     },
     "practical-life": {
@@ -1440,7 +1432,7 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 24,
+      "records": 22,
       "available": true
     },
     "maker-creative": {
@@ -1480,7 +1472,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 19,
+      "records": 20,
       "available": true
     },
     "deep-science": {
@@ -1502,7 +1494,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 43,
+      "records": 42,
       "available": true
     },
     "humanities-culture": {
@@ -1526,7 +1518,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 23,
+      "records": 26,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -1546,7 +1538,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 11,
+      "records": 12,
       "available": true
     },
     "mind-body-practice": {
@@ -1564,7 +1556,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 8,
+      "records": 9,
       "available": true
     },
     "relationships-care": {
@@ -1585,7 +1577,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8,
-      "records": 10,
+      "records": 11,
       "available": true
     },
     "garden-nature": {
@@ -1598,11 +1590,10 @@
         "climate-environment"
       ],
       "covered_topics": [
-        "gardening-plants",
         "biology-life",
         "climate-environment"
       ],
-      "coverage": 1.0,
+      "coverage": 0.6667,
       "records": 8,
       "available": true
     },
@@ -1623,7 +1614,7 @@
         "communication-conflict"
       ],
       "coverage": 1.0,
-      "records": 9,
+      "records": 8,
       "available": true
     },
     "music-performance": {
@@ -1693,7 +1684,7 @@
         "health-wellness"
       ],
       "coverage": 0.6,
-      "records": 12,
+      "records": 11,
       "available": true
     },
     "hands-on-maker": {
@@ -1715,7 +1706,7 @@
         "computing-basics"
       ],
       "coverage": 0.6667,
-      "records": 15,
+      "records": 14,
       "available": true
     },
     "environment-resilience": {
@@ -1772,7 +1763,7 @@
         "critical-thinking"
       ],
       "coverage": 1.0,
-      "records": 10,
+      "records": 12,
       "available": true
     },
     "technology-builder": {
@@ -1794,7 +1785,7 @@
         "prompt-engineering"
       ],
       "coverage": 1.0,
-      "records": 12,
+      "records": 11,
       "available": true
     }
   },
@@ -1811,9 +1802,9 @@
     "schema": "civweave.open-learning-media-selection-gate.v3",
     "policy": "Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."
   },
-  "records_before_title_quality_gate": 230,
-  "rejected_by_title_quality_gate": 28,
-  "rejected_topic_links_by_title_quality_gate": 30,
+  "records_before_title_quality_gate": 227,
+  "rejected_by_title_quality_gate": 29,
+  "rejected_topic_links_by_title_quality_gate": 31,
   "title_quality_gate": {
     "schema": "civweave.open-learning-media-title-quality-gate.v2",
     "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary; known software/content-category collisions are rejected for language learning."

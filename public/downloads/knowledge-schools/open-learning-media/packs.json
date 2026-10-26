@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-packs.v1",
-  "built_at": "2026-10-19T10:47:09Z",
+  "built_at": "2026-10-26T11:06:48Z",
   "revision": "subject-media-packs-v2.5",
   "default_pack": "general-knowledge",
   "packs": [
@@ -179,7 +179,7 @@
         "biology-life",
         "climate-environment"
       ],
-      "coverage": 1.0,
+      "coverage": 0.6667,
       "available": true
     },
     {
