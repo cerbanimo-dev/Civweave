@@ -2,9 +2,9 @@
 
 ## Status
 
-Phase 1 implementation on the development branch. This adds Civweave Settings → Android Device Host,
+Phase 1 plus a first Android host handshake implementation on the development branch. This adds Civweave Settings → Android Device Host,
 a browser update manager, a typed signed-release contract, an offline manifest signer,
-and regression tests. **It does not produce a built APK or activate installation.**
+and regression tests. **It does not publish a signed release APK or activate native installation.**
 Until an operator provisions a trusted Ed25519 release key and publishes a valid
 release manifest, the download action fails closed.
 
@@ -54,6 +54,31 @@ verify the APK signature and compatible package ID/certificate during installati
 the Android signing identity stable across updates. Loss of that identity cannot be solved by
 changing only the release manifest.
 
+## Experimental native host
+
+Android Studio can open `native/android/device-host/`. GitHub Actions compiles
+`:app:assembleDebug` using Android SDK 35, Gradle 8.9 and Java 17. The generated
+debug APK is not a production upgrade; CI-generated debug signing is not a stable
+Android release certificate.
+
+Host version 0.1.0 opens a native pairing screen. While Android keeps its activity
+alive, a read-only server binds to `127.0.0.1:8792`. The PWA update manager
+accepts a user-entered, 10-character code valid for two minutes and five failed
+attempts. Successful pairing issues an opaque, ephemeral bearer token that is kept
+only in PWA sessionStorage and native app process memory.
+
+The only endpoints are `OPTIONS /v1/pair`, `OPTIONS /v1/status`,
+`POST /v1/pair` and paired `GET /v1/status`, which advertises only
+`android.host.status.v1`. Disallowed browser origins, unauthenticated status
+requests, and other routes fail closed. Origin headers constrain browser
+callers, but are forgeable by native processes. Future privileged endpoints must
+independently authenticate requests and require user approval.
+
+**Not yet a background service:** Android may terminate the activity when not
+foregrounded. There is no local AI, BLE, package-install or unrestricted command
+execution endpoint in this milestone. The upcoming PackageInstaller integration
+must independently validate signed releases and preserve user approval.
+
 ## User flow
 
 1. User opens Civweave Settings → Manage installation and direct APK updates.
@@ -63,10 +88,7 @@ changing only the release manifest.
 5. User opens the saved file and confirms any Android unknown-app-source and install prompts.
 
 The browser cannot silently install APKs. This phase never says an APK was installed merely
-because the download completed. The browser cannot yet authenticate an installed host, so
-the UI reports installed version as **unknown**. A subsequent native host implementation must
-add authenticated pairing, version discovery, Android-approved PackageInstaller handoff, explicit
-install result reporting, compatibility negotiation and retained-data migration tests.
+because the download completed. The browser can now authenticate the experimental host and read its version after manual pairing. When unreachable, the installed version remains **unknown**. The next host milestone must implement independently verified native update download, Android-approved PackageInstaller handoff, explicit install-result reporting, background lifecycle, compatibility negotiation and retained-data migration tests.
 
 The PWA remains usable if the optional Android host is unavailable. Do not use runtime
 application-code injection or download/install new executables behind users' backs.
@@ -75,6 +97,8 @@ application-code injection or download/install new executables behind users' bac
 
 - `node --test scripts/test-device-host-updates.mjs`
 - `node --check public/app/device-host-updates.mjs`
+- `node --check public/app/device-host-client.mjs`
+- Android Gradle CI `:app:assembleDebug` compile gate
 - `npm run check` before shipping a materialized release
 - `npm run build:install` to regenerate the offline install kit
 - Android instrumentation on real devices for initial install, update, rollback rejection,
