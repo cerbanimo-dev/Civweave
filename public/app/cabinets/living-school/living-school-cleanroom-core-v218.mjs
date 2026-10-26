@@ -39,11 +39,14 @@ function tierConfig(config,tier){
 }
 // Force SSE only for the explicitly selected same-phone Qwen server. Other
 // providers retain their user-selected streaming behavior and routing.
-function withNativeMossStream(config={}){
+const NATIVE_QWEN_DESIGN_TIMEOUT_MS=1200000;
+function withNativeMossStream(config={},stage=''){
   const provider=providerName(config),model=clean(config.model,160);
   const endpoint=clean(config.endpoint||config.baseUrl,320).replace(/\/+$/,'');
-  return provider==='openai-compatible'&&model==='qwen35-4b-native'&&
-    endpoint==='http://127.0.0.1:8080/v1'?{...config,stream:true}:config;
+  if(provider!=='openai-compatible'||model!=='qwen35-4b-native'||
+    endpoint!=='http://127.0.0.1:8080/v1')return config;
+  return{...config,stream:true,
+    ...(stage==='design'?{timeoutMs:Math.max(Number(config.timeoutMs)||0,NATIVE_QWEN_DESIGN_TIMEOUT_MS)}:{})};
 }
 function resultText(result){
   const direct=[result?.outputText,result?.text,result?.output,result?.content,result?.responseText].find(value=>typeof value==='string'&&value.trim());
@@ -93,7 +96,7 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
     signal:options.signal,onEvent:options.onEvent,onToken:options.onToken,
     purpose:DESIGN_PURPOSE,taskTier:'complex',executionProfile:'interactive',
     ...(providerName(config)==='ollama'?{think:false}:{}),
-    config:withNativeMossStream({...tierConfig(config,'complex'),maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.25,0.35)}),
+    config:withNativeMossStream({...tierConfig(config,'complex'),maxTokens:Math.max(Number(config.maxTokens)||0,8192),temperature:Math.min(Number(config.temperature)||0.25,0.35)},'design'),
     context,
     messages:[
       {role:'system',content:'You are Moss performing the research synthesis and instructional design pass for Living School. Produce a substantive human-readable teaching and curriculum design packet. Do not serialize the final application schema and do not return JSON.'},
