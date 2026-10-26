@@ -41,9 +41,42 @@ function queuedPlan(read){
   const queued=read(QUEUE_KEY,null);
   return queued?.approvedAt&&queued.approvedPlanId&&queued.capability?queued:null;
 }
+// Old Moss messages may contain complete, high-level plans that were later
+// overwritten in the single pending-plan slot. Recover only explicit,
+ // human-visible plan outlines, never infer approval from chat text.
+const CHAT_THREAD_KEY='civweave.guide-thread.v350.living-school';
+export function recoverableChatPlans(read){
+  const thread=(typeof read==='function'?read:()=>null)(CHAT_THREAD_KEY,{});
+  const messages=Array.isArray(thread?.messages)?thread.messages:[];
+  const plans=[];
+  for(let index=0;index<messages.length;index++){
+    const msg=messages[index];
+    if(msg?.role!=='assistant')continue;
+    const content=clean(msg.text||msg.content,12000);
+    const title=content.match(/Learning Journey plan:\s*[“"]([^”"\n]{3,240})[”"]/i)?.[1];
+    const capability=content.match(/^Goal:\s*(.{3,900})$/im)?.[1];
+    if(!title||!capability)continue;
+    const modules=[];
+    const rx=/^\s*\d+\.\s+(.+)\n\s*Focus:\s*(.+)\n\s*Demonstrate:\s*(.+)/gm;
+    for(const match of content.matchAll(rx))if(modules.length<8)
+      modules.push({title:clean(match[1],220),focus:clean(match[2],700),outcome:clean(match[3],700)});
+    if(!modules.length)continue;
+    const id='chat-recovered-'+clean(msg.id||String(index),100).replace(/[^a-zA-Z0-9-]/g,'-');
+    const date=clean(msg.at||thread.updatedAt||'',90);
+    plans.push({schema:LEARNING_PLAN_SCHEMA,id,state:'review',createdAt:date,updatedAt:date,
+      request:{title:clean(title,240),capability:clean(capability,900),
+        level:clean(content.match(/^Level:\s*(.+)$/im)?.[1]||'beginner',80),
+        mode:clean(content.match(/^Mode:\s*(.+)$/im)?.[1]||'guided',80),
+        proof:clean(content.match(/^Proof of capability:\s*(.+)$/im)?.[1]||'',1200),
+        count:modules.length,intent:'new',newPath:true},
+      modules,assumptions:[],authoring:{mode:'chat-history-recovery',recoveredFromMessage:id}});
+  }
+  return plans.slice(-40);
+}
+
 export function learningJourneySnapshot(read,schoolState={}){
   const readRecord=typeof read==='function'?read:()=>null;
-  const plan=approvedPlan(readRecord),queue=queuedPlan(readRecord),plans=storedPlans(readRecord);
+  const plan=approvedPlan(readRecord),queue=queuedPlan(readRecord),plans=storedPlans(readRecord),recoverable=recoverableChatPlans(readRecord).filter(candidate=>!plans.some(plan=>matching(plan.request,candidate.request)));
   const current=schoolState?.school?.modules?.length?schoolState.school:null;
   const recovery=schoolState?.generationRecovery;
   const rows=[],seen=new Set();
@@ -63,6 +96,11 @@ export function learningJourneySnapshot(read,schoolState={}){
       entry.state==='revision-requested'?'Revision requested':entry.state==='superseded'?'Older plan · not approved':'Declined plan';
     add('plan:'+entry.id,entry.request.title,entry.request.capability,status,kind,entry.updatedAt||entry.createdAt,
       failed?clean(recovery?.unstructured?.error||'The last generation did not complete.',900):'');
+  }
+  for(const recovered of recoverable){
+    add('recover:'+recovered.id,recovered.request.title,recovered.request.capability,
+      'Recoverable from Moss chat · review required','recoverable',recovered.updatedAt,
+      'Original approval cannot be confirmed; restore the outline and approve it again before generation');
   }
   if(queue&&!seen.has('plan:'+queue.approvedPlanId)){
     const ready=matching(current,queue)&&current.modules.length>=Math.max(1,Number(queue.count)||1);
@@ -103,5 +141,5 @@ export function learningJourneySnapshot(read,schoolState={}){
   const retry=generatable[0]||null;
   const failedRequest=recovery?.request?.capability&&['failed','partial'].includes(recovery.status)?recovery.request:null;
   const focus=(!current?(plan?.state==='approved'?plan.request:queue||failedRequest):null);
-  return {rows:rows.slice(0,50),retry,generatable,plans,focus,plan,queue};
+  return {rows:rows.slice(0,50),retry,generatable,plans,recoverable,focus,plan,queue};
 }
