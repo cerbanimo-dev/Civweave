@@ -1,7 +1,7 @@
 ;(() => {
 'use strict';
 
-const V305_REVISION = 'radio-core-shell-v305';
+const V305_REVISION = 'radio-core-shell-v305-direct-audio-v1';
 const V305_REQUIRED_ASSETS = Object.freeze([
   '/app/install-boundary-v146.js',
   '/app/experience-orchestrator-v232.js',
@@ -11,6 +11,7 @@ const V305_REQUIRED_ASSETS = Object.freeze([
   '/app/canonical-playlists-v1.js',
   '/app/radio-playlist-governance-v1.js',
   '/app/radio-track-map-v241.json',
+  '/downloads/hub-media/open-music/starter-catalog.json',
   '/app/radio-directory-v240/civweave.txt',
   '/app/radio-directory-v240/living-school.txt',
   '/app/radio-directory-v240/cerbanimo.txt',

@@ -1,19 +1,23 @@
+(()=>{
+'use strict';
+const VERSION='1.0.0-native-direct-owner';
+if(globalThis.CivweaveFellowFareCabinetBridgeV1?.version===VERSION)return;
 const ORIGIN=location.origin;
 const NATIVE=Boolean(document.querySelector('[data-fellowfare-native-host]'));
-const BRIDGE_PEER=NATIVE?window:parent;
+const BRIDGE_PEER=parent;
 const LEGACY_KEY='fellowfare.mvp.state.v3';
 const V2_KEY='fellowfare.marketplace.v2';
-const routeButton=route=>document.querySelector(`[data-route="${CSS.escape(route)}"]`);
-function route(route){const button=routeButton(route);if(button){button.click();return true}globalThis.CivweaveFellowFareMarketplaceV2?.routeTo?.(route);return false}
+let ready=false;
+function route(name){const api=globalThis.CivweaveFellowFareMarketplaceV2;if(!api?.routeTo)return false;api.routeTo(name);return true}
 function composer(mode='offer',text=''){
   const api=globalThis.CivweaveFellowFareMarketplaceV2;
-  if(api?.openComposer){api.openComposer(mode==='need'?'need':'offer');requestAnimationFrame(()=>{const form=document.querySelector('#ffv2ComposerForm');if(form&&text){form.elements.description.value=String(text).slice(0,2400);if(!form.elements.title.value)form.elements.title.value=String(text).trim().slice(0,120)}});return}
-  route('loom');
+  if(api?.openComposer){api.openComposer(mode==='need'?'need':'offer');requestAnimationFrame(()=>{const form=document.querySelector('#ffv2ComposerForm');if(form&&text){form.elements.description.value=String(text).slice(0,2400);if(!form.elements.title.value)form.elements.title.value=String(text).trim().slice(0,120)}});return true}
+  return route('loom');
 }
 function command(name,payload={}){
-  if(name==='compose'){composer(payload.mode,payload.text||'');return}
-  if(['market','loom','assemblies','inbox','profile'].includes(name)){route(name);return}
-  route('market');
+  if(name==='compose')return composer(payload.mode,payload.text||'');
+  if(['market','loom','assemblies','inbox','profile'].includes(name))return route(name);
+  return false;
 }
 function importLegacyThread(thread={}){
   const api=globalThis.CivweaveFellowFareMarketplaceV2;if(!api)return null;
@@ -28,9 +32,10 @@ function consumeExchangeImport(message){
   const threads=message?.bundle?.entities?.threads;
   if(!Array.isArray(threads)||!threads.length)return;
   const imported=threads.map(importLegacyThread).filter(Boolean);
-  BRIDGE_PEER.postMessage({type:'civweave:exchange-import-receipt',status:'reviewed',detail:`Imported ${imported.length} reviewed FellowFare listing${imported.length===1?'':'s'} into the live marketplace.`,automaticEffect:false},ORIGIN);
+  const receipt={type:'civweave:exchange-import-receipt',status:'reviewed',detail:`Imported ${imported.length} reviewed FellowFare listing${imported.length===1?'':'s'} into the live marketplace.`,automaticEffect:false};
+  if(NATIVE)dispatchEvent(new CustomEvent('fellowfare:cabinet-receipt',{detail:receipt}));else BRIDGE_PEER.postMessage(receipt,ORIGIN);
 }
-addEventListener('message',event=>{
+if(!NATIVE)addEventListener('message',event=>{
   if(event.origin!==ORIGIN||event.source!==BRIDGE_PEER||!event.data||typeof event.data!=='object')return;
   if(event.data.type==='fellowfare:cabinet-command'){command(String(event.data.command||'market'),event.data.payload||{});return}
   if(event.data.type==='civweave:exchange-import'){consumeExchangeImport(event.data);return}
@@ -39,9 +44,14 @@ addEventListener('storage',event=>{
   if(![LEGACY_KEY,V2_KEY,'civweave.reward-ledger.v2','civweave.cerbanimo-commerce-receipts.v1'].includes(event.key)||event.newValue===event.oldValue)return;
   globalThis.CivweaveFellowFareMarketplaceV2?.render?.();
 });
-addEventListener('DOMContentLoaded',()=>{
+function start(){
   document.body.classList.add(NATIVE?'ff-market-native':'ff-cabinet-embedded');
   const hash=location.hash.slice(1);if(!['market','loom','assemblies','inbox','profile'].includes(hash))history.replaceState(null,'','#market');
   globalThis.CivweaveFellowFareMarketplaceV2?.render?.(location.hash.slice(1)||'market');
-  BRIDGE_PEER.postMessage({type:'fellowfare:cabinet-ready',version:'2.0.0-live-market',capabilities:['products','services','learning-modules','tutoring','resources','needs','collectives','listings','orders','proposals','agreements','assemblies','canonical-acorns','canonical-buttons','commerce-receipts','usd-money-edge-status','portable-market-data']},ORIGIN);
-},{once:true});
+  ready=true;
+  const detail={type:'fellowfare:cabinet-ready',version:'2.0.0-live-market',capabilities:['products','services','learning-modules','tutoring','resources','needs','collectives','listings','orders','proposals','agreements','assemblies','canonical-acorns','canonical-buttons','commerce-receipts','usd-money-edge-status','portable-market-data']};
+  if(NATIVE)dispatchEvent(new CustomEvent('fellowfare:cabinet-ready',{detail}));else BRIDGE_PEER.postMessage(detail,ORIGIN);
+}
+globalThis.CivweaveFellowFareCabinetBridgeV1=Object.freeze({version:VERSION,native:NATIVE,command,importReviewed:consumeExchangeImport,get ready(){return ready}});
+if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();

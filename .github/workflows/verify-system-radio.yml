@@ -9,6 +9,7 @@ on:
       - 'public/app/radio-track-map-v241.json'
       - 'public/app/radio-directory-v240/**'
       - 'public/app/radio-playlist-governance-v1.js'
+      - 'public/downloads/hub-media/open-music/**'
       - 'public/app/cabinets/living-school/index.html'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/experience-orchestrator-v232.js'
@@ -19,9 +20,12 @@ on:
       - 'scripts/verify-living-school-radio-v252.mjs'
       - 'scripts/verify-radio-bootstrap-priority-v267.mjs'
       - 'scripts/verify-radio-shell-guarantee-v305.mjs'
+      - 'scripts/test-radio-direct-audio-v1.mjs'
+      - 'scripts/test-radio-core-starter-cache-v1.mjs'
       - '.github/workflows/verify-system-radio.yml'
       - 'VERSION'
       - 'package.json'
+      - 'package-lock.json'
   push:
     branches: [main, staging]
     paths:
@@ -31,6 +35,7 @@ on:
       - 'public/app/radio-track-map-v241.json'
       - 'public/app/radio-directory-v240/**'
       - 'public/app/radio-playlist-governance-v1.js'
+      - 'public/downloads/hub-media/open-music/**'
       - 'public/app/cabinets/living-school/index.html'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/experience-orchestrator-v232.js'
@@ -41,9 +46,12 @@ on:
       - 'scripts/verify-living-school-radio-v252.mjs'
       - 'scripts/verify-radio-bootstrap-priority-v267.mjs'
       - 'scripts/verify-radio-shell-guarantee-v305.mjs'
+      - 'scripts/test-radio-direct-audio-v1.mjs'
+      - 'scripts/test-radio-core-starter-cache-v1.mjs'
       - '.github/workflows/verify-system-radio.yml'
       - 'VERSION'
       - 'package.json'
+      - 'package-lock.json'
   workflow_dispatch:
 
 permissions:
@@ -58,6 +66,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
       - name: Check runtime syntax
         run: |
           node --check public/app/system-radio-agent-v233.js
@@ -71,6 +81,8 @@ jobs:
           node --check scripts/verify-living-school-radio-v252.mjs
           node --check scripts/verify-radio-bootstrap-priority-v267.mjs
           node --check scripts/verify-radio-shell-guarantee-v305.mjs
+      - name: Verify direct audio, offline playback, licensing, and shared ownership
+        run: node --test scripts/test-radio-direct-audio-v1.mjs scripts/test-radio-core-starter-cache-v1.mjs
       - name: Verify radio contract
         run: |
           node scripts/verify-system-radio-v233.mjs

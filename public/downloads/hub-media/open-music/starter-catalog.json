@@ -1,0 +1,213 @@
+{
+  "schema": "civweave.open-music-catalog.v1",
+  "built_at": "2026-10-26",
+  "record_count": 3,
+  "records": [
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "61065",
+      "playlist_id": "living-school",
+      "matched_query": "curated:61065",
+      "title": "Climate Change The Dirty Water Remix",
+      "artist": "J.Lang",
+      "album": "",
+      "source_url": "https://ccmixter.org/files/djlang59/61065",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "https://creativecommons.org/licenses/by/3.0/",
+        "evidence": "Primary ccMixter source page explicitly names Creative Commons Attribution (3.0), verified 2026-10-26: https://ccmixter.org/files/djlang59/61065",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "/downloads/hub-media/open-music/audio/ccmixter-61065.mp3",
+          "mime": "audio/mpeg",
+          "bytes": 4741999,
+          "role": "redistributed-source-download",
+          "sha256": "61982c5d1e5c6e0df666f450da54d6408b3e70813d5e7381f5c885a9952466d4"
+        }
+      ],
+      "attribution": {
+        "creator": "J.Lang",
+        "source_title": "Climate Change The Dirty Water Remix",
+        "source_url": "https://ccmixter.org/files/djlang59/61065",
+        "license": "Attribution (3.0)",
+        "license_url": "https://creativecommons.org/licenses/by/3.0/",
+        "credit_line": "J.Lang featuring Coruscate",
+        "changes": "Unmodified source recording."
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": "61982c5d1e5c6e0df666f450da54d6408b3e70813d5e7381f5c885a9952466d4",
+      "hash_state": "verified-source-download-sha256",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "climate",
+        "truth",
+        "accountability",
+        "future"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:61065"
+        }
+      ],
+      "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
+      "quality_score": 125,
+      "source_download_url": "https://ccmixter.org/content/djlang59/djlang59_-_Climate_Change_The_Dirty_Water_Remix.mp3",
+      "duration_seconds": 197
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "28236",
+      "playlist_id": "civweave",
+      "matched_query": "curated:28236",
+      "title": "Freedom in my voice",
+      "artist": "Carosone",
+      "album": "",
+      "source_url": "https://ccmixter.org/files/Carosone/28236",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "https://creativecommons.org/licenses/by/3.0/",
+        "evidence": "Primary ccMixter source page explicitly names Creative Commons Attribution (3.0), verified 2026-10-26: https://ccmixter.org/files/Carosone/28236",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "/downloads/hub-media/open-music/audio/ccmixter-28236.mp3",
+          "mime": "audio/mpeg",
+          "bytes": 3704835,
+          "role": "redistributed-source-download",
+          "sha256": "4073713605c3746915488133abc644f246a999b930dce0008a2721a6ff07b517"
+        }
+      ],
+      "attribution": {
+        "creator": "Carosone",
+        "source_title": "Freedom in my voice",
+        "source_url": "https://ccmixter.org/files/Carosone/28236",
+        "license": "Attribution (3.0)",
+        "license_url": "https://creativecommons.org/licenses/by/3.0/",
+        "credit_line": "Carosone featuring SackJo22, Ditto Ditto",
+        "changes": "Unmodified source recording."
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": "4073713605c3746915488133abc644f246a999b930dce0008a2721a6ff07b517",
+      "hash_state": "verified-source-download-sha256",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "creative freedom",
+        "reuse",
+        "open source"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28236"
+        }
+      ],
+      "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
+      "quality_score": 125,
+      "source_download_url": "https://ccmixter.org/content/Carosone/Carosone_-_Freedom_in_my_voice.mp3",
+      "duration_seconds": 231
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "57569",
+      "playlist_id": "anarchadia",
+      "matched_query": "curated:57569",
+      "title": "The Singularity",
+      "artist": "Aussens@iter",
+      "album": "",
+      "duration_seconds": 225,
+      "source_url": "https://ccmixter.org/files/tobias_weber/57569",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "https://creativecommons.org/licenses/by/3.0/",
+        "evidence": "Primary ccMixter source page explicitly names Creative Commons Attribution (3.0), verified 2026-10-26: https://ccmixter.org/files/tobias_weber/57569",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "/downloads/hub-media/open-music/audio/ccmixter-57569.mp3",
+          "mime": "audio/mpeg",
+          "bytes": 3597758,
+          "role": "redistributed-source-download",
+          "sha256": "441395fc09b2d7a8fe21924d58fe8a11792f87e7eb4981c5070fb90f809a4a2d"
+        }
+      ],
+      "attribution": {
+        "creator": "Aussens@iter",
+        "source_title": "The Singularity",
+        "source_url": "https://ccmixter.org/files/tobias_weber/57569",
+        "license": "Attribution (3.0)",
+        "license_url": "https://creativecommons.org/licenses/by/3.0/",
+        "credit_line": "Aussens@iter featuring Mr. Yesterday & Snowflake",
+        "changes": "Unmodified source recording."
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": "441395fc09b2d7a8fe21924d58fe8a11792f87e7eb4981c5070fb90f809a4a2d",
+      "hash_state": "verified-source-download-sha256",
+      "vocal_verified": true,
+      "vocal_evidence": "exact ccMixter upload manually reviewed for vocals and lyrical theme before configuration",
+      "instrumental_only": false,
+      "teeth_score": 5,
+      "themes": [
+        "automation",
+        "corporate power",
+        "humanity",
+        "technology"
+      ],
+      "explicit": false,
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:57569"
+        }
+      ],
+      "candidate_id": "openmusic:a4f43dde6f263bd73763e649",
+      "quality_score": 125,
+      "source_download_url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_The_Singularity.mp3"
+    }
+  ],
+  "distribution": "Unmodified CC BY 3.0 source recordings, fetched by the app only after explicit Play or Save offline."
+}

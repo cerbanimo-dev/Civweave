@@ -82,10 +82,14 @@ test('embedded Cerbanimo waits for its asynchronous canonical workbench mount',{
 
 test('embedded FellowFare consumes the requested tab through its existing controller',t=>{
   const app=fixture(t,{path:'/app/fellowfare-cabinet-v144.html',system:'fellowfare',feature:'assemblies'}),{window}=app;
+  window.eval(read('app/services/fellowfare/marketplace-v2.js'));
   window.eval(read('app/fellowfare-native-host-v207.js'));
+  window.eval(read('app/services/fellowfare/cabinet-bridge.js'));
   window.eval(read('app/fellowfare-cabinet-v144.js'));
   app.start();
   assert.equal(window.document.querySelector('[data-ffc-command="assemblies"]').hasAttribute('aria-current'),true);
+  assert.equal(window.document.body.dataset.ffRoute,'assemblies','The shortcut must render the requested native screen, not only decorate its tab.');
+  assert.equal(window.document.querySelector('#main h1').textContent,'From listing to fulfilled exchange.');
   assert.equal(window.document.querySelector('[data-ffc-status]').textContent,'Opened orders.');
   assert.equal(new URL(window.location.href).searchParams.get('feature'),'assemblies');
   assert.equal(window.document.getElementById('cw-themed-system-nav'),null);

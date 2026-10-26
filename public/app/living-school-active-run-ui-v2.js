@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.1.0-living-school-native-stream-visible-v3';
+const VERSION='2.1.1-living-school-terminal-state';
 const GENERATE='[data-ls-action="generate-curriculum"]';
 const REPORT='#lsc220-generation-recovery';
 const RAIL_ID='lsc-living-school-generation-run-rail';
@@ -17,6 +17,7 @@ function active(button){
   const label=String(button.textContent||'');
   return button.getAttribute('aria-busy')==='true'||(button.disabled&&/researching|generating|regenerating|completing/i.test(label));
 }
+function generationActive(button){return active(button)||document.documentElement.dataset.livingSchoolChatAction==='generating-curriculum'}
 function selectedRuntime(){
   let config={};try{config=globalThis.CivweaveModelRuntime?.readSharedConfig?.('interactive')||{}}catch{}
   return{provider:clean(config.provider||config.route||config.engine,120),model:clean(config.model,220)};
@@ -82,6 +83,7 @@ function finishSession(status='complete'){
   session.status=status;session.endedAt=end;
   if(status==='complete')session.phase='Curriculum ready';
   else if(status==='partial')session.phase='Partial curriculum generated';
+  else if(status==='failed')session.phase='Curriculum generation failed';
   else if(status==='preflight')session.phase='Stopped before provider call';
   else session.phase='Generation stopped';
   delete document.documentElement.dataset.livingSchoolRunRailActive;stopTimer();renderRail();
@@ -93,7 +95,7 @@ function runDetailMarkup(run){
     return session?.status==='preflight'?'No provider call started.':'No model call was recorded.';
   }
   const route=providerLabel(run.provider),model=clean(run.model,180),status=run.status==='active'?`running · ${formatElapsed(nowMs()-run.startedAt)}`:run.status==='failed'?`failed${run.errorCode?` · ${run.errorCode}`:''}`:`complete · ${formatElapsed((run.endedAt||run.startedAt)-run.startedAt)}`;
-  return`<strong>${route}${model?` · ${model}`:''}</strong> · ${purposeLabel(run.purpose)}${run.nested?' · nested':''} · ${status}`;
+  return`<strong>${route}${model?` · ${model}`:''}</strong> · ${purposeLabel(run.purpose)}${run.nested?' · nested':run.background?' · background':''} · ${status}`;
 }
 function selectedCall(){
    const runs=session?.runs||[];
@@ -104,14 +106,14 @@ function selectedCall(){
    if(!rail||!run)return;
    const status=rail.querySelector('.lsc-run-stream-status'),preview=rail.querySelector('.lsc-run-stream-text');
    if(!status||!preview)return;
-   const age=Math.max(0,Math.floor((nowMs()-run.startedAt)/1000));
+   const age=Math.max(0,Math.floor(((run.endedAt||nowMs())-run.startedAt)/1000));
    const chars=Number(run.generatedChars||0),first=run.firstTokenAt?formatElapsed(run.firstTokenAt-run.startedAt):'';
    const bytesLabel=chars?chars.toLocaleString()+' characters received':'0 characters received';
    const prefix=run.status==='failed'?'Failed':run.status==='complete'?'Finished':run.lastTokenAt?'Receiving streamed text':run.eventPhase==='connecting'?'Connecting to model':run.eventPhase==='repairing'?'Repairing generated output':'Waiting for first visible token';
    const extra=run.lastTokenAt&&run.status==='active'? ' · last text '+Math.max(0,Math.floor((nowMs()-run.lastTokenAt)/1000))+'s ago':'';
    const tokens=run.outputTokens?' · '+run.outputTokens.toLocaleString()+' output tokens':'';
    status.textContent=prefix+' · '+bytesLabel+(first?' · first text at '+first:' · elapsed '+formatElapsed(age*1000))+extra+tokens+(run.finishReason?' · finish '+run.finishReason:'');
-   const next=run.preview||'No model text received yet. The request may still be loading or processing its prompt.';
+   const next=run.preview||(run.status==='active'?'No model text received yet. The request may still be loading or processing its prompt.':'No model text was returned by this request.');
    if(preview.textContent!==next){
      const nearBottom=preview.scrollTop+preview.clientHeight>=preview.scrollHeight-32;
      preview.textContent=next;
@@ -133,13 +135,18 @@ function renderRail(){
 function updatePhase(value){const next=clean(value,180);if(!session||!next||session.phase===next)return;session.phase=next;const node=document.getElementById(RAIL_ID)?.querySelector?.('.lsc-run-phase');if(node)node.textContent=next}
 function onModelEvent(event){
   const detail=event?.detail||{},requestId=clean(detail.requestId,180),phase=clean(detail.phase,80).toLowerCase(),purpose=clean(detail.purpose,220);
-  const button=document.querySelector(GENERATE),running=active(button),relevant=running||session?.status==='running'||livingSchoolPurpose(purpose);
+  const button=document.querySelector(GENERATE),running=generationActive(button),relevant=running||session?.status==='running'||livingSchoolPurpose(purpose);
   if(!requestId||!relevant)return;
-  beginSession(session?.phase||'Generating curriculum');
-  const provider=clean(detail.provider,120),model=clean(detail.model,180);if(provider)session.provider=provider;if(model)session.model=model;
-  let run=session.runs.find(item=>item.callId===requestId);
+  let run=session?.runs.find(item=>item.callId===requestId);
   const terminal=['completed','failed','cancelled'].includes(phase);
-  if(!run&&!terminal){run={index:session.runs.length,callId:requestId,provider,model,purpose,startedAt:Date.parse(detail.at)||nowMs(),endedAt:0,status:'active',nested:!livingSchoolPurpose(purpose),errorCode:'',eventPhase:phase,generatedChars:0,firstTokenAt:0,lastTokenAt:0,preview:'',finishReason:'',outputTokens:0};session.runs.push(run);selectedRun=run.index}
+  // Duplicate or late terminal events cannot reopen a settled generation run.
+  if((terminal&&!run)||(run&&run.status!=='active'))return;
+  if(!run)beginSession(session?.phase||'Generating curriculum');
+  const provider=clean(detail.provider,120),model=clean(detail.model,180);if(provider)session.provider=provider;if(model)session.model=model;
+  if(!run&&!terminal){
+    const parentRequestId=clean(detail.parentRequestId,180),nested=Boolean(parentRequestId&&session.runs.some(item=>item.callId===parentRequestId));
+    run={index:session.runs.length,callId:requestId,provider,model,purpose,startedAt:Date.parse(detail.at)||nowMs(),endedAt:0,status:'active',nested,background:!livingSchoolPurpose(purpose)&&!nested,parentRequestId,errorCode:'',eventPhase:phase,generatedChars:0,firstTokenAt:0,lastTokenAt:0,preview:'',finishReason:'',outputTokens:0};session.runs.push(run);selectedRun=run.index;
+  }
   if(run){
      if(provider)run.provider=provider;if(model)run.model=model;if(purpose)run.purpose=purpose;
      run.eventPhase=phase;
@@ -162,23 +169,24 @@ function onModelEvent(event){
    }
   renderRail();
 }
-function onStage(event){const stage=clean(event?.detail?.stage,120);if(!stage)return;beginSession(phaseLabel(stage));session.stage=stage;session.phase=phaseLabel(stage);if(stage==='complete')finishSession('complete');else renderRail()}
+function onStage(event){const stage=clean(event?.detail?.stage,120);if(!stage)return;if(stage==='complete'){if(session?.status==='running'){session.stage=stage;finishSession('complete')}return}beginSession(phaseLabel(stage));session.stage=stage;session.phase=phaseLabel(stage);renderRail()}
 function sync(){
-  queued=false;const button=document.querySelector(GENERATE),report=document.querySelector(REPORT),running=active(button),root=document.documentElement;
+  queued=false;const button=document.querySelector(GENERATE),report=document.querySelector(REPORT),running=generationActive(button),root=document.documentElement;
   if(report){if(report.hidden!==running)report.hidden=running;report.dataset.previousRunWhileGenerating=running?'true':'false'}
   root.dataset.livingSchoolGenerationActive=running?'true':'false';
   if(running&&!wasRunning)beginSession('Preparing generation');
   if(running&&session?.status==='running'){
     const label=clean(button?.textContent,240).toLowerCase();if(label.includes('researching'))updatePhase('Researching sources');else if(label.includes('completing'))updatePhase('Completing assessments');else if(label.includes('generating')||label.includes('regenerating'))updatePhase('Generating curriculum');
-  }else if(!running&&wasRunning&&session?.status==='running'&&session.stage!=='complete'){
-    if(!(session.runs||[]).length)finishSession('preflight');else{const recovery=clean(root.dataset.livingSchoolGenerationRecovery,40).toLowerCase();if(recovery==='partial')finishSession('partial');else if(recovery==='complete')finishSession('complete');else finishSession('stopped')}
+  }else if(!running&&session?.status==='running'&&session.stage!=='complete'){
+    const runs=session.runs||[],recovery=clean(root.dataset.livingSchoolGenerationRecovery,40).toLowerCase(),settled=['partial','complete','failed'].includes(recovery)&&!runs.some(run=>run.status==='active');
+    if(wasRunning||settled){if(!runs.length)finishSession('preflight');else if(recovery==='partial')finishSession('partial');else if(recovery==='complete')finishSession('complete');else if(recovery==='failed'||runs.every(run=>run.status==='failed'))finishSession('failed');else finishSession('stopped')}
   }
   wasRunning=running;if(session&&!document.getElementById(RAIL_ID))renderRail();
 }
 function schedule(){if(queued)return;queued=true;queueMicrotask(sync)}
 function install(){
   if(!document.body)return false;
-  installRailStyle();new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['aria-busy','disabled']});
+  installRailStyle();new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['aria-busy','disabled','data-living-school-chat-action','data-living-school-generation-recovery']});
   addEventListener(MODEL_EVENT,onModelEvent);addEventListener(STAGE_EVENT,onStage);
   document.addEventListener('click',event=>{const dot=event.target?.closest?.('[data-lsc-run-index]');if(!dot)return;selectedRun=Number(dot.dataset.lscRunIndex);renderRail()},true);
   sync();return true;

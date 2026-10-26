@@ -37,10 +37,9 @@ async function shareListing(id){
  const ok=await copyText(text);notify(ok?'Listing copied for sharing.':'Could not copy this listing on this device.');
 }
 function marketState(){const state=parse(localStorage.getItem(MARKET_KEY),{});return state&&typeof state==='object'?state:{}}
-function saveMarket(state,reason){state.updatedAt=now();localStorage.setItem(MARKET_KEY,JSON.stringify(state));dispatchEvent(new CustomEvent('fellowfare:marketplace-changed',{detail:{reason,updatedAt:state.updatedAt}}));api()?.render?.();}
 function updateOrder(id,status){
- const state=marketState(),rows=Array.isArray(state.orders)?state.orders:[],order=rows.find(row=>row?.id===id);if(!order){notify('This arrangement is read-only or no longer exists.');return false}
- const prior=clean(order.status,60)||'pending';order.status=status;order.updatedAt=now();order.statusHistory=Array.isArray(order.statusHistory)?order.statusHistory:[];order.statusHistory.push({from:prior,to:status,at:order.updatedAt,actor:'me'});saveMarket(state,'arrangement-status');notify(`Arrangement marked ${status.replace(/-/g,' ')}.`);return true;
+ if(!api()?.updateOrder?.(id,status)){notify('This arrangement is read-only or no longer exists.');return false}
+ notify(`Arrangement marked ${status.replace(/-/g,' ')}.`);return true;
 }
 function orderActionButtons(order){
  const status=clean(order.status,60).toLowerCase();
@@ -105,6 +104,6 @@ async function handleClick(event){
 }
 const observer=new MutationObserver(()=>requestAnimationFrame(enhance));
 function start(){document.addEventListener('click',handleClick);observer.observe(document.querySelector('#main')||document.body,{childList:true,subtree:true});addEventListener('hashchange',()=>requestAnimationFrame(enhance));addEventListener('fellowfare:marketplace-changed',()=>requestAnimationFrame(enhance));enhance()}
-globalThis.CivweaveFellowFareMarketplaceCapabilities=Object.freeze({version:'1.0.0',enhance,rewardSnapshot,updateOrder,shareListing});
+globalThis.CivweaveFellowFareMarketplaceCapabilities=Object.freeze({version:'1.0.1-canonical-order-owner',enhance,rewardSnapshot,updateOrder,shareListing});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

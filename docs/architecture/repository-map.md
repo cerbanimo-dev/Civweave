@@ -139,6 +139,10 @@ Current route table:
 
 This table is a **route snapshot**, not an architecture contract. If the dispatcher changes, update this table in the same change. Do not infer shared-system ownership from these filenames.
 
+Anarchadia's Governance and Workbench are native content destinations within the same persistent shell. `persistent-system-shell-v1.js` accepts only the fixed `nativePage=governance` and `nativePage=workbench` routes for Anarchadia, with allowlisted Workbench views and bounded proposal/Quest identifiers. The first-frame bootstrap uses the same fixed destinations, and the shell validates the expected content origin, path, and launch parameters. Native entry and return controls delegate to the parent's existing `CivweavePersistentSystemShellV1.navigate` owner; standalone returns preserve the installed/embedding context without creating another shell or navigation owner.
+
+FellowFare's active entry renders its marketplace in the same document. `fellowfare-cabinet-v144.js` delegates commands and reviewed imports directly to the existing `services/fellowfare/cabinet-bridge.js` API. `services/fellowfare/marketplace-v2.js` owns marketplace state, order persistence, rendering, and current-tab state; `marketplace-v2-capabilities.js` delegates order mutations to it. The retained iframe boundary uses `postMessage` only with matching origin and parent sender checks. The native host does not emulate an iframe's `contentWindow` or `contentDocument`.
+
 ## Shared capability landmarks
 
 The canonical ownership list lives in `docs/architecture/systems-of-practice.md` and `config/system-ownership.json`. Current high-value landmarks include:
@@ -159,6 +163,8 @@ The canonical ownership list lives in `docs/architecture/systems-of-practice.md`
 | Review surface | `public/app/shared-review-surface-v234.js` |
 
 These are navigation landmarks only. Always re-check the ownership registry and active callers before changing them because filenames and owners can move.
+
+The persistent shell owns the single radio player in `system-radio-agent-v233.js`. Embedded content aliases the parent radio API instead of creating another player, launcher, or audio element, so changing native content does not replace playback. Direct listening uses the licensed same-origin starter catalog at `public/downloads/hub-media/open-music/starter-catalog.json`; streaming and saving individual tracks begin with explicit user actions, while Spotify remains an extension. `radio-safe-stations-v1.js` and `radio-track-suggestions-v240.js` also alias their parent owners when embedded and leave the direct-audio view to the player owner.
 
 ## Hosting and runtime model
 

@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
+try{if(globalThis.parent!==globalThis&&globalThis.parent.document?.documentElement?.hasAttribute('data-persistent-system')){const inherit=()=>{globalThis.CivweaveRadioSafeStationsV1=globalThis.parent.CivweaveRadioSafeStationsV1};if(globalThis.parent.CivweaveRadioSafeStationsV1)inherit();else globalThis.parent.addEventListener('civweave:radio-safe-stations-ready',inherit,{once:true});return}}catch{}
 
-const VERSION='1.1.0';
+const VERSION='1.1.1';
 const REVISION='radio-safe-stations-v1-general-audience-queue';
 const SAFE_KEY='civweave.safe-mode.v1';
 const STATE_KEY='civweave.radio.safe-station-state.v1';
@@ -160,6 +161,7 @@ function installStyle(){
   document.head?.append(style);
 }
 function sanitizeCoreCopy(){
+  if(globalThis.CivweaveRadioStationSurfaceV1?.mode?.()==='direct')return false;
   const panel=document.getElementById(PANEL_ID);if(!panel)return false;
   const auditLabel=panel.querySelector(':scope > header small');if(auditLabel)auditLabel.hidden=true;
   panel.querySelector('.cw-radio-note')?.remove();
@@ -169,6 +171,7 @@ function sanitizeCoreCopy(){
 }
 function restoreCoreSurface(){
   const panel=document.getElementById(PANEL_ID),surface=globalThis.CivweaveRadioStationSurfaceV1;if(!panel)return false;
+  if(surface?.mode?.()==='direct'){surface.refresh();return true}
   const original=panel.querySelector('[data-radio-mode="original"]'),clean=panel.querySelector('[data-radio-mode="clean"]');
   if(original){original.style.removeProperty('display');original.removeAttribute('aria-hidden')}
   if(clean)clean.textContent='Clean station';
@@ -176,6 +179,7 @@ function restoreCoreSurface(){
   return true;
 }
 function render(){
+  if(globalThis.CivweaveRadioStationSurfaceV1?.mode?.()==='direct')return false;
   if(!safeModeEnabled()){sanitizeCoreCopy();return false}
   const panel=document.getElementById(PANEL_ID),id=currentSystem(),item=station(id);if(!panel||!item)return false;
   installStyle();sanitizeCoreCopy();

@@ -54,6 +54,15 @@ function execution(){
   return `<section class="hero"><div class="kicker">Local branch executor</div><h2>Prepare, test, commit. Never push itself.</h2><p>Download a packet, then run it from a clean Civweave checkout. The executor creates an isolated worktree and <code>agent/anarchadia-*</code> branch, runs <code>npm run check</code>, commits only on success, and leaves publication separate.</p><pre>npm run anarchadia:execute -- --packet /path/to/anarchadia-execution-….json</pre></section><section class="grid">${state.executionPackets.map(p=>`<article class="card"><h2>${esc(p.changeSet.title)}</h2><div class="mono">${esc(p.id)}<br>${esc(p.authorization.targetBranch)}<br>${esc(p.packetHash)}</div><div class="actions"><button data-action="download-packet" data-id="${p.id}">Download</button><button data-action="verify-packet" data-id="${p.id}">Verify</button></div></article>`).join('')||'<div class="empty">No execution packets.</div>'}</section>`;
 }
 function render(){document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===view));app.innerHTML=({overview,identity,changes,ballots,federation,execution}[view]||overview)()}
+function returnToConsole(){
+  try{
+    const parent=globalThis.parent,shell=parent&&parent!==globalThis?parent.CivweavePersistentSystemShellV1:null;
+    if(shell?.navigate?.('anarchadia',{replace:true,source:'anarchadia-governance-v145'}))return;
+  }catch{}
+  const target=new URL('/app/anarchadia-console-v139.html',location.href),current=new URLSearchParams(location.search);target.searchParams.set('cabinet','1');
+  for(const key of ['installed','embed','persistentShell'])if(current.get(key))target.searchParams.set(key,current.get(key));
+  location.assign(target.href);
+}
 async function importConsole(proposalId=''){
   const source=JSON.parse(localStorage.getItem('civweave.anarchadia.citizen-console.v139')||'null'),p=(source?.proposals||[]).find(x=>!proposalId||x.id===proposalId)||(source?.proposals||[]).at(-1);
   if(!p)throw new Error('No Citizen Console preview is available.');
@@ -65,7 +74,7 @@ document.addEventListener('click',async e=>{
   const v=e.target.closest('[data-view]');if(v){view=v.dataset.view;render();return}
   const b=e.target.closest('[data-action]');if(!b)return;const action=b.dataset.action,id=b.dataset.id;
   try{
-    if(action==='back')location.assign('/app/anarchadia-console-v139.html?embed=1&system=anarchadia');
+    if(action==='back')returnToConsole();
     else if(action==='create-node'){const x=await createCredential(ask('Node label','Local Anarchadia node'),'node','federation');state.node=x.record;await putPrivateKey(x.record.id,x.privateKey);await save('node.created',{nodeId:x.record.id})}
     else if(action==='export-node')download(`anarchadia-node-${state.node.id}.json`,state.node);
     else if(action==='create-member'){const x=await createCredential(ask('Member or role label'),'member','community');state.credentials.push(x.record);await putPrivateKey(x.record.id,x.privateKey);await save('credential.created',{credentialId:x.record.id})}

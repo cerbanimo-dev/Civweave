@@ -47,6 +47,7 @@ const QUEST_VEIL_LEDGER_GATE='/app/quest-veil-ledger-gate-v1.js';
 const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
 const RADIO_SAFE_STATIONS='/app/radio-safe-stations-v1.js';
 const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v240.js';
+const RADIO_ASSET_REVISIONS=Object.freeze({[SYSTEM_RADIO_AGENT]:'1.1.0-direct-audio-v1',[RADIO_SAFE_STATIONS]:'1.1.1-direct-audio-v1',[RADIO_TRACK_SUGGESTIONS]:'1.6.1-direct-audio-v1'});
 const CANONICAL_PLAYLISTS='/app/canonical-playlists-v1.js';
 const RADIO_PLAYLIST_GOVERNANCE='/app/radio-playlist-governance-v1.js';
 const SHARED_REVIEW_SURFACE='/app/shared-review-surface-v234.js';
@@ -88,7 +89,7 @@ function allowed(){return installedDisplay()||launchSession()||developer()}
 function installerUrl(){const target=`${location.pathname}${location.search}${location.hash}`;const next=new URL(INSTALLER,location.origin);next.searchParams.set('install','required');next.searchParams.set('next',target.slice(0,1800));return next.href}
 function closeBrowserChatBeforeRedirect(){try{globalThis.CivweaveGuideChatSurfaceV350?.close?.();globalThis.CivweavePersistentGuideChatV215?.close?.()}catch{}}
 function liveHead(head=document.head){return!unloading&&document.documentElement?.isConnected&&head?.isConnected}
-function addScript(src){const head=document.head;if(!liveHead(head)||document.querySelector(`script[src^="${src}"]`))return false;const script=document.createElement('script');script.src=`${src}?v=${ADDITIONS_VERSION}${src===THEMED_SYSTEM_NAV?'-fulltile-art-v1':''}`;script.async=false;if(!liveHead(head))return false;head.append(script);return true}
+function addScript(src){const head=document.head;if(!liveHead(head)||document.querySelector(`script[src^="${src}"]`))return false;const script=document.createElement('script');script.src=`${src}?v=${RADIO_ASSET_REVISIONS[src]||ADDITIONS_VERSION}${src===THEMED_SYSTEM_NAV?'-fulltile-art-v1':''}`;script.async=false;if(!liveHead(head))return false;head.append(script);return true}
 function assetCustomizationConfigured(){try{const value=JSON.parse(localStorage.getItem(ASSET_CUSTOMIZATION_STORAGE)||'{}');return value?.personalEnabled!==false&&value?.pathOverrides&&Object.keys(value.pathOverrides).length>0}catch{return false}}
 function installAssetCustomizationIfConfigured(){if(!assetCustomizationConfigured())return false;return addScript(ASSET_CUSTOMIZATION)}
 function installEarlyGuards(){addScript(MOBILE_AI_HARDENING);addScript(PLATFORM_STABILITY);return true}

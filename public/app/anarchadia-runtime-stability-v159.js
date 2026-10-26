@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.8-anarchadia-runtime-stability-v159-current-quest-actions';
+const VERSION='1.0.9-anarchadia-runtime-stability-v159-native-routes';
 if(globalThis.AnarchadiaRuntimeStabilityV159?.version===VERSION)return;
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const LOADER_SRC='/app/family-ai-loader-v105.js?v=headless-canonical-r1';
@@ -53,8 +53,23 @@ async function askMerlin(_system,text,rows=[]){
   const answer=clean(result.response?.answer||'Merlin returned no text.',12000),next=clean(result.response?.choice?.nextAction,800);
   return{role:'assistant',text:next?`${answer}\n\nNext: ${next}`:answer,provider:result.provider,model:result.model};
 }
-function openGovernance(proposalId=''){location.assign(`/app/anarchadia-governance-v145.html${proposalId?`?proposal=${encodeURIComponent(proposalId)}`:''}`)}
-function openWorkbench(route='workbench'){location.assign(`/app/services/anarchadia/workbench.html?cabinet=1#${encodeURIComponent(route)}`)}
+function openNativePage(nativePage,options={}){
+  try{
+    const parent=globalThis.parent,shell=parent&&parent!==globalThis?parent.CivweavePersistentSystemShellV1:null;
+    if(shell?.anarchadiaNativePages?.includes(nativePage)&&shell.navigate('anarchadia',{nativePage,...options,source:'anarchadia-runtime-stability-v159'}))return true;
+  }catch{}
+  const target=new URL(nativePage==='governance'?'/app/anarchadia-governance-v145.html':'/app/services/anarchadia/workbench.html',location.href),current=new URLSearchParams(location.search);
+  target.searchParams.set('cabinet','1');
+  for(const key of ['installed','embed','persistentShell'])if(current.get(key))target.searchParams.set(key,current.get(key));
+  if(nativePage==='governance'&&options.proposal)target.searchParams.set('proposal',String(options.proposal));
+  if(nativePage==='workbench'){
+    for(const key of ['weave','path'])if(options[key])target.searchParams.set(key,String(options[key]));
+    const routes=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);target.hash=routes.has(options.nativeRoute)?options.nativeRoute:'workbench';
+  }
+  location.assign(target.href);return true;
+}
+function openGovernance(proposalId=''){return openNativePage('governance',{proposal:proposalId})}
+function openWorkbench(route='workbench'){return openNativePage('workbench',{nativeRoute:route})}
 function currentQuestPlan(){
   const campus=parse(localStorage.getItem(QUEST_KEYS.campus),{}),campusPlan=campus?.plan;
   if(campusPlan)return campusPlan;
@@ -77,7 +92,7 @@ function openQuestPath(plan,path){
     const parent=globalThis.parent,shell=parent&&parent!==globalThis?parent.CivweavePersistentSystemShellV1:null;
     if(typeof shell?.navigate==='function'&&shell.navigate(realm,{source:'anarchadia-passport'}))return true;
   }catch{}
-  if(realm==='anarchadia'){location.assign(`/app/services/anarchadia/workbench.html?cabinet=1&${query}#overview`);return true}
+  if(realm==='anarchadia')return openNativePage('workbench',{nativeRoute:'overview',weave:plan.id,path:path.id});
   if(realm==='living-school'){location.assign(`/app/cabinets/living-school/index.html?cabinet=1&${query}`);return true}
   if(realm==='cerbanimo'){location.assign(`/app/realm-console-v140.html?system=cerbanimo&cabinet=1&${query}`);return true}
   if(realm==='fellowfare'){location.assign(`/app/fellowfare-cabinet-v144.html?cabinet=1&${query}`);return true}

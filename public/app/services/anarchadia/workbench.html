@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-cabinet-workbench="v144">
+<html lang="en" data-cabinet-workbench="v144" data-civweave-system="anarchadia">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -77,10 +77,18 @@
     launch?.addEventListener('click',event=>{const button=event.target.closest('[data-start]');if(button)start(button.dataset.start)});
   </script>
   <script src="civweave-handoff-consumer.js" data-system="anarchadia"></script>
-  <script src="civweave-quest-path-v266.js?v=quest-path-r2"></script>
+  <script src="civweave-quest-path-v266.js?v=quest-path-r3-native-return"></script>
   <script src="civweave-presence.js"></script>
   <script>
-    document.querySelector('#cabinet-workbench-return').addEventListener('click',()=>location.replace('/app/anarchadia-console-v139.html?embed=1&system=anarchadia'));
+    document.querySelector('#cabinet-workbench-return').addEventListener('click',()=>{
+      try{
+        const shell=parent!==window?parent.CivweavePersistentSystemShellV1:null;
+        if(shell?.navigate?.('anarchadia',{replace:true,source:'anarchadia-workbench-v144'}))return;
+      }catch{}
+      const target=new URL('/app/anarchadia-console-v139.html',location.href),current=new URLSearchParams(location.search);target.searchParams.set('cabinet','1');
+      for(const key of ['installed','embed','persistentShell'])if(current.get(key))target.searchParams.set(key,current.get(key));
+      location.replace(target.href);
+    });
   </script>
 </body>
 </html>

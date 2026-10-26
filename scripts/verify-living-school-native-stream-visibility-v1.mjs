@@ -12,7 +12,7 @@ assert.match(core,/function withNativeMossStream\(config/);
 assert.match(core,/config:withNativeMossStream\(/,'Curriculum design enables native SSE');
 assert.match(core,/smallConfig=withNativeMossStream\(/,'Module compilation enables native SSE');
 assert.match(runtime,/pendingText\+=delta/,'Native server emits raw text deltas');
-assert.match(index,/active-run-ui-v2\.js\?v=2\.1\.0-native-stream-visible-v3/);
+assert.match(index,/active-run-ui-v2\.js\?v=2\.1\.1-terminal-state/);
 assert.ok(ui.includes("phase==='partial'"),'Run panel consumes the streaming partial event');
 
 const helper=core.slice(core.indexOf('function withNativeMossStream('),core.indexOf('function resultText('));

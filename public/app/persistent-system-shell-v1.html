@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="persistent-system-shell-v1-r30-independent-first-frame-rescue" data-civweave-system="civweave">
+<html lang="en" data-build="persistent-system-shell-v1-r30-independent-first-frame-rescue" data-civweave-system="civweave" data-persistent-system="civweave">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -23,8 +23,8 @@ body{padding:0!important}
 <!-- External runtimes are deliberately deferred. The iframe, loading surface, and error surface below must be parsed before any network-loaded script can delay startup. -->
 <!-- Shell-critical code comes first so Settings/AI/chat can never gate navigation or the canonical rail. -->
 <script src="/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner" defer></script>
-<script src="/app/persistent-system-shell-v1.js?v=1.1.17-ai-lifecycle" defer></script>
-<script src="/app/themed-system-nav-v178.js?v=1.0.164-feature-consumption" defer></script>
+<script src="/app/persistent-system-shell-v1.js?v=1.1.18-native-anarchadia-routes" defer></script>
+<script src="/app/themed-system-nav-v178.js?v=1.0.165-viewport-bounds" defer></script>
 <script src="/app/persistent-shell-actions-v1.js?v=1.0.8-reserved-navigation-utilities" defer></script>
 <script src="/app/generation-lifecycle-v2.js?v=1.3.3-preserve-stream-text" defer></script>
 <!-- Settings opens in the parent persistent shell. Prewarm its saved-state renderer only after shell navigation is guaranteed. -->
@@ -54,6 +54,10 @@ body{padding:0!important}
 <script src="/app/human-message-bubble-v1.js?v=1.1.1-human-message-chat-icon" defer></script>
 <script src="/app/human-chat-network-v1.js?v=1.0.0-human-chat-network-v1" defer></script>
 <script src="/app/human-chat-guild-context-v1.js?v=1.0.2-human-chat-standalone-v2" defer></script>
+<!-- One parent-owned player persists across native system travel. -->
+<script src="/app/system-radio-agent-v233.js?v=1.1.0-direct-audio-v1" defer></script>
+<script src="/app/radio-safe-stations-v1.js?v=1.1.1-direct-audio-v1" defer></script>
+<script src="/app/radio-track-suggestions-v240.js?v=1.6.1-direct-audio-v1" defer></script>
 </head>
 <body>
 <iframe id="cw-persistent-system-stage" title="Civweave system" src="about:blank" allow="clipboard-read; clipboard-write; geolocation; microphone"></iframe>
@@ -72,21 +76,30 @@ const routes={
 };
 const query=new URLSearchParams(location.search),requested=String(query.get('system')||'civweave').toLowerCase();
 const system=Object.prototype.hasOwnProperty.call(routes,requested)?requested:'civweave';
-const [pathname,params]=routes[system],target=new URL(pathname,location.origin);
+const nativePages={governance:'/app/anarchadia-governance-v145.html',workbench:'/app/services/anarchadia/workbench.html'};
+const nativePage=system==='anarchadia'&&Object.prototype.hasOwnProperty.call(nativePages,query.get('nativePage'))?query.get('nativePage'):'';
+const [pathname,params]=routes[system],target=new URL(nativePages[nativePage]||pathname,location.origin);
 for(const [key,value] of Object.entries(params))target.searchParams.set(key,value);
 target.searchParams.set('installed','1');target.searchParams.set('embed','1');target.searchParams.set('persistentShell','1');
 if(query.get('feature'))target.searchParams.set('feature',query.get('feature'));
+if(nativePage==='governance'&&query.get('proposal'))target.searchParams.set('proposal',query.get('proposal').slice(0,240));
+if(nativePage==='workbench'){
+  for(const key of ['weave','path'])if(query.get(key))target.searchParams.set(key,query.get(key).slice(0,240));
+  const workbenchRoutes=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);
+  target.hash=workbenchRoutes.has(query.get('nativeRoute'))?query.get('nativeRoute'):'workbench';
+}
 const host=document.getElementById('cw-persistent-system-stage');
 const loading=document.getElementById('cw-persistent-system-loading');
 const error=document.getElementById('cw-persistent-system-error');
 const normalizedPath=url=>url.pathname.replace(/\/index\.html$/,'/').replace(/\.html$/,'');
 function currentTarget(){try{return new URL(host?.dataset.cwExpectedHref||target.href,location.href)}catch{return target}}
-function currentSystem(expected=currentTarget()){return Object.entries(routes).find(([,entry])=>normalizedPath(new URL(entry[0],location.origin))===normalizedPath(expected))?.[0]||system}
+function currentSystem(expected=currentTarget()){return Object.values(nativePages).some(path=>normalizedPath(new URL(path,location.origin))===normalizedPath(expected))?'anarchadia':Object.entries(routes).find(([,entry])=>normalizedPath(new URL(entry[0],location.origin))===normalizedPath(expected))?.[0]||system}
 function validDocument(){
   try{
     const doc=host.contentDocument,href=host.contentWindow.location.href,actual=new URL(href,location.href),expected=currentTarget();
+    const keys=new Set([...expected.searchParams.keys(),'system','cabinet','installed','embed','persistentShell','feature']);
     return Boolean(doc?.body&&doc.contentType==='text/html'&&doc.documentElement?.dataset.civweaveSystem===currentSystem(expected)&&actual.origin===expected.origin&&normalizedPath(actual)===normalizedPath(expected)
-      &&actual.search===expected.search&&actual.hash===expected.hash&&actual.searchParams.get('embed')==='1'&&actual.searchParams.get('persistentShell')==='1');
+      &&[...keys].every(key=>actual.searchParams.get(key)===expected.searchParams.get(key))&&actual.searchParams.get('embed')==='1'&&actual.searchParams.get('persistentShell')==='1');
   }catch{return false}
 }
 function fail(message){

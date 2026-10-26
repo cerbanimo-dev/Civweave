@@ -10,7 +10,7 @@ assert.match(worker,/cerbanimo-first-frame-v1/, 'Registered installed worker byt
 const launch=html.match(/<script id="cw-persistent-first-frame-rescue-v1">([\s\S]*?)<\/script>/)?.[1];
 assert.ok(launch,'Independent shell first-frame launch must be included inline in the HTML.');
 
-function harness({system='cerbanimo',valid=true,redirect=false,actualSystem=system}={}){
+function harness({system='cerbanimo',valid=true,redirect=false,actualSystem=system,query=''}={}){
   const handlers={},timers=[],children=[],nodes={};
   const element=(type='div')=>({type,style:{},dataset:{},hidden:false,children:[],textContent:'',append(...items){this.children.push(...items)},replaceChildren(...items){this.children=[...items]},addEventListener(type,fn){(this.handlers||= {})[type]=fn}});
   const frame=element('iframe'),loading=element(),error=element();
@@ -19,7 +19,7 @@ function harness({system='cerbanimo',valid=true,redirect=false,actualSystem=syst
   frame.contentWindow={location:{href:'about:blank',pathname:'about:blank'}};
   Object.defineProperty(frame,'src',{get(){return frame._src},set(value){frame._src=value;frame.contentWindow.location.href=redirect?'https://evil.test/elsewhere':value;frame.contentWindow.location.pathname=new URL(frame.contentWindow.location.href).pathname;}});
   const context={URL,URLSearchParams,
-    location:{href:'https://civweave-staging.pages.dev/app/persistent-system-shell-v1.html?system='+system,origin:'https://civweave-staging.pages.dev',search:'?system='+system,reload(){nodes.reloaded=true}},
+    location:{href:'https://civweave-staging.pages.dev/app/persistent-system-shell-v1.html?system='+system+query,origin:'https://civweave-staging.pages.dev',search:'?system='+system+query,reload(){nodes.reloaded=true}},
     document:{getElementById:id=>({'cw-persistent-system-stage':frame,'cw-persistent-system-loading':loading,'cw-persistent-system-error':error})[id],createElement:element,documentElement:{dataset:{}}},
     setTimeout:(fn,ms)=>{timers.push({fn,ms});return timers.length},clearTimeout:()=>{},
   };
@@ -45,6 +45,49 @@ test('healthy embedded HTML hides startup overlay without shared runtime',()=>{
   assert.equal(h.loading.hidden,true);
   assert.equal(h.error.dataset.open,'0');
   assert.equal(h.context.document.documentElement.dataset.cwFirstFrame,'embedded-ready');
+});
+
+test('independent first-frame boot restores allowlisted native pages with the same exact runtime target',()=>{
+  const runtimeContext={URL,URLSearchParams,location:{origin:'https://civweave-staging.pages.dev',href:'https://civweave-staging.pages.dev/app/persistent-system-shell-v1.html'},document:{readyState:'loading',addEventListener(){}},addEventListener(){}};
+  vm.runInNewContext(runtime,runtimeContext);
+  const owner=runtimeContext.CivweavePersistentSystemShellV1;
+  for(const options of [{nativePage:'governance',proposal:'qa & approval'},{nativePage:'workbench',nativeRoute:'charter',weave:'qa-weave',path:'qa-path'}]){
+    const query='&'+new URLSearchParams(options),h=harness({system:'anarchadia',query});
+    assert.equal(h.frame.src,owner.contentUrl('anarchadia',options).href,'Independent boot and shared owner must produce the exact same native target.');
+    assert.notEqual(new URL(h.frame.src).pathname,'/app/anarchadia-console-v139.html');
+    h.frame.handlers.load();assert.equal(h.context.CivweaveShellRescueV1.validDocument(),true);assert.equal(h.loading.hidden,true);
+  }
+  const h=harness({system:'anarchadia',query:'&nativePage=https%3A%2F%2Fevil.test%2F'});
+  assert.equal(new URL(h.frame.src).pathname,'/app/anarchadia-console-v139.html');
+});
+
+for(const options of [
+    {system:'fellowfare',hash:'market'},
+    {system:'fellowfare',hash:'orders',view:'open'},
+    {system:'anarchadia',query:'&nativePage=workbench&nativeRoute=charter&weave=qa-weave&path=qa-path',hash:'readiness',view:'proof'}
+  ])test(`independent rescue accepts ${options.system} native view #${options.hash}`,()=>{
+    const h=harness(options),actual=new URL(h.frame.src);actual.hash=options.hash;if(options.view)actual.searchParams.set('view',options.view);
+    h.frame.src=actual.href;h.frame.handlers.load();
+    assert.equal(h.context.CivweaveShellRescueV1.validDocument(),true,'A native startup hash or view must not be mistaken for a failed frame.');
+    assert.equal(h.loading.hidden,true);assert.equal(h.error.dataset.open,'0');
+});
+
+test('independent rescue rejects changed native launch identity while allowing native views',()=>{
+  const options={system:'anarchadia',query:'&nativePage=workbench&nativeRoute=charter&weave=qa-weave&path=qa-path'};
+  for(const mutate of [
+    url=>url.hostname='foreign.test',
+    url=>url.pathname='/app/anarchadia-console-v139.html',
+    url=>url.searchParams.set('embed','0'),
+    url=>url.searchParams.delete('persistentShell'),
+    url=>url.searchParams.set('installed','0'),
+    url=>url.searchParams.set('weave','stale-weave'),
+    url=>url.searchParams.set('path','stale-path'),
+    url=>url.searchParams.set('feature','stale-feature')
+  ]){
+    const h=harness(options),actual=new URL(h.frame.src);mutate(actual);actual.hash='readiness';actual.searchParams.set('view','proof');h.frame.src=actual.href;
+    assert.equal(h.context.CivweaveShellRescueV1.validDocument(),false,'View changes must not hide a changed origin, canonical route, launch flag or requested artifact.');
+    h.frame.handlers.load();assert.equal(h.error.dataset.open,'1');
+  }
 });
 
 test('Living School directory redirects are healthy in the independent first-frame rescue',()=>{

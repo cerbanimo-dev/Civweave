@@ -22,9 +22,13 @@ on:
       - 'scripts/verify-fellowfare-marketplace-v2.mjs'
       - 'scripts/verify-fellowfare-symbols-contrast-r2.mjs'
       - 'scripts/verify-basic-value-guide-v1.mjs'
+      - 'scripts/test-fellowfare-native-functional-v1.mjs'
+      - 'scripts/test-fellowfare-native-tabs-v1.mjs'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/verify-fellowfare-native.yml'
   push:
-    branches: [main]
+    branches: [main, staging]
     paths:
       - 'public/app/fellowfare-cabinet-v144.html'
       - 'public/app/fellowfare-cabinet-v144.js'
@@ -45,6 +49,10 @@ on:
       - 'scripts/verify-fellowfare-marketplace-v2.mjs'
       - 'scripts/verify-fellowfare-symbols-contrast-r2.mjs'
       - 'scripts/verify-basic-value-guide-v1.mjs'
+      - 'scripts/test-fellowfare-native-functional-v1.mjs'
+      - 'scripts/test-fellowfare-native-tabs-v1.mjs'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/verify-fellowfare-native.yml'
   workflow_dispatch:
 
@@ -64,6 +72,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
       - name: Check FellowFare verifier syntax
         run: |
           node --check public/app/fellowfare-native-scroll-v208.js
@@ -73,6 +83,8 @@ jobs:
           node --check scripts/verify-fellowfare-marketplace-v2.mjs
           node --check scripts/verify-fellowfare-symbols-contrast-r2.mjs
           node --check scripts/verify-basic-value-guide-v1.mjs
+      - name: Verify native tab actions and mobile tab layout
+        run: node --test scripts/test-fellowfare-native-functional-v1.mjs scripts/test-fellowfare-native-tabs-v1.mjs
       - name: Verify FellowFare contracts
         run: |
           node scripts/verify-fellowfare-native-v208.mjs

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.164-five-system-navigation-v234-feature-consumption';
+const VERSION='1.0.165-five-system-navigation-v235-viewport-bounds';
 const NAV_ID='cw-themed-system-nav';
 const MENU_ID='cw-themed-system-nav-menu';
 const STYLE_ID='cw-themed-system-nav-style';
@@ -129,7 +129,7 @@ function installStyle(){
 /* Both navigation and its utility row fit inside this one reserved dock. */
 :root{--cw-themed-nav-height:132px;--cw-themed-nav-bottom-gap:0px}
 html{scroll-padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 16px)}
-html.cw-themed-system-nav-active body{padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 12px)!important}
+html.cw-themed-system-nav-active:not([data-persistent-system]) body{padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 12px)!important}
 html.cw-themed-system-nav-active nav.bottom,
 html.cw-themed-system-nav-active .rc-bottom,
 html.cw-themed-system-nav-active .ls-tray,
@@ -217,7 +217,7 @@ function ensureMenu(){
   if(!menu.isConnected)document.body.append(menu);return menu;
 }
 function positionMenu(link){
-  if(!menu||!link)return;const rect=link.getBoundingClientRect(),width=Math.min(282,Math.max(220,innerWidth-20)),left=Math.max(8,Math.min(innerWidth-width-8,rect.left+rect.width/2-width/2)),bottom=Math.max(8,Math.min(innerHeight-8,innerHeight-rect.top+8));menu.style.width=`${width}px`;menu.style.left=`${Math.round(left)}px`;menu.style.bottom=`${Math.round(bottom)}px`;
+  if(!menu||!link)return;const rect=link.getBoundingClientRect(),width=menu.getBoundingClientRect().width,left=Math.max(8,Math.min(innerWidth-width-8,rect.left+rect.width/2-width/2)),bottom=Math.max(8,Math.min(innerHeight-8,innerHeight-rect.top+8));menu.style.left=`${Math.round(left)}px`;menu.style.bottom=`${Math.round(bottom)}px`;
 }
 function openQuickMenu(system,{focus=true}={}){
   const item=itemFor(system),link=linkFor(system);if(!item||!link)return false;ensureMenu();closeQuickMenu({restoreFocus:false});menuSystem=system;menu.style.setProperty('--menu-glow',item.glow);menu.setAttribute('aria-label',`${item.character} shortcuts`);
@@ -277,7 +277,7 @@ function ensureMounted(){if(EMBEDDED){clearEmbedded();return false}return mount(
 addEventListener('civweave:subsystem-avatar-state',event=>applySubsystem(event.detail||{}));
 addEventListener('civweave:subsystem-avatar-state-ready',hydrate);
 addEventListener('civweave:avatar-expression',event=>applyChat(event.detail||{}));
-addEventListener('civweave:system-route-changed',()=>syncCurrentSelection());
+addEventListener('civweave:system-route-changed',()=>{cancelHold();closeQuickMenu({restoreFocus:false});syncCurrentSelection()});
 addEventListener('civweave:guide-chat-state',syncUnread);
 addEventListener('civweave:realm-guide-thread-changed',syncUnread);
 addEventListener('civweave:guide-chat-ready',syncUnread);

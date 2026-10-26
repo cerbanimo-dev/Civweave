@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.17-ai-lifecycle';
+const VERSION='1.1.18-native-anarchadia-routes';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -9,6 +9,8 @@ const ROUTES=Object.freeze({
   fellowfare:['/app/fellowfare-cabinet-v144.html',{cabinet:'1'}],
   anarchadia:['/app/anarchadia-console-v139.html',{cabinet:'1'}]
 });
+const ANARCHADIA_NATIVE_PAGES=Object.freeze({governance:'/app/anarchadia-governance-v145.html',workbench:'/app/services/anarchadia/workbench.html'});
+const ANARCHADIA_WORKBENCH_ROUTES=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);
 const FRAME_ID='cw-persistent-system-stage';
 const HUMAN_LAUNCHER_ID='cw-human-message-launcher-v1';
 const AI_LAUNCHER_ID='cwp215-launcher';
@@ -43,15 +45,26 @@ let backlightTimers=[];
 
 function cleanSystem(value){const id=String(value||'').toLowerCase();return SYSTEMS.has(id)?id:'civweave'}
 function parse(value,fallback={}){try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}}
-function contentUrl(system,{feature=''}={}){
-  system=cleanSystem(system);const [path,params]=ROUTES[system];const url=new URL(path,location.origin);
+function nativeOptions(system,options={}){
+  const nativePage=system==='anarchadia'&&Object.prototype.hasOwnProperty.call(ANARCHADIA_NATIVE_PAGES,options.nativePage)?options.nativePage:'';
+  if(!nativePage)return{};
+  const id=value=>String(value||'').slice(0,240);
+  return nativePage==='governance'?{nativePage,proposal:id(options.proposal)}:{nativePage,nativeRoute:ANARCHADIA_WORKBENCH_ROUTES.has(options.nativeRoute)?options.nativeRoute:'workbench',weave:id(options.weave),path:id(options.path)};
+}
+function requestedOptions(query){return Object.fromEntries(['feature','nativePage','nativeRoute','proposal','weave','path'].map(key=>[key,query.get(key)||'']))}
+function contentUrl(system,options={}){
+  system=cleanSystem(system);const {feature=''}=options,native=nativeOptions(system,options),[path,params]=ROUTES[system];const url=new URL(ANARCHADIA_NATIVE_PAGES[native.nativePage]||path,location.origin);
   for(const [key,value] of Object.entries(params))url.searchParams.set(key,value);
   url.searchParams.set('installed','1');url.searchParams.set('embed','1');url.searchParams.set('persistentShell','1');
   if(feature)url.searchParams.set('feature',String(feature));
+  for(const key of ['proposal','weave','path'])if(native[key])url.searchParams.set(key,native[key]);
+  if(native.nativeRoute)url.hash=native.nativeRoute;
   return url;
 }
-function shellUrl(system,{feature=''}={}){
-  const url=new URL('/app/persistent-system-shell-v1.html',location.origin);url.searchParams.set('system',cleanSystem(system));url.searchParams.set('installed','1');if(feature)url.searchParams.set('feature',String(feature));return url;
+function shellUrl(system,options={}){
+  system=cleanSystem(system);const {feature=''}=options,native=nativeOptions(system,options),url=new URL('/app/persistent-system-shell-v1.html',location.origin);url.searchParams.set('system',system);url.searchParams.set('installed','1');if(feature)url.searchParams.set('feature',String(feature));
+  for(const [key,value] of Object.entries(native))if(value)url.searchParams.set(key,value);
+  return url;
 }
 function mark(system){
   current=cleanSystem(system);document.documentElement.dataset.civweaveSystem=current;document.documentElement.dataset.cwThemedCurrent=current;document.documentElement.dataset.persistentSystem=current;
@@ -221,14 +234,15 @@ function scheduleChildChrome(reason='frame-load',{token=loadToken,expectedHref='
   return true;
 }
 
-function navigate(system,{feature='',replace=false,source='persistent-navbar'}={}){
-  system=cleanSystem(system);mark(system);const url=shellUrl(system,{feature});history[replace?'replaceState':'pushState']({system,feature},'',`${url.pathname}${url.search}`);
-  const target=contentUrl(system,{feature}),host=frame();if(!host)return false;
+function navigate(system,options={}){
+  const {feature='',replace=false,source='persistent-navbar'}=options;
+  system=cleanSystem(system);const route={feature,...nativeOptions(system,options)};mark(system);const url=shellUrl(system,route);history[replace?'replaceState':'pushState']({system,...route},'',`${url.pathname}${url.search}`);
+  const target=contentUrl(system,route),host=frame();if(!host)return false;
   clearChildChromeWork();
   const token=++loadToken;showLoading();clearTimeout(loadTimer);clearInterval(readyPollTimer);loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
   host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;host.title=`${system} · Civweave`;host.src=target.href;watchChildInteractive({token,expectedHref:target.href});
   scheduleBacklights();
-  try{dispatchEvent(new CustomEvent('civweave:system-route-changed',{detail:{system,feature,source,version:VERSION,persistent:true}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:system-route-changed',{detail:{system,...route,source,version:VERSION,persistent:true}}))}catch{}
   return true;
 }
 function intercept(event){
@@ -259,21 +273,21 @@ function boot(){
     if(!childReadyEnough(host,expectedHref))return;
     clearTimeout(loadTimer);hideLoading();const node=errorBox();if(node)node.dataset.open='0';scheduleChildChrome('frame-load',{token,expectedHref});scheduleBacklights();
   });
-  const query=new URLSearchParams(location.search),system=cleanSystem(query.get('system')),feature=query.get('feature')||'';
-  const target=contentUrl(system,{feature});
+  const query=new URLSearchParams(location.search),system=cleanSystem(query.get('system')),options=requestedOptions(query);
+  const target=contentUrl(system,options);
   if(host?.dataset.cwBootstrapHref===target.href){
     // Adopt the independent first-frame load rather than reloading a healthy realm.
     mark(system);const token=++loadToken;
     host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;
     loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
     watchChildInteractive({token,expectedHref:target.href});scheduleChildChrome('preloaded-frame',{token,expectedHref:target.href});scheduleBacklights();
-  }else navigate(system,{feature,replace:true,source:'shell-boot'});
-  addEventListener('popstate',()=>{const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{feature:query.get('feature')||'',replace:true,source:'history'});});
+  }else navigate(system,{...options,replace:true,source:'shell-boot'});
+  addEventListener('popstate',()=>{const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{...requestedOptions(query),replace:true,source:'history'});});
   scheduleBacklights();
 }
 
 globalThis.CivweavePersistentSystemShellV1=Object.freeze({
-  version:VERSION,navigate,contentUrl,shellUrl,current:()=>current,systems:[...SYSTEMS],persistentNavbar:true,stage:'iframe-content-only',
+  version:VERSION,navigate,contentUrl,shellUrl,current:()=>current,systems:[...SYSTEMS],anarchadiaNativePages:Object.freeze(Object.keys(ANARCHADIA_NATIVE_PAGES)),persistentNavbar:true,stage:'iframe-content-only',
   chromeOwner:true,sharedQuickFeatures:Object.freeze(['settings','chat']),updateSignal:'platform-backlight-v2',childChatLauncherPolicy:'parent-only',
   openSettings,openGuide,syncBacklights,suppressChildChrome
 });
