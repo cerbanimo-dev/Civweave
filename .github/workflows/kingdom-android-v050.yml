@@ -1,0 +1,71 @@
+name: Kingdom of Heaven v0.5.0 integrated Android APK
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'pocket-scribe/m4/kingdom-v050-integrate.py'
+      - 'pocket-scribe/m4/kingdom-v4-source.html.gz.b64'
+      - '.github/workflows/kingdom-android-v050.yml'
+  push:
+    branches: [kingdom/android-v050-merged]
+    paths:
+      - 'pocket-scribe/m4/kingdom-v050-integrate.py'
+      - 'pocket-scribe/m4/kingdom-v4-source.html.gz.b64'
+      - '.github/workflows/kingdom-android-v050.yml'
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    permissions: {contents: read}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct the verified Pocket Scribe 0.4.4 base
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pocket-scribe/m4/workspace
+          tar -xzf pocket-scribe/m4/source.tar.gz -C pocket-scribe/m4/workspace
+          tar -xzf pocket-scribe/m4/import-fix-0.4.1.tar.gz -C pocket-scribe/m4/workspace
+          (cd pocket-scribe/m4/workspace && xz -dc ../qwen-runtime-fix-0.4.2.diff.xz | patch -p1 --fuzz=0)
+          sed -i 's/mp.n_gpu_layers=0;mp.use_mmap=true;/mp.n_gpu_layers=0;/' pocket-scribe/m4/workspace/android/app/src/main/cpp/qwen_jni.cpp
+          tar -xzf pocket-scribe/m4/offline-setup-0.4.3.tar.gz -C pocket-scribe/m4/workspace
+          tar -xzf pocket-scribe/m4/download-buttons-0.4.4.tar.gz -C pocket-scribe/m4/workspace
+          mkdir -p pocket-scribe/m4/workspace/legacy
+          base64 --decode pocket-scribe/m4/kingdom-v4-source.html.gz.b64 | gzip -d > pocket-scribe/m4/workspace/legacy/kingdom-mobile-shell-v4.html
+          echo '{"type":"commonjs"}' > pocket-scribe/m4/workspace/package.json
+      - name: Merge the full available Kingdom v4 shell and sermon studio
+        run: python pocket-scribe/m4/kingdom-v050-integrate.py
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '17'}
+      - name: Android SDK, NDK and CMake
+        shell: bash
+        run: |
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" --install 'platforms;android-36' 'build-tools;35.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
+      - uses: gradle/actions/setup-gradle@v4
+        with: {gradle-version: '8.13'}
+      - name: Verify pinned Kokoro and Qwen native dependencies
+        run: bash pocket-scribe/m4/workspace/android/scripts/prepare-android-deps.sh
+      - name: Source and integration regressions
+        working-directory: pocket-scribe/m4/workspace
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py' -q
+          node tests/js/test_envelope.cjs
+      - name: Compile integrated ARM64 Kingdom APK
+        working-directory: pocket-scribe/m4/workspace/android
+        shell: bash
+        run: |
+          gradle :app:assembleDebug --no-daemon --stacktrace --max-workers=2
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | tee kingdom-package-info.txt
+          grep "package: name='org.kingdom.ofheaven'" kingdom-package-info.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kingdom-of-heaven-android-v050-debug-apk
+          path: pocket-scribe/m4/workspace/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 21
