@@ -1,5 +1,6 @@
 import assert from'node:assert/strict';
 import fs from'node:fs';
+import vm from'node:vm';
 import{execFileSync}from'node:child_process';
 import{learningJourneySnapshot,learningJourneyPlanById,recoverableChatPlans,PLAN_LIBRARY_KEY,PLAN_KEY,QUEUE_KEY,LEARNING_PLAN_SCHEMA}from'../public/app/cabinets/living-school/living-school-journey-index-v1.mjs';
 
@@ -120,4 +121,30 @@ assert.match(renderer,/recover-chat-journey/);
 assert.match(controller,/chat-outline-is-not-approval-no-generation/);
 store(PLAN_LIBRARY_KEY,{plans:[recovered[0]]});
 assert.equal(snapshot({}).recoverable.length,0,'Do not duplicate a recovered plan after saving it');
+// Exercise the real producer too: saving a second unrelated Moss plan
+// must not erase the first reviewed/approved draft.
+const unifiedSource=read('public/app/unified-chat-system-v1.js');
+const first=unifiedSource.indexOf('function readLearningPlan(){');
+const last=unifiedSource.indexOf('function learningPlanControl(',first);
+assert.ok(first>0&&last>first,'Moss verified plan persistence helpers must be present');
+const persistence=new Map();
+const saveScope={
+  localStorage:{
+    getItem:key=>persistence.get(key)||null,
+    setItem:(key,value)=>persistence.set(key,value),
+    removeItem:key=>persistence.delete(key)
+  },
+  LEARNING_PLAN_KEY:PLAN_KEY,LEARNING_PLAN_LIBRARY_KEY:PLAN_LIBRARY_KEY,LEARNING_PLAN_SCHEMA,
+  parse:(value,otherwise)=>{try{return JSON.parse(value)??otherwise}catch{return otherwise}},
+  dispatchEvent:()=>true,CustomEvent:class{constructor(type,opts){this.type=type;this.detail=opts.detail}},
+  JSON,Date,Map
+};
+const save=vm.runInNewContext(unifiedSource.slice(first,last)+'\\nsaveLearningPlan',saveScope);
+const planA={...oldTarot,state:'approved'};
+const planB={...other,state:'review',approvedAt:null};
+save(planA);save(planB);
+const retained=JSON.parse(persistence.get(PLAN_LIBRARY_KEY)).plans;
+assert.equal(retained.length,2,'Moss plan producer must retain both topics across saves');
+assert.equal(retained.find(item=>item.id===planA.id).state,'approved');
+assert.equal(retained.find(item=>item.id===planB.id).state,'review');
 console.log('PASS Living School saved journey list, approval, retry, rollback, partial and stale-path goal isolation');
