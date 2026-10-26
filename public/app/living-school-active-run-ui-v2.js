@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='2.1.0-living-school-native-stream-visible-v3';
+const VERSION='2.1.1-living-school-native-prefill-budget-v4';
 const GENERATE='[data-ls-action="generate-curriculum"]';
 const REPORT='#lsc220-generation-recovery';
 const RAIL_ID='lsc-living-school-generation-run-rail';
@@ -107,11 +107,11 @@ function selectedCall(){
    const age=Math.max(0,Math.floor((nowMs()-run.startedAt)/1000));
    const chars=Number(run.generatedChars||0),first=run.firstTokenAt?formatElapsed(run.firstTokenAt-run.startedAt):'';
    const bytesLabel=chars?chars.toLocaleString()+' characters received':'0 characters received';
-   const prefix=run.status==='failed'?'Failed':run.status==='complete'?'Finished':run.lastTokenAt?'Receiving streamed text':run.eventPhase==='connecting'?'Connecting to model':run.eventPhase==='repairing'?'Repairing generated output':'Waiting for first visible token';
+   const prefix=run.status==='failed'?'Failed'+(run.errorCode?' · '+run.errorCode:''):run.status==='complete'?'Finished':run.lastTokenAt?'Receiving streamed text':run.eventPhase==='awaiting-first-token'?'Server connected · waiting for first token':run.eventPhase==='connecting'?'Connecting to model':run.eventPhase==='repairing'?'Repairing generated output':'Waiting for first visible token';
    const extra=run.lastTokenAt&&run.status==='active'? ' · last text '+Math.max(0,Math.floor((nowMs()-run.lastTokenAt)/1000))+'s ago':'';
    const tokens=run.outputTokens?' · '+run.outputTokens.toLocaleString()+' output tokens':'';
-   status.textContent=prefix+' · '+bytesLabel+(first?' · first text at '+first:' · elapsed '+formatElapsed(age*1000))+extra+tokens+(run.finishReason?' · finish '+run.finishReason:'');
-   const next=run.preview||'No model text received yet. The request may still be loading or processing its prompt.';
+   status.textContent=prefix+' · '+bytesLabel+(first?' · first text at '+first:' · elapsed '+formatElapsed(age*1000))+extra+tokens+(run.finishReason?' · finish '+run.finishReason:'')+(run.deadlineMs?' · limit '+formatElapsed(run.deadlineMs):'')+(run.promptCharacters?' · prompt '+run.promptCharacters.toLocaleString()+' chars':'');
+   const next=run.preview||(run.status==='failed'?'No model text was received before the request failed.':run.eventPhase==='awaiting-first-token'?'HTTP connection established. Qwen may still be evaluating the prompt; llama.cpp does not send individual prompt-processing tokens on this response stream.':'No model text received yet. The request may still be loading or processing its prompt.');
    if(preview.textContent!==next){
      const nearBottom=preview.scrollTop+preview.clientHeight>=preview.scrollHeight-32;
      preview.textContent=next;
@@ -139,10 +139,12 @@ function onModelEvent(event){
   const provider=clean(detail.provider,120),model=clean(detail.model,180);if(provider)session.provider=provider;if(model)session.model=model;
   let run=session.runs.find(item=>item.callId===requestId);
   const terminal=['completed','failed','cancelled'].includes(phase);
-  if(!run&&!terminal){run={index:session.runs.length,callId:requestId,provider,model,purpose,startedAt:Date.parse(detail.at)||nowMs(),endedAt:0,status:'active',nested:!livingSchoolPurpose(purpose),errorCode:'',eventPhase:phase,generatedChars:0,firstTokenAt:0,lastTokenAt:0,preview:'',finishReason:'',outputTokens:0};session.runs.push(run);selectedRun=run.index}
+  if(!run&&!terminal){run={index:session.runs.length,callId:requestId,provider,model,purpose,startedAt:Date.parse(detail.at)||nowMs(),endedAt:0,status:'active',nested:!livingSchoolPurpose(purpose),errorCode:'',eventPhase:phase,generatedChars:0,firstTokenAt:0,lastTokenAt:0,preview:'',finishReason:'',outputTokens:0,promptCharacters:0,deadlineMs:0};session.runs.push(run);selectedRun=run.index}
   if(run){
      if(provider)run.provider=provider;if(model)run.model=model;if(purpose)run.purpose=purpose;
      run.eventPhase=phase;
+     if(Number(detail.promptCharacters)>0)run.promptCharacters=Number(detail.promptCharacters);
+     if(Number(detail.deadlineMs)>0)run.deadlineMs=Number(detail.deadlineMs);
      if(phase==='partial'&&run.status==='active'){
        const incoming=typeof detail.accumulatedText==='string'?detail.accumulatedText:null;
        const delta=typeof detail.text==='string'?detail.text:'';
