@@ -1,7 +1,7 @@
 import assert from'node:assert/strict';
 import fs from'node:fs';
 import{execFileSync}from'node:child_process';
-import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,LEARNING_PLAN_SCHEMA}from'../public/app/cabinets/living-school/living-school-journey-index-v1.mjs';
+import{learningJourneySnapshot,learningJourneyPlanById,PLAN_LIBRARY_KEY,PLAN_KEY,QUEUE_KEY,LEARNING_PLAN_SCHEMA}from'../public/app/cabinets/living-school/living-school-journey-index-v1.mjs';
 
 const read=path=>fs.readFileSync(new URL('../'+path,import.meta.url),'utf8');
 for(const file of [
@@ -81,4 +81,26 @@ assert.match(controller,/localStorage\.removeItem\(PLAN_KEY\)/);
 assert.match(controller,/living-school-new-path-replacement-rolled-back/);
 assert.match(controller,/const attemptedRecovery=copy\(state\(\)\.generationRecovery\|\|null\)/);
 assert.match(controller,/addEventListener\('storage'/);
+// Multiple independently saved plans must remain visible/selectable after
+// the historical single-plan slot has been overwritten by a newer subject.
+records.clear();
+const other={...approved,id:'learning-plan-bed',request:{...approved.request,title:'Morning Bed-Making',capability:'make a bed every morning',count:6},updatedAt:'2026-10-26T18:00:00Z'};
+const oldTarot={...approved,updatedAt:'2026-10-25T19:00:00Z'};
+store(PLAN_LIBRARY_KEY,{schema:'civweave.learning-journey-plan-library.v1',plans:[oldTarot,other]});
+store(PLAN_KEY,other);
+view=snapshot({});
+assert.equal(view.plans.length,2,'Old approved plan must survive latest pending-plan overwrite');
+assert.ok(view.rows.some(row=>row.title===title),'Tarot must appear alongside bed-making');
+assert.ok(view.rows.some(row=>row.title==='Morning Bed-Making'));
+assert.equal(view.generatable.length,2,'Both approved plans need independent Generate controls');
+assert.equal(view.generatable.find(item=>item.id==='plan:learning-plan-tarot').request.capability,capability);
+assert.equal(view.generatable.find(item=>item.id==='plan:learning-plan-bed').request.capability,'make a bed every morning');
+assert.equal(learningJourneyPlanById(fetch,'plan:learning-plan-tarot').id,oldTarot.id);
+assert.match(renderer,/journeys\.generatable\.some\(item=>item\.id===row\.id\)/);
+assert.match(controller,/generatable\.find\(item=>item\.id===clean\(target\.dataset\.journeyId,180\)\)/);
+records.clear();
+store(PLAN_KEY,approved);
+view=snapshot({});
+assert.equal(view.plans.length,1,'Legacy plans must show without a library migration');
+assert.equal(view.generatable[0].id,'plan:learning-plan-tarot');
 console.log('PASS Living School saved journey list, approval, retry, rollback, partial and stale-path goal isolation');
