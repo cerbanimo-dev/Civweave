@@ -1,6 +1,10 @@
 name: Kingdom of Heaven v0.5.0 integrated Android APK
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'pocket-scribe/m4/kingdom-v050-integrate.py'
+      - '.github/workflows/kingdom-android-v050.yml'
   push:
     branches: [kingdom/android-v050-merged]
     paths:
