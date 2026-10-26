@@ -70,7 +70,8 @@ function latest(type=''){for(let i=history.length-1;i>=0;i-=1)if(!type||history[
 function inferRuntimeStage(args={},forcedModelId=''){
   const explicit=clean(args.__civweaveStage||args.stage||args.stageLabel,180);if(explicit)return explicit;
   const prompt=clean(args.systemPrompt,16000).toLowerCase(),model=clean(forcedModelId,160).toLowerCase();
-  if(prompt.includes('fast e2b intake')||prompt.includes('route_civweave_request')||model.includes('e2b'))return'E2B Intake';
+  if(prompt.includes('fast e4b intake')||prompt.includes('route_civweave_request'))return'E4B Intake';
+  if(model.includes('e2b'))return'E2B Generation';
   if(prompt.includes('targeted repair'))return'E4B Repair';
   if(prompt.includes("civweave's compiler")||prompt.includes('convert a completed weave draft'))return'E4B JSON Compile';
   if(prompt.includes('draft mode')||prompt.includes('planning artifact'))return'E4B Plan Draft';
