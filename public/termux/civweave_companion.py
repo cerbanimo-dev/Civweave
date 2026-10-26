@@ -362,7 +362,7 @@ class Controller:
             "server_reachable": reachable, "unmanaged_running": reachable and not owned,
             "selected_model": chosen, "context": context,
             "llama_installed": bool(shutil.which("llama-server")),
-            "models": names, "job": job,
+            "models": names, "job": job, "generation_api": "durable-v1",
         }
 
     def update_job(self, **fields):
