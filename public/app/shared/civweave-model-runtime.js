@@ -904,6 +904,39 @@
     };
   }
 
+  // Bounded Termux dialogue for a 2 GB phone. Structured artifacts retain their normal route.
+  function lowMemoryTermuxDialogue(config, request) {
+    if (config.provider !== "openai-compatible" || config.model !== "smollm2-360m" ||
+        request.purpose !== "civweave-guide-response-v141" ||
+        request.schema || request.task?.kind !== "dialogue" ||
+        request.task?.requirements?.planning || request.task?.requirements?.externalResearch ||
+        request.capabilityRequirements?.planning) return false;
+    try {
+      const endpoint = new URL(config.endpoint);
+      return endpoint.protocol === "http:" &&
+        ["127.0.0.1", "localhost", "[::1]"].includes(endpoint.hostname.toLowerCase()) &&
+        endpoint.port === "8080" &&
+        /^\/v1(?:\/chat\/completions)?\/?$/.test(endpoint.pathname);
+    } catch { return false; }
+  }
+
+  function lowMemoryTermuxMessages(request) {
+    const guide = safeString(request.context?.guide?.name || "Weaveling", 50).trim();
+    const supplied = messagesFromRequest(request);
+    const latestUser = [...supplied].reverse().find(row => row.role === "user")?.content || "";
+    const text = safeString(request.context?.userMessage || latestUser, 500).trim() || "Hello.";
+    const prior = (Array.isArray(request.context?.recentConversation) ? request.context.recentConversation : [])
+      .filter(row => ["user", "assistant"].includes(row?.role))
+      .map(row => ({ role: row.role, content: safeString(row.text || row.content, 160).trim() }))
+      .filter(row => row.content);
+    if (prior.at(-1)?.role === "user" && prior.at(-1)?.content === text) prior.pop();
+    return [
+      { role: "system", content: "You are " + guide + ", a Civweave guide. Reply clearly in 1-2 short sentences. Admit uncertainty. Never claim an action happened unless confirmed. Write ordinary text, not JSON." },
+      ...prior.slice(-2),
+      { role: "user", content: text },
+    ];
+  }
+
   async function generate(request = {}) {
     const executionProfile = resolveExecutionProfile(request);
     const selectedShared = readSharedConfig(executionProfile) || readSharedConfig("interactive") || {};
@@ -912,6 +945,13 @@
       ? { ...requestedConfig, ...selectedShared, apiKey: requestedConfig.apiKey || selectedShared.apiKey, externalConsent: requestedConfig.externalConsent ?? selectedShared.externalConsent }
       : requestedConfig;
     const config = normalizeConfig({ ...selectedShared, ...profileOverride });
+    const lowRamChat = lowMemoryTermuxDialogue(config, request);
+    if (lowRamChat) {
+      config.maxTokens = Math.min(config.maxTokens, 64);
+      config.context = Math.min(config.context, 512);
+      config.timeoutMs = Math.max(config.timeoutMs, 180000);
+      request = { ...request, responseFormat: "text", maxRepairAttempts: 0 };
+    }
     // First cold load of a ~2.7GB GGUF on Android includes Wllama/WASM setup,
     // possible WebGPU failure, CPU fallback, and then the first decoded token.
     // The ordinary 90-second HTTP-provider deadline aborts before that work
@@ -930,7 +970,7 @@
     }
     const context = makeContext(request, config);
     const started = Date.now();
-    const messages = messagesFromRequest(request);
+    const messages = lowRamChat ? lowMemoryTermuxMessages(request) : messagesFromRequest(request);
     const structured = request.responseFormat === "json" || Boolean(request.schema);
 
     if (config.provider === "deterministic") {
