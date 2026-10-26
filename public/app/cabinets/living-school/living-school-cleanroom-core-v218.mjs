@@ -13,7 +13,7 @@ import {
   progressFor,
   weavePathIdentity,
 } from './living-school-cleanroom-core-v218-base.mjs';
-import {ensureModuleVideo} from '../../video-learning-contract-v1.mjs?v=video-atlas-v1-subject-anchors';
+import {ensureModuleVideo} from '../../video-learning-contract-v1.mjs?v=video-atlas-v1-distinctive-topics';
 import {assertGenerationActive,generationCancelled} from './living-school-cleanroom-core-v218-base.mjs';
 
 const RECOVERY_SCHEMA='civweave.living-school-generation-recovery.v1';

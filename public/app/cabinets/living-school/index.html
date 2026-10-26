@@ -10,7 +10,7 @@
   <link rel="preload" as="image" href="/app/assets/ai/weaveling-compass.png">
   <script src="/app/themed-system-nav-v178.js?v=1.0.165-viewport-bounds" defer></script>
   <script src="/app/japanese-mode-v1.js?v=japanese-mode-v1" defer></script>
-  <script src="/app/system-radio-agent-v233.js?v=1.1.0-direct-audio-v1" defer></script>
+  <script src="/app/system-radio-agent-v233.js?v=1.1.1-direct-audio-v2" defer></script>
   <script src="/app/radio-track-suggestions-v240.js?v=1.6.1-direct-audio-v1" defer></script>
   <script src="/app/install-boundary-v146.js"></script>
   <script src="/app/cw-reward-ledger-v2.js?v=basic-value-v1"></script>
@@ -155,7 +155,7 @@
     const supportReady=ensureSupportRuntime();
     globalThis.CivweaveLivingSchoolSupportRuntimeReadyV1=supportReady;
     supportReady.catch(error=>console.warn('[Living School support runtime]',error));
-    import('/app/living-school-learning-packs-v1.mjs?v=learning-packs-v1').catch(error=>console.warn('[Living School learning packs]',error));
+    import('/app/living-school-learning-packs-v1.mjs?v=learning-packs-v1.1-parent-return').catch(error=>console.warn('[Living School learning packs]',error));
   }catch(error){
     clearTimeout(watchdog);
     console.error('[Living School bootstrap]',error);

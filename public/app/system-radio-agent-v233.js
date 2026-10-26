@@ -137,7 +137,7 @@ try{dispatchEvent(new CustomEvent('civweave:radio-agent-ready',{detail:{version:
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-direct-audio-v1';
+const VERSION='1.1.1-direct-audio-v2';
 const LAUNCHER_ID='cw-radio-station-launcher-v1';
 const PANEL_ID='cw-radio-station-panel-v1';
 const STYLE_ID='cw-radio-station-surface-v1-style';
@@ -170,6 +170,7 @@ let catalogPromise=null;
 let catalogError='';
 let currentTrack=null;
 let playbackToken=0;
+let pendingSeek=null;
 let objectUrl='';
 let isPlaying=false;
 let statusText='Choose a track to listen.';
@@ -248,11 +249,12 @@ async function loadCatalog(){
 }
 function revokeObjectUrl(){if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=''}}
 function status(message){statusText=message;updatePlaybackUi()}
-function stopTrack(){playbackToken++;audio?.pause();audio?.removeAttribute('src');audio?.load();revokeObjectUrl();currentTrack=null;isPlaying=false;updatePlaybackUi()}
+function cancelSeek(){if(pendingSeek){pendingSeek.controller.abort();pendingSeek=null}}
+function stopTrack(){playbackToken++;cancelSeek();audio?.pause();audio?.removeAttribute('src');audio?.load();revokeObjectUrl();currentTrack=null;isPlaying=false;updatePlaybackUi()}
 async function playTrack(id){
   if(!audio)ensureSurface();
   const track=directTracksFor().find(row=>row.id===id);if(!track){status('This track is unavailable in the current station.');return false}
-  const token=++playbackToken;audio.pause();revokeObjectUrl();currentTrack=track;status(`Loading ${track.title}…`);updatePlaybackUi();
+  const token=++playbackToken;cancelSeek();audio.pause();revokeObjectUrl();currentTrack=track;status(`Loading ${track.title}…`);updatePlaybackUi();
   try{
     let source=track.url;
     if(globalThis.caches)try{const cached=await(await caches.open(AUDIO_CACHE)).match(track.url);if(cached){const blob=await cached.blob();if(token!==playbackToken)return false;objectUrl=URL.createObjectURL(blob);source=objectUrl;savedIds.add(track.id)}}catch{}
@@ -263,18 +265,66 @@ async function playTrack(id){
 }
 function nextTrack(direction=1){const rows=directTracksFor();if(!rows.length)return false;const index=rows.findIndex(row=>row.id===currentTrack?.id);return playTrack(rows[index<0?(direction>0?0:rows.length-1):(index+direction+rows.length)%rows.length].id)}
 async function togglePlayback(){if(!currentTrack)return playTrack(directTracksFor()[0]?.id);if(isPlaying){audio.pause();isPlaying=false;status('Paused.');return true}try{await audio.play();isPlaying=true;status(`Playing ${currentTrack.title}.`);return true}catch{status('Playback could not start. Try selecting the track again.');return false}}
+async function verifiedAudio(track,signal){
+  const response=await fetch(track.url,{cache:'no-store',signal});if(signal.aborted||!response.ok||response.type==='opaque')throw new Error('Audio unavailable.');
+  const declared=Number(response.headers.get('content-length'))||0;if(declared>MAX_AUDIO_BYTES)throw new Error('Invalid audio size.');
+  let bytes;
+  if(response.body?.getReader){
+    const reader=response.body.getReader(),chunks=[];let length=0;
+    try{for(;;){const part=await reader.read();if(signal.aborted)throw new Error('Audio request cancelled.');if(part.done)break;length+=part.value.byteLength;if(length>MAX_AUDIO_BYTES||length>track.bytes){await reader.cancel();throw new Error('Audio too large.')}chunks.push(part.value)}}finally{reader.releaseLock()}
+    const joined=new Uint8Array(length);let offset=0;for(const part of chunks){joined.set(part,offset);offset+=part.byteLength}bytes=joined.buffer;
+  }else bytes=await response.arrayBuffer();
+  if(signal.aborted||bytes.byteLength!==track.bytes||bytes.byteLength>MAX_AUDIO_BYTES)throw new Error('Invalid audio size.');
+  const header=new Uint8Array(bytes,0,Math.min(bytes.byteLength,3));if(!(header[0]===73&&header[1]===68&&header[2]===51)&&!(header[0]===255&&(header[1]&224)===224))throw new Error('Invalid MP3 response.');
+  if(!globalThis.crypto?.subtle)throw new Error('Audio integrity checking is unavailable.');
+  const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(value=>value.toString(16).padStart(2,'0')).join('');
+  if(signal.aborted||track.sha256&&hash!==track.sha256)throw new Error('Audio integrity mismatch.');
+  return{bytes,hash};
+}
+function canSeekTo(target){
+  if(objectUrl&&audio?.src===objectUrl)return true;
+  try{for(let index=0;index<audio.seekable.length;index++)if(target>=audio.seekable.start(index)&&target<=audio.seekable.end(index))return true}catch{}
+  return false;
+}
+function loadSeekSource(source,signal){
+  return new Promise((resolve,reject)=>{
+    const cleanup=()=>{audio.removeEventListener('loadedmetadata',ready);audio.removeEventListener('error',failed);signal.removeEventListener('abort',aborted)};
+    const ready=()=>{cleanup();resolve()};
+    const failed=()=>{cleanup();reject(new Error('Prepared audio could not be decoded.'))};
+    const aborted=()=>{cleanup();reject(new Error('Seek preparation cancelled.'))};
+    audio.addEventListener('loadedmetadata',ready);audio.addEventListener('error',failed);signal.addEventListener('abort',aborted,{once:true});
+    if(signal.aborted){aborted();return}audio.src=source;audio.load();if(audio.readyState>=1)ready();
+  });
+}
+async function seekTrack(value){
+  if(!audio||!currentTrack||!Number.isFinite(audio.duration))return false;
+  const target=Math.min(audio.duration,Math.max(0,Number(value)||0));
+  if(pendingSeek&&pendingSeek.token===playbackToken&&pendingSeek.track.id===currentTrack.id){pendingSeek.target=target;updatePlaybackUi();return pendingSeek.promise}
+  if(canSeekTo(target)){audio.currentTime=target;updatePlaybackUi();return true}
+  const request={token:++playbackToken,track:currentTrack,target,wasPlaying:isPlaying,controller:new AbortController(),promise:null};
+  pendingSeek=request;audio.pause();isPlaying=false;status(`Preparing this track for seeking… (${(currentTrack.bytes/1048576).toFixed(1)} MB)`);
+  const timer=setTimeout(()=>request.controller.abort(),90000);
+  request.promise=(async()=>{
+    try{
+      const {bytes}=await verifiedAudio(request.track,request.controller.signal);
+      if(request.token!==playbackToken||currentTrack?.id!==request.track.id)return false;
+      revokeObjectUrl();objectUrl=URL.createObjectURL(new Blob([bytes],{type:'audio/mpeg'}));request.preparedUrl=objectUrl;
+      await loadSeekSource(objectUrl,request.controller.signal);
+      if(request.token!==playbackToken||currentTrack?.id!==request.track.id)return false;
+      audio.currentTime=Math.min(audio.duration,request.target);pendingSeek=null;
+      if(request.wasPlaying){await audio.play();if(request.token!==playbackToken)return false;isPlaying=true}
+      status(`${request.wasPlaying?'Playing from':'Paused at'} ${timeLabel(audio.currentTime)}.`);return true;
+    }catch(error){if(request.token===playbackToken){if(request.preparedUrl&&objectUrl===request.preparedUrl){revokeObjectUrl();audio.src=request.track.url;audio.load();audio.pause()}isPlaying=false;status('Could not seek in this recording. Playback is paused; choose Play to resume.')}return false}
+    finally{clearTimeout(timer);if(pendingSeek===request)pendingSeek=null;updatePlaybackUi()}
+  })();return request.promise;
+}
 async function saveOffline(id){
   const track=directTracksFor().find(row=>row.id===id);if(!track||busyIds.has(id))return false;
   if(!globalThis.caches||!globalThis.crypto?.subtle){status('Offline audio storage is unavailable in this browser. You can still stream.');return false}
   busyIds.add(id);status(`Saving ${track.title} for offline listening…`);renderTrackList();
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);
   try{
-    const response=await fetch(track.url,{cache:'no-store',signal:controller.signal});if(!response.ok||response.type==='opaque')throw new Error('Audio unavailable.');
-    const declared=Number(response.headers.get('content-length'))||0;if(declared>MAX_AUDIO_BYTES)throw new Error('Audio too large.');
-    const bytes=await response.arrayBuffer();if(!bytes.byteLength||bytes.byteLength>MAX_AUDIO_BYTES)throw new Error('Invalid audio size.');
-    const header=new Uint8Array(bytes,0,Math.min(bytes.byteLength,3));if(!(header[0]===73&&header[1]===68&&header[2]===51)&&!(header[0]===255&&(header[1]&224)===224))throw new Error('Invalid MP3 response.');
-    const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(value=>value.toString(16).padStart(2,'0')).join('');
-    if(track.sha256&&hash!==track.sha256)throw new Error('Audio integrity mismatch.');
+    const {bytes,hash}=await verifiedAudio(track,controller.signal);
     const cache=await caches.open(AUDIO_CACHE);await cache.put(track.url,new Response(bytes,{headers:{'content-type':'audio/mpeg','content-length':String(bytes.byteLength),'x-civweave-audio-sha256':hash}}));
     savedIds.add(id);status(`${track.title} saved offline.`);return true;
   }catch(error){status(`Could not save ${track.title}. Check your connection or device storage and try again.`);return false}
@@ -287,9 +337,9 @@ async function removeOffline(id){
 function timeLabel(value){const seconds=Math.max(0,Math.floor(Number(value)||0));return `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`}
 function updatePlaybackUi(){
   if(!panel)return;
-  const duration=Number.isFinite(audio?.duration)?audio.duration:0,position=Number(audio?.currentTime)||0;
+  const duration=Number.isFinite(audio?.duration)?audio.duration:0,position=pendingSeek?.target??(Number(audio?.currentTime)||0);
   const title=panel.querySelector('[data-radio-current]');if(title)title.textContent=currentTrack?`${currentTrack.title} — ${currentTrack.artist}`:'Choose a track';
-  const play=panel.querySelector('[data-radio-play]');if(play){play.textContent=isPlaying?'Pause':'Play';play.setAttribute('aria-label',isPlaying?'Pause music':'Play music');play.disabled=!directTracksFor().length&&!currentTrack}
+  const play=panel.querySelector('[data-radio-play]');if(play){play.textContent=pendingSeek?'Preparing…':isPlaying?'Pause':'Play';play.setAttribute('aria-label',pendingSeek?'Preparing track for seeking':isPlaying?'Pause music':'Play music');play.disabled=Boolean(pendingSeek)||!directTracksFor().length&&!currentTrack}
   const seek=panel.querySelector('[data-radio-seek]');if(seek){seek.max=String(duration||1);seek.value=String(position);seek.disabled=!duration}
   const time=panel.querySelector('[data-radio-time]');if(time)time.textContent=`${timeLabel(position)} / ${timeLabel(duration)}`;
   const message=panel.querySelector('[data-radio-status]');if(message&&message.textContent!==statusText)message.textContent=statusText;
@@ -334,21 +384,28 @@ html:not([data-radio-embedded="true"]){--cw-radio-dock-space:calc(var(--cw-theme
 #${LAUNCHER_ID}{bottom:calc(var(--cw-radio-dock-space) + 8px);width:44px;height:44px;background:transparent;border:0;border-radius:12px;color:var(--cw-radio-accent,#cfabed);box-shadow:none;font-size:28px;text-shadow:0 1px 3px #000b}
 #${LAUNCHER_ID}[aria-expanded="true"],#${LAUNCHER_ID}[data-playing="true"]{box-shadow:none;color:var(--cw-radio-accent,#cfabed)}
 #${LAUNCHER_ID}:focus-visible{outline:2px solid currentColor;outline-offset:2px}
-#${PANEL_ID}{bottom:calc(var(--cw-radio-dock-space) + 58px);max-height:calc(100dvh - var(--cw-radio-dock-space) - 78px);display:flex;flex-direction:column;overflow:auto;background:var(--cw-radio-background,#21152e);border-color:color-mix(in srgb,var(--cw-radio-accent,#cfabed) 45%,transparent);box-shadow:0 12px 34px #0008;overscroll-behavior:contain}
+#${PANEL_ID}{bottom:calc(var(--cw-radio-dock-space) + 58px);max-height:calc(100dvh - var(--cw-radio-dock-space) - 78px);display:grid;grid-template-rows:auto auto auto minmax(0,1fr);min-height:0;overflow:hidden;background:var(--cw-radio-background,#21152e);border-color:color-mix(in srgb,var(--cw-radio-accent,#cfabed) 45%,transparent);box-shadow:0 12px 34px #0008;overscroll-behavior:contain}
 #${PANEL_ID}>header{padding:10px 12px;flex:none}#${PANEL_ID}>header strong{font-size:17px}
-#${PANEL_ID} .cw-radio-modebar{padding:8px 12px;flex:none}#${PANEL_ID} .cw-radio-modebar>button{min-height:44px}
+#${PANEL_ID} .cw-radio-modebar{padding:8px 12px;max-height:112px;overflow-y:auto;overscroll-behavior:contain}#${PANEL_ID} .cw-radio-modebar>button{min-height:44px}
 #${PANEL_ID} .cw-radio-modebar details{flex:1;min-width:140px}#${PANEL_ID} .cw-radio-modebar summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:12px;color:var(--cw-radio-accent,#cfabed)}
 #${PANEL_ID} .cw-radio-modebar details[open]>div{display:flex;gap:6px;flex-wrap:wrap;padding:4px 0}
 #${PANEL_ID} .cw-radio-modebar button[aria-pressed="true"]{border-color:var(--cw-radio-accent,#cfabed);background:color-mix(in srgb,var(--cw-radio-accent,#cfabed) 15%,transparent)}
-#${PANEL_ID} .cw-radio-player{display:grid;gap:7px;padding:10px 12px;border-bottom:1px solid #ffffff20;flex:none}
+#${PANEL_ID} .cw-radio-player{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:6px;padding:10px 12px;border-bottom:1px solid #ffffff20;min-width:0}
+#${PANEL_ID} .cw-radio-player>audio{display:none}#${PANEL_ID} [data-radio-current]{grid-column:1/-1;grid-row:1}
+#${PANEL_ID} .cw-radio-controls{grid-column:1;grid-row:2}#${PANEL_ID} .cw-radio-volume{grid-column:2;grid-row:2;flex-direction:column;justify-content:center;gap:0}
+#${PANEL_ID} .cw-radio-seek{grid-column:1/-1;grid-row:3}#${PANEL_ID} [data-radio-status]{grid-column:1/-1;grid-row:4;max-height:2.8em;overflow:auto}
+#${PANEL_ID} [data-radio-current-credits]{grid-column:1/-1;grid-row:5;max-height:2.8em;overflow:auto}
 #${PANEL_ID} .cw-radio-player>strong{font-size:13px;overflow-wrap:anywhere}#${PANEL_ID} .cw-radio-controls{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
 #${PANEL_ID} .cw-radio-player button,#${PANEL_ID} .cw-radio-direct-actions button,#${PANEL_ID} [data-radio-retry]{min-height:44px;border:1px solid #ffffff38;border-radius:10px;background:#ffffff0b;color:inherit;padding:7px 10px;font-weight:750}
 #${PANEL_ID} button:disabled{opacity:.5;cursor:default}#${PANEL_ID} .cw-radio-seek{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}#${PANEL_ID} .cw-radio-volume{display:flex;gap:8px;align-items:center;font-size:11px}
 #${PANEL_ID} input[type="range"]{min-height:28px;width:100%;accent-color:var(--cw-radio-accent,#cfabed);margin:0}#${PANEL_ID} .cw-radio-volume input{max-width:130px}
 #${PANEL_ID} [data-radio-status]{margin:0;font-size:11px;color:#d5d5df}#${PANEL_ID} [data-radio-current-credits]{font-size:10px;overflow-wrap:anywhere}#${PANEL_ID} a{color:var(--cw-radio-accent,#cfabed)}
-#${PANEL_ID} .cw-radio-body{overflow:visible;flex:none}#${PANEL_ID} .cw-radio-note{color:#d0cbd6}
+#${PANEL_ID} .cw-radio-body{min-height:0;overflow:auto;overscroll-behavior:contain}#${PANEL_ID} .cw-radio-note{color:#d0cbd6}
 #${PANEL_ID} .cw-radio-direct-track{display:grid;gap:6px;padding:12px 0;border-bottom:1px solid #ffffff20;overflow-wrap:anywhere}#${PANEL_ID} .cw-radio-direct-track>span,#${PANEL_ID} .cw-radio-direct-track>small{font-size:11px;color:#d5d5df}
 #${PANEL_ID} .cw-radio-direct-actions{display:flex;gap:7px;flex-wrap:wrap}
+@media(max-width:360px){#${PANEL_ID} .cw-radio-controls{grid-column:1/-1}#${PANEL_ID} .cw-radio-volume{grid-column:1/-1;grid-row:4;flex-direction:row;justify-content:flex-start;gap:8px}#${PANEL_ID} [data-radio-status]{grid-row:5}#${PANEL_ID} [data-radio-current-credits]{grid-row:6}}
+/* When even compact controls cannot fit, preserve a sticky Close and expose all content through one scrollable fallback. */
+@media(max-height:520px){#${PANEL_ID}{display:block;overflow:auto}#${PANEL_ID}>header{position:sticky;top:0;z-index:2;background:var(--cw-radio-background,#21152e)}#${PANEL_ID} .cw-radio-body{overflow:visible}#${PANEL_ID} .cw-radio-modebar{max-height:none;overflow-y:visible}}
 `;
   document.head?.append(style);
 }
@@ -410,7 +467,7 @@ function ensureSurface(){
     audio.addEventListener('error',()=>{isPlaying=false;status('This recording could not be played. Try saving it while online, or choose another track.')});
     panel.querySelector('[data-radio-play]').addEventListener('click',togglePlayback);
     panel.querySelector('[data-radio-previous]').addEventListener('click',()=>nextTrack(-1));panel.querySelector('[data-radio-next]').addEventListener('click',()=>nextTrack(1));
-    panel.querySelector('[data-radio-seek]').addEventListener('input',event=>{if(Number.isFinite(audio.duration))audio.currentTime=Math.min(audio.duration,Math.max(0,Number(event.target.value)||0));updatePlaybackUi()});
+    panel.querySelector('[data-radio-seek]').addEventListener('input',event=>{seekTrack(event.target.value)});
     panel.querySelector('[data-radio-volume]').addEventListener('input',event=>{audio.volume=Math.min(1,Math.max(0,Number(event.target.value)||0))});
     panel.querySelector('[data-radio-body]').addEventListener('click',event=>{
       const play=event.target.closest?.('[data-radio-track-play]');if(play){playTrack(play.dataset.radioTrackPlay);return}
@@ -437,7 +494,7 @@ function start(){
   addEventListener('civweave:safe-mode-changed',()=>{if(safeModeEnabled()&&currentTrack&&!currentTrack.safeAudit){stopTrack();status('S.A.F.E. is on. Select a recording with a complete safety audit.')}if(safeModeEnabled()&&mode()==='original')setMode('clean');else refresh()});
   addEventListener('civweave:system-route-changed',refresh);
   addEventListener('keydown',event=>{if(event.key==='Escape'&&openState){close();launcher?.focus()}});
-  addEventListener('pagehide',()=>{playbackToken++;audio?.pause();revokeObjectUrl()});
+  addEventListener('pagehide',()=>{playbackToken++;cancelSeek();audio?.pause();revokeObjectUrl()});
   addEventListener('civweave:canonical-playlists:changed',refresh);
   addEventListener('civweave:radio-preferences-changed',refresh);
   addEventListener('civweave:radio-station-open-request',open);

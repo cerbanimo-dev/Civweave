@@ -166,6 +166,10 @@ These are navigation landmarks only. Always re-check the ownership registry and 
 
 The persistent shell owns the single radio player in `system-radio-agent-v233.js`. Embedded content aliases the parent radio API instead of creating another player, launcher, or audio element, so changing native content does not replace playback. Direct listening uses the licensed same-origin starter catalog at `public/downloads/hub-media/open-music/starter-catalog.json`; streaming and saving individual tracks begin with explicit user actions, while Spotify remains an extension. `radio-safe-stations-v1.js` and `radio-track-suggestions-v240.js` also alias their parent owners when embedded and leave the direct-audio view to the player owner.
 
+The shared Guild launcher uses `guild-symbol-v1.js` and the existing `host-node-installer-lobby-v1.js` owner. `boot({mount})` connects that lobby inside the installed shell before binding controls; installer placement remains the default when no mount is supplied. Load failures stay in the current surface with retry instead of navigating the installed app to the installer.
+
+Direct audio seeking falls back to a bounded, verified in-memory blob when the static host cannot serve a requested time range. That explicit seek does not persist media; only Save offline writes the audio cache.
+
 ## Hosting and runtime model
 
 Civweave is an offline-first installable family with optional connected services.

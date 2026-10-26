@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.8-reserved-navigation-utilities';
+const VERSION='1.0.9-in-shell-guild-retry';
 const NAV_ID='cw-themed-system-nav';
 const ACTIONS_ID='cw-persistent-shell-actions-v1';
 const STYLE_ID='cw-persistent-shell-actions-v1-style';
@@ -13,7 +13,7 @@ const RETIRED_PATHS=Object.freeze({
   '/app/fullscreen-family-v104.html':'civweave',
   '/app/persistent-family-shell-v1.html':'civweave'
 });
-const GUILD_RUNTIME_SRC='/app/guild-symbol-v1.js?v=guild-symbol-v1.5-standalone-guild-search-card';
+const GUILD_RUNTIME_SRC='/app/guild-symbol-v1.js?v=guild-symbol-v1.6-in-shell-guild-search';
 let guildRuntimePromise=null;
 let legacyRouteBound=false;
 let observedNav=null;
@@ -41,12 +41,20 @@ function switchLegacyRoute(system,source='retired-shell-link'){
 }
 function interceptRetiredShellRoute(event){if(event.defaultPrevented||event.button!=null&&event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;const link=event.target?.closest?.('a[href]');if(!link)return;const system=legacySystemFor(link.href);if(!system)return;event.preventDefault();event.stopImmediatePropagation();switchLegacyRoute(system,'retired-shell-link')}
 function bindLegacyRoutes(){if(legacyRouteBound)return true;legacyRouteBound=true;document.addEventListener('click',interceptRetiredShellRoute,true);return true}
-function guildFallback(){const target=new URL('/app/index.html',location.origin);target.searchParams.set('manage','guilds');target.searchParams.set('source','persistent-shell');target.hash='cw-host-node-lobby';location.assign(`${target.pathname}${target.search}${target.hash}`);return true}
+function guildLauncherState(failed=false){const button=document.querySelector('[data-cw-persistent-action="guilds"]');if(!button)return;const label=button.querySelector('span');if(label)label.textContent=failed?'Retry Guilds':'Guilds';button.setAttribute('aria-label',failed?'Guild search unavailable. Try again.':'Find nearby Guilds');if(failed)button.title='Guild search could not load. Select Retry Guilds to try again.';else button.removeAttribute('title')}
 function ensureGuildRuntime(){
   if(globalThis.CivweaveGuildSymbolV1?.openNearbyGuilds)return Promise.resolve(globalThis.CivweaveGuildSymbolV1);if(guildRuntimePromise)return guildRuntimePromise;
-  guildRuntimePromise=new Promise((resolve,reject)=>{let script=[...document.scripts].find(node=>String(node.src||'').includes('/app/guild-symbol-v1.js'));const ready=()=>globalThis.CivweaveGuildSymbolV1?.openNearbyGuilds?resolve(globalThis.CivweaveGuildSymbolV1):reject(new Error('Guild finder runtime did not become ready.'));if(script){if(globalThis.CivweaveGuildSymbolV1?.openNearbyGuilds)return resolve(globalThis.CivweaveGuildSymbolV1);script.addEventListener('load',ready,{once:true});script.addEventListener('error',()=>reject(new Error('Guild finder runtime failed to load.')),{once:true});setTimeout(ready,2500);return}script=document.createElement('script');script.src=GUILD_RUNTIME_SRC;script.async=true;script.dataset.cwPersistentShellGuildRuntime=VERSION;script.onload=ready;script.onerror=()=>reject(new Error('Guild finder runtime failed to load.'));(document.head||document.documentElement).append(script)}).catch(error=>{guildRuntimePromise=null;throw error});return guildRuntimePromise
+  guildRuntimePromise=new Promise((resolve,reject)=>{
+    const existing=[...document.scripts].find(node=>{try{return new URL(node.src,location.href).pathname==='/app/guild-symbol-v1.js'}catch{return false}}),script=existing||document.createElement('script');let settled=false;
+    const finish=error=>{if(settled)return;settled=true;clearTimeout(timeout);script.removeEventListener('load',ready);script.removeEventListener('error',failed);if(error){script.remove();reject(error)}else resolve(globalThis.CivweaveGuildSymbolV1)};
+    const ready=()=>finish(globalThis.CivweaveGuildSymbolV1?.openNearbyGuilds?null:new Error('Guild finder runtime did not become ready.'));
+    const failed=()=>finish(new Error('Guild finder runtime failed to load.'));
+    const timeout=setTimeout(()=>finish(new Error('Guild finder runtime did not become ready.')),6000);
+    script.addEventListener('load',ready,{once:true});script.addEventListener('error',failed,{once:true});
+    if(!existing){script.src=GUILD_RUNTIME_SRC;script.async=true;script.dataset.cwPersistentShellGuildRuntime=VERSION;(document.head||document.documentElement).append(script)}
+  }).catch(error=>{guildRuntimePromise=null;throw error});return guildRuntimePromise
 }
-async function openGuilds(){try{const api=await ensureGuildRuntime();await api.openNearbyGuilds();return true}catch(error){console.warn('[Civweave] Persistent Guild action fell back to the Guild lobby.',error);return guildFallback()}}
+async function openGuilds(){try{const api=await ensureGuildRuntime(),opened=await api.openNearbyGuilds();if(opened)guildLauncherState();return Boolean(opened)}catch(error){console.warn('[Civweave] Guild search could not load in the current app.',error);guildLauncherState(true);return false}}
 function openMap(){location.assign('/finder?view=map&source=persistent-shell');return true}
 function openSurvival(){location.assign(SURVIVAL_PATH);return true}
 

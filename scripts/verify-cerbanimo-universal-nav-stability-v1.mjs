@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 const shell=read('public/app/persistent-system-shell-v1.html');
 const shellRuntime=read('public/app/persistent-system-shell-v1.js');
@@ -36,7 +37,7 @@ assert(shellRuntime.includes('chromeTimers=[0,60,220,800,1800].map'),'Child-chro
 assert(/data-build="realm-console-canonical-v\d+[^\"]*"/.test(realm),'Cerbanimo must expose a revisioned canonical realm build identity.');
 assert(realm.includes("query.get('embed')==='1'"),'Cerbanimo must recognize persistent-shell embedding.');
 assert(realm.includes("location.replace(target.href)"),'Direct top-level Cerbanimo entry must recover into the persistent system shell.');
-assert(!realm.includes('/app/themed-system-nav-v178.js'),'Cerbanimo content must not instantiate another navbar.');
+assert(scriptTag(realm,'/app/themed-system-nav-v178.js'),'Cerbanimo must load the canonical destination-feature owner. Loading that owner must not mount embedded chrome.');
 assert(!realm.includes('/app/persistent-shell-actions-v1.js'),'Cerbanimo content must not instantiate another Guild/Map rail.');
 assert(!realm.includes('/app/install-boundary-v146.js'),'Cerbanimo content must not load the global shell injector inside the content frame.');
 assert(!realm.includes('/app/platform-experience-v160.js'),'Cerbanimo content must not run the global experience observer stack inside the frame.');
@@ -45,6 +46,51 @@ assert(realm.includes('/app/cerbanimo-quest-engine-v144.js'),'Cerbanimo must ret
 assert(cerbanimoNavStability.includes("const persistentEmbedded=embedded&&(params.get('embed')==='1'||params.get('persistentShell')==='1')"),'Cerbanimo nav stability must distinguish persistent-shell frames from top-level standalone entry.');
 assert(!cerbanimoNavStability.includes('window.top.location.replace'),'Embedded Cerbanimo must never navigate the parent shell.');
 assert(cerbanimoNavStability.includes("document.documentElement.dataset.cerbanimoEmbed=persistentEmbedded?'persistent-shell-frame':'foreign-frame'"),'Cerbanimo must explicitly mark persistent-shell embedding.');
+
+// The shared navigation file also owns destination-feature consumption. Prove
+// its real embedded path instead of mistaking a script tag for another navbar.
+{
+  const href='https://civweave.test/app/realm-console-v140.html?system=cerbanimo&cabinet=1&installed=1&embed=1&persistentShell=1&feature=project-workbench';
+  const listeners=new Map(),created=[],removed=[],parentRail={owner:'parent'},childNodes=new Map();
+  for(const id of ['cw-themed-system-nav','cw-themed-system-nav-menu','cw-themed-system-nav-style'])childNodes.set(id,{remove(){removed.push(id);childNodes.delete(id)}});
+  let ready=false,activations=0;
+  const child={},parent={rail:parentRail};child.self=child;child.top=parent;
+  const document={readyState:'complete',documentElement:{dataset:{civweaveSystem:'cerbanimo'},classList:{remove(){}}},body:{style:{removeProperty(){}}},getElementById:id=>childNodes.get(id)||null,
+    querySelector:selector=>ready&&selector==='[data-dashboard-room="project-workbench"],[data-room="project-workbench"]'?{click(){activations++}}:null,
+    createElement:type=>{created.push(type);throw new Error('Embedded navigation attempted to create '+type)},addEventListener(){}};
+  const context={window:child,document,location:new URL(href),URL,URLSearchParams,addEventListener:(name,handler)=>listeners.set(name,handler),
+    setTimeout:()=>{throw new Error('Embedded feature readiness must not schedule mount retries')}};
+  vm.runInNewContext(nav,context);
+  const owner=context.CivweaveFamilyNavigationV178;
+  assert.equal(owner.ensureMounted(),false);assert.equal(owner.mount(),false);
+  assert.equal(childNodes.size,0,'Embedded startup must remove only its own stale navigation DOM.');
+  assert.equal(removed.length,3);assert.deepEqual(created,[]);assert.equal(parent.rail,parentRail);
+  assert.equal(activations,0,'The shortcut must wait for the actual capability to become ready.');
+  ready=true;listeners.get('civweave:realm-console-ready')();
+  assert.equal(activations,1,'The requested native workbench must activate through the existing owner.');
+  listeners.get('civweave:realm-console-ready')();
+  assert.equal(activations,1,'Repeated readiness must not replay the destination action.');
+  assert.equal(context.location.href,href,'An embedded shortcut must preserve its parent launch identity.');
+  const listenerCount=listeners.size;vm.runInNewContext(nav,context);
+  assert.equal(context.CivweaveFamilyNavigationV178,owner);assert.equal(listeners.size,listenerCount);assert.deepEqual(created,[]);
+}
+
+// Exercise the parent runtime's public suppression operation against actual
+// frame URLs. A matching native view may change its hash; other documents may
+// not acquire the parent's chrome policy by changing origin, path or launch keys.
+{
+  const expected='https://civweave.test/app/realm-console-v140.html?system=cerbanimo&cabinet=1&installed=1&embed=1&persistentShell=1&feature=project-workbench';
+  let removals=0;
+  const childDocument={documentElement:{dataset:{}},getElementById:()=>({remove(){removals++}})};
+  const frame={dataset:{cwExpectedHref:expected},contentDocument:childDocument,contentWindow:{location:{href:expected+'#project-workbench'}}};
+  const document={readyState:'loading',getElementById:id=>id==='cw-persistent-system-stage'?frame:null,addEventListener(){}};
+  const context={document,location:new URL('https://civweave.test/app/persistent-system-shell-v1.html?system=cerbanimo'),URL,URLSearchParams,addEventListener(){},MutationObserver:class{observe(){}disconnect(){}}};
+  vm.runInNewContext(shellRuntime,context);
+  const owner=context.CivweavePersistentSystemShellV1;
+  assert.equal(owner.suppressChildChrome(),true);assert.equal(removals,3);assert.equal(childDocument.documentElement.dataset.persistentParentChrome,'parent-owned');
+  const rejected=[expected.replace('https://civweave.test','https://untrusted.test'),expected.replace('realm-console-v140','fellowfare-cabinet-v144'),expected.replace('system=cerbanimo','system=fellowfare'),expected.replace('embed=1','embed=0'),expected.replace('persistentShell=1','persistentShell=0'),expected.replace('feature=project-workbench','feature=observatory')];
+  for(const href of rejected){frame.contentWindow.location.href=href;const before=removals;assert.equal(owner.suppressChildChrome(),false,href);assert.equal(removals,before,'Rejected frame identity must not mutate its document.');}
+}
 
 assert(/const VERSION=['"][^'"]*generation-lifecycle-v2[^'"]*['"]/.test(generationLifecycle),'Generation lifecycle must use the canonical v2 runtime.');
 assert(generationLifecycle.includes('const wiredFrames=new WeakSet()'),'Generation lifecycle must remember which iframe elements already own a load hook.');

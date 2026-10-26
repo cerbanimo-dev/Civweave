@@ -5,7 +5,7 @@ import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../.
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
 import{installLivingSchoolVideoGenerationGuardV1}from'../../living-school-video-generation-guard-v1.mjs?v=video-atlas-v1';
-import{ensureLivingSchool,renderLivingSchoolEmbed,FALLBACK_VIDEO_URL}from'../../video-learning-contract-v1.mjs?v=video-atlas-v1-subject-anchors';
+import{ensureLivingSchool,renderLivingSchoolEmbed,FALLBACK_VIDEO_URL}from'../../video-learning-contract-v1.mjs?v=video-atlas-v1-distinctive-topics';
 import safeMode from'../../safe-mode-v1.mjs?v=safe-mode-v12-extensible';
 import{assertGenerationActive,generationCancelled}from'./living-school-cleanroom-core-v218.mjs';
 

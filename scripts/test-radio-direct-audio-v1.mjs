@@ -49,6 +49,7 @@ test('explicit track playback, pause, next, seek and volume control the same med
   x.w.document.querySelector('[data-radio-play]').click();assert.ok(x.pauses>=1);
   x.w.document.querySelector('[data-radio-next]').click();await x.settle();assert.match(audio.src,/two\.mp3$/);
   Object.defineProperty(audio,'duration',{value:120,configurable:true});audio.dispatchEvent(new x.w.Event('loadedmetadata'));
+  Object.defineProperty(audio,'seekable',{value:{length:1,start:()=>0,end:()=>120},configurable:true});
   const seek=x.w.document.querySelector('[data-radio-seek]');seek.value='42';seek.dispatchEvent(new x.w.Event('input',{bubbles:true}));assert.equal(audio.currentTime,42);
   const volume=x.w.document.querySelector('[data-radio-volume]');volume.value='0.3';volume.dispatchEvent(new x.w.Event('input',{bubbles:true}));assert.equal(audio.volume,0.3);
   x.api.close();x.api.open();assert.equal(x.w.document.querySelector('audio'),audio);

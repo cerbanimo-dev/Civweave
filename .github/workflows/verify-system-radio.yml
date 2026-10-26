@@ -21,6 +21,8 @@ on:
       - 'scripts/verify-radio-bootstrap-priority-v267.mjs'
       - 'scripts/verify-radio-shell-guarantee-v305.mjs'
       - 'scripts/test-radio-direct-audio-v1.mjs'
+      - 'scripts/test-radio-panel-layout-v1.mjs'
+      - 'scripts/test-radio-seek-fallback-v1.mjs'
       - 'scripts/test-radio-core-starter-cache-v1.mjs'
       - '.github/workflows/verify-system-radio.yml'
       - 'VERSION'
@@ -47,6 +49,8 @@ on:
       - 'scripts/verify-radio-bootstrap-priority-v267.mjs'
       - 'scripts/verify-radio-shell-guarantee-v305.mjs'
       - 'scripts/test-radio-direct-audio-v1.mjs'
+      - 'scripts/test-radio-panel-layout-v1.mjs'
+      - 'scripts/test-radio-seek-fallback-v1.mjs'
       - 'scripts/test-radio-core-starter-cache-v1.mjs'
       - '.github/workflows/verify-system-radio.yml'
       - 'VERSION'
@@ -82,7 +86,7 @@ jobs:
           node --check scripts/verify-radio-bootstrap-priority-v267.mjs
           node --check scripts/verify-radio-shell-guarantee-v305.mjs
       - name: Verify direct audio, offline playback, licensing, and shared ownership
-        run: node --test scripts/test-radio-direct-audio-v1.mjs scripts/test-radio-core-starter-cache-v1.mjs
+        run: node --test scripts/test-radio-direct-audio-v1.mjs scripts/test-radio-core-starter-cache-v1.mjs scripts/test-radio-panel-layout-v1.mjs scripts/test-radio-seek-fallback-v1.mjs
       - name: Verify radio contract
         run: |
           node scripts/verify-system-radio-v233.mjs

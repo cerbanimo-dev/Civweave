@@ -1,10 +1,10 @@
 (()=>{
 'use strict';
-const VERSION='living-library-panel-v1.1';
+const VERSION='living-library-panel-v1.2-parent-return';
 const BUTTON_ID='living-library-button';
 const PANEL_ID='living-library-panel-v1';
 const STYLE_ID='living-library-panel-v1-style';
-const LIBRARY_URL='/app/knowledge-library-browser-v1.html?embed=living-school&v=living-library-downloads-v1';
+const LIBRARY_URL='/app/knowledge-library-browser-v1.html?embed=living-school&v=parent-return-v1.3';
 if(globalThis.CivweaveLivingLibraryV1?.version===VERSION)return;
 if(document.documentElement.dataset.civweaveSystem!=='living-school')return;
 let lastFocus=null,bodyOverflow='',frameLoaded=false;

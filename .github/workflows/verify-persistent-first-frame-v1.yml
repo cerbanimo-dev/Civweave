@@ -5,6 +5,7 @@ on:
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/persistent-system-shell-v1.js'
       - 'scripts/test-persistent-shell-first-frame-rescue-v1.mjs'
+      - 'scripts/verify-cerbanimo-universal-nav-stability-v1.mjs'
       - '.github/workflows/verify-persistent-first-frame-v1.yml'
   push:
     branches: [staging]
@@ -12,6 +13,7 @@ on:
       - 'public/app/persistent-system-shell-v1.html'
       - 'public/app/persistent-system-shell-v1.js'
       - 'scripts/test-persistent-shell-first-frame-rescue-v1.mjs'
+      - 'scripts/verify-cerbanimo-universal-nav-stability-v1.mjs'
       - '.github/workflows/verify-persistent-first-frame-v1.yml'
 jobs:
   first-frame:

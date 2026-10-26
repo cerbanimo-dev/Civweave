@@ -1,11 +1,11 @@
 (()=>{
 'use strict';
 
-const VERSION='guild-symbol-v1.5-standalone-guild-search-card';
+const VERSION='guild-symbol-v1.6-in-shell-guild-search';
 const SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
 const CHAT_SRC='/app/assets/chat-symbol-v1.png';
-const GUILD_FINDER_SCRIPT='/app/host-node-installer-lobby-v1.js?v=working-campus-nearby-guilds-v2';
+const GUILD_FINDER_SCRIPT='/app/host-node-installer-lobby-v1.js?v=explicit-mount-v3';
 const STYLE_ID='cw-guild-symbol-v1-style';
 const ICON_CLASS='cw-guild-symbol-icon';
 const MAP_ICON_CLASS='cw-map-symbol-icon';
@@ -163,51 +163,47 @@ function ensureNearbyGuildsOverlay(){
   return overlay;
 }
 
-function waitForGuildFinderRuntime(timeout=6000){
-  return new Promise((resolve,reject)=>{
-    const started=Date.now();
-    const tick=()=>{
-      const api=globalThis.CivweaveHostNodeInstallerLobbyV1;
-      if(api){resolve(api);return}
-      if(Date.now()-started>timeout){reject(new Error('Nearby Guild finder did not become ready.'));return}
-      setTimeout(tick,50);
-    };
-    tick();
-  });
-}
-
 async function ensureGuildFinderRuntime(){
   if(globalThis.CivweaveHostNodeInstallerLobbyV1)return globalThis.CivweaveHostNodeInstallerLobbyV1;
   if(guildFinderPromise)return guildFinderPromise;
-  guildFinderPromise=(async()=>{
-    let script=[...document.scripts].find(node=>{try{return new URL(node.src,location.href).pathname==='/app/host-node-installer-lobby-v1.js'}catch{return false}});
-    if(!script){script=document.createElement('script');script.src=GUILD_FINDER_SCRIPT;script.async=true;document.head.append(script)}
-    return waitForGuildFinderRuntime();
-  })().catch(error=>{guildFinderPromise=null;throw error});
+  guildFinderPromise=new Promise((resolve,reject)=>{
+    const existing=[...document.scripts].find(node=>{try{return new URL(node.src,location.href).pathname==='/app/host-node-installer-lobby-v1.js'}catch{return false}});
+    const script=existing||document.createElement('script');let settled=false;
+    const finish=error=>{
+      if(settled)return;settled=true;clearTimeout(timeout);
+      script.removeEventListener('load',ready);script.removeEventListener('error',failed);
+      if(error){script.remove();reject(error)}else resolve(globalThis.CivweaveHostNodeInstallerLobbyV1);
+    };
+    const ready=()=>finish(globalThis.CivweaveHostNodeInstallerLobbyV1?null:new Error('Nearby Guild finder did not become ready.'));
+    const failed=()=>finish(new Error('Nearby Guild finder could not load.'));
+    const timeout=setTimeout(()=>finish(new Error('Nearby Guild finder did not become ready.')),6000);
+    script.addEventListener('load',ready,{once:true});script.addEventListener('error',failed,{once:true});
+    if(!existing){script.src=GUILD_FINDER_SCRIPT;script.async=true;document.head.append(script)}
+  }).catch(error=>{guildFinderPromise=null;throw error});
   return guildFinderPromise;
 }
 
-function nearbyGuildsFallback(){
-  const target=new URL('/app/index.html',location.origin);
-  target.searchParams.set('manage','guilds');
-  target.searchParams.set('source','working-campus-nav');
-  target.hash='cw-host-node-lobby';
-  location.assign(`${target.pathname}${target.search}${target.hash}`);
-  return true;
+function showGuildFinderState(mount,error=false){
+  mount.querySelector('[data-cw-guild-search-state]')?.remove();
+  const state=document.createElement('div');state.dataset.cwGuildSearchState=error?'error':'loading';state.setAttribute('role',error?'alert':'status');
+  const message=document.createElement('p');message.textContent=error?'Nearby Guild search is unavailable. Try again.':'Loading nearby Guild search…';state.append(message);
+  if(error){const retry=document.createElement('button');retry.type='button';retry.dataset.cwGuildSearchRetry='true';retry.textContent='Retry Guild search';retry.addEventListener('click',()=>void openNearbyGuilds());state.append(retry)}
+  mount.prepend(state);
 }
 
 async function openNearbyGuilds(){
+  const overlay=ensureNearbyGuildsOverlay(),mount=overlay.querySelector(`#${GUILD_MOUNT_ID}`);
+  overlay.hidden=false;
+  if(!mount)return false;
+  showGuildFinderState(mount);
   try{
-    const overlay=ensureNearbyGuildsOverlay();
-    overlay.hidden=false;
     const api=await ensureGuildFinderRuntime();
-    await api.boot?.();
+    await api.boot?.({mount});
     api.showSearch?.(true);
     const lobby=document.getElementById('cw-host-node-lobby');
     if(!lobby)throw new Error('Nearby Guild finder card was not created.');
-    const mount=overlay.querySelector(`#${GUILD_MOUNT_ID}`);
-    if(!mount)throw new Error('Nearby Guild finder mount was not created.');
     if(lobby.parentElement!==mount)mount.append(lobby);
+    mount.querySelector('[data-cw-guild-search-state]')?.remove();
     lobby.dataset.openedFrom='working-campus-guilds-nav';
     lobby.dataset.surface='standalone-guild-search-card';
     overlay.hidden=false;
@@ -216,8 +212,8 @@ async function openNearbyGuilds(){
     return true;
   }catch(error){
     console.warn('[Civweave] Nearby Guild finder could not open in place.',error);
-    closeNearbyGuilds('fallback');
-    return nearbyGuildsFallback();
+    showGuildFinderState(mount,true);
+    return false;
   }
 }
 

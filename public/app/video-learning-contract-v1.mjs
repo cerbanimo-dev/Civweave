@@ -1,7 +1,7 @@
 import openMedia from'./open-learning-media-cache-v1.mjs?v=open-media-cache-v1';
 import safeMode,{validateAdmission,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v12-extensible';
 
-const REVISION='civweave-video-learning-contract-v1.6-subject-anchors';
+const REVISION='civweave-video-learning-contract-v1.7-distinctive-topics';
 export const FALLBACK_VIDEO_URL='https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const LOOKUP_URL='/downloads/knowledge-schools/video-atlases/lookup.json';
 const AVAILABILITY_URL='/downloads/knowledge-schools/video-atlases/youtube-availability-current.json';
@@ -11,7 +11,7 @@ const YOUTUBE_PLAYER_ORIGINS=Object.freeze(['https://www.youtube-nocookie.com','
 const clean=(value,max=6000)=>String(value??'').trim().slice(0,max);
 const copy=value=>{try{return structuredClone(value)}catch{return JSON.parse(JSON.stringify(value))}};
 const STOP=new Set(['about','after','again','also','and','are','artifact','basic','basics','been','being','build','can','capability','complete','concept','concepts','could','course','create','doing','does','evidence','for','foundation','foundations','from','guide','have','how','into','intro','introduction','its','just','learn','learning','lesson','make','module','more','most','not','objective','one','other','over','per','practice','practical','same','skill','skills','some','study','such','summary','teach','teaching','than','that','the','their','then','there','these','they','this','through','under','use','using','very','vocabulary','want','what','when','where','which','while','with','would','you','your']);
-for(const word of ['digital','online','open','task','tasks','tool','tools','video','videos'])STOP.add(word);
+for(const word of ['digital','online','open','task','tasks','tool','tools','video','videos','unit','units','work','step','steps','technology'])STOP.add(word);
 let lookupPromise=null,availabilityPromise=null;
 let availabilityVerification='';
 const safeAdmissionCache=new Map();
@@ -40,7 +40,15 @@ function youtubeWatchUrl(value){const id=youtubeId(value);return id?`https://www
 function safeExternalUrl(value){try{const url=new URL(clean(value,1800),globalThis.location?.origin||'https://civweave.invalid');return['http:','https:'].includes(url.protocol)?url.href:''}catch{return''}}
 function safePlayableUrl(value){try{const url=new URL(clean(value,1800),globalThis.location?.origin||'https://civweave.invalid');if(url.protocol==='https:'||url.protocol==='blob:')return url.href;if(globalThis.location&&url.origin===globalThis.location.origin&&['http:','https:'].includes(url.protocol))return url.href;return''}catch{return''}}
 function normalizedMedia(value={}){const raw=clean(typeof value==='string'?value:value?.url||value?.videoUrl,1800);if(!raw)return null;if(isYoutubeUrl(raw))return{kind:'youtube',url:youtubeWatchUrl(raw)||raw,title:clean(value?.title,240)||'Video companion',creator:clean(value?.creator||value?.channel,180),description:clean(value?.description||value?.catalog_description||value?.transcript,5000),reason:clean(value?.reason||value?.relevance,600),source:clean(value?.source,120)||'generated',score:Number(value?.score)||0,safeAdmission:value?.safeAdmission||null};const source=clean(value?.source,160);const open=source.startsWith('civweave-open-learning-media')||value?.kind==='open-media';if(!open)return null;const url=safePlayableUrl(raw);if(!url)return null;return{kind:'open-media',url,title:clean(value?.title,320)||'Open learning media',creator:clean(value?.creator||value?.attribution?.creator,180),description:clean(value?.description||value?.catalog_description||value?.transcript,5000),reason:clean(value?.reason,600),source:source||'civweave-open-learning-media',score:Number(value?.score)||0,mime:clean(value?.mime,160),local:Boolean(value?.local),recordKey:clean(value?.recordKey,500),contentHash:clean(value?.contentHash,128),license:value?.license||null,attribution:value?.attribution||null,topicSlug:clean(value?.topicSlug,120),safeAdmission:value?.safeAdmission||null}}
-export function mediaMatchesTopic(media,topic){if(!media)return false;if(media.url===FALLBACK_VIDEO_URL)return true;const queryWords=[...new Set(words(topic))].slice(0,28);if(!queryWords.length)return false;const evidence=new Set(words(`${media.title||''} ${media.description||media.catalog_description||''} ${media.creator||''}`));const matched=queryWords.filter(word=>evidence.has(word));return matched.length>=Math.min(2,queryWords.length)}
+export function mediaMatchesTopic(media,topic){
+  if(!media)return false;if(media.url===FALLBACK_VIDEO_URL)return true;
+  const queryWords=[...new Set(words(topic))].slice(0,28);if(!queryWords.length)return false;
+  const titleWords=new Set(words(media.title)),evidence=new Set([...titleWords,...words(media.description||media.catalog_description||'')]);
+  const matched=queryWords.filter(word=>evidence.has(word));
+  // A creator name or incidental workflow in a description cannot establish
+  // the subject of a lecture whose title describes something else.
+  return matched.some(word=>titleWords.has(word))&&matched.length>=Math.min(2,queryWords.length);
+}
 function fallbackMedia(reason='No sufficiently relevant video candidate was available for this topic.'){return{kind:'youtube',url:FALLBACK_VIDEO_URL,title:'Fallback video companion',creator:'',description:'',reason,source:'required-fallback',score:0}}
 async function cachedResponse(url){if(!('caches'in globalThis))return null;try{const cache=await caches.open(VIDEO_CACHE_NAME);const absolute=typeof location!=='undefined'?new URL(url,location.origin).href:url;return await cache.match(absolute)||await cache.match(url)||null}catch{return null}}
 async function networkResponse(url){const controller=typeof AbortController==='function'?new AbortController():null;const timeout=controller?setTimeout(()=>controller.abort(),4000):null;try{return await fetch(url,{cache:'no-store',signal:controller?.signal})}finally{if(timeout)clearTimeout(timeout)}}
@@ -48,7 +56,7 @@ async function responseJson(response){if(!response?.ok)return null;try{return aw
 async function loadLookup(){if(lookupPromise)return lookupPromise;lookupPromise=(async()=>{let data=await responseJson(await cachedResponse(LOOKUP_URL));if(!data){try{data=await responseJson(await networkResponse(LOOKUP_URL))}catch{return[]}}return Array.isArray(data?.records)?data.records:[]})();return lookupPromise}
 function availabilitySet(data){if(data?.schema!=='civweave.youtube-availability-index.v1'||data?.status!=='current'||!Array.isArray(data?.eligible_video_ids))return null;const expires=Date.parse(data?.expires_at||'');if(Number.isFinite(expires)&&Date.now()>expires)return null;availabilityVerification=clean(data?.verification?.mode,160);return new Set(data.eligible_video_ids.filter(id=>/^[\w-]{11}$/.test(id)))}
 async function loadAvailability(){if(availabilityPromise)return availabilityPromise;availabilityPromise=(async()=>{try{const network=availabilitySet(await responseJson(await networkResponse(AVAILABILITY_URL)));if(network)return network}catch{}return availabilitySet(await responseJson(await cachedResponse(AVAILABILITY_URL)))})();return availabilityPromise}
-function relevanceScore(record,queryWords,schoolSlug=''){if(!queryWords.length)return 0;const titleWords=new Set(words(record?.title));const bodyWords=new Set(words(`${record?.catalog_description||''} ${record?.creator||''}`));let score=0;for(const word of queryWords){if(titleWords.has(word))score+=6;else if(bodyWords.has(word))score+=2}if(schoolSlug&&record?.school_slug===schoolSlug)score+=3;if(record?.source_datasets?.includes?.('youtube-commons'))score+=2;return score}
+function relevanceScore(record,queryWords,schoolSlug=''){if(!queryWords.length)return 0;const titleWords=new Set(words(record?.title));const bodyWords=new Set(words(record?.catalog_description||''));let score=0;for(const word of queryWords){if(titleWords.has(word))score+=6;else if(bodyWords.has(word))score+=2}if(schoolSlug&&record?.school_slug===schoolSlug)score+=3;if(record?.source_datasets?.includes?.('youtube-commons'))score+=2;return score}
 function allowedExisting(media,availability){if(!media)return false;if(media.kind==='open-media'){if(media.local)return true;if(globalThis.navigator?.onLine===false)return false;return openMedia.licenseAllowed(media.license)}const id=youtubeId(media.url);if(id&&failedYoutubeIds.has(id))return false;if(media.url===FALLBACK_VIDEO_URL||!availability||media.source!=='civweave-video-atlas')return true;return availability.has(id)}
 async function admitMedia(media,label='video'){
   if(media?.url===FALLBACK_VIDEO_URL)return media;
