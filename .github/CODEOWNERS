@@ -1,5 +1,9 @@
 # Capability Lock control plane. Branch protection should require code-owner review for these paths.
+/.github/CODEOWNERS @cerbanimo-dev
 /config/accepted-capabilities.json @cerbanimo-dev
 /scripts/capability-lock-runner.mjs @cerbanimo-dev
+/scripts/capability-lock-enforced-runner.mjs @cerbanimo-dev
+/scripts/verify-capability-lock-control-plane-v2.mjs @cerbanimo-dev
 /.github/workflows/capability-lock.yml @cerbanimo-dev
+/.github/workflows/capability-lock-enforced.yml @cerbanimo-dev
 /docs/contracts/capability-lock.md @cerbanimo-dev
