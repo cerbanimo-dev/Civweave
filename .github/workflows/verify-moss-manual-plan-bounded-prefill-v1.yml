@@ -4,6 +4,9 @@ on:
     branches: [staging]
     paths:
       - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/moss-learning-plan-approval-button-v1.js'
+      - 'scripts/verify-moss-learning-plan-approval-button-v1.mjs'
+      - 'scripts/verify-living-school-journey-list-v1.mjs'
       - 'public/app/family-ai-loader-v105.js'
       - 'public/app/shared/civweave-model-runtime.js'
       - 'public/app/cabinets/living-school/index.html'
@@ -16,6 +19,9 @@ on:
     branches: [staging]
     paths:
       - 'public/app/unified-chat-system-v1.js'
+      - 'public/app/moss-learning-plan-approval-button-v1.js'
+      - 'scripts/verify-moss-learning-plan-approval-button-v1.mjs'
+      - 'scripts/verify-living-school-journey-list-v1.mjs'
       - 'public/app/family-ai-loader-v105.js'
       - 'public/app/shared/civweave-model-runtime.js'
       - 'public/app/cabinets/living-school/index.html'
@@ -38,6 +44,7 @@ jobs:
       - name: Check syntax and manual generation regression
         run: |
           node --check public/app/unified-chat-system-v1.js
+          node --check public/app/moss-learning-plan-approval-button-v1.js
           node --check public/app/family-ai-loader-v105.js
           node --check public/app/shared/civweave-model-runtime.js
           node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
@@ -45,6 +52,8 @@ jobs:
           node --check public/app/cabinets/living-school/living-school-journey-index-v1.mjs
           node --check scripts/verify-moss-manual-plan-and-bounded-prefill-v1.mjs
           node scripts/verify-moss-manual-plan-and-bounded-prefill-v1.mjs
+          node scripts/verify-moss-learning-plan-approval-button-v1.mjs
+          node scripts/verify-living-school-journey-list-v1.mjs
       - name: Preserve native SSE and Qwen deadline contracts
         run: |
           node scripts/verify-native-moss-long-output-runtime-v1.mjs
