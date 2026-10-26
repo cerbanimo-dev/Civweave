@@ -570,11 +570,36 @@ def make_handler(controller):
                 return
             if self.path == "/v1/status":
                 self.json(200, controller.status())
+            elif re.fullmatch(r"/v1/generations/[0-9a-f]{32}", self.path):
+                try:
+                    self.json(200, controller.generation(self.path.rsplit("/", 1)[-1]))
+                except LookupError as exc:
+                    self.json(404, {"error": str(exc)})
             else:
                 self.json(404, {"error": "Unknown endpoint."})
 
         def do_POST(self):
             if not self.guard():
+                return
+            if self.path == "/v1/generations" or re.fullmatch(r"/v1/generations/[0-9a-f]{32}/cancel", self.path):
+                try:
+                    size = int(self.headers.get("Content-Length", "0"))
+                    if size < 0 or size > 65536:
+                        raise ValueError("Generation request exceeds 64 KiB.")
+                    raw = self.rfile.read(size) if size else b"{}"
+                    body = json.loads(raw)
+                    if self.path == "/v1/generations":
+                        result = controller.submit_generation(body)
+                        self.json(202, result)
+                    else:
+                        result = controller.cancel_generation(self.path.split("/")[3])
+                        self.json(200, result)
+                except (ValueError, TypeError) as exc:
+                    self.json(400, {"error": str(exc)[:250]})
+                except LookupError as exc:
+                    self.json(404, {"error": str(exc)[:250]})
+                except RuntimeError as exc:
+                    self.json(409, {"error": str(exc)[:250]})
                 return
             prefix = "/v1/actions/"
             if not self.path.startswith(prefix):
