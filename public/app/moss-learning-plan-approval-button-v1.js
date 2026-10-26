@@ -82,7 +82,7 @@ function reviewArticle(root,plan){
 function approvedArticle(root,plan){
   return articles(root).find(article=>{
     const text=clean(article.querySelector('.cw350-bubble')?.textContent,12000);
-    return /Learning Journey plan:/i.test(text)&&/Status:\\s*APPROVED\\b/i.test(text)&&text.includes(clean(plan.request?.title,220));
+    return /Learning Journey plan:/i.test(text)&&/Status:\s*APPROVED\b/i.test(text)&&text.includes(clean(plan.request?.title,220));
   })||null;
 }
 function findFollowUpArticle(root,kind,plan){
