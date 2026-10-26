@@ -1,10 +1,11 @@
 (()=>{'use strict';
 
-const VERSION='1.2.19-unified-chat-manual-learning-generation';
+const VERSION='1.2.20-moss-multi-plan-library';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
 const LEARNING_PLAN_KEY=`${PENDING_PREFIX}.living-school.plan.v1`;
+const LEARNING_PLAN_LIBRARY_KEY='civweave.living-school.learning-journey-plans.v1';
 const WEAVELING_ORCHESTRATOR_PATH='/extensions/civweave-weaveling-plan-json-v190.js';
 const MEMORY_FOLDERS=Object.freeze(Object.fromEntries(SYSTEMS.map(system=>[system,`civweave.guide-thread.${system}.v237`])));
 const THEMES=Object.freeze({
@@ -163,10 +164,25 @@ function curriculumRequest(options={}){
 function packet(answer,nextAction='',extra={}){return{response:{answer,choice:{mode:'Learn',system:'living-school',room:'',nextAction},assumptions:Array.isArray(extra.assumptions)?extra.assumptions:[],requiresConsent:Boolean(extra.requiresConsent),confidence:Number(extra.confidence)||.99,approvalGate:extra.approvalGate||null},provider:extra.provider||'unified-chat-capability',model:extra.model||'living-school-learning-engine',action:extra.action||null,context:{guide:{system:'living-school',name:'Moss'},capability:'curriculum',canonicalArtifact:'Learning Journey'},fallbackFrom:null}}
 function readLearningPlan(){try{return parse(localStorage.getItem(LEARNING_PLAN_KEY),null)}catch{return null}}
 function saveLearningPlan(plan){
+  if(!plan?.id||!plan?.request?.capability)throw new Error('Cannot save a Learning Journey without an ID and capability.');
+  // Migration must happen BEFORE overwriting the historical single-plan slot.
+  // Multiple generated REVIEW/APPROVED plans must never replace one another.
+  const legacy=readLearningPlan();
+  const saved=parse(localStorage.getItem(LEARNING_PLAN_LIBRARY_KEY),{});
+  const existing=Array.isArray(saved?.plans)?saved.plans:[];
+  const byId=new Map();
+  for(const entry of [...existing,legacy,plan])
+    if(entry?.id&&entry?.request?.capability&&entry.schema===LEARNING_PLAN_SCHEMA)
+      byId.set(entry.id,entry);
+  const plans=[...byId.values()].sort((a,b)=>
+    (Date.parse(b.updatedAt||b.createdAt)||0)-(Date.parse(a.updatedAt||a.createdAt)||0)).slice(0,50);
+  localStorage.setItem(LEARNING_PLAN_LIBRARY_KEY,JSON.stringify({schema:'civweave.learning-journey-plan-library.v1',plans}));
   localStorage.setItem(LEARNING_PLAN_KEY,JSON.stringify(plan));
   const stored=readLearningPlan();
-  if(stored?.id!==plan?.id||stored?.state!==plan?.state)
-    throw new Error('Living School REVIEW plan could not be verified in local storage.');
+  const verified=parse(localStorage.getItem(LEARNING_PLAN_LIBRARY_KEY),{});
+  if(stored?.id!==plan.id||stored?.state!==plan.state||
+    !verified?.plans?.some(entry=>entry.id===plan.id&&entry.state===plan.state))
+    throw new Error('Living School plan library could not be verified in local storage.');
   try{dispatchEvent(new CustomEvent('civweave:living-school-pending-plan-review',{detail:{id:stored.id,state:stored.state,capability:stored.request?.capability}}))}catch{}
   return stored;
 }
