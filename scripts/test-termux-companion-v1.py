@@ -130,16 +130,16 @@ class CompanionTests(unittest.TestCase):
             {"choices": [{"delta": {}, "finish_reason": "stop"}],
              "usage": {"completion_tokens": 7, "prompt_tokens": 15}}
         ]
-        stream = b"".join(b"data: " + json.dumps(frame).encode() + b"\\n\\n" for frame in frames)
-        stream += b"data: [DONE]\\n\\n"
+        stream = b"".join(b"data: " + json.dumps(frame).encode() + b"\n\n" for frame in frames)
+        stream += b"data: [DONE]\n\n"
         def model_reply(request, **kwargs):
             self.assertEqual(request.full_url, "http://127.0.0.1:8080/v1/chat/completions")
             payload = json.loads(request.data)
             self.assertEqual(payload["model"], "qwen35-4b-native")
             self.assertTrue(payload["stream"])
             return io.BytesIO(stream)
-        with patch.object(self.app, "server_responding", return_value=True), \\
-             patch.object(module.urllib.request, "urlopen", side_effect=model_reply):
+        with (patch.object(self.app, "server_responding", return_value=True),
+              patch.object(module.urllib.request, "urlopen", side_effect=model_reply)):
             accepted = self.app.submit_generation(body)
             self.assertRegex(accepted["job_id"], r"^[0-9a-f]{32}$")
             for _ in range(150):
