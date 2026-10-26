@@ -1,0 +1,30 @@
+name: Android Host direct-distribution contract
+on:
+  pull_request:
+    paths:
+      - 'public/app/device-host-updates*'
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/service-worker.js'
+      - 'scripts/test-device-host-updates.mjs'
+      - 'scripts/sign-android-host-release.mjs'
+      - 'config/system-ownership.json'
+      - '.github/workflows/android-host-direct-updates.yml'
+  workflow_dispatch:
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check public/app/device-host-updates.mjs
+          node --check public/app/device-host-update-ui.mjs
+          node --check public/app/settings-gateway-v317.js
+          node --check scripts/sign-android-host-release.mjs
+      - name: Signed-release and ownership regression tests
+        run: node --test scripts/test-device-host-updates.mjs
