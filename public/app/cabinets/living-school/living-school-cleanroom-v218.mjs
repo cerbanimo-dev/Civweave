@@ -1,5 +1,5 @@
 import{copy,state,persist,readJson,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
-import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY,learningJourneyPlanById}from'./living-school-journey-index-v1.mjs?v=multi-plan-library-v2';
+import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY,learningJourneyPlanById,recoverableChatPlans}from'./living-school-journey-index-v1.mjs?v=multi-plan-library-v2';
 import{render}from'./living-school-cleanroom-render-v218.mjs?v=multi-plan-library-v2';
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=source-recovery-details-v269-selected-deadline';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
@@ -194,6 +194,23 @@ async function handleLivingSchoolClick(event){
     state().settings={...(state().settings||{}),selectedJourneyPlanId:chosen.id};
     persist('living-school-approved-journey-selected',{id:chosen.id,capability:chosen.request?.capability,policy:'manual-plan-selection-no-generation'});
     renderEnhanced();
+    return;
+  }
+  if(actionName==='recover-chat-journey'){
+    const id=clean(target.dataset.journeyId,180);
+    const recovered=recoverableChatPlans(readJson).find(item=>'recover:'+item.id===id);
+    if(!recovered)return;
+    // The old chat is evidence of a draft, not proof of approval.
+    const draft={...recovered,state:'review',updatedAt:new Date().toISOString()};
+    const library=readJson(PLAN_LIBRARY_KEY,{});
+    const existing=Array.isArray(library?.plans)?library.plans:[];
+    if(existing.some(item=>item.id===draft.id))return;
+    localStorage.setItem(PLAN_LIBRARY_KEY,JSON.stringify({schema:'civweave.learning-journey-plan-library.v1',
+      plans:[draft,...existing].slice(0,50)}));
+    localStorage.setItem(PLAN_KEY,JSON.stringify(draft));
+    persist('living-school-chat-plan-recovered-for-review',{id:draft.id,title:draft.request.title,
+      policy:'chat-outline-is-not-approval-no-generation'});
+    location.assign('/app/working-campus-v440.html?source=moss-pending-review');
     return;
   }
   if(actionName==='select-journey-for-review'){
