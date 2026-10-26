@@ -10,7 +10,7 @@ assert.match(core,/NATIVE_QWEN_DESIGN_TIMEOUT_MS=1200000/);
 assert.match(core,/withNativeMossStream\([^\n]*,'design'\)/);
 assert.match(core,/compactDesignEvidence\(sources\)/,'Bounded excerpts must enter the actual messages sent to Qwen');
 assert.match(budget,/configuredTimeout\(config,DESIGN_TIMEOUT_MS\)/,'Budget must preserve design-specific requested deadline');
-assert.match(index,/living-school-cleanroom-v218\.mjs\?v=structured-single-v221-boot-first-v9-qwen-design-prefill/);
+assert.match(index,/living-school-cleanroom-v218\.mjs\?v=manual-approval-select-v10/);
 
 const helpers=core.slice(core.indexOf('const NATIVE_QWEN_DESIGN_TIMEOUT_MS='),core.indexOf('function resultText('));
 const scope={clean:(x,n=9999)=>String(x??'').slice(0,n),providerName:c=>String(c?.provider||c?.route||'').toLowerCase()};
@@ -62,7 +62,11 @@ async function checkPurpose(purpose,timeout){
   assert.equal(response.status,'success');
   const connecting=events.find(e=>e.phase==='connecting');
   assert.equal(connecting.deadlineMs,timeout,'Incorrect deadline applied to '+purpose);
-  assert.equal(connecting.promptCharacters,'Draft a lesson.'.length);
+  assert.equal(connecting.originalPromptCharacters,'Draft a lesson.'.length);
+  if(purpose==='living-school-research-grounded-curriculum-v218.1'){
+    assert.ok(connecting.promptCharacters<3500,'Bounded curriculum prompt must fit phone prefill budget');
+    assert.ok(connecting.promptCharacters>connecting.originalPromptCharacters,'Design includes necessary syllabus contract');
+  }else assert.equal(connecting.promptCharacters,'Draft a lesson.'.length);
   assert.ok(events.some(e=>e.phase==='awaiting-first-token'),'Need explicit successful HTTP / prompt evaluation wait');
   assert.ok(events.some(e=>e.phase==='partial'&&e.accumulatedText.includes('Tarot lesson')));
   assert.ok(response.events.some(e=>e.phase==='partial'&&!e.accumulatedText),'Do not retain repeated full draft strings in event history');
