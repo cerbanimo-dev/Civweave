@@ -64,7 +64,7 @@ test('the Settings owner and offline installer package expose exactly the canoni
   const settings = await readFile(new URL('../public/app/settings-gateway-v317.js', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../public/service-worker.js', import.meta.url), 'utf8');
   const owner = JSON.parse(await readFile(new URL('../config/system-ownership.json', import.meta.url), 'utf8'));
-  assert.match(settings, /href="\\/app\\/device-host-updates\\.html"/);
+  assert.ok(settings.includes('href="/app/device-host-updates.html"'));
   for (const path of ['device-host-updates.html','device-host-updates.mjs','device-host-update-ui.mjs'])
     assert.ok(worker.includes("'/app/" + path + "'"), 'mobile install CORE must include ' + path);
   assert.equal(owner.systems['android-device-host-updates'].owner, 'public/app/device-host-updates.mjs');
