@@ -16,8 +16,8 @@ assert.match(workbench,/actionName==='select-approved-learning-journey'/);
 assert.match(workbench,/state\(\)\.settings\?\.selectedJourneyPlanId!==record\.id/,'Only explicit selected-plan generation allowed');
 assert.match(render,/data-ls-action="select-approved-learning-journey"/);
 assert.match(render,/data-ls-action="retry-approved-learning-journey"/);
-assert.match(boot,/manual-approval-select-v10/);
-assert.match(loader,/1\.2\.19-manual-learning-generation/);
+assert.match(boot,/multi-plan-library-v11/);
+assert.match(loader,/1\.2\.20-moss-multi-plan-library/);
 
 const planKey='civweave.chat.capability.pending.living-school.plan.v1';
 const queueKey='civweave.chat.capability.pending.living-school.curriculum.v1';

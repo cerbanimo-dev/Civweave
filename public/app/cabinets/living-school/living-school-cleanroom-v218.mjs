@@ -1,6 +1,6 @@
 import{copy,state,persist,readJson,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
-import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY}from'./living-school-journey-index-v1.mjs';
-import{render}from'./living-school-cleanroom-render-v218.mjs?v=manual-approved-journey-selection-v1';
+import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY,learningJourneyPlanById,recoverableChatPlans}from'./living-school-journey-index-v1.mjs?v=multi-plan-library-v2';
+import{render}from'./living-school-cleanroom-render-v218.mjs?v=multi-plan-library-v2';
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=source-recovery-details-v269-selected-deadline';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
@@ -149,7 +149,7 @@ actions['discard-ls-failed-drafts']=async target=>{
 };
 
 async function retryApprovedLearningJourney(target){
-  const record=learningJourneySnapshot(readJson,state()).retry;
+  const record=learningJourneySnapshot(readJson,state()).generatable.find(item=>item.id===clean(target.dataset.journeyId,180));
   if(!record||record.id!==clean(target.dataset.journeyId,180)||!record.approvedAt||
     state().settings?.selectedJourneyPlanId!==record.id)
     throw new Error('Select an approved, incomplete Learning Journey before choosing Generate.');
@@ -167,7 +167,14 @@ async function retryApprovedLearningJourney(target){
     return school;
   }
   const plan=readJson(PLAN_KEY,null);
+  const library=readJson(PLAN_LIBRARY_KEY,{});
+  if(Array.isArray(library?.plans)){
+    const entries=library.plans.map(item=>'plan:'+item.id===record.id?
+      {...item,state:'generated',generatedAt:new Date().toISOString(),updatedAt:new Date().toISOString(),generatedSchoolId:school.id}:item);
+    localStorage.setItem(PLAN_LIBRARY_KEY,JSON.stringify({...library,plans:entries}));
+  }
   if(record.id==='plan:'+plan?.id&&plan.state==='approved')localStorage.removeItem(PLAN_KEY);
+  state().settings={...(state().settings||{}),selectedJourneyPlanId:''};
   const queued=readJson(QUEUE_KEY,null);
   if(queued?.approvedPlanId&&(record.id==='queue:'+queued.approvedPlanId||record.id==='plan:'+queued.approvedPlanId))
     localStorage.removeItem(QUEUE_KEY);
@@ -182,11 +189,41 @@ async function handleLivingSchoolClick(event){
   if(target.disabled||busy||retryStarting)return;
   const actionName=String(target.dataset.lsAction||'').trim();
   if(actionName==='select-approved-learning-journey'){
-    const chosen=learningJourneySnapshot(readJson,state()).retry;
+    const chosen=learningJourneySnapshot(readJson,state()).generatable.find(item=>item.id===clean(target.dataset.journeyId,180));
     if(!chosen||chosen.id!==clean(target.dataset.journeyId,180))return;
     state().settings={...(state().settings||{}),selectedJourneyPlanId:chosen.id};
     persist('living-school-approved-journey-selected',{id:chosen.id,capability:chosen.request?.capability,policy:'manual-plan-selection-no-generation'});
     renderEnhanced();
+    return;
+  }
+  if(actionName==='recover-chat-journey'){
+    const id=clean(target.dataset.journeyId,180);
+    const recovered=recoverableChatPlans(readJson).find(item=>'recover:'+item.id===id);
+    if(!recovered)return;
+    // The old chat is evidence of a draft, not proof of approval.
+    const draft={...recovered,state:'review',updatedAt:new Date().toISOString()};
+    const library=readJson(PLAN_LIBRARY_KEY,{});
+    const existing=Array.isArray(library?.plans)?library.plans:[];
+    if(existing.some(item=>item.id===draft.id))return;
+    localStorage.setItem(PLAN_LIBRARY_KEY,JSON.stringify({schema:'civweave.learning-journey-plan-library.v1',
+      plans:[draft,...existing].slice(0,50)}));
+    localStorage.setItem(PLAN_KEY,JSON.stringify(draft));
+    persist('living-school-chat-plan-recovered-for-review',{id:draft.id,title:draft.request.title,
+      policy:'chat-outline-is-not-approval-no-generation'});
+    location.assign('/app/working-campus-v440.html?source=moss-pending-review');
+    return;
+  }
+  if(actionName==='select-journey-for-review'){
+    const id=clean(target.dataset.journeyId,180),original=learningJourneyPlanById(readJson,id);
+    if(!original||!['review','superseded','revision-requested'].includes(original.state))return;
+    const revived=original.state==='review'?original:
+      {...original,state:'review',updatedAt:new Date().toISOString(),supersededBy:undefined};
+    localStorage.setItem(PLAN_KEY,JSON.stringify(revived));
+    const library=readJson(PLAN_LIBRARY_KEY,{});
+    const plans=Array.isArray(library?.plans)?library.plans:[];
+    localStorage.setItem(PLAN_LIBRARY_KEY,JSON.stringify({...library,plans:plans.map(item=>item.id===revived.id?revived:item)}));
+    persist('living-school-review-plan-selected',{id:revived.id,capability:revived.request?.capability});
+    location.assign('/app/working-campus-v440.html?source=moss-pending-review');
     return;
   }
   if(actionName==='retry-approved-learning-journey'){
@@ -308,7 +345,7 @@ async function generateCurriculumFromChat(input={},options={}){
 sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
 renderEnhanced();
-for(const key of [PLAN_KEY,QUEUE_KEY]){
+for(const key of [PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY]){
   // A pending plan may be approved in the parent persistent guide surface.
   addEventListener('storage',event=>{if(event.key===key&&!busy)renderEnhanced()});
 }
