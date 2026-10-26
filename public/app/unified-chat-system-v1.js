@@ -1,6 +1,6 @@
 (()=>{'use strict';
 
-const VERSION='1.2.18-unified-chat-system-v1-explicit-learning-goal';
+const VERSION='1.2.19-unified-chat-manual-learning-generation';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const PENDING_PREFIX='civweave.chat.capability.pending';
@@ -292,11 +292,11 @@ function normalizeModelPlan(value,request,existingPlan=null,route={}){
 function learningPlanText(plan){
   const request=plan?.request||{},modules=Array.isArray(plan?.modules)?plan.modules:[],outline=modules.length?`\n\nOutline:\n${modules.map((module,index)=>`${index+1}. ${clean(module.title,220)}\n   Focus: ${clean(module.focus,700)}\n   Demonstrate: ${clean(module.outcome,700)}`).join('\n')}`:'';
   const assumptions=(plan?.assumptions||[]).length?`\n\nAssumptions:\n${plan.assumptions.map(item=>`- ${clean(item,500)}`).join('\n')}`:'';
-  return `Learning Journey plan: “${clean(request.title||'Learning Journey',240)}”\n\nGoal: ${clean(request.capability,900)}\nLevel: ${clean(request.level||'beginner',80)}\nMode: ${clean(request.mode||'guided',80)}\nProof of capability: ${clean(request.proof,1200)}${outline}${assumptions}\n\nStatus: ${plan.state==='superseded'?'SUPERSEDED — a newer learning goal was requested; this older plan cannot be approved.':plan.state==='denied'?'DENIED — this plan will not be generated.':plan.state==='revision-requested'?'REVISION REQUESTED — waiting for your change instructions.':plan.state==='approved'?'APPROVED — materialization is underway or needs retry.':'REVIEW'}. This is only the high-level plan; no lessons, exercises, quizzes, or module content have been generated yet.`;
+  return `Learning Journey plan: “${clean(request.title||'Learning Journey',240)}”\n\nGoal: ${clean(request.capability,900)}\nLevel: ${clean(request.level||'beginner',80)}\nMode: ${clean(request.mode||'guided',80)}\nProof of capability: ${clean(request.proof,1200)}${outline}${assumptions}\n\nStatus: ${plan.state==='superseded'?'SUPERSEDED — a newer learning goal was requested; this older plan cannot be approved.':plan.state==='denied'?'DENIED — this plan will not be generated.':plan.state==='revision-requested'?'REVISION REQUESTED — waiting for your change instructions.':plan.state==='approved'?'APPROVED — select this plan in Living School and explicitly choose Generate; opening the app never starts inference.':'REVIEW'}. This is only the high-level plan; no lessons, exercises, quizzes, or module content have been generated yet.`;
 }
 function learningPlanResponse(plan){
   if(!plan?.request)return packet('There is no Learning Journey plan waiting for review.','Tell Moss what you want to learn or demonstrate.');
-  if(plan.state!=='review')return packet(learningPlanText(plan),plan.state==='revision-requested'?'Describe the change you want Moss to make.':plan.state==='denied'?'Tell Moss what you want to learn next.':plan.state==='approved'?'If generation failed, retry materialization; otherwise open Living School.':'Request a new Learning Journey plan.',{provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan'});
+  if(plan.state!=='review')return packet(learningPlanText(plan),plan.state==='revision-requested'?'Describe the change you want Moss to make.':plan.state==='denied'?'Tell Moss what you want to learn next.':plan.state==='approved'?'Open Living School, select this plan, and choose Generate when ready.':'Request a new Learning Journey plan.',{provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan'});
   return packet(learningPlanText(plan),'Review or revise this plan. When it is right, explicitly approve the Learning Journey to generate its learning content.',{assumptions:plan.assumptions||[],requiresConsent:true,provider:plan.authoring?.provider||'unified-chat-capability',model:plan.authoring?.model||'learning-plan',approvalGate:{kind:'learning-journey-plan-approval',planId:plan.id,state:plan.state||'review',required:true,actions:['review','revise','approve']},action:{kind:'living-school-learning-plan',system:'living-school',state:plan.state||'review',title:plan.request.title,capability:plan.request.capability,canonicalArtifact:'Learning Journey'}});
 }
 // The Moss learning capability owns its real progress milestones.
@@ -670,9 +670,8 @@ async function runLivingSchoolCurriculum(options={}){
   if(options.requireApprovedPlan!==false&&!plan?.approvedAt)return learningPlanResponse(plan||readLearningPlan());
   const engine=globalThis.LivingSchoolCleanroomV218;
   if(typeof engine?.generateCurriculumFromChat!=='function'){
-    try{localStorage.setItem(`${PENDING_PREFIX}.living-school.curriculum.v1`,JSON.stringify({...request,autoRun:true,approvedAt:plan.approvedAt,approvedPlanId:plan.id,queuedAt:now()}))}catch{}
-    clearLearningPlan();
-    return packet('The Learning Journey plan is approved. I queued its materialization; Living School will generate the learning content when the learning engine is available.','Open Living School when you want to review the generated Learning Journey.',{action:{kind:'living-school-curriculum-queued',system:'living-school',state:'queued',title:request.title,capability:request.capability,intent:request.intent,approvedPlanId:plan.id,canonicalArtifact:'Learning Journey'}});
+    try{localStorage.setItem(`${PENDING_PREFIX}.living-school.curriculum.v1`,JSON.stringify({...request,autoRun:false,requiresManualGeneration:true,approvedAt:plan.approvedAt,approvedPlanId:plan.id,queuedAt:now()}))}catch{}
+    return packet('The Learning Journey plan is approved, but the Living School engine is not currently available. It is saved for manual generation; opening Living School will not start inference.','Open Living School, select the approved plan, and press Generate when ready.',{action:{kind:'living-school-curriculum-queued',system:'living-school',state:'queued',title:request.title,capability:request.capability,intent:request.intent,approvedPlanId:plan.id,canonicalArtifact:'Learning Journey'}});
   }
   try{
     const result=await engine.generateCurriculumFromChat(request,options);assertLearningPlanActive(options);
@@ -707,7 +706,7 @@ async function approveLivingSchoolPlan(plan,options={}){
   if(plan.state!=='review'||!latest?.id||latest.id!==plan.id||latest.state!=='review')return packet('This Learning Journey plan is no longer in REVIEW and cannot be approved. No learning content was generated.','Review the current Learning Journey before approving.');
   const approved={...latest,state:'approved',approvedAt:now(),updatedAt:now()};
   saveLearningPlan(approved);
-  return runLivingSchoolCurriculum({...options,reviewPlan:approved,requireApprovedPlan:true});
+  return learningPlanResponse(approved);
 }
 function guardLivingSchoolMutation(result,before){
   if(!result?.response)return result;
@@ -797,7 +796,7 @@ async function consumePending(){
   pendingRun=globalThis.LivingSchoolCleanroomV218.generateCurriculumFromChat(request).then(result=>{localStorage.removeItem(key);try{globalThis.CivweavePersistentGuideChatV215?.notify?.('living-school',`Your approved Learning Journey “${clean(result?.school?.title||request.title,180)}” is ready.`,{open:false})}catch{};return result}).catch(error=>{try{globalThis.CivweavePersistentGuideChatV215?.notify?.('living-school',`The approved Learning Journey build stopped: ${clean(error?.message||error,800)} Nothing was marked generated.`,{open:false})}catch{};return null}).finally(()=>{pendingRun=null});
   return pendingRun;
 }
-function synchronize(){normalizeSurface();patchLoader();patchAssistant();consumePending();return true}
+function synchronize(){normalizeSurface();patchLoader();patchAssistant();return true}
 function bindLifecycle(){
   if(lifecycleBound)return;
   lifecycleBound=true;

@@ -17,7 +17,7 @@ function approvedPlan(read){
 }
 function queuedPlan(read){
   const queued=read(QUEUE_KEY,null);
-  return queued?.autoRun===true&&queued.approvedAt&&queued.approvedPlanId&&queued.capability?queued:null;
+  return queued?.approvedAt&&queued.approvedPlanId&&queued.capability?queued:null;
 }
 export function learningJourneySnapshot(read,schoolState={}){
   const readRecord=typeof read==='function'?read:()=>null;
@@ -36,14 +36,14 @@ export function learningJourneySnapshot(read,schoolState={}){
     const matchReady=matching(current,plan.request)&&current.modules.length>=Math.max(1,Number(plan.request.count)||1);
     const failed=matching(recovery?.request,plan.request)&&['failed','partial'].includes(recovery?.status);
     const status=matchReady?'Curriculum ready':plan.state==='review'?'Review required':failed?'Generation failed · retry available':
-      queue?.approvedPlanId===plan.id?'Queued for generation':'Approved · curriculum not generated';
+      queue?.approvedPlanId===plan.id?'Approved · select to generate':'Approved · curriculum not generated';
     add('plan:'+plan.id,plan.request.title,plan.request.capability,status,
       matchReady?'current':plan.state==='review'?'review':'approved',plan.updatedAt,
       failed?clean(recovery?.unstructured?.error||'The last generation did not complete.',900):'');
   }
   if(queue&&!seen.has('plan:'+queue.approvedPlanId)){
     const ready=matching(current,queue)&&current.modules.length>=Math.max(1,Number(queue.count)||1);
-    add('queue:'+queue.approvedPlanId,queue.title,queue.capability,ready?'Curriculum ready':'Queued · generation incomplete',
+    add('queue:'+queue.approvedPlanId,queue.title,queue.capability,ready?'Curriculum ready':'Approved · generation awaits selection',
       ready?'current':'queued',queue.queuedAt);
   }
   if(current)add('school:'+current.id,current.title,current.capability,

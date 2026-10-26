@@ -8,11 +8,11 @@ const approval=fs.readFileSync('public/app/moss-learning-plan-approval-button-v1
 assert.match(boundary,/const MOSS_PLAN_APPROVAL_BUTTON='\/app\/moss-learning-plan-approval-button-v1\.js';/,'Install boundary must name the Moss approval-button runtime.');
 assert.ok(boundary.includes('GUIDE_WORKSPACE,UNIFIED_CHAT_SYSTEM,MOSS_PLAN_APPROVAL_BUTTON,SERVER_AI_OUTPUT_NORMALIZER'),'Moss approval button must load immediately after unified chat on first-class system surfaces.');
 assert.ok(boundary.includes('GUIDE_WORKSPACE,UNIFIED_CHAT_SYSTEM,MOSS_PLAN_APPROVAL_BUTTON,SERVER_AI_OUTPUT_NORMALIZER'),'Compatibility chat surfaces must retain the same direct approval-button load order.');
-assert.match(approval,/Approve Learning Journey/,'The review surface must expose an explicit Approve Learning Journey button.');
+assert.match(approval,/Approve the Learning Journey plan for later manual generation/,'The button must clearly approve the plan, not trigger inference.');
 assert.match(approval,/moss-face-v255\.webp/,'The review surface must use the real Moss mascot artwork inline.');
 assert.match(approval,/actionButton\(actions,'Revise'/,'The review surface must expose Revise.');
 assert.match(approval,/actionButton\(actions,'Deny'/,'The review surface must expose Deny.');
-assert.match(approval,/Retry generation/,'A failed approved materialization must offer a retry.');
+assert.match(approval,/Moss · Plan approved/,'Approved plan must show a manual selection state, not an automatic retry.');
 assert.match(approval,/Open Learning Journey/,'A successful materialization must have an actionable next step.');
 assert.match(approval,/approveLivingSchoolPlan\(plan\)/,'The button must call the canonical Learning Journey approval/materialization API directly.');
 assert.doesNotMatch(approval,/submitText\s*\(/,'Approval must not be implemented by synthesizing a chat message.');
@@ -79,7 +79,7 @@ const sandbox={
     },
     approveLivingSchoolPlan:async value=>{
       approvedPlan=value;
-      return{response:{answer:'I materialized the approved Learning Journey “Tarot Foundations”.',choice:{mode:'Learn',system:'living-school',nextAction:'Open Module 1: One.'},approvalGate:null},provider:'living-school-learning-engine',model:'canonical-learning-engine',action:{kind:'living-school-curriculum-generated',state:'completed'}};
+      plan={...plan,state:'approved',approvedAt:new Date().toISOString()};storage.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.stringify(plan));return{response:{answer:'Learning Journey plan: “Tarot Foundations”\nStatus: APPROVED — select the plan in Living School to generate later.',choice:{mode:'Learn',system:'living-school',nextAction:'Open Living School.'},approvalGate:null},provider:'unified-chat-capability',model:'learning-plan'};
     }
   },
   CivweaveRealmSessionIntegrityV237:{
@@ -96,11 +96,12 @@ assert.equal(api.approvalSurface,'approve-revise-deny');
 assert.equal(api.chatApprovalRequired,false);
 const ok=await api.approvePlanById(plan.id);
 assert.equal(ok,true,'Button approval must complete the direct approval call.');
-assert.equal(approvedPlan,plan,'Button approval must pass the pending REVIEW plan directly to approveLivingSchoolPlan.');
-assert.equal(thread.messages.length,1,'Direct button approval should append exactly one assistant materialization result and no synthetic user approval message.');
+assert.equal(approvedPlan.id,plan.id,'Button approval must pass the pending REVIEW plan to approveLivingSchoolPlan.');
+assert.equal(approvedPlan.state,'review','Approval input must be a REVIEW plan.');
+assert.equal(thread.messages.length,1,'Direct button approval should append exactly one saved-plan result and no synthetic user approval message.');
 assert.equal(thread.messages[0].role,'assistant');
-assert.match(thread.messages[0].text,/materialized the approved Learning Journey/);
-assert.doesNotMatch(thread.messages[0].text,/^Approved$/i);
+assert.match(thread.messages[0].text,/Status: APPROVED/);
+assert.doesNotMatch(thread.messages[0].text,/materialized the approved Learning Journey/,'Approval must not claim generated lessons.');
 
 // Independent decision buttons must not forge chat messages or start curriculum generation.
 const approvalCount=thread.messages.length;
