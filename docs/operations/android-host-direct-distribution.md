@@ -79,6 +79,57 @@ foregrounded. There is no local AI, BLE, package-install or unrestricted command
 execution endpoint in this milestone. The upcoming PackageInstaller integration
 must independently validate signed releases and preserve user approval.
 
+## Native foreground lifecycle and future direct updater
+
+The Android Host is now explicitly started from its Activity via
+`startForegroundService`, with a user-visible ongoing notification and a Stop
+button. The canonical `DeviceHostService` owns the loopback server; exiting the
+Activity should no longer close it. It is opt-in, not boot-started, and returns
+`START_NOT_STICKY`: Android may stop the process or reject a foreground-service
+start in some conditions. It declares the `specialUse` type with a concrete
+subtype and requires physical-device validation on Android 14–16.
+
+The native app also contains `HostReleasePolicy` and `HostUpdateManager`.
+They independently verify an Ed25519-signed manifest, reject a non-increasing
+versionCode, strictly bind the package ID and HTTPS release origin, stream the
+APK with a signed size cap and SHA-256 checksum, then compare the embedded APK
+signing certificate with the installed Android Host. Only after a user presses
+**Review and install** can it create a `PackageInstaller` session. User action
+is explicitly required. The installer result receiver surfaces Android's
+confirmation through a notification instead of silently launching an installer
+from the background. Users can deny updates.
+
+**Activation lock:** the native Ed25519 public signing key and key ID remain
+empty constants in `HostReleasePolicy.kt`, and the browser keys remain empty
+in `device-host-update-ui.mjs`. Both installer lanes fail closed until an
+operator reviews and pins the production public key and publishes a compatible,
+production-certificate-signed APK. Never upload private signing material.
+
+The PWA can open the native manager through `civweave-host://updates` without
+sending APK URLs, executable code, shell instructions or credentials through
+the deep link. This avoids making the loopback interface a privileged install
+endpoint. Pairing and version discovery remain read-only.
+
+### Required device acceptance cases
+
+- Starting host, switching to Chrome/PWA and checking paired status, then
+  stopping host and confirming the endpoint becomes unavailable.
+- Backgrounding, battery-saver activation, process termination and reboot:
+  no false always-on guarantees or surprise restarts.
+- Android 14–16 special-use foreground service behavior and notification
+  permission denial.
+- Rejecting forged manifests, damaged APKs, old versions, mismatched APK
+  certificates, non-Civweave APKs and redirects, without opening installation.
+- Actual signed update with Android approval, user cancellation, interruption,
+  and preserved application data. Test the first production signing certificate
+  separately from the ephemeral CI debug certificate; they are not compatible
+  upgrade identities.
+- Android's version-specific permission and pending-user-action installer
+  callbacks, including the case where a confirmation notification cannot be shown.
+- Compatibility on older Android versions that lack an Ed25519 verification
+  provider: fail closed and use the manually verified APK pathway until support
+  is explicitly added and tested.
+
 ## User flow
 
 1. User opens Civweave Settings → Manage installation and direct APK updates.
