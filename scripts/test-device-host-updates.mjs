@@ -160,3 +160,23 @@ test('Native APK install lane is disabled without an embedded release verificati
   assert.match(file,/cc\.civweave\.devicehost/);
   assert.match(file,/https:\/\/civweave\.cc\/downloads\/device-host\//);
 });
+
+test('native updater only stages a self-update from an authenticated signed release and requires Android confirmation', async () => {
+  const {readFile}=await import('node:fs/promises');
+  const root=new URL('../native/android/device-host/app/src/main/',import.meta.url);
+  const updater=await readFile(new URL('java/cc/civweave/devicehost/HostUpdateManager.kt',root),'utf8');
+  const result=await readFile(new URL('java/cc/civweave/devicehost/HostInstallResultReceiver.kt',root),'utf8');
+  const manifest=await readFile(new URL('AndroidManifest.xml',root),'utf8');
+  assert.match(updater,/HostReleasePolicy\.verifyEnvelope/);
+  assert.match(updater,/MessageDigest\.getInstance\("SHA-256"\)/);
+  assert.match(updater,/PackageInstaller\.SessionParams/);
+  assert.match(updater,/USER_ACTION_REQUIRED/);
+  assert.match(updater,/canRequestPackageInstalls/);
+  assert.match(updater,/getPackageArchiveInfo/);
+  assert.match(updater,/EXPE(C|C)TED_PACKAGE|EXPECTED_PACKAGE/);
+  assert.match(result,/STATUS_PENDING_USER_ACTION/);
+  assert.match(result,/PendingIntent\.getActivity/);
+  assert.match(manifest,/REQUEST_INSTALL_PACKAGES/);
+  assert.match(manifest,/HostInstallResultReceiver/);
+  assert.doesNotMatch(updater,/exec\(|Runtime\.getRuntime/);
+});
