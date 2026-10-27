@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.2.22-guide-generation-tracker-v1-idempotent-history';
-const REVISION='1.3.3-idempotent-lifecycle-history';
+const VERSION='1.2.23-guide-generation-tracker-v1-universal-artifact-rail';
+const REVISION='1.3.4-universal-structured-artifact-lifecycle';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const STYLE_ID='cw-guide-generation-tracker-v1-style';
 const STAGES=Object.freeze([
@@ -69,7 +69,7 @@ async function browserGGUFProbe({timeoutMs=480000,onStatus=()=>{}}={}){
 function emptyArtifacts(){return{learningPlan:false,endeavour:false,manifest:false,proposal:false}}
 function inferArtifacts(text='',route=''){return bus()?.inferArtifacts?.(text,route)||{...emptyArtifacts(),learningPlan:route==='learning',endeavour:route==='quest'}}
 function mergeArtifacts(base={},extra={}){return bus()?.mergeArtifacts?.(base,extra)||{learningPlan:Boolean(base.learningPlan||extra.learningPlan),endeavour:Boolean(base.endeavour||extra.endeavour),manifest:Boolean(base.manifest||extra.manifest),proposal:Boolean(base.proposal||extra.proposal)}}
-function artifactName(){return bus()?.artifactName?.(state.artifacts)||'Generation'}
+function artifactName(){return state.kind==='quest'?'Quest':state.kind==='endeavour'?'Endeavor':state.kind==='manifest'?'Manifest':state.kind==='governance'?'Proposal':bus()?.artifactName?.(state.artifacts)||'Generation'}
 function freshState(){return{
   requestId:`process-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,pipelineId:'',guideSystem:'',messageId:'',startedMs:now(),terminal:'',nativeFormal:false,activeStage:'',showPipeline:false,expanded:true,pendingObserved:false,pendingKey:'',kind:'',artifacts:emptyArtifacts(),
   stages:Object.fromEntries(STAGES.map(stage=>[stage.id,{state:'waiting',label:stage.label,model:''}])),streams:{intake:'',draft:'',compile:'',repair:'',final:''},runtimePhase:'',errorDetail:'',executionModel:'',probeBusy:false,probeStatus:'',counts:{resources:0,specialists:0,gates:0},artifactKey:'',finalSource:''
@@ -78,7 +78,7 @@ function activeRoot(){return document.getElementById(ROOT_ID)}
 function currentGuide(){return clean(activeRoot()?.dataset?.guide||globalThis.CivweaveGuideChatSurfaceV350?.activeWindow?.()||'',80)}
 function activeArticle(){const root=activeRoot();if(!root||state.guideSystem&&currentGuide()&&state.guideSystem!==currentGuide())return null;const rows=[...root.querySelectorAll('[data-log] article[data-role="assistant"]')];return state.messageId?rows.find(row=>row.dataset?.messageId===state.messageId)||null:rows.at(-1)||null}
 function stageState(id,status,label='',model=''){const row=state.stages[id]||{state:'waiting',label:id,model:''};state.stages[id]={...row,state:status,label:label||row.label,model:model||row.model};if(['running','streaming','queued'].includes(status))state.activeStage=id;if(model)state.executionModel=model}
-function resetForRequest({text='',route='',pendingKey='',startedMs=now(),system='',messageId=''}={}){state=freshState();consumedLifecycleIds.clear();state.guideSystem=clean(system||currentGuide(),80);state.messageId=clean(messageId,180);state.startedMs=startedMs;state.pendingKey=pendingKey;state.artifacts=inferArtifacts(text,route);state.showPipeline=Object.values(state.artifacts).some(Boolean);state.pendingObserved=true;if(state.showPipeline)stageState('intake','queued','Waiting for intake');lastFinalFingerprint=''}
+function resetForRequest({text='',route='',pendingKey='',startedMs=now(),system='',messageId=''}={}){state=freshState();consumedLifecycleIds.clear();state.guideSystem=clean(system||currentGuide(),80);state.messageId=clean(messageId,180);state.startedMs=startedMs;state.pendingKey=pendingKey;state.artifacts=inferArtifacts(text,route);state.showPipeline=true;state.pendingObserved=true;state.streams.intake=clean('Current request (application-derived; not model output): '+clean(text,6000),8000);stageState('intake','queued','Waiting for model route');lastFinalFingerprint=''}
 function updateArtifacts(detail={}){
   const route=detail.route||detail.kind||'';
   if(detail.artifactSet||detail.artifacts)state.artifacts=mergeArtifacts(state.artifacts,bus()?.normalizeArtifacts?.(detail.artifactSet||detail.artifacts)||emptyArtifacts());
@@ -249,7 +249,55 @@ function applyLearningPlanProgress(detail={}){
   }
   ensurePanel();
 }
-function connectedWindows(){
+// Shared structured-artifact lifecycle: Quest, Learning Journey, Endeavor,
+ // Manifest and Proposal generators all use the same honest progress rail.
+ // A single structured JSON model call has no fictional draft/compile agents.
+ function applyStructuredArtifactProgress(detail={}){
+   if(!detail||!['quest','learning','endeavour','manifest','governance','curriculum'].includes(detail.artifact))return false;
+   const system=clean(detail.system||'',90);
+   if(state.guideSystem&&system&&system!==state.guideSystem)return false;
+   if(!state.pendingObserved||state.terminal)return false;
+   const phase=clean(detail.phase,90),model=clean(detail.model||'',180);
+   state.kind=detail.artifact==='curriculum'?'learning':detail.artifact;
+   state.showPipeline=true;
+   if(detail.artifact==='quest')state.artifacts=mergeArtifacts(state.artifacts,{endeavour:true});
+   if(['started','generating','streaming'].includes(phase)){
+     stageState('intake','complete','Current request and route (app-derived)');
+     if(state.stages.compile.state==='waiting')stageState('compile','skipped','One schema-constrained JSON request');
+     if(phase==='streaming'){
+       stageState('draft','streaming','Receiving visible JSON',model);
+       if(typeof detail.accumulatedText==='string')state.streams.draft=clean(detail.accumulatedText,50000);
+       else if(detail.text)state.streams.draft=clean(state.streams.draft+detail.text,50000);
+       state.runtimePhase='Receiving JSON · '+(Number(detail.characters)||state.streams.draft.length)+' characters';
+       refreshStream('draft');
+     }else{
+       stageState('draft',phase==='started'?'queued':'running',detail.label||'Model generating structured draft',model);
+       state.runtimePhase=phase==='started'?'Preparing schema':'Awaiting visible model output';
+     }
+   }else if(phase==='validating'){
+     stageState('draft','complete','Model JSON received',model);
+     if(state.stages.compile.state==='waiting')stageState('compile','skipped','Single-pass JSON schema');
+     stageState('validate','running',detail.label||'Checking JSON and route constraints');
+   }else if(phase==='validated'){
+     stageState('validate','complete','Structured artifact validated');
+     if(state.stages.repair.state==='waiting')stageState('repair','skipped','No repair required');
+     stageState('saved','queued','Persisting REVIEW artifact');
+   }else if(phase==='repairing'){
+     stageState('repair','running','Model-assisted structural repair',model);
+     state.runtimePhase='Repairing invalid JSON';
+   }else if(phase==='saved'){
+     if(state.stages.validate.state!=='complete')stageState('validate','complete','Structure validated');
+     if(state.stages.repair.state==='waiting')stageState('repair','skipped','No repair required');
+     stageState('saved','complete','Saved for REVIEW');
+     state.terminal='complete';state.errorDetail='';
+   }else if(phase==='failed'||phase==='stopped'){
+     state.terminal=phase;
+     stageState(state.activeStage||'draft',phase,phase==='failed'?'Structured generation failed':'Generation stopped');
+     state.errorDetail=clean(detail.message||detail.reason||'The structured model request did not finish.',1600);
+   }
+   ensurePanel();return true;
+ }
+ function connectedWindows(){
   const found=[globalThis];
   try{
     const parent=globalThis.parent;
@@ -437,7 +485,7 @@ function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();add
   state.runtimePhase='GGUF · '+stage+(backend?' · '+backend:'');
   if(stage==='failed'&&detail.reason)state.errorDetail='GGUF '+clean(detail.reason,400);
   ensurePanel();
-});addEventListener('civweave:moss-learning-plan-progress',event=>applyLearningPlanProgress(event?.detail||{}));if(!bus()){addEventListener('civweave:weaveling-intake-progress',event=>applyIntake(event?.detail||{}));addEventListener('civweave:weave-pipeline',event=>applyPipeline(event?.detail||{}))}addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{ensurePanel();replayLifecycle()}));document.addEventListener('click',event=>{const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;details.hidden=!details.hidden;state.expanded=!details.hidden;button.setAttribute('aria-expanded',details.hidden?'false':'true');button.textContent=details.hidden?'Show live process':'Hide live process';if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}});document.addEventListener('click',event=>{
+});addEventListener('civweave:moss-learning-plan-progress',event=>applyLearningPlanProgress(event?.detail||{}));if(!bus()){addEventListener('civweave:weaveling-intake-progress',event=>applyIntake(event?.detail||{}));addEventListener('civweave:weave-pipeline',event=>applyPipeline(event?.detail||{}))}addEventListener('civweave:structured-artifact-progress',event=>applyStructuredArtifactProgress(event?.detail||{}));addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{ensurePanel();replayLifecycle()}));document.addEventListener('click',event=>{const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;details.hidden=!details.hidden;state.expanded=!details.hidden;button.setAttribute('aria-expanded',details.hidden?'false':'true');button.textContent=details.hidden?'Show live process':'Hide live process';if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}});document.addEventListener('click',event=>{
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-probe]`)){void probeClick();return}
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-worker-probe]`)){void isolatedWorkerClick();return}
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-runtime-restart]`)){
