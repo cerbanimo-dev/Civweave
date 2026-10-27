@@ -520,6 +520,14 @@ async function submitActive(text){
           :(stream?.splitThinking?.(accumulated)?.answer??accumulated);
       }
       if(!latestText)return;
+      // The shared six-stage rail observes visible chat output for every guide.
+      // Do not report JSON-Quest or Moss progress as ordinary chat, and never
+      // expose model thinking segments hidden by GuideStreamThinking.
+      if(typeof accumulated==='string'&&accumulated&&!meta?.kind&&!/weaveling-intention-json/i.test(meta?.purpose||'')){
+        try{dispatchEvent(new CustomEvent('civweave:guide-generation-progress',{
+          detail:{system,phase:'streaming',text:clean(latestText,30000)}
+        }))}catch{}
+      }
       if(Date.now()-lastPaint>=80){if(paintTimer){clearTimeout(paintTimer);paintTimer=null;}paint();}
       else if(!paintTimer)paintTimer=setTimeout(paint,80);
     };
