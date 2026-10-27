@@ -507,7 +507,7 @@ async function submitActive(text){
       if(meta?.kind==='quest-progress'){
         if(meta.draft){
           const raw=String(meta.draft||'');
-          partialQuestJson=clean(globalThis.CivweaveGuideStreamThinkingV249?.splitThinking?.(raw)?.answer??raw,12000);
+          partialQuestJson=clean(globalThis.CivweaveGuideStreamThinkingV249?.splitThinking?.(raw)?.answer??raw,12000).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*$/gi,'');
         }
         const phase=meta.phase==='saved'?'Saved for REVIEW':meta.phase==='generating'?'Creating Quest':'Preparing cross-realm Quest';
         latestText='Weaveling · '+phase+(meta.characters?' · '+Number(meta.characters)+' characters drafted':'')+'. Activation requires approval.';
