@@ -372,3 +372,14 @@ Civweave Current Quest/Quest Library/secondary controls were opened. Four-path s
 > Preserve `approvedPlanId` from canonical Learning Journey approval through `chatCurriculumData`, generation `requestedData`, successful curriculum metadata and recovery records. Consolidate Civweave Library projections only when those real identities match; prefer the current materialized/recovery status while retaining plan actions. Add regressions for queued+failed+successful projection, distinct same-title journeys and ambiguous legacy records. Do not infer identity from title/capability text or delete stored journeys. Offer explicit association for legacy recovery records lacking proof of their originating plan.
 
 The UI-CAMP-02 diagnosis is complete, but no unsafe deduplication was made: `savedLearningJourneys()` in `working-campus-v156.part3.txt` collapses approved/queued plan IDs and emits recovery by request ID; legacy request data discarded approvedPlanId. This is a data-lineage project, not evidence that the two cards can safely be merged by their shared title.
+
+
+### UI source bundle ready for browser acceptance
+
+`139c648d` commits Guild mount/retry, authenticated Library/Map returns, radio v2 scroll/seek repair, and saved-video admission. `c88bb4ca` integrates upstream7d without replacing its explicit Moss plan-selection/compact-native-prompt changes. Active family-loader and approval/chat caller revisions were refreshed after the merge.
+
+Post-merge Guide workflow commands passed locally: startup/HTTP/review17 cases; native/Moss/navigation/media125; subsystem/route context49; proof projection16. Two old fixtures were updated to assert inert approval/open/selection and the explicit Generate path; API Stop still refuses late persistence and real selected path identity survives the native handler. Additional focused radio/Guild40 and Library/Map/Guild22 checks passed; all four radio verifiers and first-frame singleton/strict-route verifier passed. No real model generation was part of these deterministic checks.
+
+**AI-UX-03 — manual generation cancellation acceptance:** the current native Generate handler calls the engine without an explicit lifecycle options object. The public retry/materialization API supports signal/onEvent and its cancellation regression passes; this does not prove the native Generate UI offers or forwards Stop. Inspect the existing lifecycle owner and verify actual Stop during the next controlled generation, preserving the approved plan and preventing late course commits.
+
+The saved-video repair performs display admission without rewriting accepted Quest/tasks/reviews/proofs/receipts. The legacy source label user-selected is not authoritative attachment provenance; unmatched stored videos remain directly accessible with an honest notice, but cannot bypass topic admission. The new direct link offers a way out of an IAB-refused embed without claiming that playback was tested.

@@ -2,24 +2,34 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,LEARNING_PLAN_SCHEMA} from '../public/app/cabinets/living-school/living-school-journey-index-v1.mjs';
 
 const read=path=>fs.readFileSync(new URL(`../public/app/${path}`,import.meta.url),'utf8');
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 globalThis.document={getElementById:()=>null};globalThis.localStorage={getItem:()=>null,setItem(){}};
 const {assertGenerationActive,generationCancelled,curriculumWeaveIdentity,weavePathIdentity}=await import('../public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs');
-const base=()=>({console,URL,URLSearchParams,AbortController,structuredClone,queueMicrotask,setTimeout,clearTimeout,Date,Math,JSON,Object,Array,String,Number,Boolean,RegExp,Promise,Set,Map,clean,copy:structuredClone,now:()=>new Date().toISOString(),uid:prefix=>`${prefix}-qa`,clip:(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0)),assertGenerationActive,generationCancelled,curriculumWeaveIdentity,weavePathIdentity,addEventListener(){},dispatchEvent(){},CustomEvent:class{},document:{readyState:'loading',documentElement:{dataset:{}},scripts:[],addEventListener(){},querySelector:()=>null,querySelectorAll:()=>[]},localStorage:{getItem:()=>null,setItem(){},removeItem(){}}});
+const base=()=>({console,URL,URLSearchParams,AbortController,structuredClone,queueMicrotask,setTimeout,clearTimeout,Date,Math,JSON,Object,Array,String,Number,Boolean,RegExp,Promise,Set,Map,clean,copy:structuredClone,now:()=>new Date().toISOString(),uid:prefix=>`${prefix}-qa`,clip:(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0)),assertGenerationActive,generationCancelled,curriculumWeaveIdentity,weavePathIdentity,addEventListener(){},dispatchEvent(){},CustomEvent:class{},document:{readyState:'loading',documentElement:{dataset:{}},scripts:[],getElementById:()=>null,addEventListener(){},querySelector:()=>null,querySelectorAll:()=>[]},localStorage:{getItem:()=>null,setItem(){},removeItem(){}}});
 const stripModules=source=>source.replace(/^export \* from[^\n]+\r?\n/gm,'').replace(/^import[\s\S]*?from\s*['"][^'"]+['"];\r?\n/gm,'').replace(/export (async )?function /g,'$1function ').replace(/export const /g,'const ');
 const oldSchool=()=>({id:'old-school',title:'Previous QA Journey',capability:'Previous topic',generation:{provider:'ollama'},modules:[{id:'old-module',quiz:{bank:[]}}]});
 async function waitFor(predicate){for(let turn=0;!predicate()&&turn<40;turn++)await Promise.resolve();assert.ok(predicate(),'the expected provider request must start within the fixture budget')}
 
-test('typed Moss approval forwards its Stop signal and events to the existing learning engine',async()=>{
-  const values=new Map(),controller=new AbortController(),reason=new Error('QA stopped typed approval');let received,resolveEngine;
-  const context=vm.createContext({...base(),localStorage:{getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)},location:{pathname:'/app/working-campus-v440.html',search:''},LivingSchoolCleanroomV218:{generateCurriculumFromChat:async(_request,options)=>{received=options;return new Promise(resolve=>{resolveEngine=resolve})}}});
+test('typed Moss approval and selection stay inert; explicit materialization forwards Stop and events',async()=>{
+  const values=new Map(),current={school:oldSchool(),settings:{}},controller=new AbortController(),reason=new Error('QA stopped explicit materialization');let received,resolveEngine,calls=0;
+  const context=vm.createContext({...base(),state:()=>current,learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,readJson:(key,fallback)=>values.has(key)?JSON.parse(values.get(key)):fallback,persist(){},renderEnhanced(){},toastMessage(){},markDispatch(){},localStorage:{getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)},location:{pathname:'/app/working-campus-v440.html',search:''},LivingSchoolCleanroomV218:{generateCurriculumFromChat:async(_request,options)=>{calls++;received=options;return new Promise(resolve=>{resolveEngine=resolve})}}});
   vm.runInContext(read('unified-chat-system-v1.js'),context);
-  const plan={id:'qa-review',state:'review',request:{title:'QA conversion',capability:'Convert Celsius to Fahrenheit',intent:'new'},modules:[]};values.set('civweave.chat.capability.pending.living-school.plan.v1',JSON.stringify(plan));
-  const onEvent=()=>{},pending=context.CivweaveUnifiedChatSystemV1.handleNativeLivingSchoolRequest({text:'approve',signal:controller.signal,onEvent,history:[]});
+  const native=read('cabinets/living-school/living-school-cleanroom-v218.mjs');
+  vm.runInContext('let busy=false,retryStarting=false;'+native.slice(native.indexOf('async function retryApprovedLearningJourney('),native.indexOf('\nfunction chatCurriculumData('))+'\nglobalThis.__click=handleLivingSchoolClick;',context);
+  const plan={schema:LEARNING_PLAN_SCHEMA,id:'qa-review',state:'review',request:{title:'QA conversion',capability:'Convert Celsius to Fahrenheit',intent:'new'},modules:[]};values.set(PLAN_KEY,JSON.stringify(plan));
+  const onEvent=()=>{},api=context.CivweaveUnifiedChatSystemV1;
+  await api.handleNativeLivingSchoolRequest({text:'approve',signal:controller.signal,onEvent,history:[]});
+  assert.equal(api.readLearningPlan()?.state,'approved');assert.equal(calls,0,'Typed approval saves the plan without starting inference');
+  api.synchronize();assert.equal(calls,0,'Opening/synchronizing must not consume the approved plan');
+  const target={dataset:{lsAction:'select-approved-learning-journey',journeyId:'plan:'+plan.id}};
+  await context.__click({target:{closest:()=>target},preventDefault(){},stopImmediatePropagation(){}});
+  assert.equal(current.settings.selectedJourneyPlanId,'plan:'+plan.id);assert.equal(calls,0,'Selecting the approved plan must not start inference');
+  const approved=values.get(PLAN_KEY),pending=api.retryLivingSchoolPlanMaterialization(plan.id,{signal:controller.signal,onEvent});
   await waitFor(()=>resolveEngine);assert.equal(received?.signal,controller.signal);assert.equal(received?.onEvent,onEvent);controller.abort(reason);resolveEngine({school:{id:'late-course',modules:[]}});
-  await assert.rejects(pending,error=>error===reason);assert.equal(context.CivweaveUnifiedChatSystemV1.readLearningPlan()?.state,'approved','cancelled materialization retains the approved retryable plan');
+  await assert.rejects(pending,error=>error===reason);assert.equal(calls,1);assert.equal(api.readLearningPlan()?.state,'approved','cancelled materialization retains the approved retryable plan');assert.equal(values.get(PLAN_KEY),approved,'A late engine result cannot consume or rewrite the approved plan');assert.equal(current.school.id,'old-school');
 });
 
 test('Moss materialization passes lifecycle to research and refuses a late course commit',async()=>{
