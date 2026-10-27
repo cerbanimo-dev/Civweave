@@ -3,10 +3,10 @@
 export const NATIVE_MODEL='qwen35-4b-native';
 export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
 const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.17-native-quest-schema';
-const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.18-explicit-learning-goal';
+const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.20-moss-multi-plan-library';
 const INTENTION_PLANNER='/app/intention-planner-v141.js?v=1.1.0-ai-authority-only';
 const QUEST_MATERIALIZER='/app/weaveling-plan-materialization-v265.js?v=1.1.3-current-selection';
-const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.12-saved-quest-revision';
+const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.12-clipped-quest-recovery-v1';
 let modelsPromise=null,plannerPromise=null,questPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);
 const GUIDE=Object.freeze({
@@ -58,7 +58,7 @@ async function ensurePlanner(){
     .catch(error=>{modelsPromise=null;throw error});
   await modelsPromise;
   if(!plannerPromise)plannerPromise=loadScript(MOSS_PLANNER,
-    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.18-unified-chat-system-v1-explicit-learning-goal','Moss planner')
+    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.20-moss-multi-plan-library','Moss planner')
     .catch(error=>{plannerPromise=null;throw error});
   await plannerPromise;
   return globalThis.CivweaveUnifiedChatSystemV1;
@@ -68,6 +68,9 @@ function plausibleQuestRequest(system,user){
   if(system!=='civweave')return false;
   // Only consult the canonical Quest owner when a planning/build intent is
   // explicit. Pure learning and regular chat stay on their existing lanes.
+  // Project creation is Weaveling's canonical Quest, even without the word Quest.
+  if(/\b(?:help\s+(?:me|us)\s+|(?:i|we)\s+(?:want|need)\s+to\s+)?(?:create|build|establish|organize|launch|start|develop|form)\b[^.!?\n]{0,220}\b(?:commune|community\s+garden|community\s+infrastructure|cooperative|co-op|collective|neighborhood\s+project|shared\s+(?:space|housing|infrastructure))\b/i.test(user))
+    return true;
   return /\b(?:create|draft|generate|make|build|design|develop|plan|prepare|organize|start|launch)\b[\s\S]{0,120}\b(?:quest|cross[- ]realm|project|application|app|software|website|roadmap)\b/i.test(user)||
     /\b(?:teach|learn|memorize|study)\b[\s\S]{0,220}\b(?:then|afterwards?|after that)\b[\s\S]{0,120}\b(?:create|build|develop|design|plan|code|make)\b/i.test(user);
 }
@@ -116,6 +119,36 @@ async function maybeCreateOfficialQuest({system,user,history,signal,onToken}){
     markNativeStage('quest-review-saved',result.plan.id||'');
     try{onToken?.('','',{kind:'quest-progress',phase:'saved',characters:0})}catch{}
   }else markNativeStage('quest-generation-failed',result?.response?.answer||'No plan saved.');
+  return result;
+}
+// Explicit recovery from a chat response that was clipped or misrouted.
+// The original Hero request remains the authority; draft output is untrusted.
+export async function captureClippedQuest({originalRequest='',clippedText='',history=[],signal=null,onToken=null}={}){
+  if(!nativeSelection())throw new Error('Select the matching local Qwen native server to capture this clipped output.');
+  const user=clean(originalRequest,5000),draft=clean(clippedText,3600);
+  if(user.length<10||draft.length<20)throw new Error('A prior user request and existing assistant text are required.');
+  markNativeStage('quest-clipped-capture-requested');
+  let owner=await ensureQuestPlanner();
+  // Existing PWA tabs may have the older Quest owner already initialized.
+  if(!owner.supportsClippedDraftV1){
+    await loadScript(QUEST_PLANNER,()=>globalThis.CivweaveWeavelingPlanJsonV190?.supportsClippedDraftV1===true,'Clipped-draft Quest repair');
+    owner=globalThis.CivweaveWeavelingPlanJsonV190;
+  }
+  if(!owner.explicitProjectIntent?.(user)&&!owner.planIntent?.(user,history,{currentContext:{systemId:'civweave'}}))
+    throw new Error('This response has no identifiable Quest-producing project request. Nothing was saved.');
+  const result=await owner.createModelPlan({
+    text:user,history,signal,latestRequest:user,clippedDraft:draft,
+    onEvent:event=>{
+      if(event?.phase==='partial')try{onToken?.(String(event.text||''),String(event.accumulatedText||''),event)}catch{}
+    }
+  },{
+    selectedConfig:()=>({provider:'openai-compatible',route:'openai-compatible',model:NATIVE_MODEL,
+      endpoint:NATIVE_ENDPOINT,stream:true,timeoutMs:900000,temperature:.2}),
+    context:async()=>({currentContext:{systemId:'civweave'},routingAnswer:{room:'civweave.quad'}})
+  });
+  if(result?.plan?.state!=='review'||result.questAuthoring?.aiGenerated!==true)
+    throw new Error('The clipped answer did not yield a validated structured Quest. No Quest was saved.');
+  markNativeStage('quest-clipped-capture-saved',result.plan.id);
   return result;
 }
 function standaloneRequest(user){
