@@ -6,7 +6,7 @@ const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.17-native-quest
 const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.20-moss-multi-plan-library';
 const INTENTION_PLANNER='/app/intention-planner-v141.js?v=1.1.0-ai-authority-only';
 const QUEST_MATERIALIZER='/app/weaveling-plan-materialization-v265.js?v=1.1.3-current-selection';
-const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.12-clipped-quest-recovery-v1';
+const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.13-universal-quest-rail';
 let modelsPromise=null,plannerPromise=null,questPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);
 const GUIDE=Object.freeze({
