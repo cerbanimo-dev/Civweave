@@ -16,6 +16,9 @@ const authority=read('public/app/local-ai/gemma4-litert-request-authority-v1.js'
 
 assert.match(guide,/ensureGenerationTracker\(\)/);
 assert.match(guide,/await ensureGenerationTracker\(\)/,'Native fastpath must wait for tracker before inference.');
+assert.match(native,/draft:value\.slice\(0,12000\)/,'Partial structured Quest JSON must reach the chat for manual recovery.');
+assert.match(guide,/partialQuestJson:partialQuestJson\.length>=40\?partialQuestJson/);
+assert.match(guide,/candidate\.structuredDraft\?'Recover clipped Quest JSON'/);
 assert.match(guide,/1\.2\.23-universal-artifact-rail/);
 assert.match(native,/1\.2\.13-universal-quest-rail/);
 assert.match(quest,/maxTokens:4096,timeoutMs:1800000/);
@@ -93,4 +96,18 @@ events.get('civweave:realm-guide-thread-changed')({detail:{system:'civweave',thr
 ]}}});
 assert.equal(ui.state().terminal,'complete');
 assert.equal(ui.state().stages.saved.state,'skipped','A plain chat answer is not a saved artifact.');
+// A stopped native Quest must keep the received JSON visible for recovery,
+ // but must not masquerade as a completed artifact.
+ const candidateStart=guide.indexOf('function clippedQuestCandidate(');
+ const candidateEnd=guide.indexOf('let captureQuestBusy=false;',candidateStart);
+ const candidate=vm.runInNewContext(
+   "const activeSystem='civweave';const clean=(s,n)=>String(s??'').trim().slice(0,n);"+
+   guide.slice(candidateStart,candidateEnd)+";clippedQuestCandidate;");
+ const source='Help me create a commune starting with a community garden and building infrastructure from there';
+ const draft='{"title":"Community Garden Commune","paths":[{"realm":"fellowfare"';
+ const prior=[{role:'user',text:source},{role:'assistant',text:'Weaveling could not complete the selected local-server request: stopped at max_tokens.',partialQuestJson:draft}];
+ const rescued=candidate(prior[1],prior,1);
+ assert.equal(rescued?.original,source);
+ assert.equal(rescued?.excerpt,draft);
+ assert.equal(rescued?.structuredDraft,true);
 console.log('PASS universal tracker: one-pass Quest JSON shows real stages, live text, validation and REVIEW save; other realm artifacts share the rail and failures are not saved.');
