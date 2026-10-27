@@ -353,7 +353,7 @@ function syncClippedQuestCapture(article,row,messages,index){
   button.textContent=row.capturedQuestId?'Open captured Quest':'Capture as structured Quest';
   button.disabled=captureQuestBusy;
   button.onclick=async()=>{
-    if(row.capturedQuestId){globalThis.CivweaveIntentionUI?.open?.(row.capturedQuestId);return}
+    if(row.capturedQuestId){const ui=globalThis.CivweaveIntentionUI;if(typeof ui?.open==='function')ui.open(row.capturedQuestId);else location.assign('/app/working-campus-v440.html?source=clipped-quest-review');return}
     if(captureQuestBusy)return;
     captureQuestBusy=true;button.disabled=true;button.textContent='Generating structured Quest…';
     const notice=document.createElement('span');notice.textContent='Converting existing text using the selected model; no Quest will activate automatically.';
@@ -533,7 +533,7 @@ async function submitActive(text){
       ? {text:requestAbort?.signal.aborted?'Generation stopped.':`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
       : await fallbackReply(system,value);
     const retained=system==='civweave'&&nativeApiRoute()&&partialNativeAnswer.length>=40?
-      partialNativeAnswer+'\\n\\n[Partial native generation saved after interruption. Use Capture as structured Quest to convert it for review.]':null;
+      partialNativeAnswer+'\n\n[Partial native generation saved after interruption. Use Capture as structured Quest to convert it for review.]':null;
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:system,responderSystem:system,text:retained||fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
   }finally{busy=false;nativeAbortController=null;if(button){button.disabled=false;button.type='submit';button.textContent='Send';}render();emitState()}
   return true;
