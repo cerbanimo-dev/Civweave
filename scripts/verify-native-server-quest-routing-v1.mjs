@@ -47,6 +47,6 @@ assert.equal(calls.length,4,'Manual capture must perform exactly one additional 
 assert.equal(calls.at(-1).args.text,commune,'Clipped assistant text must not replace the original Hero wish.');
 assert.match(calls.at(-1).args.clippedDraft,/Commune Starting/);
 assert.equal(calls.at(-1).selected.model,'qwen35-4b-native');
-await assert.rejects(native.captureClippedQuest({originalRequest:'Say READY',clippedText:'A long generic reply that is not a plan'}),/no identifiable Quest|project request/i);
+await assert.rejects(native.captureClippedQuest({originalRequest:'Tell me the current weather forecast for tomorrow',clippedText:'A long generic reply that is not a plan'}),/no identifiable Quest|project request/i);
 assert.equal(calls.length,4,'Non-project clipped chat must not start another Quest.');
 console.log('PASS native Termux route invokes canonical Weaveling Quest planning for explicit and combined intents; no generic chat or second model.');
