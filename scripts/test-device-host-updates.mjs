@@ -132,3 +132,31 @@ test('native Android Host keeps the first protocol scoped to loopback and paired
   assert.ok(!manifest.includes('REQUEST_INSTALL_PACKAGES'));
   assert.match(gradle,/applicationId = "cc.civweave.devicehost"/);
 });
+
+test('Android Host lifecycle has an opt-in foreground service, explicit stop, and no automatic boot', async () => {
+  const {readFile} = await import('node:fs/promises');
+  const base = new URL('../native/android/device-host/app/src/main/', import.meta.url);
+  const manifest=await readFile(new URL('AndroidManifest.xml',base),'utf8');
+  const activity=await readFile(new URL('java/cc/civweave/devicehost/MainActivity.kt',base),'utf8');
+  const service=await readFile(new URL('java/cc/civweave/devicehost/DeviceHostService.kt',base),'utf8');
+  assert.match(manifest,/android:foregroundServiceType="specialUse"/);
+  assert.match(manifest,/android\.permission\.FOREGROUND_SERVICE_SPECIAL_USE/);
+  assert.match(manifest,/android:exported="false"/);
+  assert.doesNotMatch(manifest,/BOOT_COMPLETED/);
+  assert.match(service,/startForeground\(/);
+  assert.match(service,/LoopbackHostServer/);
+  assert.match(service,/ACTION_STOP/);
+  assert.match(service,/START_NOT_STICKY/);
+  assert.match(activity,/startForegroundService\(/);
+  assert.match(activity,/bindService\(/);
+  assert.doesNotMatch(activity,/server\?\.close\(\)/);
+});
+
+test('Native APK install lane is disabled without an embedded release verification key', async () => {
+  const {readFile}=await import('node:fs/promises');
+  const file=await readFile(new URL('../native/android/device-host/app/src/main/java/cc/civweave/devicehost/HostReleasePolicy.kt',import.meta.url),'utf8');
+  assert.match(file,/PINNED_ED25519_PUBLIC_KEY_B64URL = ""/);
+  assert.match(file,/verificationKeyConfigured\(\)/);
+  assert.match(file,/cc\.civweave\.devicehost/);
+  assert.match(file,/https:\/\/civweave\.cc\/downloads\/device-host\//);
+});
