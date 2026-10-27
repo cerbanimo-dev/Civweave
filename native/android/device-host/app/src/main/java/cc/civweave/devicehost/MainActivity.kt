@@ -151,7 +151,10 @@ class MainActivity : Activity() {
             thread(name="civweave-host-update", isDaemon=true) {
                 val result = runCatching { HostUpdateManager.prepare(this) }
                 runOnUiThread {
-                    if (isDestroyed) return@runOnUiThread
+                    if (isDestroyed) {
+                        result.getOrNull()?.file?.delete()
+                        return@runOnUiThread
+                    }
                     checkUpdates.isEnabled = HostReleasePolicy.verificationKeyConfigured()
                     result.onSuccess { staged ->
                         stagedUpdate = staged
@@ -193,6 +196,8 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        stagedUpdate?.file?.delete()
+        stagedUpdate = null
         if (bound) unbindService(connection)
         bound = false
         host = null
