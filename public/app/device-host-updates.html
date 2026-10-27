@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#061019">
+<title>Civweave · Android Device Host</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#061019;color:#effff7}
+*{box-sizing:border-box}body{margin:0;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
+main{max-width:640px;margin:30px auto}a{color:#9cead9}h1{font-size:1.55rem}p{line-height:1.55;color:#c4d7d5}
+section{border:1px solid #3b5d61;border-radius:14px;padding:18px;background:#10232b;margin:20px 0}
+button{font:inherit;padding:12px 18px;border-radius:10px;border:1px solid #83cbb8;color:#071b1b;background:#a0e5ce;cursor:pointer}
+button[disabled]{cursor:not-allowed;opacity:.48}
+#host-update-status{white-space:pre-wrap;overflow-wrap:anywhere}
+small{color:#adccc9}nav{padding:14px 0}
+</style>
+</head>
+<body>
+<main>
+<nav><a href="/app/installed-entry-v146.html">Back to Civweave</a></nav>
+<h1>Android Device Host</h1>
+<p>Manage the optional native companion independently of Civweave's web updates. The browser can verify an APK and save it; Android controls installation and may ask for permission.</p>
+<section>
+<h2>Connect your Android Host</h2>
+<p>Open the Device Host app on this phone, generate a code, then enter it here. Pairing grants only read-only version discovery. No installation permissions are granted.</p>
+<label for="host-pair-code">Ten-character pairing code</label>
+<input id="host-pair-code" type="text" inputmode="text" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter code from host" style="display:block;width:100%;font:inherit;padding:12px;margin:10px 0;background:#091921;border:1px solid #729b92;border-radius:8px;color:#fff" />
+<button id="host-pair" type="button">Pair and read host version</button>
+<p id="host-pair-status" role="status" aria-live="polite">Not connected. Open the native host to get a code.</p>
+</section>
+<section>
+<h2>Direct distribution</h2>
+<p><a href="civweave-host://updates">Open Android Host to review and install signed updates</a></p>
+<p><small>This opens the native Host interface only. Android independently fetches and checks the release; no arbitrary APK URL is sent to the app.</small></p>
+<p id="host-update-status" role="status" aria-live="polite">Preparing update controls…</p>
+<p><small id="host-update-version">Installed host version: not yet connected.</small></p>
+<button id="host-update-check" type="button">Check for a signed release</button>
+<button id="host-update-download" type="button" disabled>Download verified APK</button>
+</section>
+<p><small>Only packages signed by the pinned Civweave release key may be offered. No native install happens without your action. Existing application data must be preserved by retaining the same app ID and Android signing certificate.</small></p>
+</main>
+<script type="module" src="/app/device-host-update-ui.mjs"></script>
+</body></html>

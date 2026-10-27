@@ -35,6 +35,7 @@ const MAP_CORE=[
 
 const CORE=[
   '/index.html','/install-v130.css','/install-v130.js','/offline.html',
+  '/app/device-host-updates.html','/app/device-host-updates.mjs','/app/device-host-update-ui.mjs','/app/device-host-client.mjs',
   '/app/manifest.webmanifest','/app/installed-entry-v146.html','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/local-object-mesh-v146.js','/app/local-first-policy-v131.js',
   '/app/working-campus-v156.html','/app/working-campus-v156.css','/app/working-campus-v156.js','/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt',
   '/app/system-routes-v227.js','/app/persistent-system-context-v1.js','/app/themed-system-nav-v178.js','/app/persistent-shell-actions-v1.js','/app/subsystem-avatar-state-v347.js',

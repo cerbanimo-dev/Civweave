@@ -128,6 +128,20 @@ The API and privacy boundaries are defined in `docs/contracts/guild-quest-public
 
 Extend these systems at their owners. Do not attach duplicate launchers or parallel global listeners from realm code.
 
+## Android Device Host direct distribution
+
+- Canonical release verification and download owner: `public/app/device-host-updates.mjs`.
+- Presentation controller: `public/app/device-host-update-ui.mjs`.
+- One shared entry in canonical Settings: `public/app/settings-gateway-v317.js`.
+- User-facing route: `public/app/device-host-updates.html`.
+- Offline release signing: `scripts/sign-android-host-release.mjs`.
+- Release and native-install limitations: `docs/operations/android-host-direct-distribution.md`.
+
+The browser verifies an operator-signed APK release; it does not infer that Android installed
+anything. Never introduce a competing updater in a realm or auto-install a native package.
+The optional host's eventual paired version and capability claims must be authenticated,
+and installation remains subject to Android user consent and signing identity checks.
+
 ## When a new shared system is genuinely necessary
 
 A new cross-cutting owner requires all of the following in the same PR:
