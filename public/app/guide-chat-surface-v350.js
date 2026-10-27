@@ -322,7 +322,7 @@ function syncArtifactGates(){
 }
 function clippedQuestCandidate(row,messages,index){
   if(activeSystem!=='civweave'||!row||row.role!=='assistant'||row.pending||row.planSnapshot?.paths?.length||row.approvalGate?.kind==='intention-activation')return null;
-  if(!/Learning Journey plan:|Response reached the generation limit|## Module|\bStatus: REVIEW\b/i.test(String(row.text||'')))return null;
+  if(!/Learning Journey plan:|Response reached the generation limit|Partial native generation saved|## Module|\bStatus: REVIEW\b/i.test(String(row.text||'')))return null;
   let source=null;
   for(let i=index-1;i>=0;i--)if(messages[i]?.role==='user'){source=messages[i];break}
   const original=clean(source?.text||'',5000);
@@ -473,6 +473,7 @@ async function submitActive(text){
   if(button){button.disabled=!(nativeRequested||ollamaRequested);button.type=(nativeRequested||ollamaRequested)?'button':'submit';button.textContent=(nativeRequested||ollamaRequested)?'Stop':'Send';}
   if(input)input.value='';
   append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${guide(system).name} is thinking…`,pending:true});render();emitAvatar(system,'',value,'thinking');
+  let partialNativeAnswer='';
   try{
     // The current user turn has already been appended to the visible thread.
     // Do not submit it as both a historical user message and the current turn.
@@ -492,6 +493,7 @@ async function submitActive(text){
       else if(meta?.kind==='moss-progress')
         latestText='Moss · '+(meta.phase==='compile'?'Compiling JSON':meta.phase==='repair'?'Repairing plan':meta.phase==='saved'?'Saved for REVIEW':'Drafting outline')+' · '+(Number(meta.characters)||0)+' characters received. Approval required.';
       else if(typeof accumulated==='string'&&accumulated){
+        if(!/weaveling-intention-json/i.test(meta?.purpose||''))partialNativeAnswer=accumulated.slice(0,10000);
         const stream=globalThis.CivweaveGuideStreamThinkingV249;
         latestText=/weaveling-intention-json/i.test(meta?.purpose||'')
           ?(stream?.visibleWeavelingPlan?.(accumulated)||'Preparing your Quest for review…')
@@ -530,7 +532,9 @@ async function submitActive(text){
     const fallback=(requestAbort?.signal.aborted||ollamaRequested||nativeApiRoute())
       ? {text:requestAbort?.signal.aborted?'Generation stopped.':`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
       : await fallbackReply(system,value);
-    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
+    const retained=system==='civweave'&&nativeApiRoute()&&partialNativeAnswer.length>=40?
+      partialNativeAnswer+'\\n\\n[Partial native generation saved after interruption. Use Capture as structured Quest to convert it for review.]':null;
+    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:system,responderSystem:system,text:retained||fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
   }finally{busy=false;nativeAbortController=null;if(button){button.disabled=false;button.type='submit';button.textContent='Send';}render();emitState()}
   return true;
 }
