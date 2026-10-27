@@ -12,7 +12,7 @@ try{
   }
 }catch{}
 
-const VERSION='1.0.197-weaveling-clipped-quest-capture';
+const VERSION='1.0.198-universal-artifact-rail';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -103,6 +103,24 @@ function selectedLocal(){
     const value=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});
     return value?.active&&value?.id?value:null;
   }catch{return null}
+}
+let generationTrackerPromise=null;
+function ensureGenerationTracker(){
+  if(globalThis.CivweaveGuideGenerationTrackerV1?.version==='1.2.23-guide-generation-tracker-v1-universal-artifact-rail'){
+    globalThis.CivweaveGuideGenerationTrackerV1.install?.();return Promise.resolve(true);
+  }
+  if(generationTrackerPromise)return generationTrackerPromise;
+  generationTrackerPromise=new Promise((resolve,reject)=>{
+    const src='/app/guide-generation-tracker-v1.js?v=1.2.23-universal-artifact-rail';
+    const existing=[...document.scripts].find(node=>node.src?.includes(src));
+    if(existing?.dataset?.loaded==='true'){resolve(true);return}
+    const script=existing||document.createElement('script');
+    if(!existing){script.src=src;script.async=false}
+    script.addEventListener('load',()=>{script.dataset.loaded='true';resolve(Boolean(globalThis.CivweaveGuideGenerationTrackerV1?.install?.()))},{once:true});
+    script.addEventListener('error',()=>reject(new Error('The shared generation rail could not load.')),{once:true});
+    if(!existing)document.head.append(script);
+  }).catch(error=>{generationTrackerPromise=null;console.warn('[Civweave] Generation tracker unavailable:',error);return false});
+  return generationTrackerPromise;
 }
 function nativeApiRoute(){
   const route=configuredRoute();
@@ -506,6 +524,7 @@ async function submitActive(text){
       else if(!paintTimer)paintTimer=setTimeout(paint,80);
     };
     try {
+    await ensureGenerationTracker();
     if(ollamaRequested){
       result=await globalThis.CivweaveFamilyAILoaderV105.respondOllama({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else if(nativeRequested){
@@ -565,6 +584,7 @@ async function submitText(text,system=activeSystem,options={}){
 }
 async function submitVoiceText(text,system=activeSystem){return submitText(text,system,{allowBare:true})}
 function start(){
+  void ensureGenerationTracker();
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
   void ensureSpecializedRegistry().catch(()=>{});
   addEventListener('civweave:system-route-changed',event=>{const system=event?.detail?.system;if(SYSTEMS.includes(system)&&system!==pageSystem){pageSystem=system;syncChrome()}});
