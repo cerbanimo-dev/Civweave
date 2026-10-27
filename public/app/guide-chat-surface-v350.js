@@ -360,7 +360,7 @@ function syncClippedQuestCapture(article,row,messages,index){
     panel.append(notice);
     try{
       const module=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.14-clipped-quest-capture');
-      const result=await module.captureClippedQuest({originalRequest:candidate.original,clippedText:candidate.excerpt});
+      const result=await module.captureClippedQuest({originalRequest:candidate.original,clippedText:candidate.excerpt,onToken:(_delta,accumulated)=>{button.textContent='Structuring Quest · '+String(accumulated||'').length.toLocaleString()+' characters';}});
       if(!result?.planItemId||result?.plan?.state!=='review')throw new Error('No validated reviewable Quest was produced.');
       const thread=readThread('civweave'),idx=(thread.messages||[]).findIndex(item=>item.id===row.id);
       if(idx>=0)thread.messages[idx]={...thread.messages[idx],capturedQuestId:result.planItemId};
