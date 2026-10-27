@@ -22,7 +22,8 @@ function show(message) { status.textContent = message; }
 function busy(value) {
   working = value;
   check.disabled = value;
-  download.disabled = value || !verified;
+  download.disabled = value || !verified ||
+    ['current', 'older-release'].includes(updateDecision(hostVersion(), verified.versionCode));
 }
 function hostVersion() {
   return pairedHost?.versionCode || null;
