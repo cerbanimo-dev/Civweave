@@ -60,8 +60,10 @@ assert.match(ui.state().streams.draft,/Community garden/);
 assert.equal(ui.state().terminal,'','Raw JSON is not a saved Quest.');
 emit({phase:'validating'});
 assert.equal(ui.state().stages.validate.state,'running');
-emit({phase:'validated'});
+emit({phase:'validated',paths:[{realm:'fellowfare',title:'Gather tools and materials',steps:['Identify donated tools','Inspect delivery']},{realm:'cerbanimo',title:'Construct garden beds',steps:['Measure site','Build and test beds']}]});
 assert.equal(ui.state().stages.validate.state,'complete');
+assert.equal(ui.state().beats.length,2,'Quest beats must only be shown after schema validation.');
+assert.deepEqual(Array.from(ui.state().beats.map(x=>x.realm)),['fellowfare','cerbanimo']);
 assert.equal(ui.state().stages.saved.state,'queued');
 emit({phase:'saved',planId:'review-only-1'});
 assert.equal(ui.state().stages.saved.state,'complete');
@@ -77,4 +79,15 @@ assert.equal(ui.state().terminal,'failed');
 assert.match(ui.state().errorDetail,/Truncated JSON/);
 assert.notEqual(ui.state().stages.saved.state,'complete');
 assert.equal(ui.state().kind,'manifest','The shared progress bus must support non-Quest artifact types.');
+ui.resetForRequest({text:'Explain morning bed-making habits',route:'',system:'civweave',messageId:'m3'});
+events.get('civweave:guide-generation-progress')({detail:{system:'civweave',phase:'streaming',text:'A habit needs a cue and a small repeatable step.'}});
+assert.equal(ui.state().kind,'dialogue');
+assert.equal(ui.state().stages.draft.state,'streaming');
+assert.match(ui.state().streams.draft,/repeatable step/);
+events.get('civweave:realm-guide-thread-changed')({detail:{system:'civweave',thread:{updatedAt:'now',messages:[
+ {role:'user',text:'Explain morning bed-making habits'},
+ {role:'assistant',id:'m3',text:'A habit needs a cue and a small repeatable step.'}
+]}}});
+assert.equal(ui.state().terminal,'complete');
+assert.equal(ui.state().stages.saved.state,'skipped','A plain chat answer is not a saved artifact.');
 console.log('PASS universal tracker: one-pass Quest JSON shows real stages, live text, validation and REVIEW save; other realm artifacts share the rail and failures are not saved.');
