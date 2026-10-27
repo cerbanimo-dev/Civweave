@@ -54,9 +54,21 @@ assert.ok(request?.config?.maxTokens<=1200,'Local Quest request is unbounded for
 assert.ok(request.messages[0].content.length<1000,'Native model prompt regressed into a large multi-system prefill.');
 assert.equal(request.purpose,'civweave-weaveling-intention-json-v190');
 
+// Clipped assistant prose is included as bounded, explicitly untrusted context
+// while the original user wish and strict Quest schema remain authoritative.
+const draft='Learning Journey plan: Commune starts with a community garden and then infrastructure. '.repeat(45);
+const captured=await api.createModelPlan({text:wish,history:[],clippedDraft:draft},opts);
+assert.equal(captured.plan?.state,'review');
+assert.equal(saves,2,'Capturing a draft must save only a fully validated Quest.');
+assert.equal(request.purpose,'civweave-weaveling-intention-json-v190');
+assert.ok(request.messages.some(row=>/REFERENCE ONLY.*INCOMPLETE PRIOR ASSISTANT DRAFT/.test(row.content)));
+assert.ok(request.messages.some(row=>row.content.includes(draft.slice(0,100))));
+assert.equal(request.messages[1].content.includes(wish),true,'Original wish was lost during capture');
+assert.equal(request.messages.find(row=>/REFERENCE ONLY/.test(row.content)).content.length<3000,'Draft reference was not bounded');
+assert.equal(captured.plan.wish,wish,'Clipped text must never override the current project goal');
 // Even a syntactically valid model response may never erase the build stage.
 payload={...payload,paths:payload.paths.slice(0,1)};
 await assert.rejects(api.createModelPlan({text:wish,history:[]},opts),/required cerbanimo|requires 2 paths|missing/i);
-assert.equal(saves,1,'An incomplete two-path Quest was persisted.');
+assert.equal(saves,2,'An incomplete two-path Quest was persisted.');
 
 console.log('PASS native Quest schema requires tarot learning + Cerbanimo app construction, preserves REVIEW, bounds prompt and generation, rejects missing production.');
