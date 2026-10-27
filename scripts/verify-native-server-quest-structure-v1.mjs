@@ -64,7 +64,7 @@ assert.equal(request.purpose,'civweave-weaveling-intention-json-v190');
 assert.ok(request.messages.some(row=>/REFERENCE ONLY.*INCOMPLETE PRIOR ASSISTANT DRAFT/.test(row.content)));
 assert.ok(request.messages.some(row=>row.content.includes(draft.slice(0,100))));
 assert.equal(request.messages[1].content.includes(wish),true,'Original wish was lost during capture');
-assert.equal(request.messages.find(row=>/REFERENCE ONLY/.test(row.content)).content.length<3000,'Draft reference was not bounded');
+assert.ok(request.messages.find(row=>/REFERENCE ONLY/.test(row.content)).content.length<3000,'Draft reference was not bounded');
 assert.equal(captured.plan.wish,wish,'Clipped text must never override the current project goal');
 // Even a syntactically valid model response may never erase the build stage.
 payload={...payload,paths:payload.paths.slice(0,1)};
