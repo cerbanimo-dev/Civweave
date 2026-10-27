@@ -49,8 +49,8 @@ assert.equal(request?.schema?.properties?.paths?.minItems,2);
 assert.equal(request?.schema?.properties?.paths?.maxItems,2);
 assert.deepEqual(Array.from(request.context.workingMemory.structuralConstraints.requiredRealms),['living-school','cerbanimo']);
 assert.equal(request?.config?.stream,true,'Local Quest authoring did not enable progress streaming.');
-assert.equal(request?.config?.timeoutMs,900000,'Quest was routed through the ordinary 150-second deadline.');
-assert.ok(request?.config?.maxTokens<=1200,'Local Quest request is unbounded for an 8GB Moto.');
+assert.equal(request?.config?.timeoutMs,1800000,'Extended Quest deadline was not applied.');
+assert.equal(request?.config?.maxTokens,4096,'The native Quest schema is not allocated enough output tokens.');
 assert.ok(request.messages[0].content.length<1000,'Native model prompt regressed into a large multi-system prefill.');
 assert.equal(request.purpose,'civweave-weaveling-intention-json-v190');
 

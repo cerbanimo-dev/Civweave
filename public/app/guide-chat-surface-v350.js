@@ -12,7 +12,7 @@ try{
   }
 }catch{}
 
-const VERSION='1.0.197-weaveling-clipped-quest-capture';
+const VERSION='1.0.198-universal-artifact-rail';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -103,6 +103,24 @@ function selectedLocal(){
     const value=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});
     return value?.active&&value?.id?value:null;
   }catch{return null}
+}
+let generationTrackerPromise=null;
+function ensureGenerationTracker(){
+  if(globalThis.CivweaveGuideGenerationTrackerV1?.version==='1.2.23-guide-generation-tracker-v1-universal-artifact-rail'){
+    globalThis.CivweaveGuideGenerationTrackerV1.install?.();return Promise.resolve(true);
+  }
+  if(generationTrackerPromise)return generationTrackerPromise;
+  generationTrackerPromise=new Promise((resolve,reject)=>{
+    const src='/app/guide-generation-tracker-v1.js?v=1.2.23-universal-artifact-rail';
+    const existing=[...document.scripts].find(node=>node.src?.includes(src));
+    if(existing?.dataset?.loaded==='true'){resolve(true);return}
+    const script=existing||document.createElement('script');
+    if(!existing){script.src=src;script.async=false}
+    script.addEventListener('load',()=>{script.dataset.loaded='true';resolve(Boolean(globalThis.CivweaveGuideGenerationTrackerV1?.install?.()))},{once:true});
+    script.addEventListener('error',()=>reject(new Error('The shared generation rail could not load.')),{once:true});
+    if(!existing)document.head.append(script);
+  }).catch(error=>{generationTrackerPromise=null;console.warn('[Civweave] Generation tracker unavailable:',error);return false});
+  return generationTrackerPromise;
 }
 function nativeApiRoute(){
   const route=configuredRoute();
@@ -322,13 +340,13 @@ function syncArtifactGates(){
 }
 function clippedQuestCandidate(row,messages,index){
   if(activeSystem!=='civweave'||!row||row.role!=='assistant'||row.pending||row.planSnapshot?.paths?.length||row.approvalGate?.kind==='intention-activation')return null;
-  if(!/Learning Journey plan:|Response reached the generation limit|Partial native generation saved|## Module|\bStatus: REVIEW\b/i.test(String(row.text||'')))return null;
+  if(!row.partialQuestJson&&!/Learning Journey plan:|Response reached the generation limit|Partial native generation saved|## Module|\bStatus: REVIEW\b/i.test(String(row.text||'')))return null;
   let source=null;
   for(let i=index-1;i>=0;i--)if(messages[i]?.role==='user'){source=messages[i];break}
   const original=clean(source?.text||'',5000);
   if(!/\b(?:help me|help us|we want|i want|create|build|start|establish|organize|launch|design|plan|develop|make)\b/i.test(original)||
     !/\b(?:commune|garden|infrastructure|community|cooperative|project|quest|app|website|service|collective|enterprise|workspace|device|platform)\b/i.test(original))return null;
-  return {original,excerpt:clean(row.text,3600)};
+  return {original,excerpt:clean(row.partialQuestJson||row.text,3600),structuredDraft:Boolean(row.partialQuestJson)};
 }
 let captureQuestBusy=false;
 function syncClippedQuestCapture(article,row,messages,index){
@@ -344,7 +362,7 @@ function syncClippedQuestCapture(article,row,messages,index){
     article.querySelector('.cw350-bubble')?.parentElement?.append(panel);
   }
   const title=panel.querySelector('strong'),description=panel.querySelector('span'),actions=panel.querySelector('.cw350-artifact-actions');
-  title.textContent=row.capturedQuestId?'Structured Quest captured':'Recover clipped generation';
+  title.textContent=row.capturedQuestId?'Structured Quest captured':candidate.structuredDraft?'Recover clipped Quest JSON':'Recover clipped generation';
   description.textContent=row.capturedQuestId?
     'Your reviewable structured Quest was saved. It has not been activated.':
     'This answer is chat text, not a saved Quest. Use the original request plus this partial draft to create a validated, reviewable cross-realm Quest.';
@@ -359,7 +377,7 @@ function syncClippedQuestCapture(article,row,messages,index){
     const notice=document.createElement('span');notice.textContent='Converting existing text using the selected model; no Quest will activate automatically.';
     panel.append(notice);
     try{
-      const module=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.14-clipped-quest-capture');
+      const module=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.15-universal-quest-rail');
       const result=await module.captureClippedQuest({originalRequest:candidate.original,clippedText:candidate.excerpt,onToken:(_delta,accumulated)=>{button.textContent='Structuring Quest · '+String(accumulated||'').length.toLocaleString()+' characters';}});
       if(!result?.planItemId||result?.plan?.state!=='review')throw new Error('No validated reviewable Quest was produced.');
       const thread=readThread('civweave'),idx=(thread.messages||[]).findIndex(item=>item.id===row.id);
@@ -473,7 +491,7 @@ async function submitActive(text){
   if(button){button.disabled=!(nativeRequested||ollamaRequested);button.type=(nativeRequested||ollamaRequested)?'button':'submit';button.textContent=(nativeRequested||ollamaRequested)?'Stop':'Send';}
   if(input)input.value='';
   append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${guide(system).name} is thinking…`,pending:true});render();emitAvatar(system,'',value,'thinking');
-  let partialNativeAnswer='';
+  let partialNativeAnswer='',partialQuestJson='';
   try{
     // The current user turn has already been appended to the visible thread.
     // Do not submit it as both a historical user message and the current turn.
@@ -487,6 +505,10 @@ async function submitActive(text){
     };
     const onToken=(delta,accumulated,meta)=>{
       if(meta?.kind==='quest-progress'){
+        if(meta.draft){
+          const raw=String(meta.draft||'');
+          partialQuestJson=clean(globalThis.CivweaveGuideStreamThinkingV249?.splitThinking?.(raw)?.answer??raw,12000).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*$/gi,'');
+        }
         const phase=meta.phase==='saved'?'Saved for REVIEW':meta.phase==='generating'?'Creating Quest':'Preparing cross-realm Quest';
         latestText='Weaveling · '+phase+(meta.characters?' · '+Number(meta.characters)+' characters drafted':'')+'. Activation requires approval.';
       }
@@ -502,10 +524,19 @@ async function submitActive(text){
           :(stream?.splitThinking?.(accumulated)?.answer??accumulated);
       }
       if(!latestText)return;
+      // The shared six-stage rail observes visible chat output for every guide.
+      // Do not report JSON-Quest or Moss progress as ordinary chat, and never
+      // expose model thinking segments hidden by GuideStreamThinking.
+      if(typeof accumulated==='string'&&accumulated&&!meta?.kind&&!/weaveling-intention-json/i.test(meta?.purpose||'')){
+        try{dispatchEvent(new CustomEvent('civweave:guide-generation-progress',{
+          detail:{system,phase:'streaming',text:clean(latestText,30000)}
+        }))}catch{}
+      }
       if(Date.now()-lastPaint>=80){if(paintTimer){clearTimeout(paintTimer);paintTimer=null;}paint();}
       else if(!paintTimer)paintTimer=setTimeout(paint,80);
     };
     try {
+    await ensureGenerationTracker();
     if(ollamaRequested){
       result=await globalThis.CivweaveFamilyAILoaderV105.respondOllama({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else if(nativeRequested){
@@ -518,7 +549,7 @@ async function submitActive(text){
         console.warn('[Civweave] Optional generation tracker unavailable:',error);
       }
       await verifyNativePhoneServerTransport();
-      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.14-clipped-quest-capture');
+      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.15-universal-quest-rail');
       if(requestAbort?.signal.aborted)throw new Error('Generation cancelled before the request was sent.');
       result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else{
@@ -536,7 +567,7 @@ async function submitActive(text){
       : await fallbackReply(system,value);
     const retained=system==='civweave'&&nativeApiRoute()&&partialNativeAnswer.length>=40?
       partialNativeAnswer+'\n\n[Partial native generation saved after interruption. Use Capture as structured Quest to convert it for review.]':null;
-    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:system,responderSystem:system,text:retained||fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
+    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:system,responderSystem:system,text:retained||fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',partialQuestJson:partialQuestJson.length>=40?partialQuestJson:'',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
   }finally{busy=false;nativeAbortController=null;if(button){button.disabled=false;button.type='submit';button.textContent='Send';}render();emitState()}
   return true;
 }
@@ -565,6 +596,7 @@ async function submitText(text,system=activeSystem,options={}){
 }
 async function submitVoiceText(text,system=activeSystem){return submitText(text,system,{allowBare:true})}
 function start(){
+  void ensureGenerationTracker();
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
   void ensureSpecializedRegistry().catch(()=>{});
   addEventListener('civweave:system-route-changed',event=>{const system=event?.detail?.system;if(SYSTEMS.includes(system)&&system!==pageSystem){pageSystem=system;syncChrome()}});
