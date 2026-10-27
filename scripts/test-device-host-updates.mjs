@@ -190,3 +190,11 @@ test('PWA opens native update review without passing arbitrary APK URLs or insta
   assert.ok(html.includes('href="civweave-host://updates"'));
   assert.ok(!html.includes('apkUrl='));
 });
+
+test('PWA does not offer a downgrade or installed-version reinstall as an update', async () => {
+  const {readFile}=await import('node:fs/promises');
+  const ui=await readFile(new URL('../public/app/device-host-update-ui.mjs',import.meta.url),'utf8');
+  assert.match(ui,/updateDecision\(hostVersion\(\), verified\.versionCode\)/);
+  assert.match(ui,/updateDecision\(hostVersion\(\), release\.versionCode\)/);
+  assert.ok(!ui.includes('Installed version: unknown. Android will determine'));
+});
