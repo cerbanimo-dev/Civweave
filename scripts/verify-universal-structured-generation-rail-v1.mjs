@@ -7,6 +7,7 @@ const read=p=>readFileSync(p,'utf8');
 const tracker=read('public/app/guide-generation-tracker-v1.js');
 const guide=read('public/app/guide-chat-surface-v350.js');
 const native=read('public/app/local-ai/native-server-guide-fastpath-v1.js');
+const runtime=read('public/app/shared/civweave-model-runtime.js');
 const quest=read('public/extensions/civweave-weaveling-plan-json-v190.js');
 const moss=read('public/app/unified-chat-system-v1.js');
 const working=read('public/app/working-campus-v440.html');
@@ -18,6 +19,8 @@ assert.match(guide,/await ensureGenerationTracker\(\)/,'Native fastpath must wai
 assert.match(guide,/1\.2\.23-universal-artifact-rail/);
 assert.match(native,/1\.2\.13-universal-quest-rail/);
 assert.match(quest,/maxTokens:4096,timeoutMs:1500000/);
+assert.match(runtime,/config\.timeoutMs = Math\.max\(config\.timeoutMs, 1500000\)/,'Native Quest runtime must not override the expanded deadline.');
+assert.match(native,/1\.0\.18-native-quest-extended-budget/);
 assert.match(quest,/questProgress\(args,'streaming'/);
 assert.match(quest,/questProgress\(args,'validating'/);
 assert.match(quest,/questProgress\(args,'validated'/);
