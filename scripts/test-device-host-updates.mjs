@@ -180,3 +180,13 @@ test('native updater only stages a self-update from an authenticated signed rele
   assert.match(manifest,/HostInstallResultReceiver/);
   assert.doesNotMatch(updater,/exec\(|Runtime\.getRuntime/);
 });
+
+test('PWA opens native update review without passing arbitrary APK URLs or installer commands', async () => {
+  const {readFile}=await import('node:fs/promises');
+  const manifest=await readFile(new URL('../native/android/device-host/app/src/main/AndroidManifest.xml',import.meta.url),'utf8');
+  const html=await readFile(new URL('../public/app/device-host-updates.html',import.meta.url),'utf8');
+  assert.match(manifest,/android:scheme="civweave-host"/);
+  assert.match(manifest,/android:host="updates"/);
+  assert.ok(html.includes('href="civweave-host://updates"'));
+  assert.ok(!html.includes('apkUrl='));
+});
