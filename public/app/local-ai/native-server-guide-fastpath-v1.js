@@ -3,7 +3,7 @@
 export const NATIVE_MODEL='qwen35-4b-native';
 export const NATIVE_ENDPOINT='http://127.0.0.1:8080/v1';
 const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.17-native-quest-schema';
-const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.18-explicit-learning-goal';
+const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.20-moss-multi-plan-library';
 const INTENTION_PLANNER='/app/intention-planner-v141.js?v=1.1.0-ai-authority-only';
 const QUEST_MATERIALIZER='/app/weaveling-plan-materialization-v265.js?v=1.1.3-current-selection';
 const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.12-clipped-quest-recovery-v1';
@@ -58,7 +58,7 @@ async function ensurePlanner(){
     .catch(error=>{modelsPromise=null;throw error});
   await modelsPromise;
   if(!plannerPromise)plannerPromise=loadScript(MOSS_PLANNER,
-    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.18-unified-chat-system-v1-explicit-learning-goal','Moss planner')
+    ()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.20-moss-multi-plan-library','Moss planner')
     .catch(error=>{plannerPromise=null;throw error});
   await plannerPromise;
   return globalThis.CivweaveUnifiedChatSystemV1;
