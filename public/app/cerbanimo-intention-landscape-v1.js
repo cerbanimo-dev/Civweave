@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.0-live-guild-data';
+const VERSION='1.4.0-member-quest-publication';
 const ROOT_ID='cerbanimo-intention-landscape';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const DISCOVERY_KEY='civweave.hub-discovery.v1';
@@ -25,8 +25,10 @@ const HOUSES=Object.freeze([
 const PATHS=Object.freeze({
 'living-school':{id:'living-school',label:'Living School',strap:'Learn & Grow',solid:'#aeea57',soft:'#d8f6a4'},
 cerbanimo:{id:'cerbanimo',label:'Cerbanimo',strap:'Design & Build',solid:'#e85dff',soft:'#f3b0ff'},
-fellowfare:{id:'fellowfare',label:'FellowFare',strap:'Support & Share',solid:'#efb452',soft:'#f8d99a'}
+fellowfare:{id:'fellowfare',label:'FellowFare',strap:'Support & Share',solid:'#efb452',soft:'#f8d99a'},
+anarchadia:{id:'anarchadia',label:'Anarchadia',strap:'Agree & Govern',solid:'#ff3d96',soft:'#f6d0df'}
 });
+const UNASSIGNED_PATH=Object.freeze({id:'unassigned',label:'Unassigned paths',strap:'Subsystem not recognized',solid:'#aebbd0',soft:'#e4eaf5'});
 const TIER_COLORS=Object.freeze({guild:'#8af5d2',quest:'#e85dff',map:'#efb452'});
 const VOTE_COLORS=['#ff3d9f','#48e6ff','#ffd84e','#9c63ff','#4df2a6','#ff7b54','#67a8ff','#f47dff','#9ee34e','#ffae57'];
 const COMPLETE=new Set(['completed','complete','done','closed','fulfilled','settled','accepted','delivered','verified','passed']);
@@ -40,7 +42,7 @@ const arr=v=>Array.isArray(v)?v:[];
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const hash=v=>{let out=2166136261;for(const c of String(v??'')){out^=c.charCodeAt(0);out=Math.imul(out,16777619)}return out>>>0};
 const isComplete=v=>COMPLETE.has(clean(v,60).toLowerCase());
-const state={screen:1,guildIndex:0,questIndex:0,guilds:[],votes:[],touchStart:null,wheelLock:false,observer:null,rendering:false,shell:null,directoryLoading:false,directoryState:'idle'};
+const state={screen:1,guildIndex:0,questIndex:0,guilds:[],votes:[],touchStart:null,wheelLock:false,observer:null,rendering:false,shell:null,directoryLoading:false,directoryState:'idle',boards:new Map(),composer:null,publicationBusy:false,publicationNotice:'',withdrawReview:''};
 
 function query(){return new URLSearchParams(location.search)}
 function isCivweave(){const data=document.documentElement?.dataset||{},route=globalThis.CivweaveSystemRoutesV227?.identify?.(location.pathname)||'';return route==='civweave'||query().get('system')==='civweave'||data.civweaveSystemRoute==='civweave'||data.civweaveSystem==='civweave'||data.system==='civweave'}
@@ -125,18 +127,57 @@ function discoveredGuilds(){
         id:selectedId,
         nodeId:selectedId,
         displayName:selected.displayName||selected.guildName||selected.name,
-        publicOrigin:selected.origin||selected.publicOrigin,
-        intentions:localIntentions()
+        publicOrigin:selected.origin||selected.publicOrigin
       },0,'local');
     }
     if(guild){
-      const localQuests=localIntentions();
-      guild={...guild,source:'local',quests:localQuests.length?localQuests:guild.quests};
+      guild={...guild,source:'local'};
       byId.set(guild.id,guild);
     }
   }
 
   return[...byId.values()].sort((a,b)=>Number(b.source==='local')-Number(a.source==='local')||Number(b.boosted)-Number(a.boosted)||(b.boost-a.boost)||((a.distance??Infinity)-(b.distance??Infinity))||a.name.localeCompare(b.name));
+}
+
+function questClient(){return globalThis.CivweaveGuildQuestsV1||null}
+function membership(guild){return questClient()?.sessionForGuild(guild)||null}
+function boardFor(guild){const board=state.boards.get(guild?.id),session=membership(guild);return board&&session?.userId===board.userId?board:null}
+async function refreshQuestBoard(guild=activeGuild(),{force=false,append=false}={}){
+  if(!guild)return;
+  const client=questClient(),session=membership(guild),prior=boardFor(guild);
+  if(!client||!session||prior?.status==='loading'||!force&&prior)return;
+  const board={userId:session.userId,status:'loading',quests:prior?.quests||[],nextCursor:prior?.nextCursor||null,error:''};state.boards.set(guild.id,board);renderSurface();
+  try{
+    const packet=await client.list(guild,{cursor:append?board.nextCursor||'':''});
+    if(membership(guild)?.userId!==board.userId)return;
+    const guildId=packet.guildId||packet.nodeId;
+    const rows=arr(packet.quests).filter(row=>row?.status==='published'&&row.guildId===guildId&&row.quest);
+    board.quests=append?[...board.quests,...rows].filter((row,index,all)=>all.findIndex(other=>other.id===row.id)===index):rows;
+    board.guildId=guildId;board.nextCursor=packet.nextCursor||null;board.status='live';
+  }catch(error){board.status='error';board.error=clean(error?.message||error,1200)}
+  renderSurface();
+}
+function availableDrafts(){return localIntentions().flatMap(raw=>{try{return[{id:raw.id||raw.plan?.id,snapshot:questClient().preview(raw)}]}catch{return[]}})}
+async function prepareSubmission(guild,draft){
+  const composer={guildId:guild.id,draftId:draft?.id||'',snapshot:draft?.snapshot||null,expectedRevision:null,preparing:Boolean(draft)};state.composer=composer;state.publicationNotice='';renderSurface();if(!draft)return;
+  try{const row=await questClient().ownPublication(guild,composer.snapshot,{guildId:boardFor(guild)?.guildId});if(state.composer===composer)composer.expectedRevision=row?.revision||0}catch(error){if(state.composer===composer)state.publicationNotice=clean(error?.message||error,1200)}finally{composer.preparing=false;if(state.composer===composer)renderSurface()}
+}
+function selectDraft(id){const guild=activeGuild();if(state.composer&&guild)void prepareSubmission(guild,availableDrafts().find(row=>row.id===id))}
+function composeQuest(){const guild=activeGuild();if(guild&&membership(guild))void prepareSubmission(guild,availableDrafts()[0])}
+async function publishQuest(){
+  const guild=activeGuild(),composer=state.composer,client=questClient();if(state.publicationBusy||!guild||composer?.guildId!==guild.id||!composer.snapshot||!client||composer.preparing||composer.expectedRevision==null)return;
+  state.publicationBusy=true;state.publicationNotice='';renderSurface();
+  try{
+    const packet=await client.publish(guild,composer.snapshot,{expectedRevision:composer.expectedRevision});
+    const publication=packet.publication;if(!publication||publication.status!=='published')throw new Error('The Guild did not confirm publication.');
+    const board=boardFor(guild)||{userId:membership(guild)?.userId,quests:[],nextCursor:null};board.quests=[publication,...board.quests.filter(row=>row.id!==publication.id)];board.status='live';board.error='';state.boards.set(guild.id,board);
+    state.composer=null;state.publicationNotice=`Quest submitted to ${guild.name}. Guild members can now view it.`;state.questIndex=0;
+  }catch(error){state.publicationNotice=clean(error?.message||error,1200)}finally{state.publicationBusy=false;renderSurface()}
+}
+async function withdrawQuest(){
+  const guild=activeGuild(),publication=boardFor(guild)?.quests.find(row=>row.id===state.withdrawReview);if(state.publicationBusy||!publication)return;
+  state.publicationBusy=true;state.publicationNotice='';renderSurface();
+  try{await questClient().withdraw(guild,publication);const board=boardFor(guild);if(board)board.quests=board.quests.filter(row=>row.id!==publication.id);state.withdrawReview='';state.publicationNotice=`Quest withdrawn from ${guild.name}. Your local Quest is still available.`}catch(error){state.publicationNotice=clean(error?.message||error,1200)}finally{state.publicationBusy=false;renderSurface()}
 }
 async function refreshDirectory(){
   if(state.directoryLoading||navigator.onLine===false)return;
@@ -181,8 +222,11 @@ function normalizeQuest(raw,index=0){
   const id=clean(raw.id||plan.id||`quest-${index}`,180),description=clean(plan.outcome||raw.description||raw.summary||raw.text,1000);
   return{id,title,description,state:clean(raw.state||plan.state||'shared',40),needs:normalizeNeeds(raw),plan,raw};
 }
-function questsFor(guild){return arr(guild?.quests).map(normalizeQuest).filter(Boolean)}
-function realmForPath(path){const v=clean(path?.realm||path?.system||path?.type,80).toLowerCase();if(v.includes('living')||v.includes('learn'))return'living-school';if(v.includes('fellow')||v.includes('market')||v.includes('resource')||v.includes('mentor')||v.includes('outsource'))return'fellowfare';return'cerbanimo'}
+function questVisible(raw){const mode=globalThis.CivweaveLudModeV1;return mode?.isEnabled?.()===true?mode.contentVisible?.(raw)===true:true}
+function questsFor(guild){const board=boardFor(guild);return board?board.quests.filter(row=>questVisible(row.quest)).map(row=>{const quest=normalizeQuest(row.quest);return quest?{...quest,publication:row}:null}).filter(Boolean):arr(guild?.quests).filter(questVisible).map(normalizeQuest).filter(Boolean)}
+function realmForPath(path){const v=clean(path?.realm||path?.system||path?.type,80).toLowerCase();if(v.includes('living')||v.includes('learn'))return'living-school';if(/anarchadia|governance|civic|consent|agreement|vote/.test(v))return'anarchadia';if(v.includes('fellow')||v.includes('market')||v.includes('resource')||v.includes('mentor')||v.includes('outsource')||v.includes('material'))return'fellowfare';if(/cerbanimo|skilled|labor|design|build|productive/.test(v))return'cerbanimo';return'unassigned'}
+function pathSpec(path){return PATHS[realmForPath(path)]||UNASSIGNED_PATH}
+function pathLabel(path){return[clean(path?.title,240),clean(path?.realm||path?.system||path?.type,80)].filter(Boolean).join(' · ')}
 function taskList(path){
   const source=arr(path?.tasks).length?arr(path.tasks):arr(path?.steps),progress=new Set(arr(path?.progress).map(Number)),pathDone=isComplete(path?.status);
   return source.map((task,i)=>{
@@ -193,7 +237,7 @@ function taskList(path){
     return{id:clean(task?.id||task?.taskId||`${realmForPath(path)}-${i}`,160),title,status,complete:isComplete(status)||pathDone||progress.has(i),raw:task||{}};
   }).filter(Boolean);
 }
-function mapFor(quest){const lanes={'living-school':[],'cerbanimo':[],'fellowfare':[]};for(const path of arr(quest?.plan?.paths||quest?.raw?.paths||quest?.plan?.tracks)){const realm=realmForPath(path);lanes[realm].push(...taskList(path))}return lanes}
+function mapFor(quest){const lanes=Object.fromEntries(Object.keys(PATHS).map(realm=>[realm,[]]));for(const path of arr(quest?.plan?.paths||quest?.raw?.paths||quest?.plan?.tracks)){const realm=realmForPath(path);if(!lanes[realm])lanes[realm]=[];lanes[realm].push(...taskList(path).map(task=>({...task,pathLabel:pathLabel(path)})))}return lanes}
 function questProgress(quest){const tasks=Object.values(mapFor(quest)).flat(),done=tasks.filter(x=>x.complete).length;return{done,total:tasks.length,percent:tasks.length?Math.round(done/tasks.length*100):0}}
 
 function voteId(vote,i=0){return clean(vote?.id||vote?.voteId||vote?.proposalId||vote?.proposal_id||vote?.slug||`vote-${i}`,180)}
@@ -238,18 +282,65 @@ function guildFacts(guild,house,quests){
 }
 function guildCard(guild){
   const house=houseFor(guild),quests=questsFor(guild);
-  return`<article class="cil-dropcard cil-guild-card" style="${houseVars(house)}"><div class="cil-card-handle"></div><div class="cil-card-heading"><div><small>GUILD · ${esc(guildMeta(guild))}</small><h2>${esc(guild.name)}</h2></div>${house?`<span class="cil-house-orb" title="${esc(house.name)}"></span>`:''}</div>${guild.description?`<p>${esc(guild.description)}</p>`:''}<div class="cil-guild-facts">${guildFacts(guild,house,quests)}</div><div class="cil-card-actions"><button type="button" class="cil-primary" data-advance="guild" ${quests.length?'':'disabled'}>Browse Guild Quests <span>↓</span></button><button type="button" class="cil-quiet" data-house-vote="${esc(guild.id)}">Guild House vote</button></div></article>`;
+  return`<article class="cil-dropcard cil-guild-card" style="${houseVars(house)}"><div class="cil-card-handle"></div><div class="cil-card-heading"><div><small>GUILD · ${esc(guildMeta(guild))}</small><h2>${esc(guild.name)}</h2></div>${house?`<span class="cil-house-orb" title="${esc(house.name)}"></span>`:''}</div>${guild.description?`<p>${esc(guild.description)}</p>`:''}<div class="cil-guild-facts">${guildFacts(guild,house,quests)}</div><div class="cil-card-actions"><button type="button" class="cil-primary" data-advance="guild">Browse Guild Quests <span>↓</span></button><button type="button" class="cil-quiet" data-house-vote="${esc(guild.id)}">Guild House vote</button></div></article>`;
 }
+function submissionPreview(snapshot){
+  const plan=snapshot.plan;
+  return`<section class="cil-submit-preview" aria-label="Quest submission preview"><h3>${esc(plan.title)}</h3><p>Reported state: ${esc(snapshot.state)}</p>${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}
+    ${arr(plan.paths).map(path=>`<section><h4>${esc(pathSpec(path).label)}${pathLabel(path)?` · ${esc(pathLabel(path))}`:''}</h4>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}<p>Reported path state: ${esc(path.status||'unspecified')} · ${arr(path.progress).length} of ${arr(path.steps).length} steps reported complete.</p><ol>${arr(path.steps).map((step,index)=>`<li>${esc(typeof step==='string'?step:step.title)}${typeof step==='object'&&step.description?`<p>${esc(step.description)}</p>`:''}<small>Reported: ${esc(typeof step==='object'&&step.status?step.status:arr(path.progress).includes(index)?'complete':'unspecified')}</small></li>`).join('')}</ol>${path.completionCriteria?`<p>Completion: ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
+    ${arr(snapshot.needs).length?`<h4>Open needs</h4><ul>${snapshot.needs.map(need=>`<li>${esc(typeof need==='string'?need:need.title)}${typeof need==='object'?`<small>${esc(need.realm)} · ${esc(need.status||'unspecified')}</small>`:''}</li>`).join('')}</ul>`:''}
+  </section>`;
+}
+function composerPanel(guild,composer){
+  const drafts=availableDrafts(),disabled=state.publicationBusy?'disabled':'',submitDisabled=state.publicationBusy||composer.preparing||composer.expectedRevision==null;
+  const label=state.publicationBusy?'Submitting…':composer.preparing?'Checking prior submission…':`Submit Quest to ${guild.name}`;
+  return`<div class="cil-submit-form">
+    <label for="cil-quest-draft">Your local Quest</label>
+    ${drafts.length?`<select id="cil-quest-draft" data-quest-draft ${disabled}>${drafts.map(draft=>`<option value="${esc(draft.id)}" ${composer.draftId===draft.id?'selected':''}>${esc(draft.snapshot.plan.title)}</option>`).join('')}</select>`:'<p>Create a Quest with Weaveling on the Campus first, then return here to submit it.</p>'}
+    <p>Review the title, outcome, map steps, and open needs below. Submitting shares this snapshot with ${esc(guild.name)} members.</p>
+    ${composer.snapshot?submissionPreview(composer.snapshot):''}
+    <div class="cil-card-actions">
+      ${composer.snapshot?`<button type="button" class="cil-primary" data-quest-action="publish" ${submitDisabled?'disabled':''}>${esc(label)}</button>`:''}
+      ${composer.snapshot&&composer.expectedRevision==null&&!composer.preparing?'<button type="button" class="cil-quiet" data-quest-action="prepare">Retry preparation</button>':''}
+      <button type="button" class="cil-quiet" data-quest-action="cancel" ${disabled}>Cancel</button>
+    </div>
+  </div>`;
+}
+function publicationPanel(guild){
+  if(!guild)return'';
+  if(!questClient())return'<section class="cil-dropcard cil-publication"><h2>Connected Guild Quest board unavailable</h2><p>This package can show saved eligible Guild Quests. Connected Quest viewing and submission are unavailable here.</p></section>';
+  const session=membership(guild),board=boardFor(guild),composer=state.composer?.guildId===guild.id?state.composer:null,disabled=state.publicationBusy?'disabled':'';
+  if(!session)return`<section class="cil-dropcard cil-publication"><h2>Guild member Quests</h2><p>Log in to ${esc(guild.name)} to view its member board or submit one of your Quests.</p><div class="cil-card-actions"><button type="button" class="cil-primary" data-quest-action="login">Open Guild login</button></div></section>`;
+  const boardMessage=board?.status==='loading'?'Loading this Guild’s shared Quests…':board?.error||'Quests on this board are shared with Guild members.';
+  return`<section class="cil-dropcard cil-publication" aria-label="Submit Quest to Guild">
+    <h2>Share work with ${esc(guild.name)}</h2><p role="status">${esc(boardMessage)}</p>
+    ${state.publicationNotice?`<p class="cil-publication-notice" role="status">${esc(state.publicationNotice)}</p>`:''}
+    <div class="cil-card-actions">
+      <button type="button" class="cil-quiet" data-quest-action="refresh" ${board?.status==='loading'||state.publicationBusy?'disabled':''}>Refresh Guild Quests</button>
+      ${board?.nextCursor?`<button type="button" class="cil-quiet" data-quest-action="more" ${disabled}>Load more Quests</button>`:''}
+      ${!composer?`<button type="button" class="cil-primary" data-quest-action="compose" ${board?.status==='loading'||state.publicationBusy?'disabled':''}>Submit Quest to Guild</button>`:''}
+    </div>
+    ${composer?composerPanel(guild,composer):''}
+  </section>`;
+}
+function withdrawalControls(quest){const row=quest?.publication,guild=activeGuild();if(!row||row.authorUserId!==membership(guild)?.userId)return'';const reviewing=state.withdrawReview===row.id;return`<div class="cil-card-actions">${reviewing?`<p>Withdraw this Quest from ${esc(guild.name)}? Your local Quest stays on this device.</p><button type="button" class="cil-quiet" data-quest-action="withdraw" ${state.publicationBusy?'disabled':''}>Withdraw from ${esc(guild.name)}</button><button type="button" class="cil-quiet" data-quest-action="cancel-withdraw">Keep shared</button>`:`<button type="button" class="cil-quiet" data-quest-action="review-withdraw" data-publication-id="${esc(row.id)}">Withdraw Quest</button>`}</div>`}
+function emptyQuestMessage(){if(!questClient())return'Connected Guild Quest viewing is unavailable in this package.';if(!membership(activeGuild()))return'Log in to this Guild to load its member Quest board.';const board=boardFor(activeGuild());if(board?.error)return'The Guild board could not be loaded. Refresh Guild Quests to retry.';if(board?.status==='loading')return'Loading this Guild’s shared Quests…';return'No shared Quests eligible for this operating mode are available on this Guild board.'}
 function emptyGuildCard(){const source=state.directoryState==='unavailable'?'The live Guild directory is unavailable and this device has no saved Guild data.':'No Guild records are available from the live directory or this device yet.';return`<article class="cil-dropcard cil-empty"><div class="cil-card-handle"></div><small>GUILD DIRECTORY</small><h2>No Guild data available</h2><p>${esc(source)}</p></article>`}
-function questCard(quest){if(!quest)return`<article class="cil-dropcard cil-empty"><div class="cil-card-handle"></div><small>QUEST BOARD</small><h2>No shared Quests here yet</h2><p>This Guild has not published any shared intentions available to this device.</p></article>`;const needs=quest.needs,progress=questProgress(quest);return`<article class="cil-dropcard cil-needs-card"><div class="cil-card-handle"></div><small>QUEST · ${esc(quest.state||'shared')}</small><div class="cil-card-heading"><div><h2>${esc(quest.title)}</h2>${quest.description?`<p>${esc(quest.description)}</p>`:''}</div><div class="cil-progress-orb" style="--quest-progress:${progress.percent}"><b>${progress.percent}%</b><small>mapped</small></div></div><div class="cil-section-kicker">Open needs</div><div class="cil-needs">${needs.length?needs.map(n=>`<div class="cil-need"><span>${esc(PATHS[n.realm]?.label||'Guild need')}</span><b>${esc(n.title)}</b></div>`).join(''):'<p class="cil-muted">No open needs are published right now. You can still inspect the Quest Map.</p>'}</div><button type="button" class="cil-primary" data-advance="quest">View Quest Map <span>↓</span></button></article>`}
+function questCard(quest){if(!quest)return`<article class="cil-dropcard cil-empty"><div class="cil-card-handle"></div><small>QUEST BOARD</small><h2>Guild Quest board</h2><p>${esc(emptyQuestMessage())}</p></article>`;const needs=quest.needs,progress=questProgress(quest);return`<article class="cil-dropcard cil-needs-card"><div class="cil-card-handle"></div><small>QUEST · ${quest.publication?'SHARED BY A MEMBER':esc(quest.state||'shared')}</small><div class="cil-card-heading"><div><h2>${esc(quest.title)}</h2>${quest.description?`<p>${esc(quest.description)}</p>`:''}</div><div class="cil-progress-orb" style="--quest-progress:${progress.percent}"><b>${progress.percent}%</b><small>${quest.publication?'reported':'mapped'}</small></div></div><div class="cil-section-kicker">Open needs</div><div class="cil-needs">${needs.length?needs.map(n=>`<div class="cil-need"><span>${esc(PATHS[n.realm]?.label||'Guild need')}</span><b>${esc(n.title)}</b></div>`).join(''):'<p class="cil-muted">No open needs are published right now. You can still inspect the Quest Map.</p>'}</div><button type="button" class="cil-primary" data-advance="quest">View Quest Map <span>↓</span></button>${withdrawalControls(quest)}</article>`}
 function voteBadges(task){const votes=votesForTask(task);if(!votes.length)return'';return`<span class="cil-votes" aria-label="${votes.length} related Anarchadia vote${votes.length===1?'':'s'}">${votes.slice(0,4).map(v=>`<span class="cil-vote" style="--vote:${voteColor(v)}" title="${esc(v.label)}">${voteNumber(v)}</span>`).join('')}</span>`}
-function lane(realm,tasks){const spec=PATHS[realm],done=tasks.filter(t=>t.complete).length;return`<section class="cil-lane" data-lane="${realm}" style="--lane:${spec.solid};--lane-soft:${spec.soft}"><header><span class="cil-lane-glyph"></span><b>${esc(spec.label)}</b><small>${esc(spec.strap)} · ${done}/${tasks.length}</small></header><div class="cil-track">${tasks.length?tasks.map((task,i)=>`<article class="cil-task ${task.complete?'is-complete':''}" data-task-id="${esc(task.id)}"><span class="cil-node">${task.complete?'✓':i+1}</span><b>${esc(task.title)}</b><small>${task.complete?'Complete':esc(task.status||'Ready')}</small>${voteBadges(task)}</article>`).join(''):`<div class="cil-lane-empty"><span class="cil-node">·</span><small>No active ${esc(spec.label)} steps.</small></div>`}</div></section>`}
-function mapPanel(quest){if(!quest)return'';const lanes=mapFor(quest),progress=questProgress(quest);return`<section class="cil-map"><header class="cil-map-head"><div><small>QUEST MAP · ${progress.done}/${progress.total} STEPS COMPLETE</small><h2>${esc(quest.title)}</h2><p>Walk whichever lane the Quest needs. Learning, making, and resources can advance together.</p></div><button type="button" class="cil-up" data-screen="2" aria-label="Back to Quest level">↑ Quests</button></header><div class="cil-map-grid">${lane('living-school',lanes['living-school'])}${lane('cerbanimo',lanes.cerbanimo)}${lane('fellowfare',lanes.fellowfare)}</div><footer><span>Every step weaves impact. Completed steps come from the Quest's stored path progress and proof state.</span><span class="cil-vote-legend"><i class="cil-vote-demo"></i>Numbered bubbles are linked Anarchadia votes; one vote keeps the same color everywhere.</span></footer></section>`}
+function lane(realm,tasks,reported=false){const spec=PATHS[realm]||UNASSIGNED_PATH,done=tasks.filter(t=>t.complete).length;return`<section class="cil-lane" data-lane="${realm}" style="--lane:${spec.solid};--lane-soft:${spec.soft}"><header><span class="cil-lane-glyph"></span><b>${esc(spec.label)}</b><small>${esc(spec.strap)} · ${done}/${tasks.length}</small></header><div class="cil-track">${tasks.length?tasks.map((task,i)=>`<article class="cil-task ${task.complete?'is-complete':''}" data-task-id="${esc(task.id)}"><span class="cil-node">${task.complete?'✓':i+1}</span><b>${esc(task.title)}</b>${task.pathLabel?`<small>${esc(task.pathLabel)}</small>`:''}<small>${task.complete?(reported?'Reported complete':'Complete'):reported?'Reported: '+esc(task.status||'Ready'):esc(task.status||'Ready')}</small>${voteBadges(task)}</article>`).join(''):`<div class="cil-lane-empty"><span class="cil-node">·</span><small>No active ${esc(spec.label)} steps.</small></div>`}</div></section>`}
+function mapPanel(quest){
+  if(!quest)return'';
+  const lanes=mapFor(quest),progress=questProgress(quest),reported=Boolean(quest.publication);
+  return`<section class="cil-map"><header class="cil-map-head"><div><small>QUEST MAP · ${progress.done}/${progress.total} ${reported?'STEPS REPORTED COMPLETE':'STEPS COMPLETE'}</small><h2>${esc(quest.title)}</h2><p>Learning, building, resources, and agreements can advance together.</p></div><button type="button" class="cil-up" data-screen="2" aria-label="Back to Quest level">↑ Quests</button></header>
+    <div class="cil-map-grid" style="--lane-count:${Object.keys(lanes).length}">${Object.entries(lanes).map(([realm,tasks])=>lane(realm,tasks,reported)).join('')}</div>
+    <footer><span>${reported?'This map is a member-reported snapshot. Proof is not included in this publication.':"Every step weaves impact. Completed steps come from the Quest's stored path progress and proof state."}</span><span class="cil-vote-legend"><i class="cil-vote-demo"></i>Numbered bubbles are linked Anarchadia votes; one vote keeps the same color everywhere.</span></footer></section>`;
+}
 function screenControls(){const labels=[['1','Guilds'],['2','Quests'],['3','Quest Map']];return`<nav class="cil-level-indicator" aria-label="Guild Quest hierarchy">${labels.map(([num,label],i)=>{const screen=i+1,disabled=screen===2?!activeGuild():screen===3?!activeQuests().length:false;return`${i?'<span aria-hidden="true">›</span>':''}<button type="button" data-screen="${screen}" class="${state.screen===screen?'is-active':''}" ${disabled?'disabled':''}><i>${num}</i>${label}</button>`}).join('')}</nav>`}
 function surfaceHtml(){
   const guilds=state.guilds,guild=guilds[state.guildIndex]||guilds[0]||null,quests=questsFor(guild),quest=quests[state.questIndex]||quests[0]||null,house=houseFor(guild),copy=tierCopy();
   state.questIndex=clamp(state.questIndex,0,Math.max(0,quests.length-1));
-  return`<section id="${ROOT_ID}" class="cil-root cil-screen-${state.screen}" style="${houseVars(house)}" aria-label="Civweave Guild Quest tracker"><div class="cil-aurora"></div><header class="cil-titlebar"><div class="cil-titlecopy"><small>CIVWEAVE · GUILD QUEST TRACKER</small><h1>${esc(copy.title)}</h1><p>${esc(copy.subtitle)}</p></div>${screenControls()}</header><div class="cil-stage"><section class="cil-level cil-guild-level"><div class="cil-level-label"><span>01</span><b>Guilds</b><small>Guilds · live + saved</small></div>${carousel(guilds,state.guildIndex,'guild')}${state.screen===1?(guild?guildCard(guild):emptyGuildCard()):''}</section>${state.screen>=2?`<section class="cil-level cil-quest-level"><div class="cil-level-label"><span>02</span><b>Quests</b><small>${esc(guild?.name||'Guild')} · shared intentions</small></div>${carousel(quests,state.questIndex,'quest')}${state.screen===2?questCard(quest):''}</section>`:''}${state.screen===3&&quest?`<section class="cil-level cil-map-level"><div class="cil-level-label"><span>03</span><b>Quest Map</b><small>Living School · Cerbanimo · FellowFare</small></div>${mapPanel(quest)}</section>`:''}</div><footer class="cil-journey-footer"><b>Guilds → Quests → Quest Maps</b><span>Many paths. One weave. Better together.</span></footer><div class="cil-gesture-hint">Swipe, scroll, or use ← → to rotate · tap the centered card to descend</div></section>`;
+  return`<section id="${ROOT_ID}" class="cil-root cil-screen-${state.screen}" style="${houseVars(house)}" aria-label="Civweave Guild Quest tracker"><div class="cil-aurora"></div><header class="cil-titlebar"><div class="cil-titlecopy"><small>CIVWEAVE · GUILD QUEST TRACKER</small><h1>${esc(copy.title)}</h1><p>${esc(copy.subtitle)}</p></div>${screenControls()}</header><div class="cil-stage"><section class="cil-level cil-guild-level"><div class="cil-level-label"><span>01</span><b>Guilds</b><small>Guilds · live + saved</small></div>${carousel(guilds,state.guildIndex,'guild')}${state.screen===1?(guild?guildCard(guild):emptyGuildCard()):''}</section>${state.screen>=2?`<section class="cil-level cil-quest-level"><div class="cil-level-label"><span>02</span><b>Quests</b><small>${esc(guild?.name||'Guild')} · shared intentions</small></div>${carousel(quests,state.questIndex,'quest')}${state.screen===2?questCard(quest):''}</section>`:''}${state.screen===3&&quest?`<section class="cil-level cil-map-level"><div class="cil-level-label"><span>03</span><b>Quest Map</b><small>Living School · Cerbanimo · FellowFare · Anarchadia</small></div>${mapPanel(quest)}</section>`:''}</div>${publicationPanel(guild)}<footer class="cil-journey-footer"><b>Guilds → Quests → Quest Maps</b><span>Many paths. One weave. Better together.</span></footer><div class="cil-gesture-hint">Swipe, scroll, or use ← → to rotate · tap the centered card to descend</div></section>`;
 }
 
 function hideLegacy(shell,hidden){for(const sel of ['.rc-hero','.rc-active','.rc-dashboard','.rc-room-nav','.rc-workspace'])for(const node of shell.querySelectorAll(sel))node.hidden=hidden}
@@ -257,26 +348,42 @@ function addReturnLink(){const shell=document.querySelector('#rc-app .rc-shell')
 function renderSurface(){if(state.rendering)return;state.rendering=true;try{const shell=document.querySelector('#rc-app .rc-shell');if(!shell)return;state.shell=shell;addReturnLink();const existing=document.getElementById(ROOT_ID);if(!shouldOwnSurface()){existing?.remove();hideLegacy(shell,false);return}hideLegacy(shell,true);if(!state.guilds.length)state.guilds=discoveredGuilds();const markup=surfaceHtml();if(existing)existing.outerHTML=markup;else shell.querySelector('.rc-top')?.insertAdjacentHTML('afterend',markup)}finally{state.rendering=false}}
 function activeGuild(){return state.guilds[state.guildIndex]||state.guilds[0]||null}
 function activeQuests(){return questsFor(activeGuild())}
-function rotate(kind,direction){if(kind==='guild'){const count=state.guilds.length;if(!count)return;state.guildIndex=(state.guildIndex+direction+count)%count;state.questIndex=0}else{const quests=activeQuests(),count=quests.length;if(!count)return;state.questIndex=(state.questIndex+direction+count)%count}renderSurface()}
-function advance(kind){if(kind==='guild'&&state.screen===1&&activeQuests().length){state.screen=2;state.questIndex=0;renderSurface()}else if(kind==='quest'&&state.screen===2&&activeQuests().length){state.screen=3;renderSurface()}}
+function rotate(kind,direction){if(kind==='guild'){const count=state.guilds.length;if(!count)return;setIndex('guild',(state.guildIndex+direction+count)%count)}else{const quests=activeQuests(),count=quests.length;if(!count)return;state.questIndex=(state.questIndex+direction+count)%count;renderSurface()}}
+function advance(kind){if(kind==='guild'&&state.screen===1&&activeGuild()){state.screen=2;state.questIndex=0;renderSurface();refreshQuestBoard()}else if(kind==='quest'&&state.screen===2&&activeQuests().length){state.screen=3;renderSurface()}}
 function setScreen(value){const next=Number(value);if(next===1)state.screen=1;else if(next===2&&activeGuild())state.screen=2;else if(next===3&&activeQuests().length)state.screen=3;else return;renderSurface()}
-function setIndex(kind,index){const next=Number(index);if(!Number.isFinite(next))return;if(kind==='guild'){if(next===state.guildIndex&&state.screen===1)return advance('guild');state.guildIndex=clamp(next,0,Math.max(0,state.guilds.length-1));state.questIndex=0}else{const quests=activeQuests();if(next===state.questIndex&&state.screen===2)return advance('quest');state.questIndex=clamp(next,0,Math.max(0,quests.length-1))}renderSurface()}
+function setIndex(kind,index){const next=Number(index);if(!Number.isFinite(next))return;if(kind==='guild'){if(next===state.guildIndex&&state.screen===1)return advance('guild');state.guildIndex=clamp(next,0,Math.max(0,state.guilds.length-1));state.questIndex=0;state.composer=null;state.publicationNotice='';state.withdrawReview=''}else{const quests=activeQuests();if(next===state.questIndex&&state.screen===2)return advance('quest');state.questIndex=clamp(next,0,Math.max(0,quests.length-1))}renderSurface();if(kind==='guild')refreshQuestBoard()}
 function requestHouseVote(guildId){const guild=state.guilds.find(x=>x.id===guildId)||activeGuild();if(!guild)return;const house=houseFor(guild),proposal={id:uid('house-vote'),schema:'civweave.house-change-proposal.v1',type:'house-change',status:'requested',hubId:guild.id,guildId:guild.id,hubName:guild.name,guildName:guild.name,currentHouse:house?.id||null,options:HOUSES.map(x=>x.id),title:`Choose ${guild.name}'s Civweave House`,taskIds:[],createdAt:new Date().toISOString()};const old=parse(localStorage.getItem(HOUSE_VOTE_KEY),[]),list=Array.isArray(old)?old:[];list.unshift(proposal);try{localStorage.setItem(HOUSE_VOTE_KEY,JSON.stringify(list.slice(0,100)))}catch{}try{dispatchEvent(new CustomEvent('civweave:anarchadia-proposal-requested',{detail:proposal}))}catch{}const toast=document.getElementById('rc-toast');if(toast){toast.textContent=`Guild House vote queued for Anarchadia: ${guild.name}.`;toast.hidden=false;setTimeout(()=>{toast.hidden=true},3200)}refreshVotes()}
-function onClick(event){const target=event.target.closest?.('[data-guild-index],[data-quest-index],[data-advance],[data-screen],[data-house-vote]');if(!target)return;if(target.dataset.houseVote){event.preventDefault();event.stopPropagation();requestHouseVote(target.dataset.houseVote);return}if(target.dataset.screen){event.preventDefault();setScreen(target.dataset.screen);return}if(target.dataset.guildIndex!=null){event.preventDefault();setIndex('guild',target.dataset.guildIndex);return}if(target.dataset.questIndex!=null){event.preventDefault();setIndex('quest',target.dataset.questIndex);return}if(target.dataset.advance){event.preventDefault();advance(target.dataset.advance)}}
+function onQuestAction(target){
+  const action=target.dataset.questAction;
+  if(action==='compose')composeQuest();
+  else if(action==='prepare'&&state.composer?.snapshot)void prepareSubmission(activeGuild(),{id:state.composer.draftId,snapshot:state.composer.snapshot});
+  else if(action==='cancel'){state.composer=null;state.publicationNotice='';renderSurface()}
+  else if(action==='publish')void publishQuest();
+  else if(action==='refresh'||action==='more')void refreshQuestBoard(activeGuild(),{force:true,append:action==='more'});
+  else if(action==='review-withdraw'){state.withdrawReview=target.dataset.publicationId;renderSurface()}
+  else if(action==='cancel-withdraw'){state.withdrawReview='';renderSurface()}
+  else if(action==='withdraw')void withdrawQuest();
+  else if(action==='login'){let launcher=globalThis.CivweaveGuildSymbolV1;try{launcher=parent.CivweaveGuildSymbolV1||launcher}catch{}if(launcher?.openNearbyGuilds)launcher.openNearbyGuilds();else location.assign('/finder?view=guilds&source=quest-submission')}
+}
+function onClick(event){const target=event.target.closest?.('[data-guild-index],[data-quest-index],[data-advance],[data-screen],[data-house-vote],[data-quest-action]');if(!target||target.disabled)return;if(target.dataset.questAction){event.preventDefault();onQuestAction(target);return}if(target.dataset.houseVote){event.preventDefault();event.stopPropagation();requestHouseVote(target.dataset.houseVote);return}if(target.dataset.screen){event.preventDefault();setScreen(target.dataset.screen);return}if(target.dataset.guildIndex!=null){event.preventDefault();setIndex('guild',target.dataset.guildIndex);return}if(target.dataset.questIndex!=null){event.preventDefault();setIndex('quest',target.dataset.questIndex);return}if(target.dataset.advance){event.preventDefault();advance(target.dataset.advance)}}
+function onChange(event){if(event.target.matches?.('[data-quest-draft]'))selectDraft(event.target.value)}
 function onKey(event){const node=event.target.closest?.('[data-carousel]');if(!node||!['ArrowLeft','ArrowRight','Enter',' '].includes(event.key))return;event.preventDefault();const kind=node.dataset.carousel;if(event.key==='ArrowLeft')rotate(kind,-1);else if(event.key==='ArrowRight')rotate(kind,1);else advance(kind)}
 function onWheel(event){const node=event.target.closest?.('[data-carousel]');if(!node||state.wheelLock||Math.abs(event.deltaX)+Math.abs(event.deltaY)<8)return;event.preventDefault();state.wheelLock=true;rotate(node.dataset.carousel,(event.deltaX||event.deltaY)>0?1:-1);setTimeout(()=>{state.wheelLock=false},180)}
 function onTouchStart(event){const node=event.target.closest?.('[data-carousel]');if(!node||!event.touches?.length)return;state.touchStart={kind:node.dataset.carousel,x:event.touches[0].clientX,y:event.touches[0].clientY}}
 function onTouchEnd(event){if(!state.touchStart||!event.changedTouches?.length)return;const touch=event.changedTouches[0],dx=touch.clientX-state.touchStart.x,dy=touch.clientY-state.touchStart.y,kind=state.touchStart.kind;state.touchStart=null;if(Math.abs(dx)<36||Math.abs(dx)<Math.abs(dy))return;rotate(kind,dx<0?1:-1)}
-function refreshFromStorage(){state.guilds=discoveredGuilds();state.guildIndex=clamp(state.guildIndex,0,Math.max(0,state.guilds.length-1));state.questIndex=0;state.votes=localVotes();renderSurface()}
+function refreshFromStorage(){state.guilds=discoveredGuilds();state.guildIndex=clamp(state.guildIndex,0,Math.max(0,state.guilds.length-1));state.questIndex=0;state.votes=localVotes();renderSurface();refreshQuestBoard()}
 function onStorage(event){if([INTENTIONS_KEY,DISCOVERY_KEY,MESH_KEY,DIRECTORY_CACHE_KEY,HOST_SELECTION_KEY,HOUSE_KEY,HOUSE_VOTE_KEY,VOTE_INDEX_KEY].includes(event.key))refreshFromStorage()}
 function onProgressChanged(){state.guilds=discoveredGuilds();renderSurface()}
 function onDirectoryChanged(){state.guilds=discoveredGuilds();renderSurface()}
 function boot(){
   state.guilds=discoveredGuilds();state.votes=localVotes();
-  document.addEventListener('click',onClick,true);document.addEventListener('keydown',onKey,true);document.addEventListener('wheel',onWheel,{capture:true,passive:false});document.addEventListener('touchstart',onTouchStart,{capture:true,passive:true});document.addEventListener('touchend',onTouchEnd,{capture:true,passive:true});
+  document.addEventListener('click',onClick,true);document.addEventListener('change',onChange);document.addEventListener('keydown',onKey,true);document.addEventListener('wheel',onWheel,{capture:true,passive:false});document.addEventListener('touchstart',onTouchStart,{capture:true,passive:true});document.addEventListener('touchend',onTouchEnd,{capture:true,passive:true});
   addEventListener('storage',onStorage);addEventListener('civweave:intentions-changed',onProgressChanged);addEventListener('civweave:proof-progress-synced',onProgressChanged);addEventListener('civweave:hub-map-directory',onDirectoryChanged);addEventListener('civweave:host-node-selected',refreshFromStorage);
   state.observer=new MutationObserver(()=>{if(state.rendering)return;const shell=document.querySelector('#rc-app .rc-shell');if(shell!==state.shell||(shouldOwnSurface()&&!document.getElementById(ROOT_ID))){state.shell=shell;renderSurface()}else addReturnLink()});state.observer.observe(document.getElementById('rc-app')||document.body,{childList:true,subtree:true});
-  renderSurface();refreshVotes();refreshDirectory();
+  for(const event of ['civweave:capacity-session-ready','civweave:capacity-session-cleared','civweave:host-node-session-ready'])addEventListener(event,refreshFromStorage);
+  addEventListener('online',()=>refreshQuestBoard(activeGuild(),{force:true}));
+  renderSurface();refreshVotes();refreshDirectory();refreshQuestBoard();
+  Promise.resolve(questClient()?.restoreSelected()).then(()=>refreshQuestBoard()).catch(()=>{});
   const api=Object.freeze({version:VERSION,houses:HOUSES,paths:PATHS,tierColors:TIER_COLORS,refresh(){refreshFromStorage();refreshVotes();refreshDirectory()},houseForGuild:g=>houseFor(g),houseForHub:g=>houseFor(g),requestHouseVote,openGuilds(){state.screen=1;renderSurface()},openQuests(){if(activeGuild()){state.screen=2;renderSurface()}},openQuestMap(){if(activeQuests().length){state.screen=3;renderSurface()}}});
   globalThis.CivweaveCerbanimoIntentionLandscapeV1=api;globalThis.CivweaveGuildQuestTrackerV1=api;
   try{dispatchEvent(new CustomEvent('civweave:guild-quest-tracker-ready',{detail:{version:VERSION,hierarchy:['guild','quest','quest-map'],houses:HOUSES.map(x=>x.id),paths:Object.keys(PATHS),directoryEndpoint:DIRECTORY_ENDPOINT}}))}catch{}

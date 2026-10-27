@@ -1,10 +1,10 @@
 # Staging QA running log and follow-up projects
 
-Updated: **2026-10-26**. This is the current working record for the staging mascot QA session. Update the existing IDs as work progresses; add new IDs for new findings. This is a test and project record, not an architectural contract.
+Updated: **2026-10-27**. This is the current working record for the staging mascot QA session. Update the existing IDs as work progresses; add new IDs for new findings. This is a test and project record, not an architectural contract.
 
 ## Current instruction and test environment
 
-The user's latest instruction is **check the AI tests and update this log, then resume screen-by-screen visual repairs and missing/barebones functionality**. The Qwen3.5 4B results and unfinished AI acceptance gates remain recorded below. Visual/navigation/music work is now resumed; preserve and finish its existing source changes. Keep recording every observed or user-reported issue as a bounded follow-up project.
+The user's current priorities include **screen-by-screen visual repairs, the restored Guild Quest carousel and explicit member submission, visible Quest maps, and satisfying animated progress/review feedback with the AI friends and Lari the Lyrebird**. The Qwen3.5 4B results and unfinished AI acceptance gates remain recorded below. Keep recording every observed or user-reported issue as a bounded follow-up project.
 
 The authorized scope includes taking fictional local QA records through their real lifecycle when possible. Do not invent physical proof, purchases, counterparties, messages, votes, or settlements to make a test appear complete. Saved user chats must be preserved.
 
@@ -12,10 +12,10 @@ The authorized scope includes taking fictional local QA records through their re
 | --- | --- |
 | Source checkout | `C:\Users\glaed\Downloads\civweave-launch\staging-ai-cors`, branch `fix/staging-ai-cors` |
 | Integration target | `staging`; no shipping/main deployment is claimed |
-| Current exact live marker | `7d4e2913aacedbb4d166f4380efc49349ded82e8`, exact live marker verified 2026-10-26 after the later resume; UI/radio bundle8841 remains in its lineage |
-| Deployment / focused app CI | Deploy `40336824484`, Guide Full DOM Startup `40336824523`, FellowFare `40336824642` and Moss Native Design Timeout `40336824592` succeeded. This is not a claim that every legacy repository check passes. |
+| Current exact live marker | `bfbb48beb952b5aba30252f6a2097c5988fecaff`, exact live marker verified 2026-10-26; includes the saved-video, parent-return and direct-radio v2 repairs |
+| Deployment / focused app CI | Deploy `40442009143`, Guide Full DOM Startup `40442009291`, System Radio `40442008929`, first-frame recovery `40442008979`, Termux controls `40442008948` and Moss manual-plan/bounded-prefill `40442009247` succeeded. Full local Guide workflow: 209 passing cases. This is not a claim that every legacy repository check passes. |
 | Earlier browser results | The four-path shelf draft and prior preview/proof results used `9e7a0cbd` or the specifically recorded earlier deployment; later checks identify their deployment explicitly. |
-| Integrated upstream base | `c8870c6e` (36 newer staging commits), preserving Moss streaming/source-recovery and Termux context updates |
+| Integrated upstream base | `f6a0e65a`, preserving multi-plan learning libraries and durable Termux jobs from newer staging work |
 | Deployment marker | [staging-deployment-v1.json](https://civweave-staging.pages.dev/app/staging-deployment-v1.json) |
 | Active browser entry | [persistent system shell](https://civweave-staging.pages.dev/app/persistent-system-shell-v1.html?system=anarchadia&installed=1) |
 | Selected provider/model | Local Ollama / `qwen3.5:4b` |
@@ -35,6 +35,40 @@ Evidence labels used below:
 
 ### Latest deployment checkpoint
 
+**October 26, live `bfbb48be`:** Guild search now mounts its full capacity/search dialog inside the current shell without installer navigation. Location was not requested and no Guild was joined. Direct-radio v2 played the unsaved Climate Change track; its network stream exposed a zero-length seek range, then an explicit seek loaded the verified memory copy and reached 0:40 while remaining paused. A second seek while playing reached 1:00 and continued playback. The track still offered **Save offline**, proving the seek preparation did not represent an offline save. Header and player stayed visible when a lower track control scrolled into view at 390×667. Previously saved Freedom in my voice played from a blob after the full app reload (duration 231.296 s); offline removal acceptance is being checked. Screenshots: `qa-guild-search-after-2026-10-26.png`, `qa-radio-layout-after-2026-10-26.png` in the wrapper workspace.
+
+Saved-video display admission also passed live: the completed digital-note Endeavor still has 3/3 accepted units and its original evidence, while all three unrelated saved electronics videos show a mismatch explanation and a direct link instead of loading their players. Full-screen screenshot records the current entry; DOM inspection supplies the below-fold acceptance evidence. Library Back returned the parent to persistent Civweave and removed the nested modal. Map Back likewise returned the top wrapper to persistent Civweave. Freedom's offline removal settled to Save offline, verified after returning through those routes. Playback was paused and volume stayed 0.7.
+
+**OPS-CI-01 update:** two older checks also fail on upstream `f6a0e65a`: Moss SSE readiness expects the superseded runtime query `1.0.16-ollama-request-thinking`; Termux transport isolation expects the superseded Guide query `1.0.186-draft-completeness`. Focused behavior checks above pass. These stale version assertions require their own maintenance and are not hidden as green checks.
+
+### GUILD-QUEST-01 — Shared board, carousel and explicit submission
+
+**User reported:** no usable infrastructure for publishing/viewing Guild Quests; restore the earlier carousel and let any user with a Guild submit a Quest.
+
+**Source finding:** the existing Guild → Quest → colored Quest Map carousel survives in `CivweaveGuildQuestTrackerV1`, but `discoveredGuilds()` projected device-local private drafts into the selected Guild's shared board. A local association is not a multi-member publication. User-facing Quests are Weaveling `weave-plan` artifacts; Cerbanimo's internal `quest` records are Endeavors and must not be silently republished as Quests.
+
+**In progress:** shared allowlisted publication domain for existing node-cloud and mobile Guild authorities; any verified current member may submit, authors alone may revise/withdraw with revision conflicts. UI restores the carousel, previews the exact public fields and names the destination before explicit submission. No automatic publication on local creation/activation. Tests use fictional two-member Guild stores; no real Guild publication or membership is fabricated.
+
+Acceptance: member A submits → member B reads the same hosted Quest → carousel map displays its paths → author withdrawal disappears for both → expired/nonmember/cross-Guild attempts fail → private wish/chat/profile/proof/session fields never enter the publication. Deploy the staging Guild Worker separately from Pages. The real Kamido mobile Guild deployment is outside this staging acceptance.
+
+### VISUAL-QUEST-01 — Maps and review reward scenes
+
+**User requested:** visual Quest maps like the earlier glaedn/Cerbanimo site, stronger gamified visual feedback, reward animations and AI-friend versus Lari the Lyrebird scenes demonstrating success versus requested revision.
+
+**Source finding:** the carousel already has colored lane maps; active guide sprite sheets are available. No active Lari sprite/battle implementation was found. Extend the current capability owners rather than restoring obsolete world/navigation owners.
+
+**Source/test verified October 27:** restored carousel has all four subsystem lanes, with unknown paths explicitly labelled instead of being routed to Cerbanimo. The canonical shared review also maps private Quests without a Guild or network, including the separately stored Anarchadia governance layer. Nodes focus existing detail sections; declared dependency references are distinct from merely displayed plan order. The Endeavor workboard has its own real task-dependency graph with accepted, blocked, review and revision states.
+
+The finite Cerbanimo receipt scene now uses the original Kamiya expression sheet and a generated transparent four-pose Lari atlas. **User correction applied:** Lari's actual black feathers, purple-and-gold warlock costume, heart staff and orange-and-black tail were inspected on cerbanimo.cc and supplied as identity references; the existing Kamiya sheet supplied the style reference. The earlier invented brown bird was replaced before deployment. Prompt, source links and asset hash: `docs/history/lari-review-sprites-2026-10-27.md`. Accepted outcomes celebrate; revision remains constructive. Persisted acceptance stays authoritative, no reward balances or proof are minted by animation, reopening does not replay automatically, and reduced-motion users receive the same readable outcome. This currently wires Kamiya receipts; the other guide outcome hooks and actual ledger-backed reward bursts remain open.
+
+Follow-up project: extend verified scene hooks to the other four guide outcomes and actual ledger-backed reward bursts. Improve the visual dependency layout using explicitly supplied relationships; never infer successful execution from map order. Record exactly which hooks are implemented before calling the complete visual feedback system finished.
+
+**UI-CAMP-03:** the current Quest's Revise button only searched its own document for a textarea, so the persistent shell's parent chat stayed closed. A failing full-DOM regression now passes after the caller delegates to the canonical parent-owned Weaveling composer. Opening revision starts no inference and preserves the selected Quest. Browser acceptance follows deployment.
+
+**Packaging verification:** 71 focused Guild/private-map/visual/receipt/startup/current-selection cases pass. The complete updated Guide Full DOM workflow passes 217 cases (19 + 125 + 49 + 24). Guild and shared review structural checks pass; both Worker dry-run bundles pass; all 52 required shell hashes pass. The old service-worker evaluation script invokes a stale source-rewriting version synchronizer before evaluating; it fails on the unchanged current route revision. Its incidental local source changes were inspected and reverted, preserving the current navigation and manifest. The old practicum test harness also omits `allModuleAssessmentsPassed` and fails before its receipt assertion; the current final-gate tests remain the relevant check. These are recorded failures, not green checks.
+
+**OPS-BUILD-01:** service-worker regeneration was found to overwrite the current registered worker's Settings/runtime/persistent-shell imports with an older template. The generator now preserves the active registered worker generation, changes only the new shell-assets pin, and supports a nonmutating `--check` in Guild CI. Generated metadata remains committed-byte-only.
+
 `f6a9cd83` deploys the saved-Quest revision route and selected Ollama timeout repair, Moss explicit capability/title/module-count parsing, Rook revision prose consistency, Kamiya selected review deadlines, and Moss course-stage deadline/thinking fixes. Focused checks passed before deployment. Parked visual/native-route edits were excluded.
 
 **Latest live outcome, checked October 26:** Moss's original prompt reached Qwen and saved **QA Temperature Conversions** with the correct title, exactly three relevant modules, worksheet outcome and approval gate. Approval and native handoff passed. Research fallback completed, then **curriculum design timed out; 0/3 modules were built**. An overlapping background Cerbanimo economic review also timed out. The approved plan survived; final competency and credential remained locked. Evidence: `qa-moss-qwen-plan-review.png` and `qa-moss-qwen-course-timeout-2026-10-26.png`. This is a failed course-build test, not a completed Learning Journey. Weaveling's repaired revision route and Rook/Kamiya fixes still need real Qwen retests.
@@ -43,7 +77,7 @@ Evidence labels used below:
 
 | Priority / project ID | Current result | Next acceptance gate |
 | --- | --- | --- |
-| 1 — **AI-WEV-01: Four-subsystem Quest quality** | Latest real browser draft includes all four in the correct dependency order and includes assembly practice. The targeted revision timed out; the prior review draft is preserved. | Retry the deployed AI-WEV-04 routing/deadline repair explicitly. Review the resulting revision for skills, four-day schedule, agreed targets and the complete $25 budget. |
+| 1 — **AI-WEV-01: Four-subsystem Quest quality** | October 27 real Qwen revision completed on `bfbb48be`, saved all four ordered paths in REVIEW, included assembly practice, practice scrap inside $25 and final dimension/load checks. | Fix contradictory experience assumptions and incomplete four-day/two-weekend schedule; verify these in a further explicit revision. |
 | 2 — **AI-MOS-01: Learning Journey to credential** | Real Qwen plan/approval/handoff passed on `f6a9cd83`; design timed out, 0/3 modules. Approved plan retained, credential locked. | Isolate background interference and design output/duration before explicit retry; then all module assessments, real practicum receipt and final credential gates. |
 | 3 — **AI-KAM-01: Qwen Endeavor authoring and proof** | Real native proof/reopen/resubmit lifecycle passed using Llama before flagship steering. | Author a new Endeavor through Kamiya with Qwen, then execute honest digital proof and final acceptance. Verify the deployed selected-deadline review fix in the actual flow. |
 | 4 — **AI-ROO-01: Manifest revision consistency** | Earlier create/revise/approve/publish/inspect/close passed with Llama; revised title/description were stale. | Repeat with Qwen; ensure title, description, quantity, place and date agree after revision and in the native listing. Repair native tab access if it blocks the test. |
@@ -51,6 +85,10 @@ Evidence labels used below:
 | Alongside each — **AI-UX-01 / AI-UX-02** | Streaming lifecycle has deterministic coverage; duplicate chat fixed live. | Observe real Qwen completion without unnecessary replay/redraw, and keep checking one parent chat while switching native routes. |
 
 ## AI-WEV-01 — Weaveling routing, planning and revision
+
+**October 27 real retest:** the shorter explicit shelf revision completed with Ollama `qwen3.5:4b` and saved **Weekend Shelf Build: Novice Safety & Budget (Revised)** in REVIEW. All four paths remain Anarchadia → FellowFare → Living School → Cerbanimo. Material cost includes practice scrap, Living School includes dry-fit assembly practice, and final inspection refers to agreed dimensions and safe load. No activation, purchase, messaging or execution occurred. The original wish remains visible as the governing Quest goal.
+
+**Quality still open:** its assumption simultaneously says both participants have no prior experience and says the other participant's level is unknown. Its steps mention Day 1 and a Day 2 agreement, without assigning Day 3–4 or the two weekends. The response therefore passes routing/persistence/deadline recovery and several content criteria, but fails full planning quality. Screenshot: `qa-qwen-revision-saved-2026-10-27.png`. The chat's Live Study Kit also displays Intake/Draft/Compile as “Not reached” despite a saved generated result; record that instrumentation issue as **AI-UX-04**, without presenting it as evidence that no model ran.
 
 **User request:** discern the necessary subsystems from prompt context, produce useful Quest weaves, and route/plan across **all four** subsystems using Qwen3.5 4B.
 

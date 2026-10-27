@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.3-weaveling-plan-materialization-v265-current-selection';
+const VERSION='1.1.4-weaveling-plan-materialization-v265-revision-composer';
 const WORKING_KEY='civweave.working-campus.v1';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const QUARANTINE_KEY='civweave.quest-quarantine.v1';
@@ -90,6 +90,9 @@ function materialize(plan,{source='weaveling-ai-structured-v265',preserveCampusI
   return next;
 }
 function focusRevision(){
+  let guide=globalThis.CivweaveGuideChatSurfaceV350;
+  try{const host=globalThis.parent;if(host!==globalThis&&host.location.origin===location.origin&&new URLSearchParams(location.search).get('persistentShell')==='1'&&host.CivweavePersistentSystemShellV1&&host.document.getElementById('cw-persistent-system-stage')?.contentWindow===globalThis)guide=host.CivweaveGuideChatSurfaceV350}catch{}
+  if(guide?.canonicalOwner&&typeof guide.openWindow==='function')return guide.openWindow('civweave',{focus:true});
   const target=document.querySelector('#cw-shared-guide-surface-v236 textarea,#weaveling-chat-input,#cw-persistent-guide-chat-v215 textarea');
   if(!target)return false;target.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>target.focus(),220);return true;
 }

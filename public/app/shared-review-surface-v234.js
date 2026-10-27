@@ -14,6 +14,13 @@ const CONTRACT_SCRIPT='/app/guide-contracts-v141.js';
 const SYSTEM_LABEL={civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'};
 const GUIDE_NAME={civweave:'Weaveling','living-school':'Moss',cerbanimo:'Kamiya',fellowfare:'Rook',anarchadia:'Merlin'};
 const SUPPORTED_GATES=new Set(['open-plan','activate-plan','open-action','approve-action']);
+const MAP_LANES=Object.freeze([
+  {id:'living-school',label:'Living School',color:'#aeea57'},
+  {id:'cerbanimo',label:'Cerbanimo',color:'#e85dff'},
+  {id:'fellowfare',label:'FellowFare',color:'#efb452'},
+  {id:'anarchadia',label:'Anarchadia',color:'#ff3d96'}
+]);
+const MAP_PATH_LIMIT=12,MAP_STEP_LIMIT=96;
 
 if(globalThis.CivweaveSharedReviewSurfaceV234?.version===VERSION)return;
 
@@ -48,9 +55,16 @@ function installStyle(){
 #${SURFACE_ID} .cwsr234-block{margin-top:10px;padding:11px;border:1px solid color-mix(in srgb,var(--line,#ffffff2b) 70%,transparent);border-radius:14px;background:#ffffff08}#${SURFACE_ID} .cwsr234-block>small{display:block;color:var(--accent,#8de5ef);font-size:9px;font-weight:900;letter-spacing:.1em;margin-bottom:5px}#${SURFACE_ID} .cwsr234-block h3{margin:0 0 6px;font-size:14px}#${SURFACE_ID} .cwsr234-block p{margin:0 0 7px;color:var(--muted,#b8c6df)}#${SURFACE_ID} ol,#${SURFACE_ID} ul{margin:7px 0 0;padding-left:20px}#${SURFACE_ID} li+li{margin-top:5px}
 #${SURFACE_ID} .cwsr234-fields{display:grid;gap:7px;margin:0}#${SURFACE_ID} .cwsr234-fields>div{display:grid;gap:2px;padding:7px 0;border-top:1px solid #ffffff0e}#${SURFACE_ID} .cwsr234-fields>div:first-child{border-top:0}#${SURFACE_ID} dt{font-size:10px;font-weight:900;color:var(--accent,#8de5ef);text-transform:uppercase;letter-spacing:.06em}#${SURFACE_ID} dd{margin:0;color:var(--muted,#b8c6df);white-space:pre-wrap}
 #${SURFACE_ID} .cwsr234-warning{margin-top:10px;padding:9px 10px;border:1px solid #ffd36e66;border-radius:12px;background:#ffd36e12;color:#ffe7a8}
+#${SURFACE_ID} .cwsr234-map{margin:12px 0;padding:12px;border:1px solid #8af5d244;border-radius:16px;background:radial-gradient(ellipse at top,#8af5d20d,transparent 70%),#ffffff04}
+#${SURFACE_ID} .cwsr234-map>header h3{margin:0;font:800 17px/1.2 Georgia,serif}#${SURFACE_ID} .cwsr234-map>header p,#${SURFACE_ID} .cwsr234-map-note{margin:6px 0 10px;color:var(--muted,#b8c6df);font-size:11px}
+#${SURFACE_ID} .cwsr234-map-lanes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#${SURFACE_ID} .cwsr234-map-lane{min-width:0;padding:10px;border-top:3px solid var(--map-lane);border-radius:12px;background:#ffffff06}#${SURFACE_ID} .cwsr234-map-lane>h4{margin:0 0 9px;color:var(--map-lane);font-size:12px}
+#${SURFACE_ID} .cwsr234-map-path{margin:0 0 12px}#${SURFACE_ID} .cwsr234-map-path:last-child{margin-bottom:0}#${SURFACE_ID} .cwsr234-map button{display:grid;gap:4px;width:100%;min-height:44px;padding:9px;text-align:left;white-space:normal;overflow-wrap:anywhere;border:1px solid color-mix(in srgb,var(--map-lane) 45%,#ffffff20);border-radius:10px;background:#07111f;color:inherit;cursor:pointer;font:inherit}#${SURFACE_ID} .cwsr234-map button:focus-visible,#${SURFACE_ID} [data-review-path]:focus{outline:2px solid var(--map-lane,#8af5d2);outline-offset:3px}
+#${SURFACE_ID} .cwsr234-map button strong{font-size:11px}#${SURFACE_ID} .cwsr234-map button small{color:var(--muted,#b8c6df);font-size:10px}#${SURFACE_ID} .cwsr234-map button[data-map-status="review"]{border-style:dashed;border-color:#ffd36e88}#${SURFACE_ID} .cwsr234-map button[data-map-status="accepted"]{border-color:#8af5d299;background:#8af5d20b}
+#${SURFACE_ID} .cwsr234-map-order{margin:6px 0;font-size:10px;color:var(--muted,#b8c6df)}#${SURFACE_ID} .cwsr234-map-steps{list-style:none;margin:0;padding:0 0 0 10px;display:grid;gap:8px}#${SURFACE_ID} .cwsr234-map-steps>li{position:relative;min-width:0}#${SURFACE_ID} .cwsr234-map-steps[data-connections="order"]>li:not(:last-child)::after{content:'';position:absolute;left:12px;top:100%;height:8px;border-left:2px dotted var(--map-lane);opacity:.5}#${SURFACE_ID} .cwsr234-map-links{list-style:none;margin:4px 0 0;padding:0;font-size:10px;overflow-wrap:anywhere;color:var(--muted,#b8c6df)}#${SURFACE_ID} .cwsr234-map-links li+li{margin-top:3px}
+#${SURFACE_ID} [data-review-path]{scroll-margin:12px}#${SURFACE_ID} .cwsr234-map-empty{margin:0;color:var(--muted,#b8c6df);font-size:11px}
 #${SURFACE_ID} .cwsr234-actions{position:sticky;bottom:-13px;display:flex;flex-wrap:wrap;gap:8px;margin:13px -13px -13px;padding:11px 13px;background:color-mix(in srgb,var(--panel,#081225) 96%,#000);border-top:1px solid var(--line,#ffffff2b)}#${SURFACE_ID} .cwsr234-actions button{min-height:40px;padding:0 13px;border:1px solid var(--line,#ffffff2b);border-radius:999px;background:#ffffff0d;color:inherit;font-weight:800;cursor:pointer}#${SURFACE_ID} .cwsr234-actions .primary{background:var(--accent,#d8dde7);color:#09111d;border-color:transparent}
 #${PENDING_ID}{border-color:#d8dde755!important}#${PENDING_ID} .cwsr234-pending-list{display:grid}#${PENDING_ID} details{border-top:1px solid #ffffff10}#${PENDING_ID} details:first-child{border-top:0}#${PENDING_ID} summary{list-style:none;cursor:pointer;padding:11px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}#${PENDING_ID} summary::-webkit-details-marker{display:none}#${PENDING_ID} summary strong{display:block;font-size:13px}#${PENDING_ID} summary small{display:block;color:var(--mint,#8af5d2);font-size:9px;font-weight:900;letter-spacing:.09em}#${PENDING_ID} summary b{font-size:10px;color:var(--muted,#9eb0c6);text-transform:uppercase}#${PENDING_ID} .cwsr234-pending-body{padding:0 12px 12px}#${PENDING_ID} .cwsr234-pending-body p{margin:0 0 8px;color:var(--muted,#9eb0c6);font-size:12px}#${PENDING_ID} .cwsr234-path-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}#${PENDING_ID} .cwsr234-path-list span{padding:3px 7px;border-radius:999px;background:#ffffff0b;border:1px solid #ffffff18;font-size:10px}#${PENDING_ID} .cwsr234-review-button{min-height:34px;padding:0 10px;border:1px solid #8af5d255;border-radius:999px;background:#8af5d214;color:inherit;font-weight:800;cursor:pointer}
-@media(max-width:560px){#${SURFACE_ID}[data-host="body"]{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:auto}}
+@media(max-width:560px){#${SURFACE_ID}[data-host="body"]{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:auto}#${SURFACE_ID} .cwsr234-map-lanes{grid-template-columns:minmax(0,1fr)}}
 `;
   document.head.append(style);
 }
@@ -81,6 +95,39 @@ function fieldsMarkup(fields={}){
 function listMarkup(label,items){
   const list=Array.isArray(items)?items.map(item=>clean(item,1400)).filter(Boolean):[];
   return list.length?`<section class="cwsr234-block"><small>${esc(label)}</small><ol>${list.map(item=>`<li>${esc(item)}</li>`).join('')}</ol></section>`:'';
+}
+function pathSteps(path){return Array.isArray(path?.steps)&&path.steps.length?path.steps:Array.isArray(path?.tasks)?path.tasks:[]}
+function stepTitle(step){return typeof step==='string'?clean(step,500):clean(step?.title||step?.name||step?.label||step?.description,500)}
+function mapRealm(path){
+  const raw=clean(path?.realm||path?.system||path?.type,80),id=raw.toLowerCase().replace(/[ _]+/g,'-');
+  const known=MAP_LANES.find(lane=>lane.id===id);
+  if(known)return{id:known.id,label:known.label};
+  if(['learning','learn'].includes(id))return{id:'living-school',label:'Living School'};
+  if(['skilled-labor','making','build'].includes(id))return{id:'cerbanimo',label:'Cerbanimo'};
+  if(['resource','resources','exchange','outsource'].includes(id))return{id:'fellowfare',label:'FellowFare'};
+  if(['governance','consent'].includes(id))return{id:'anarchadia',label:'Anarchadia'};
+  return{id:'unassigned',label:raw||'Unassigned'};
+}
+function dependencyIds(value){const source=value?.dependencies||value?.dependsOn||value?.dependencyIds||[];return(Array.isArray(source)?source:[source]).map(ref=>clean(typeof ref==='string'?ref:ref?.id||ref?.taskId,180)).filter(Boolean)}
+function mapStatus(raw){const id=clean(raw,60).toLowerCase()||'draft',labels={review:'Under review',accepted:'Accepted',completed:'Marked complete',complete:'Marked complete',done:'Marked complete',draft:'Draft',ready:'Ready',active:'Active',blocked:'Blocked'};return{id,label:labels[id]||humanKey(id)}}
+function privateQuestMap(plan,paths){
+  const sources=paths.map((path,pathIndex)=>({path,pathIndex,governance:false}));
+  if(plan.governance&&typeof plan.governance==='object')sources.push({path:{...plan.governance,realm:'anarchadia',steps:[]},pathIndex:paths.length,governance:true});
+  if(!sources.length)return`<section class="cwsr234-map" data-private-quest-map aria-label="Private Quest map"><header><h3>Your Quest map</h3><p>No paths are saved in this Quest yet.</p></header></section>`;
+  const visible=sources.slice(0,MAP_PATH_LIMIT),perPath=Math.min(24,Math.max(1,Math.floor(MAP_STEP_LIMIT/visible.length))),index=new Map();
+  const records=visible.map(({path,pathIndex,governance})=>{
+    const source=pathSteps(path),progress=new Set(Array.isArray(path.progress)?path.progress:[]),status=mapStatus(path.status||plan.state||'draft');
+    const record={path,pathIndex,governance,realm:mapRealm(path),id:clean(path.id,180),title:clean(path.title,240)||(governance?'Governance layer':'Untitled path'),status,dependencies:dependencyIds(path).slice(0,16),total:source.length,steps:source.slice(0,perPath).map((step,stepIndex)=>({id:clean(typeof step==='object'?step?.id||step?.taskId:'',180),title:stepTitle(step),stepIndex,status:mapStatus((typeof step==='object'?step?.status:'')||(progress.has(stepIndex)?'completed':plan.state==='review'?'draft':'ready')),dependencies:dependencyIds(step).slice(0,16)})).filter(step=>step.title)};
+    return record;
+  });
+  for(const record of records)for(const node of[record,...record.steps])if(node.id){const matches=index.get(node.id)||[];matches.push(node);index.set(node.id,matches)}
+  const links=node=>node.dependencies.length?`<ul class="cwsr234-map-links">${node.dependencies.map(ref=>{const matches=index.get(ref)||[];return matches.length===1?`<li data-map-edge-from="${esc(ref)}" data-map-edge-to="${esc(node.id)}">Depends on: ${esc(matches[0].title)}</li>`:`<li>Unresolved dependency: ${esc(ref)}</li>`}).join('')}</ul>`:'';
+  const pathMarkup=record=>{
+    const {pathIndex,realm,status}=record,explicit=record.dependencies.length||record.steps.some(step=>step.dependencies.length);
+    return`<div class="cwsr234-map-path"><button type="button" data-review-command="map-focus" data-path-index="${pathIndex}" data-map-governance="${record.governance}" data-map-path="${pathIndex}" data-map-status="${esc(status.id)}" aria-label="Open ${esc(record.title)} path details"><strong>${esc(record.title)}</strong><small>${esc(realm.label)} · ${esc(status.label)}</small></button>${links(record)}<p class="cwsr234-map-order">${explicit?'Declared dependencies':record.governance?'Governance layer':'Plan order · no dependencies supplied'}</p><ol class="cwsr234-map-steps" data-connections="${explicit?'dependencies':'order'}">${record.steps.map(step=>`<li><button type="button" data-review-command="map-focus" data-path-index="${pathIndex}" data-map-step="${esc(step.id||`${pathIndex}:${step.stepIndex}`)}" data-map-status="${esc(step.status.id)}" aria-label="${esc(step.title)} · ${esc(step.status.label)} · open path details"><strong>${step.stepIndex+1}. ${esc(step.title)}</strong><small>${esc(step.status.label)}</small></button>${links(step)}</li>`).join('')}</ol>${record.total>record.steps.length?`<p class="cwsr234-map-order">${record.steps.length} of ${record.total} steps shown. Open path details for the saved steps.</p>`:record.total?'':record.governance?'<p class="cwsr234-map-empty">Inspect the saved agreements in the details.</p>':'<p class="cwsr234-map-empty">No steps specified.</p>'}</div>`;
+  };
+  const lanes=[...MAP_LANES,...(records.some(record=>record.realm.id==='unassigned')?[{id:'unassigned',label:'Unassigned / Other',color:'#b8c6df'}]:[])];
+  return`<section class="cwsr234-map" data-private-quest-map aria-label="Private Quest map"><header><h3>Your Quest map</h3><p>Private on this device. Select a node to inspect its path. Statuses reflect the saved plan; viewing this map changes no work state.</p></header><div class="cwsr234-map-lanes">${lanes.map(lane=>`<section class="cwsr234-map-lane" data-map-lane="${lane.id}" style="--map-lane:${lane.color}" aria-label="${lane.label}"><h4>${lane.label}</h4>${records.filter(record=>record.realm.id===lane.id).map(pathMarkup).join('')||'<p class="cwsr234-map-empty">No path in this subsystem.</p>'}</section>`).join('')}</div>${sources.length>visible.length?`<p class="cwsr234-map-note">Map preview: ${visible.length} of ${sources.length} paths. All saved path details remain below.</p>`:''}</section>`;
 }
 function openPersistentChat(system){
   try{return globalThis.CivweavePersistentGuideChatV215?.open?.({guide:realm(system)})||null}catch{return null}
@@ -114,9 +161,10 @@ function renderPlan(item,source=null){
   surface.innerHTML=`
     <header class="cwsr234-head"><div><small>QUEST REVIEW</small><h2>${esc(plan.title||item.text||'Untitled Quest')}</h2><span class="cwsr234-state">${esc(item.state||plan.state||'review')}</span></div><button class="cwsr234-close" type="button" data-review-command="close" aria-label="Close review">×</button></header>
     <div class="cwsr234-summary">${plan.wish?`<p><strong>Quest goal:</strong> ${esc(plan.wish)}</p>`:''}${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}</div>
-    ${paths.map((path,index)=>`<section class="cwsr234-block"><small>${esc(`${index+1} · ${SYSTEM_LABEL[realm(path.realm)]||humanKey(path.realm)} · ${path.status||'ready'}`)}</small><h3>${esc(path.title||'Untitled path')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}${listMarkup('STEPS',path.steps)}${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
+    ${privateQuestMap({...plan,state:item.state||plan.state||'review'},paths)}
+    ${paths.map((path,index)=>`<section class="cwsr234-block" data-review-path="${index}" tabindex="-1"><small>${esc(`${index+1} · ${mapRealm(path).label} · ${path.status||'ready'}`)}</small><h3>${esc(path.title||'Untitled path')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}${listMarkup('STEPS',pathSteps(path).map(stepTitle))}${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
     ${listMarkup('ASSUMPTIONS',plan.assumptions)}
-    ${governance?`<section class="cwsr234-block"><small>ANARCHADIA · PASSPORT AND CONSENT</small><h3>${esc(governance.title||'Governance layer')}</h3>${governance.purpose?`<p>${esc(governance.purpose)}</p>`:''}${Array.isArray(governance.agreements)&&governance.agreements.length?`<ul>${governance.agreements.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`:''}</section>`:''}
+    ${governance?`<section class="cwsr234-block" data-review-governance tabindex="-1"><small>ANARCHADIA · PASSPORT AND CONSENT</small><h3>${esc(governance.title||'Governance layer')}</h3>${governance.purpose?`<p>${esc(governance.purpose)}</p>`:''}${Array.isArray(governance.agreements)&&governance.agreements.length?`<ul>${governance.agreements.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`:''}${governance.reviewQuestion?`<p><strong>Review:</strong> ${esc(governance.reviewQuestion)}</p>`:''}</section>`:''}
     <div class="cwsr234-actions"><button type="button" data-review-command="close">Keep under review</button>${String(item.state||plan.state||'review')==='review'?`<button type="button" class="primary" data-review-command="activate-plan" data-id="${esc(item.id||plan.id)}">Activate Quest</button>`:''}</div>`;
   host.node.append(surface);current={kind:'weave',id:surface.dataset.id,source};return surface;
 }
@@ -198,6 +246,12 @@ async function handleSurfaceClick(event){
   const command=button.dataset.reviewCommand,id=button.dataset.id||current?.id;
   if(command==='close')return removeSurface();
   if(command==='focus-chat')return focusChat();
+  if(command==='map-focus'){
+    const index=Number(button.dataset.pathIndex),surface=button.closest(`#${SURFACE_ID}`);
+    if(!Number.isInteger(index)||index<0||index>=MAP_PATH_LIMIT)return;
+    const target=button.dataset.mapGovernance==='true'?surface?.querySelector('[data-review-governance]'):surface?.querySelector(`[data-review-path="${index}"]`);if(!target)return;
+    target.focus({preventScroll:true});target.scrollIntoView?.({block:'nearest',behavior:'auto'});return;
+  }
   if(command==='activate-plan')return activatePlan(id);
   if(command==='approve-action')return approveAction(id);
 }

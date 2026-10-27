@@ -112,6 +112,14 @@ Realm code may call the canonical API or host a presentation surface. It may not
 
 The v1 P-256 ECDH + HKDF + AES-GCM envelope is a baseline transport-privacy layer. Do not describe it as a mature Signal-equivalent protocol until forward secrecy, multi-device fanout, key transparency, prekeys/rotation, and verification UX are implemented and reviewed.
 
+## Guild Quest publication
+
+`cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs` owns the portable publication contract. The node-cloud Guild Durable Object and the standalone mobile Guild capacity Durable Object use that same contract with their existing authenticated member authorities and storage. The standalone template keeps this source inside its deploy directory; node-cloud imports it directly.
+
+`public/app/guild-quest-client-v1.js` is the browser transport. It reads existing `CivweaveHostNodeSessionV1` sessions and delegates explicit submission and listing to `/api/node/quests`. The existing Guild Quest Tracker presents that capability. It must not substitute device-local drafts for published Guild records or create a second membership/publication store. Every current member may submit; only the publishing member may revise or withdraw. Publication never activates the local plan, and its allowlist excludes private conversation, wish, profile, evidence, and credentials.
+
+The API and privacy boundaries are defined in `docs/contracts/guild-quest-publication-v1.md` and exercised by `scripts/test-guild-quest-publications-v1.mjs` and `scripts/test-guild-quest-publication-ui-v1.mjs`.
+
 ## Radio and review
 
 - Radio owner: `public/app/system-radio-agent-v233.js`

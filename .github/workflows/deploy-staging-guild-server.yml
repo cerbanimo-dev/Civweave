@@ -6,6 +6,7 @@ on:
       - staging
     paths:
       - cloudflare/node-cloud/src/**
+      - cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs
       - cloudflare/node-cloud/wrangler.staging.jsonc
       - .github/workflows/deploy-staging-guild-server.yml
   workflow_dispatch:
@@ -56,6 +57,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check cloudflare/node-cloud/src/staging-entry-v1.mjs
+          node --test scripts/test-guild-quest-publications-v1.mjs
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
           const raw = readFileSync('cloudflare/node-cloud/wrangler.staging.jsonc', 'utf8');

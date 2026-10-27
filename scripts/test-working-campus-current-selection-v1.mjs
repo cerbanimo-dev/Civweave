@@ -47,6 +47,14 @@ test('a detached review banner cannot open its previous Quest after another Ques
   assert.deepEqual(app.opened,[app.newer.id],'The explicitly labeled queue retains its independent latest-pending action.');
 });
 
+test('Revise Quest opens the canonical Weaveling composer when it lives outside the content document',t=>{
+  const app=fixture(t),calls=[];app.window.CivweaveGuideChatSurfaceV350={canonicalOwner:true,openWindow:(system,options)=>{calls.push({system,options});return true},submitText:()=>assert.fail('Opening revision must not start inference.')};
+  const before=app.window.localStorage.getItem(intentionsKey);
+  app.banner().querySelector('[data-revise-weave]').click();
+  assert.equal(calls.length,1);assert.equal(calls[0].system,'civweave');assert.equal(calls[0].options.focus,true);
+  assert.equal(app.window.localStorage.getItem(intentionsKey),before);assert.equal(app.window.document.querySelector('#cw-persistent-guide-chat-v215'),null,'No second chat is created in the content document.');
+});
+
 test('opening an older review Quest refreshes its own banner and review action without changing queue order',async t=>{
   const app=fixture(t);app.open(app.otherReview.id);await Promise.resolve();
   assert.match(app.thread().textContent,/Quest older-review/);assert.equal(app.banner().dataset.planId,app.otherReview.id);assert.match(app.banner().textContent,/Quest older-review/);

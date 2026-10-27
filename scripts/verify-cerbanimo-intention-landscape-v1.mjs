@@ -26,9 +26,11 @@ for(const token of [
   "'living-school':{id:'living-school'",
   "cerbanimo:{id:'cerbanimo'",
   "fellowfare:{id:'fellowfare'",
+  "anarchadia:{id:'anarchadia'",
   "solid:'#aeea57'",
   "solid:'#e85dff'",
   "solid:'#efb452'",
+  "solid:'#ff3d96'",
   "const TIER_COLORS=Object.freeze({guild:'#8af5d2',quest:'#e85dff',map:'#efb452'})",
   "const HOUSE_VOTE_KEY='civweave.anarchadia.pending-proposals.v1'",
   "schema:'civweave.house-change-proposal.v1'",
@@ -95,6 +97,9 @@ for(const token of [
   'canonical `#aeea57`',
   'canonical `#e85dff`',
   'canonical `#efb452`',
+  'canonical `#ff3d96`',
+  'Unassigned paths',
+  'member-reported',
   '/api/hub-map-nodes',
   'must not inject a synthetic "Your Civweave Guild" record',
   'Rendering the tracker must not randomly assign a House',
@@ -116,4 +121,4 @@ assert(!js.includes('document.createElement(\'script\')'),'Guild Quest tracker m
 assert(!js.includes('new Function'),'Guild Quest tracker must not use runtime code generation.');
 assert(!js.includes('eval('),'Guild Quest tracker must not use eval.');
 
-console.log(JSON.stringify({ok:true,feature:'guild-quest-tracker-v1-civweave-owner',owner:'civweave',entry:'/app/civweave-guild-quest-v1.html',hierarchy:['guilds','quests','quest-maps'],screens:3,houses:5,pathways:3,canonicalRealmColors:true,proofAwareProgress:true,governanceVoteBadges:true,liveGuildDirectory:true,noSyntheticGuildFallback:true,cerbanimoDetached:true},null,2));
+console.log(JSON.stringify({ok:true,feature:'guild-quest-tracker-v1-civweave-owner',owner:'civweave',entry:'/app/civweave-guild-quest-v1.html',hierarchy:['guilds','quests','quest-maps'],screens:3,houses:5,pathways:4,canonicalRealmColors:true,memberReportedSharedProgress:true,governanceVoteBadges:true,liveGuildDirectory:true,noSyntheticGuildFallback:true,cerbanimoDetached:true},null,2));

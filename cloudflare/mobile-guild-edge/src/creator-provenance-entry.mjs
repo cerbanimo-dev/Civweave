@@ -1,4 +1,5 @@
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
+import {GUILD_QUEST_ROUTE,GUILD_QUEST_CORS,guildQuestAction,readGuildQuestInput,executeGuildQuestAction,guildQuestJson,guildQuestError} from './guild-quest-publications-v1.mjs';
 
 export {CivweaveGuildEdgeState,CivweaveGuildNodeState};
 const RECEIPT_KIND='civweave.creation-receipt.v1';
@@ -34,6 +35,13 @@ function nodeCloudOrigin(env,nodeId){const explicit=clean(env.CIVWEAVE_NODE_CLOU
 async function forwardReceipt(env,object){const nodeId=receiptGuildId(object);if(!nodeId)return{forwarded:false,reason:'not-guild-receipt'};const target=new URL('/api/node/creator-provenance/receipt',nodeCloudOrigin(env,nodeId));target.searchParams.set('nodeId',nodeId);const response=await fetch(target,{method:'POST',headers:{'content-type':'application/json','x-civweave-node-id':nodeId},body:JSON.stringify({object})});if(!response.ok){const body=await response.text().catch(()=>'');throw new Error(`Guild provenance receipt forward failed (${response.status})${body?`: ${body.slice(0,300)}`:''}`)}return{forwarded:true,nodeId}}
 
 export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
+  async guildQuestAction({tokenHash,requestedNodeId,action,input}={}){
+    if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))throw Object.assign(new Error('Guild capacity session belongs to a different Guild.'),{status:403});
+    const session=this.sessionForHash({tokenHash,requestedNodeId});
+    if(!session?.ok)throw Object.assign(new Error(session?.error||'Guild session is invalid.'),{status:session?.status||401});
+    const guildId=this.baseStatus().guildId;
+    return executeGuildQuestAction(this.ctx.storage,{guildId,nodeId:session.nodeId,userId:session.userId},action,input);
+  }
   ensureResidentTables(){
     this.sql.exec('CREATE TABLE IF NOT EXISTS resident_members (node_id TEXT NOT NULL, user_id TEXT NOT NULL, credential_hash TEXT NOT NULL, seat_class TEXT NOT NULL, created_at TEXT NOT NULL, last_seen_at TEXT NOT NULL, PRIMARY KEY(node_id,user_id))');
     this.sql.exec('CREATE INDEX IF NOT EXISTS resident_members_user_idx ON resident_members(user_id)');
@@ -99,6 +107,11 @@ async function handleSessionGenerate(request,env){
 
 export default{
   async fetch(request,env,ctx){
+    const questUrl=new URL(request.url);
+    if(questUrl.pathname===GUILD_QUEST_ROUTE||questUrl.pathname.startsWith(GUILD_QUEST_ROUTE+'/')){
+      if(request.method==='OPTIONS')return new Response(null,{status:204,headers:GUILD_QUEST_CORS});
+      try{const route=guildQuestAction(request),body=request.method==='POST'?await readGuildQuestInput(request):{},result=await capacityStub(env).guildQuestAction({tokenHash:await sessionTokenHash(bearer(request)),requestedNodeId:requestedNodeId(request),action:route.action,input:{...body,...route.input}});return guildQuestJson(result,result.created?201:200)}catch(error){return guildQuestError(error)}
+    }
     const url=new URL(request.url);if(request.method==='OPTIONS'&&(isSessionPath(url.pathname)||isGeneratePath(url.pathname)))return new Response(null,{status:204,headers:sessionCors});
     if(isSessionPath(url.pathname))return handleSession(request,env);
     if(isGeneratePath(url.pathname)){const sessionResponse=await handleSessionGenerate(request.clone(),env);if(sessionResponse)return sessionResponse}

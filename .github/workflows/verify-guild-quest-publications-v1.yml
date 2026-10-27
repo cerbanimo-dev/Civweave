@@ -1,0 +1,47 @@
+name: Guild Quest publication contract
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/node-cloud/src/**'
+      - 'cloudflare/mobile-guild-edge/src/**'
+      - 'public/app/guild-quest-client-v1.js'
+      - 'public/app/cerbanimo-intention-landscape-v1.js'
+      - 'public/app/cerbanimo-intention-landscape-v1.css'
+      - 'public/app/civweave-guild-quest-v1.html'
+      - 'public/app/civweave-guild-quest-embed-v1.html'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/test-guild-quest-publications-v1.mjs'
+      - 'scripts/test-guild-quest-publication-ui-v1.mjs'
+      - 'config/system-ownership.json'
+      - '.github/workflows/verify-guild-quest-publications-v1.yml'
+  push:
+    branches: [staging, main]
+    paths:
+      - 'cloudflare/node-cloud/src/**'
+      - 'cloudflare/mobile-guild-edge/src/**'
+      - 'public/app/guild-quest-client-v1.js'
+      - 'public/app/cerbanimo-intention-landscape-v1.js'
+      - 'public/app/cerbanimo-intention-landscape-v1.css'
+      - 'public/app/civweave-guild-quest-v1.html'
+      - 'public/app/civweave-guild-quest-embed-v1.html'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/test-guild-quest-publications-v1.mjs'
+      - 'scripts/test-guild-quest-publication-ui-v1.mjs'
+      - 'config/system-ownership.json'
+      - '.github/workflows/verify-guild-quest-publications-v1.yml'
+permissions:
+  contents: read
+jobs:
+  publication:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node --test scripts/test-guild-quest-publications-v1.mjs scripts/test-guild-quest-publication-ui-v1.mjs
+      - run: node scripts/build-service-worker-v211.mjs --check

@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v27-event-bounded-generation-lifecycle-required-fulltile-art-v1';
-const OPTIONAL=['/app/installer-repair-only-v2.js'];
+const REVISION='shell-assets-v1-repair-v28-member-quest-publication';
+const OPTIONAL=['/app/installer-repair-only-v2.js','/app/assets/ai/lari-review-sprites-v1.png'];
 const REQUIRED_FAMILY_NAV=[
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',
@@ -48,7 +48,8 @@ const OPTIONAL_GUILD_QUEST=[
   '/app/civweave-guild-quest-v1.html',
   '/app/civweave-guild-quest-embed-v1.html',
   '/app/cerbanimo-intention-landscape-v1.css',
-  '/app/cerbanimo-intention-landscape-v1.js'
+  '/app/cerbanimo-intention-landscape-v1.js',
+  '/app/guild-quest-client-v1.js'
 ];
 const OPTIONAL_HUMAN_CHAT=[
   '/app/guild-membership-mesh-v1.js',
