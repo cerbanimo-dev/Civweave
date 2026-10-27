@@ -496,7 +496,7 @@ async function submitActive(text){
         const stream=globalThis.CivweaveGuideStreamThinkingV249;
         if(!/weaveling-intention-json/i.test(meta?.purpose||''))
           partialNativeAnswer=String(stream?.splitThinking?.(accumulated)?.answer??accumulated)
-            .replace(/<think>[\\s\\S]*?<\\/think>/gi,'').replace(/<think>[\\s\\S]*$/gi,'').slice(0,10000);
+            .replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*$/gi,'').slice(0,10000);
         latestText=/weaveling-intention-json/i.test(meta?.purpose||'')
           ?(stream?.visibleWeavelingPlan?.(accumulated)||'Preparing your Quest for review…')
           :(stream?.splitThinking?.(accumulated)?.answer??accumulated);
