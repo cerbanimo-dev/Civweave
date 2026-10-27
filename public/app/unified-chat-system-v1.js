@@ -773,7 +773,7 @@ async function ensureWeavelingOrchestrator(){
     return hasResponseLayer(globalThis.CivweaveAssistantV141?.respond,'__weavelingPlanJsonV190');
   };
   if(globalThis.CivweaveWeavelingPlanJsonV190?.install)return install();
-  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.12-saved-quest-revision').then(install).catch(error=>{orchestratorPromise=null;throw error});
+  if(!orchestratorPromise)orchestratorPromise=loadScript(WEAVELING_ORCHESTRATOR_PATH,'1.2.13-universal-quest-rail').then(install).catch(error=>{orchestratorPromise=null;throw error});
   return orchestratorPromise;
 }
 function patchAssistant(){
