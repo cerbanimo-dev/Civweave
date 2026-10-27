@@ -1,6 +1,6 @@
 import{copy,state,persist,readJson,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
-import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY}from'./living-school-journey-index-v1.mjs';
-import{render}from'./living-school-cleanroom-render-v218.mjs?v=manual-approved-journey-selection-v1';
+import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY,learningJourneyPlanById,recoverableChatPlans}from'./living-school-journey-index-v1.mjs?v=multi-plan-library-v2';
+import{render}from'./living-school-cleanroom-render-v218.mjs?v=durable-jobs-v3';
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=source-recovery-details-v269-selected-deadline';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
@@ -149,7 +149,7 @@ actions['discard-ls-failed-drafts']=async target=>{
 };
 
 async function retryApprovedLearningJourney(target){
-  const record=learningJourneySnapshot(readJson,state()).retry;
+  const record=learningJourneySnapshot(readJson,state()).generatable.find(item=>item.id===clean(target.dataset.journeyId,180));
   if(!record||record.id!==clean(target.dataset.journeyId,180)||!record.approvedAt||
     state().settings?.selectedJourneyPlanId!==record.id)
     throw new Error('Select an approved, incomplete Learning Journey before choosing Generate.');
@@ -167,7 +167,14 @@ async function retryApprovedLearningJourney(target){
     return school;
   }
   const plan=readJson(PLAN_KEY,null);
+  const library=readJson(PLAN_LIBRARY_KEY,{});
+  if(Array.isArray(library?.plans)){
+    const entries=library.plans.map(item=>'plan:'+item.id===record.id?
+      {...item,state:'generated',generatedAt:new Date().toISOString(),updatedAt:new Date().toISOString(),generatedSchoolId:school.id}:item);
+    localStorage.setItem(PLAN_LIBRARY_KEY,JSON.stringify({...library,plans:entries}));
+  }
   if(record.id==='plan:'+plan?.id&&plan.state==='approved')localStorage.removeItem(PLAN_KEY);
+  state().settings={...(state().settings||{}),selectedJourneyPlanId:''};
   const queued=readJson(QUEUE_KEY,null);
   if(queued?.approvedPlanId&&(record.id==='queue:'+queued.approvedPlanId||record.id==='plan:'+queued.approvedPlanId))
     localStorage.removeItem(QUEUE_KEY);
@@ -181,12 +188,85 @@ async function handleLivingSchoolClick(event){
   event.preventDefault();event.stopImmediatePropagation();
   if(target.disabled||busy||retryStarting)return;
   const actionName=String(target.dataset.lsAction||'').trim();
+  if(actionName==='resume-companion-generation'){
+    const job=readJson('civweave.termux-companion.curriculum-job.v1',null);
+    if(!job?.capability||!job?.clientKey||!job?.purpose)return;
+    const pairing=sessionStorage.getItem('civweave.termux-companion.session-pairing.v1')||'';
+    if(!/^[0-9a-f]{64}$/i.test(pairing))
+      throw new Error('Pair the currently running Termux Companion in Civweave Settings, then return here to resume the existing job.');
+    sessionStorage.setItem('civweave.termux-companion.resume-once.v1',
+      JSON.stringify({jobId:job.jobId||'',purpose:job.purpose,capability:job.capability}));
+    retryStarting=true;markDispatch();target.setAttribute('aria-busy','true');
+    target.textContent='Reconnecting to Termux generation…';
+    try{
+      const result=await generateCurriculumFromChat(job.request||{title:job.capability,capability:job.capability,count:4,
+        intent:'new',newPath:true,replaceExisting:true});
+      if(result?.school?.modules?.length&&result.school.capability===job.capability){
+        localStorage.removeItem('civweave.termux-companion.curriculum-job.v1');
+        toastMessage('Background Qwen generation recovered and saved as a curriculum.');
+      }
+    }catch(error){console.error('[Living School background generation resume]',error);toastMessage(clean(error?.message||error,900));}
+    finally{retryStarting=false;target.removeAttribute('aria-busy');renderEnhanced();}
+    return;
+  }
+  if(actionName==='cancel-companion-generation'){
+    const job=readJson('civweave.termux-companion.curriculum-job.v1',null);
+    if(!/^[0-9a-f]{32}$/.test(job?.jobId||''))throw new Error('No accepted Companion job ID is available to cancel.');
+    const key=sessionStorage.getItem('civweave.termux-companion.session-pairing.v1')||'';
+    if(!/^[0-9a-f]{64}$/i.test(key))throw new Error('Pair Termux Companion in Settings before cancelling a background job.');
+    if(!confirm('Request cancellation of this exact Qwen job in Termux? Browser suspension alone does not cancel it.'))return;
+    const response=await fetch('http://127.0.0.1:8766/v1/generations/'+job.jobId+'/cancel',{
+      method:'POST',mode:'cors',cache:'no-store',credentials:'omit',
+      headers:{'X-Civweave-Token':key,'Content-Type':'application/json'},body:'{}'
+    });
+    if(!response.ok)throw new Error('Termux cancellation request failed: HTTP '+response.status);
+    toastMessage('Termux cancellation requested; Qwen may need to reach the next stream frame before stopping.');
+    return;
+  }
+  if(actionName==='dismiss-companion-generation'){
+    const job=readJson('civweave.termux-companion.curriculum-job.v1',null);
+    if(job&&['running','queued','submitting'].includes(job.state))
+      throw new Error('This job may still be running in Termux. Resume it rather than dismissing an active generation.');
+    localStorage.removeItem('civweave.termux-companion.curriculum-job.v1');
+    sessionStorage.removeItem('civweave.termux-companion.resume-once.v1');
+    renderEnhanced();return;
+  }
   if(actionName==='select-approved-learning-journey'){
-    const chosen=learningJourneySnapshot(readJson,state()).retry;
+    const chosen=learningJourneySnapshot(readJson,state()).generatable.find(item=>item.id===clean(target.dataset.journeyId,180));
     if(!chosen||chosen.id!==clean(target.dataset.journeyId,180))return;
     state().settings={...(state().settings||{}),selectedJourneyPlanId:chosen.id};
     persist('living-school-approved-journey-selected',{id:chosen.id,capability:chosen.request?.capability,policy:'manual-plan-selection-no-generation'});
     renderEnhanced();
+    return;
+  }
+  if(actionName==='recover-chat-journey'){
+    const id=clean(target.dataset.journeyId,180);
+    const recovered=recoverableChatPlans(readJson).find(item=>'recover:'+item.id===id);
+    if(!recovered)return;
+    // The old chat is evidence of a draft, not proof of approval.
+    const draft={...recovered,state:'review',updatedAt:new Date().toISOString()};
+    const library=readJson(PLAN_LIBRARY_KEY,{});
+    const existing=Array.isArray(library?.plans)?library.plans:[];
+    if(existing.some(item=>item.id===draft.id))return;
+    localStorage.setItem(PLAN_LIBRARY_KEY,JSON.stringify({schema:'civweave.learning-journey-plan-library.v1',
+      plans:[draft,...existing].slice(0,50)}));
+    localStorage.setItem(PLAN_KEY,JSON.stringify(draft));
+    persist('living-school-chat-plan-recovered-for-review',{id:draft.id,title:draft.request.title,
+      policy:'chat-outline-is-not-approval-no-generation'});
+    location.assign('/app/working-campus-v440.html?source=moss-pending-review');
+    return;
+  }
+  if(actionName==='select-journey-for-review'){
+    const id=clean(target.dataset.journeyId,180),original=learningJourneyPlanById(readJson,id);
+    if(!original||!['review','superseded','revision-requested'].includes(original.state))return;
+    const revived=original.state==='review'?original:
+      {...original,state:'review',updatedAt:new Date().toISOString(),supersededBy:undefined};
+    localStorage.setItem(PLAN_KEY,JSON.stringify(revived));
+    const library=readJson(PLAN_LIBRARY_KEY,{});
+    const plans=Array.isArray(library?.plans)?library.plans:[];
+    localStorage.setItem(PLAN_LIBRARY_KEY,JSON.stringify({...library,plans:plans.map(item=>item.id===revived.id?revived:item)}));
+    persist('living-school-review-plan-selected',{id:revived.id,capability:revived.request?.capability});
+    location.assign('/app/working-campus-v440.html?source=moss-pending-review');
     return;
   }
   if(actionName==='retry-approved-learning-journey'){
@@ -286,6 +366,9 @@ async function generateCurriculumFromChat(input={},options={}){
     if(data.newPath){preservePreviousPath(previous);persist('living-school-new-path-replacement-completed',{schoolId:school.id,title:school.title,capability:school.capability,moduleCount:school.modules?.length||0,source:'moss-shared-chat'});}
     renderEnhanced();
     queueMicrotask(()=>renderLivingSchoolEmbed(document,school,state().activeModuleId));
+    const finishedCompanion=readJson('civweave.termux-companion.curriculum-job.v1',null);
+    if(finishedCompanion?.capability===school.capability&&finishedCompanion?.state==='completed')
+      localStorage.removeItem('civweave.termux-companion.curriculum-job.v1');
     const result={school:copy(school),sourceCount:Number(state().sources?.length||0),research:copy(state().research||null),generationRecovery:copy(state().generationRecovery||null),activeModuleId:state().activeModuleId,intent:data.intent};
     try{dispatchEvent(new CustomEvent('civweave:living-school-curriculum-generated',{detail:{schoolId:school.id,title:school.title,moduleCount:school.modules.length,requestedModuleCount:school.requestedModuleCount||school.modules.length,capability:school.capability,source:data.newPath?'moss-shared-chat-new-path':'moss-shared-chat',intent:data.intent,videoContract:'required-per-module',generationStatus:state().generationRecovery?.status||'complete'}}))}catch{}
     return result;
@@ -308,7 +391,7 @@ async function generateCurriculumFromChat(input={},options={}){
 sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
 renderEnhanced();
-for(const key of [PLAN_KEY,QUEUE_KEY]){
+for(const key of [PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY]){
   // A pending plan may be approved in the parent persistent guide surface.
   addEventListener('storage',event=>{if(event.key===key&&!busy)renderEnhanced()});
 }

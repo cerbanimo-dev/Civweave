@@ -7,6 +7,10 @@ on:
       - 'public/app/local-ai/termux-companion-controls-v1.js'
       - 'public/app/local-ai/native-gguf-server-setup-v1.js'
       - 'scripts/test-termux-companion-v1.py'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'scripts/verify-termux-durable-generation-v1.mjs'
       - '.github/workflows/verify-termux-companion-v1.yml'
   push:
     branches: [staging]
@@ -15,6 +19,10 @@ on:
       - 'public/app/local-ai/termux-companion-controls-v1.js'
       - 'public/app/local-ai/native-gguf-server-setup-v1.js'
       - 'scripts/test-termux-companion-v1.py'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'scripts/verify-termux-durable-generation-v1.mjs'
       - '.github/workflows/verify-termux-companion-v1.yml'
 
 permissions:
@@ -37,8 +45,14 @@ jobs:
           python -m py_compile public/termux/civweave_companion.py
           node --check public/app/local-ai/termux-companion-controls-v1.js
           node --check public/app/local-ai/native-gguf-server-setup-v1.js
+          node --check public/app/shared/civweave-model-runtime.js
+          node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs
+          node --check scripts/verify-termux-durable-generation-v1.mjs
       - name: Verify loopback auth, origin restrictions, and command allowlist
         run: python scripts/test-termux-companion-v1.py
+      - name: Verify detached generations survive browser suspension
+        run: node scripts/verify-termux-durable-generation-v1.mjs
       - name: Verify PWA has no automatic local controls
         run: |
           node --input-type=module <<'NODE'

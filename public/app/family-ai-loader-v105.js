@@ -7,7 +7,7 @@ if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
 const PREREQUISITES=[
   ['/app/shared/civweave-parity-runtime.js?v=1.0.4',()=>globalThis.CivweaveParity],
-  ['/app/shared/civweave-model-runtime.js?v=1.0.16-ollama-request-thinking',()=>globalThis.CivweaveModelRuntime],
+  ['/app/shared/civweave-model-runtime.js?v=1.0.17-termux-durable-jobs',()=>globalThis.CivweaveModelRuntime],
   ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryV191],
   ['/app/intention-planner-v141.js?v=1.0.4',()=>globalThis.CivweaveIntentionPlanner],
   ['/app/guide-contracts-v141.js?v=1.0.6-manifest-revision',()=>globalThis.CivweaveGuideContractsV141]
@@ -38,7 +38,7 @@ const OPTIONAL=[
   ['/app/validation-cloud-optin-v1.js?v=host-capacity-v1',()=>globalThis.CivweaveValidationCloudOptInV1]
 ];
 const GUIDE_CAPABILITIES=[
-  ['/app/unified-chat-system-v1.js?v=1.2.19-manual-learning-generation',()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.19-unified-chat-manual-learning-generation'],
+  ['/app/unified-chat-system-v1.js?v=1.2.20-moss-multi-plan-library',()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.19-unified-chat-manual-learning-generation'],
   ['/app/cerbanimo-chat-quest-capability-v2.js?v=2.2.1-ollama-schema-lifecycle',()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV2],
   ['/app/action-followthrough-v165.js?v=1.0.5-material-revisions',()=>globalThis.CivweaveActionFollowthroughV165],
   ['/app/guide-capability-passover-v1.js?v=1.1.4-explicit-change-requests',()=>globalThis.CivweaveGuideCapabilityPassoverV1]

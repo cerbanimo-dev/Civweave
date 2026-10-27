@@ -90,7 +90,7 @@ async function generateDesignPacket(runtime,config,data,count,sources,previous='
   assertGenerationActive(options);
   const current=state(),sourcePacket=sourcePacketText(current,sources);
   const context={
-    capability:data.capability,level:data.level,mode:data.mode,moduleCount:count,proofContract:data.proof,
+    title:data.title,capability:data.capability,level:data.level,mode:data.mode,moduleCount:count,proofContract:data.proof,
     sources,research:current.research||{},previousPacket:clean(previous,12000),
     constraints:[
       'This is the reasoning and instructional-design pass, not the final Living School JSON pass.',

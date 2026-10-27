@@ -1,7 +1,8 @@
 import assert from'node:assert/strict';
 import fs from'node:fs';
+import vm from'node:vm';
 import{execFileSync}from'node:child_process';
-import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,LEARNING_PLAN_SCHEMA}from'../public/app/cabinets/living-school/living-school-journey-index-v1.mjs';
+import{learningJourneySnapshot,learningJourneyPlanById,recoverableChatPlans,PLAN_LIBRARY_KEY,PLAN_KEY,QUEUE_KEY,LEARNING_PLAN_SCHEMA}from'../public/app/cabinets/living-school/living-school-journey-index-v1.mjs';
 
 const read=path=>fs.readFileSync(new URL('../'+path,import.meta.url),'utf8');
 for(const file of [
@@ -30,7 +31,7 @@ assert.equal(view.focus,null,'Unapproved REVIEW plans must not silently populate
 const approved={...plan,state:'approved',approvedAt:'2026-10-24T22:02:00Z',updatedAt:'2026-10-24T22:02:00Z'};
 store(PLAN_KEY,approved);
 view=snapshot(original);
-assert.equal(view.rows[0].status,'Approved · curriculum not generated');
+assert.equal(view.rows[0].status,'Approved · select to generate');
 assert.equal(view.focus.title,title,'Approved Moss plan must take priority over stale garden pathContext');
 assert.equal(view.focus.capability,capability);
 assert.equal(view.retry.id,'plan:learning-plan-tarot');
@@ -81,4 +82,69 @@ assert.match(controller,/localStorage\.removeItem\(PLAN_KEY\)/);
 assert.match(controller,/living-school-new-path-replacement-rolled-back/);
 assert.match(controller,/const attemptedRecovery=copy\(state\(\)\.generationRecovery\|\|null\)/);
 assert.match(controller,/addEventListener\('storage'/);
+// Multiple independently saved plans must remain visible/selectable after
+// the historical single-plan slot has been overwritten by a newer subject.
+records.clear();
+const other={...approved,id:'learning-plan-bed',request:{...approved.request,title:'Morning Bed-Making',capability:'make a bed every morning',count:6},updatedAt:'2026-10-26T18:00:00Z'};
+const oldTarot={...approved,updatedAt:'2026-10-25T19:00:00Z'};
+store(PLAN_LIBRARY_KEY,{schema:'civweave.learning-journey-plan-library.v1',plans:[oldTarot,other]});
+store(PLAN_KEY,other);
+view=snapshot({});
+assert.equal(view.plans.length,2,'Old approved plan must survive latest pending-plan overwrite');
+assert.ok(view.rows.some(row=>row.title===title),'Tarot must appear alongside bed-making');
+assert.ok(view.rows.some(row=>row.title==='Morning Bed-Making'));
+assert.equal(view.generatable.length,2,'Both approved plans need independent Generate controls');
+assert.equal(view.generatable.find(item=>item.id==='plan:learning-plan-tarot').request.capability,capability);
+assert.equal(view.generatable.find(item=>item.id==='plan:learning-plan-bed').request.capability,'make a bed every morning');
+assert.equal(learningJourneyPlanById(fetch,'plan:learning-plan-tarot').id,oldTarot.id);
+assert.match(renderer,/journeys\.generatable\.some\(item=>item\.id===row\.id\)/);
+assert.match(controller,/generatable\.find\(item=>item\.id===clean\(target\.dataset\.journeyId,180\)\)/);
+records.clear();
+store(PLAN_KEY,approved);
+view=snapshot({});
+assert.equal(view.plans.length,1,'Legacy plans must show without a library migration');
+assert.equal(view.generatable[0].id,'plan:learning-plan-tarot');
+// A previously overwritten plan can be reconstructed only if its original
+// outline is still present in Moss's on-device chat history. Never assume that
+// text is evidence of approval; it must re-enter REVIEW.
+records.clear();
+const oldMessage={id:'message-100',role:'assistant',at:'2026-10-24T19:00:00Z',
+ text:'Learning Journey plan: “Tarot Memorization”\n\nGoal: read and memorize the tarot\nLevel: beginner\nMode: guided\nProof of capability: Read three cards independently\n\nOutline:\n1. Major Arcana\n   Focus: tarot archetypes\n   Demonstrate: identify cards\n2. Minor Arcana\n   Focus: suits and elements\n   Demonstrate: identify suits\n\nStatus: REVIEW. This is only a plan.'};
+store('civweave.guide-thread.v350.living-school',{messages:[oldMessage]});
+const recovered=recoverableChatPlans(fetch);
+assert.equal(recovered.length,1);
+assert.equal(recovered[0].request.title,'Tarot Memorization');
+assert.equal(recovered[0].state,'review');
+assert.equal(recovered[0].request.count,2);
+assert.equal(snapshot({}).rows[0].kind,'recoverable');
+assert.match(renderer,/recover-chat-journey/);
+assert.match(controller,/chat-outline-is-not-approval-no-generation/);
+store(PLAN_LIBRARY_KEY,{plans:[recovered[0]]});
+assert.equal(snapshot({}).recoverable.length,0,'Do not duplicate a recovered plan after saving it');
+// Exercise the real producer too: saving a second unrelated Moss plan
+// must not erase the first reviewed/approved draft.
+const unifiedSource=read('public/app/unified-chat-system-v1.js');
+const first=unifiedSource.indexOf('function readLearningPlan(){');
+const last=unifiedSource.indexOf('function learningPlanControl(',first);
+assert.ok(first>0&&last>first,'Moss verified plan persistence helpers must be present');
+const persistence=new Map();
+const saveScope={
+  localStorage:{
+    getItem:key=>persistence.get(key)||null,
+    setItem:(key,value)=>persistence.set(key,value),
+    removeItem:key=>persistence.delete(key)
+  },
+  LEARNING_PLAN_KEY:PLAN_KEY,LEARNING_PLAN_LIBRARY_KEY:PLAN_LIBRARY_KEY,LEARNING_PLAN_SCHEMA,
+  parse:(value,otherwise)=>{try{return JSON.parse(value)??otherwise}catch{return otherwise}},
+  dispatchEvent:()=>true,CustomEvent:class{constructor(type,opts){this.type=type;this.detail=opts.detail}},
+  JSON,Date,Map
+};
+const save=vm.runInNewContext(unifiedSource.slice(first,last)+'\nsaveLearningPlan',saveScope);
+const planA={...oldTarot,state:'approved'};
+const planB={...other,state:'review',approvedAt:null};
+save(planA);save(planB);
+const retained=JSON.parse(persistence.get(PLAN_LIBRARY_KEY)).plans;
+assert.equal(retained.length,2,'Moss plan producer must retain both topics across saves');
+assert.equal(retained.find(item=>item.id===planA.id).state,'approved');
+assert.equal(retained.find(item=>item.id===planB.id).state,'review');
 console.log('PASS Living School saved journey list, approval, retry, rollback, partial and stale-path goal isolation');
