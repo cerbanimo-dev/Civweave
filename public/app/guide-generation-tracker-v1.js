@@ -112,7 +112,7 @@ function panelHtml(){
   const beats=state.kind==='quest'&&state.beats?.length
     ?'<div class="cw-weave-stream"><strong>Validated Quest beats <span>Dependencies and evidence · REVIEW only</span></strong>'+
       state.beats.map((beat,i)=>'<pre>'+esc(String(i+1)+'. '+beat.realm+' · '+beat.title+
-      '\\n'+beat.steps.map((step,j)=>'  '+(j+1)+'. '+step).join('\\n'))+'</pre>').join('')+'</div>':'';
+      '\n'+beat.steps.map((step,j)=>'  '+(j+1)+'. '+step).join('\n'))+'</pre>').join('')+'</div>':'';
   const embeddedGGUF=embeddedGGUFSelection();
   const probe=state.terminal==='failed'?`<div class="cw-weave-probe"><button type="button" data-weave-probe ${state.probeBusy?'disabled':''}>${state.probeBusy?'Testing model…':embeddedGGUF?'Test selected GGUF inference':'Test local inference'}</button>${embeddedGGUF?'':`<button type="button" data-weave-worker-probe ${state.probeBusy?'disabled':''}>Test isolated GPU worker (LiteRT)</button>`}<button type="button" data-weave-runtime-restart title="Reloads the app shell without deleting model data.">Reload Civweave</button><p>${esc(state.probeStatus||(embeddedGGUF?'Minimal GGUF/Wllama generation, independent of Moss. Cold-loading may take several minutes; no LiteRT test is involved.':'Minimal one-word LiteRT GPU test, independent of Moss and the JSON compiler.'))}</p></div>`:'';
   const model=state.executionModel?` · Model ${state.executionModel}`:'';const runtime=state.runtimePhase?` · Runtime: ${state.runtimePhase}`:'';
