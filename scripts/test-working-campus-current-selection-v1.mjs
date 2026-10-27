@@ -21,7 +21,7 @@ function fixture(t,options={}){
   window.localStorage.setItem(campusKey,JSON.stringify({stage:'review',view:'quest',mode:'guided',wish:newer.wish,plan:newer,reviewReady:{planId:newer.id,title:newer.title},conversation:[]}));
   window.localStorage.setItem(intentionsKey,JSON.stringify(rows));
   window.eval(read('app/intention-planner-v141.js'));window.eval(campusSource);window.eval(read('app/weaveling-hub-v233.js'));window.eval(read('app/shared-review-surface-v234.js'));window.eval(read('app/weaveling-plan-materialization-v265.js'));window.eval(read('app/platform-experience-v160.js'));
-  const opened=[];window.CivweaveIntentionUI={open:id=>{opened.push(id);return true}};window.CivweaveFamilyAILoaderV105={ensure:async()=>true};
+  const opened=[];window.CivweaveIntentionUI={open:id=>{opened.push(id);return true}};window.CivweaveSharedReviewSurfaceV234={...window.CivweaveSharedReviewSurfaceV234,openPlan:id=>{opened.push(id);return true}};window.CivweaveFamilyAILoaderV105={ensure:async()=>true};
   const open=id=>{window.CivweaveWorkingCampusV156.openLibrary();const button=window.document.querySelector(`[data-load="${id}"]`);assert.ok(button);button.click()};
   return{window,newer,older,otherReview,opened,open,read:key=>JSON.parse(window.localStorage.getItem(key)),thread:()=>window.document.querySelector('.wh233-thread'),banner:()=>window.document.getElementById('cw-weave-review-ready-v265')};
 }
@@ -53,6 +53,11 @@ test('Revise Quest opens the canonical Weaveling composer when it lives outside 
   app.banner().querySelector('[data-revise-weave]').click();
   assert.equal(calls.length,1);assert.equal(calls[0].system,'civweave');assert.equal(calls[0].options.focus,true);
   assert.equal(app.window.localStorage.getItem(intentionsKey),before);assert.equal(app.window.document.querySelector('#cw-persistent-guide-chat-v215'),null,'No second chat is created in the content document.');
+});
+
+test('the visible Review Quest banner uses the canonical mapped review even when a legacy view is loaded',t=>{
+  const app=fixture(t),calls=[];app.window.CivweaveSharedReviewSurfaceV234={openPlan:id=>{calls.push(id);return true}};app.window.CivweaveIntentionUI={open:()=>assert.fail('The optional legacy list cannot replace the shared map review.')};
+  app.banner().querySelector('[data-review-weave]').click();assert.deepEqual(calls,[app.newer.id]);
 });
 
 test('opening an older review Quest refreshes its own banner and review action without changing queue order',async t=>{

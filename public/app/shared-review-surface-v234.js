@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-direct-quest-copy';
+const VERSION='1.0.2-private-quest-map';
 const REVISION='shared-review-surface-v234';
 const STYLE_ID='cw-shared-review-style-v234';
 const SURFACE_ID='cw-shared-review-surface-v234';

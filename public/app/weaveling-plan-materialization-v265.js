@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.4-weaveling-plan-materialization-v265-revision-composer';
+const VERSION='1.1.5-weaveling-plan-materialization-v265-canonical-review';
 const WORKING_KEY='civweave.working-campus.v1';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const QUARANTINE_KEY='civweave.quest-quarantine.v1';
@@ -89,9 +89,12 @@ function materialize(plan,{source='weaveling-ai-structured-v265',preserveCampusI
   }
   return next;
 }
+function ownedPersistentHost(){
+  try{const host=globalThis.parent;if(host!==globalThis&&host.location.origin===location.origin&&new URLSearchParams(location.search).get('persistentShell')==='1'&&host.CivweavePersistentSystemShellV1&&host.document.getElementById('cw-persistent-system-stage')?.contentWindow===globalThis)return host}catch{}
+  return null;
+}
 function focusRevision(){
-  let guide=globalThis.CivweaveGuideChatSurfaceV350;
-  try{const host=globalThis.parent;if(host!==globalThis&&host.location.origin===location.origin&&new URLSearchParams(location.search).get('persistentShell')==='1'&&host.CivweavePersistentSystemShellV1&&host.document.getElementById('cw-persistent-system-stage')?.contentWindow===globalThis)guide=host.CivweaveGuideChatSurfaceV350}catch{}
+  const guide=ownedPersistentHost()?.CivweaveGuideChatSurfaceV350||globalThis.CivweaveGuideChatSurfaceV350;
   if(guide?.canonicalOwner&&typeof guide.openWindow==='function')return guide.openWindow('civweave',{focus:true});
   const target=document.querySelector('#cw-shared-guide-surface-v236 textarea,#weaveling-chat-input,#cw-persistent-guide-chat-v215 textarea');
   if(!target)return false;target.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>target.focus(),220);return true;
@@ -100,6 +103,8 @@ function openReview(plan){
   if(!aiAuthoredPlan(plan))return false;
   const item=reviewItemFor(plan);
   if(!item)try{globalThis.CivweaveIntentionPlanner?.restore?.(plan)}catch{}
+  const shared=ownedPersistentHost()?.CivweaveSharedReviewSurfaceV234||globalThis.CivweaveSharedReviewSurfaceV234;
+  if(typeof shared?.openPlan==='function')return shared.openPlan(plan.id);
   if(globalThis.CivweaveIntentionUI?.open){globalThis.CivweaveIntentionUI.open(plan.id);return true}
   try{const current=parse(localStorage.getItem(WORKING_KEY),{});localStorage.setItem(WORKING_KEY,JSON.stringify({...current,stage:'review',view:'quest',plan:clone(plan),updatedAt:now()}))}catch{}
   location.reload();return true;
