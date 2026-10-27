@@ -12,7 +12,7 @@ try{
   }
 }catch{}
 
-const VERSION='1.0.196-guide-chat-surface-v350-ai-lifecycle';
+const VERSION='1.0.197-weaveling-clipped-quest-capture';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -322,12 +322,12 @@ function syncArtifactGates(){
 }
 function clippedQuestCandidate(row,messages,index){
   if(activeSystem!=='civweave'||!row||row.role!=='assistant'||row.pending||row.planSnapshot?.paths?.length||row.approvalGate?.kind==='intention-activation')return null;
-  if(!/Learning Journey plan:|Response reached the generation limit|## Module|\\bStatus: REVIEW\\b/i.test(String(row.text||'')))return null;
+  if(!/Learning Journey plan:|Response reached the generation limit|## Module|\bStatus: REVIEW\b/i.test(String(row.text||'')))return null;
   let source=null;
   for(let i=index-1;i>=0;i--)if(messages[i]?.role==='user'){source=messages[i];break}
   const original=clean(source?.text||'',5000);
-  if(!/\\b(?:help me|help us|we want|i want|create|build|start|establish|organize|launch|design|plan|develop|make)\\b/i.test(original)||
-    !/\\b(?:commune|garden|infrastructure|community|cooperative|project|quest|app|website|service|collective|enterprise|workspace|device|platform)\\b/i.test(original))return null;
+  if(!/\b(?:help me|help us|we want|i want|create|build|start|establish|organize|launch|design|plan|develop|make)\b/i.test(original)||
+    !/\b(?:commune|garden|infrastructure|community|cooperative|project|quest|app|website|service|collective|enterprise|workspace|device|platform)\b/i.test(original))return null;
   return {original,excerpt:clean(row.text,3600)};
 }
 let captureQuestBusy=false;
