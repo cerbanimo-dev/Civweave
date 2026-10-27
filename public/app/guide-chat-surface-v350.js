@@ -377,7 +377,7 @@ function syncClippedQuestCapture(article,row,messages,index){
     const notice=document.createElement('span');notice.textContent='Converting existing text using the selected model; no Quest will activate automatically.';
     panel.append(notice);
     try{
-      const module=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.14-clipped-quest-capture');
+      const module=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.15-universal-quest-rail');
       const result=await module.captureClippedQuest({originalRequest:candidate.original,clippedText:candidate.excerpt,onToken:(_delta,accumulated)=>{button.textContent='Structuring Quest · '+String(accumulated||'').length.toLocaleString()+' characters';}});
       if(!result?.planItemId||result?.plan?.state!=='review')throw new Error('No validated reviewable Quest was produced.');
       const thread=readThread('civweave'),idx=(thread.messages||[]).findIndex(item=>item.id===row.id);
@@ -537,7 +537,7 @@ async function submitActive(text){
         console.warn('[Civweave] Optional generation tracker unavailable:',error);
       }
       await verifyNativePhoneServerTransport();
-      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.14-clipped-quest-capture');
+      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.15-universal-quest-rail');
       if(requestAbort?.signal.aborted)throw new Error('Generation cancelled before the request was sent.');
       result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else{
