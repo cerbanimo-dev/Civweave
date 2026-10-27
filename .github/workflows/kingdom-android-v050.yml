@@ -1,13 +1,14 @@
-name: Kingdom v0.5.3 KleidiAI ARM64 inference diagnostic APK
+name: Kingdom v0.5.4 Snapdragon quantized ARM64 diagnostic APK
 on:
   workflow_dispatch:
   pull_request:
     paths:
       - 'pocket-scribe/m4/kingdom-v052-optimized-cpu.py'
       - 'pocket-scribe/m4/kingdom-v053-kleidiai.py'
+      - 'pocket-scribe/m4/kingdom-v054-snapdragon.py'
       - '.github/workflows/kingdom-android-v050.yml'
   push:
-    branches: [kingdom/android-v053-arm-kleidiai]
+    branches: [kingdom/android-v054-snapdragon-quant]
     paths:
       - 'pocket-scribe/m4/kingdom-v052-optimized-cpu.py'
       - '.github/workflows/kingdom-android-v050.yml'
@@ -40,6 +41,7 @@ jobs:
           python pocket-scribe/m4/kingdom-v051-fix.py
           python pocket-scribe/m4/kingdom-v052-optimized-cpu.py
           python pocket-scribe/m4/kingdom-v053-kleidiai.py
+          python pocket-scribe/m4/kingdom-v054-snapdragon.py
           node --check pocket-scribe/m4/workspace/android/app/src/main/assets/app.js
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '17'}
@@ -64,18 +66,19 @@ jobs:
         working-directory: pocket-scribe/m4/workspace/android
         shell: bash
         run: |
-          sed -i "s/applicationId 'org.kingdom.ofheaven'/applicationId 'org.kingdom.ofheaven.kleidiai053'/" app/build.gradle
-          sed -i "s/versionName '0.5.0-Kingdom-Integrated'/versionName '0.5.3-Optimized-ARM-KleidiAI'/" app/build.gradle
+          sed -i "s/applicationId 'org.kingdom.ofheaven'/applicationId 'org.kingdom.ofheaven.snap054'/" app/build.gradle
+          sed -i "s/versionName '0.5.0-Kingdom-Integrated'/versionName '0.5.4-Snapdragon-Qwen'/" app/build.gradle
           gradle :app:assembleDebug --no-daemon --stacktrace --max-workers=2
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -s "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | tee kingdom-package-info.txt
-          grep "package: name='org.kingdom.ofheaven.kleidiai053'" kingdom-package-info.txt
+          grep "package: name='org.kingdom.ofheaven.snap054'" kingdom-package-info.txt
           grep -R -l -m1 -- '-O3' app/.cxx/Debug >/dev/null
           grep -R -l -m1 -- 'GGML_CPU_KLEIDIAI' app/.cxx/Debug >/dev/null
+          grep -R -l -m1 -- 'armv8.6-a+dotprod+i8mm+fp16' app/.cxx/Debug >/dev/null
       - uses: actions/upload-artifact@v4
         with:
-          name: kingdom-of-heaven-v053-kleidiai-diagnostic-apk
+          name: kingdom-of-heaven-v054-snapdragon-qwen-diagnostic-apk
           path: pocket-scribe/m4/workspace/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 21
