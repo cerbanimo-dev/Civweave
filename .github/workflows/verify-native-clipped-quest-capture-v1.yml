@@ -1,0 +1,47 @@
+name: Verify Native Clipped Quest Capture
+on:
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/native-server-guide-fastpath-v1.js'
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/persistent-system-shell-v1.js'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-native-server-quest-routing-v1.mjs'
+      - 'scripts/verify-native-server-quest-structure-v1.mjs'
+      - 'scripts/verify-native-clipped-quest-capture-v1.mjs'
+      - '.github/workflows/verify-native-clipped-quest-capture-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/native-server-guide-fastpath-v1.js'
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/persistent-system-shell-v1.js'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-native-server-quest-routing-v1.mjs'
+      - 'scripts/verify-native-server-quest-structure-v1.mjs'
+      - 'scripts/verify-native-clipped-quest-capture-v1.mjs'
+      - '.github/workflows/verify-native-clipped-quest-capture-v1.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax, routing, schema and capture contracts
+        run: |
+          node --check public/app/local-ai/native-server-guide-fastpath-v1.js
+          node --check public/app/guide-chat-surface-v350.js
+          node --check public/extensions/civweave-weaveling-plan-json-v190.js
+          node --check scripts/verify-native-clipped-quest-capture-v1.mjs
+          node scripts/verify-native-server-quest-routing-v1.mjs
+          node scripts/verify-native-server-quest-structure-v1.mjs
+          node scripts/verify-native-clipped-quest-capture-v1.mjs
+          node scripts/verify-native-fast-chat-lane-v1.mjs
