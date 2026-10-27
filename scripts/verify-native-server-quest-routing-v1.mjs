@@ -25,7 +25,7 @@ globalThis.CivweaveWeavelingPlanJsonV190={
   combinedLearningProductionIntent:text=>/teach me.*then.*app/i.test(text),
   createModelPlan:async(args,api)=>{
     calls.push({args,selected:api.selectedConfig()});
-    return{provider:'openai-compatible',model:'qwen35-4b-native',plan:{state:'review',paths:[{realm:'living-school'},{realm:'cerbanimo'}]},response:{answer:'A reviewable cross-realm Quest was generated.',requiresConsent:true,approvalGate:{kind:'intention-activation',required:true}}};
+    return{provider:'openai-compatible',model:'qwen35-4b-native',questAuthoring:{aiGenerated:true},plan:{state:'review',paths:[{realm:'living-school'},{realm:'cerbanimo'}]},response:{answer:'A reviewable cross-realm Quest was generated.',requiresConsent:true,approvalGate:{kind:'intention-activation',required:true}}};
   }
 };
 const noGeneric=async()=>{throw Error('Native Quest incorrectly fell through to generic chat')};
