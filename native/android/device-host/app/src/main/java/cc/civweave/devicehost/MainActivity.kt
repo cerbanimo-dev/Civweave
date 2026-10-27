@@ -1,6 +1,9 @@
 package cc.civweave.devicehost
 
 import android.app.Activity
+import android.Manifest
+import android.content.pm.PackageManager
+import kotlin.concurrent.thread
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -26,6 +29,9 @@ class MainActivity : Activity() {
     private lateinit var startButton: Button
     private lateinit var stopButton: Button
     private lateinit var rotate: Button
+    private lateinit var checkUpdates: Button
+    private lateinit var installUpdate: Button
+    private var stagedUpdate: HostUpdateManager.Staged? = null
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, binder: IBinder) {
@@ -74,7 +80,7 @@ class MainActivity : Activity() {
         }
         val details = TextView(this).apply {
             text = "This optional service reports native host capabilities to Civweave. " +
-                "It cannot install APKs or run unrestricted commands in this build. " +
+                "Updates require a pinned signing key and separate Android confirmation. " +
                 "Start it, then enter the displayed code in Civweave Settings → Android Device Host."
             textSize = 16f
             setPadding(0, 14, 0, 14)
@@ -87,11 +93,19 @@ class MainActivity : Activity() {
         startButton = Button(this).apply { text = "Start local host" }
         stopButton = Button(this).apply { text = "Stop local host" }
         rotate = Button(this).apply { text = "Generate a new pairing code" }
+        checkUpdates = Button(this).apply {
+            text = "Check for signed Host update"
+            isEnabled = HostReleasePolicy.verificationKeyConfigured()
+        }
+        installUpdate = Button(this).apply {
+            text = "Review and install verified update"
+            isEnabled = false
+        }
         status = TextView(this).apply {
             textSize = 14f
             setPadding(0, 16, 0, 16)
         }
-        listOf(title, details, codeView, startButton, stopButton, rotate, status).forEach {
+        listOf(title, details, codeView, startButton, stopButton, rotate, checkUpdates, installUpdate, status).forEach {
             column.addView(it, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
             ))
@@ -123,6 +137,56 @@ class MainActivity : Activity() {
                 codeView.text = next
                 status.text = "New code issued. All previous pairing sessions were revoked."
             }
+        }
+        checkUpdates.setOnClickListener {
+            if (!HostReleasePolicy.verificationKeyConfigured()) {
+                status.text = "No native release trust key has been provisioned. Updates disabled."
+                return@setOnClickListener
+            }
+            stagedUpdate?.file?.delete()
+            stagedUpdate = null
+            installUpdate.isEnabled = false
+            checkUpdates.isEnabled = false
+            status.text = "Checking independently signed release and verifying the APK…"
+            thread(name="civweave-host-update", isDaemon=true) {
+                val result = runCatching { HostUpdateManager.prepare(this) }
+                runOnUiThread {
+                    if (isDestroyed) return@runOnUiThread
+                    checkUpdates.isEnabled = HostReleasePolicy.verificationKeyConfigured()
+                    result.onSuccess { staged ->
+                        stagedUpdate = staged
+                        installUpdate.isEnabled = true
+                        status.text = "Verified update " + staged.release.versionName +
+                            " is staged. Tap Review and install to request Android confirmation."
+                    }.onFailure { error ->
+                        status.text = "No trusted update is ready: " +
+                            (error.message ?: error.javaClass.simpleName)
+                    }
+                }
+            }
+        }
+        installUpdate.setOnClickListener {
+            val staged = stagedUpdate
+            if (staged == null) {
+                status.text = "Check for a verified update first."
+                return@setOnClickListener
+            }
+            if (android.os.Build.VERSION.SDK_INT >= 33 &&
+                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1242)
+                status.text = "Allow installation notifications, then tap Review and install again."
+                return@setOnClickListener
+            }
+            try {
+                status.text = HostUpdateManager.requestInstall(this, staged)
+            } catch (error: Exception) {
+                status.text = "Android installation not started: " +
+                    (error.message ?: error.javaClass.simpleName)
+            }
+        }
+        if (!HostReleasePolicy.verificationKeyConfigured()) {
+            status.text = "Native updates disabled: release verification key not provisioned. " +
+                "Start the host to pair with Civweave."
         }
         // Reconnect to an already running host, but do not launch one implicitly.
         bindRunningHost(0)
