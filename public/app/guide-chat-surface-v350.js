@@ -320,6 +320,62 @@ function syncArtifactGates(){
   const messages=readThread(activeSystem).messages||[],rows=new Map(messages.map((row,index)=>[String(row.id||`history-${activeSystem}-${index}`),row]));
   for(const article of log.children)syncArtifactGate(article,rows.get(article.dataset.messageId));
 }
+function clippedQuestCandidate(row,messages,index){
+  if(activeSystem!=='civweave'||!row||row.role!=='assistant'||row.pending||row.planSnapshot?.paths?.length||row.approvalGate?.kind==='intention-activation')return null;
+  if(!/Learning Journey plan:|Response reached the generation limit|## Module|\\bStatus: REVIEW\\b/i.test(String(row.text||'')))return null;
+  let source=null;
+  for(let i=index-1;i>=0;i--)if(messages[i]?.role==='user'){source=messages[i];break}
+  const original=clean(source?.text||'',5000);
+  if(!/\\b(?:help me|help us|we want|i want|create|build|start|establish|organize|launch|design|plan|develop|make)\\b/i.test(original)||
+    !/\\b(?:commune|garden|infrastructure|community|cooperative|project|quest|app|website|service|collective|enterprise|workspace|device|platform)\\b/i.test(original))return null;
+  return {original,excerpt:clean(row.text,3600)};
+}
+let captureQuestBusy=false;
+function syncClippedQuestCapture(article,row,messages,index){
+  const candidate=clippedQuestCandidate(row,messages,index);
+  let panel=article.querySelector('.cw350-clipped-quest-capture');
+  if(!candidate){panel?.remove();return}
+  if(!panel){
+    panel=document.createElement('section');
+    panel.className='cw350-artifact-gate cw350-clipped-quest-capture';
+    const title=document.createElement('strong'),description=document.createElement('span'),actions=document.createElement('div');
+    actions.className='cw350-artifact-actions';
+    panel.append(title,description,actions);
+    article.querySelector('.cw350-bubble')?.parentElement?.append(panel);
+  }
+  const title=panel.querySelector('strong'),description=panel.querySelector('span'),actions=panel.querySelector('.cw350-artifact-actions');
+  title.textContent=row.capturedQuestId?'Structured Quest captured':'Recover clipped generation';
+  description.textContent=row.capturedQuestId?
+    'Your reviewable structured Quest was saved. It has not been activated.':
+    'This answer is chat text, not a saved Quest. Use the original request plus this partial draft to create a validated, reviewable cross-realm Quest.';
+  let button=actions.querySelector('button');
+  if(!button){button=document.createElement('button');button.type='button';actions.append(button)}
+  button.textContent=row.capturedQuestId?'Open captured Quest':'Capture as structured Quest';
+  button.disabled=captureQuestBusy;
+  button.onclick=async()=>{
+    if(row.capturedQuestId){globalThis.CivweaveIntentionUI?.open?.(row.capturedQuestId);return}
+    if(captureQuestBusy)return;
+    captureQuestBusy=true;button.disabled=true;button.textContent='Generating structured Quest…';
+    const notice=document.createElement('span');notice.textContent='Converting existing text using the selected model; no Quest will activate automatically.';
+    panel.append(notice);
+    try{
+      const module=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.14-clipped-quest-capture');
+      const result=await module.captureClippedQuest({originalRequest:candidate.original,clippedText:candidate.excerpt});
+      if(!result?.planItemId||result?.plan?.state!=='review')throw new Error('No validated reviewable Quest was produced.');
+      const thread=readThread('civweave'),idx=(thread.messages||[]).findIndex(item=>item.id===row.id);
+      if(idx>=0)thread.messages[idx]={...thread.messages[idx],capturedQuestId:result.planItemId};
+      thread.messages.push({id:uid('msg'),at:now(),role:'assistant',guide:'civweave',responderSystem:'civweave',
+        text:clean(result?.response?.answer||'The recovered structured Quest is ready for review.',10000),
+        nextAction:clean(result?.response?.choice?.nextAction||'',1200),
+        provider:result.provider,model:result.model,approvalGate:result.response?.approvalGate||null,
+        planSnapshot:clone(result.plan),capturedFromMessageId:row.id});
+      writeThread('civweave',thread);
+      render();
+    }catch(error){
+      notice.textContent='Capture failed: '+clean(error?.message||error,700)+'. The original message remains saved; no Quest was activated.';
+    }finally{captureQuestBusy=false;button.disabled=false;if(!row.capturedQuestId)button.textContent='Capture as structured Quest'}
+  };
+}
 function render(){
   if(!root)return false;syncChrome();const log=root.querySelector('[data-log]');if(!log)return false;
   const thread=readThread(activeSystem),messages=Array.isArray(thread.messages)?thread.messages:[];
@@ -350,6 +406,7 @@ function render(){
     if(!user&&meta){if(!metadata){metadata=document.createElement('div');metadata.className='cw350-meta';bubble.parentElement.append(metadata);}if(metadata.textContent!==meta)metadata.textContent=meta;}
     else metadata?.remove();
     syncArtifactGate(article,row);
+    syncClippedQuestCapture(article,row,messages,index);
     if(article!==cursor)log.insertBefore(article,cursor);else cursor=cursor.nextElementSibling;
   });
   for(const article of existing.values())article.remove();
