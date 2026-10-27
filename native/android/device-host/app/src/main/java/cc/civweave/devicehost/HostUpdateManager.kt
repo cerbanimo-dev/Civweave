@@ -105,17 +105,18 @@ internal object HostUpdateManager {
         }.toSet()
     }
 
+    @Suppress("DEPRECATION")
     private fun verifyArchive(activity: Activity, file: File, expectedVersion: Long) {
         val pm = activity.packageManager
         val flags = if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
-                    else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES
+                    else PackageManager.GET_SIGNATURES
         @Suppress("DEPRECATION")
         val candidate = pm.getPackageArchiveInfo(file.absolutePath, flags)
             ?: throw SecurityException("Downloaded file is not a valid Android APK.")
         if (candidate.packageName != HostReleasePolicy.EXPECTED_PACKAGE)
             throw SecurityException("Package identity mismatch.")
         val code = if (Build.VERSION.SDK_INT >= 28) candidate.longVersionCode
-                   else @Suppress("DEPRECATION") candidate.versionCode.toLong()
+                   else candidate.versionCode.toLong()
         if (code != expectedVersion || code <= BuildConfig.VERSION_CODE)
             throw SecurityException("APK version does not match the signed manifest.")
         @Suppress("DEPRECATION")
