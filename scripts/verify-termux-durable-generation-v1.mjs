@@ -94,3 +94,69 @@ assert.ok(observed.some(event=>event.phase==='native-background-submitted'));
 assert.equal(sessionMap.has(resumeKey),false,'Consume only explicit matching resume marker');
 assert.equal(JSON.parse(localMap.get(pendingKey)).state,'completed');
 console.log('PASS: Detached Termux job persists after browser abort, resumes exact job on a fresh page, restores model output without duplicate generation.');
+
+// Run the canonical native click owner with isolated storage and transport. The
+// foreground generation/resume keeps this owner busy until observation ends.
+const clickStart=controller.indexOf('async function handleLivingSchoolClick(event){');
+const clickEnd=controller.indexOf('\nfunction chatCurriculumData(',clickStart);
+assert.ok(clickStart>=0&&clickEnd>clickStart,'Find the canonical native click owner');
+const clickOwner=controller.slice(clickStart,clickEnd);
+function clickFixture({busy=false,retryStarting=false,jobId='f'.repeat(32),pairing='a'.repeat(64),
+  confirmed=true,disabled=false,action='cancel-companion-generation'}={}){
+  const job={jobId,capability:'Learn note taking',clientKey:'c'.repeat(32),purpose:'living-school-research-grounded-curriculum-v218.1',state:'running'};
+  const calls=[],writes=[],toasts=[];
+  let confirmations=0,ordinaryActions=0;
+  const target={disabled,dataset:{lsAction:action,jobId:'e'.repeat(32)}};
+  const sandbox={busy,retryStarting,console,
+    readJson:key=>{assert.equal(key,pendingKey);return job;},
+    sessionStorage:{getItem:key=>{assert.equal(key,pairKey);return pairing;},
+      setItem:(...args)=>writes.push(args),removeItem:(...args)=>writes.push(args)},
+    localStorage:{removeItem:(...args)=>writes.push(args),setItem:(...args)=>writes.push(args)},
+    confirm:()=>{confirmations++;return confirmed;},
+    fetch:async(url,options)=>{calls.push({url,options});return{ok:true,status:200};},
+    toastMessage:message=>toasts.push(message),
+    actions:{'generate-curriculum':async()=>ordinaryActions++},
+    markDispatch:()=>ordinaryActions++,generateCurriculumFromChat:async()=>ordinaryActions++,
+    renderEnhanced:()=>ordinaryActions++,
+  };
+  vm.runInNewContext(clickOwner+'\nglobalThis.click=handleLivingSchoolClick;',sandbox,
+    {filename:'living-school-cleanroom-v218.mjs:native-click-owner'});
+  return{calls,writes,toasts,get confirmations(){return confirmations;},get ordinaryActions(){return ordinaryActions;},
+    click:()=>sandbox.click({target:{closest:selector=>{assert.equal(selector,'[data-ls-action]');return target;}},
+      preventDefault(){},stopImmediatePropagation(){}})};
+}
+for(const active of [{busy:true},{retryStarting:true},{busy:true,retryStarting:true}]){
+  const fixture=clickFixture(active);
+  await fixture.click();
+  assert.equal(fixture.calls.length,1,'Explicit native cancellation must reach the accepted job while '+JSON.stringify(active));
+  const {url,options}=fixture.calls[0];
+  assert.equal(url,'http://127.0.0.1:8766/v1/generations/'+'f'.repeat(32)+'/cancel',
+    'Cancel the current accepted job from storage, never an arbitrary control job ID');
+  assert.equal(options.method,'POST');
+  assert.equal(options.headers['X-Civweave-Token'],'a'.repeat(64));
+  assert.equal(options.credentials,'omit');
+  assert.equal(options.mode,'cors');
+  assert.equal(options.body,'{}');
+  assert.equal(fixture.confirmations,1);
+  assert.equal(fixture.writes.length,0,'Cancellation must not dismiss the saved job or submit/resume inference');
+  assert.equal(fixture.ordinaryActions,0);
+  assert.match(fixture.toasts[0],/cancellation requested/);
+  for(const action of ['generate-curriculum','resume-companion-generation','dismiss-companion-generation']){
+    const blocked=clickFixture({...active,action});
+    await blocked.click();
+    assert.equal(blocked.calls.length+blocked.writes.length+blocked.ordinaryActions+blocked.confirmations,0,
+      action+' must remain blocked while '+JSON.stringify(active));
+  }
+}
+for(const options of [{disabled:true},{confirmed:false}]){
+  const fixture=clickFixture({busy:true,...options});
+  await fixture.click();
+  assert.equal(fixture.calls.length,0,'Disabled or declined cancellation must not reach Termux');
+}
+for(const [options,message] of [[{jobId:''},/No accepted Companion job ID/],[{jobId:'../another-job'},/No accepted Companion job ID/],
+  [{pairing:''},/Pair Termux Companion/],[{pairing:'not-a-pairing-key'},/Pair Termux Companion/]]){
+  const fixture=clickFixture({busy:true,...options});
+  await assert.rejects(fixture.click(),message);
+  assert.equal(fixture.calls.length+fixture.confirmations,0,'Invalid job or pairing must fail before confirmation/transport');
+}
+console.log('PASS: Native cancellation bypasses only the busy/retry guard, authenticates the exact accepted Termux job, and preserves ordinary-action blocking.');

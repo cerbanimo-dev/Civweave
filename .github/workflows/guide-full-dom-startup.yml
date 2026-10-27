@@ -10,6 +10,7 @@ on:
       - 'scripts/test-merlin-full-dom-preview-v1.mjs'
       - 'scripts/test-weaveling-full-dom-authoring-v1.mjs'
       - 'scripts/test-local-authority-lifecycle-v1.mjs'
+      - 'scripts/test-family-guide-readiness-v1.mjs'
       - 'scripts/test-persistent-guide-owner-v1.mjs'
       - 'scripts/test-anarchadia-path-navigation-v1.mjs'
       - 'scripts/test-anarchadia-native-return-v1.mjs'
@@ -41,6 +42,7 @@ on:
       - 'scripts/test-merlin-full-dom-preview-v1.mjs'
       - 'scripts/test-weaveling-full-dom-authoring-v1.mjs'
       - 'scripts/test-local-authority-lifecycle-v1.mjs'
+      - 'scripts/test-family-guide-readiness-v1.mjs'
       - 'scripts/test-persistent-guide-owner-v1.mjs'
       - 'scripts/test-anarchadia-path-navigation-v1.mjs'
       - 'scripts/test-anarchadia-native-return-v1.mjs'
@@ -79,7 +81,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - name: Verify startup, selected HTTP routing, saved draft review and approval
-        run: node --test scripts/test-local-authority-lifecycle-v1.mjs scripts/test-persistent-guide-owner-v1.mjs scripts/test-guide-full-dom-startup-v1.mjs scripts/test-merlin-full-dom-preview-v1.mjs scripts/test-weaveling-full-dom-authoring-v1.mjs
+        run: node --test scripts/test-family-guide-readiness-v1.mjs scripts/test-local-authority-lifecycle-v1.mjs scripts/test-persistent-guide-owner-v1.mjs scripts/test-guide-full-dom-startup-v1.mjs scripts/test-merlin-full-dom-preview-v1.mjs scripts/test-weaveling-full-dom-authoring-v1.mjs
       - name: Verify Passport navigation and Moss authoring lifecycle
         run: node --test scripts/test-guild-map-return-v1.mjs scripts/test-knowledge-library-return-v1.mjs scripts/test-guild-search-in-shell-v1.mjs scripts/test-anarchadia-native-screen-visibility-v1.mjs scripts/test-anarchadia-path-navigation-v1.mjs scripts/test-anarchadia-native-return-v1.mjs scripts/test-navigation-dock-v1.mjs scripts/test-living-school-active-run-ui-v2.mjs scripts/test-moss-plan-lifecycle-v1.mjs scripts/test-moss-final-completion-gate-v1.mjs scripts/test-moss-weave-path-identity-v1.mjs scripts/test-moss-materialization-lifecycle-v1.mjs scripts/test-moss-assessment-materialization-v1.mjs scripts/test-moss-prompt-transport-v1.mjs scripts/test-cerbanimo-startup-v1.mjs scripts/test-video-learning-contract-v1.mjs scripts/test-video-topic-relevance-v1.mjs
       - name: Verify Quest subsystem scope and guide navigation context

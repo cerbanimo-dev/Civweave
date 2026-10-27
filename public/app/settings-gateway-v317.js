@@ -7,7 +7,7 @@ const LAYER_ID='cw-settings-v320';
 const STYLE_ID='cw-settings-v320-style';
 const INPUT_SLOT='__civweaveSettingsV320Capture';
 const SETTINGS_UI='/app/server-ai-settings-v301.js?v=1.0.117-v305-community-dividend';
-const MODEL_PROVIDER_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.16-ollama-request-thinking';
+const MODEL_PROVIDER_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.17-termux-durable-jobs';
 const SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v325.js?v=1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const SETTINGS_KEY='civweave.universal-ai.v127';

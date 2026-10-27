@@ -10,7 +10,7 @@ assert.match(core,/NATIVE_QWEN_DESIGN_TIMEOUT_MS=1200000/);
 assert.match(core,/withNativeMossStream\([^\n]*,'design'\)/);
 assert.match(core,/compactDesignEvidence\(sources\)/,'Bounded excerpts must enter the actual messages sent to Qwen');
 assert.match(budget,/configuredTimeout\(config,DESIGN_TIMEOUT_MS\)/,'Budget must preserve design-specific requested deadline');
-assert.match(index,/living-school-cleanroom-v218\.mjs\?v=structured-single-v221-durable-jobs-v12/);
+assert.match(index,/living-school-cleanroom-v218\.mjs\?v=structured-single-v221-durable-jobs-v13-cancel-busy/);
 
 const helpers=core.slice(core.indexOf('const NATIVE_QWEN_DESIGN_TIMEOUT_MS='),core.indexOf('function resultText('));
 const scope={clean:(x,n=9999)=>String(x??'').slice(0,n),providerName:c=>String(c?.provider||c?.route||'').toLowerCase()};

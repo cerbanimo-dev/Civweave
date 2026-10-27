@@ -186,8 +186,8 @@ async function handleLivingSchoolClick(event){
   const target=event.target?.closest?.('[data-ls-action]');
   if(!target)return;
   event.preventDefault();event.stopImmediatePropagation();
-  if(target.disabled||busy||retryStarting)return;
   const actionName=String(target.dataset.lsAction||'').trim();
+  if(target.disabled||((busy||retryStarting)&&actionName!=='cancel-companion-generation'))return;
   if(actionName==='resume-companion-generation'){
     const job=readJson('civweave.termux-companion.curriculum-job.v1',null);
     if(!job?.capability||!job?.clientKey||!job?.purpose)return;

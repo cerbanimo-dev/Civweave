@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
-import {learningJourneySnapshot,PLAN_KEY,QUEUE_KEY} from '../public/app/cabinets/living-school/living-school-journey-index-v1.mjs';
+import {learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY} from '../public/app/cabinets/living-school/living-school-journey-index-v1.mjs';
 
 const read=path=>readFileSync(new URL(`../public/${path}`,import.meta.url),'utf8');
 const stripModules=source=>source.replace(/^import[^\n]*;\r?\n/gm,'').replace(/^export \* from[^\n]+\r?\n/gm,'').replace(/export (async )?function /g,'$1function ').replace(/export const /g,'const ');
@@ -19,7 +19,7 @@ function fixture(){
   save(keys.handoff,{target:'living-school',weaveId:plan.id,pathId:route.id,plan,preparedAt:'2026-01-01T00:00:00.000Z',source:'anarchadia-passport-v159'});
   save('civweave.living-school.intake.v152',[{id:`learning:${plan.id}`,sourcePlanId:plan.id,title:route.title,purpose:capability,completionCriteria:route.completionCriteria,status:'ready'}]);
   const document={readyState:'loading',hidden:false,documentElement:{dataset:{}},getElementById:()=>null,querySelector:()=>null,querySelectorAll:()=>[],scripts:[],addEventListener(){}};
-  const context=vm.createContext({console,Date,Math,JSON,Object,Array,String,Number,Boolean,Set,Map,Promise,URL,URLSearchParams,AbortController,structuredClone,learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,document,location:{pathname:'/app/cabinets/living-school/index.html',href:'https://civweave.test/app/cabinets/living-school/index.html',search:''},
+  const context=vm.createContext({console,Date,Math,JSON,Object,Array,String,Number,Boolean,Set,Map,Promise,URL,URLSearchParams,AbortController,structuredClone,learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY,document,location:{pathname:'/app/cabinets/living-school/index.html',href:'https://civweave.test/app/cabinets/living-school/index.html',search:''},
     localStorage:{getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)},
     gate:{defaultProjectGate:()=>({status:'not-started'}),normalizeProjectGate:value=>value},
     addEventListener:(type,fn)=>events.set(type,[...(events.get(type)||[]),fn]),dispatchEvent:event=>{for(const fn of events.get(event.type)||[])fn(event)},CustomEvent:class{constructor(type,options={}){this.type=type;this.detail=options.detail}},
