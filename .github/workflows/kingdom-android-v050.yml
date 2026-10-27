@@ -1,4 +1,4 @@
-name: Kingdom v0.6.0 conversational voice and Scripture research Android APK
+name: Kingdom v0.6.1 on-device source search tools Android APK
 on:
   workflow_dispatch:
   pull_request:
@@ -7,9 +7,10 @@ on:
       - 'pocket-scribe/m4/kingdom-v053-kleidiai.py'
       - 'pocket-scribe/m4/kingdom-v054-snapdragon.py'
       - 'pocket-scribe/m4/kingdom-v060-conversation-research.tar.gz.b64'
+      - 'pocket-scribe/m4/kingdom-v061-tool-routing.tar.gz.b64'
       - '.github/workflows/kingdom-android-v050.yml'
   push:
-    branches: [kingdom/android-v060-conversation-research]
+    branches: [kingdom/android-v061-research-tools]
     paths:
       - 'pocket-scribe/m4/kingdom-v052-optimized-cpu.py'
       - '.github/workflows/kingdom-android-v050.yml'
@@ -46,6 +47,7 @@ jobs:
           base64 -d pocket-scribe/m4/kingdom-v060-conversation-research.tar.gz.b64 | tar -xzf - -C pocket-scribe/m4/workspace
           sed -i 's/mp.n_gpu_layers=0;mp.use_mmap=true;/mp.n_gpu_layers=0;/' pocket-scribe/m4/workspace/android/app/src/main/cpp/qwen_jni.cpp
           sed -i '/import java.io.InputStream;/a import java.io.IOException;' pocket-scribe/m4/workspace/android/app/src/main/java/org/kingdom/pocketscribe/MainActivity.java
+          base64 -d pocket-scribe/m4/kingdom-v061-tool-routing.tar.gz.b64 | tar -xzf - -C pocket-scribe/m4/workspace
           node --check pocket-scribe/m4/workspace/android/app/src/main/assets/app.js
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '17'}
@@ -70,19 +72,19 @@ jobs:
         working-directory: pocket-scribe/m4/workspace/android
         shell: bash
         run: |
-          sed -i "s/applicationId 'org.kingdom.ofheaven'/applicationId 'org.kingdom.ofheaven.converse060'/" app/build.gradle
-          sed -i "s/versionName '0.5.0-Kingdom-Integrated'/versionName '0.6.0-Conversational-Research'/" app/build.gradle
+          sed -i "s/applicationId 'org.kingdom.ofheaven'/applicationId 'org.kingdom.ofheaven.tools061'/" app/build.gradle
+          sed -i "s/versionName '0.5.0-Kingdom-Integrated'/versionName '0.6.1-Source-Tools'/" app/build.gradle
           gradle :app:assembleDebug --no-daemon --stacktrace --max-workers=2
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -s "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | tee kingdom-package-info.txt
-          grep "package: name='org.kingdom.ofheaven.converse060'" kingdom-package-info.txt
+          grep "package: name='org.kingdom.ofheaven.tools061'" kingdom-package-info.txt
           grep -R -l -m1 -- '-O3' app/.cxx/Debug >/dev/null
           grep -R -l -m1 -- 'GGML_CPU_KLEIDIAI' app/.cxx/Debug >/dev/null
           grep -R -l -m1 -- 'armv8.6-a+dotprod+i8mm+fp16' app/.cxx/Debug >/dev/null
       - uses: actions/upload-artifact@v4
         with:
-          name: kingdom-of-heaven-v060-conversation-research-debug-apk
+          name: kingdom-of-heaven-v061-source-tools-debug-apk
           path: pocket-scribe/m4/workspace/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 21
