@@ -73,7 +73,7 @@ importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v28-m
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v295-entry-integrity');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
-importScripts('/service-worker-radio-core-v305.js?v=1.0.163-radio-core-shell-v305-direct-audio-v1');
+importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-direct-audio-v1');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
 importScripts('/service-worker-offline-low-pressure-v1.js?v=offline-campus-low-pressure-v1');
