@@ -9,6 +9,7 @@ const url='data:text/javascript;base64,'+Buffer.from(source).toString('base64');
 const native=await import(url);
 const request='Create a reviewable cross-realm Quest with two required paths: Living School for mastering and memorizing tarot, followed by Cerbanimo for designing, developing, and testing my own tarot application. Include dependencies and completion evidence for both. Do not activate the Quest.';
 const combined='Can you teach me how to read and memorize the tarot, then create a plan to create my own tarot app';
+const commune='Help me create a commune starting with a community garden and building infrastructure from there';
 const calls=[];
 globalThis.localStorage={getItem:()=>null,setItem(){}};
 globalThis.CivweaveSettingsV320={readState:()=>({provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1'})};
@@ -18,7 +19,9 @@ globalThis.CivweaveWeavelingPlanMaterializationV265={materialize:()=>{throw Erro
 globalThis.CivweaveUnifiedChatSystemV1={version:'1.2.18-unified-chat-system-v1-explicit-learning-goal',handleNativeLivingSchoolRequest:async()=>{throw Error('Moss stole the Quest')}};
 globalThis.CivweaveWeavelingPlanJsonV190={
   version:'1.2.12-weaveling-plan-json-v190-saved-quest-revision',
-  planIntent:text=>/quest|plan/i.test(text),
+  planIntent:text=>/quest|plan|commune|community garden/i.test(text),
+  explicitProjectIntent:text=>/create|build|project|quest/i.test(text),
+  supportsClippedDraftV1:true,
   combinedLearningProductionIntent:text=>/teach me.*then.*app/i.test(text),
   createModelPlan:async(args,api)=>{
     calls.push({args,selected:api.selectedConfig()});
@@ -26,7 +29,7 @@ globalThis.CivweaveWeavelingPlanJsonV190={
   }
 };
 const noGeneric=async()=>{throw Error('Native Quest incorrectly fell through to generic chat')};
-for(const text of [request,combined]){
+for(const text of [request,combined,commune]){
   const ctrl=new AbortController(),progress=[];
   const result=await native.respondNative({system:'civweave',text,history:[],signal:ctrl.signal,fetcher:noGeneric,onToken:(delta,whole,meta)=>progress.push(meta)});
   assert.equal(result.plan?.state,'review');
@@ -34,8 +37,16 @@ for(const text of [request,combined]){
   assert.equal(result.plan.paths.length,2);
   assert.ok(progress.some(row=>row?.kind==='quest-progress'),'Quest never entered the official generation lifecycle.');
 }
-assert.equal(calls.length,2,'Expected exactly one canonical Quest planning call per user request.');
+assert.equal(calls.length,3,'Expected exactly one canonical Quest planning call per user request.');
 assert.ok(calls.every(row=>row.args.signal),'The user cancellation signal was not forwarded to Quest generation.');
 assert.ok(calls.every(row=>row.selected.model==='qwen35-4b-native'),'The selected Termux model was not preserved.');
-assert.ok(calls.every(row=>row.args.text===request||row.args.text===combined),'The original Quest request was modified or lost.');
+assert.ok(calls.every(row=>[request,combined,commune].includes(row.args.text)),'The original Quest request was modified or lost.');
+const captured=await native.captureClippedQuest({originalRequest:commune,clippedText:'Learning Journey plan: Commune Starting With A Community Garden. This is only a partial draft.'});
+assert.equal(captured.plan.state,'review');
+assert.equal(calls.length,4,'Manual capture must perform exactly one additional canonical structured Quest call.');
+assert.equal(calls.at(-1).args.text,commune,'Clipped assistant text must not replace the original Hero wish.');
+assert.match(calls.at(-1).args.clippedDraft,/Commune Starting/);
+assert.equal(calls.at(-1).selected.model,'qwen35-4b-native');
+await assert.rejects(native.captureClippedQuest({originalRequest:'Say READY',clippedText:'A long generic reply that is not a plan'}),/no identifiable Quest|project request/i);
+assert.equal(calls.length,4,'Non-project clipped chat must not start another Quest.');
 console.log('PASS native Termux route invokes canonical Weaveling Quest planning for explicit and combined intents; no generic chat or second model.');
