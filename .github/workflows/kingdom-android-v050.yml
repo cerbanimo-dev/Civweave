@@ -44,6 +44,7 @@ jobs:
           python pocket-scribe/m4/kingdom-v053-kleidiai.py
           python pocket-scribe/m4/kingdom-v054-snapdragon.py
           base64 -d pocket-scribe/m4/kingdom-v060-conversation-research.tar.gz.b64 | tar -xzf - -C pocket-scribe/m4/workspace
+          sed -i 's/mp.n_gpu_layers=0;mp.use_mmap=true;/mp.n_gpu_layers=0;/' pocket-scribe/m4/workspace/android/app/src/main/cpp/qwen_jni.cpp
           sed -i '/import java.io.InputStream;/a import java.io.IOException;' pocket-scribe/m4/workspace/android/app/src/main/java/org/kingdom/pocketscribe/MainActivity.java
           node --check pocket-scribe/m4/workspace/android/app/src/main/assets/app.js
       - uses: actions/setup-java@v4
