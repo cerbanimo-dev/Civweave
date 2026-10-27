@@ -26,7 +26,7 @@ class DeviceHostService : Service() {
         private const val NOTIFICATION_ID = 1241
     }
 
-    inner class LocalBinder : Binder() {
+    internal inner class LocalBinder : Binder() {
         fun host(): LoopbackHostServer? = server
     }
 
