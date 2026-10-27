@@ -108,7 +108,7 @@ async function maybeCreateOfficialQuest({system,user,history,signal,onToken}){
     onEvent:event=>{
       if(event?.phase!=='partial')return;
       const value=String(event.accumulatedText||'');
-      try{onToken?.('','',{kind:'quest-progress',phase:'generating',characters:value.length})}catch{}
+      try{onToken?.('','',{kind:'quest-progress',phase:'generating',characters:value.length,draft:value.slice(0,12000)})}catch{}
     }
   },{
     selectedConfig:()=>({provider:'openai-compatible',route:'openai-compatible',model:NATIVE_MODEL,
