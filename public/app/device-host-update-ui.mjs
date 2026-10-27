@@ -86,8 +86,12 @@ check.addEventListener('click', async () => {
       publicKeyBase64Url: RELEASE_PUBLIC_KEY_BASE64URL, keyId: RELEASE_KEY_ID
     });
     verified = release;
+    const decision = updateDecision(hostVersion(), release.versionCode);
     show('Verified release: ' + release.versionName +
-      '\nInstalled version: unknown. Android will determine whether installation or an update is allowed.');
+      '\nHost status: ' + decision +
+      (decision === 'older-release' || decision === 'current'
+        ? '. The installed host is already current or newer; download blocked.'
+        : '. Android will independently approve or reject installation.'));
   } catch (error) {
     show('No verified download available: ' + String(error?.message || error));
   } finally { busy(false); }
