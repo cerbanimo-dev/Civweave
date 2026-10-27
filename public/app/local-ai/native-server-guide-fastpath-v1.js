@@ -128,7 +128,12 @@ export async function captureClippedQuest({originalRequest='',clippedText='',his
   const user=clean(originalRequest,5000),draft=clean(clippedText,3600);
   if(user.length<10||draft.length<20)throw new Error('A prior user request and existing assistant text are required.');
   markNativeStage('quest-clipped-capture-requested');
-  const owner=await ensureQuestPlanner();
+  let owner=await ensureQuestPlanner();
+  // Existing PWA tabs may have the older Quest owner already initialized.
+  if(!owner.supportsClippedDraftV1){
+    await loadScript(QUEST_PLANNER,()=>globalThis.CivweaveWeavelingPlanJsonV190?.supportsClippedDraftV1===true,'Clipped-draft Quest repair');
+    owner=globalThis.CivweaveWeavelingPlanJsonV190;
+  }
   if(!owner.explicitProjectIntent?.(user)&&!owner.planIntent?.(user,history,{currentContext:{systemId:'civweave'}}))
     throw new Error('This response has no identifiable Quest-producing project request. Nothing was saved.');
   const result=await owner.createModelPlan({
