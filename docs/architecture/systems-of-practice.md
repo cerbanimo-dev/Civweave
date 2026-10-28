@@ -112,6 +112,10 @@ Realm code may call the canonical API or host a presentation surface. It may not
 
 The v1 P-256 ECDH + HKDF + AES-GCM envelope is a baseline transport-privacy layer. Do not describe it as a mature Signal-equivalent protocol until forward secrecy, multi-device fanout, key transparency, prekeys/rotation, and verification UX are implemented and reviewed.
 
+## Optional Starling Guild Collective (migration foundation)
+
+`lib/starling-collective-v1.mjs` holds the ported Starling persona registry and pure policies for Guildkeeper founding Intention fallback, human-member-only ratification eligibility, task-offer compatibility, and hosted generation preflight. Its contract is `docs/contracts/starling-collective-guild-service-v1.md`. This is not a second Guild, Quest, governance, membership, wallet, or inference owner. It does not currently start agents, create/claim tasks, execute spending, or publish Guild updates. Future adapters must delegate execution and persistence to existing capability owners.
+
 ## Guild Quest publication
 
 `cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs` owns the portable publication contract. The node-cloud Guild Durable Object and the standalone mobile Guild capacity Durable Object use that same contract with their existing authenticated member authorities and storage. The standalone template keeps this source inside its deploy directory; node-cloud imports it directly.
