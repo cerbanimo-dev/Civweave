@@ -1,4 +1,5 @@
 import {STARLING_PERSONAS,guildQuestBeatSnapshot,discoverGuildOpportunities} from './shared/starling-collective-v1.mjs';
+import {COLLECTIVE_TOOL_CATALOG} from './shared/starling-collective-tools-v1.mjs';
 
 const ID='cw-starling-lounge';
 const PEOPLE=Object.values(STARLING_PERSONAS);
@@ -12,7 +13,7 @@ function setup(){
   if(state.root)return state.root;
   const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=starling-native-r1';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
-  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-stage-avatar" data-sl-stage-avatar></div><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><h2>Collective conversation</h2><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Communicate with the Collective</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Write a message for the Collective or selected persona…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Messages open in Civweave’s existing chat. Direct persona delivery is not enabled until the native worker is installed.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><p class="sl-status" data-sl-work-status></p></aside></div>';
+  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><h2>Collective conversation</h2><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Communicate with the Collective</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Write a message for the Collective or selected persona…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Messages open in Civweave’s existing chat. Direct persona delivery is not enabled until the native worker is installed.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><p class="sl-status" data-sl-work-status></p></aside></div>';
   root.addEventListener('click',click);
   root.querySelector('[data-sl-form]').addEventListener('submit',send);
   root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close()}});
@@ -24,14 +25,14 @@ function renderCast(){
   target.replaceChildren();
   for(const person of PEOPLE){
     const b=el('button','sl-persona');b.type='button';b.dataset.slPersona=person.id;b.setAttribute('aria-pressed',String(state.speaker===person.id));
-    const avatar=el('span','sl-avatar',person.name.slice(0,1));avatar.style.setProperty('--avatar',person.color);
+    const avatar=el('img','sl-avatar');avatar.src='/app/assets/starling/'+person.id+'.svg';avatar.alt='';avatar.loading='lazy';
     const label=el('span');label.append(el('b','',person.name),el('small','',person.role));
     b.append(avatar,label);target.append(b);
   }
 }
 function renderSpeaker(){
   const person=STARLING_PERSONAS[state.speaker]||STARLING_PERSONAS.kami;
-  $('[data-sl-stage-avatar]').textContent=person.name.slice(0,1);
+  $('[data-sl-stage-avatar]').src='/app/assets/starling/'+person.id+'.svg';
   $('[data-sl-stage-avatar]').style.setProperty('--avatar',person.color);
   $('[data-sl-stage-name]').textContent=person.name+' · '+person.role;
   $('[data-sl-summary]').textContent=person.goal+'. '+person.style+'.';
@@ -76,6 +77,7 @@ function renderWork(){
       offers.append(row);
     }
   }
+  const bench=$('[data-sl-toolbench]');bench.replaceChildren();for(const tool of COLLECTIVE_TOOL_CATALOG){const entry=el('section','sl-output');entry.append(el('b','',tool.name+' · '+tool.kind),el('p','sl-sub',tool.description));entry.append(el('small','',tool.status==='migration-pending'?'Porting existing Starling adapter':'Not installed yet'));bench.append(entry)}
   $('[data-sl-work-status]').textContent=state.loading?'Loading authenticated Guild Quests…':state.error||('Guild board: '+state.status+'. Progress is member-reported, not automatically verified.');
 }
 function render(){
