@@ -143,6 +143,8 @@ Anarchadia's Governance and Workbench are native content destinations within the
 
 FellowFare's active entry renders its marketplace in the same document. `fellowfare-cabinet-v144.js` delegates commands and reviewed imports directly to the existing `services/fellowfare/cabinet-bridge.js` API. `services/fellowfare/marketplace-v2.js` owns marketplace state, order persistence, rendering, and current-tab state; `marketplace-v2-capabilities.js` delegates order mutations to it. The retained iframe boundary uses `postMessage` only with matching origin and parent sender checks. The native host does not emulate an iframe's `contentWindow` or `contentDocument`.
 
+The optional Starling Guild Collective migration foundation is owned by `lib/starling-collective-v1.mjs` under `docs/contracts/starling-collective-guild-service-v1.md`. It is a pure domain policy, not a replacement for Guild/Quest/governance owners; its end-user runtime and UI are not yet wired.
+
 ## Shared capability landmarks
 
 The canonical ownership list lives in `docs/architecture/systems-of-practice.md` and `config/system-ownership.json`. Current high-value landmarks include:
