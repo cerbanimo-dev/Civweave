@@ -21,7 +21,7 @@ test('uninstalled tools cannot be invoked by a model',()=>{
 test('workspace write requires a verified task approval and install',()=>{
  const common={toolId:'aider',taskId:'t',guildId:'g',actorId:'kami',enabledTools:['aider']};
  assert.equal(planCollectiveToolUse(common).allowed,false);
- assert.equal(planCollectiveToolUse({...common,authorization:{scope:'task',guildId:'g',taskId:'t',actorId:'kami',toolId:'aider',approved:true}}).allowed,true);
+ assert.equal(planCollectiveToolUse({...common,authorization:{scope:'task',guildId:'g',taskId:'t',actorId:'kami',toolId:'aider',approved:true},verifyAuthorization:()=>true}).allowed,true);
 });
 test('approval is strictly scoped to tool, Guild, task, and actor',()=>{
  const common={toolId:'aider',taskId:'t',guildId:'g',actorId:'kami',enabledTools:['aider']};
