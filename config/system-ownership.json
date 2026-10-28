@@ -334,16 +334,23 @@
     },
     "starling-collective": {
       "capability": "Optional Guild-scoped Starling persona collective, deliberation and AI task-offer policy",
-      "owner": "lib/starling-collective-v1.mjs",
+      "owner": "public/app/shared/starling-collective-v1.mjs",
       "schema": "civweave.starling-collective.v1",
       "contract": "docs/contracts/starling-collective-guild-service-v1.md",
-      "stage": "migration-foundation-no-live-runner",
+      "stage": "native-foundation-no-autonomous-execution",
       "rules": [
         "No parallel Guild, Quest, task, learning, governance, reward, fulfillment or inference ledger; always use existing canonical owners.",
         "Guildkeeper founding Intention remains provisional until superseded by validated human-member Guild ratification; agents never count as Guild voting members.",
         "Only explicitly permissioned human-authored Guild tasks may be offered or considered for authorized AI auto-claim; this owner does not perform claims.",
         "Local use does not spend hosted credits; hosted Collective generation has daily tier limits inside the existing node AI neuron budget."
-      ]
+      ],
+      "nodeAdapter": "lib/starling-collective-v1.mjs",
+      "toolPolicy": "public/app/shared/starling-collective-tools-v1.mjs",
+      "localToolAdapters": [
+        "tools/starling/aider-adapter-v1.mjs"
+      ],
+      "lounge": "public/app/starling-lounge-v1.mjs",
+      "maturity": "migration-foundation-plus-guildkeeper-intention-and-read-only-lounge"
     }
   }
 }
