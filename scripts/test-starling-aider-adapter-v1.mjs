@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,writeFile,rm,readFile,access} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {executeAiderHandoff,normalizeAiderFiles} from '../tools/starling/aider-adapter-v1.mjs';
@@ -46,4 +46,23 @@ test('external remote model endpoints blocked from local-only Aider lane',async(
   try{
     await assert.rejects(()=>executeAiderHandoff({workspaceRoot:root,guildId:'g',taskId:'t',actorId:'kami',brief:'Change script',files:['main.py'],authorization:auth,verifyAuthorization:verified,enabledTools:['aider'],baseUrl:'https://some-cloud.example/v1',runner:async()=>({success:true})}),/loopback/);
   }finally{await rm(root,{recursive:true,force:true})}
+});
+
+test('approved apply copies back only approved files, never unexpected Aider creations',async()=>{
+ const root=await mkdtemp(join(tmpdir(),'cw-aider-'));await writeFile(join(root,'main.py'),'print(1)');
+ try{
+   let observedCwd='';
+   const result=await executeAiderHandoff({workspaceRoot:root,guildId:'g',taskId:'t',actorId:'kami',brief:'Edit the example',files:['main.py'],authorization:auth,verifyAuthorization:verified,verifyApplyAuthorization:verified,enabledTools:['aider'],apply:true,runner:async ({cwd})=>{
+     observedCwd=cwd;
+     await writeFile(join(cwd,'main.py'),'print(2)');
+     await writeFile(join(cwd,'unauthorized.py'),'print("DO NOT COPY")');
+     return {success:true};
+   }});
+   assert.notEqual(observedCwd,root);
+   assert.equal((await readFile(join(root,'main.py'),'utf8')),'print(2)');
+   await assert.rejects(()=>access(join(root,'unauthorized.py')));
+   assert.deepEqual(result.changedFiles,['main.py']);
+   assert.equal(result.reviewRequired,true);
+   assert.equal(result.questBeatCompleted,false);
+ }finally{await rm(root,{recursive:true,force:true})}
 });
