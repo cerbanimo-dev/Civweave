@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v30-outcome-polish';
+const REVISION='shell-assets-v1-repair-v31-visible-civic-map';
 const OPTIONAL=['/app/installer-repair-only-v2.js','/app/assets/ai/lari-review-sprites-v1.png','/app/assets/ai/kamiya-review-sprites-v1.png','/app/shared/guide-outcome-scene-v1.js','/app/shared/guide-outcome-scene-v1.css'];
 const REQUIRED_FAMILY_NAV=[
   '/app/persistent-system-shell-v1.html',
