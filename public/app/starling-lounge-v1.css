@@ -51,3 +51,18 @@
 @media(max-width:990px){#cw-starling-lounge .sl-layout{grid-template-columns:200px 1fr}#cw-starling-lounge .sl-work{grid-column:1/-1}}
 @media(max-width:650px){#cw-starling-lounge .sl-layout{display:flex;flex-direction:column;padding:8px}#cw-starling-lounge .sl-card{width:100%}#cw-starling-lounge .sl-cast{display:flex;overflow-x:auto}#cw-starling-lounge .sl-persona{min-width:125px;flex-direction:column;text-align:center}#cw-starling-lounge .sl-head h1{font-size:20px}}
 @media(prefers-reduced-motion:reduce){#cw-starling-lounge .sl-stage-avatar,#cw-starling-lounge .sl-stage.is-talking .sl-stage-avatar{animation:none}}
+
+
+#cw-starling-lounge .sl-ensemble{position:absolute;inset:0;z-index:3;pointer-events:none}
+#cw-starling-lounge .sl-stage-persona{position:absolute;width:39px;height:39px;min-height:0;padding:1px;border-radius:50%;overflow:hidden;background:#231c36;pointer-events:auto;opacity:.77;border:2px solid #dac5ef9c;transition:opacity .16s,transform .16s}
+#cw-starling-lounge .sl-stage-persona:hover,#cw-starling-lounge .sl-stage-persona[aria-pressed=true]{opacity:1;transform:scale(1.14);border-color:#fff}
+#cw-starling-lounge .sl-stage-persona img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+#cw-starling-lounge .sl-stage-persona:nth-child(1){top:13%;left:6%}
+#cw-starling-lounge .sl-stage-persona:nth-child(2){top:10%;left:27%}
+#cw-starling-lounge .sl-stage-persona:nth-child(3){top:10%;right:27%}
+#cw-starling-lounge .sl-stage-persona:nth-child(4){top:13%;right:6%}
+#cw-starling-lounge .sl-stage-persona:nth-child(5){bottom:16%;left:6%}
+#cw-starling-lounge .sl-stage-persona:nth-child(6){bottom:14%;left:27%}
+#cw-starling-lounge .sl-stage-persona:nth-child(7){bottom:14%;right:27%}
+#cw-starling-lounge .sl-stage-persona:nth-child(8){bottom:16%;right:6%}
+#cw-starling-lounge .sl-stage-avatar{object-fit:cover}
