@@ -23,7 +23,7 @@ export function normalizeAiderFiles(files) {
     if(typeof value!=='string'||!value||value.length>160||value.includes('\\')||value.includes(':')||value.startsWith('.')||value.startsWith('/')||isAbsolute(value)||win32.isAbsolute(value))
       throw new TypeError('Unsafe workspace file path.');
     const parts=value.split('/');
-    if(parts.some(part=>!part||part==='.'||part==='..'||part.startsWith('.')||['secrets','data','node_modules','dist','build'].includes(part.toLowerCase())))
+    if(parts.some(part=>!part||part==='.'||part==='..'||part.startsWith('.')||part.startsWith('-')||['secrets','data','node_modules','dist','build'].includes(part.toLowerCase())))
       throw new TypeError('Restricted workspace path.');
     const extension=posix.extname(value).toLowerCase();
     if(!EXTENSIONS.has(extension))throw new TypeError('Unsupported source file format.');
@@ -33,7 +33,7 @@ export function normalizeAiderFiles(files) {
 }
 function localEndpoint(input){
   const url=new URL(text(input||'http://127.0.0.1:11434/v1',1000));
-  if(url.protocol!=='http:'||!['127.0.0.1','localhost','[::1]'].includes(url.hostname)||url.username||url.password||url.hash)
+  if(url.protocol!=='http:'||!['127.0.0.1','localhost','[::1]'].includes(url.hostname)||url.username||url.password||url.hash||url.search)
     throw new TypeError('The Aider local adapter requires a loopback HTTP model endpoint.');
   if(!url.pathname.endsWith('/v1'))url.pathname=url.pathname.replace(/\/+$/,'')+'/v1';
   return url.origin+url.pathname;
