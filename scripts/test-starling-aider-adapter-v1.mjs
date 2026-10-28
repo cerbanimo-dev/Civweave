@@ -7,7 +7,7 @@ import {executeAiderHandoff,normalizeAiderFiles} from '../tools/starling/aider-a
 const auth={scope:'task',guildId:'g',taskId:'t',actorId:'kami',toolId:'aider',approved:true};
 const verified=()=>true;
 test('reject path traversal, hidden config and drive paths',()=>{
-  for(const file of ['../outside.py','C:\\private.py','.env','a/../../other.js','/absolute.py','.git/config']){
+  for(const file of ['../outside.py','C:\\private.py','.env','a/../../other.js','/absolute.py','.git/config','--dangerous.py','lib/--flag.js']){
     assert.throws(()=>normalizeAiderFiles([file]));
   }
 });
