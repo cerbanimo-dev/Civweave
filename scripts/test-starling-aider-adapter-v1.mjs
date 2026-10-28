@@ -28,7 +28,7 @@ test('default preview handoff is non-committing and uses an isolated approved wo
     const res=await executeAiderHandoff({workspaceRoot:root,guildId:'g',taskId:'t',actorId:'kami',brief:'Refactor module safely',files:['main.py'],authorization:auth,verifyAuthorization:verified,enabledTools:['aider'],model:'qwen3.5:4b',runner:async input=>{observed.push(input);return {success:true,stdout:'preview'}}});
     assert.equal(res.mode,'preview');assert.equal(observed.length,1);
     assert.ok(observed[0].args.includes('--dry-run'));assert.ok(observed[0].args.includes('--no-git'));
-    assert.equal(observed[0].cwd,root);
+    assert.notEqual(observed[0].cwd,root);assert.equal(res.workshop,root);
     assert.equal(res.applied,false);
   }finally{await rm(root,{recursive:true,force:true})}
 });
