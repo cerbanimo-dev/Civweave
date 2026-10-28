@@ -1,4 +1,5 @@
 import {completeGuildHostOnboarding} from './guild-host-onboarding-v1.mjs';
+import {normalizeFoundingIntention} from './shared/starling-collective-v1.mjs';
 import {CivweavePocketGuildNodeV1} from './pocket-guild-node-v1.mjs';
 
 export const MOBILE_GUILD_CREATE_SCHEMA='civweave.mobile-guild-create.v3';
@@ -129,16 +130,17 @@ export async function updateMobileGuildLocation({precise=false,position=null}={}
   return Object.freeze({...next,deployUrl:cloudflareDeployUrl()});
 }
 
-export async function createMobileGuild({displayName,guildId='',charter=null}={}){
+export async function createMobileGuild({displayName,guildId='',charter=null,foundingIntention}={}){
   const name=clean(displayName,120);if(!name)throw new TypeError('Give the Guild a name first.');
+  const initialIntention=normalizeFoundingIntention(foundingIntention);
   const location=await captureGuildLocation({precise:false});
   const id=clean(guildId,180)||createGuildId(name),membershipKey=randomSecret(),cloudPairingCode=randomSecret(),charterContext=normalizeCharterContext(charter);
   const mesh=await ensurePocketMesh();
   const onboarding=await completeGuildHostOnboarding({guildId:id,primaryOrigin:null,membershipKey,route:'pocket-node',enablePocketNode:true});
   if(!onboarding.pocketNodeEnrolled)throw new Error(onboarding.pocketNodeError||'This device could not enroll as the Pocket Guild host.');
   const deviceId=await mesh.deviceId(),createdAt=now();
-  const genesis=await mesh.createObject({id:`guild-genesis:${id}`,revision:1,kind:'civweave.guild-genesis.v1',purpose:'Create a Pocket-first Guild whose canonical identity begins on this device.',consent:'group',audience:[`guild:${id}`],publish:true,priority:100,payload:{schema:'civweave.guild-genesis.v1',guildId:id,displayName:name,foundingDeviceId:deviceId,hostRoute:'pocket-node',cloudAttached:false,workerCreated:false,downloadOriginUsedAsBackend:false,charter:charterContext,location,createdAt}});
-  const state=Object.freeze({schema:MOBILE_GUILD_CREATE_SCHEMA,guildId:id,displayName:name,deviceId,route:'pocket-node',cloudAttached:false,workerCreated:false,cloudStage:'ready-to-connect',membershipKey,cloudPairingCode,downloadOriginUsedAsBackend:false,charter:charterContext,location,createdAt,updatedAt:createdAt,genesisObjectId:genesis.id});write(state);
+  const genesis=await mesh.createObject({id:`guild-genesis:${id}`,revision:1,kind:'civweave.guild-genesis.v1',purpose:'Create a Pocket-first Guild whose canonical identity begins on this device.',consent:'group',audience:[`guild:${id}`],publish:true,priority:100,payload:{schema:'civweave.guild-genesis.v1',guildId:id,displayName:name,foundingDeviceId:deviceId,hostRoute:'pocket-node',cloudAttached:false,workerCreated:false,downloadOriginUsedAsBackend:false,charter:charterContext,foundingIntention:initialIntention,location,createdAt}});
+  const state=Object.freeze({schema:MOBILE_GUILD_CREATE_SCHEMA,guildId:id,displayName:name,deviceId,route:'pocket-node',cloudAttached:false,workerCreated:false,cloudStage:'ready-to-connect',membershipKey,cloudPairingCode,downloadOriginUsedAsBackend:false,charter:charterContext,foundingIntention:initialIntention,location,createdAt,updatedAt:createdAt,genesisObjectId:genesis.id});write(state);
   if(typeof globalThis.CustomEvent==='function')globalThis.dispatchEvent?.(new CustomEvent('civweave:mobile-guild-created',{detail:state}));
   return Object.freeze({...state,deployUrl:cloudflareDeployUrl()});
 }
