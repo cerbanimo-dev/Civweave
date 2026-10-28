@@ -93,15 +93,31 @@ export async function executeAiderHandoff({
   const entries=await validatedFiles(root,selected);
   const endpoint=localEndpoint(baseUrl),chosenModel=normalizeModel(model);
   const deadline=Math.min(900000,Math.max(10000,Math.floor(Number(timeoutMs)||240000)));
-  const scratch=apply?null:await mkdtemp(join(tmpdir(),'civweave-starling-aider-'));
-  const cwd=scratch||root;
+  // Both preview and approved apply run in a disposable file-only copy.
+  // This is not OS-level isolation: host security must still restrict the
+  // Aider process externally when invoking untrusted model-generated code.
+  const scratch=await mkdtemp(join(tmpdir(),'civweave-starling-aider-'));
+  const cwd=scratch;
   try{
-    if(scratch)for(const file of entries){const target=join(scratch,file.name);await mkdir(dirname(target),{recursive:true});await copyFile(file.full,target)}
+    for(const file of entries){const target=join(scratch,file.name);await mkdir(dirname(target),{recursive:true});await copyFile(file.full,target)}
     const assignment='You are the Aider implementation tool for Civweave Starling Collective. Edit only listed workshop files. Do not access secrets, the parent workspace, deployment, payments, publishing, or other services. Return the changes for Cerbanimo review. This is not authority to mark work complete.\n\nTASK:\n'+prompt;
     const args=['--yes','--no-git','--no-auto-commits','--no-stream','--message',assignment,...(apply?[]:['--dry-run']),'--model',chosenModel,...selected];
     const result=await runner({args,cwd,endpoint,timeoutMs:deadline,executable:'aider'});
     const changes=[];
-    if(apply)for(const file of entries){let actual=null;try{actual=sha(await readFile(file.full))}catch{}if(actual!==file.hash)changes.push(file.name)}
+    if(apply&&result?.success===true)for(const file of entries){
+      const candidate=resolve(scratch,file.name);
+      const stat=await lstat(candidate);
+      if(!stat.isFile()||stat.isSymbolicLink()||stat.size>2_000_000)throw new TypeError('Aider returned an unsafe edited file.');
+      const bytes=await readFile(candidate),actual=sha(bytes);
+      if(actual!==file.hash){
+        // Re-check target identity and the original contents immediately
+        // before copying; another actor must not replace this approved file.
+        const current=await realpath(file.full);
+        if(current!==file.full||sha(await readFile(file.full))!==file.hash)throw new Error('Workshop file changed during Aider execution; review and retry.');
+        await copyFile(candidate,file.full);
+        changes.push(file.name);
+      }
+    }
     return Object.freeze({
       schema:'civweave.starling-aider-result.v1',
       success:result?.success===true&&(!apply||changes.length>0),
@@ -111,5 +127,5 @@ export async function executeAiderHandoff({
       error:text(result?.error,500)||((result?.success===true&&apply&&!changes.length)?'No approved file changed.':null),
       reviewRequired:true,questBeatCompleted:false
     });
-  }finally{if(scratch)await rm(scratch,{recursive:true,force:true})}
+  }finally{await rm(scratch,{recursive:true,force:true})}
 }
