@@ -1,0 +1,53 @@
+
+/* Starling Lounge • adapted from the original Starling Studio's jewel-box cast,
+   lilac stage, story feed, and maker's corner; Civweave owns the data/actions. */
+#cw-starling-lounge, #cw-starling-lounge * {box-sizing:border-box}
+#cw-starling-lounge {position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;background:#171526f5;color:#f6edfa;font:14px/1.45 system-ui,sans-serif;overflow:auto;overscroll-behavior:contain}
+#cw-starling-lounge[hidden]{display:none}
+#cw-starling-lounge .sl-head {position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#242137;padding:12px 18px;border-bottom:1px solid #ffffff23}
+#cw-starling-lounge h1,#cw-starling-lounge h2,#cw-starling-lounge h3 {margin:0;font-weight:680;line-height:1.15}
+#cw-starling-lounge h1{font-size:23px}
+#cw-starling-lounge h2{font-size:17px}
+#cw-starling-lounge h3{font-size:15px}
+#cw-starling-lounge small,#cw-starling-lounge .sl-sub {font-size:11px;letter-spacing:.05em;color:#bdafcf}
+#cw-starling-lounge button {color:inherit;background:#453952;border:1px solid #ffffff26;border-radius:12px;padding:8px 11px;cursor:pointer;min-height:38px}
+#cw-starling-lounge button:focus-visible,#cw-starling-lounge textarea:focus-visible{outline:2px solid #c79de9;outline-offset:2px}
+#cw-starling-lounge button:hover{background:#5f4a72}
+#cw-starling-lounge .sl-strong {background:#7d558f}
+#cw-starling-lounge .sl-layout {width:min(1290px,100%);margin:auto;display:grid;grid-template-columns:220px minmax(340px,1fr) 310px;align-items:start;gap:14px;padding:14px}
+#cw-starling-lounge .sl-card {border:1px solid #ffffff1b;background:#272338;border-radius:20px;padding:14px;min-width:0;box-shadow:0 8px 30px #05030c24}
+#cw-starling-lounge .sl-label{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#e6b7e3;margin:0 0 12px}
+#cw-starling-lounge .sl-cast {display:grid;gap:7px}
+#cw-starling-lounge .sl-persona {display:flex;align-items:center;gap:10px;text-align:left;background:transparent;padding:7px;min-height:55px}
+#cw-starling-lounge .sl-persona[aria-pressed=true] {background:#674771;box-shadow:inset 0 0 0 1px #d7a8ed77}
+#cw-starling-lounge .sl-avatar {width:40px;height:40px;border-radius:15px;display:grid;place-items:center;flex:0 0 auto;color:#191425;font-weight:800;font-size:17px;background:var(--avatar,#dda6dd);border:2px solid #ffffff72;box-shadow:0 1px 13px #0004}
+#cw-starling-lounge .sl-persona b {display:block}
+#cw-starling-lounge .sl-persona small {display:block;font-size:10px;letter-spacing:0}
+#cw-starling-lounge .sl-stage {position:relative;overflow:hidden;min-height:228px;border-radius:17px;background:radial-gradient(ellipse at 55% 25%,#7f65a9 0,#48446f 42%,#26294c 84%);text-align:center;display:grid;place-items:center}
+#cw-starling-lounge .sl-stage:before {content:'✦  ·  ✧  ·  ⋆  ·  ✦';position:absolute;inset:7px 0 auto;color:#f2d6fc8c;letter-spacing:19px}
+#cw-starling-lounge .sl-moon {position:absolute;top:28px;left:calc(50% - 48px);width:96px;height:96px;border-radius:50%;background:#e3cce5;box-shadow:0 0 55px #eacfff5c}
+#cw-starling-lounge .sl-stage-avatar{position:relative;z-index:2;width:110px;height:110px;border-radius:40px;display:grid;place-items:center;background:var(--avatar,#e9b9de);font-size:45px;font-weight:850;color:#302441;border:5px solid #f7e4ffb4;box-shadow:0 10px 50px #1a0c4488;animation:sl-float 3.4s ease-in-out infinite}
+#cw-starling-lounge .sl-stage-name {position:absolute;bottom:12px;left:0;right:0;z-index:2;font-weight:780;text-shadow:0 2px 5px #000a}
+#cw-starling-lounge .sl-stage.is-talking .sl-stage-avatar {animation:sl-talk .6s ease-in-out infinite alternate}
+@keyframes sl-float{50%{transform:translateY(-7px)}}@keyframes sl-talk{to{transform:translateY(-5px) scale(1.05)}}
+#cw-starling-lounge .sl-narrative {padding:12px;margin:12px 0;border-radius:13px;background:#312b48;color:#eaddf3}
+#cw-starling-lounge .sl-feed {max-height:300px;min-height:94px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:2px}
+#cw-starling-lounge .sl-entry {border:1px solid #ffffff15;background:#1c1a2b;border-radius:11px;padding:9px}
+#cw-starling-lounge .sl-entry b {color:#f9cbe8}
+#cw-starling-lounge .sl-entry time {font-size:10px;color:#baa9cb;margin-left:8px}
+#cw-starling-lounge .sl-entry p {white-space:pre-wrap;overflow-wrap:anywhere;margin:5px 0 0}
+#cw-starling-lounge .sl-compose {display:grid;gap:7px;margin-top:12px}
+#cw-starling-lounge textarea {width:100%;min-height:74px;resize:vertical;color:#f9effe;background:#1b1a28;border:1px solid #796b8f;border-radius:12px;padding:10px;font:inherit}
+#cw-starling-lounge .sl-status {font-size:12px;color:#d9baca;margin-top:8px}
+#cw-starling-lounge .sl-metric-row {display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
+#cw-starling-lounge .sl-metric {background:#332c46;border-radius:12px;padding:8px;text-align:center}
+#cw-starling-lounge .sl-metric strong {font-size:21px;display:block}
+#cw-starling-lounge .sl-output {padding:10px 0;border-top:1px solid #ffffff24}
+#cw-starling-lounge .sl-output p {margin:4px 0;color:#ccbfd7}
+#cw-starling-lounge .sl-output button {font-size:12px;padding:6px}
+#cw-starling-lounge .sl-flex{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#cw-starling-lounge .sl-grow {flex:1}
+#cw-starling-lounge [data-sl-error] {color:#ffcad4}
+@media(max-width:990px){#cw-starling-lounge .sl-layout{grid-template-columns:200px 1fr}#cw-starling-lounge .sl-work{grid-column:1/-1}}
+@media(max-width:650px){#cw-starling-lounge .sl-layout{display:flex;flex-direction:column;padding:8px}#cw-starling-lounge .sl-card{width:100%}#cw-starling-lounge .sl-cast{display:flex;overflow-x:auto}#cw-starling-lounge .sl-persona{min-width:125px;flex-direction:column;text-align:center}#cw-starling-lounge .sl-head h1{font-size:20px}}
+@media(prefers-reduced-motion:reduce){#cw-starling-lounge .sl-stage-avatar,#cw-starling-lounge .sl-stage.is-talking .sl-stage-avatar{animation:none}}
