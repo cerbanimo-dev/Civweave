@@ -6,7 +6,9 @@ import {
 import {loadGovernanceState,saveGovernanceState,putPrivateKey,getPrivateKey} from './anarchadia-governance-store-v145.js';
 
 const app=document.querySelector('#app');
-let state=normalizeGovernanceState(await loadGovernanceState()||newGovernanceState()),view='overview';
+const VIEWS=new Set(['overview','identity','changes','ballots','federation','execution']);
+const initialView=location.hash.slice(1);
+let state=normalizeGovernanceState(await loadGovernanceState()||newGovernanceState()),view=VIEWS.has(initialView)?initialView:'overview';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const by=(list,id)=>list.find(x=>x.id===id);
 const slug=v=>String(v||'change').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48)||'change';
@@ -53,7 +55,7 @@ function federation(){
 function execution(){
   return `<section class="hero"><div class="kicker">Local branch executor</div><h2>Prepare, test, commit. Never push itself.</h2><p>Download a packet, then run it from a clean Civweave checkout. The executor creates an isolated worktree and <code>agent/anarchadia-*</code> branch, runs <code>npm run check</code>, commits only on success, and leaves publication separate.</p><pre>npm run anarchadia:execute -- --packet /path/to/anarchadia-execution-….json</pre></section><section class="grid">${state.executionPackets.map(p=>`<article class="card"><h2>${esc(p.changeSet.title)}</h2><div class="mono">${esc(p.id)}<br>${esc(p.authorization.targetBranch)}<br>${esc(p.packetHash)}</div><div class="actions"><button data-action="download-packet" data-id="${p.id}">Download</button><button data-action="verify-packet" data-id="${p.id}">Verify</button></div></article>`).join('')||'<div class="empty">No execution packets.</div>'}</section>`;
 }
-function render(){document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===view));app.innerHTML=({overview,identity,changes,ballots,federation,execution}[view]||overview)()}
+function render(){document.querySelectorAll('[data-view]').forEach(x=>{const active=x.dataset.view===view;x.classList.toggle('active',active);if(x.closest('nav')){if(active)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')}});app.innerHTML=({overview,identity,changes,ballots,federation,execution}[view]||overview)()}
 function returnToConsole(){
   try{
     const parent=globalThis.parent,shell=parent&&parent!==globalThis?parent.CivweavePersistentSystemShellV1:null;
@@ -71,7 +73,7 @@ async function importConsole(proposalId=''){
   state.changeSets=state.changeSets.filter(x=>x.id!==c.id);state.changeSets.unshift(c);view='changes';await save('console.change-imported',{proposalId:p.id,changeSetId:c.id});
 }
 document.addEventListener('click',async e=>{
-  const v=e.target.closest('[data-view]');if(v){view=v.dataset.view;render();return}
+  const v=e.target.closest('[data-view]');if(v){view=VIEWS.has(v.dataset.view)?v.dataset.view:'overview';history.replaceState(null,'',`#${view}`);render();return}
   const b=e.target.closest('[data-action]');if(!b)return;const action=b.dataset.action,id=b.dataset.id;
   try{
     if(action==='back')returnToConsole();

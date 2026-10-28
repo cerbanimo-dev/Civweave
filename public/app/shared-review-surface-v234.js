@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.2-private-quest-map';
+const VERSION='1.0.3-plan-review-outcomes';
 const REVISION='shared-review-surface-v234';
 const STYLE_ID='cw-shared-review-style-v234';
 const SURFACE_ID='cw-shared-review-surface-v234';
@@ -55,6 +55,7 @@ function installStyle(){
 #${SURFACE_ID} .cwsr234-block{margin-top:10px;padding:11px;border:1px solid color-mix(in srgb,var(--line,#ffffff2b) 70%,transparent);border-radius:14px;background:#ffffff08}#${SURFACE_ID} .cwsr234-block>small{display:block;color:var(--accent,#8de5ef);font-size:9px;font-weight:900;letter-spacing:.1em;margin-bottom:5px}#${SURFACE_ID} .cwsr234-block h3{margin:0 0 6px;font-size:14px}#${SURFACE_ID} .cwsr234-block p{margin:0 0 7px;color:var(--muted,#b8c6df)}#${SURFACE_ID} ol,#${SURFACE_ID} ul{margin:7px 0 0;padding-left:20px}#${SURFACE_ID} li+li{margin-top:5px}
 #${SURFACE_ID} .cwsr234-fields{display:grid;gap:7px;margin:0}#${SURFACE_ID} .cwsr234-fields>div{display:grid;gap:2px;padding:7px 0;border-top:1px solid #ffffff0e}#${SURFACE_ID} .cwsr234-fields>div:first-child{border-top:0}#${SURFACE_ID} dt{font-size:10px;font-weight:900;color:var(--accent,#8de5ef);text-transform:uppercase;letter-spacing:.06em}#${SURFACE_ID} dd{margin:0;color:var(--muted,#b8c6df);white-space:pre-wrap}
 #${SURFACE_ID} .cwsr234-warning{margin-top:10px;padding:9px 10px;border:1px solid #ffd36e66;border-radius:12px;background:#ffd36e12;color:#ffe7a8}
+#${SURFACE_ID} [data-guide-outcome]{margin:12px 0}#${SURFACE_ID} .cwsr234-change-request{margin:10px 0;border:1px solid #ffffff24;border-radius:12px;background:#ffffff06;padding:0 10px}#${SURFACE_ID} .cwsr234-change-request>summary{min-height:44px;padding:11px 0;cursor:pointer;font-weight:800}#${SURFACE_ID} [data-review-revision-form]{display:grid;gap:8px;padding:0 0 12px}#${SURFACE_ID} [data-review-revision-form] label{font-weight:800;font-size:12px}#${SURFACE_ID} [data-review-revision-form] textarea{box-sizing:border-box;width:100%;min-height:90px;resize:vertical;border:1px solid #ffffff33;border-radius:10px;padding:9px;background:#07111f;color:inherit;font:inherit}#${SURFACE_ID} [data-review-revision-form] p{margin:0;color:var(--muted,#b8c6df);font-size:11px}#${SURFACE_ID} [data-review-revision-form] button{min-height:44px;border:1px solid #8af5d266;border-radius:10px;background:#8af5d215;color:inherit;font-weight:800;cursor:pointer}#${SURFACE_ID} .cwsr234-change-request>summary:focus-visible,#${SURFACE_ID} [data-review-revision-form] :focus-visible{outline:2px solid #8af5d2;outline-offset:3px}
 #${SURFACE_ID} .cwsr234-map{margin:12px 0;padding:12px;border:1px solid #8af5d244;border-radius:16px;background:radial-gradient(ellipse at top,#8af5d20d,transparent 70%),#ffffff04}
 #${SURFACE_ID} .cwsr234-map>header h3{margin:0;font:800 17px/1.2 Georgia,serif}#${SURFACE_ID} .cwsr234-map>header p,#${SURFACE_ID} .cwsr234-map-note{margin:6px 0 10px;color:var(--muted,#b8c6df);font-size:11px}
 #${SURFACE_ID} .cwsr234-map-lanes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#${SURFACE_ID} .cwsr234-map-lane{min-width:0;padding:10px;border-top:3px solid var(--map-lane);border-radius:12px;background:#ffffff06}#${SURFACE_ID} .cwsr234-map-lane>h4{margin:0 0 9px;color:var(--map-lane);font-size:12px}
@@ -62,9 +63,11 @@ function installStyle(){
 #${SURFACE_ID} .cwsr234-map button strong{font-size:11px}#${SURFACE_ID} .cwsr234-map button small{color:var(--muted,#b8c6df);font-size:10px}#${SURFACE_ID} .cwsr234-map button[data-map-status="review"]{border-style:dashed;border-color:#ffd36e88}#${SURFACE_ID} .cwsr234-map button[data-map-status="accepted"]{border-color:#8af5d299;background:#8af5d20b}
 #${SURFACE_ID} .cwsr234-map-order{margin:6px 0;font-size:10px;color:var(--muted,#b8c6df)}#${SURFACE_ID} .cwsr234-map-steps{list-style:none;margin:0;padding:0 0 0 10px;display:grid;gap:8px}#${SURFACE_ID} .cwsr234-map-steps>li{position:relative;min-width:0}#${SURFACE_ID} .cwsr234-map-steps[data-connections="order"]>li:not(:last-child)::after{content:'';position:absolute;left:12px;top:100%;height:8px;border-left:2px dotted var(--map-lane);opacity:.5}#${SURFACE_ID} .cwsr234-map-links{list-style:none;margin:4px 0 0;padding:0;font-size:10px;overflow-wrap:anywhere;color:var(--muted,#b8c6df)}#${SURFACE_ID} .cwsr234-map-links li+li{margin-top:3px}
 #${SURFACE_ID} [data-review-path]{scroll-margin:12px}#${SURFACE_ID} .cwsr234-map-empty{margin:0;color:var(--muted,#b8c6df);font-size:11px}
+#${SURFACE_ID} .cwsr234-map-lane>h4{margin-bottom:3px}#${SURFACE_ID} .cwsr234-map-lane-counts{margin:0 0 8px;color:var(--muted,#b8c6df);font-size:10px}#${SURFACE_ID} .cwsr234-map-path-counts{font-size:10px;color:var(--map-lane,#8af5d2)}#${SURFACE_ID} .cwsr234-map-beats{border-bottom:1px solid #ffffff16;margin-top:3px}#${SURFACE_ID} .cwsr234-map-beats>summary{display:flex;align-items:center;justify-content:space-between;gap:5px;min-height:44px;padding:7px 2px;list-style:none;cursor:pointer;font-size:10px;font-weight:800;color:var(--map-lane,#8af5d2)}#${SURFACE_ID} .cwsr234-map-beats>summary::-webkit-details-marker{display:none}#${SURFACE_ID} .cwsr234-map-beats>summary::after{content:'+';font-size:16px;font-weight:600}#${SURFACE_ID} .cwsr234-map-beats[open]>summary::after{content:'−'}#${SURFACE_ID} .cwsr234-map-beats>summary:focus-visible{outline:2px solid var(--map-lane,#8af5d2);outline-offset:2px}#${SURFACE_ID} .cwsr234-map-beats[open]{padding-bottom:8px}#${SURFACE_ID} .cwsr234-map-plan-order{min-width:0;margin:0 0 12px}#${SURFACE_ID} .cwsr234-map-plan-order>small{color:var(--muted,#b8c6df);font-size:10px}#${SURFACE_ID} .cwsr234-map-order-strip{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;max-width:100%;list-style:none;margin:5px 0 0;padding:2px 2px 7px;scroll-snap-type:x proximity}#${SURFACE_ID} .cwsr234-map-order-strip>li{flex:0 0 145px;min-width:0;margin:0;scroll-snap-align:start}#${SURFACE_ID} .cwsr234-map-order-strip button{grid-template-columns:auto minmax(0,1fr);align-items:center;gap:7px;min-height:50px;padding:7px;border-color:#8af5d233}#${SURFACE_ID} .cwsr234-map-order-strip button>span{display:grid;place-items:center;width:22px;height:22px;border:1px solid #8af5d255;border-radius:50%;color:#8af5d2;font-size:10px}#${SURFACE_ID} .cwsr234-map-order-strip button>strong{font-size:10px}
 #${SURFACE_ID} .cwsr234-actions{position:sticky;bottom:-13px;display:flex;flex-wrap:wrap;gap:8px;margin:13px -13px -13px;padding:11px 13px;background:color-mix(in srgb,var(--panel,#081225) 96%,#000);border-top:1px solid var(--line,#ffffff2b)}#${SURFACE_ID} .cwsr234-actions button{min-height:40px;padding:0 13px;border:1px solid var(--line,#ffffff2b);border-radius:999px;background:#ffffff0d;color:inherit;font-weight:800;cursor:pointer}#${SURFACE_ID} .cwsr234-actions .primary{background:var(--accent,#d8dde7);color:#09111d;border-color:transparent}
 #${PENDING_ID}{border-color:#d8dde755!important}#${PENDING_ID} .cwsr234-pending-list{display:grid}#${PENDING_ID} details{border-top:1px solid #ffffff10}#${PENDING_ID} details:first-child{border-top:0}#${PENDING_ID} summary{list-style:none;cursor:pointer;padding:11px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}#${PENDING_ID} summary::-webkit-details-marker{display:none}#${PENDING_ID} summary strong{display:block;font-size:13px}#${PENDING_ID} summary small{display:block;color:var(--mint,#8af5d2);font-size:9px;font-weight:900;letter-spacing:.09em}#${PENDING_ID} summary b{font-size:10px;color:var(--muted,#9eb0c6);text-transform:uppercase}#${PENDING_ID} .cwsr234-pending-body{padding:0 12px 12px}#${PENDING_ID} .cwsr234-pending-body p{margin:0 0 8px;color:var(--muted,#9eb0c6);font-size:12px}#${PENDING_ID} .cwsr234-path-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}#${PENDING_ID} .cwsr234-path-list span{padding:3px 7px;border-radius:999px;background:#ffffff0b;border:1px solid #ffffff18;font-size:10px}#${PENDING_ID} .cwsr234-review-button{min-height:34px;padding:0 10px;border:1px solid #8af5d255;border-radius:999px;background:#8af5d214;color:inherit;font-weight:800;cursor:pointer}
-@media(max-width:560px){#${SURFACE_ID}[data-host="body"]{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:auto}#${SURFACE_ID} .cwsr234-map-lanes{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:560px){#${SURFACE_ID}[data-host="body"]{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:auto}#${SURFACE_ID} .cwsr234-map-lanes{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#${SURFACE_ID} .cwsr234-map-lane{padding:8px}#${SURFACE_ID} .cwsr234-map{padding:9px}#${SURFACE_ID} .cwsr234-map-lane>h4{font-size:11px}#${SURFACE_ID} .cwsr234-map button{padding:7px}#${SURFACE_ID} .cwsr234-map-lane-counts{font-size:9px}}
+@media(max-width:340px){#${SURFACE_ID} .cwsr234-map-lanes{grid-template-columns:minmax(0,1fr)}}
 `;
   document.head.append(style);
 }
@@ -124,10 +127,17 @@ function privateQuestMap(plan,paths){
   const links=node=>node.dependencies.length?`<ul class="cwsr234-map-links">${node.dependencies.map(ref=>{const matches=index.get(ref)||[];return matches.length===1?`<li data-map-edge-from="${esc(ref)}" data-map-edge-to="${esc(node.id)}">Depends on: ${esc(matches[0].title)}</li>`:`<li>Unresolved dependency: ${esc(ref)}</li>`}).join('')}</ul>`:'';
   const pathMarkup=record=>{
     const {pathIndex,realm,status}=record,explicit=record.dependencies.length||record.steps.some(step=>step.dependencies.length);
-    return`<div class="cwsr234-map-path"><button type="button" data-review-command="map-focus" data-path-index="${pathIndex}" data-map-governance="${record.governance}" data-map-path="${pathIndex}" data-map-status="${esc(status.id)}" aria-label="Open ${esc(record.title)} path details"><strong>${esc(record.title)}</strong><small>${esc(realm.label)} · ${esc(status.label)}</small></button>${links(record)}<p class="cwsr234-map-order">${explicit?'Declared dependencies':record.governance?'Governance layer':'Plan order · no dependencies supplied'}</p><ol class="cwsr234-map-steps" data-connections="${explicit?'dependencies':'order'}">${record.steps.map(step=>`<li><button type="button" data-review-command="map-focus" data-path-index="${pathIndex}" data-map-step="${esc(step.id||`${pathIndex}:${step.stepIndex}`)}" data-map-status="${esc(step.status.id)}" aria-label="${esc(step.title)} · ${esc(step.status.label)} · open path details"><strong>${step.stepIndex+1}. ${esc(step.title)}</strong><small>${esc(step.status.label)}</small></button>${links(step)}</li>`).join('')}</ol>${record.total>record.steps.length?`<p class="cwsr234-map-order">${record.steps.length} of ${record.total} steps shown. Open path details for the saved steps.</p>`:record.total?'':record.governance?'<p class="cwsr234-map-empty">Inspect the saved agreements in the details.</p>':'<p class="cwsr234-map-empty">No steps specified.</p>'}</div>`;
+    const accepted=record.steps.filter(step=>step.status.id==='accepted').length,completed=record.steps.filter(step=>['completed','complete','done'].includes(step.status.id)).length,
+      counts=record.governance?'Separate governance layer':`${record.total} ${record.total===1?'beat':'beats'}${accepted?` · ${accepted} accepted`:''}${completed?` · ${completed} marked complete`:''}${record.total>record.steps.length?' · preview counts':''}`;
+    return`<div class="cwsr234-map-path"><button type="button" data-review-command="map-focus" data-path-index="${pathIndex}" data-map-governance="${record.governance}" data-map-path="${pathIndex}" data-map-status="${esc(status.id)}" aria-label="Open ${esc(record.title)} path details"><strong>${esc(record.title)}</strong><small>${esc(realm.label)} · ${esc(status.label)}</small><span class="cwsr234-map-path-counts" data-map-path-counts>${counts}</span></button>${record.governance?'<p class="cwsr234-map-order">Governance layer · inspect saved agreements</p>':`<details class="cwsr234-map-beats" data-map-beats="${pathIndex}"><summary>${record.total} ${record.total===1?'beat':'beats'} & links</summary>${links(record)}<p class="cwsr234-map-order">${explicit?'Declared dependencies':'Plan order · no dependencies supplied'}</p><ol class="cwsr234-map-steps" data-connections="${explicit?'dependencies':'order'}">${record.steps.map(step=>`<li><button type="button" data-review-command="map-focus" data-path-index="${pathIndex}" data-map-step="${esc(step.id||`${pathIndex}:${step.stepIndex}`)}" data-map-status="${esc(step.status.id)}" aria-label="${esc(step.title)} · ${esc(step.status.label)} · open path details"><strong>${step.stepIndex+1}. ${esc(step.title)}</strong><small>${esc(step.status.label)}</small></button>${links(step)}</li>`).join('')}</ol>${record.total>record.steps.length?`<p class="cwsr234-map-order">${record.steps.length} of ${record.total} steps shown. Open path details for the saved steps.</p>`:record.total?'':'<p class="cwsr234-map-empty">No beats specified.</p>'}</details>`}</div>`;
   };
   const lanes=[...MAP_LANES,...(records.some(record=>record.realm.id==='unassigned')?[{id:'unassigned',label:'Unassigned / Other',color:'#b8c6df'}]:[])];
-  return`<section class="cwsr234-map" data-private-quest-map aria-label="Private Quest map"><header><h3>Your Quest map</h3><p>Private on this device. Select a node to inspect its path. Statuses reflect the saved plan; viewing this map changes no work state.</p></header><div class="cwsr234-map-lanes">${lanes.map(lane=>`<section class="cwsr234-map-lane" data-map-lane="${lane.id}" style="--map-lane:${lane.color}" aria-label="${lane.label}"><h4>${lane.label}</h4>${records.filter(record=>record.realm.id===lane.id).map(pathMarkup).join('')||'<p class="cwsr234-map-empty">No path in this subsystem.</p>'}</section>`).join('')}</div>${sources.length>visible.length?`<p class="cwsr234-map-note">Map preview: ${visible.length} of ${sources.length} paths. All saved path details remain below.</p>`:''}</section>`;
+  const ordered=records.filter(record=>!record.governance),order=ordered.length?`<nav class="cwsr234-map-plan-order" data-map-plan-order aria-label="Saved Quest plan order"><small>Plan order · not dependencies</small><ol class="cwsr234-map-order-strip">${ordered.map(record=>`<li><button type="button" data-review-command="map-focus" data-path-index="${record.pathIndex}" aria-label="Open path ${record.pathIndex+1}: ${esc(record.title)}"><span>${record.pathIndex+1}</span><strong>${esc(record.title)}</strong></button></li>`).join('')}</ol></nav>`:'';
+  const laneMarkup=lane=>{
+    const members=records.filter(record=>record.realm.id===lane.id),work=members.filter(record=>!record.governance),beats=work.reduce((sum,record)=>sum+record.total,0);
+    return`<section class="cwsr234-map-lane" data-map-lane="${lane.id}" style="--map-lane:${lane.color}" aria-label="${lane.label}"><h4>${lane.label}</h4><p class="cwsr234-map-lane-counts" data-map-lane-counts>${work.length} ${work.length===1?'path':'paths'} · ${beats} ${beats===1?'beat':'beats'}${members.some(record=>record.governance)?' + governance':''}</p>${members.map(pathMarkup).join('')||'<p class="cwsr234-map-empty">No path in this subsystem.</p>'}</section>`;
+  };
+  return`<section class="cwsr234-map" data-private-quest-map aria-label="Private Quest map"><header><h3>Your Quest map</h3><p>Private on this device. Open a path or expand its beats. Statuses reflect the saved plan; viewing this map changes no work state.</p></header>${order}<div class="cwsr234-map-lanes">${lanes.map(laneMarkup).join('')}</div>${sources.length>visible.length?`<p class="cwsr234-map-note">Map preview: ${visible.length} of ${sources.length} paths. All saved path details remain below.</p>`:''}</section>`;
 }
 function openPersistentChat(system){
   try{return globalThis.CivweavePersistentGuideChatV215?.open?.({guide:realm(system)})||null}catch{return null}
@@ -148,12 +158,40 @@ function notify(system,text){
   try{globalThis.CivweavePersistentGuideChatV215?.notify?.(realm(system),text,{open:true});return}catch{}
   try{dispatchEvent(new CustomEvent('civweave:guide-notification',{detail:{system:realm(system),text,open:true}}))}catch{}
 }
+function planReviewOutcome(item){
+  const plan=item?.plan||item,decision=plan?.reviewDecision,id=clean(plan?.id||item?.id,180),state=String(item?.state||plan?.state||'');
+  if(!id||!decision?.id||decision.planId!==id||decision.scope!=='plan'||!Date.parse(decision.at)||state!==plan.state)return null;
+  if(decision.decision==='accepted'&&state==='active')return{guide:'civweave',receiptId:decision.id,outcome:'accepted',label:'Quest plan activated',title:plan.title||'Quest plan',scope:'Quest plan review',note:'Paths unlocked; execution and completion still need evidence',progressText:'Plan accepted · Quest work remains to be demonstrated',fresh:false};
+  if(decision.decision==='revision'&&state==='review'&&clean(decision.note,2000))return{guide:'civweave',receiptId:decision.id,outcome:'revision',label:'Quest plan changes requested',title:plan.title||'Quest plan',scope:'Quest plan review',note:clean(decision.note,2000),progressText:'Saved under review · describe the next revision with Weaveling',fresh:false};
+  return null;
+}
+function planReviewScene(item){
+  const outcome=planReviewOutcome(item);if(!outcome)return'';
+  const art=globalThis.CivweaveLudModeV1?.isEnabled?.()!==true&&document.documentElement.dataset.civweaveOperatingMode!=='lud';
+  return globalThis.CivweaveGuideOutcomeSceneV1?.render?.({...outcome,art})||`<section class="cwsr234-block" role="status"><small>${esc(outcome.scope)}</small><h3>${esc(outcome.label)}</h3><p>${esc(outcome.progressText)}</p><p>${esc(outcome.note)}</p></section>`;
+}
+function reviewFailure(message){
+  const error=clean(message,900),status=document.querySelector(`#${SURFACE_ID} [data-review-decision-status]`);
+  if(status){status.textContent=error;status.hidden=false}
+  return{ok:false,error};
+}
+function commitReviewWrites(entries){
+  const previous=new Map(),written=[];
+  try{for(const[key]of entries)previous.set(key,localStorage.getItem(key))}catch{return reviewFailure('The saved Quest could not be read. No decision was recorded.')}
+  for(const[key,value]of entries){
+    if(write(key,value)){written.push(key);continue}
+    let restored=true;
+    for(const changed of written.reverse())try{const old=previous.get(changed);if(old===null)localStorage.removeItem(changed);else localStorage.setItem(changed,old)}catch{restored=false}
+    return reviewFailure(restored?'The Quest decision could not be saved. Your previous review state was restored.':'The Quest decision could not be saved completely. Reopen the saved Quest to inspect its current state before trying again.');
+  }
+  return{ok:true};
+}
 function renderPlan(item,source=null){
   const plan=item?.plan||item;
   if(!plan)return false;
   openPersistentChat('civweave');
   installStyle();
-  const host=chooseHost(source),surface=document.createElement('section');
+  const host=chooseHost(source),surface=document.createElement('section'),previous=document.getElementById(SURFACE_ID);
   removeSurface();
   surface.id=SURFACE_ID;surface.dataset.host=host.type;surface.dataset.kind='weave';surface.dataset.id=clean(item.id||plan.id,180);
   const paths=Array.isArray(plan.paths)?plan.paths:[];
@@ -161,11 +199,15 @@ function renderPlan(item,source=null){
   surface.innerHTML=`
     <header class="cwsr234-head"><div><small>QUEST REVIEW</small><h2>${esc(plan.title||item.text||'Untitled Quest')}</h2><span class="cwsr234-state">${esc(item.state||plan.state||'review')}</span></div><button class="cwsr234-close" type="button" data-review-command="close" aria-label="Close review">×</button></header>
     <div class="cwsr234-summary">${plan.wish?`<p><strong>Quest goal:</strong> ${esc(plan.wish)}</p>`:''}${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}</div>
+    ${planReviewScene(item)}
     ${privateQuestMap({...plan,state:item.state||plan.state||'review'},paths)}
+    <details class="cwsr234-change-request"><summary>Request changes to this plan</summary><form data-review-revision-form><label for="cwsr234-revision-note">What needs to change?</label><textarea id="cwsr234-revision-note" name="revisionNote" required maxlength="2000" rows="3">${esc(plan.reviewDecision?.decision==='revision'?clean(plan.reviewDecision.note,2000):'')}</textarea><p>Saving returns this plan to review and keeps its existing work records. Continue with Weaveling when you are ready.</p><button type="button" data-review-command="request-plan-changes" data-id="${esc(item.id||plan.id)}">Save revision request</button></form></details><p class="cwsr234-warning" role="alert" data-review-decision-status hidden></p>
     ${paths.map((path,index)=>`<section class="cwsr234-block" data-review-path="${index}" tabindex="-1"><small>${esc(`${index+1} · ${mapRealm(path).label} · ${path.status||'ready'}`)}</small><h3>${esc(path.title||'Untitled path')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}${listMarkup('STEPS',pathSteps(path).map(stepTitle))}${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
     ${listMarkup('ASSUMPTIONS',plan.assumptions)}
     ${governance?`<section class="cwsr234-block" data-review-governance tabindex="-1"><small>ANARCHADIA · PASSPORT AND CONSENT</small><h3>${esc(governance.title||'Governance layer')}</h3>${governance.purpose?`<p>${esc(governance.purpose)}</p>`:''}${Array.isArray(governance.agreements)&&governance.agreements.length?`<ul>${governance.agreements.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`:''}${governance.reviewQuestion?`<p><strong>Review:</strong> ${esc(governance.reviewQuestion)}</p>`:''}</section>`:''}
-    <div class="cwsr234-actions"><button type="button" data-review-command="close">Keep under review</button>${String(item.state||plan.state||'review')==='review'?`<button type="button" class="primary" data-review-command="activate-plan" data-id="${esc(item.id||plan.id)}">Activate Quest</button>`:''}</div>`;
+    <div class="cwsr234-actions"><button type="button" data-review-command="close">${String(item.state||plan.state||'review')==='review'?'Keep under review':'Close review'}</button>${plan.reviewDecision?.decision==='revision'?'<button type="button" data-review-command="focus-chat">Continue with Weaveling</button>':''}${String(item.state||plan.state||'review')==='review'?`<button type="button" class="primary" data-review-command="activate-plan" data-id="${esc(item.id||plan.id)}">Activate Quest</button>`:''}</div>`;
+  globalThis.CivweaveGuideOutcomeSceneV1?.preserve?.(previous,surface);
+  globalThis.CivweaveGuideOutcomeSceneV1?.bind?.(surface);
   host.node.append(surface);current={kind:'weave',id:surface.dataset.id,source};return surface;
 }
 function renderAction(action,source=null){
@@ -203,21 +245,41 @@ function buildHandoffs(plan){
 }
 function activatePlan(id){
   const items=arr(INTENTIONS_KEY),index=items.findIndex(item=>item?.id===id||item?.plan?.id===id);
-  if(index<0)return{ok:false,error:'The saved Quest could not be found.'};
+  if(index<0)return reviewFailure('The saved Quest could not be found.');
   const item=items[index],plan=structuredClone(item.plan||item);
+  if(String(item.state||plan.state)==='active'&&plan.state==='active')return{ok:true,unchanged:true,item,plan};
+  if(String(item.state||plan.state)!=='review'||plan.state!=='review')return reviewFailure('Only a saved Quest under review can be activated.');
   const at=now();
-  plan.state='active';plan.updatedAt=at;
+  plan.state='active';plan.updatedAt=at;plan.reviewDecision={id:uid('quest-review'),planId:plan.id||item.id,decision:'accepted',at,scope:'plan'};
   if(Array.isArray(plan.paths))for(const path of plan.paths){if(!path.status||path.status==='draft'||path.status==='review')path.status='ready';if(!Array.isArray(path.progress))path.progress=[]}
   item.plan=plan;item.state='active';item.done=false;item.updatedAt=at;items[index]=item;
-  write(INTENTIONS_KEY,items.slice(0,100));
   const oldInbox=arr(REALM_INBOX_KEY).filter(packet=>packet?.payload?.weaveId!==plan.id);
-  write(REALM_INBOX_KEY,[...buildHandoffs(plan),...oldInbox].slice(0,120));
   const working=obj(WORKING_KEY);
-  write(WORKING_KEY,{...working,wish:plan.wish||working.wish||'',plan,stage:'active',view:'quest',updatedAt:at});
+  const committed=commitReviewWrites([[INTENTIONS_KEY,items],[REALM_INBOX_KEY,[...buildHandoffs(plan),...oldInbox].slice(0,120)],[WORKING_KEY,{...working,wish:plan.wish||working.wish||'',plan,stage:'active',view:'quest',updatedAt:at}]]);
+  if(!committed.ok)return committed;
   try{dispatchEvent(new CustomEvent('civweave:intentions-changed',{detail:{items}}))}catch{}
   try{dispatchEvent(new CustomEvent('civweave:working-campus-plan-built',{detail:{plan,state:'active',source:REVISION}}))}catch{}
   try{dispatchEvent(new CustomEvent('civweave:review-plan-activated',{detail:{id:plan.id,plan,source:REVISION}}))}catch{}
-  removeSurface();mountPendingWeaves();notify('civweave',`The Quest “${plan.title||'Untitled Quest'}” is active. Its realm handoffs are ready.`);
+  const source=current?.source||null;mountPendingWeaves();notify('civweave',`The Quest “${plan.title||'Untitled Quest'}” is active. Its realm handoffs are ready.`);
+  globalThis.CivweaveGuideOutcomeSceneV1?.markFresh?.(plan.reviewDecision.id);renderPlan(item,source);
+  return{ok:true,item,plan};
+}
+function requestPlanChanges(id,note){
+  note=clean(note,2000);if(!note)return reviewFailure('Describe the change before saving a revision request.');
+  const items=arr(INTENTIONS_KEY),index=items.findIndex(item=>item?.id===id||item?.plan?.id===id);
+  if(index<0)return reviewFailure('The saved Quest could not be found.');
+  const item=items[index],plan=structuredClone(item.plan||item),state=String(item.state||plan.state||'');
+  if(!['review','active'].includes(state))return reviewFailure('Only a saved plan under review or active can receive a revision request.');
+  if(planReviewOutcome(item)?.outcome==='revision'&&plan.reviewDecision.note===note)return{ok:true,unchanged:true,item,plan};
+  const at=now();plan.state='review';plan.updatedAt=at;plan.reviewDecision={id:uid('quest-review'),planId:plan.id||item.id,decision:'revision',note,at,scope:'plan'};
+  item.plan=plan;item.state='review';item.updatedAt=at;items[index]=item;
+  const working=obj(WORKING_KEY),selected=working.plan?.id===(plan.id||item.id),entries=[[INTENTIONS_KEY,items]];
+  if(selected)entries.push([WORKING_KEY,{...working,plan,stage:'review',updatedAt:at}]);
+  const committed=commitReviewWrites(entries);if(!committed.ok)return committed;
+  try{dispatchEvent(new CustomEvent('civweave:intentions-changed',{detail:{items}}))}catch{}
+  if(selected)try{dispatchEvent(new CustomEvent('civweave:working-campus-plan-built',{detail:{plan,state:'review',source:REVISION}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:review-plan-revision-requested',{detail:{id:plan.id,plan,source:REVISION}}))}catch{}
+  globalThis.CivweaveGuideOutcomeSceneV1?.markFresh?.(plan.reviewDecision.id);renderPlan(item,current?.source||null);
   return{ok:true,item,plan};
 }
 function ensureGuideContracts(){
@@ -253,6 +315,11 @@ async function handleSurfaceClick(event){
     target.focus({preventScroll:true});target.scrollIntoView?.({block:'nearest',behavior:'auto'});return;
   }
   if(command==='activate-plan')return activatePlan(id);
+  if(command==='request-plan-changes'){
+    const input=button.closest('form')?.querySelector('[name="revisionNote"]'),note=clean(input?.value,2000);
+    if(!note){input?.setCustomValidity('Describe the change before saving.');input?.reportValidity?.();return reviewFailure('Describe the change before saving a revision request.')}
+    input?.setCustomValidity('');return requestPlanChanges(id,note);
+  }
   if(command==='approve-action')return approveAction(id);
 }
 function onGateCapture(event){
@@ -317,7 +384,7 @@ function start(){
   try{dispatchEvent(new CustomEvent('civweave:shared-review-ready',{detail:{version:VERSION,revision:REVISION,at:now()}}))}catch{}
 }
 
-const api=Object.freeze({version:VERSION,revision:REVISION,openPlan,activatePlan,openAction,approveAction,close:removeSurface,reviewWeaves,mountPendingWeaves,start});
+const api=Object.freeze({version:VERSION,revision:REVISION,openPlan,activatePlan,requestPlanChanges,openAction,approveAction,close:removeSurface,reviewWeaves,mountPendingWeaves,start});
 globalThis.CivweaveSharedReviewSurfaceV234=api;
 document.readyState==='loading'?addEventListener('DOMContentLoaded',start,{once:true}):start();
 })();

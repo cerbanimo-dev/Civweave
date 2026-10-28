@@ -443,3 +443,41 @@ Merged stagingf6a0e65a, retaining its multi-plan library and authenticated durab
 
 
 **Final integration checks before deploy:** new loader regressions2/2; post-latest-merge Guide commands19+125+49+16 cases all pass. Radio35/35 pass in its dedicated run; one preceding35-case run failed under parallel full-graph CPU load and passed immediately in isolation, so keep test timing under observation rather than claiming flake-free CI. The Termux cancellation verifier now proves Cancel bypasses only the busy/retry guard, uses the stored accepted job ID and pairing token, and leaves disabled/ordinary/declined actions blocked. UI controller cache pin is durable-jobs-v13-cancel-busy. No real Termux/Ollama inference was run by these checks.
+
+
+### October 27 — subsystem visualization overhaul
+
+User requested continued sprite battles plus useful information maps and quick controls across every subsystem. Work is integrated at the existing capability owners; maps do not create another chat, state store, review authority, inference loop, or navigation system.
+
+| ID | Implemented source / remaining acceptance |
+| --- | --- |
+| **VIS-SHARED-01** | One common receipt presenter uses existing five-guide sheets and the official Lari atlas. Scoped accepted/revision scenes, finite 3.2-second motion, Replay/Stop, same-receipt DOM preservation, reduced motion and Lud text are implemented. The old Cerbanimo-only renderer is removed. Browser acceptance follows deployment. |
+| **VIS-CIV-01** | Private Quest map now has four compact lanes, real counts, expandable beats/dependencies, and quick focus controls. Governance stays separate. Explicit activation records plan activation, not completed work. Required-note revision preserves evidence and starts no model. Checked three-key persistence rolls back on failure instead of reporting an unsaved success. |
+| **VIS-CERB-01** | Existing task dependency/proof map now delegates actual review outcomes to the shared presenter. Accepted task and final endeavor scopes remain distinct. Saved 3/3 digital-note evidence is preserved. |
+| **VIS-LEARN-01** | Living School has a seven-stage plan/source/design/assessment/practicum/final/credential map. Actual current IDs and receipts govern progress. The saved failed 0/3 course build remains failed and the credential remains locked. Map focus does not generate or assess. |
+| **VIS-FF-01** | FellowFare has a five-stage draft/listing/arrangement/delivery/completion projection and three next-action shortcuts. Same-title arrangements use exact IDs. Rook outcome requires a completed order and matching persisted fulfillment contribution; it does not imply payment. Queued listing source identity now survives publication. |
+| **VIS-ANA-01** | Anarchadia replaces misleading citizen/participation pulse with request/review/preview and separately read ballot/decision/packet counts. Unreadable vaults show unknown with explicit Retry. Merlin scene is a corroborated local Keep/Revert receipt, never a passed ballot or published update. Governance quick links retain the six allowlisted tabs through parent and standalone routes. |
+| **VIS-REWARD-01** | Canonical ledger emits an eligible delta only after signing and persistence. Existing bootstrap/migration/duplicate/failed writes do not celebrate. Shared presentation filters the actual parent account, combines newly earned asset amounts in one finite dismissible toast, and never mints or replays grants. Cross-frame and multi-asset losses found in review have regressions and fixes. No genuine reward was fabricated for live QA. |
+
+Source evidence before deployment: 69 new/expanded map/outcome/grant cases passed; after independent review added two cases, all17 presenter+ledger cases passed. Broader lifecycle/proof/native navigation/first-frame regression set113/113 passed. These are deterministic fixtures, not fresh Qwen generations. Existing flagship quality and full-flow gates remain open as recorded above.
+
+`npm run check` reached post-syntax ownership verification and stopped at the already recorded Settings query expectation (`settings-v324` versus current `1.0.138-generation-timeout`). `npm run build:install` could not start because Windows WSL has no `/bin/bash`. This is not an installer acceptance pass. Focused packaging checks and live deployment acceptance are recorded below when completed.
+
+
+### October 28 — Kamiya, learning receipts and scene polish
+
+**VIS-CERB-02:** replaced the battle presenter's use of Kamiya's original sheet with a fresh transparent six-pose fox atlas, retaining his goggles, teal scarf and maker gear. Character/style references and all generation prompts are in `docs/history/kamiya-review-sprites-2026-10-28.md`. Final1536×1024RGBA atlas has3×2square cells and verified transparent spacing; no visible silhouette crosses a cell boundary. Lari's approved design is unchanged.
+
+**VIS-LEARN-02:** active module quiz result now has one nearby success/revision scene with saved score, pass target, criterion feedback, date and attempt receipt. Its control opens the actual next module or current lesson; it never submits another assessment. The map avoids repeating the same quiz scene. A completed Learning Journey receives one credential-linked completion receipt only after every current gate corroborates. Partial/fallback generation, demo practicum, duplicate module IDs and foreign/stale gates cannot claim completion. Storage failure restores saved state; unverifiable saves cannot celebrate.
+
+**VIS-EFFECTS-01:** accepted scenes use a proof shield and green particle burst; revision scenes use amber gathering particles/ripples and constructive feedback. Twelve decorative particles remain inside the battle, ignore pointer input, and stop with the finite3.2s scene. Reduced motion and Lud suppress motion/art as applicable. Same-receipt redraws do not replay the scene.
+
+**VIS-SOUND-01:** optional visible Sound on/off defaults off in each document. Opt-in enables quiet self-contained synthesized3-note success/2-note revision cues. No network track, dependency, radio interruption or autoplay on reopening is added. Stop cancels active sound and particles; page exit closes the single lazy audio context. Browser control acceptance and audio output limits are recorded below.
+
+**OPS-CI-02:** reproduced the embedded Anarchadia fixture's10passing assertions followed by teardown rejection. The test now controls its actual vault module/read promise and waits for controller settlement, asserting the ledger shortcut survives vault refresh before closing JSDOM. Product exceptions are not swallowed. Isolated10/10 exits0; pre-polish integration92/92 and focused scene/learning/receipt/cache65/65 passed.
+
+**UI-ANA-05 (open):** separate Observatory still defaults readiness to100% with zero proposals and calls preview-ready summary scaffolds validated. The new civic home map does not make those claims. Correct the Observatory's labels/count denominator and add zero-work/scaffold regressions during the next screen polish pass.
+
+No new flagship inference or genuine credential was created by these deterministic tests. AI quality/full-flow gates, real member Guild publication and the recorded stalled0/3course remain open. Existing `npm run check` Settings revision assertion and missing Bash installer-build limitations remain recorded; no broad installer pass is implied.
+
+**October28 integration gate:** all Guide Full DOM Startup and Guide Artifact Lifecycle workflow test commands run together with bounded concurrency: **346/346 pass**. Shell integrity52/52 and registered worker builder `--check` pass. This covers actual quiz/completion gate behavior with deterministic fixtures and does not close the pending real Qwen completion/quality gates.

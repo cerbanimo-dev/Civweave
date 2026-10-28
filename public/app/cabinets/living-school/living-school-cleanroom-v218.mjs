@@ -1,6 +1,6 @@
-import{copy,state,persist,readJson,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
+import{copy,state,replaceState,persist,readJson,STATE_KEY,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
 import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY,learningJourneyPlanById,recoverableChatPlans}from'./living-school-journey-index-v1.mjs?v=multi-plan-library-v2';
-import{render}from'./living-school-cleanroom-render-v218.mjs?v=durable-jobs-v3';
+import{render,currentLearningOutcome}from'./living-school-cleanroom-render-v218.mjs?v=quiz-journey-receipts-v2';
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=source-recovery-details-v269-selected-deadline';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
@@ -182,11 +182,22 @@ async function retryApprovedLearningJourney(target){
   toastMessage('The approved Learning Journey is available in the curriculum and saved Learning Journeys list.');
   return school;
 }
+function focusLearningStage(stage){
+  if(!['journeys','sources','curriculum','modules','module','practicum','final','credential'].includes(stage))return;
+  const destination=document.getElementById('lsc218-'+stage);
+  if(!destination)return;
+  if(destination.tagName==='DETAILS')destination.open=true;
+  destination.focus({preventScroll:true});
+  destination.scrollIntoView?.({block:'start',behavior:'auto'});
+}
 async function handleLivingSchoolClick(event){
   const target=event.target?.closest?.('[data-ls-action]');
   if(!target)return;
   event.preventDefault();event.stopImmediatePropagation();
   const actionName=String(target.dataset.lsAction||'').trim();
+  if(!target.disabled&&actionName==='focus-learning-stage'){
+    focusLearningStage(target.dataset.lsStage);return;
+  }
   if(target.disabled||((busy||retryStarting)&&actionName!=='cancel-companion-generation'))return;
   if(actionName==='resume-companion-generation'){
     const job=readJson('civweave.termux-companion.curriculum-job.v1',null);
@@ -278,16 +289,30 @@ async function handleLivingSchoolClick(event){
   }
   const action=actions[actionName];
   if(!action)return;
+  const reviewAction=['evaluate-assessment','evaluate-final','issue-credential','import-receipt','check-cerbanimo-receipt'].includes(actionName),
+    previousRecord=reviewAction?copy(state()):null,previousOutcome=reviewAction?currentLearningOutcome(state(),actionName)?.receiptId:null;
+  let actionCompleted=false;
   busy=true;markDispatch();target.setAttribute('aria-busy','true');
   try{
     if(AI_ACTIONS.has(actionName))await ensureAIGuards(`action:${actionName}`);
     await action(target);
+    if(reviewAction){
+      const outcome=currentLearningOutcome(state(),actionName),saved=readJson(STATE_KEY,null),
+        persistedOutcome=saved?.school?.id===state().school?.id?currentLearningOutcome(saved,actionName):null;
+      if(outcome&&outcome.receiptId!==previousOutcome){
+        if(persistedOutcome?.receiptId!==outcome.receiptId||persistedOutcome.outcome!==outcome.outcome||persistedOutcome.kind!==outcome.kind||persistedOutcome.moduleId!==outcome.moduleId)
+          throw new Error('The new learning result could not be verified in the saved local record. The previous saved result has been restored.');
+        globalThis.CivweaveGuideOutcomeSceneV1?.markFresh?.(outcome.receiptId);
+      }
+    }
+    actionCompleted=true;
     await applyVideoContract(`action:${actionName}`);
   }catch(error){
+    if(reviewAction&&!actionCompleted)replaceState(readJson(STATE_KEY,previousRecord));
     console.error('[Living School cleanroom]',error);
     toastMessage(String(error?.message||error));
   }
-  finally{busy=false;target.removeAttribute('aria-busy');renderEnhanced();queueMicrotask(()=>renderLivingSchoolEmbed(document,state().school,state().activeModuleId))}
+  finally{busy=false;target.removeAttribute('aria-busy');renderEnhanced();if(actionName==='select-module'&&target.dataset.lsFocusAfter==='module')focusLearningStage('module');queueMicrotask(()=>renderLivingSchoolEmbed(document,state().school,state().activeModuleId))}
 }
 
 function chatCurriculumData(input={}){

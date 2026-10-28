@@ -95,13 +95,29 @@ test('embedded FellowFare consumes the requested tab through its existing contro
   assert.equal(window.document.getElementById('cw-themed-system-nav'),null);
 });
 
-test('embedded Anarchadia consumes a ledger shortcut after its existing controller is ready',t=>{
+test('embedded Anarchadia consumes a ledger shortcut after its existing controller is ready',async t=>{
   const app=fixture(t,{path:'/app/anarchadia-console-v139.html',system:'anarchadia',feature:'ledger'}),{window}=app;
-  window.eval(read('app/anarchadia-console-v158.js'));app.start();
+  let releaseVault,reads=0;
+  const vaultRead=new Promise(resolve=>{releaseVault=resolve});
+  window.__qaGovernanceStore={loadGovernanceState:()=>{reads++;return vaultRead}};
+  // JSDOM's outside-only eval has no browser module loader. Substitute just
+  // that boundary and settle the real controller's bounded startup read before
+  // closing its document; never suppress a rejection from the controller.
+  const source=read('app/anarchadia-console-v158.js'),fixtureSource=source.replace("import('./anarchadia-governance-store-v145.js')",'Promise.resolve(globalThis.__qaGovernanceStore)');
+  assert.notEqual(fixtureSource,source,'The fixture must replace the canonical vault import, rather than bypass controller startup.');
+  window.eval(fixtureSource);app.start();
   assert.equal(window.document.getElementById('ac-app').dataset.screen,'ledger');
   assert.equal(window.document.getElementById('screen-ledger').hidden,false);
   assert.equal(new URL(window.location.href).searchParams.get('feature'),'ledger');
   assert.equal(window.document.getElementById('cw-themed-system-nav'),null);
+  await Promise.resolve();assert.equal(reads,1,'Controller startup reads its existing vault once.');
+  releaseVault({schema:'civweave.anarchadia-governance.v145',changeSets:[],ballots:[],executionPackets:[],authorizations:[]});
+  for(let pass=0;pass<12;pass++)await Promise.resolve();
+  assert.equal(window.document.getElementById('ac-app').dataset.screen,'ledger','An asynchronous vault refresh must not undo the requested screen.');
+  assert.equal(window.document.getElementById('screen-ledger').hidden,false);
+  window.AnarchadiaCitizenConsoleV158.setScreen('home');
+  assert.match(window.document.querySelector('.ac-civic-footer [role="status"]').textContent,/0 governed changes/,'The vault completion and its render must settle before teardown.');
+  assert.equal(reads,1,'Opening home reuses the settled vault, without another startup read.');
 });
 
 test('loading the shared feature owner twice preserves one embedded lifecycle',t=>{

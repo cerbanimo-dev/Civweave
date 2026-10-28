@@ -30,9 +30,12 @@ assert.match(review,/Quest goal:/,'Quest review must label the governing request
 assert.doesNotMatch(review,/Wish:<\/strong>/,'Quest review must not expose the retired Wish label.');
 assert.match(review,/<details><summary>/,'Review-state Quests must be collapsed by default.');
 assert.doesNotMatch(review,/<details\s+open/,'Review-state Quests must not auto-expand.');
-assert.match(review,/write\(INTENTIONS_KEY/,'Quest activation must update the canonical intention ledger.');
-assert.match(review,/write\(REALM_INBOX_KEY/,'Quest activation must create canonical realm handoffs.');
-assert.match(review,/write\(WORKING_KEY/,'Quest activation must synchronize Working Campus state.');
+const activation=review.slice(review.indexOf('function activatePlan('),review.indexOf('function requestPlanChanges('));
+assert.match(activation,/commitReviewWrites\(\[\[INTENTIONS_KEY,items\]/,'Quest activation must commit the canonical intention ledger.');
+assert.match(activation,/\[REALM_INBOX_KEY,\[\.\.\.buildHandoffs\(plan\)/,'Quest activation must commit canonical realm handoffs.');
+assert.match(activation,/\[WORKING_KEY,\{\.\.\.working/,'Quest activation must commit Working Campus state.');
+assert.match(activation,/if\(!committed\.ok\)return committed/,'A failed owner commit must not publish an accepted review outcome.');
+assert.match(review,/written\.reverse\(\)/,'A partial decision commit must restore prior owner values.');
 assert.match(review,/civweave:review-plan-activated/,'Quest activation must emit a review lifecycle event.');
 assert.match(review,/civweave:review-action-approved/,'Realm approval must emit a review lifecycle event.');
 

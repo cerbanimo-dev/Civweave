@@ -291,7 +291,24 @@
     },
     "review": {
       "capability": "Shared review surface and review handoffs",
-      "owner": "public/app/shared-review-surface-v234.js"
+      "owner": "public/app/shared-review-surface-v234.js",
+      "presentationHelper": "public/app/shared/guide-outcome-scene-v1.js",
+      "presentationStyles": "public/app/shared/guide-outcome-scene-v1.css",
+      "presentationApi": "globalThis.CivweaveGuideOutcomeSceneV1",
+      "allowedPresentationCallers": [
+        "public/app/shared-review-surface-v234.js",
+        "public/app/cerbanimo-quest-engine-v144.js",
+        "public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs",
+        "public/app/services/fellowfare/marketplace-v2.js",
+        "public/app/anarchadia-console-v158.js"
+      ],
+      "presentationRules": [
+        "Capability owners supply corroborated persisted receipt IDs and scoped outcomes; the helper never accepts work or grants rewards.",
+        "Replay, Stop, map focus, and refresh do not invoke AI, publish, vote, transfer, or change review state.",
+        "Canonical reward append events animate only a new persisted eligible grant for the current account; bootstrap, duplicates, migrations, and failed writes remain silent.",
+        "An installed child delegates reward presentation only to its exact same-origin persistent parent; no duplicate child toast.",
+        "Finite motion, reduced-motion support, Lud text presentation, and stable same-receipt DOM survive redraws."
+      ]
     },
     "survival-assessment": {
       "capability": "Offline first safety prioritization from user-reported conditions and locally stored references",

@@ -3,10 +3,10 @@
 // always move it onto the live marketplace and the current economy boundary.
 
 import './live-data-preflight-v3.js';
-import '../../cw-reward-ledger-v2.js';
+import '../../cw-reward-ledger-v2.js?v=2.1.1-persisted-grants';
 import '../../civweave-live-data.js';
-import './marketplace-v2.js';
-import './marketplace-v2-capabilities.js';
+import './marketplace-v2.js?v=2.1.0-visual-workflow';
+import './marketplace-v2-capabilities.js?v=1.0.2-stable-order-target-visual-workflow';
 import './fulfillment-economy-v2.js';
 import './goods-fulfillment-v1.js';
 import './jurisdiction-policy-v1.js';
@@ -28,5 +28,5 @@ function ensureStyle(href, marker) {
   document.head.append(link);
 }
 
-ensureStyle('./marketplace-v2.css?v=live-market-v2', 'data-fellowfare-marketplace-v2');
+ensureStyle('./marketplace-v2.css?v=visual-workflow-v1', 'data-fellowfare-marketplace-v2');
 ensureStyle('./marketplace-v2-contrast.css?v=contrast-live-r1', 'data-fellowfare-marketplace-contrast');

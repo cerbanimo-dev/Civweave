@@ -61,9 +61,20 @@ test('independent first-frame boot restores allowlisted native pages with the sa
   assert.equal(new URL(h.frame.src).pathname,'/app/anarchadia-console-v139.html');
 });
 
+test('independent Governance tab boot matches the parent and defaults untrusted values to Overview',()=>{
+  const context={URL,URLSearchParams,location:{origin:'https://civweave-staging.pages.dev',href:'https://civweave-staging.pages.dev/app/persistent-system-shell-v1.html'},document:{readyState:'loading',addEventListener(){}},addEventListener(){}};
+  vm.runInNewContext(runtime,context);const owner=context.CivweavePersistentSystemShellV1;
+  for(const nativeRoute of ['overview','identity','changes','ballots','federation','execution','unknown','javascript:alert(1)','__proto__','charter']){
+    const options={nativePage:'governance',nativeRoute,proposal:'qa & review',feature:'receipts'},h=harness({system:'anarchadia',query:'&'+new URLSearchParams(options)}),target=new URL(h.frame.src),expected=['overview','identity','changes','ballots','federation','execution'].includes(nativeRoute)?nativeRoute:'overview';
+    assert.equal(h.frame.src,owner.contentUrl('anarchadia',options).href);assert.equal(target.hash,`#${expected}`);assert.equal(target.searchParams.get('proposal'),'qa & review');assert.equal(target.searchParams.get('feature'),'receipts');
+    h.frame.handlers.load();assert.equal(h.loading.hidden,true);assert.equal(h.context.CivweaveShellRescueV1.validDocument(),true);
+  }
+});
+
 for(const options of [
     {system:'fellowfare',hash:'market'},
     {system:'fellowfare',hash:'orders',view:'open'},
+    {system:'anarchadia',query:'&nativePage=governance&nativeRoute=ballots&proposal=qa-proposal',hash:'execution'},
     {system:'anarchadia',query:'&nativePage=workbench&nativeRoute=charter&weave=qa-weave&path=qa-path',hash:'readiness',view:'proof'}
   ])test(`independent rescue accepts ${options.system} native view #${options.hash}`,()=>{
     const h=harness(options),actual=new URL(h.frame.src);actual.hash=options.hash;if(options.view)actual.searchParams.set('view',options.view);

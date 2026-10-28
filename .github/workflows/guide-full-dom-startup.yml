@@ -30,6 +30,11 @@ on:
       - 'scripts/test-working-campus-proof-projection-v1.mjs'
       - 'scripts/test-working-campus-current-selection-v1.mjs'
       - 'scripts/test-private-quest-map-v1.mjs'
+      - 'scripts/test-private-quest-map-compact-v1.mjs'
+      - 'scripts/test-weaveling-review-outcomes-v1.mjs'
+      - 'scripts/test-living-school-journey-map-v1.mjs'
+      - 'scripts/test-fellowfare-visual-workflow-v1.mjs'
+      - 'scripts/test-anarchadia-visual-workflow-v1.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/guide-full-dom-startup.yml'
@@ -63,6 +68,11 @@ on:
       - 'scripts/test-working-campus-proof-projection-v1.mjs'
       - 'scripts/test-working-campus-current-selection-v1.mjs'
       - 'scripts/test-private-quest-map-v1.mjs'
+      - 'scripts/test-private-quest-map-compact-v1.mjs'
+      - 'scripts/test-weaveling-review-outcomes-v1.mjs'
+      - 'scripts/test-living-school-journey-map-v1.mjs'
+      - 'scripts/test-fellowfare-visual-workflow-v1.mjs'
+      - 'scripts/test-anarchadia-visual-workflow-v1.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/guide-full-dom-startup.yml'
@@ -90,3 +100,5 @@ jobs:
         run: node --test scripts/test-weaveling-subsystem-scope-v1.mjs scripts/test-guide-route-context-v1.mjs scripts/test-guide-change-request-routing-v1.mjs scripts/test-embedded-feature-navigation-v1.mjs
       - name: Verify accepted work updates and revokes Quest progress
         run: node --test scripts/test-private-quest-map-v1.mjs scripts/test-weave-native-proof-progress-v1.mjs scripts/test-working-campus-proof-projection-v1.mjs scripts/test-working-campus-current-selection-v1.mjs
+      - name: Verify subsystem maps, scoped review decisions and inert quick controls
+        run: node --test scripts/test-private-quest-map-compact-v1.mjs scripts/test-weaveling-review-outcomes-v1.mjs scripts/test-living-school-journey-map-v1.mjs scripts/test-fellowfare-visual-workflow-v1.mjs scripts/test-anarchadia-visual-workflow-v1.mjs

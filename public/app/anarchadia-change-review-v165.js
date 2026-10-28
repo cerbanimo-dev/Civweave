@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.5-anarchadia-change-review-v165-provider-outcome';
+const VERSION='1.0.6-anarchadia-change-review-v165-receipt-outcome';
 if(globalThis.AnarchadiaChangeReviewV165?.version===VERSION)return;
 const CONSOLE_KEY='civweave.anarchadia.citizen-console.v139';
 const ACTION_KEY='civweave.realm-actions.v141';
@@ -20,7 +20,7 @@ function notifyState(serialized){
   try{dispatchEvent(new StorageEvent('storage',{key:CONSOLE_KEY,newValue:serialized,url:location.href,storageArea:localStorage}))}catch{}
 }
 function writeState(state){state.proposals=Array.isArray(state.proposals)?state.proposals.slice(0,80):[];state.ledger=Array.isArray(state.ledger)?state.ledger.slice(0,250):[];const serialized=JSON.stringify(state);localStorage.setItem(CONSOLE_KEY,serialized);notifyState(serialized);scheduleDecorate();return state}
-function record(state,kind,detail,proposalId=''){state.ledger.unshift({id:uid('evt'),time:now(),kind,detail:clean(detail,2400),proposalId})}
+function record(state,kind,detail,proposalId=''){const receipt={id:uid('evt'),time:now(),kind,detail:clean(detail,2400),proposalId};state.ledger.unshift(receipt);return receipt}
 function actions(){const rows=parse(localStorage.getItem(ACTION_KEY),[]);return Array.isArray(rows)?rows:[]}
 function writeActions(rows){localStorage.setItem(ACTION_KEY,JSON.stringify(rows.slice(0,120)));try{dispatchEvent(new CustomEvent('civweave:actions-changed',{detail:{items:rows}}))}catch{}}
 function updateAction(id,patch){if(!id)return null;const rows=actions(),index=rows.findIndex(item=>item.id===id);if(index<0)return null;const action=rows[index];patch(action);action.updatedAt=now();rows[index]=action;writeActions(rows);return action}
@@ -81,14 +81,14 @@ async function approveAndRun(id){
 }
 function selectPreview(id){
   const state=readState(),item=state.proposals.find(row=>row.id===id);if(!item?.preview?.srcdoc)return{ok:false,error:'No generated preview is available.'};
-  item.status='preview-accepted';item.previewDecision={state:'accepted',at:now(),label:'Keep this preview'};item.updatedAt=now();item.pipeline=Array.isArray(item.pipeline)?item.pipeline:[];item.pipeline.push({time:now(),stage:'preview-decision',note:'The user kept this preview as the selected governed candidate.'});record(state,'preview-kept',`${item.title}: preview selected. Current production remains unchanged until its governed publication route completes.`,item.id);writeState(state);
+  item.status='preview-accepted';item.previewDecision={state:'accepted',at:now(),label:'Keep this preview'};item.updatedAt=now();item.pipeline=Array.isArray(item.pipeline)?item.pipeline:[];item.pipeline.push({time:now(),stage:'preview-decision',note:'The user kept this preview as the selected governed candidate.'});const receipt=record(state,'preview-kept',`${item.title}: preview selected. Current production remains unchanged until its governed publication route completes.`,item.id);writeState(state);globalThis.CivweaveGuideOutcomeSceneV1?.markFresh?.(receipt.id);
   const selected=parse(localStorage.getItem(SELECTED_KEY),[]),rows=Array.isArray(selected)?selected:[],entry={proposalId:item.id,sourceActionId:item.sourceActionId,title:item.title,generator:item.preview.generator||item.patch?.generator||'configured-provider',acceptedAt:item.previewDecision.at};const index=rows.findIndex(row=>row.proposalId===item.id);if(index>=0)rows[index]=entry;else rows.unshift(entry);localStorage.setItem(SELECTED_KEY,JSON.stringify(rows.slice(0,80)));
   updateAction(item.sourceActionId,action=>{action.state='preview-accepted';action.execution={...(action.execution||{}),status:'preview-accepted',events:[...(action.execution?.events||[]),{type:'anarchadia.preview.accepted',at:now(),proposalId:item.id}].slice(-40)}});
   document.querySelector('#ac-preview-dialog')?.close();toast('Preview kept as the selected candidate. The current production look remains available until governed publication.');return{ok:true,proposal:item};
 }
 function revertPreview(id){
   const state=readState(),item=state.proposals.find(row=>row.id===id);if(!item)return{ok:false,error:'The preview request could not be found.'};
-  delete item.patch;delete item.preview;delete item.validation;item.status='review';item.stage='intake';item.failedStage=null;item.previewDecision={state:'reverted',at:now(),label:'Revert to current look'};item.approval={...(item.approval||{}),state:'review',approvedAt:''};item.updatedAt=now();item.pipeline=Array.isArray(item.pipeline)?item.pipeline:[];item.pipeline.push({time:now(),stage:'preview-reverted',note:'The user rejected the generated preview and returned to the current look.'});record(state,'preview-reverted',`${item.title}: generated preview discarded; current look retained.`,item.id);writeState(state);
+  delete item.patch;delete item.preview;delete item.validation;item.status='review';item.stage='intake';item.failedStage=null;item.previewDecision={state:'reverted',at:now(),label:'Revert to current look'};item.approval={...(item.approval||{}),state:'review',approvedAt:''};item.updatedAt=now();item.pipeline=Array.isArray(item.pipeline)?item.pipeline:[];item.pipeline.push({time:now(),stage:'preview-reverted',note:'The user rejected the generated preview and returned to the current look.'});const receipt=record(state,'preview-reverted',`${item.title}: generated preview discarded; current look retained.`,item.id);writeState(state);globalThis.CivweaveGuideOutcomeSceneV1?.markFresh?.(receipt.id);
   updateAction(item.sourceActionId,action=>{action.state='review';action.execution={...(action.execution||{}),status:'awaiting-preview-approval',events:[...(action.execution?.events||[]),{type:'anarchadia.preview.reverted',at:now(),proposalId:item.id}].slice(-40)}});
   document.querySelector('#ac-preview-dialog')?.close();toast('Preview reverted. The current look is unchanged, and the request returned to review.');return{ok:true,proposal:item};
 }

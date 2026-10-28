@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.9-preview-source-owner';
+const VERSION='1.0.10-civic-work-map';
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const CHAT_KEY='civweave.guide-chat.anarchadia.v153';
 const HUB_PROPOSALS='/lite/?system=anarchadia&room=anarchadia.proposals#proposals';
@@ -32,6 +32,8 @@ let renderQueued=false;
 let modelStatusTicket=0;
 let merlinBusy=false;
 const runningPipelines=new Set();
+let civicVault={status:'idle',data:null};
+let civicVaultRead=null;
 
 function load(){const saved=parse(localStorage.getItem(STORAGE_KEY),null);return saved?.schema==='civweave.anarchadia-console.v1'?saved:defaultState()}
 function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
@@ -57,8 +59,64 @@ function renderObservatory(){
   modelStatus(++modelStatusTicket);
 }
 async function modelStatus(ticket){const node=$('#ac-model-posture');if(!node)return;try{const runtime=globalThis.CivweaveReflexRuntime||parent?.CivweaveReflexRuntime,status=await runtime?.status?.();if(ticket!==modelStatusTicket||!node.isConnected)return;node.textContent=status?.available?'MiniLM semantic retrieval is ready.':'Lexical rails are active while the semantic package warms.'}catch{if(ticket===modelStatusTicket&&node.isConnected)node.textContent='Lexical rails are active; semantic retrieval is optional.'}}
-function renderPulse(){const total=state.proposals.length,ready=state.proposals.filter(p=>p.stage==='preview-ready').length;$('#ac-passport-id').textContent=state.passportId;$('#ac-proposal-count').textContent=String(total);$('#ac-participation').textContent=total?`${Math.round((state.proposals.filter(p=>p.voteSignal).length/total)*100)}%`:'0%';$('#ac-momentum').textContent=total?(ready===total?'HIGH':ready?'RISING':'FORMING'):'IDLE'}
-function renderAll(){renderPulse();const screen=currentScreen();if(screen==='proposals')renderProposals();if(screen==='ledger')renderLedger();if(screen==='automation')renderPipelines();if(screen==='observatory')renderObservatory()}
+async function refreshCivicVault(){
+  if(civicVaultRead)return civicVaultRead;
+  civicVault={status:'loading',data:null};queueRender();
+  // Read the canonical governance vault. The console never writes, normalizes,
+  // imports a candidate, or creates a second authority store for this map.
+  civicVaultRead=import('./anarchadia-governance-store-v145.js').then(api=>api.loadGovernanceState()).then(data=>{
+    if(data&&data.schema!=='civweave.anarchadia-governance.v145')throw new Error('Unrecognized governance vault.');
+    civicVault={status:'ready',data};
+  }).catch(()=>{civicVault={status:'unavailable',data:null}}).finally(()=>{civicVaultRead=null;queueRender()});
+  return civicVaultRead;
+}
+function civicOutcome(){
+  for(const receipt of state.ledger.slice(0,250)){
+    const outcome=receipt.kind==='preview-kept'?'accepted':receipt.kind==='preview-reverted'?'revision':'';
+    if(!outcome||!receipt.id||!receipt.proposalId)continue;
+    const item=proposal(receipt.proposalId),decision=item?.previewDecision;
+    if(!decision||decision.state!==(outcome==='accepted'?'accepted':'reverted'))continue;
+    const decidedAt=Date.parse(decision.at),recordedAt=Date.parse(receipt.time);
+    if(!Number.isFinite(decidedAt)||!Number.isFinite(recordedAt)||recordedAt<decidedAt)continue;
+    return{guide:'anarchadia',outcome,receiptId:receipt.id,label:outcome==='accepted'?'Preview kept':'Preview returned for changes',title:String(item.title||'Change request').slice(0,160),note:outcome==='accepted'?'The candidate is selected. Governed adoption and publication still require their own decisions.':'The generated candidate was discarded and the request returned to review.',scope:'Device-local preview decision',progressText:outcome==='accepted'?'Selected candidate · governance remains separate':'Back in review · current look retained',fresh:false,art:globalThis.CivweaveLudModeV1?.isEnabled?.()!==true&&document.documentElement.dataset.civweaveOperatingMode!=='lud'};
+  }
+  return null;
+}
+function civicStage({id,label,count,note,icon,control,tone=''}){
+  return `<li class="ac-civic-node ${tone}" data-civic-stage="${id}"><button type="button" ${control}><span class="ac-civic-node-head"><span class="ac-civic-glyph" aria-hidden="true">${icon}</span><b data-civic-count>${count}</b></span><strong>${label}</strong><small>${esc(note)}</small><span class="ac-civic-open">Open <span aria-hidden="true">↗</span></span></button></li>`;
+}
+function renderCivicOutcome(){
+  const host=$('#ac-civic-outcome'),scene=globalThis.CivweaveGuideOutcomeSceneV1;if(!host)return;
+  const spec=civicOutcome();host.hidden=!spec||!scene?.render;
+  if(host.hidden){host.replaceChildren();return}
+  const next=document.createElement('div');next.innerHTML=scene.render(spec);scene.preserve?.(host,next);host.replaceChildren(...next.childNodes);scene.bind?.(host);
+}
+function renderCivicFlow(){
+  const node=$('#ac-civic-flow');if(!node)return;
+  if(civicVault.status==='idle')void refreshCivicVault();
+  const rows=state.proposals,needsReview=rows.filter(p=>['draft','review','reverted','blocked','failed'].includes(p.status)||p.previewDecision?.state==='reverted'),blocked=rows.filter(p=>['blocked','failed'].includes(p.status)),previews=rows.filter(p=>Boolean(p.preview?.srcdoc)),kept=previews.filter(p=>p.previewDecision?.state==='accepted'),working=rows.filter(p=>runningPipelines.has(p.id)||p.status==='working');
+  const known=civicVault.status==='ready',vault=civicVault.data,list=key=>Array.isArray(vault?.[key])?vault[key]:[],ballots=list('ballots'),open=ballots.filter(b=>b.status==='open'),closed=ballots.filter(b=>b.status==='closed'),packets=list('executionPackets'),unknown='—';
+  const latest=rows.slice().sort((a,b)=>(Date.parse(b.updatedAt||b.createdAt)||0)-(Date.parse(a.updatedAt||a.createdAt)||0))[0];
+  const decisionNote=known?`${closed.filter(b=>b.outcome?.outcome==='adopted').length} adopted · ${closed.filter(b=>b.outcome?.outcome==='not-adopted').length} not adopted · ${closed.filter(b=>b.outcome?.outcome==='no-quorum').length} no quorum`:'Read the governance vault to inspect decisions';
+  const stages=[
+    {id:'requests',label:'Requests',count:rows.length,note:rows.length?'Saved on this device':'No requests yet',icon:'✎',control:'data-screen-target="proposals"'},
+    {id:'review',label:'Review',count:needsReview.length,note:blocked.length?`${blocked.length} blocked or failed · inspect reasons`:'Explicit approval before generation',icon:'◇',control:'data-screen-target="automation"',tone:blocked.length?'is-blocked':''},
+    {id:'previews',label:'Previews',count:previews.length,note:`${kept.length} kept · ${working.length} generating`,icon:'▣',control:'data-screen-target="automation"'},
+    {id:'ballots',label:'Open ballots',count:known?open.length:unknown,note:known?(open.length?'Frozen revision · review before voting':'No ballots open'):'Governance vault not yet read',icon:'⚖',control:'data-ag145-open data-ag145-view="ballots"',tone:known?'':'is-unknown'},
+    {id:'decisions',label:'Recorded decisions',count:known?closed.length:unknown,note:decisionNote,icon:'▤',control:'data-ag145-open data-ag145-view="ballots"',tone:known?'':'is-unknown'},
+    {id:'execution',label:'Prepared packets',count:known?packets.length:unknown,note:'Preparation is separate from execution',icon:'⌘',control:'data-ag145-open data-ag145-view="execution"',tone:known?'':'is-unknown'}
+  ];
+  const next=document.createElement('div');
+  next.innerHTML=`<header class="ac-civic-head"><div><small>ANARCHADIA · WORK MAP</small><h2>Civic work in motion</h2><p>Follow a request from local review to a governed decision.</p></div><div class="ac-civic-head-actions"><button type="button" data-request-kind="feature">New request</button><button type="button" data-civic-refresh ${civicVault.status==='loading'?'disabled':''}>${civicVault.status==='loading'?'Reading…':civicVault.status==='unavailable'?'Retry vault':'Refresh'}</button></div></header>
+    <div class="ac-civic-scopes"><span>Device-local request &amp; preview</span><span>Governance vault · this device</span></div>
+    <ol class="ac-civic-track" aria-label="Civic workflow stages">${stages.map(civicStage).join('')}</ol>
+    <p class="ac-civic-boundary">A kept preview is a candidate. Importing it into Governance, voting, consent, and publication are separate explicit steps.</p>
+    <div class="ac-civic-next"><div><small>${latest?'LATEST REQUEST':'START A CHANGE'}</small><strong>${latest?esc(String(latest.title||'Untitled request').slice(0,160)):'What could work better?'}</strong><p>${latest?'Open the pipeline to inspect its review, safeguards, and next action.':'Describe the problem and the result you want. Review it before generation begins.'}</p></div><button type="button" ${latest?'data-screen-target="automation"':'data-request-kind="feature"'}>${latest?'Open pipeline':'New request'}</button></div>
+    <div class="ac-civic-footer"><span role="status">${civicVault.status==='unavailable'?'Governance vault unavailable. Counts are unknown.':known?`${list('changeSets').length} governed changes · ${packets.length} prepared packets`:'Reading governance vault…'}</span><button type="button" data-ag145-open data-ag145-view="changes">Governed changes ↗</button><button type="button" data-ag145-open data-ag145-view="federation">Federation receipts ↗</button></div>`;
+  node.replaceChildren(...next.childNodes);
+}
+function renderPulse(){const passport=$('#ac-passport-id');if(passport)passport.textContent=state.passportId;if(currentScreen()==='home')renderCivicFlow()}
+function renderAll(){renderPulse();renderCivicOutcome();const screen=currentScreen();if(screen==='proposals')renderProposals();if(screen==='ledger')renderLedger();if(screen==='automation')renderPipelines();if(screen==='observatory')renderObservatory()}
 function record(p,stage,note){p.stage=stage;p.pipeline=p.pipeline||[];p.pipeline.push({time:now(),stage,note});p.updatedAt=now();save(`pipeline:${stage}`,`${p.title}: ${note}`,p.id)}
 function railCheck(p){const results=RAILS.map(rail=>{const pass=Boolean(rail.check(p));return{id:rail.id,label:rail.label,pass,note:pass?'Pass':'Needs revision before automation may continue.'}});p.rails=results;return results.every(item=>item.pass)}
 async function semanticReview(p){
@@ -133,7 +191,7 @@ function initialChat(){return{role:'assistant',text:'I’m Merlin, Anarchadia’
 function renderMerlinChat(){const log=$('#ac-merlin-log'),button=$('#ac-merlin-send'),status=$('#ac-merlin-status');if(!log)return;const rows=readChat(),list=rows.length?rows:[initialChat()];log.innerHTML=list.slice(-40).map(row=>`<article class="ac-merlin-message ${row.role==='user'?'is-user':'is-merlin'}${row.pending?' is-pending':''}${row.error?' is-error':''}"><p>${esc(row.text)}</p>${row.provider?`<small>${esc(row.provider)}${row.model?` · ${esc(row.model)}`:''}</small>`:''}</article>`).join('');log.scrollTop=log.scrollHeight;if(button){button.disabled=merlinBusy;button.textContent=merlinBusy?'THINKING…':'SEND'}if(status)status.textContent=merlinBusy?'Merlin is checking rails, assumptions, and next actions.':'Local history · shared model settings'}
 async function sendMerlin(event){event.preventDefault();if(merlinBusy)return;const input=$('#ac-merlin-input'),text=String(input?.value||'').trim().slice(0,8000);if(!text)return;const rows=readChat(),pendingId=uid('merlin');rows.push({role:'user',text},{role:'assistant',id:pendingId,text:'Merlin is translating the request into plain mechanics and accountable next actions…',pending:true});writeChat(rows);input.value='';merlinBusy=true;renderMerlinChat();try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();const api=globalThis.CivweaveGuideChatV153;if(!api?.ask)throw new Error('The shared guide runtime did not become ready.');const reply=await api.ask('anarchadia',text,rows),latest=readChat(),index=latest.findIndex(row=>row.id===pendingId);if(index>=0)latest[index]=reply;else latest.push(reply);writeChat(latest)}catch(error){const latest=readChat(),index=latest.findIndex(row=>row.id===pendingId),reply={role:'assistant',text:`Merlin could not complete this call: ${error.message}`,error:true};if(index>=0)latest[index]=reply;else latest.push(reply);writeChat(latest)}finally{merlinBusy=false;renderMerlinChat();input?.focus()}}
 async function openFullMerlin(){try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();globalThis.CivweaveGuideChatV153?.open?.('anarchadia')}catch(error){toast(error.message)}}
-function click(event){const target=event.target.closest('button,[data-action]');if(!target)return;if(target.dataset.screenTarget){setScreen(target.dataset.screenTarget);return}if(target.dataset.requestKind){startRequest(target.dataset.requestKind);return}if(target.dataset.action==='vote-hub'){openHub();return}if(target.dataset.action==='open-merlin-guide'){openFullMerlin();return}if(target.dataset.preview){openPreview(target.dataset.preview);return}if(target.dataset.rerun){runPipeline(target.dataset.rerun);return}if(target.dataset.openPipeline){setScreen('automation');return}if(target.dataset.signalVote){signalVote(target.dataset.signalVote);return}if(target.matches('[data-close-preview]')){$('#ac-preview-dialog')?.close();return}}
+function click(event){const target=event.target.closest('button,[data-action]');if(!target)return;if(target.hasAttribute('data-civic-refresh')){void refreshCivicVault();return}if(target.dataset.screenTarget){setScreen(target.dataset.screenTarget);return}if(target.dataset.requestKind){startRequest(target.dataset.requestKind);return}if(target.dataset.action==='vote-hub'){openHub();return}if(target.dataset.action==='open-merlin-guide'){openFullMerlin();return}if(target.dataset.preview){openPreview(target.dataset.preview);return}if(target.dataset.rerun){runPipeline(target.dataset.rerun);return}if(target.dataset.openPipeline){setScreen('automation');return}if(target.dataset.signalVote){signalVote(target.dataset.signalVote);return}if(target.matches('[data-close-preview]')){$('#ac-preview-dialog')?.close();return}}
 
 document.addEventListener('click',click);
 $('#ac-request-form').addEventListener('submit',submitRequest);

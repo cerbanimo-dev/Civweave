@@ -110,7 +110,10 @@ test('the existing explicit activation still owns state changes after map inspec
     assert.equal(b.writes, 0);
     b.win.document.querySelector('[data-review-command="activate-plan"]').click();
     assert.equal(JSON.parse(b.win.localStorage.getItem(key))[0].state, 'active');
-    assert.equal(b.win.document.querySelector('[data-private-quest-map]'), null);
+    assert.ok(b.win.document.querySelector('[data-private-quest-map]'), 'the active Quest stays visible with its recorded plan decision');
+    assert.equal(JSON.parse(b.win.localStorage.getItem(key))[0].plan.reviewDecision.decision, 'accepted');
+    assert.match(b.win.document.querySelector('#cw-shared-review-surface-v234').textContent, /Quest plan activated/);
+    assert.equal(b.win.document.querySelector('[data-review-command="activate-plan"]'), null, 'the recorded active plan cannot be activated again from review');
     await new Promise(resolve => setImmediate(resolve));
   } finally { b.close(); }
 });

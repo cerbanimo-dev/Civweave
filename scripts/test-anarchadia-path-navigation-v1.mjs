@@ -91,6 +91,18 @@ test('native page fallback preserves real launch context without inventing embed
   }
 });
 
+for(const nativeRoute of ['overview','identity','changes','ballots','federation','execution','not-a-tab','https://foreign.test/','__proto__']){
+  test(`Governance quick control ${nativeRoute} follows the existing parent or standalone route`,()=>{
+    const expected=['overview','identity','changes','ballots','federation','execution'].includes(nativeRoute)?nativeRoute:'overview';
+    for(const embedded of [true,false]){
+      const app=harness({embedded});app.click('[data-ag145-open]',{ag145Open:'proposal & approval',ag145View:nativeRoute});
+      if(embedded){assert.equal(app.assignments.length,0);assert.equal(app.navigations.length,1);assert.equal(app.navigations[0].options.nativeRoute,expected);assert.equal(app.navigations[0].options.proposal,'proposal & approval')}
+      else{const target=new URL(app.assignments[0],app.context.location.origin);assert.equal(target.pathname,'/app/anarchadia-governance-v145.html');assert.equal(target.hash,`#${expected}`);assert.equal(target.searchParams.get('proposal'),'proposal & approval');assert.equal(target.searchParams.get('installed'),'1');assert.equal(target.searchParams.get('embed'),null)}
+      assert.equal(app.storage.has(handoffKey),false,'Opening a read view does not create a Quest handoff or decision.');
+    }
+  });
+}
+
 function shellHarness(){
   const assignments=[],history=[],events=new Map(),host={dataset:{}},loading={hidden:true},error={dataset:{}};
   Object.defineProperty(host,'src',{set(href){assignments.push({href,expected:host.dataset.cwExpectedHref});host._src=href},get(){return host._src}});
@@ -121,6 +133,20 @@ test('the parent launches only fixed native Anarchadia pages and records identit
     assert.equal(target.hash,'');assert.equal(app.api.shellUrl(system,{nativePage}).searchParams.get('nativePage'),null);
   }
   assert.equal(app.api.contentUrl('anarchadia',{nativePage:'workbench',nativeRoute:'javascript:alert(1)'}).hash,'#workbench');
+});
+
+test('parent preserves only allowlisted Governance tabs in its child and browser-history targets',()=>{
+  const app=shellHarness();
+  for(const nativeRoute of ['overview','identity','changes','ballots','federation','execution','unknown','javascript:alert(1)','__proto__','charter']){
+    const expected=['overview','identity','changes','ballots','federation','execution'].includes(nativeRoute)?nativeRoute:'overview';
+    app.api.navigate('anarchadia',{nativePage:'governance',nativeRoute,proposal:'qa & review',feature:'receipts'});
+    const target=new URL(app.assignments.at(-1).href),history=new URL(app.history.at(-1),'https://civweave.test');
+    assert.equal(target.pathname,'/app/anarchadia-governance-v145.html');assert.equal(target.hash,`#${expected}`);assert.equal(target.searchParams.get('proposal'),'qa & review');assert.equal(target.searchParams.get('feature'),'receipts');
+    for(const flag of ['installed','embed','persistentShell','cabinet'])assert.equal(target.searchParams.get(flag),'1');
+    assert.equal(history.searchParams.get('nativeRoute'),expected);assert.equal(history.searchParams.get('nativePage'),'governance');assert.equal(history.searchParams.get('proposal'),'qa & review');assert.equal(history.searchParams.get('feature'),'receipts');
+    assert.equal(app.assignments.at(-1).expected,target.href,'Tab selection stays part of the pre-recorded target.');
+  }
+  assert.equal(app.api.contentUrl('anarchadia',{nativePage:'governance'}).hash,'#overview');
 });
 
 test('native subpages retain strict parent frame identity while allowing local workbench tabs',()=>{

@@ -6,7 +6,14 @@ on:
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-quest-engine-v144.css'
       - 'public/app/assets/ai/lari-review-sprites-v1.png'
+      - 'public/app/assets/ai/kamiya-review-sprites-v1.png'
       - 'scripts/test-cerbanimo-visual-feedback-v1.mjs'
+      - 'public/app/shared/guide-outcome-scene-v1.js'
+      - 'public/app/shared/guide-outcome-scene-v1.css'
+      - 'public/app/cw-reward-ledger-v2.js'
+      - 'scripts/test-guide-outcome-scene-v1.mjs'
+      - 'scripts/test-visual-feedback-integration-v1.mjs'
+      - 'scripts/test-canonical-reward-grant-notification-v1.mjs'
       - 'public/app/cerbanimo-ai-validator-v159.js'
       - 'public/app/realm-console-v140.html'
       - 'public/app/guide-contracts-v141.js'
@@ -18,7 +25,14 @@ on:
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-quest-engine-v144.css'
       - 'public/app/assets/ai/lari-review-sprites-v1.png'
+      - 'public/app/assets/ai/kamiya-review-sprites-v1.png'
       - 'scripts/test-cerbanimo-visual-feedback-v1.mjs'
+      - 'public/app/shared/guide-outcome-scene-v1.js'
+      - 'public/app/shared/guide-outcome-scene-v1.css'
+      - 'public/app/cw-reward-ledger-v2.js'
+      - 'scripts/test-guide-outcome-scene-v1.mjs'
+      - 'scripts/test-visual-feedback-integration-v1.mjs'
+      - 'scripts/test-canonical-reward-grant-notification-v1.mjs'
       - 'public/app/cerbanimo-ai-validator-v159.js'
       - 'public/app/realm-console-v140.html'
       - 'public/app/guide-contracts-v141.js'
@@ -41,4 +55,4 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - name: Verify guide artifact creation, revision, approval, completion, and reopening
-        run: node --test scripts/test-guide-artifact-lifecycle-v1.mjs scripts/test-cerbanimo-visual-feedback-v1.mjs
+        run: node --test scripts/test-guide-artifact-lifecycle-v1.mjs scripts/test-cerbanimo-visual-feedback-v1.mjs scripts/test-guide-outcome-scene-v1.mjs scripts/test-canonical-reward-grant-notification-v1.mjs scripts/test-visual-feedback-integration-v1.mjs

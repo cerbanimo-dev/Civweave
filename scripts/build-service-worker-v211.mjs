@@ -9,6 +9,8 @@ const required=[
   'public/app/system-routes-v227.js',
   'public/app/themed-system-nav-v178.js',
   'public/app/persistent-shell-actions-v1.js',
+  'public/app/shared/guide-outcome-scene-v1.js',
+  'public/app/shared/guide-outcome-scene-v1.css',
   'public/service-worker-canonical-navbar-v1.js',
   'public/service-worker-direct-shell-retirement-v1.js',
   'public/service-worker-living-school-cleanroom-v218.js',
@@ -46,7 +48,7 @@ const output=`// GENERATED: one persistent five-system shell + shared canonical 
 // direct-shell-retirement-v1: only retired legacy shells are purged; the current persistent-system-shell-v1 is not retired.
 // persistent-shell-actions-v1: Guilds and Map belong to the canonical rail across all five systems.
 // family-nav-single-owner-r3: themed-system-nav-v178 is mounted once by persistent-system-shell-v1 and is not recreated by realms.
-// shell-assets-v27: persistent shell, event-bounded generation lifecycle, shared navbar runtime, five sprite sheets, and fallback portraits are required app-shell assets.
+// shell-assets-v29: required navigation and optional shared outcome presentation follow their existing shell asset owners.
 'use strict';
 // The canonical installed PWA registers this worker directly, so current-generation AI route takeovers must be imported here rather than only from the root compatibility worker.
 importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r46');
@@ -69,7 +71,7 @@ importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-c
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.167-local-ai-code-v322-ai-quest-source-authority');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v289-lifecycle-deferred');
 importScripts('/service-worker-core-v208.js?v=1.0.163-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1');
-importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v28-member-quest-publication');
+importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v30-outcome-polish');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v295-entry-integrity');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
@@ -175,7 +177,7 @@ console.log(JSON.stringify({
   persistentActions:'guilds-map-all-systems-v2-chat-icon',
   iframeShell:true,
   iframeShellRetirement:'v1-purge-and-redirect',
-  shellAssets:'shell-assets-v1-repair-v28-member-quest-publication',
+  shellAssets:'shell-assets-v1-repair-v30-outcome-polish',
   navigationSafety:'direct-system-pages-v2',
   localAICodeCoherence:'v322-ai-quest-source-authority',
   codeCoherence:'v289-lifecycle-deferred',

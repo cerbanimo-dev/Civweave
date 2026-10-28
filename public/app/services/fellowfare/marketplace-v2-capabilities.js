@@ -68,7 +68,7 @@ function enhanceOrders(){
  for(const card of document.querySelectorAll('.ffv2-order')){
    if(card.querySelector('.ffv2-live-order-actions'))continue;
    const title=clean(card.querySelector('h3')?.textContent,180),status=clean(card.querySelector('.ffv2-status')?.textContent,60).toLowerCase();
-   const order=orders.find(row=>unmatched.has(row.id)&&clean(row.title,180)===title&&clean(row.status||'pending',60).toLowerCase()===status);
+   const order=card.dataset.orderRecord?orders.find(row=>unmatched.has(row.id)&&row.id===card.dataset.orderRecord):orders.find(row=>unmatched.has(row.id)&&clean(row.title,180)===title&&clean(row.status||'pending',60).toLowerCase()===status);
    if(!order)continue;unmatched.delete(order.id);card.dataset.ffOrderId=order.id;
    const actions=document.createElement('div');actions.className='ffv2-card-actions ffv2-live-order-actions';actions.innerHTML=orderActionButtons(order);card.append(actions);
  }
@@ -104,6 +104,6 @@ async function handleClick(event){
 }
 const observer=new MutationObserver(()=>requestAnimationFrame(enhance));
 function start(){document.addEventListener('click',handleClick);observer.observe(document.querySelector('#main')||document.body,{childList:true,subtree:true});addEventListener('hashchange',()=>requestAnimationFrame(enhance));addEventListener('fellowfare:marketplace-changed',()=>requestAnimationFrame(enhance));enhance()}
-globalThis.CivweaveFellowFareMarketplaceCapabilities=Object.freeze({version:'1.0.1-canonical-order-owner',enhance,rewardSnapshot,updateOrder,shareListing});
+globalThis.CivweaveFellowFareMarketplaceCapabilities=Object.freeze({version:'1.0.2-stable-order-target',enhance,rewardSnapshot,updateOrder,shareListing});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

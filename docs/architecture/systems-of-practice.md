@@ -128,6 +128,12 @@ The API and privacy boundaries are defined in `docs/contracts/guild-quest-public
 
 Extend these systems at their owners. Do not attach duplicate launchers or parallel global listeners from realm code.
 
+Review presentation uses `public/app/shared/guide-outcome-scene-v1.js` and its matching stylesheet. `CivweaveGuideOutcomeSceneV1.render/bind/preserve/markFresh` presents a capability-supplied persisted receipt; it cannot accept work, generate plans, publish, issue credentials, or grant rewards. The five callers are the shared Quest review, learning renderer, Cerbanimo engine, FellowFare marketplace, and Anarchadia console. Each retains its authoritative state and names the scope of its outcome. The obsolete Cerbanimo-only scene renderer is removed.
+
+The helper also subscribes once to `civweave:canonical-rewards-changed`. Only `{reason: 'append', persisted: true, grantDelta}` from `cw-reward-ledger-v2.js` can request a celebration, after account/asset/positive-amount checks and bounded receipt deduplication. Startup snapshots and legacy imports carry no delta. The exact installed child delegates this display to the same-origin persistent parent. Replay never repeats a grant. Animation is finite; reduced motion and Lud retain readable state. Scene sound is off by default and enabled only by the visible Sound control for the current document. The presenter owns one lazy WebAudio context and at most three quiet synthesized notes per cue; Stop and page exit cancel playback. No media download, radio control, new preference store or audio prewarm is involved. Deterministic contracts live in `scripts/test-guide-outcome-scene-v1.mjs` and `scripts/test-canonical-reward-grant-notification-v1.mjs`.
+
+Subsystem maps are projections of their existing capability owners: four private Quest lanes with expandable beats and governance kept distinct; Cerbanimo task dependencies and accepted proof; Living School plan-to-credential gates; FellowFare listing-to-fulfillment counts; Anarchadia local requests plus separately read governance vault decisions and prepared packets. Focus controls route to existing actions. A route, selection, replay, or map expansion supplies no authorization to perform the underlying action.
+
 ## When a new shared system is genuinely necessary
 
 A new cross-cutting owner requires all of the following in the same PR:
@@ -146,3 +152,6 @@ The objective is not fewer files for aesthetic reasons. It is one source of beha
 ## Survival Mode
 
 Canonical assessment and reference policy: public/app/survival/survival-mode.mjs. Mobile caller: public/app/survival/app.mjs. The existing persistent-shell-actions-v1.js owns its launcher; this does not fork guide chat, navigation, or Settings. Offline seed/package: public/app/offline-package-v208.json. Photographs remain local previews, and downloaded passages never prove identification or edibility. The governing contract is docs/contracts/survival-mode-v1.md and its executable test is scripts/test-survival-mode-v1.mjs.
+
+
+Living School places module quiz receipt scenes next to the active assessment, using its saved attempt ID, score, pass target and criterion feedback. A full Learning Journey completion receipt requires the current unique module set, passed assessments, matching accepted practicum, matching final pass and issued credential. Partial, fallback, demo, foreign and inconsistent records cannot produce that completed-journey receipt. The controller corroborates action-specific receipts against saved state before marking them fresh; storage failure restores the saved state and displays the failure.

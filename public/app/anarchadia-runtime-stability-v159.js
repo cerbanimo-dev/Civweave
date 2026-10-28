@@ -1,10 +1,11 @@
 (()=>{
 'use strict';
-const VERSION='1.0.9-anarchadia-runtime-stability-v159-native-routes';
+const VERSION='1.0.10-anarchadia-runtime-stability-v159-governance-tabs';
 if(globalThis.AnarchadiaRuntimeStabilityV159?.version===VERSION)return;
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
 const LOADER_SRC='/app/family-ai-loader-v105.js?v=headless-canonical-r1';
 const QUEST_KEYS={campus:'civweave.working-campus.v1',intentions:'civweave.intentions.v127',inbox:'civweave.realm-inbox.v1',handoff:'civweave.active-handoff.v1'};
+const GOVERNANCE_VIEWS=new Set(['overview','identity','changes','ballots','federation','execution']);
 let loaderPromise=null;
 const clean=(value,max=12000)=>String(value??'').slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -61,14 +62,17 @@ function openNativePage(nativePage,options={}){
   const target=new URL(nativePage==='governance'?'/app/anarchadia-governance-v145.html':'/app/services/anarchadia/workbench.html',location.href),current=new URLSearchParams(location.search);
   target.searchParams.set('cabinet','1');
   for(const key of ['installed','embed','persistentShell'])if(current.get(key))target.searchParams.set(key,current.get(key));
-  if(nativePage==='governance'&&options.proposal)target.searchParams.set('proposal',String(options.proposal));
+  if(nativePage==='governance'){
+    if(options.proposal)target.searchParams.set('proposal',String(options.proposal));
+    target.hash=GOVERNANCE_VIEWS.has(options.nativeRoute)?options.nativeRoute:'overview';
+  }
   if(nativePage==='workbench'){
     for(const key of ['weave','path'])if(options[key])target.searchParams.set(key,String(options[key]));
     const routes=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);target.hash=routes.has(options.nativeRoute)?options.nativeRoute:'workbench';
   }
   location.assign(target.href);return true;
 }
-function openGovernance(proposalId=''){return openNativePage('governance',{proposal:proposalId})}
+function openGovernance(proposalId='',view='overview'){return openNativePage('governance',{proposal:proposalId,nativeRoute:GOVERNANCE_VIEWS.has(view)?view:'overview'})}
 function openWorkbench(route='workbench'){return openNativePage('workbench',{nativeRoute:route})}
 function currentQuestPlan(){
   const campus=parse(localStorage.getItem(QUEST_KEYS.campus),{}),campusPlan=campus?.plan;
@@ -120,7 +124,7 @@ function mountQuestPathActions(){
   return true;
 }
 document.addEventListener('click',event=>{
-  const governed=event.target.closest?.('[data-ag145-open]');if(governed){event.preventDefault();event.stopImmediatePropagation();openGovernance(governed.dataset.ag145Open||'');return}
+  const governed=event.target.closest?.('[data-ag145-open]');if(governed){event.preventDefault();event.stopImmediatePropagation();openGovernance(governed.dataset.ag145Open||'',governed.dataset.ag145View||'overview');return}
   const workbench=event.target.closest?.('[data-anarchadia-workbench]');if(workbench){event.preventDefault();event.stopImmediatePropagation();openWorkbench(workbench.dataset.anarchadiaWorkbench||'workbench');return}
   if(event.target.closest?.('[data-cwf-chat]')&&!actualLoader()){event.preventDefault();event.stopImmediatePropagation();proxy.openChat('anarchadia',{contextSystem:'anarchadia'});return}
 },true);

@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.18-native-anarchadia-routes';
+const VERSION='1.1.19-governance-tab-routes';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -10,6 +10,7 @@ const ROUTES=Object.freeze({
   anarchadia:['/app/anarchadia-console-v139.html',{cabinet:'1'}]
 });
 const ANARCHADIA_NATIVE_PAGES=Object.freeze({governance:'/app/anarchadia-governance-v145.html',workbench:'/app/services/anarchadia/workbench.html'});
+const ANARCHADIA_GOVERNANCE_ROUTES=new Set(['overview','identity','changes','ballots','federation','execution']);
 const ANARCHADIA_WORKBENCH_ROUTES=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);
 const FRAME_ID='cw-persistent-system-stage';
 const HUMAN_LAUNCHER_ID='cw-human-message-launcher-v1';
@@ -49,7 +50,7 @@ function nativeOptions(system,options={}){
   const nativePage=system==='anarchadia'&&Object.prototype.hasOwnProperty.call(ANARCHADIA_NATIVE_PAGES,options.nativePage)?options.nativePage:'';
   if(!nativePage)return{};
   const id=value=>String(value||'').slice(0,240);
-  return nativePage==='governance'?{nativePage,proposal:id(options.proposal)}:{nativePage,nativeRoute:ANARCHADIA_WORKBENCH_ROUTES.has(options.nativeRoute)?options.nativeRoute:'workbench',weave:id(options.weave),path:id(options.path)};
+  return nativePage==='governance'?{nativePage,nativeRoute:ANARCHADIA_GOVERNANCE_ROUTES.has(options.nativeRoute)?options.nativeRoute:'overview',proposal:id(options.proposal)}:{nativePage,nativeRoute:ANARCHADIA_WORKBENCH_ROUTES.has(options.nativeRoute)?options.nativeRoute:'workbench',weave:id(options.weave),path:id(options.path)};
 }
 function requestedOptions(query){return Object.fromEntries(['feature','nativePage','nativeRoute','proposal','weave','path'].map(key=>[key,query.get(key)||'']))}
 function contentUrl(system,options={}){
