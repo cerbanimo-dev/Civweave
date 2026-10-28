@@ -114,7 +114,7 @@ The v1 P-256 ECDH + HKDF + AES-GCM envelope is a baseline transport-privacy laye
 
 ## Optional Starling Guild Collective (migration foundation)
 
-`lib/starling-collective-v1.mjs` holds the ported Starling persona registry and pure policies for Guildkeeper founding Intention fallback, human-member-only ratification eligibility, task-offer compatibility, and hosted generation preflight. Its contract is `docs/contracts/starling-collective-guild-service-v1.md`. This is not a second Guild, Quest, governance, membership, wallet, or inference owner. It does not currently start agents, create/claim tasks, execute spending, or publish Guild updates. Future adapters must delegate execution and persistence to existing capability owners.
+`public/app/shared/starling-collective-v1.mjs` (also re-exported through `lib/starling-collective-v1.mjs`) holds the ported Starling persona registry and pure policies for Guildkeeper founding Intention fallback, human-member-only ratification eligibility, task-offer compatibility, and hosted generation preflight. `public/app/shared/starling-collective-tools-v1.mjs` is the optional tool manifest and task-scoped authorization preflight. `public/app/starling-lounge-v1.mjs` is a Guild-scoped view that reads existing Quest publication data, not a new chat or task owner. Its contract is `docs/contracts/starling-collective-guild-service-v1.md`. This is not a second Guild, Quest, governance, membership, wallet, or inference owner. It does not currently start agents, create/claim tasks, execute spending, or publish Guild updates. Future adapters must delegate execution and persistence to existing capability owners.
 
 ## Guild Quest publication
 
