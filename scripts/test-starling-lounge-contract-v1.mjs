@@ -51,3 +51,11 @@ test('Lounge reloads signed Collective turns and only starts inference by explic
  assert.doesNotMatch(src,/civweave:starling-turn-recorded/);
  assert.match(src,/CivweaveModelRuntime/);
 });
+
+test('Lounge can explicitly start a bounded multi-persona round without a background timer',()=>{
+ const src=read('public/app/starling-lounge-v1.mjs');
+ assert.match(src,/data-sl-action="round"/);
+ assert.match(src,/\.runRound\(/);
+ assert.match(src,/function runLocalRound\(/);
+ assert.doesNotMatch(src,/setInterval\(|requestIdleCallback\(/);
+});
