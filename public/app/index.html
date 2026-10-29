@@ -6,6 +6,22 @@
   <meta name="theme-color" content="#141126">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Install Civweave v1.0.163</title>
+  <script>
+  // iOS in-app web views cannot satisfy display-mode:standalone. Treat an
+  // ordinary browser visit as web access, not as a failed installation.
+  // Explicit install=required always keeps the installer available.
+  (()=>{'use strict';
+    const params=new URLSearchParams(location.search);
+    const ua=String(navigator.userAgent||'');
+    const ios=/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/i.test(ua)&&Number(navigator.maxTouchPoints||0)>1);
+    let installed=false;try{installed=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches}catch{}
+    if(!ios||installed||params.get('install')==='required'||params.has('installrequired')||params.get('manage'))return;
+    const target=new URL('/app/working-campus-v440.html',location.origin);
+    target.searchParams.set('iosLocal','1');
+    target.searchParams.set('source','ios-webview-installer-entry');
+    location.replace(target.href);
+  })();
+  </script>
   <script src="/app/pwa-install-prompt-v250.js?v=cache-distinct-freeze-recovery"></script>
   <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.163">
   <link rel="icon" href="/app/logos/civweave-day-logo.jpg" type="image/jpeg">
