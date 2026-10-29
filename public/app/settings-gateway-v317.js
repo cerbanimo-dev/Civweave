@@ -1,12 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.134-settings-v324-local-route-self-loading';
-const COMPAT_VERSION='1.0.134-settings-gateway-v317-compat';
+const VERSION='1.0.136-settings-v324-generation-timeout';
+const COMPAT_VERSION='1.0.135-settings-gateway-v317-compat';
 const SELECTOR='[data-open-unified-ai-settings]';
 const LAYER_ID='cw-settings-v320';
 const STYLE_ID='cw-settings-v320-style';
 const INPUT_SLOT='__civweaveSettingsV320Capture';
 const SETTINGS_UI='/app/server-ai-settings-v301.js?v=1.0.117-v305-community-dividend';
+const MODEL_PROVIDER_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.17-termux-durable-jobs';
 const SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v325.js?v=1.1.3-settings-local-route-v326-canonical-inert-hard-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const SETTINGS_KEY='civweave.universal-ai.v127';
@@ -17,6 +18,7 @@ const PERSIST_KEY='civweave-model-persistent-secrets-v191';
 const LEGACY_PERSIST_KEY='civweave-model-persistent-secrets-v160';
 const POLICY_KEY='civweave-model-credential-policy-v191';
 const SAFE_MODE_KEY='civweave.safe-mode.v1';
+const PHONE_GGUF_KEY='civweave.mobile.gguf-primary.v1';
 const LANGUAGE_KEY='civweave.language.v1';
 const CREDENTIAL_REVISION='v191-explicit-device-persistence';
 const GEMINI_SMALL='gemini-3.1-flash-lite';
@@ -24,9 +26,9 @@ const GEMINI_COMPLEX='gemini-3.7-flash';
 const GEMINI_ENDPOINT='https://generativelanguage.googleapis.com/v1beta';
 const GEMINI_ROUTING='capability-spine-v271';
 const APP_VERSION='1.0.8';
-const DEFAULTS=Object.freeze({route:'deterministic',provider:'deterministic',model:'civweave-deterministic-v188',endpoint:'',consent:false,apiKey:'',credentialMode:'session'});
+const DEFAULTS=Object.freeze({route:'deterministic',provider:'deterministic',model:'civweave-deterministic-v188',endpoint:'',consent:false,apiKey:'',credentialMode:'session',timeoutSeconds:90});
 if(globalThis.CivweaveSettingsV320?.version===VERSION)return;
-let returnFocus=null,uiPromise=null,localPromise=null;
+let returnFocus=null,uiPromise=null,localPromise=null,modelRuntimePromise=null;
 const parse=(value,fallback={})=>{try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}};
 const getLocal=key=>{try{return localStorage.getItem(key)||''}catch{return''}};
 const setLocal=(key,value)=>{try{localStorage.setItem(key,value);return true}catch{return false}};
@@ -56,14 +58,15 @@ function existingKey(provider){
 function credentialStatus(){const remembered=Boolean(persistentRecord()),session=Boolean(parse(getSession(SESSION_KEY),{}).apiKey||parse(getSession(SECRET_KEY),{}).interactive?.apiKey);return{remembered,session,mode:remembered?'device':'session',revision:CREDENTIAL_REVISION}}
 function credentialMode(){return credentialStatus().remembered||getLocal(POLICY_KEY)==='device'?'device':'session'}
 function forgetCredential(){removeLocal(PERSIST_KEY);removeLocal(LEGACY_PERSIST_KEY);removeLocal(POLICY_KEY);removeSession(SESSION_KEY);removeSession(SECRET_KEY);try{dispatchEvent(new CustomEvent('civweave:model-secret-forgotten',{detail:{version:VERSION,credentialRevision:CREDENTIAL_REVISION,at:new Date().toISOString()}}))}catch{}return credentialStatus()}
+function generationTimeout(value){const seconds=Number(value);return Number.isFinite(seconds)?Math.min(600,Math.max(5,Math.round(seconds))):90}
 function readState(){
   const saved=parse(getLocal(SETTINGS_KEY),{}),profiles=parse(getLocal(PROFILES_KEY),{}),interactive=profiles.interactive&&typeof profiles.interactive==='object'?profiles.interactive:saved,mode=credentialMode();
   if(isRetired(interactive))return{...DEFAULTS,hasKey:Boolean(existingKey()),remembered:credentialStatus().remembered,credentialMode:mode};
   const route=providerName(interactive.provider||interactive.route||saved.provider||saved.route);
   const fallbackModel=route==='gemini'?GEMINI_SMALL:route==='ollama'?'llama3.2':route==='openai-compatible'?'local-model':route==='server-auto'?'civweave-server-auto-v1':DEFAULTS.model;
   const fallbackEndpoint=route==='gemini'?GEMINI_ENDPOINT:route==='ollama'?'http://127.0.0.1:11434/api/chat':'';
-  const remembered=credentialStatus().remembered;
-  return{route,provider:route,model:String(route==='gemini'?GEMINI_SMALL:(interactive.model||saved.model||fallbackModel)),endpoint:String(interactive.endpoint||saved.endpoint||fallbackEndpoint),consent:Boolean(interactive.externalConsent??saved.consent),apiKey:'',hasKey:Boolean(existingKey()),remembered,credentialMode:mode};
+  const remembered=credentialStatus().remembered,timeoutMs=interactive.timeoutMs??saved.timeoutMs,timeoutSeconds=generationTimeout(timeoutMs!=null?Number(timeoutMs)/1000:interactive.timeoutSeconds??saved.timeoutSeconds);
+  return{route,provider:route,model:String(route==='gemini'?GEMINI_SMALL:(interactive.model||saved.model||fallbackModel)),endpoint:String(interactive.endpoint||saved.endpoint||fallbackEndpoint),consent:Boolean(interactive.externalConsent??saved.consent),apiKey:'',hasKey:Boolean(existingKey()),remembered,credentialMode:mode,timeoutSeconds};
 }
 const normalizeLanguage=value=>String(value||'').toLowerCase().startsWith('ja')?'ja':'en';
 const currentLanguage=()=>normalizeLanguage(getLocal(LANGUAGE_KEY)||document.documentElement.lang||'en');
@@ -74,15 +77,36 @@ function installStyle(){
   const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`#${LAYER_ID}[hidden]{display:none!important}#${LAYER_ID}{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));background:rgba(2,5,16,.94);overflow:auto;font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f5f7ff}#${LAYER_ID},#${LAYER_ID} *{box-sizing:border-box;scroll-behavior:auto!important}#${LAYER_ID} .cw-settings-shell{width:min(760px,100%);max-height:calc(100dvh - 20px);overflow:auto;border:1px solid rgba(126,239,213,.42);border-radius:20px;background:#10182f;box-shadow:0 24px 70px rgba(0,0,0,.72)}#${LAYER_ID} header{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;padding:22px;border-bottom:1px solid rgba(255,255,255,.1);background:#172445}#${LAYER_ID} h2{margin:2px 0 5px;font-size:clamp(1.25rem,4vw,1.8rem)}#${LAYER_ID} h3{margin:0 0 5px;font-size:1.05rem}#${LAYER_ID} p{margin:0;color:#cbd4ee}#${LAYER_ID} small{color:#90efd8;font-weight:700;letter-spacing:.08em}#${LAYER_ID} button,#${LAYER_ID} input,#${LAYER_ID} select{font:inherit}#${LAYER_ID} button{min-height:44px;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:9px 14px;background:#26365f;color:#fff;cursor:pointer}#${LAYER_ID} button:disabled{opacity:.65;cursor:wait}#${LAYER_ID} .cw-settings-close{width:44px;min-width:44px;padding:0;font-size:1.5rem;background:#202d4d}#${LAYER_ID} form{padding:20px;display:grid;gap:17px}#${LAYER_ID} label{display:grid;gap:7px;font-weight:700;color:#e9edfb}#${LAYER_ID} input,#${LAYER_ID} select{width:100%;min-height:46px;border:1px solid rgba(255,255,255,.24);border-radius:11px;padding:10px 12px;background:#080f22;color:#fff}#${LAYER_ID} input[type=checkbox]{width:22px;min-height:22px;margin:0}#${LAYER_ID} .cw-clean-consent{display:flex;align-items:flex-start;gap:10px;font-weight:500}#${LAYER_ID} .cw-clean-panel{display:grid;gap:14px;padding:16px;border:1px solid rgba(255,255,255,.12);border-radius:15px;background:#0b1329}#${LAYER_ID} .cw-clean-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}#${LAYER_ID} .cw-clean-note{padding:13px 15px;border-radius:13px;background:#091d20;color:#c9fff2;border:1px solid rgba(91,235,200,.25)}#${LAYER_ID} .cw-clean-warning{padding:13px 15px;border-radius:13px;background:#261b0d;color:#ffe8b0;border:1px solid rgba(255,194,91,.32)}#${LAYER_ID} .cw-clean-secret-row{display:flex;gap:10px;align-items:end}#${LAYER_ID} .cw-clean-secret-row>label{flex:1}#${LAYER_ID} .cw-language-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}#${LAYER_ID} [data-cw-language-option][aria-pressed="true"]{outline:2px solid #90efd8}#${LAYER_ID} footer{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding-top:4px}#${LAYER_ID} output{display:block;min-height:1.4em;color:#9ff2dc}#${LAYER_ID} .cw-settings-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}#${LAYER_ID} .cw-settings-tabs button{min-width:0;padding-inline:8px;background:#0b1329;color:#cbd4ee}#${LAYER_ID} .cw-settings-tabs button[aria-selected="true"]{border-color:#7eeed5;background:#26365f;color:#fff;box-shadow:inset 0 -3px #7eeed5}#${LAYER_ID} .cw-settings-tab-panel{display:grid;gap:17px}#${LAYER_ID} .cw-settings-tab-panel[hidden]{display:none!important}#${LAYER_ID} .cw-gemini-presets{display:grid;grid-template-columns:1fr 1fr;gap:9px}#${LAYER_ID} .cw-gemini-preset{padding:12px;border:1px solid rgba(126,239,213,.2);border-radius:12px;background:#07172b}#${LAYER_ID} .cw-gemini-preset b{display:block;margin:3px 0;color:#fff}#${LAYER_ID} .cw-gemini-preset span{display:block;color:#cbd4ee;font-size:.86rem}#${LAYER_ID} [data-gemini-presets][hidden],#${LAYER_ID} [data-model-field][hidden]{display:none!important}@media(max-width:600px){#${LAYER_ID}{padding:6px}#${LAYER_ID} .cw-settings-shell{max-height:calc(100dvh - 12px);border-radius:15px}#${LAYER_ID} header{padding:17px}#${LAYER_ID} form{padding:16px}#${LAYER_ID} .cw-clean-grid,#${LAYER_ID} .cw-gemini-presets{grid-template-columns:1fr}#${LAYER_ID} .cw-clean-secret-row{display:grid}}`;
   document.head.append(style);
 }
-function markup(){return `<div class="cw-settings-shell"><header><div><small>CIVWEAVE SETTINGS · v324</small><h2>Settings</h2><p>One shared menu for Civweave, Living School, Cerbanimo, FellowFare, and Anarchadia.</p></div><button type="button" class="cw-settings-close" data-close aria-label="Close settings">×</button></header><form data-cw-settings-form data-cw-cleanroom-form data-settings-tabs="1"><nav class="cw-settings-tabs" role="tablist" aria-label="Settings sections"><button type="button" role="tab" aria-selected="true" data-settings-tab="general">AI &amp; safety</button><button type="button" role="tab" aria-selected="false" data-settings-tab="local-models">Local models</button><button type="button" role="tab" aria-selected="false" data-settings-tab="membership">Membership</button></nav><div class="cw-settings-tab-panel" data-settings-tab-panel="general"><section class="cw-clean-panel"><div><h3>AI route</h3><p>Opening or saving Settings never probes, starts, stops, or loads a model.</p></div><label>Primary route<select name="route"><option value="deterministic">Manual / local rules (no AI)</option><option value="downloaded-local">Downloaded local AI</option><option value="server-auto">Server-side AI · local → host → Cloudflare</option><option value="gemini">Google Gemini</option><option value="ollama">Ollama or local API</option><option value="openai-compatible">OpenAI-compatible endpoint</option></select></label><div data-panel="deterministic"><p>Uses Civweave’s local rules and saved state.</p></div><div data-panel="remote" hidden><div class="cw-gemini-presets" data-gemini-presets hidden><article class="cw-gemini-preset" data-gemini-preset="routine"><small>ROUTINE · FAST</small><b>Gemini 3.1 Flash-Lite</b><span>Conversation, quick answers, and lightweight generation.</span></article><article class="cw-gemini-preset" data-gemini-preset="complex"><small>COMPLEX · SMART</small><b>Gemini 3.7 Flash</b><span>Planning, research, code generation, and agentic or tool-using work.</span></article></div><div class="cw-clean-note" data-gemini-routing-note hidden><b>Automatic Gemini task routing</b><br>These are the shared Gemini presets. Civweave chooses between them by task capability; changing realms does not change the preset pair.</div><div class="cw-clean-grid"><label data-model-field>Model<input name="model" maxlength="200" autocomplete="off"></label><label>Endpoint<input name="endpoint" maxlength="2048" autocomplete="url" spellcheck="false"></label></div><div class="cw-clean-secret-row"><label>API key<input name="apiKey" type="password" maxlength="1000" autocomplete="off" spellcheck="false" placeholder="Enter provider credential"></label><button type="button" data-forget-key hidden>Forget saved key</button></div><label>Credential lifetime<select name="credentialMode"><option value="session">This app session only</option><option value="device">Remember on this device</option></select></label><div class="cw-clean-warning" data-credential-teaching></div><label class="cw-clean-consent"><input name="consent" type="checkbox"><span>Allow requests to the selected external endpoint.</span></label></div></section><section class="cw-clean-panel"><label class="cw-clean-consent"><input name="safeMode" type="checkbox"><span><b>S.A.F.E. mode</b><br><span style="font-weight:400;color:#cbd4ee">Use strict deterministic and independent AI admission checks for sources, videos, curriculum, project plans, and resource requests.</span></span></label></section><section class="cw-clean-panel" data-cw-language-settings="v324"><div><h3>Language / 言語</h3><p>Choose the interface language for this device.</p></div><div class="cw-language-grid"><button type="button" data-cw-language-option="en">English</button><button type="button" data-cw-language-option="ja" lang="ja">日本語</button></div><output data-cw-language-status aria-live="polite"></output></section><div class="cw-clean-note">Remembered credentials stay in this browser profile and are excluded from Civweave exports, handoffs, memory, and offline seed bundles. You can change providers without deleting downloaded models.</div><footer><output data-status role="status"></output><div><button type="button" data-reset>Use deterministic mode</button> <button type="submit">Save settings</button></div></footer></div><div class="cw-settings-tab-panel" data-settings-tab-panel="local-models" hidden><section class="cw-clean-panel" data-local-model-slot-placeholder><div><h3>Downloaded local AI</h3><p>Opening this tab reads only small saved-state records. Local-model lifecycle, cache, service-worker, GPU, and inference modules remain untouched until you choose a model action.</p></div><output data-local-model-management-status aria-live="polite">Open Local models to view this device’s saved choices.</output></section></div><div class="cw-settings-tab-panel" data-settings-tab-panel="membership" hidden><section class="cw-clean-panel" data-membership-slot-placeholder><div><h3>Membership &amp; compute</h3><p>Loading shared membership controls…</p></div></section></div></form></div>`}
+function markup(){return `<div class="cw-settings-shell"><header><div><small>CIVWEAVE SETTINGS · v324</small><h2>Settings</h2><p>One shared menu for Civweave, Living School, Cerbanimo, FellowFare, and Anarchadia.</p></div><button type="button" class="cw-settings-close" data-close aria-label="Close settings">×</button></header><form data-cw-settings-form data-cw-cleanroom-form data-settings-tabs="1"><nav class="cw-settings-tabs" role="tablist" aria-label="Settings sections"><button type="button" role="tab" aria-selected="true" data-settings-tab="general">AI &amp; safety</button><button type="button" role="tab" aria-selected="false" data-settings-tab="local-models">Local models</button><button type="button" role="tab" aria-selected="false" data-settings-tab="membership">Membership</button></nav><div class="cw-settings-tab-panel" data-settings-tab-panel="general"><section class="cw-clean-panel"><div><h3>AI route</h3><p>Opening or saving Settings never probes, starts, stops, or loads a model.</p></div><label>Primary route<select name="route"><option value="deterministic">Manual / local rules (no AI)</option><option value="downloaded-local">Downloaded local AI</option><option value="server-auto">Server-side AI · local → host → Cloudflare</option><option value="gemini">Google Gemini</option><option value="ollama">Ollama or local API</option><option value="openai-compatible">OpenAI-compatible endpoint</option></select></label><label data-generation-timeout-field>Generation timeout (seconds)<input name="timeoutSeconds" type="number" min="5" max="600" step="1" required aria-describedby="cw-generation-timeout-help"><span id="cw-generation-timeout-help">Wait 5 to 600 seconds for each generation request. Slower local models may need more time.</span></label><div data-panel="deterministic"><p>Uses Civweave’s local rules and saved state.</p></div><div class="cw-clean-note" data-native-server-selected-note hidden><b>Selected: native GGUF server on this phone</b><p>Termux runs Qwen 3.5 4B locally at 127.0.0.1:8080. No internet provider is used. Keep the Termux server running; your browser GGUF import is preserved.</p></div><div class="cw-clean-note" data-embedded-gguf-selected-note hidden><b>Selected: on-device GGUF</b><p>The imported Q4_K_M model runs in this browser. The localhost URL stored internally is a compatibility routing key, not a server address; Civweave does not contact it. No API credential or external consent is needed.</p></div><div data-panel="remote" hidden><div class="cw-gemini-presets" data-gemini-presets hidden><article class="cw-gemini-preset" data-gemini-preset="routine"><small>ROUTINE · FAST</small><b>Gemini 3.1 Flash-Lite</b><span>Conversation, quick answers, and lightweight generation.</span></article><article class="cw-gemini-preset" data-gemini-preset="complex"><small>COMPLEX · SMART</small><b>Gemini 3.7 Flash</b><span>Planning, research, code generation, and agentic or tool-using work.</span></article></div><div class="cw-clean-note" data-gemini-routing-note hidden><b>Automatic Gemini task routing</b><br>These are the shared Gemini presets. Civweave chooses between them by task capability; changing realms does not change the preset pair.</div><div class="cw-clean-grid"><label data-model-field>Model<input name="model" maxlength="200" autocomplete="off"></label><label>Endpoint<input name="endpoint" maxlength="2048" autocomplete="url" spellcheck="false"></label></div><div class="cw-clean-grid" data-ollama-tools hidden><button type="button" data-ollama-discover>Find installed Ollama models</button><button type="button" data-ollama-test>Test Ollama connection</button></div><datalist id="cw-ollama-installed-models"></datalist><output data-ollama-test-status role="status" aria-live="polite"></output><div class="cw-clean-secret-row"><label>API key<input name="apiKey" type="password" maxlength="1000" autocomplete="off" spellcheck="false" placeholder="Enter provider credential"></label><button type="button" data-forget-key hidden>Forget saved key</button></div><label>Credential lifetime<select name="credentialMode"><option value="session">This app session only</option><option value="device">Remember on this device</option></select></label><div class="cw-clean-warning" data-credential-teaching></div><label class="cw-clean-consent"><input name="consent" type="checkbox"><span>Allow requests to the selected external endpoint.</span></label></div></section><section class="cw-clean-panel"><label class="cw-clean-consent"><input name="safeMode" type="checkbox"><span><b>S.A.F.E. mode</b><br><span style="font-weight:400;color:#cbd4ee">Use strict deterministic and independent AI admission checks for sources, videos, curriculum, project plans, and resource requests.</span></span></label></section><section class="cw-clean-panel" data-cw-language-settings="v324"><div><h3>Language / 言語</h3><p>Choose the interface language for this device.</p></div><div class="cw-language-grid"><button type="button" data-cw-language-option="en">English</button><button type="button" data-cw-language-option="ja" lang="ja">日本語</button></div><output data-cw-language-status aria-live="polite"></output></section><div class="cw-clean-note">Remembered credentials stay in this browser profile and are excluded from Civweave exports, handoffs, memory, and offline seed bundles. You can change providers without deleting downloaded models.</div><footer><output data-status role="status"></output><div><button type="button" data-reset>Use deterministic mode</button> <button type="submit">Save settings</button></div></footer><section class="cw-clean-panel" data-mobile-gguf-panel><div><h3>On-device GGUF · phone primary</h3><p>Download GGUF directly into Civweave and run it inside this browser using the self-hosted Wllama WebAssembly/WebGPU engine. No LiteRT, llama-server, localhost connection, or cloud inference is used. Only one GGUF runs at a time.</p></div><label>Choose a GGUF<select name="embeddedGGUFPreset"><option value="4b">Qwen 3.5 4B · GGUF IQ2_M · about 1.6 GB</option><option value="2b">Qwen 3.5 2B · GGUF Q4_K_M · about 1.3 GB</option></select></label><label>GGUF download URL<input name="embeddedGGUFUrl" type="url" value="https://huggingface.co/eaddario/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-IQ2_M.gguf" autocomplete="off" spellcheck="false"></label><p class="cw-clean-warning">4B IQ2_M is a lower-bit browser-compatible GGUF, not the same quantization used by your benchmark. For a larger Q4 GGUF, use a properly sharded first-file URL (-00001-of-0000N.gguf); individual GGUF files over 2 GB cannot be loaded by this browser engine. WebGPU support on phones is experimental, and CPU fallback may be slow.</p><div class="cw-clean-grid"><button type="button" data-embedded-gguf-download>Download GGUF into Civweave</button><button type="button" data-embedded-gguf-activate>Use downloaded GGUF as primary</button></div><div class="cw-clean-note"><b>Already downloaded the exact GGUF?</b><p>Select its file from Downloads. Select your existing GGUF file from Downloads, including a Q4 file larger than 2 GB. Civweave will split oversized GGUF files into tensor-aligned shards automatically on your phone, without changing quantization or modifying the original. You can also select all existing -00001-of-0000N.gguf shards together. This requires free browser storage roughly equal to the model size.</p><label>Choose existing GGUF file or shards<input type="file" name="embeddedGGUFFiles" accept=".gguf" multiple></label><div class="cw-clean-grid"><button type="button" data-embedded-gguf-import>Import selected GGUF files and use as primary</button><button type="button" data-embedded-gguf-cancel-import hidden>Cancel GGUF import</button></div></div><output data-embedded-gguf-status role="status" aria-live="polite">Downloads are explicit and stored in the browser cache. Existing model downloads remain untouched.</output></section><section class="cw-clean-panel" data-phone-native-server-panel><details data-native-gguf-server><summary><b>Native GGUF server · Android Termux (faster alternative)</b></summary><div data-native-gguf-setup><p>Expand this guide for official downloads, install commands, existing-model setup, and explicit localhost connection tests.</p></div></details></section></div><div class="cw-settings-tab-panel" data-settings-tab-panel="local-models" hidden><section class="cw-clean-panel" data-local-model-slot-placeholder><div><h3>Downloaded local AI</h3><p>Opening this tab reads only small saved-state records. Local-model lifecycle, cache, service-worker, GPU, and inference modules remain untouched until you choose a model action.</p></div><output data-local-model-management-status aria-live="polite">Open Local models to view this device’s saved choices.</output></section></div><div class="cw-settings-tab-panel" data-settings-tab-panel="membership" hidden><section class="cw-clean-panel" data-membership-slot-placeholder><div><h3>Membership &amp; compute</h3><p>Loading shared membership controls…</p></div></section></div></form></div>`}
 const byName=(form,name)=>form.elements.namedItem(name);
 function credentialTeaching(form){const mode=byName(form,'credentialMode')?.value||'session',route=providerName(byName(form,'route')?.value),node=form.querySelector('[data-credential-teaching]');if(!node)return;node.textContent=mode==='device'?`Remember on this device keeps the ${route==='gemini'?'Gemini':'provider'} key in this browser profile until you remove it, clear site data, or uninstall/reset the app.`:'Session-only keeps the key in temporary browser storage. A full app or browser restart may require entering it again.'}
 function selectTab(form,name){for(const button of form.querySelectorAll('[data-settings-tab]'))button.setAttribute('aria-selected',String(button.dataset.settingsTab===name));for(const panel of form.querySelectorAll('[data-settings-tab-panel]'))panel.hidden=panel.dataset.settingsTabPanel!==name;form.dataset.activeSettingsTab=name}
 function sync(form){
   const route=providerName(byName(form,'route')?.value),remote=!['deterministic','downloaded-local','server-auto'].includes(route),gemini=route==='gemini';
+  const selectedGGUF=parse(getLocal('civweave.mobile.gguf-primary.v2'),null);
+  const browserGGUF=route==='openai-compatible'&&byName(form,'model')?.value!=='qwen35-4b-native'&&selectedGGUF?.enabled&&selectedGGUF?.engine==='wllama'&&
+    byName(form,'model')?.value===selectedGGUF.model&&byName(form,'endpoint')?.value==='http://127.0.0.1:8080/v1';
+  const selectedNote=form.querySelector('[data-embedded-gguf-selected-note]');
+  if(selectedNote)selectedNote.hidden=!browserGGUF;
+  const nativeServer=route==='openai-compatible'&&
+    byName(form,'model')?.value==='qwen35-4b-native'&&
+    byName(form,'endpoint')?.value==='http://127.0.0.1:8080/v1';
+  const nativeNote=form.querySelector('[data-native-server-selected-note]');
+  if(nativeNote)nativeNote.hidden=!nativeServer;
+  const consentField=byName(form,'consent')?.closest?.('.cw-clean-consent');
+  if(consentField)consentField.hidden=nativeServer;
+  const ollamaTools=form.querySelector('[data-ollama-tools]');if(ollamaTools)ollamaTools.hidden=route!=='ollama';
+  const ollamaModel=byName(form,'model');if(ollamaModel)ollamaModel.setAttribute('list',route==='ollama'?'cw-ollama-installed-models':'');
+  const secretField=form.querySelector('.cw-clean-secret-row');
+  if(secretField)secretField.hidden=nativeServer;
+  const credentialLifetime=byName(form,'credentialMode')?.closest?.('label');
+  if(credentialLifetime)credentialLifetime.hidden=nativeServer;
+  const compatibleOption=byName(form,'route')?.querySelector?.('option[value="openai-compatible"]');
+  if(compatibleOption)compatibleOption.textContent=browserGGUF?'On-device GGUF · browser engine':nativeServer?'Native GGUF · Termux server':'OpenAI-compatible endpoint';
   const deterministic=form.querySelector('[data-panel="deterministic"]'),remotePanel=form.querySelector('[data-panel="remote"]');
   if(deterministic)deterministic.hidden=route!=='deterministic';
-  if(remotePanel)remotePanel.hidden=!remote;
+  if(remotePanel)remotePanel.hidden=!remote||browserGGUF;
+  const timeoutField=form.querySelector('[data-generation-timeout-field]');if(timeoutField)timeoutField.hidden=route==='deterministic';const timeoutInput=byName(form,'timeoutSeconds');if(timeoutInput)timeoutInput.disabled=route==='deterministic';
   const presets=form.querySelector('[data-gemini-presets]'),routingNote=form.querySelector('[data-gemini-routing-note]'),modelField=form.querySelector('[data-model-field]');
   if(presets)presets.hidden=!gemini;
   if(routingNote)routingNote.hidden=!gemini;
@@ -91,20 +115,94 @@ function sync(form){
   credentialTeaching(form);
 }
 function renderLanguage(section){if(!section)return;const selected=currentLanguage();section.querySelectorAll('[data-cw-language-option]').forEach(button=>button.setAttribute('aria-pressed',button.dataset.cwLanguageOption===selected?'true':'false'));const status=section.querySelector('[data-cw-language-status]');if(status)status.textContent=selected==='ja'?'日本語を使用中':'Using English'}
-function fill(form){restoreRememberedCredential();const state=readState();byName(form,'safeMode').checked=Boolean(parse(getLocal(SAFE_MODE_KEY),{}).enabled);const route=byName(form,'route');if(route.querySelector(`option[value="${state.route}"]`))route.value=state.route;else route.value='deterministic';byName(form,'model').value=state.route==='gemini'?GEMINI_SMALL:state.model;byName(form,'endpoint').value=state.route==='gemini'?(state.endpoint||GEMINI_ENDPOINT):state.endpoint;byName(form,'apiKey').value='';byName(form,'apiKey').placeholder=state.hasKey?(state.remembered?'A remembered device key is available. Enter another to replace it.':'A session key is loaded. Enter another to replace it.'):'Enter provider credential';byName(form,'credentialMode').value=state.credentialMode||'session';byName(form,'consent').checked=state.consent;form.querySelector('[data-forget-key]').hidden=!state.hasKey;form.querySelector('[data-status]').textContent='';selectTab(form,'general');sync(form);renderLanguage(form.querySelector('[data-cw-language-settings]'))}
+function fill(form){restoreRememberedCredential();const state=readState();byName(form,'safeMode').checked=Boolean(parse(getLocal(SAFE_MODE_KEY),{}).enabled);const route=byName(form,'route');if(route.querySelector(`option[value="${state.route}"]`))route.value=state.route;else route.value='deterministic';byName(form,'model').value=state.route==='gemini'?GEMINI_SMALL:state.model;byName(form,'endpoint').value=state.route==='gemini'?(state.endpoint||GEMINI_ENDPOINT):state.endpoint;byName(form,'timeoutSeconds').value=String(state.timeoutSeconds);byName(form,'apiKey').value='';byName(form,'apiKey').placeholder=state.hasKey?(state.remembered?'A remembered device key is available. Enter another to replace it.':'A session key is loaded. Enter another to replace it.'):'Enter provider credential';byName(form,'credentialMode').value=state.credentialMode||'session';byName(form,'consent').checked=state.consent;form.querySelector('[data-forget-key]').hidden=!state.hasKey;form.querySelector('[data-status]').textContent='';selectTab(form,'general');sync(form);renderLanguage(form.querySelector('[data-cw-language-settings]'))}
 function localSelection(){return parse(getLocal(SELECTION_KEY),{active:false,id:null})}
 function stateFrom(form){
   const safeMode=Boolean(byName(form,'safeMode').checked),route=providerName(byName(form,'route').value);
   if(route==='deterministic')return{...DEFAULTS,safeMode};
+  const timeoutSeconds=Number(byName(form,'timeoutSeconds')?.value??readState().timeoutSeconds);
+  if(!Number.isInteger(timeoutSeconds)||timeoutSeconds<5||timeoutSeconds>600)throw new Error('Generation timeout must be a whole number from 5 to 600 seconds.');
   if(route==='downloaded-local'){
     const selected=localSelection();
     if(!selected.id)throw new Error('Choose a downloaded model in Local models before saving this route.');
-    return{...DEFAULTS,route,provider:route,model:selected.id,safeMode};
+    return{...DEFAULTS,route,provider:route,model:selected.id,safeMode,timeoutSeconds};
   }
-  if(route==='server-auto')return{...DEFAULTS,route,provider:route,model:'civweave-server-auto-v1',consent:true,safeMode};
+  if(route==='server-auto')return{...DEFAULTS,route,provider:route,model:'civweave-server-auto-v1',consent:true,safeMode,timeoutSeconds};
   const model=route==='gemini'?GEMINI_SMALL:(String(byName(form,'model').value||'').trim()||(route==='ollama'?'llama3.2':'local-model'));
   const endpoint=String(byName(form,'endpoint').value||'').trim()||(route==='gemini'?GEMINI_ENDPOINT:route==='ollama'?'http://127.0.0.1:11434/api/chat':'');
-  return{route,provider:route,model,endpoint,consent:Boolean(byName(form,'consent').checked),apiKey:String(byName(form,'apiKey').value||'').trim()||existingKey(route),credentialMode:byName(form,'credentialMode').value==='device'?'device':'session',safeMode};
+  return{route,provider:route,model,endpoint,consent:Boolean(byName(form,'consent').checked),apiKey:String(byName(form,'apiKey').value||'').trim()||existingKey(route),credentialMode:byName(form,'credentialMode').value==='device'?'device':'session',safeMode,timeoutSeconds};
+}
+const EMBEDDED_GGUF_PRESETS=Object.freeze({
+  '4b':Object.freeze({id:'qwen35-4b-iq2m-gguf',label:'Qwen 3.5 4B · GGUF IQ2_M',url:'https://huggingface.co/eaddario/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-IQ2_M.gguf'}),
+  '2b':Object.freeze({id:'qwen35-2b-q4km-gguf',label:'Qwen 3.5 2B · GGUF Q4_K_M',url:'https://huggingface.co/SoAIHQ/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf'})
+});
+const EMBEDDED_GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v5-opfs-progress';
+function ggufSettingsChoice(form){
+  const id=String(byName(form,'embeddedGGUFPreset')?.value||'4b'),preset=EMBEDDED_GGUF_PRESETS[id]||EMBEDDED_GGUF_PRESETS['4b'];
+  return{...preset,url:String(byName(form,'embeddedGGUFUrl')?.value||preset.url).trim()};
+}
+function ggufSettingsStatus(form,message){const node=form.querySelector('[data-embedded-gguf-status]');if(node)node.textContent=String(message||'')}
+let ggufImportAbort=null;
+async function ggufSettingsImport(form){
+  const picker=byName(form,'embeddedGGUFFiles'),files=Array.from(picker?.files||[]);
+  if(!files.length){ggufSettingsStatus(form,'Choose the GGUF file from your phone first (or all real GGUF shards together).');return}
+  const importButton=form.querySelector('[data-embedded-gguf-import]'),downloadButton=form.querySelector('[data-embedded-gguf-download]'),activateButton=form.querySelector('[data-embedded-gguf-activate]');
+  if(importButton?.disabled||downloadButton?.disabled||activateButton?.disabled)return;
+  importButton.disabled=true;downloadButton.disabled=true;activateButton.disabled=true;
+  const cancelButton=form.querySelector('[data-embedded-gguf-cancel-import]');
+  ggufImportAbort=new AbortController();
+  if(cancelButton){cancelButton.hidden=false;cancelButton.disabled=false}
+  ggufSettingsStatus(form,'Preparing browser GGUF storage. Writes will update every 8 MiB; the original file remains untouched…');
+  try{
+    const gguf=await import(EMBEDDED_GGUF_MODULE);
+    const record=await gguf.importFiles(files,{signal:ggufImportAbort.signal,onProgress:progress=>{
+      const pct=progress.total?(100*progress.loaded/progress.total).toFixed(1):'0.0';
+      const phase=progress.phase==='writing'?'Saving shard '+progress.index+'/'+progress.count+' · piece '+progress.part+'/'+progress.parts
+        :progress.phase==='verifying'?'Checking saved shards'
+        :progress.phase==='preparing'?'Split prepared; opening phone storage'
+        :'Shard '+progress.index+'/'+progress.count+' saved';
+      ggufSettingsStatus(form,'Importing GGUF: '+pct+'% · '+(progress.loaded/1e6).toFixed(1)+' / '+(progress.total/1e6).toFixed(1)+' MB · '+phase);
+    }});
+    const active=await gguf.activateImported(record.importId);
+    persist({...DEFAULTS,route:'openai-compatible',provider:'openai-compatible',
+      model:active.model,endpoint:'http://127.0.0.1:8080/v1',consent:false,credentialMode:'session',
+      safeMode:Boolean(parse(getLocal(SAFE_MODE_KEY),{}).enabled)});
+    removeLocal(PHONE_GGUF_KEY);
+    fill(form);
+    ggufSettingsStatus(form,'Imported and selected '+record.sourceNames.join(', ')+' ('+(record.bytes/1e6).toFixed(0)+' MB). Original quantization preserved; all five systems use this GGUF in the browser. No server required.');
+    if(picker)picker.value='';
+  }catch(error){ggufSettingsStatus(form,'Import not completed: '+String(error?.message||error))}
+  finally{ggufImportAbort=null;importButton.disabled=false;downloadButton.disabled=false;activateButton.disabled=false;if(cancelButton){cancelButton.hidden=true;cancelButton.disabled=true}}
+}
+async function ggufSettingsAction(form,kind){
+  const downloadButton=form.querySelector('[data-embedded-gguf-download]'),activateButton=form.querySelector('[data-embedded-gguf-activate]');
+  if(downloadButton?.disabled||activateButton?.disabled)return;
+  downloadButton.disabled=true;activateButton.disabled=true;
+  const selected=ggufSettingsChoice(form);
+  ggufSettingsStatus(form,kind==='download'?'Checking GGUF cache and preparing download…':'Verifying complete local GGUF cache…');
+  try{
+    const gguf=await import(EMBEDDED_GGUF_MODULE);
+    if(kind==='download'){
+      const result=await gguf.download(selected.url,{onProgress:({loaded,total})=>{
+        const percent=total?Math.floor(loaded/total*100):null;
+        ggufSettingsStatus(form,'GGUF '+(percent===null?'downloading…':percent+'%')+' · '+(loaded/1e6).toFixed(1)+' / '+(total/1e6).toFixed(1)+' MB');
+      }});
+      ggufSettingsStatus(form,'Complete GGUF cached in Civweave ('+(result.bytes/1e6).toFixed(0)+' MB). Choose “Use downloaded GGUF as primary”.');
+    }else{
+      const active=await gguf.activate(selected);
+      // Keep one canonical Settings writer for the five-system AI profile.
+      // Explicitly deactivate any previously selected LiteRT/ONNX local model,
+      // but never delete its weights.
+      persist({...DEFAULTS,route:'openai-compatible',provider:'openai-compatible',
+        model:active.model,endpoint:'http://127.0.0.1:8080/v1',
+        consent:false,credentialMode:'session',
+        safeMode:Boolean(parse(getLocal(SAFE_MODE_KEY),{}).enabled)});
+      removeLocal(PHONE_GGUF_KEY); // retire the native server preference
+      fill(form);
+      ggufSettingsStatus(form,active.label+' selected for all five systems. Inference executes inside Civweave; localhost is never contacted for this model.');
+    }
+  }catch(error){ggufSettingsStatus(form,'Unchanged or incomplete: '+String(error?.message||error))}
+  finally{downloadButton.disabled=false;activateButton.disabled=false}
 }
 function selectLocalModel(selected){
   if(!selected?.active||!selected.id)return null;
@@ -117,7 +215,7 @@ function persist(state){
     const next={...selected,active:state.route==='downloaded-local',updatedAt:now};
     if(next.active!==selected.active){setLocal(SELECTION_KEY,JSON.stringify(next));dispatchEvent(new CustomEvent('civweave:local-model-selection',{detail:{...next,source:'settings-v320'}}))}
   }
-  const interactive={route:state.route,provider:state.provider,model:state.route==='gemini'?GEMINI_SMALL:state.model,endpoint:state.endpoint,externalConsent:Boolean(state.consent)};
+  const interactive={route:state.route,provider:state.provider,model:state.route==='gemini'?GEMINI_SMALL:state.model,endpoint:state.endpoint,externalConsent:Boolean(state.consent),timeoutMs:generationTimeout(state.timeoutSeconds??readState().timeoutSeconds)*1000};
   const agentic=state.route==='gemini'?{...interactive,model:GEMINI_COMPLEX}:null;
   const agenticEnabled=Boolean(agentic);
   const stored={...interactive,consent:Boolean(state.consent),agenticEnabled,version:APP_VERSION,settingsOwner:VERSION,credentialRevision:CREDENTIAL_REVISION,...(agentic?{geminiRouting:GEMINI_ROUTING}:{})};
@@ -134,6 +232,15 @@ function persist(state){
 function close(reason='explicit'){const layer=document.getElementById(LAYER_ID);if(!layer||layer.hidden)return false;layer.hidden=true;layer.dataset.closeReason=reason;document.documentElement.dataset.settingsOpenState='closed';const target=returnFocus;returnFocus=null;if(target?.isConnected&&typeof target.focus==='function')try{target.focus({preventScroll:true})}catch{}try{dispatchEvent(new CustomEvent('civweave:model-settings-closed',{detail:{reason,version:VERSION,owner:'settings-v320'}}))}catch{}return true}
 function afterPaint(task){const run=()=>setTimeout(task,0);if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(task,0)}
 function append(src,ready,label){if(ready?.())return Promise.resolve(true);return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveSettingsService='v324';const timer=setTimeout(()=>reject(new Error(`${label} did not become ready.`)),8000);script.onload=()=>{clearTimeout(timer);ready?.()?resolve(true):reject(new Error(`${label} loaded without becoming ready.`))};script.onerror=()=>{clearTimeout(timer);reject(new Error(`${label} could not load.`))};if(!document.head?.isConnected){clearTimeout(timer);reject(new Error(`${label} could not mount because the document is leaving.`));return}document.head.append(script)})}
+function ensureModelRuntime(){
+  const ready=()=>typeof globalThis.CivweaveModelRuntime?.discoverOllamaModels==='function';
+  if(ready())return Promise.resolve(globalThis.CivweaveModelRuntime);
+  if(modelRuntimePromise)return modelRuntimePromise;
+  modelRuntimePromise=append(MODEL_PROVIDER_RUNTIME,ready,'Shared Ollama provider runtime')
+    .then(()=>globalThis.CivweaveModelRuntime)
+    .finally(()=>{modelRuntimePromise=null});
+  return modelRuntimePromise;
+}
 function ensureSettingsUI(layer=document.getElementById(LAYER_ID)){if(!layer?.isConnected||layer.hidden)return Promise.resolve(false);const ready=()=>Boolean(globalThis.CivweaveServerAISettingsV301?.enhance);if(ready()){globalThis.CivweaveServerAISettingsV301.enhance(layer.querySelector('form'));layer.querySelector('[data-membership-slot-placeholder]')?.remove();return Promise.resolve(true)}if(uiPromise)return uiPromise;uiPromise=append(SETTINGS_UI,ready,'Shared Settings membership service').then(()=>{globalThis.CivweaveServerAISettingsV301?.enhance?.(layer.querySelector('form'));layer.querySelector('[data-membership-slot-placeholder]')?.remove();return true}).catch(error=>{const placeholder=layer.querySelector('[data-membership-slot-placeholder] p');if(placeholder)placeholder.textContent='Membership controls are unavailable in this session.';try{dispatchEvent(new CustomEvent('civweave:settings-ui-extension-unavailable',{detail:{version:VERSION,message:String(error?.message||error)}}))}catch{}return false}).finally(()=>{uiPromise=null});return uiPromise}
 function renderLocalRoute(layer){
   const local=globalThis.CivweaveSettingsLocalRouteV323;
@@ -176,7 +283,53 @@ function bind(layer){
   byName(form,'credentialMode').addEventListener('change',()=>credentialTeaching(form));
   layer.querySelector('[data-close]').addEventListener('click',()=>close('close-button'));
   form.querySelector('.cw-settings-tabs').addEventListener('click',event=>{const button=event.target.closest('[data-settings-tab]');if(!button)return;const name=button.dataset.settingsTab;selectTab(form,name);if(name==='local-models'){layer.dataset.localModelsRequestedAt=String(Date.now());const status=form.querySelector('[data-local-model-management-status]');if(status)status.textContent='Reading saved local model choices…';afterPaint(()=>void ensureManagement(layer))}if(name==='membership')afterPaint(()=>void ensureSettingsUI(layer))});
+  async function checkOllama(discover,button){
+    const status=form.querySelector('[data-ollama-test-status]');
+    const endpoint=String(byName(form,'endpoint')?.value||'').trim()||'http://127.0.0.1:11434/api/chat';
+    button.disabled=true;status.textContent=discover?'Finding installed Ollama models…':'Checking Ollama connectivity…';
+    try{
+      const runtime=await ensureModelRuntime();
+      const models=await runtime.discoverOllamaModels(endpoint);
+      const list=form.querySelector('#cw-ollama-installed-models');
+      list.replaceChildren(...models.map(item=>{const option=document.createElement('option');option.value=item.name;return option}));
+      if(discover){status.textContent=models.length?`Ollama reachable; found ${models.length} models. Choose one in the Model field (not saved until Save settings).`:'Ollama reachable, but no installed models were listed.';return}
+      const selected=String(byName(form,'model')?.value||'').trim();
+      const present=models.some(item=>item.name===selected);
+      status.textContent=present?`Ollama reachable; ${selected} is installed. This checks connectivity, not text generation.`:`Ollama reachable, but selected model "${selected}" was not found. Choose an installed model.`;
+    }catch(error){status.textContent=`Ollama connection test failed: ${String(error?.message||error)}`;}
+    finally{button.disabled=false}
+  }
+  form.querySelector('[data-ollama-discover]')?.addEventListener('click',event=>void checkOllama(true,event.currentTarget));
+  form.querySelector('[data-ollama-test]')?.addEventListener('click',event=>void checkOllama(false,event.currentTarget));
   form.querySelector('[data-forget-key]').addEventListener('click',()=>{forgetCredential();byName(form,'apiKey').value='';byName(form,'credentialMode').value='session';form.querySelector('[data-forget-key]').hidden=true;form.querySelector('[data-status]').textContent='Saved provider credential removed from this device and session.';credentialTeaching(form)});
+  form.querySelector('[data-native-gguf-server]')?.addEventListener('toggle',event=>{
+    if(!event.target?.open)return;
+    const target=form.querySelector('[data-native-gguf-setup]');
+    if(!target||target.dataset.nativeServerMounted==='1')return;
+    void import('/app/local-ai/native-gguf-server-setup-v1.js?v=termux-companion-model-discovery')
+      .then(module=>module.mountNativeServerSetup(target,{activate:({model,endpoint})=>{
+        if(model!=='qwen35-4b-native'||endpoint!=='http://127.0.0.1:8080/v1')
+          throw new Error('Native GGUF activation requires the tested loopback server and model alias.');
+        const state=persist({...DEFAULTS,route:'openai-compatible',provider:'openai-compatible',
+          model,endpoint,consent:false,credentialMode:'session',
+          safeMode:Boolean(parse(getLocal(SAFE_MODE_KEY),{}).enabled)});
+        fill(form);
+        return state;
+      }}))
+      .catch(error=>{target.textContent='Native server setup guide could not load: '+String(error?.message||error)});
+  });
+  form.querySelector('[data-embedded-gguf-import]')?.addEventListener('click',()=>void ggufSettingsImport(form));
+  form.querySelector('[data-embedded-gguf-cancel-import]')?.addEventListener('click',()=>{
+    ggufImportAbort?.abort();
+    ggufSettingsStatus(form,'Cancelling GGUF storage write; the original Downloads file is untouched…');
+  });
+  form.querySelector('[data-embedded-gguf-download]')?.addEventListener('click',()=>void ggufSettingsAction(form,'download'));
+  form.querySelector('[data-embedded-gguf-activate]')?.addEventListener('click',()=>void ggufSettingsAction(form,'activate'));
+  byName(form,'embeddedGGUFPreset')?.addEventListener('change',()=>{
+    const preset=EMBEDDED_GGUF_PRESETS[byName(form,'embeddedGGUFPreset')?.value]||EMBEDDED_GGUF_PRESETS['4b'];
+    const url=byName(form,'embeddedGGUFUrl');if(url)url.value=preset.url;
+    ggufSettingsStatus(form,'Ready to download '+preset.label+' into this browser. The current AI route is unchanged.');
+  });
   form.querySelector('[data-reset]').addEventListener('click',()=>{byName(form,'route').value='deterministic';byName(form,'model').value=DEFAULTS.model;byName(form,'endpoint').value='';byName(form,'apiKey').value='';byName(form,'credentialMode').value='session';byName(form,'consent').checked=false;sync(form);form.querySelector('[data-status]').textContent='Deterministic mode selected. Save to apply.'});
   form.querySelectorAll('[data-cw-language-option]').forEach(button=>button.addEventListener('click',()=>chooseLanguage(button.dataset.cwLanguageOption)));
   form.addEventListener('submit',event=>{

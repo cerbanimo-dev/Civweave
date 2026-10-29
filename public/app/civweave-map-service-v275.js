@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.75-civweave-map-service-v275-guild-directory-view';
+const VERSION='1.0.76-civweave-map-service-v275-owned-wrapper-return';
 const VIEW=new URLSearchParams(location.search).get('view')||'';
 const GUILD_DIRECTORY_VIEW=VIEW==='hub-nodes';
 const BUNDLED='/app/federation-finder-data/federation-seed-v269.json';
@@ -365,6 +365,22 @@ function changeTheme(theme){
   if(!OPENFREEMAP.styles[theme])return;
   state.theme=theme;localStorage.setItem(THEME_KEY,theme);state.styleReady=false;state.map.setStyle(styleUrl());
 }
+function returnToCivweave(event){
+  event?.preventDefault();
+  try{
+    let host=window;
+    if(window.parent!==window){
+      const wrapper=window.parent,frame=window.frameElement;
+      // This service owns the inner map button. Only its actual same-origin,
+      // top-level Guild Map wrapper may receive the return navigation.
+      if(location.pathname!=='/app/federation-finder-map-v275.html'||wrapper.location.origin!==location.origin||wrapper.location.pathname!=='/app/hub-map-v1.html'||wrapper.parent!==wrapper||!frame||wrapper.document.getElementById('hubMapFrame')!==frame||frame.contentWindow!==window)throw new Error('Unrecognized map host');
+      host=wrapper;
+    }
+    host.location.assign('/app/persistent-system-shell-v1.html?system=civweave&installed=1');
+  }catch{
+    setStatus('Could not return to Civweave from this map. Open Civweave using the main navigation.');
+  }
+}
 function bind(){
   els.searchButton?.addEventListener('click',search);
   els.search?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();search()}});
@@ -375,7 +391,7 @@ function bind(){
   els.modeFederations?.addEventListener('click',()=>changeMode('federations'));
   els.modeNodes?.addEventListener('click',()=>changeMode('nodes'));
   els.theme?.addEventListener('change',()=>changeTheme(els.theme.value));
-  els.back?.addEventListener('click',()=>{location.href='/app/installed-entry-v146.html?system=civweave'});
+  els.back?.addEventListener('click',returnToCivweave);
   if(els.nodeEndpoint)els.nodeEndpoint.value=localStorage.getItem(NODE_KEY)||'';
   if(els.theme)els.theme.value=state.theme;
   if(els.provider)els.provider.textContent=`${OPENFREEMAP.name} vector tiles · MapLibre renderer`;

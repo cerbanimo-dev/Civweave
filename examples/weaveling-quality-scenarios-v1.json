@@ -1,0 +1,36 @@
+{
+  "schema": "civweave.weaveling-quality-scenarios.v1",
+  "description": "Opt-in real-model authoring scenarios. Expected realms guide human review; the runner never adds them to the model prompt or schema.",
+  "scenarios": [
+    {
+      "id": "one-person-decision",
+      "prompt": "Create a Quest titled QA READY Decision. Goal: record my personal, non-binding fictional QA decision READY. Exactly one Anarchadia path with one checkpoint: the saved evidence note reads READY. One Hero, zero budget, no other participants, no rights changes, no rewards, no external actions. Set governance included false. Save for review.",
+      "expectations": { "expectedRealms": ["anarchadia"], "exactPaths": 1, "exactStepsPerPath": 1, "governanceIncluded": false },
+      "reviewQuestions": ["Does the sole checkpoint produce the requested READY note without inventing participants, rewards, or governance?"]
+    },
+    {
+      "id": "novice-temperature-learning",
+      "prompt": "Create a Quest to learn to convert Celsius and Fahrenheit accurately. I am a novice and can use the calculator and paper I already own. I want to understand both formulas and practise conversions until I can explain and check them. No productive artifact, exchange, spending, collaborators, or civic decision is needed. Keep this as a reviewable Quest.",
+      "expectations": { "expectedRealms": ["living-school"] },
+      "reviewQuestions": ["Does this remain a Quest containing an appropriate learning path?", "Are practice, understanding, and evidence of conversion ability specific and usable?"]
+    },
+    {
+      "id": "skilled-static-badge",
+      "prompt": "Create a Quest to write a static HTML QA READY badge in a local file using my existing text editor. I already know HTML and CSS and have all required tools and skills. The result is one green badge saying READY in my local browser. No learning path, material acquisition, collaborators, civic decision, external messages, or publication is needed. Save for review.",
+      "expectations": { "expectedRealms": ["cerbanimo"] },
+      "reviewQuestions": ["Does the plan focus on the actual skilled work without inventing prerequisites?", "Can the local file and visible READY badge serve as honest completion evidence?"]
+    },
+    {
+      "id": "spare-notebook-gift",
+      "prompt": "Create a Quest to give two spare notebooks I already own to a local recipient who can use them. I already know how to arrange this and need no learning, construction, purchase, or governance. The desired outcome is a mutually agreed handover of exactly two notebooks. This is fictional planning only; do not contact anyone or carry out the exchange. Save for review.",
+      "expectations": { "expectedRealms": ["fellowfare"] },
+      "reviewQuestions": ["Does FellowFare represent the real resource transfer instead of inventing learning or production?", "Does the plan respect recipient consent and avoid claiming the handover already happened?"]
+    },
+    {
+      "id": "novice-shared-wooden-shelf",
+      "prompt": "Create a Quest to build a small wooden shelf over two weekends. I am a novice who needs to learn safe measuring, cutting, and assembly. We still need boards and fixings and have a maximum $25 budget. Two participants will share the shelf and must agree on its size, placement, spending, and who does which work before buying or building. We have access to appropriate tools and an experienced supervisor. Save a practical reviewable Quest; do not purchase, message anyone, or execute work.",
+      "expectations": { "expectedRealms": ["living-school", "cerbanimo", "fellowfare", "anarchadia"] },
+      "reviewQuestions": ["Does each subsystem address an actual dependency of this goal?", "Are learning, supplies, agreement, and construction ordered coherently within two weekends and $25?", "Are steps and evidence specific without asserting that unsafe work or spending has already occurred?"]
+    }
+  ]
+}

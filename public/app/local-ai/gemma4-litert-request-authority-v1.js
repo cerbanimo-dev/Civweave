@@ -1,20 +1,24 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.3-gemma4-litert-request-authority-v1-family-loader-weave-rebind';
-const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.130-v325-inference-core-first';
+const VERSION='1.2.34-local-litert-request-authority-v1-idempotent-tracker';
+const LOCAL_CHAT_SRC='/app/local-chat-runtime-v295.js?v=1.0.131-v325-family-router';
 const LOCAL_CHAT_REVISION='v312-runtime-first-bootstrap';
 const FAST_EXTENSION_VERSION='1.1.1-gemma4-litert-fast-extension-v1-browser-handoff-guard';
 const FAST_EXTENSION_SRC='/app/local-ai/gemma4-litert-fast-extension-v1.js?v=1.1.1-browser-handoff-guard';
-const FAST_RUNTIME_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
-const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.4.0-formatted-output';
+const FAST_RUNTIME_VERSION='1.8.5-litert-runtime-v1-qwen4-chunked-phone-loader';
+const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.8.5-qwen4-chunked-phone-loader';
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
-const TRACKER_VERSION='1.0.1-guide-generation-tracker-v1-live-pipeline-streams';
-const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.0.1-live-pipeline-streams';
-const WEAVE_PIPELINE_VERSION='1.0.0-gemma4-weave-draft-pipeline-v1-plan-compile-repair';
-const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.0.0-plan-compile-repair';
-const DEEP_MODEL='gemma4-e4b-it-litert-web';
-const FAST_IDS=new Set(['gemma4-e2b-it-litert-web','gemma4-e4b-it-litert-web']);
+const TRACKER_VERSION='1.2.23-guide-generation-tracker-v1-universal-artifact-rail';
+const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.2.23-universal-artifact-rail';
+const WEAVE_PIPELINE_VERSION='1.3.9-weave-draft-pipeline-v1-runtime-family-gate';
+const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.9-runtime-family-gate';
+const GEMMA_FAST_MODEL='gemma4-e2b-it-litert-web';
+const GEMMA_DEEP_MODEL='gemma4-e4b-it-litert-web';
+const QWEN_FAST_MODEL='qwen35-4b-litert-web';
+const QWEN_DEEP_MODEL='qwen35-9b-litert-web';
+const QWEN_IDS=new Set([QWEN_FAST_MODEL,QWEN_DEEP_MODEL]);
+const FAST_IDS=new Set([GEMMA_FAST_MODEL,GEMMA_DEEP_MODEL,QWEN_FAST_MODEL,QWEN_DEEP_MODEL]);
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const COMPOSITION_KEYS=Object.freeze([
   '__civweaveLocalProviderAuthorityV1',
@@ -57,9 +61,19 @@ function selected(){
   }catch{return null}
 }
 function selectedFast(){
+  try{const loader=globalThis.CivweaveFamilyAILoaderV105;if(typeof loader?.localRequested==='function'&&!loader.localRequested())return false}catch{return false}
   const pick=selected();
-  return Boolean(pick?.active&&FAST_IDS.has(clean(pick.id,240)));
+  // A policy-supported pair includes experimental Llama ONNX; policy support
+  // is NOT evidence that a LiteRT profile exists. Never bootstrap LiteRT
+  // or install its handlers for Transformers/ONNX/WASM selections.
+  const id=clean(pick?.id,240),spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(id);
+  if(!pick?.active)return false;
+  if(spec?.runtime)return spec.runtime==='litert-lm-web'&&FAST_IDS.has(id);
+  return FAST_IDS.has(id);
 }
+function qwenSelected(){const pick=selected();return Boolean(pick?.active&&QWEN_IDS.has(clean(pick.id,240)))}
+function fastRoleModel(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||(qwenSelected()?QWEN_FAST_MODEL:GEMMA_FAST_MODEL)}
+function deepRoleModel(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep')||(qwenSelected()?QWEN_DEEP_MODEL:GEMMA_DEEP_MODEL)}
 function emit(type,detail={}){
   try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}
 }
@@ -79,6 +93,7 @@ function installFastStructuredToolAdapter(){
   const runFast=async(args={},forcedModelId='')=>{
     const tool=normalizedStructuredTool(args?.structuredTool);
     if(!tool)return prior(args,forcedModelId);
+    if(qwenSelected())return prior({...args,structuredTool:tool},forcedModelId);
     const toolContract=`STRUCTURED TOOL CONTRACT: You MUST respond by calling the ${tool.name} tool exactly once. Put the complete structured result in that tool's arguments. Do not answer with prose or raw JSON outside the tool call.`;
     const systemPrompt=[clean(args.systemPrompt,12000),toolContract].filter(Boolean).join('\n\n');
     try{return await prior({...args,structuredTool:tool,systemPrompt},forcedModelId)}catch(error){
@@ -102,8 +117,9 @@ function installLearningPlanMetadataAdapter(){
   const prior=current.bind(api);
   const generateLivingSchoolPlan=async(...args)=>{
     const result=await prior(...args),options=args[0]||{};
-    if(options?.__civweaveE2BIntakeCompleted===true){
-      return{...result,requestedProvider:'downloaded-local',provider:'downloaded-local',model:DEEP_MODEL,structuredGenerationModel:DEEP_MODEL,e2bIntakeModel:'gemma4-e2b-it-litert-web'};
+    if(options?.__civweaveE4BIntakeCompleted===true){
+      const deep=result?.executionModel||result?.actual?.model||deepRoleModel();
+      return{...result,requestedProvider:'downloaded-local',provider:'downloaded-local',model:deep,structuredGenerationModel:deep,intakeModel:deep,deepGenerationModel:deep};
     }
     return result;
   };
@@ -112,7 +128,7 @@ function installLearningPlanMetadataAdapter(){
   const next=Object.freeze({...api,generateLivingSchoolPlan,e4bIntakeHandoffMetadata:true});
   try{globalThis.CivweaveUnifiedChatSystemV1=next}catch{return false}
   unifiedTarget=next;
-  emit('civweave:e4b-learning-plan-metadata-ready',{model:DEEP_MODEL});
+  emit('civweave:e4b-learning-plan-metadata-ready',{model:deepRoleModel(),fastModel:fastRoleModel(),qwen35:qwenSelected()});
   return true;
 }
 function scriptFor(path){
@@ -176,7 +192,7 @@ function ensureTracker(){
 }
 async function ensureWeaveLayers(){
   await ensureTracker();
-  if(!weavePipelineReady())await loadScript(WEAVE_PIPELINE_SRC,weavePipelineReady,'E4B Weave Draft compiler');
+  if(!weavePipelineReady())await loadScript(WEAVE_PIPELINE_SRC,weavePipelineReady,'local planning compiler');
   globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.();
   if(!trackerReady()||!weavePipelineReady())throw Object.assign(new Error('The Weave Draft generation layers did not become ready.'),{code:'LOCAL_GEMMA4_WEAVE_PIPELINE_NOT_READY'});
   return true;
@@ -191,7 +207,7 @@ function installFamilyLoaderWeaveRebind(){
     if(selectedFast()){
       await ensureWeaveLayers();
       const pipeline=globalThis.CivweaveGemma4WeaveDraftPipelineV1;
-      if(!pipeline?.installRuntime?.())throw Object.assign(new Error('The family AI loader completed but the E4B Weave runtime did not reattach.'),{code:'LOCAL_GEMMA4_WEAVE_POST_LOADER_REBIND_FAILED'});
+      if(!pipeline?.installRuntime?.())throw Object.assign(new Error('The family AI loader completed but the local Weave runtime did not reattach.'),{code:'LOCAL_GEMMA4_WEAVE_POST_LOADER_REBIND_FAILED'});
       emit('civweave:gemma4-weave-post-loader-rebind',{selected:selected()?.id||'',runtimeBound:true});
     }
     return result;
@@ -245,11 +261,12 @@ async function ensure({onProgress,reason='local-request'}={}){
   return ensureFlight;
 }
 function copyCompositionMetadata(target,source){
-  for(const key of COMPOSITION_KEYS){
+  for(const key of new Set([...COMPOSITION_KEYS,...Object.keys(source||{})])){
     if(source?.[key]!==undefined)target[key]=source[key];
   }
   return target;
 }
+function hasLayer(fn,flag){const seen=new Set();for(let depth=0;typeof fn==='function'&&depth<32&&!seen.has(fn);depth++,fn=fn.__prior){if(fn[flag]===VERSION)return true;seen.add(fn)}return false}
 function installAssistant(){
   installFastStructuredToolAdapter();
   installLearningPlanMetadataAdapter();
@@ -258,7 +275,7 @@ function installAssistant(){
   try{globalThis.CivweaveGemma4WeaveDraftPipelineV1?.install?.()}catch{}
   const api=globalThis.CivweaveAssistantV141;
   if(!api?.respond)return false;
-  if(api.respond.__civweaveGemma4LiteRTFirstRequest===VERSION){assistantTarget=api;return true}
+  if(hasLayer(api.respond,'__civweaveGemma4LiteRTFirstRequest')){assistantTarget=api;return true}
   const prior=api.respond;
   const respond=async args=>{
     if(selectedFast())await ensure({onProgress:args?.onProgress,reason:'guide-request'});
@@ -315,7 +332,7 @@ globalThis.CivweaveGemma4LiteRTRequestAuthorityV1=Object.freeze({
   structuredToolAdapterVersion:FAST_STRUCTURED_TOOL_ADAPTER_VERSION,
   trackerVersion:TRACKER_VERSION,
   weavePipelineVersion:WEAVE_PIPELINE_VERSION,
-  selected,selectedFast,ensure,prewarm,ensureTracker,ensureWeaveLayers,installAssistant,installFamilyLoaderWeaveRebind,schedule,copyCompositionMetadata,normalizedStructuredTool,installFastStructuredToolAdapter,installLearningPlanMetadataAdapter,
+  selected,selectedFast,qwenSelected,fastRoleModel,deepRoleModel,ensure,prewarm,ensureTracker,ensureWeaveLayers,installAssistant,installFamilyLoaderWeaveRebind,schedule,copyCompositionMetadata,normalizedStructuredTool,installFastStructuredToolAdapter,installLearningPlanMetadataAdapter,
   firstRequestOwnership:true,
   requestTriggeredOwnership:true,
   passivePrewarm:false,

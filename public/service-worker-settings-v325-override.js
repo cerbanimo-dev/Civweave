@@ -22,7 +22,7 @@ const CW_SETTINGS_V325_PURGE_PATHS=new Set([
   CW_SETTINGS_V325_GATEWAY,
   ...CW_SETTINGS_V325_VIEW_ROUTES
 ]);
-const CW_SETTINGS_V325_ROUTE_VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
+const CW_SETTINGS_V325_ROUTE_VERSION='1.1.4-settings-local-route-v326-llama32-download';
 const CW_SETTINGS_V325_SHIM=`(()=>{'use strict';const VERSION='${CW_SETTINGS_V325_ROUTE_VERSION}';const existing=globalThis.CivweaveSettingsLocalRouteV323;if(existing?.version===VERSION&&existing?.settingsV325DisplayShim===true)return;globalThis.CivweaveSettingsLocalRouteV323=Object.freeze({version:VERSION,route:'downloaded-local',settingsV325DisplayShim:true,savedStateOnlyView:true,viewWritesState:false,managerDependencyOnView:false,cacheReadOnView:false,serviceWorkerReadyOnView:false,hardwareProbeOnView:false,renderLocalModels(layer){try{return Boolean(globalThis.CivweaveSettingsLocalDirectV325?.render?.(layer))}catch{return false}},selection(){try{return JSON.parse(localStorage.getItem('civweave.local-ai.selection.v266')||'{"active":false,"id":null}')}catch{return{active:false,id:null}}}});})();`;
 
 function cwSettingsV325Headers(source,contentType='application/javascript; charset=utf-8'){

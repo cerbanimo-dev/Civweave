@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.0-guide-generation-floor-v1-local-planner-authority';
+const VERSION='1.3.1-guide-generation-floor-v1-canonical-quest-prompt';
 const REVISION='1.3.1-local-structured-fallback';
 const MIDDLEWARE_ID='guide-generation-floor-v1';
 const FLOOR_TOKENS=900;
@@ -64,7 +64,9 @@ function appendSystemContract(request,contract,marker){
 function injectExecutionContracts(request={}){
   let next=request;
   if(localGuideRequest(next))next=appendSystemContract(next,`Civweave downloaded-local execution contract v1. ${LOCAL_EXECUTION_CONTRACT}`,'__civweaveGuideLocalExecutionContract');
-  if(planningRequest(next))next=appendSystemContract(next,`Civweave guide planning contract v1. ${PLANNING_CONTRACT}`,'__civweaveGuidePlanningContract');
+  // Structured Quest content has its own canonical author and schema. The
+  // generic prose contract adds competing step counts and planning structure.
+  if(planningRequest(next)&&!weavelingStructuredPlanRequest(next))next=appendSystemContract(next,`Civweave guide planning contract v1. ${PLANNING_CONTRACT}`,'__civweaveGuidePlanningContract');
   return next;
 }
 function enforce(request={}){

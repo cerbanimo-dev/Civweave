@@ -1,4 +1,6 @@
 export { CivweaveCapacityAccount } from './capacity.mjs';
+import { handleGuildStarlingInternal } from '../../mobile-guild-edge/src/guild-starling-transport-v1.mjs';
+import { handleGuildQuestInternal } from '../../mobile-guild-edge/src/guild-quest-publications-v1.mjs';
 
 export const CLOUD_NODE_SCHEMA = 'civweave.node.v1';
 export const CLOUD_NODE_RUNTIME = 'cloudflare-durable-object-v2';
@@ -8,6 +10,24 @@ const clean = (value, max = 500) => String(value ?? '').trim().slice(0, max);
 export const normalizeNodeId = value => clean(value, 120).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 const json = (value, status = 200, headers = {}) => new Response(JSON.stringify(value, null, 2), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers } });
 const guildSetupCors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type, x-civweave-location-key', 'access-control-max-age': '86400' };
+const releaseDiscoveryCors = Object.freeze({
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, HEAD, OPTIONS',
+  'access-control-allow-headers': 'authorization, content-type, x-civweave-node-id',
+  'access-control-max-age': '86400',
+  'cache-control': 'no-store',
+});
+function releaseDiscovery(request, pathname) {
+  if (!pathname.startsWith('/api/civweave-release/') && !pathname.startsWith('/api/civweave-trust/')) return null;
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: releaseDiscoveryCors });
+  if (!['GET', 'HEAD'].includes(request.method)) return json({ ok: false, error: 'Release discovery is read-only on this Guild.' }, 405, { ...releaseDiscoveryCors, allow: 'GET, HEAD, OPTIONS' });
+  // This fabric does not store signed application releases or grant signing trust.
+  // Clients can retain their installed release while using this Guild for AI.
+  const response = pathname === '/api/civweave-trust/bundle'
+    ? json({ schema: 'civweave.release-trust-bundle.v1', delegations: [], revocations: [] }, 200, releaseDiscoveryCors)
+    : json({ ok: false, error: 'This Guild has no signed release or release asset to relay.' }, 404, releaseDiscoveryCors);
+  return request.method === 'HEAD' ? new Response(null, { status: response.status, headers: response.headers }) : response;
+}
 function b64url(bytes) { const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes); let binary = ''; for (const byte of data) binary += String.fromCharCode(byte); return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/g, ''); }
 function fromB64url(value) { const normalized = String(value).replaceAll('-', '+').replaceAll('_', '/'); const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4); const binary = atob(padded); return Uint8Array.from(binary, char => char.charCodeAt(0)); }
 function derToPem(der) { const bytes = der instanceof Uint8Array ? der : new Uint8Array(der); let binary = ''; for (const byte of bytes) binary += String.fromCharCode(byte); const base64 = btoa(binary); return `-----BEGIN PUBLIC KEY-----\n${(base64.match(/.{1,64}/g) || []).join('\n')}\n-----END PUBLIC KEY-----`; }
@@ -174,6 +194,8 @@ export class CivweaveCloudNode {
 
   async fetch(request) {
     const url = new URL(request.url), nodeId = normalizeNodeId(request.headers.get('x-civweave-node-id') || url.searchParams.get('nodeId'));
+    if (url.pathname === '/internal/guild-starling') return handleGuildStarlingInternal(request, this);
+    if (url.pathname === '/internal/guild-quests') return handleGuildQuestInternal(request, this);
     if (!nodeId) return json({ ok: false, error: 'node-id-missing' }, 400);
     const manifest = await this.manifest(nodeId);
     if (request.method === 'GET' && url.pathname === '/') return new Response(nodePage(manifest), { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
@@ -229,6 +251,8 @@ async function coreJson(env, pathname, init = {}) { const response = await env.C
 export default {
   async fetch(request, env) {
     const url = new URL(request.url), domain = env.NODE_DOMAIN || 'nodes.commonweave.earth', nodeFromHost = nodeIdFromHostname(url.hostname, domain);
+    const discovery = releaseDiscovery(request, url.pathname);
+    if (discovery) return discovery;
     if (request.method === 'OPTIONS' && ['/api/fabric/location', '/api/fabric/rally-point'].includes(url.pathname) && !nodeFromHost) return new Response(null, { status: 204, headers: guildSetupCors });
     if (request.method === 'GET' && url.pathname === '/api/fabric/health' && !nodeFromHost) return json({ schema: 'civweave.node-cloud-fabric.v1', ok: true, domain, durableObjects: Boolean(env.NODES), capacityBinding: Boolean(env.CAPACITY), coreBinding: Boolean(env.CORE), moneyAuthority: 'cloudflare-core' });
     if (request.method === 'GET' && url.pathname === '/api/fabric/capacity' && !nodeFromHost) { const response = await callCapacity(env, `/snapshot?nodeId=${encodeURIComponent(url.searchParams.get('nodeId') || '')}`), payload = await response.json().catch(() => ({})); return json(publicCapacity(payload), response.status); }

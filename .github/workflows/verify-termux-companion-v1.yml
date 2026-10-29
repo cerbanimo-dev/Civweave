@@ -1,0 +1,73 @@
+name: Verify Termux Companion Controls
+
+on:
+  pull_request:
+    paths:
+      - 'public/termux/civweave_companion.py'
+      - 'public/app/local-ai/termux-companion-controls-v1.js'
+      - 'public/app/local-ai/native-gguf-server-setup-v1.js'
+      - 'scripts/test-termux-companion-v1.py'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'scripts/verify-termux-durable-generation-v1.mjs'
+      - '.github/workflows/verify-termux-companion-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/termux/civweave_companion.py'
+      - 'public/app/local-ai/termux-companion-controls-v1.js'
+      - 'public/app/local-ai/native-gguf-server-setup-v1.js'
+      - 'scripts/test-termux-companion-v1.py'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
+      - 'public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'
+      - 'scripts/verify-termux-durable-generation-v1.mjs'
+      - '.github/workflows/verify-termux-companion-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check Python and JavaScript syntax
+        run: |
+          python -m py_compile public/termux/civweave_companion.py
+          node --check public/app/local-ai/termux-companion-controls-v1.js
+          node --check public/app/local-ai/native-gguf-server-setup-v1.js
+          node --check public/app/shared/civweave-model-runtime.js
+          node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs
+          node --check scripts/verify-termux-durable-generation-v1.mjs
+      - name: Verify loopback auth, origin restrictions, and command allowlist
+        run: python scripts/test-termux-companion-v1.py
+      - name: Verify detached generations survive browser suspension
+        run: node scripts/verify-termux-durable-generation-v1.mjs
+      - name: Verify PWA has no automatic local controls
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          import assert from 'node:assert/strict';
+          const controls=readFileSync('public/app/local-ai/termux-companion-controls-v1.js','utf8');
+          const parent=readFileSync('public/app/local-ai/native-gguf-server-setup-v1.js','utf8');
+          assert.match(controls,/127\.0\.0\.1:8766/);
+          assert.match(controls,/X-Civweave-Token/);
+          assert.match(controls,/credentials:'omit'/);
+          assert.match(controls,/No unsolicited network request/);
+          assert.match(parent,/data-termux-companion-controls/);
+          assert.match(parent,/mountTermuxCompanionControls/);
+          assert.match(controls,/value="32768" selected/,'32K context must be the selected default');
+          assert.match(controls,/value="65536"/,'64K experimental context must be opt-in');
+          assert.match(parent,/--ctx-size 32768/,'Manual startup must match the selected 32K context');
+          console.log('PASS Termux controls are opt-in, paired, and expose safe 32K/64K context settings.');
+          NODE

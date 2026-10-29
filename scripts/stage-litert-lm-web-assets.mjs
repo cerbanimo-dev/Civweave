@@ -8,12 +8,12 @@ import {spawnSync} from 'node:child_process';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const CORE_PACKAGE='@litert-lm/core';
-const CORE_VERSION='0.14.0';
+const CORE_VERSION='0.17.1';
 const UTILS_PACKAGE='@litertjs/wasm-utils';
 const UTILS_VERSION='2.5.3';
 const SCHEMA='civweave.litert-lm-web-stage.v1';
 const MAX_CLOUDFLARE_ASSET_BYTES=24*1024*1024;
-// LiteRT-LM 0.14 ships two Asyncify fallback binaries around 31 MB each.
+// LiteRT-LM ships Asyncify fallback binaries that can exceed the Cloudflare Pages per-asset ceiling.
 // Cloudflare Pages rejects either file because its per-asset ceiling is 24 MiB.
 // Civweave's Gemma 4 fast lane is explicitly Chromium/JSPI + WebGPU; browsers
 // without JSPI fail the fast-lane capability probe and retain the existing ONNX
@@ -38,9 +38,39 @@ async function packAndExtract(npm,spec,temp,label){const packDir=path.join(temp,
 async function walk(directory){const rows=[];for(const entry of await fsp.readdir(directory,{withFileTypes:true})){const target=path.join(directory,entry.name);if(entry.isDirectory())rows.push(...await walk(target));else if(entry.isFile())rows.push(target)}return rows}
 function browserRelative(from,to){let value=path.relative(path.dirname(from),to).split(path.sep).join('/');if(!value.startsWith('.'))value=`./${value}`;return value}
 async function rewriteBareImports(coreDist,utilsEntry){let rewrites=0;for(const file of await walk(coreDist)){if(!/\.m?js$/i.test(file))continue;let text=await fsp.readFile(file,'utf8');const relative=browserRelative(file,utilsEntry),before=text;text=text.replace(/(['"])@litertjs\/wasm-utils\1/g,(_,quote)=>`${quote}${relative}${quote}`);if(text!==before){rewrites+=(before.match(/(['"])@litertjs\/wasm-utils\1/g)||[]).length;await fsp.writeFile(file,text,'utf8')}if(/(?:from\s*|import\s*\()(['"])(?:@litertjs\/wasm-utils)\1/.test(text))throw new Error(`Bare wasm-utils import remained in ${path.relative(coreDist,file)}.`)}return rewrites}
-async function omitPagesIncompatibleFallbacks(){const omitted=[];for(const relative of CLOUDFLARE_OMITTED_WASM){const target=path.join(destination,...relative.split('/'));if(!await exists(target))continue;const stat=await fsp.stat(target);omitted.push({path:relative,bytes:stat.size,reason:'cloudflare-pages-asset-limit; chromium-jspi fast lane does not require asyncify fallback'});await fsp.rm(target,{force:true})}return omitted}
+const WASM_CHUNK_BYTES=8*1024*1024;
+// Asyncify fallback builds exceed Pages' static asset ceiling. Do not omit
+// them: publish bounded chunks and reconstruct a real application/wasm stream
+// through the targeted Pages Function. The browser may choose Asyncify even
+// when WebAssembly JSPI appears available.
+async function omitPagesIncompatibleFallbacks(){
+  const omitted=[];
+  for(const relative of CLOUDFLARE_OMITTED_WASM){
+    const target=path.join(destination,...relative.split('/'));
+    if(!await exists(target))continue;
+    const stat=await fsp.stat(target),parts=[];
+    const source=await fsp.open(target,'r');
+    try{
+      for(let offset=0,index=0;offset<stat.size;index++){
+        const size=Math.min(WASM_CHUNK_BYTES,stat.size-offset),buffer=Buffer.allocUnsafe(size);
+        const {bytesRead}=await source.read(buffer,0,size,offset);
+        if(bytesRead!==size)throw new Error('Short read splitting LiteRT WASM '+relative+' at '+offset);
+        const part=relative+'.part'+index;
+        await fsp.writeFile(path.join(destination,...part.split('/')),buffer);
+        parts.push(part);offset+=size;
+      }
+    }finally{await source.close()}
+    if(!parts.length)throw new Error('Empty LiteRT WASM fallback '+relative);
+    await fsp.rm(target,{force:true});
+    omitted.push({path:relative,bytes:stat.size,reason:'cloudflare-pages-asset-limit; stream-reconstructed-from-bounded-parts',parts});
+  }
+  return omitted;
+}
 async function fileInventory(){const rows=[];for(const file of await walk(destination)){if(file===manifestPath)continue;const stat=await fsp.stat(file);rows.push({path:path.relative(destination,file).split(path.sep).join('/'),bytes:stat.size})}return rows}
-async function staged(){if(!await exists(manifestPath))return false;try{const manifest=JSON.parse(await fsp.readFile(manifestPath,'utf8'));if(manifest.schema!==SCHEMA||manifest.corePackage!==CORE_PACKAGE||manifest.coreVersion!==CORE_VERSION||manifest.utilsPackage!==UTILS_PACKAGE||manifest.utilsVersion!==UTILS_VERSION)return false;if(manifest.maxCloudflareAssetBytes!==MAX_CLOUDFLARE_ASSET_BYTES||!Array.isArray(manifest.fileInventory)||manifest.requiresJspi!==true||manifest.browserProfile!=='chromium-jspi-webgpu')return false;const required=['dist/index.js','wasm','wasm-utils/dist/index.js'];if(!(await Promise.all(required.map(name=>exists(path.join(destination,name))))).every(Boolean))return false;if((await Promise.all(CLOUDFLARE_OMITTED_WASM.map(name=>exists(path.join(destination,...name.split('/')))))).some(Boolean))return false;return !manifest.fileInventory.some(row=>Number(row.bytes)>MAX_CLOUDFLARE_ASSET_BYTES)}catch{return false}}
+async function staged(){if(!await exists(manifestPath))return false;try{const manifest=JSON.parse(await fsp.readFile(manifestPath,'utf8'));if(manifest.schema!==SCHEMA||manifest.corePackage!==CORE_PACKAGE||manifest.coreVersion!==CORE_VERSION||manifest.utilsPackage!==UTILS_PACKAGE||manifest.utilsVersion!==UTILS_VERSION)return false;if(manifest.maxCloudflareAssetBytes!==MAX_CLOUDFLARE_ASSET_BYTES||!Array.isArray(manifest.fileInventory)||manifest.requiresJspi!==true||manifest.browserProfile!=='chromium-jspi-webgpu')return false;const required=['dist/index.js','wasm','wasm-utils/dist/index.js'];if(!(await Promise.all(required.map(name=>exists(path.join(destination,name))))).every(Boolean))return false;if((await Promise.all(CLOUDFLARE_OMITTED_WASM.map(name=>exists(path.join(destination,...name.split('/')))))).some(Boolean))return false;
+    if(!Array.isArray(manifest.omittedFiles)||manifest.omittedFiles.length!==CLOUDFLARE_OMITTED_WASM.length)return false;
+    for(const row of manifest.omittedFiles){if(!Array.isArray(row.parts)||!row.parts.length)return false;for(const part of row.parts)if(!await exists(path.join(destination,...part.split('/'))))return false}
+    return !manifest.fileInventory.some(row=>Number(row.bytes)>MAX_CLOUDFLARE_ASSET_BYTES)}catch{return false}}
 
 async function main(){
   if(!force&&await staged()){console.log(`[Civweave] LiteRT-LM Web ${CORE_VERSION} Chromium/JSPI runtime is already staged.`);return}
@@ -67,7 +97,7 @@ async function main(){
     const files=inventory.map(row=>row.path);
     await fsp.writeFile(manifestPath,`${JSON.stringify({schema:SCHEMA,corePackage:CORE_PACKAGE,coreVersion:CORE_VERSION,utilsPackage:UTILS_PACKAGE,utilsVersion:UTILS_VERSION,entry:'/app/vendor/litert-lm/dist/index.js',wasmRoot:'/app/vendor/litert-lm/wasm/',backend:'webgpu-gpu-artisan',browserProfile:'chromium-jspi-webgpu',requiresJspi:true,selfHosted:true,rewrittenBareImports,omittedFiles,wasmFiles,files,fileInventory:inventory,maxCloudflareAssetBytes:MAX_CLOUDFLARE_ASSET_BYTES,stagedAt:new Date().toISOString()},null,2)}\n`,'utf8');
     const totalBytes=inventory.reduce((sum,row)=>sum+row.bytes,0);
-    console.log(`[Civweave] Staged self-hosted LiteRT-LM Web ${CORE_VERSION} Chromium/JSPI runtime: ${files.length} files, ${wasmFiles.length} WASM runtime files, ${totalBytes} bytes total, max asset ${Math.max(...inventory.map(row=>row.bytes))} bytes, ${omittedFiles.length} Asyncify fallback omission(s), ${rewrittenBareImports} bare import rewrite(s).`);
+    console.log(`[Civweave] Staged self-hosted LiteRT-LM Web ${CORE_VERSION}: ${files.length} files, ${wasmFiles.length} WASM paths, ${totalBytes} bytes, largest asset ${Math.max(...inventory.map(row=>row.bytes))}, ${omittedFiles.length} Asyncify fallbacks streamable through ${omittedFiles.flatMap(row=>row.parts).length} bounded chunks, ${rewrittenBareImports} rewritten imports.`);
   }finally{await fsp.rm(temp,{recursive:true,force:true})}
 }
 main().catch(error=>{if(soft){console.warn(`[Civweave] LiteRT-LM Web staging skipped: ${error?.message||error}`);return}console.error(error);process.exitCode=1});

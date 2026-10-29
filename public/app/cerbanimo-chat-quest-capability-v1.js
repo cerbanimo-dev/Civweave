@@ -2,7 +2,7 @@
 'use strict';
 const VERSION='1.4.1-cerbanimo-chat-quest-capability-v1-v3-provider-authority-gate';
 const V2='/app/cerbanimo-chat-quest-capability-v2.js';
-const V2_VERSION='2.2.0-malformed-json-repair-r1-from-2.1.0-transient-provider-failover';
+const V2_VERSION='2.2.1-ollama-schema-lifecycle';
 const V3='/app/cerbanimo-chat-quest-capability-v3.js';
 const V3_VERSION='3.0.0-gemini-provider-authority-r1';
 if(globalThis.CivweaveCerbanimoChatQuestCapabilityV1?.version===VERSION)return;

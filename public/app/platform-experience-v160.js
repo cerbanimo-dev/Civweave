@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.5-platform-experience-v160.1-quest-copy';
+const VERSION='1.0.7-platform-experience-v160-review-queue-scope';
 // Compatibility marker: VERSION='1.0.4-platform-experience-v160'
 if(globalThis.CivweavePlatformExperienceV160?.version===VERSION)return;
 const THEME_KEY='civweave.appearance.v160';
@@ -89,7 +89,7 @@ function installPatchedGlobal(name,patch){
 function patchAssistant(api){
   if(!api?.respond||api.__cw160ActionRouting)return api;
   const original=api.respond.bind(api);
-  api.respond=async options=>{
+  const respond=async options=>{
     const request={...(options||{})},startedIn=request.systemId||'civweave';
     let target='';
     if(startedIn==='civweave'){
@@ -101,8 +101,8 @@ function patchAssistant(api){
     if(target&&result?.action&&result.response?.answer)result.response.answer=`Weaveling routed this to ${target==='anarchadia'?'Anarchadia':target==='fellowfare'?'FellowFare':target==='living-school'?'Living School':'Cerbanimo'}. ${result.response.answer}`;
     return result;
   };
-  Object.defineProperty(api,'__cw160ActionRouting',{value:true});
-  return api;
+  // Keep the shared assistant extensible for its registered capability owners.
+  return {...api,respond,__cw160ActionRouting:true};
 }
 function buttonBudget(text){
   const value=clean(text,4000);
@@ -207,12 +207,13 @@ function refreshControls(host=controlHost()){
   const items=pending(),review=host.querySelector('[data-cw160-review]'),appearance=host.querySelector('[data-cw160-theme]');
   if(review){
     const label=review.querySelector('[data-cw160-review-label]'),count=review.querySelector('[data-cw160-review-count]'),title=review.querySelector('[data-cw160-review-title]');
-    writeText(label,'Review');
+    const queueTitle=`${items.length} item${items.length===1?'':'s'} waiting`;
+    writeText(label,'Review queue');
     writeText(count,items.length?String(items.length):'');
-    writeText(title,items[0]?.title||'');
+    writeText(title,items.length?queueTitle:'');
     writeHidden(review,!items.length);
     writeClass(review,'is-attention',Boolean(items.length));
-    writeTitle(review,items[0]?.title||'');
+    writeTitle(review,items.length?`Review queue: ${queueTitle}.`:'');
   }
   if(appearance){
     const value=theme(),label=`Theme: ${value[0].toUpperCase()+value.slice(1)}`;

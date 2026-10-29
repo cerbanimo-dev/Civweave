@@ -9,7 +9,7 @@ const LABEL_ATTR='data-minilm-label';
 const TRACKER_ATTR='data-guild-neuron-tracker';
 const MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1';
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
-const MINILM_ROUTER_SRC='/app/minilm-response-router-v347.js?v=1.3.0-minilm-primary';
+const MINILM_ROUTER_SRC='/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification';
 const SERVER_ROUTER_SRC='/app/server-ai-router-v301.js?v=1.0.121-guild-telemetry';
 const HOST_SESSION_SRC='/app/host-node-session-v1.js?v=1.0.137-mobile-guild-quota';
 const GUILD_USAGE_SRC='/app/guild-chat-usage-v1.js?v=1.0.2-mobile-session-upgrade';
@@ -76,7 +76,7 @@ function sharedUsageSnapshot(){
   }catch{}
   return null;
 }
-function exactPathScript(src){const path=new URL(src,location.href).pathname;return[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}})||null}
+function exactPathScript(src){const path=new URL(src,location.href).pathname,matching=[...document.scripts].filter(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}});return matching.find(script=>script.dataset.civweaveBalanceRepair==='true')||matching[0]||null}
 function ensureBalanceRuntime(){
   const hostVersion=String(globalThis.CivweaveHostNodeSessionV1?.version||'');
   if(!hostVersion.startsWith('1.0.137-')){

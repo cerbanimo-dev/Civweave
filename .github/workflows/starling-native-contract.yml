@@ -1,0 +1,44 @@
+name: Native Starling Collective contracts
+on:
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - 'public/app/shared/starling-collective*.mjs'
+      - 'public/app/starling-lounge-v1.mjs'
+      - 'public/app/starling-lounge-v1.css'
+      - 'public/app/assets/starling/**'
+      - 'public/app/mobile-guild-create-v1.mjs'
+      - 'public/app/cerbanimo-intention-landscape-v1.js'
+      - 'public/app/index.html'
+      - 'lib/starling-collective-v1.mjs'
+      - 'tools/starling/**'
+      - 'scripts/test-starling-*.mjs'
+      - 'public/app/shared/starling-collective-worker-v1.mjs'
+      - 'scripts/test-mobile-guild-create-v1.mjs'
+      - 'package.json'
+      - '.github/workflows/starling-native-contract.yml'
+  workflow_dispatch:
+
+jobs:
+  starling-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate syntax and Starling domain contracts
+        run: |
+          node --check public/app/shared/starling-collective-v1.mjs
+          node --check public/app/shared/starling-collective-turns-v1.mjs
+          node --check public/app/shared/starling-collective-worker-v1.mjs
+          node --check public/app/shared/starling-collective-tools-v1.mjs
+          node --check public/app/starling-lounge-v1.mjs
+          node --check public/app/mobile-guild-create-v1.mjs
+          node --check tools/starling/aider-adapter-v1.mjs
+          node --test scripts/test-starling-collective-v1.mjs scripts/test-starling-collective-turns-v1.mjs scripts/test-starling-collective-worker-v1.mjs scripts/test-starling-collective-tools-v1.mjs scripts/test-starling-aider-adapter-v1.mjs scripts/test-starling-lounge-contract-v1.mjs
+      - name: Verify real Guild creation path
+        run: node scripts/test-mobile-guild-create-v1.mjs

@@ -1,0 +1,36 @@
+name: Merlin Preview Provider
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/anarchadia-console-v139.html'
+      - 'public/app/anarchadia-console-v158.js'
+      - 'public/app/anarchadia-change-review-v165.js'
+      - 'scripts/test-merlin-preview-provider-v1.mjs'
+      - '.github/workflows/merlin-preview-provider.yml'
+  push:
+    branches: [main, staging]
+    paths:
+      - 'public/app/anarchadia-console-v139.html'
+      - 'public/app/anarchadia-console-v158.js'
+      - 'public/app/anarchadia-change-review-v165.js'
+      - 'scripts/test-merlin-preview-provider-v1.mjs'
+      - '.github/workflows/merlin-preview-provider.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Verify selected provider preview and truthful failure outcomes
+        run: node --test scripts/test-merlin-preview-provider-v1.mjs

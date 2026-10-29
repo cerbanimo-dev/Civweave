@@ -1,0 +1,30 @@
+name: Verify native server failure isolation
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/guide-chat-surface-v350.js
+      - public/app/family-ai-loader-v105.js
+      - public/app/working-campus-v440.html
+      - scripts/verify-native-server-failure-no-retry-v1.mjs
+      - .github/workflows/verify-native-server-failure-no-retry-v1.yml
+  pull_request:
+    paths:
+      - public/app/guide-chat-surface-v350.js
+      - public/app/family-ai-loader-v105.js
+      - public/app/working-campus-v440.html
+      - scripts/verify-native-server-failure-no-retry-v1.mjs
+      - .github/workflows/verify-native-server-failure-no-retry-v1.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check public/app/guide-chat-surface-v350.js
+      - run: node --check public/app/family-ai-loader-v105.js
+      - run: node scripts/verify-native-server-failure-no-retry-v1.mjs

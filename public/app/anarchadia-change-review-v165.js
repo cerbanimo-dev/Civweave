@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-anarchadia-change-review-v165';
+const VERSION='1.0.6-anarchadia-change-review-v165-receipt-outcome';
 if(globalThis.AnarchadiaChangeReviewV165?.version===VERSION)return;
 const CONSOLE_KEY='civweave.anarchadia.citizen-console.v139';
 const ACTION_KEY='civweave.realm-actions.v141';
@@ -20,7 +20,7 @@ function notifyState(serialized){
   try{dispatchEvent(new StorageEvent('storage',{key:CONSOLE_KEY,newValue:serialized,url:location.href,storageArea:localStorage}))}catch{}
 }
 function writeState(state){state.proposals=Array.isArray(state.proposals)?state.proposals.slice(0,80):[];state.ledger=Array.isArray(state.ledger)?state.ledger.slice(0,250):[];const serialized=JSON.stringify(state);localStorage.setItem(CONSOLE_KEY,serialized);notifyState(serialized);scheduleDecorate();return state}
-function record(state,kind,detail,proposalId=''){state.ledger.unshift({id:uid('evt'),time:now(),kind,detail:clean(detail,2400),proposalId})}
+function record(state,kind,detail,proposalId=''){const receipt={id:uid('evt'),time:now(),kind,detail:clean(detail,2400),proposalId};state.ledger.unshift(receipt);return receipt}
 function actions(){const rows=parse(localStorage.getItem(ACTION_KEY),[]);return Array.isArray(rows)?rows:[]}
 function writeActions(rows){localStorage.setItem(ACTION_KEY,JSON.stringify(rows.slice(0,120)));try{dispatchEvent(new CustomEvent('civweave:actions-changed',{detail:{items:rows}}))}catch{}}
 function updateAction(id,patch){if(!id)return null;const rows=actions(),index=rows.findIndex(item=>item.id===id);if(index<0)return null;const action=rows[index];patch(action);action.updatedAt=now();rows[index]=action;writeActions(rows);return action}
@@ -75,18 +75,20 @@ async function approveAndRun(id){
   updateAction(item.sourceActionId,action=>{action.state='approved-for-preview';action.execution={...(action.execution||{}),status:'approved-for-preview',events:[...(action.execution?.events||[]),{type:'anarchadia.preview-generation.approved',at:now(),proposalId:item.id}].slice(-40)}});
   ensureReviewDialog()?.close();
   const api=globalThis.AnarchadiaCitizenConsoleV158;if(!api?.runPipeline)return{ok:false,error:'The Anarchadia preview generator is not ready.'};
-  await api.runPipeline(id);scheduleDecorate();return{ok:true,proposal:proposal(id)};
+  const result=await api.runPipeline(id),completed=proposal(id);scheduleDecorate();
+  if(result?.ok===false||completed?.status!=='preview-ready'||!completed?.preview?.srcdoc)return{ok:false,error:result?.error||completed?.lastError||`Preview generation did not complete${completed?.failedStage?` at ${completed.failedStage}`:''}.`,proposal:completed};
+  return{ok:true,proposal:completed};
 }
 function selectPreview(id){
   const state=readState(),item=state.proposals.find(row=>row.id===id);if(!item?.preview?.srcdoc)return{ok:false,error:'No generated preview is available.'};
-  item.status='preview-accepted';item.previewDecision={state:'accepted',at:now(),label:'Keep this preview'};item.updatedAt=now();item.pipeline=Array.isArray(item.pipeline)?item.pipeline:[];item.pipeline.push({time:now(),stage:'preview-decision',note:'The user kept this preview as the selected governed candidate.'});record(state,'preview-kept',`${item.title}: preview selected. Current production remains unchanged until its governed publication route completes.`,item.id);writeState(state);
+  item.status='preview-accepted';item.previewDecision={state:'accepted',at:now(),label:'Keep this preview'};item.updatedAt=now();item.pipeline=Array.isArray(item.pipeline)?item.pipeline:[];item.pipeline.push({time:now(),stage:'preview-decision',note:'The user kept this preview as the selected governed candidate.'});const receipt=record(state,'preview-kept',`${item.title}: preview selected. Current production remains unchanged until its governed publication route completes.`,item.id);writeState(state);globalThis.CivweaveGuideOutcomeSceneV1?.markFresh?.(receipt.id);
   const selected=parse(localStorage.getItem(SELECTED_KEY),[]),rows=Array.isArray(selected)?selected:[],entry={proposalId:item.id,sourceActionId:item.sourceActionId,title:item.title,generator:item.preview.generator||item.patch?.generator||'configured-provider',acceptedAt:item.previewDecision.at};const index=rows.findIndex(row=>row.proposalId===item.id);if(index>=0)rows[index]=entry;else rows.unshift(entry);localStorage.setItem(SELECTED_KEY,JSON.stringify(rows.slice(0,80)));
   updateAction(item.sourceActionId,action=>{action.state='preview-accepted';action.execution={...(action.execution||{}),status:'preview-accepted',events:[...(action.execution?.events||[]),{type:'anarchadia.preview.accepted',at:now(),proposalId:item.id}].slice(-40)}});
   document.querySelector('#ac-preview-dialog')?.close();toast('Preview kept as the selected candidate. The current production look remains available until governed publication.');return{ok:true,proposal:item};
 }
 function revertPreview(id){
   const state=readState(),item=state.proposals.find(row=>row.id===id);if(!item)return{ok:false,error:'The preview request could not be found.'};
-  delete item.patch;delete item.preview;delete item.validation;item.status='review';item.stage='intake';item.failedStage=null;item.previewDecision={state:'reverted',at:now(),label:'Revert to current look'};item.approval={...(item.approval||{}),state:'review',approvedAt:''};item.updatedAt=now();item.pipeline=Array.isArray(item.pipeline)?item.pipeline:[];item.pipeline.push({time:now(),stage:'preview-reverted',note:'The user rejected the generated preview and returned to the current look.'});record(state,'preview-reverted',`${item.title}: generated preview discarded; current look retained.`,item.id);writeState(state);
+  delete item.patch;delete item.preview;delete item.validation;item.status='review';item.stage='intake';item.failedStage=null;item.previewDecision={state:'reverted',at:now(),label:'Revert to current look'};item.approval={...(item.approval||{}),state:'review',approvedAt:''};item.updatedAt=now();item.pipeline=Array.isArray(item.pipeline)?item.pipeline:[];item.pipeline.push({time:now(),stage:'preview-reverted',note:'The user rejected the generated preview and returned to the current look.'});const receipt=record(state,'preview-reverted',`${item.title}: generated preview discarded; current look retained.`,item.id);writeState(state);globalThis.CivweaveGuideOutcomeSceneV1?.markFresh?.(receipt.id);
   updateAction(item.sourceActionId,action=>{action.state='review';action.execution={...(action.execution||{}),status:'awaiting-preview-approval',events:[...(action.execution?.events||[]),{type:'anarchadia.preview.reverted',at:now(),proposalId:item.id}].slice(-40)}});
   document.querySelector('#ac-preview-dialog')?.close();toast('Preview reverted. The current look is unchanged, and the request returned to review.');return{ok:true,proposal:item};
 }
@@ -105,7 +107,11 @@ function decorateCards(){
     if(needsApproval&&!approve){approve=document.createElement('button');approve.type='button';approve.dataset.ac165Approve=id;approve.textContent='APPROVE & GENERATE';actions.append(approve)}else if(!needsApproval&&approve)approve.remove();
     const rerun=actions.querySelector('[data-rerun]');if(rerun&&item.approval?.state!=='approved'&&!item.preview?.srcdoc){rerun.disabled=true;rerun.title='Review and approve preview generation first.'}
     let stateLabel=card.querySelector('[data-ac165-state]');if(!stateLabel){stateLabel=document.createElement('small');stateLabel.dataset.ac165State='';card.querySelector('header')?.append(stateLabel)}
-    stateLabel.textContent=item.previewDecision?.state==='accepted'?'SELECTED PREVIEW':item.previewDecision?.state==='reverted'?'REVERTED · BACK IN REVIEW':item.approval?.state==='approved'&&!item.preview?.srcdoc?'APPROVED · GENERATING':item.preview?.srcdoc?'PREVIEW DECISION REQUIRED':'REVIEW & APPROVAL REQUIRED';
+    const failed=item.status==='failed',blocked=item.status==='blocked',label=failed?'GENERATION FAILED · RETRY AVAILABLE':blocked?'BLOCKED · REVIEW REQUIRED':item.previewDecision?.state==='accepted'?'SELECTED PREVIEW':item.previewDecision?.state==='reverted'?'REVERTED · BACK IN REVIEW':item.approval?.state==='approved'&&!item.preview?.srcdoc?'APPROVED · GENERATING':item.preview?.srcdoc?'PREVIEW DECISION REQUIRED':'REVIEW & APPROVAL REQUIRED';
+    if(stateLabel.textContent!==label)stateLabel.textContent=label;
+    const reason=failed||blocked?clean(item.lastError||item.validation?.errors?.join(' ')||item.rails?.filter(rail=>!rail.pass).map(rail=>rail.note||rail.label).join(' '),1600):'';
+    let failureNote=card.querySelector('[data-ac165-failure]');
+    if(reason){if(!failureNote){failureNote=document.createElement('p');failureNote.dataset.ac165Failure='';failureNote.className='ac-error';actions.insertAdjacentElement('beforebegin',failureNote)}if(failureNote.textContent!==reason)failureNote.textContent=reason}else failureNote?.remove();
   });
 }
 function decorateMerlin(){
@@ -124,7 +130,7 @@ function patchMerlin(api){
   if(!api?.ask||api.__ac165ReviewFlow)return api;const original=api.ask.bind(api);
   api.ask=async(system,text,rows=[])=>{
     const pending=latestReview();
-    if(explicitApproval(text)&&pending){const result=await approveAndRun(pending.id);return{role:'assistant',text:result.ok?`Merlin recorded your approval and generated the bounded sandbox preview for “${pending.title}.” Open the preview, then choose Keep this preview or Revert to current look.`:`Merlin could not start the preview: ${result.error}`,provider:'local-contract',model:'anarchadia-review-flow-v165'}}
+    if(explicitApproval(text)&&pending){const result=await approveAndRun(pending.id);return{role:'assistant',text:result.ok?(result.proposal?.preview?.generator==='civweave-safe-scaffolder'?`Merlin recorded your approval and created a request-summary scaffold for “${pending.title}” using the selected bundled provider. It does not implement the requested feature. Inspect the scaffold before choosing whether to keep or revert it.`:`Merlin recorded your approval and generated the bounded sandbox preview for “${pending.title}.” Open the preview, then choose Keep this preview or Revert to current look.`):`Merlin could not generate the preview: ${result.error}`,provider:'local-contract',model:'anarchadia-review-flow-v165'}}
     const before=new Set(actions().map(item=>item.id)),reply=await original(system,text,rows);let imported=null;
     for(const action of actions().filter(item=>item.system==='anarchadia'&&!before.has(item.id)))imported=importAction(action)||imported;
     imported=imported||importPendingActions();

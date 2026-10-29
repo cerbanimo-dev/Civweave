@@ -1,7 +1,18 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.170-guide-chat-surface-v350-parakeet-no-proxy-worker';
+// Persistent content documents use the parent's exact chat object. They never
+// create a second transcript, launcher, streaming owner, or chat lifecycle.
+try{
+  const host=globalThis.parent,query=new URLSearchParams(location.search);
+  if(host&&host!==globalThis&&query.get('persistentShell')==='1'&&host.CivweavePersistentSystemShellV1){
+    const attach=()=>{const api=host.CivweaveGuideChatSurfaceV350||host.CivweavePersistentGuideChatV215;if(!api?.canonicalOwner)return false;globalThis.CivweaveGuideChatSurfaceV350=api;globalThis.CivweavePersistentGuideChatV215=api;return true};
+    if(!attach())host.addEventListener('civweave:guide-chat-ready',()=>{if(attach())dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{parentOwned:true}}))},{once:true});
+    return;
+  }
+}catch{}
+
+const VERSION='1.0.200-interwoven-quest-map';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -33,6 +44,7 @@ let activeSystem='civweave';
 let openState=false;
 let minimized=false;
 let busy=false;
+let nativeAbortController=null;
 let seen={};
 let root=null;
 let launcher=null;
@@ -66,7 +78,86 @@ function append(system,row){
   thread.messages.push({...row,id:row.id||uid('msg'),at:row.at||now()});thread.updatedAt=now();
   return writeThread(system,thread);
 }
-function selectedLocal(){try{const value=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});return value?.active&&value?.id?value:null}catch{return null}}
+function configuredRoute(){
+  try{
+    const canonical=globalThis.CivweaveSettingsV320?.readState?.();
+    if(canonical?.route||canonical?.provider)return String(canonical.route||canonical.provider).toLowerCase();
+  }catch{}
+  try{
+    const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{});
+    const raw=profiles.interactive||parse(localStorage.getItem('civweave.universal-ai.v127'),{});
+    return String(raw?.route||raw?.provider||'').toLowerCase();
+  }catch{return''}
+}
+function selectedLocal(){
+  try{
+    // A saved downloaded-model ID is NOT authorization to run it if the
+    // active route is Ollama, a native llama-server or any other provider.
+    const route=configuredRoute();
+    if(route&& !['downloaded-local','generative-local','local-ai','browser','qwen','smollm2','smollm3'].includes(route))return null;
+    const gguf=parse(localStorage.getItem('civweave.mobile.gguf-primary.v2'),null);
+    const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{});
+    const raw=profiles.interactive||parse(localStorage.getItem('civweave.universal-ai.v127'),{});
+    if(gguf?.enabled&&gguf.engine==='wllama'&&raw?.model===gguf.model&&
+       (raw?.provider==='openai-compatible'||raw?.route==='openai-compatible'))return null;
+    const value=parse(localStorage.getItem(LOCAL_SELECTION_KEY),{});
+    return value?.active&&value?.id?value:null;
+  }catch{return null}
+}
+let generationTrackerPromise=null;
+function ensureGenerationTracker(){
+  if(globalThis.CivweaveGuideGenerationTrackerV1?.version==='1.2.23-guide-generation-tracker-v1-universal-artifact-rail'){
+    globalThis.CivweaveGuideGenerationTrackerV1.install?.();return Promise.resolve(true);
+  }
+  if(generationTrackerPromise)return generationTrackerPromise;
+  generationTrackerPromise=new Promise((resolve,reject)=>{
+    const src='/app/guide-generation-tracker-v1.js?v=1.2.23-universal-artifact-rail';
+    const existing=[...document.scripts].find(node=>node.src?.includes(src));
+    if(existing?.dataset?.loaded==='true'){resolve(true);return}
+    const script=existing||document.createElement('script');
+    if(!existing){script.src=src;script.async=false}
+    script.addEventListener('load',()=>{script.dataset.loaded='true';resolve(Boolean(globalThis.CivweaveGuideGenerationTrackerV1?.install?.()))},{once:true});
+    script.addEventListener('error',()=>reject(new Error('The shared generation rail could not load.')),{once:true});
+    if(!existing)document.head.append(script);
+  }).catch(error=>{generationTrackerPromise=null;console.warn('[Civweave] Generation tracker unavailable:',error);return false});
+  return generationTrackerPromise;
+}
+function nativeApiRoute(){
+  const route=configuredRoute();
+  return route==='openai-compatible'||route==='ollama'||route==='local-api';
+}
+function activeNativePhoneServer(){
+  const route=configuredRoute();
+  if(route!=='openai-compatible')return false;
+  let state=null;
+  try{state=globalThis.CivweaveSettingsV320?.readState?.()||null}catch{}
+  if(!state){
+    try{
+      const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{});
+      state=profiles.interactive||parse(localStorage.getItem('civweave.universal-ai.v127'),{});
+    }catch{}
+  }
+  return state?.model==='qwen35-4b-native'&&state?.endpoint==='http://127.0.0.1:8080/v1';
+}
+async function verifyNativePhoneServerTransport(){
+  if(!activeNativePhoneServer())return false;
+  // This fetch reads ONLY the model catalog. It cannot load GGUF weights or
+  // initiate model inference; a browser CORS failure ends before AI bootstrap.
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7000);
+  try{
+    const response=await fetch('http://127.0.0.1:8080/v1/models',{
+      method:'GET',mode:'cors',credentials:'omit',cache:'no-store',signal:controller.signal
+    });
+    if(!response.ok)throw new Error('llama-server model catalog returned HTTP '+response.status);
+    const body=await response.json(),models=Array.isArray(body?.data)?body.data:[];
+    if(!models.some(row=>row?.id==='qwen35-4b-native'))
+      throw new Error('llama-server responded, but qwen35-4b-native is not registered. Check --alias.');
+    return true;
+  }catch(error){
+    const reason=controller.signal.aborted?'local browser-to-Termux probe timed out after 7 seconds':clean(error?.message||error,300);
+    throw new Error('Native server connection failed before model loading: '+reason+'. Check /native-server-diagnostic.html in this browser; no secondary AI was started.');
+  }finally{clearTimeout(timer)}
+}
 function voiceState(){try{return globalThis.CivweaveGuideVoiceV1?.state?.()||null}catch{return null}}
 function state(){const voice=voiceState();return Object.freeze({version:VERSION,pageSystem,activeWindow:activeSystem,activeSystem,open:openState,minimized,busy,canonicalOwner:true,presentation:'single-current-chat-surface',selectedLocalModel:selectedLocal()?.id||'',voice:{loaded:Boolean(globalThis.CivweaveGuideVoiceV1),listening:Boolean(voice?.listening),source:voice?.source||'',status:voiceStatus}})}
 function saveState(){try{localStorage.setItem(STATE_KEY,JSON.stringify({...state(),seen:{...seen},updatedAt:now()}))}catch{}}
@@ -131,8 +222,9 @@ function installStyle(){
   const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`
 #${LAUNCHER_ID}{position:fixed;z-index:2147483611;right:max(12px,env(safe-area-inset-right));bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + 12px);width:60px;height:60px;padding:0;border:1px solid color-mix(in srgb,var(--guide-accent,#d8dde7) 64%,transparent);border-radius:50%;overflow:hidden;background:#07111f;box-shadow:0 10px 30px #0009,0 0 20px color-mix(in srgb,var(--guide-accent,#d8dde7) 34%,transparent);cursor:pointer;appearance:none;-webkit-appearance:none}
 #${LAUNCHER_ID} img{display:block;width:100%;height:100%;object-fit:cover}
-#${ROOT_ID}{--guide-accent:#d8dde7;--guide-panel:#111827;position:fixed;z-index:2147483612;right:max(12px,env(safe-area-inset-right));bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + 12px);width:min(520px,calc(100vw - 24px));height:min(72dvh,720px);display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto;overflow:hidden;border:1px solid color-mix(in srgb,var(--guide-accent) 46%,transparent);border-radius:20px;background:var(--guide-panel);color:#f8fbff;box-shadow:0 24px 80px #000b;font:15px/1.45 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;isolation:isolate;contain:layout paint style}
-#${ROOT_ID}[hidden]{display:none!important}#${ROOT_ID} *{box-sizing:border-box}
+body:has(#${ROOT_ID}:not([hidden])) #${LAUNCHER_ID},body:has(#${ROOT_ID}:not([hidden])) #cw-human-message-launcher-v1{visibility:hidden!important;pointer-events:none!important}
+#${ROOT_ID}{--guide-accent:#d8dde7;--guide-panel:#111827;position:fixed;z-index:2147483612;right:max(12px,env(safe-area-inset-right));bottom:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom) + 12px);width:min(520px,calc(100vw - 24px));height:min(720px,calc(100dvh - var(--cw-themed-nav-height,64px) - env(safe-area-inset-bottom) - 28px));display:flex;flex-direction:column;overflow:hidden;border:1px solid color-mix(in srgb,var(--guide-accent) 46%,transparent);border-radius:20px;background:var(--guide-panel);color:#f8fbff;box-shadow:0 24px 80px #000b;font:15px/1.45 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark;isolation:isolate;contain:layout paint style}
+#${ROOT_ID}[hidden]{display:none!important}#${ROOT_ID} *{box-sizing:border-box}#${ROOT_ID}>header,#${ROOT_ID}>.cw242-window-switcher,#${ROOT_ID}>.cw350-context,#${ROOT_ID}>[data-persistent-form]{flex:0 0 auto}#${ROOT_ID}>[data-log]{flex:1 1 0}
 #${ROOT_ID}>header{display:grid;grid-template-columns:48px minmax(0,1fr) 40px;align-items:center;gap:9px;padding:10px 11px calc(10px + env(safe-area-inset-top));border-bottom:1px solid color-mix(in srgb,var(--guide-accent) 34%,transparent);background:color-mix(in srgb,var(--guide-panel) 88%,#fff 4%)}
 #${ROOT_ID}>header img{width:48px;height:48px;border:2px solid var(--guide-accent);border-radius:14px;object-fit:cover}#${ROOT_ID}>header div{min-width:0}#${ROOT_ID}>header strong,#${ROOT_ID}>header span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#${ROOT_ID}>header strong{font-size:1rem}#${ROOT_ID}>header span{margin-top:2px;color:#b9c6d8;font-size:.72rem}
 #${ROOT_ID} [data-close]{width:40px;height:40px;border:1px solid color-mix(in srgb,var(--guide-accent) 40%,transparent);border-radius:10px;background:#ffffff0c;color:#fff;font-size:20px;font-weight:900}
@@ -146,6 +238,7 @@ function installStyle(){
 #${ROOT_ID} .cw242-unread{position:absolute;right:7px;top:6px;width:10px;height:10px;border:2px solid #08111d;border-radius:50%;background:var(--window-accent);box-shadow:0 0 9px var(--window-accent)}#${ROOT_ID} .cw242-unread[hidden]{display:none!important}
 #${ROOT_ID} .cw350-context{padding:7px 11px;border-bottom:1px solid #ffffff12;color:#9fb0c3;font-size:11px;background:#0002}#${ROOT_ID} [data-log]{min-height:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}#${ROOT_ID} [data-log]:empty::before{content:'Start a conversation';margin:auto;color:#71839a;font-weight:750}
 #${ROOT_ID} article{display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;align-items:start}#${ROOT_ID} article.is-user{display:flex;justify-content:flex-end;padding-left:42px}#${ROOT_ID} article>img{width:32px;height:32px;border:1px solid var(--guide-accent);border-radius:10px;object-fit:cover}#${ROOT_ID} .cw350-bubble{max-width:88%;padding:9px 11px;border:1px solid #ffffff18;border-radius:13px;background:#ffffff0b;white-space:pre-wrap;overflow-wrap:anywhere}#${ROOT_ID} .is-user .cw350-bubble{background:color-mix(in srgb,var(--guide-accent) 16%,#ffffff08);border-color:color-mix(in srgb,var(--guide-accent) 42%,transparent)}#${ROOT_ID} .cw350-meta{margin-top:5px;color:#8394aa;font-size:10px}
+#${ROOT_ID} .cw350-artifact-gate{margin-top:9px;padding:10px;border:1px solid color-mix(in srgb,var(--guide-accent) 42%,transparent);border-radius:12px;background:#0002}#${ROOT_ID} .cw350-artifact-gate strong,#${ROOT_ID} .cw350-artifact-gate span{display:block}#${ROOT_ID} .cw350-artifact-gate span{margin-top:3px;color:#becada;font-size:12px}#${ROOT_ID} .cw350-artifact-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}#${ROOT_ID} .cw350-artifact-actions button{min-height:42px;padding:9px 12px;border:1px solid var(--guide-accent);border-radius:10px;background:color-mix(in srgb,var(--guide-accent) 22%,#182334);color:#fff;font:750 13px/1.2 system-ui;cursor:pointer}#${ROOT_ID} .cw350-artifact-actions button:focus-visible{outline:3px solid #fff;outline-offset:3px}
 #${ROOT_ID} [data-persistent-form]{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border-top:1px solid color-mix(in srgb,var(--guide-accent) 32%,transparent);background:#0002}#${ROOT_ID} textarea{min-width:0;width:100%;min-height:54px;max-height:min(28dvh,180px);resize:none;border:1px solid #ffffff22;border-radius:12px;padding:11px;background:#050b15;color:#fff;font:inherit;caret-color:var(--guide-accent);outline:none}#${ROOT_ID} textarea:focus,#${ROOT_ID} textarea:focus-visible{border-color:var(--guide-accent)!important;outline:3px solid color-mix(in srgb,var(--guide-accent) 88%,#fff 12%)!important;outline-offset:2px;box-shadow:0 0 0 1px color-mix(in srgb,var(--guide-accent) 56%,transparent),0 0 18px color-mix(in srgb,var(--guide-accent) 30%,transparent)}#${ROOT_ID} [data-send],#${ROOT_ID} [data-voice]{border:1px solid var(--guide-accent);border-radius:12px;background:color-mix(in srgb,var(--guide-accent) 28%,#182334);color:#fff;font:900 14px/1 system-ui}#${ROOT_ID} [data-send]{min-width:76px;padding:0 14px}#${ROOT_ID} [data-voice]{min-width:54px;padding:0 10px;font-size:20px}#${ROOT_ID} [data-voice][data-listening="true"]{background:color-mix(in srgb,var(--guide-accent) 60%,#182334);box-shadow:0 0 18px color-mix(in srgb,var(--guide-accent) 42%,transparent)}#${ROOT_ID} button{cursor:pointer}
 @media(max-width:720px){#${ROOT_ID}{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:100dvh;border:0;border-radius:0;grid-template-rows:auto auto auto minmax(0,1fr) auto}#${ROOT_ID}>header{grid-template-columns:44px minmax(0,1fr) 40px;padding-top:calc(7px + env(safe-area-inset-top))}#${ROOT_ID}>header img{width:44px;height:44px}#${ROOT_ID} .cw242-window-switcher{gap:4px;padding:7px 5px 8px}#${ROOT_ID} .cw242-window img{width:48px;height:48px;border-radius:12px}#${LAUNCHER_ID}{width:56px;height:56px}}
 @media(max-width:390px){#${ROOT_ID} .cw242-window-switcher{gap:2px;padding-left:3px;padding-right:3px}#${ROOT_ID} .cw242-window img{width:44px;height:44px}#${ROOT_ID} [data-send]{min-width:66px;padding:0 10px}#${ROOT_ID} [data-voice]{min-width:48px}}
@@ -166,6 +259,7 @@ function ensureRoot(){
   root=document.getElementById(ROOT_ID)||document.createElement('section');root.id=ROOT_ID;root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Civweave guide chat');
   root.innerHTML=`<header><img data-guide-avatar alt=""><div><strong data-guide-name></strong><span data-guide-role></span></div><button data-close type="button" aria-label="Close chat">×</button></header><nav class="cw242-window-switcher" aria-label="Guide chats">${switcherMarkup()}</nav><div class="cw350-context" data-context></div><div data-log role="log" aria-live="polite"></div><form data-persistent-form><textarea rows="2" maxlength="12000" required></textarea><button data-voice type="button" aria-label="Start offline voice" title="Start offline voice">◉</button><button data-send type="submit">Send</button></form>`;
   root.querySelector('[data-close]').addEventListener('click',close);
+  root.querySelector('[data-send]').addEventListener('click',()=>{if(busy&&nativeAbortController){nativeAbortController.abort();const control=root.querySelector('[data-send]');if(control){control.textContent='Stopping…';control.disabled=true;}}});
   root.querySelector('.cw242-window-switcher').addEventListener('click',event=>{const button=event.target.closest?.('[data-cw242-window]');if(button)switchGuide(button.dataset.cw242Window,{open:true,focus:true})});
   root.querySelector('[data-voice]').addEventListener('click',()=>{void toggleVoice()});
   root.querySelector('[data-persistent-form]').addEventListener('submit',event=>{event.preventDefault();const input=event.currentTarget.querySelector('textarea'),text=clean(input?.value);if(!text)return;void submitText(text,activeSystem)});
@@ -184,7 +278,7 @@ function syncSwitcher(){
 function syncChrome(){
   const current=guide(activeSystem),page=guide(pageSystem),voice=voiceState();
   document.documentElement.style.setProperty('--guide-accent',current.accent);
-  if(launcher){launcher.style.setProperty('--guide-accent',page.accent);const image=launcher.querySelector('img');if(image){image.src=page.avatar;image.alt=page.name}}
+  if(launcher){launcher.style.setProperty('--guide-accent',page.accent);launcher.setAttribute('aria-label',`Talk to ${page.name}`);const image=launcher.querySelector('img');if(image){image.src=page.avatar;image.alt=page.name}}
   if(!root)return;
   root.style.setProperty('--guide-accent',current.accent);root.style.setProperty('--guide-panel',current.panel);root.dataset.guide=activeSystem;root.dataset.pageSystem=pageSystem;
   const avatar=root.querySelector('[data-guide-avatar]');if(avatar){avatar.src=current.avatar;avatar.alt=current.name}
@@ -195,21 +289,187 @@ function syncChrome(){
   const context=root.querySelector('[data-context]');if(context){const base=activeSystem===pageSystem?current.label:`${current.label} conversation · opened from ${guide(pageSystem).label}`;context.textContent=[base,voiceStatus||(voice?.listening?`Offline voice listening · say “Hey ${current.name}” or another guide name to switch context.`:'')].filter(Boolean).join(' · ')}
   syncSwitcher();
 }
+function savedArtifactItems(key){
+  try{const items=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(items)?items:[]}catch{return[]}
+}
+function artifactGateView(row){
+  if(row?.role==='user'||row?.pending)return null;
+  const gate=row?.approvalGate;
+  if(gate?.kind==='intention-activation'&&gate.planId){
+    const id=String(gate.planId),owner=globalThis.CivweaveIntentionUI,items=typeof owner?.items==='function'?owner.items():savedArtifactItems('civweave.intentions.v127'),item=items.find(value=>value?.id===id||value?.plan?.id===id);
+    if(!item)return{id,state:'missing',title:'Quest unavailable',description:'This Quest is no longer saved on this device.',commands:[]};
+    const state=String(item.state||item.plan?.state||'review'),commands=[['open-plan','Review Quest']];
+    if(state==='review'&&item.plan?.paths?.length)commands.push(['activate-plan','Activate Quest']);
+    return{id,state,title:state==='active'?'Quest active':state==='completed'?'Quest completed':'Quest review',description:state==='review'?'Review the saved Quest before activating its paths.':`Saved status: ${state}.`,commands};
+  }
+  if(gate?.kind==='realm-action-approval'&&gate.actionId){
+    const id=String(gate.actionId),owner=globalThis.CivweaveGuideContractsV141,action=typeof owner?.get==='function'?owner.get(id):savedArtifactItems('civweave.realm-actions.v141').find(value=>value?.id===id);
+    if(!action)return{id,state:'missing',title:'Draft unavailable',description:'This draft is no longer saved on this device.',commands:[]};
+    const state=String(action.state||'review'),missing=Array.isArray(action.missingRequired)?action.missingRequired:[],review=['draft','clarifying','review'].includes(state),commands=[['open-action','Review draft']];
+    if(review&&!missing.length&&action.approval?.required)commands.push(['approve-action',String(action.approval.label||'Approve')]);
+    return{id,state,title:missing.length?'Draft needs details':review?'Approval required':state.charAt(0).toUpperCase()+state.slice(1),description:missing.length?`Missing: ${missing.join(', ')}.`:review?'The saved draft awaits your review.':`Saved status: ${state}.`,commands};
+  }
+  // Learning Journey decisions are presented by their existing Moss owner.
+  return null;
+}
+function syncArtifactGate(article,row){
+  const view=artifactGateView(row);let panel=article.querySelector('.cw350-artifact-gate');
+  if(!view){panel?.remove();return;}
+  if(!panel){
+    panel=document.createElement('section');panel.className='cw350-artifact-gate';
+    const title=document.createElement('strong'),description=document.createElement('span'),actions=document.createElement('div');actions.className='cw350-artifact-actions';
+    panel.append(title,description,actions);article.querySelector('.cw350-bubble')?.parentElement?.append(panel);
+  }
+  if(panel.dataset.state!==view.state)panel.dataset.state=view.state;
+  const title=panel.querySelector('strong'),description=panel.querySelector('span'),actions=panel.querySelector('.cw350-artifact-actions');
+  if(title.textContent!==view.title)title.textContent=view.title;
+  if(description.textContent!==view.description)description.textContent=view.description;
+  const previous=new Map([...actions.children].map(button=>[`${button.dataset.gate}:${button.dataset.id}`,button]));
+  for(const[command,label]of view.commands){
+    const key=`${command}:${view.id}`;let button=previous.get(key);previous.delete(key);
+    if(!button){button=document.createElement('button');button.type='button';button.dataset.gate=command;button.dataset.id=view.id;actions.append(button);}
+    if(button.textContent!==label)button.textContent=label;
+  }
+  for(const button of previous.values())button.remove();
+}
+function syncQuestPathwayMap(article,row){
+  const presenter=globalThis.CivweaveQuestPathwayMapV1;
+  let host=article.querySelector('.cw350-quest-map-host');
+  const id=row?.approvalGate?.kind==='intention-activation'?row.approvalGate.planId:row?.planSnapshot?.id;
+  if(!presenter?.render||!row||row.role==='user'||row.pending||!id){host?.remove();return}
+  const item=savedArtifactItems('civweave.intentions.v127').find(value=>value?.id===id||value?.plan?.id===id);
+  if(!item?.plan){host?.remove();return}
+  const plan={...item.plan,state:item.state||item.plan.state||'review'},signature=JSON.stringify([plan,activeSystem]);
+  if(!host){host=document.createElement('section');host.className='cw350-quest-map-host';article.querySelector('.cw350-bubble')?.parentElement?.append(host)}
+  if(host.dataset.signature===signature)return;
+  host.dataset.signature=signature;
+  host.innerHTML=presenter.render(plan,{theme:activeSystem,actions:['inspect','edit','open-native','submit-guild'],scope:'Saved Quest · private on this device'});
+  presenter.bind(host,(detail,event)=>{
+    const owner=globalThis.CivweaveSharedReviewSurfaceV234;
+    if(owner?.handleMapAction)return owner.handleMapAction(detail,{source:event.target});
+    let notice=host.querySelector('[data-quest-map-notice]');if(!notice){notice=document.createElement('p');notice.dataset.questMapNotice='';notice.setAttribute('role','status');host.append(notice)}notice.textContent='Quest controls are unavailable. Reopen the app to load shared review.';
+  });
+}
+function syncArtifactGates(){
+  if(!root)return;
+  const log=root.querySelector('[data-log]');if(!log)return;
+  const messages=readThread(activeSystem).messages||[],rows=new Map(messages.map((row,index)=>[String(row.id||`history-${activeSystem}-${index}`),row]));
+  for(const article of log.children){const row=rows.get(article.dataset.messageId);syncArtifactGate(article,row);syncQuestPathwayMap(article,row)}
+}
+function clippedQuestCandidate(row,messages,index){
+  if(activeSystem!=='civweave'||!row||row.role!=='assistant'||row.pending||row.planSnapshot?.paths?.length||row.approvalGate?.kind==='intention-activation')return null;
+  if(!row.partialQuestJson&&!/Learning Journey plan:|Response reached the generation limit|Partial native generation saved|## Module|\bStatus: REVIEW\b/i.test(String(row.text||'')))return null;
+  let source=null;
+  for(let i=index-1;i>=0;i--)if(messages[i]?.role==='user'){source=messages[i];break}
+  const original=clean(source?.text||'',5000);
+  if(!/\b(?:help me|help us|we want|i want|create|build|start|establish|organize|launch|design|plan|develop|make)\b/i.test(original)||
+    !/\b(?:commune|garden|infrastructure|community|cooperative|project|quest|app|website|service|collective|enterprise|workspace|device|platform)\b/i.test(original))return null;
+  return {original,excerpt:clean(row.partialQuestJson||row.text,3600),structuredDraft:Boolean(row.partialQuestJson)};
+}
+let captureQuestBusy=false;
+function syncClippedQuestCapture(article,row,messages,index){
+  const candidate=clippedQuestCandidate(row,messages,index);
+  let panel=article.querySelector('.cw350-clipped-quest-capture');
+  if(!candidate){panel?.remove();return}
+  if(!panel){
+    panel=document.createElement('section');
+    panel.className='cw350-artifact-gate cw350-clipped-quest-capture';
+    const title=document.createElement('strong'),description=document.createElement('span'),actions=document.createElement('div');
+    actions.className='cw350-artifact-actions';
+    panel.append(title,description,actions);
+    article.querySelector('.cw350-bubble')?.parentElement?.append(panel);
+  }
+  const title=panel.querySelector('strong'),description=panel.querySelector('span'),actions=panel.querySelector('.cw350-artifact-actions');
+  title.textContent=row.capturedQuestId?'Structured Quest captured':candidate.structuredDraft?'Recover clipped Quest JSON':'Recover clipped generation';
+  description.textContent=row.capturedQuestId?
+    'Your reviewable structured Quest was saved. It has not been activated.':
+    'This answer is chat text, not a saved Quest. Use the original request plus this partial draft to create a validated, reviewable cross-realm Quest.';
+  let button=actions.querySelector('button');
+  if(!button){button=document.createElement('button');button.type='button';actions.append(button)}
+  button.textContent=row.capturedQuestId?'Open captured Quest':'Capture as structured Quest';
+  button.disabled=captureQuestBusy;
+  button.onclick=async()=>{
+    if(row.capturedQuestId){const ui=globalThis.CivweaveIntentionUI;if(typeof ui?.open==='function')ui.open(row.capturedQuestId);else location.assign('/app/working-campus-v440.html?source=clipped-quest-review');return}
+    if(captureQuestBusy)return;
+    captureQuestBusy=true;button.disabled=true;button.textContent='Generating structured Quest…';
+    const notice=document.createElement('span');notice.textContent='Converting existing text using the selected model; no Quest will activate automatically.';
+    panel.append(notice);
+    try{
+      const module=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.15-universal-quest-rail');
+      const result=await module.captureClippedQuest({originalRequest:candidate.original,clippedText:candidate.excerpt,onToken:(_delta,accumulated)=>{button.textContent='Structuring Quest · '+String(accumulated||'').length.toLocaleString()+' characters';}});
+      if(!result?.planItemId||result?.plan?.state!=='review')throw new Error('No validated reviewable Quest was produced.');
+      const thread=readThread('civweave'),idx=(thread.messages||[]).findIndex(item=>item.id===row.id);
+      if(idx>=0)thread.messages[idx]={...thread.messages[idx],capturedQuestId:result.planItemId};
+      thread.messages.push({id:uid('msg'),at:now(),role:'assistant',guide:'civweave',responderSystem:'civweave',
+        text:clean(result?.response?.answer||'The recovered structured Quest is ready for review.',10000),
+        nextAction:clean(result?.response?.choice?.nextAction||'',1200),
+        provider:result.provider,model:result.model,approvalGate:result.response?.approvalGate||null,
+        planSnapshot:clone(result.plan),capturedFromMessageId:row.id});
+      writeThread('civweave',thread);
+      render();
+    }catch(error){
+      notice.textContent='Capture failed: '+clean(error?.message||error,700)+'. The original message remains saved; no Quest was activated.';
+    }finally{captureQuestBusy=false;button.disabled=false;if(!row.capturedQuestId)button.textContent='Capture as structured Quest'}
+  };
+}
 function render(){
   if(!root)return false;syncChrome();const log=root.querySelector('[data-log]');if(!log)return false;
-  const messages=Array.isArray(readThread(activeSystem).messages)?readThread(activeSystem).messages:[];
-  log.innerHTML=messages.map(row=>{
-    const user=row?.role==='user',who=GUIDE[row?.guide||row?.responderSystem||activeSystem]||guide(activeSystem),meta=[row?.provider,row?.model].filter(Boolean).join(' · '),pending=Boolean(row?.pending);
-    if(user)return`<article class="is-user" data-role="user" data-message-role="user" data-pending="false"><div class="cw350-bubble">${esc(row.text||'')}</div></article>`;
-    return`<article data-role="assistant" data-message-role="assistant" data-pending="${pending?'true':'false'}" class="${pending?'cw-ai-pending':''}"><img src="${esc(who.avatar)}" alt="${esc(who.name)}"><div><div class="cw350-bubble">${esc(row.text||'')}</div>${meta?`<div class="cw350-meta">${esc(meta)}</div>`:''}</div></article>`;
-  }).join('');
+  const thread=readThread(activeSystem),messages=Array.isArray(thread.messages)?thread.messages:[];
+  const existing=new Map([...log.children].map(article=>[article.dataset.messageId,article]));
+  let cursor=log.firstElementChild;
+  messages.forEach((row,index)=>{
+    const id=String(row.id||`history-${activeSystem}-${index}`),user=row?.role==='user',role=user?'user':'assistant';
+    const who=GUIDE[row?.guide||row?.responderSystem||activeSystem]||guide(activeSystem),meta=[row?.provider,row?.model].filter(Boolean).join(' · '),pending=Boolean(row?.pending);
+    let article=existing.get(id);existing.delete(id);
+    if(article&&article.dataset.role!==role){if(article===cursor)cursor=article.nextElementSibling;article.remove();article=null;}
+    if(!article){
+      article=document.createElement('article');
+      if(!user)article.append(document.createElement('img'));
+      const body=document.createElement('div'),bubble=document.createElement('div');bubble.className='cw350-bubble';body.append(bubble);article.append(body);
+    }
+    article.dataset.messageId=id;article.dataset.role=role;article.dataset.messageRole=role;article.dataset.pending=pending?'true':'false';
+    article.classList.toggle('is-user',user);article.classList.toggle('cw-ai-pending',pending);
+    const avatar=article.querySelector('img');
+    if(avatar){if(avatar.getAttribute('src')!==who.avatar)avatar.setAttribute('src',who.avatar);if(avatar.getAttribute('alt')!==who.name)avatar.setAttribute('alt',who.name);}
+    const bubble=article.querySelector('.cw350-bubble'),text=String(row.text||'');
+    // Finalization keeps the streamed bubble and any capability controls in
+    // place. Only write text when the final answer actually differs.
+    if(bubble&&bubble.textContent!==text)bubble.textContent=text;
+    let nextNode=article.querySelector('.cw350-next');
+    const nextAction=user?'':String(row.nextAction||'');
+    if(nextAction){if(!nextNode){nextNode=document.createElement('div');nextNode.className='cw350-next';bubble.parentElement.append(nextNode);}const nextText=`Next: ${nextAction}`;if(nextNode.textContent!==nextText)nextNode.textContent=nextText;}else nextNode?.remove();
+    let metadata=article.querySelector('.cw350-meta');
+    if(!user&&meta){if(!metadata){metadata=document.createElement('div');metadata.className='cw350-meta';bubble.parentElement.append(metadata);}if(metadata.textContent!==meta)metadata.textContent=meta;}
+    else metadata?.remove();
+    syncArtifactGate(article,row);
+    syncQuestPathwayMap(article,row);
+    syncClippedQuestCapture(article,row,messages,index);
+    if(article!==cursor)log.insertBefore(article,cursor);else cursor=cursor.nextElementSibling;
+  });
+  for(const article of existing.values())article.remove();
   if(openState)markSeen(activeSystem);syncSwitcher();
   requestAnimationFrame(()=>{try{log.scrollTop=log.scrollHeight}catch{}});
   globalThis.CivweaveSavedChatUIV295?.render?.(activeSystem);
   return true;
 }
+function paintNativeStream(system,messageId,text){
+  // Update only the pending bubble. Rebuilding the entire thread on each
+  // token caused excessive main-thread work on Android.
+  if(activeSystem!==system||!root||!openState)return;
+  const rows=root.querySelectorAll('[data-log] article[data-pending="true"]');
+  for(const article of rows){
+    if(article.dataset.messageId!==messageId)continue;
+    const bubble=article.querySelector('.cw350-bubble');
+    if(bubble&&bubble.textContent!==text)bubble.textContent=text;
+    break;
+  }
+}
 function historyFor(system){return(readThread(system).messages||[]).filter(row=>!row.pending&&!row.modelError&&!/^(?:deterministic|manual)/.test(row.provider||'')&&['user','assistant'].includes(row.role)).slice(-16).map(row=>({role:row.role,text:clean(row.text,6000)}))}
-function localFailure(system,selection,error){const message=clean(error?.message||error||'The selected local model did not complete.',900);return{text:`${guide(system).name} could not run the selected local model ${selection?.id||''}: ${message}`,provider:'local-model-error',model:selection?.id||'',error:message}}
+function paintStream(system,text){
+  const pending=[...(readThread(system).messages||[])].reverse().find(row=>row?.role==='assistant'&&row.pending);
+  return pending?paintNativeStream(system,pending.id,text):false;
+}
+function localFailure(system,selection,error){const message=clean(error?.message||error||'The selected local model did not complete.',900);return{text:`${guide(system).name} could not run the selected local model ${selection?.id||''}: ${message}`,provider:'local-model-error',model:error?.executionModel||selection?.id||'',error:message}}
 async function fallbackReply(system,text){
   const selection=selectedLocal();
   try{
@@ -226,19 +486,108 @@ async function fallbackReply(system,text){
     return{text:`${guide(system).name} could not generate a response: ${message}`,provider:'model-error',model:'',error:message};
   }
 }
-function explicitHandoffTarget(result,system){const target=clean(result?.handoff?.targetSystem||result?.handoffSystem||result?.response?.handoffSystem,80);return SYSTEMS.includes(target)&&target!==system?target:''}
+function actualPlanningModel(result){
+  const answer=clean(result?.response?.answer||'',12000);
+  const known=result?.executionModel||result?.actual?.model||result?.deepGenerationModel||'';
+  const planning=/Moss could not generate the high-level Learning Journey plan|Learning Journey plan:|Moss could not start the selected AI for Learning Journey planning/i.test(answer);
+  if(!planning)return known||result?.model||'';
+  const role=globalThis.CivweaveLocalGenerationModelPolicyV1;
+  const configured=role?.supportsSelected?.()&&String(result?.provider||'').toLowerCase()==='downloaded-local';
+  return known||(configured?role.resolve('deep'):result?.model)||'';
+}
+function explicitHandoffTarget(result,system){
+  // Offering another guide's capability is not consent to copy private chat
+  // context or start that guide. The passover owner records acceptance first.
+  if(result?.handoff?.kind==='guide-capability-passover'&&!result.handoff.acceptedAt)return'';
+  const target=clean(result?.handoff?.targetSystem||result?.handoffSystem||result?.response?.handoffSystem,80);
+  return SYSTEMS.includes(target)&&target!==system?target:'';
+}
 async function submitActive(text){
   const value=clean(text),system=activeSystem;if(!value||busy||!SYSTEMS.includes(system))return false;
-  busy=true;ensureRoot();const button=root.querySelector('[data-send]'),input=root.querySelector('textarea');if(button)button.disabled=true;if(input)input.value='';
+  busy=true;ensureRoot();const button=root.querySelector('[data-send]'),input=root.querySelector('textarea');
+  const nativeRequested=activeNativePhoneServer(),ollamaRequested=configuredRoute()==='ollama',requestAbort=(nativeRequested||ollamaRequested)?new AbortController():null;
+  nativeAbortController=requestAbort;
+  if(button){button.disabled=!(nativeRequested||ollamaRequested);button.type=(nativeRequested||ollamaRequested)?'button':'submit';button.textContent=(nativeRequested||ollamaRequested)?'Stop':'Send';}
+  if(input)input.value='';
   append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${guide(system).name} is thinking…`,pending:true});render();emitAvatar(system,'',value,'thinking');
+  let partialNativeAnswer='',partialQuestJson='';
   try{
-    await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)throw new Error('Shared assistant runtime is not ready.');
-    const result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:historyFor(system)});
-    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),replacement={role:'assistant',guide:system,responderSystem:system,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:result?.model,chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
-    if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);emitAvatar(system,replacement.text,value,'response');const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result);
+    // The current user turn has already been appended to the visible thread.
+    // Do not submit it as both a historical user message and the current turn.
+    const recentHistory=historyFor(system);
+    const pastHistory=recentHistory.at(-1)?.role==='user'&&recentHistory.at(-1)?.text===value
+      ?recentHistory.slice(0,-1):recentHistory;
+    let result;
+    let paintTimer=null,latestText='',lastPaint=0;
+    const paint=()=>{
+      paintTimer=null;lastPaint=Date.now();paintNativeStream(system,pendingId,latestText);
+    };
+    const onToken=(delta,accumulated,meta)=>{
+      if(meta?.kind==='quest-progress'){
+        if(meta.draft){
+          const raw=String(meta.draft||'');
+          partialQuestJson=clean(globalThis.CivweaveGuideStreamThinkingV249?.splitThinking?.(raw)?.answer??raw,12000).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*$/gi,'');
+        }
+        const phase=meta.phase==='saved'?'Saved for REVIEW':meta.phase==='generating'?'Creating Quest':'Preparing cross-realm Quest';
+        latestText='Weaveling · '+phase+(meta.characters?' · '+Number(meta.characters)+' characters drafted':'')+'. Activation requires approval.';
+      }
+      else if(meta?.kind==='moss-progress')
+        latestText='Moss · '+(meta.phase==='compile'?'Compiling JSON':meta.phase==='repair'?'Repairing plan':meta.phase==='saved'?'Saved for REVIEW':'Drafting outline')+' · '+(Number(meta.characters)||0)+' characters received. Approval required.';
+      else if(typeof accumulated==='string'&&accumulated){
+        const stream=globalThis.CivweaveGuideStreamThinkingV249;
+        if(!/weaveling-intention-json/i.test(meta?.purpose||''))
+          partialNativeAnswer=String(stream?.splitThinking?.(accumulated)?.answer??accumulated)
+            .replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*$/gi,'').slice(0,10000);
+        latestText=/weaveling-intention-json/i.test(meta?.purpose||'')
+          ?(stream?.visibleWeavelingPlan?.(accumulated)||'Preparing your Quest for review…')
+          :(stream?.splitThinking?.(accumulated)?.answer??accumulated);
+      }
+      if(!latestText)return;
+      // The shared six-stage rail observes visible chat output for every guide.
+      // Do not report JSON-Quest or Moss progress as ordinary chat, and never
+      // expose model thinking segments hidden by GuideStreamThinking.
+      if(typeof accumulated==='string'&&accumulated&&!meta?.kind&&!/weaveling-intention-json/i.test(meta?.purpose||'')){
+        try{dispatchEvent(new CustomEvent('civweave:guide-generation-progress',{
+          detail:{system,phase:'streaming',text:clean(latestText,30000)}
+        }))}catch{}
+      }
+      if(Date.now()-lastPaint>=80){if(paintTimer){clearTimeout(paintTimer);paintTimer=null;}paint();}
+      else if(!paintTimer)paintTimer=setTimeout(paint,80);
+    };
+    try {
+    await ensureGenerationTracker();
+    if(ollamaRequested){
+      result=await globalThis.CivweaveFamilyAILoaderV105.respondOllama({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
+    }else if(nativeRequested){
+      // On a verified Termux route, do not initialize the entire Civweave
+      // assistant stack before the first request reaches the HTTP model.
+      // This path never loads browser GGUF weights or starts a fallback.
+      try{localStorage.setItem('civweave.native-server.last-request.v1',JSON.stringify({at:new Date().toISOString(),stage:'native-preflight',route:'openai-compatible',model:'qwen35-4b-native'}))}catch{}
+      // Use the existing canonical tracker in native-server sessions too.
+      try{await globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.ensureTracker?.()}catch(error){
+        console.warn('[Civweave] Optional generation tracker unavailable:',error);
+      }
+      await verifyNativePhoneServerTransport();
+      const direct=await import('/app/local-ai/native-server-guide-fastpath-v1.js?v=1.0.15-universal-quest-rail');
+      if(requestAbort?.signal.aborted)throw new Error('Generation cancelled before the request was sent.');
+      result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
+    }else{
+      await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)throw new Error('Shared assistant runtime is not ready.');
+      result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:pastHistory});
+    }
+    }finally{if(paintTimer){clearTimeout(paintTimer);paint();}}
+    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),respondingSystem=SYSTEMS.includes(result?.context?.guide?.system)?result.context.guide.system:system,replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:respondingSystem,responderSystem:respondingSystem,text:clean(result?.response?.answer,10000),nextAction:next,provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
+    if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);emitAvatar(respondingSystem,replacement.text,value,'response');const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result);
   }catch(error){
-    const fallback=await fallbackReply(system,value),thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
-  }finally{busy=false;if(button)button.disabled=false;render();emitState()}
+    // Stop and local HTTP failures end this request. A retry needs a new
+    // user action and must never awaken a stale downloaded-model runtime.
+    const fallback=(requestAbort?.signal.aborted||ollamaRequested||nativeApiRoute())
+      ? {text:requestAbort?.signal.aborted?'Generation stopped.':`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
+      : await fallbackReply(system,value);
+    const retained=system==='civweave'&&nativeApiRoute()&&partialNativeAnswer.length>=40?
+      partialNativeAnswer+'\n\n[Partial native generation saved after interruption. Use Capture as structured Quest to convert it for review.]':null;
+    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:system,responderSystem:system,text:retained||fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-chat-surface-v350',partialQuestJson:partialQuestJson.length>=40?partialQuestJson:'',modelError:fallback.error||clean(error?.message||error,900)};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);if(['local-model-error','model-error'].includes(fallback.provider)){try{dispatchEvent(new CustomEvent('civweave:chat-model-failed',{detail:{system,model:fallback.model,message:fallback.error||replacement.modelError}}))}catch{}}else emitAvatar(system,replacement.text,value,'response');
+  }finally{busy=false;nativeAbortController=null;if(button){button.disabled=false;button.type='submit';button.textContent='Send';}render();emitState()}
   return true;
 }
 function switchGuide(system,options={}){
@@ -266,16 +615,20 @@ async function submitText(text,system=activeSystem,options={}){
 }
 async function submitVoiceText(text,system=activeSystem){return submitText(text,system,{allowBare:true})}
 function start(){
+  void ensureGenerationTracker();
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
   void ensureSpecializedRegistry().catch(()=>{});
+  addEventListener('civweave:system-route-changed',event=>{const system=event?.detail?.system;if(SYSTEMS.includes(system)&&system!==pageSystem){pageSystem=system;syncChrome()}});
   addEventListener('civweave:realm-guide-thread-changed',()=>{if(root)queueMicrotask(()=>{if(openState)markSeen(activeSystem);syncSwitcher()})});
+  for(const name of ['civweave:actions-changed','civweave:intentions-changed'])addEventListener(name,syncArtifactGates);
+  addEventListener('storage',event=>{if(['civweave.realm-actions.v141','civweave.intentions.v127'].includes(event.key))syncArtifactGates()});
   addEventListener('civweave:guide-voice-state',event=>{const detail=event.detail||{};voiceStatus=clean(detail.error||'',300);if(root)syncChrome();emitState()});
   document.documentElement.dataset.civweaveGuideSurface='guide-chat-v350';
   document.documentElement.dataset.civweaveGuideArtifactLanguage='canonical-v1';
   try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}
 }
 
-const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,submitVoiceText,resolveGuideAddress,ensureSpecializedRegistry,ensureVoiceRuntime,toggleVoice,render,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
+const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,submitVoiceText,resolveGuideAddress,ensureSpecializedRegistry,ensureVoiceRuntime,toggleVoice,render,paintStream,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
 globalThis.CivweaveGuideChatSurfaceV350=api;
 globalThis.CivweavePersistentGuideChatV215=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

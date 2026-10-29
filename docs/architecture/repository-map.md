@@ -139,6 +139,12 @@ Current route table:
 
 This table is a **route snapshot**, not an architecture contract. If the dispatcher changes, update this table in the same change. Do not infer shared-system ownership from these filenames.
 
+Civweave's fixed `nativePage=guild-quests` displays the existing Guild Quest tracker within the persistent shell; `submitQuest` accepts only a bounded saved Quest identifier and opens its preview without publishing.
+
+Anarchadia's Governance and Workbench are native content destinations within the same persistent shell. `persistent-system-shell-v1.js` accepts only the fixed `nativePage=governance` and `nativePage=workbench` routes for Anarchadia, with allowlisted Workbench views and bounded proposal/Quest identifiers. The first-frame bootstrap uses the same fixed destinations, and the shell validates the expected content origin, path, and launch parameters. Native entry and return controls delegate to the parent's existing `CivweavePersistentSystemShellV1.navigate` owner; standalone returns preserve the installed/embedding context without creating another shell or navigation owner.
+
+FellowFare's active entry renders its marketplace in the same document. `fellowfare-cabinet-v144.js` delegates commands and reviewed imports directly to the existing `services/fellowfare/cabinet-bridge.js` API. `services/fellowfare/marketplace-v2.js` owns marketplace state, order persistence, rendering, and current-tab state; `marketplace-v2-capabilities.js` delegates order mutations to it. The retained iframe boundary uses `postMessage` only with matching origin and parent sender checks. The native host does not emulate an iframe's `contentWindow` or `contentDocument`.
+
 ## Shared capability landmarks
 
 The canonical ownership list lives in `docs/architecture/systems-of-practice.md` and `config/system-ownership.json`. Current high-value landmarks include:
@@ -155,10 +161,19 @@ The canonical ownership list lives in `docs/architecture/systems-of-practice.md`
 | Local AI bootstrap | `public/app/local-ai/bootstrap-v266.js` |
 | Private messaging | `public/app/civweave-private-messaging-v1.js` |
 | Offline object mesh | `public/app/local-object-mesh-v146.js` |
+| Starling Collective | `public/app/starling-collective-v1.js`; `starling-integration-v1.js` exposes the shared rail action. Guild limits and confirmed proposals use `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`; optional Guild-local worker, signed turns, and Lounge are subordinate capabilities at `public/app/shared/starling-collective-worker-v1.mjs`, `public/app/shared/starling-collective-turns-v1.mjs`, and `public/app/starling-lounge-v1.mjs`; native/Termux execution host adapters: `public/app/shared/starling-execution-transport-v1.mjs` and `public/termux/civweave_starling_host.py`, with Android WorkManager bridge under `native/android/civweave-starling-v1/`. |
+| Guild Quest publication | `cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs`; `public/app/guild-quest-client-v1.js` calls it through existing member sessions |
 | Radio | `public/app/system-radio-agent-v233.js` |
-| Review surface | `public/app/shared-review-surface-v234.js` |
+| Quest pathway presentation | `public/app/shared/quest-pathway-map-v1.js` and CSS; chat, shared review and Guild tracker delegate to canonical actions |
+| Review surface | `public/app/shared-review-surface-v234.js`; receipt presentation helper `public/app/shared/guide-outcome-scene-v1.js` and matching CSS |
 
 These are navigation landmarks only. Always re-check the ownership registry and active callers before changing them because filenames and owners can move.
+
+The persistent shell owns the single radio player in `system-radio-agent-v233.js`. Embedded content aliases the parent radio API instead of creating another player, launcher, or audio element, so changing native content does not replace playback. Direct listening uses the licensed same-origin starter catalog at `public/downloads/hub-media/open-music/starter-catalog.json`; streaming and saving individual tracks begin with explicit user actions, while Spotify remains an extension. `radio-safe-stations-v1.js` and `radio-track-suggestions-v240.js` also alias their parent owners when embedded and leave the direct-audio view to the player owner.
+
+The shared Guild launcher uses `guild-symbol-v1.js` and the existing `host-node-installer-lobby-v1.js` owner. `boot({mount})` connects that lobby inside the installed shell before binding controls; installer placement remains the default when no mount is supplied. Load failures stay in the current surface with retry instead of navigating the installed app to the installer.
+
+Direct audio seeking falls back to a bounded, verified in-memory blob when the static host cannot serve a requested time range. That explicit seek does not persist media; only Save offline writes the audio cache.
 
 ## Hosting and runtime model
 
@@ -263,6 +278,10 @@ Broad repository/runtime check:
 npm run check
 ```
 
+This gate validates checked-in source without generating release metadata or rewriting routes. Syntax verification discovers current repository JavaScript, excludes generated vendor/materialized trees, and retains the selected release's server syntax checks. The workflow regression checks the executable verification dependency graph for retired release mutators.
+
+Installer packaging also takes the checked-in Pages graph as its source. It generates installer assets and retains installer smoke checks; it does not run the retired route/version synchronizers that would replace current navigation.
+
 Release-discipline check:
 
 ```bash
@@ -296,3 +315,7 @@ Update this file in the same change when any of the following moves materially:
 - verification commands that agents are expected to run.
 
 Do not turn this file into a historical changelog. Keep it describing the current repository. Git history records what the map used to say.
+
+## Survival Mode capability
+
+The canonical cross-realm survival-assessment owner is public/app/survival/survival-mode.mjs, presented at public/app/survival/index.html with temporary camera preview and source browsing in public/app/survival/app.mjs. The existing persistent-shell-actions-v1.js supplies its launcher, and offline-package-v208.json and optional service-worker assets seed the offline page. This is not a sixth realm or chat system. See docs/contracts/survival-mode-v1.md.

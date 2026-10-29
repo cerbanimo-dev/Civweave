@@ -45,16 +45,33 @@ function provider(v){
 }
 function activeLocal(){try{const value=globalThis.CivweaveLocalModelDownloadV266?.selection?.();return value?.active&&value?.id?value:null}catch{return null}}
 function selectedConfig(){
-  const local=activeLocal();
-  if(local)return{provider:'downloaded-local',route:'downloaded-local',model:local.id,externalConsent:false};
   const old=parse(localStorage.getItem(SK),{route:'server-auto',provider:'server-auto',model:'',consent:false});
   let shared=null;try{shared=runtime()?.readSharedConfig?.('interactive')||null}catch{}
   const raw=shared||old,rawModel=clean(raw.model||raw.modelId,300),rawProvider=low(raw.provider||raw.route);
+  // The browser GGUF is a first-class on-device primary even though its
+  // transport compatibility config is named "openai-compatible". A stale
+  // downloaded-local Gemma selection must NOT supersede it.
+  const gguf=parse(localStorage.getItem('civweave.mobile.gguf-primary.v2'),null);
+  if(gguf?.enabled===true&&gguf.engine==='wllama'&&
+     rawProvider==='openai-compatible'&&rawModel===gguf.model)
+    return {...raw,provider:'openai-compatible',route:'openai-compatible',model:gguf.model,externalConsent:false};
   if(rawModel===MINILM_ID||rawProvider==='minilm'||rawProvider==='semantic-local'||rawProvider==='local-reflex'||rawProvider==='reflex')return{provider:'server-auto',route:'server-auto',model:'',externalConsent:false,migratedSidecar:true};
   const p=provider(rawProvider);
+  // An old browser-model selection is not permission to override a saved
+  // Ollama, Gemini, hosted, server-auto, or other non-browser provider.
+  if(['ollama','openai-compatible','gemini','server-auto','hosted','deterministic'].includes(p))
+    return{...raw,provider:p,route:p,externalConsent:Boolean(raw.externalConsent??raw.remoteConsent??old.consent)};
+  const local=activeLocal();
+  if(local)return{provider:'downloaded-local',route:'downloaded-local',model:local.id,externalConsent:false};
   return{...raw,provider:p,route:p,externalConsent:Boolean(raw.externalConsent??raw.remoteConsent??old.consent)};
 }
-async function ledger(){if(!ledgerPromise)ledgerPromise=globalThis.CivweaveParity?.load?.().catch(()=>null)||Promise.resolve(null);return ledgerPromise}
+async function ledger(){
+  if(!ledgerPromise)ledgerPromise=new Promise(resolve=>{
+    const timer=setTimeout(()=>resolve(null),1000),finish=value=>{clearTimeout(timer);resolve(value??null)};
+    try{Promise.resolve(globalThis.CivweaveParity?.load?.()).then(finish,()=>finish(null))}catch{finish(null)}
+  });
+  return ledgerPromise;
+}
 async function environment(system){const data=await ledger(),query=new URLSearchParams(location.search),saved=localStorage.getItem(`civweave.realm-room.${system}`),roomId=system==='civweave'?'civweave.quad':query.get('room')||saved||data?.systems?.find(item=>item.id===system)?.roomIds?.[0]||'',room=data?.index?.rooms?.get?.(roomId)||data?.rooms?.find?.(item=>item.id===roomId);return{systemId:system,roomId,roomLabel:room?.label||roomId||'The Quad',roomPurpose:room?.purpose||'',capabilityIds:Array.isArray(room?.capabilityIds)?room.capabilityIds:[]}}
 function kind(text){const value=low(text).replace(/[!?.,]+$/,'');if(/^(test|testing|ping|check|mic check)$/.test(value))return'test';if(/\b(are you (real|alive|sentient|a real boy)|who are you|what are you|are you a person)\b/.test(value))return'identity';if(/^(hi|hello|hey|good morning|good afternoon|good evening)$/.test(value))return'greeting';if(/^(thanks|thank you|thx|got it|okay|ok)$/.test(value))return'ack';return''}
 const mode=system=>system==='living-school'?'Learn':system==='cerbanimo'?'Build':system==='fellowfare'?'Acquire':system==='anarchadia'?'Govern':'Reflect';
@@ -65,15 +82,22 @@ function semanticRouter(){
   if(globalThis.CivweaveContextRouterV344)return Promise.resolve(globalThis.CivweaveContextRouterV344);
   if(semanticPromise)return semanticPromise;
   semanticPromise=new Promise(resolve=>{
+    const timer=setTimeout(()=>done(),800),done=()=>{clearTimeout(timer);resolve(globalThis.CivweaveContextRouterV344||null)};
     const existing=[...(document.scripts||[])].find(node=>String(node.src||'').includes('/app/minilm-context-router-v344.js'));
-    if(existing){const done=()=>resolve(globalThis.CivweaveContextRouterV344||null);if(globalThis.CivweaveContextRouterV344)done();else{existing.addEventListener('load',done,{once:true});existing.addEventListener('error',()=>resolve(null),{once:true})}return}
-    const script=document.createElement('script');script.src=MINILM_ROUTER;script.async=true;script.dataset.civweaveAssistantSemantic='v141';script.onload=()=>resolve(globalThis.CivweaveContextRouterV344||null);script.onerror=()=>resolve(null);document.head?.append(script);
+    if(existing){if(globalThis.CivweaveContextRouterV344)done();else{existing.addEventListener('load',done,{once:true});existing.addEventListener('error',done,{once:true})}return}
+    const script=document.createElement('script');script.src=MINILM_ROUTER;script.async=true;script.dataset.civweaveAssistantSemantic='v141';script.onload=done;script.onerror=done;document.head?.append(script);
   });
   return semanticPromise;
 }
 async function semanticRoute(text,system,history,env){
   const fallback=route(text,system),api=await semanticRouter();if(!api?.route)return fallback;
-  try{if(api.status?.().available&&!api.status?.().ready)await Promise.race([api.warm?.(),new Promise(resolve=>setTimeout(resolve,1000))]);const semantic=await api.route(text,{currentSystem:system,history,room:env?.roomLabel||env?.roomId||''});return semantic?.source==='minilm'?semantic:fallback}catch{return fallback}
+  try{
+    const semantic=await new Promise(resolve=>{
+      const timer=setTimeout(()=>resolve(null),1000),finish=value=>{clearTimeout(timer);resolve(value)};
+      Promise.resolve().then(async()=>{if(api.status?.().available&&!api.status?.().ready)await api.warm?.();return api.route(text,{currentSystem:system,history,room:env?.roomLabel||env?.roomId||''})}).then(finish,()=>finish(null));
+    });
+    return semantic?.source==='minilm'?semantic:fallback;
+  }catch{return fallback}
 }
 async function context(text,system,history,action=null){const env=await environment(system),r=await semanticRoute(text,system,history,env),data=await ledger(),destination=data?.systems?.find(item=>item.id===r.system),g=guide(system);return{schema:'civweave.structured-context.v4',userMessage:clean(text),currentContext:env,routingAnswer:{...r,room:destination?.roomIds?.[0]||env.roomId},contextRouter:{model:MINILM_ID,source:r.source||'rules',semantic:r.semantic||null},guide:{name:g.name,role:g.role,system,realm:LABEL[system]},recentConversation:(history||[]).slice(-12).map(item=>({role:item.role,text:clean(item.text||item.content,1200)})),requestedModel:selectedConfig(),actionDraft:action,consent:{rule:'Draft automatically; consequential execution requires affirmative consent.',consequentialActionDetected:Boolean(action?.approval?.required)}}}
 function wantsQuest(text){return /\b(plan|roadmap|steps?|build|make|create|design|develop|implement|prototype|repair|fix|organize|launch|project|feature|quest)\b/i.test(clean(text))}
@@ -102,7 +126,22 @@ function normalizeQuestDraft(value){
 function normalize(result,ctx){let value=result?.outputJson;if(!value&&typeof result?.outputText==='string'){const text=result.outputText.replace(/<think>[\s\S]*?<\/think>/gi,'').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');value=parse(text,null)||{answer:text}}value=value&&typeof value==='object'?value:{};const choice=value.choice&&typeof value.choice==='object'?value.choice:{},r=ctx.routingAnswer;return{answer:clean(value.answer||value.text||value.message,12000),choice:{mode:clean(choice.mode||r.mode,80),system:SYS.includes(choice.system)?choice.system:r.system,room:clean(choice.room||r.room,240),nextAction:nextAction(choice.nextAction||'',ctx.guide.system)},assumptions:Array.isArray(value.assumptions)?value.assumptions.map(item=>clean(item,500)).slice(0,8):[],requiresConsent:Boolean(value.requiresConsent||ctx.actionDraft?.approval?.required),confidence:Number.isFinite(Number(value.confidence))?Number(value.confidence):Number(r.confidence||.5),questDraft:normalizeQuestDraft(value)}}
 function conversational(type,system,ctx){const g=guide(system);if(type==='identity')return{answer:`I’m ${g.name}, ${g.role} of ${LABEL[system]}. I’m software, not a person or a real boy.`,choice:{mode:mode(system),system,room:ctx.currentContext.roomId,nextAction:''},assumptions:[],requiresConsent:false,confidence:.99};if(type==='test')return{answer:`Test received. I’m ${g.name}, ${g.role} of ${LABEL[system]}. I did not turn that message into a plan, quest, request, or proposal.`,choice:{mode:mode(system),system,room:ctx.currentContext.roomId,nextAction:next(system)},assumptions:[],requiresConsent:false,confidence:.99};return{answer:type==='greeting'?`Hello. I’m ${g.name}, the ${g.role} of ${LABEL[system]}.`:type==='ack'?'Understood. Nothing new was activated.':`I’m ${g.name}, the ${g.role} of ${LABEL[system]}.`,choice:{mode:mode(system),system,room:ctx.currentContext.roomId,nextAction:type==='ack'?'':next(system)},assumptions:[],requiresConsent:false,confidence:.9}}
 function taskMetadata(ctx){const text=clean(ctx?.userMessage,12000),lower=low(text),system=ctx?.guide?.system||'civweave',code=/\b(code|software|debug|refactor|patch|program|script|typescript|javascript|python|react|sql|api|database|repository|website|pwa)\b/.test(lower),research=/\b(current|latest|live|web|internet|browse|external sources?|up[- ]to[- ]date)\b/.test(lower),planning=system==='cerbanimo'?wantsQuest(text):system==='living-school'?/\b(curriculum|course|lesson|learning plan|study plan|teach)\b/.test(lower):system==='anarchadia'?/\b(proposal|vote|policy|govern|agreement|rule change)\b/.test(lower):system==='fellowfare'?/\b(request|offer|source|procure|exchange|trade|budget)\b/.test(lower):/\b(plan|roadmap|weave|across (?:the )?realms|cross[- ]realm)\b/.test(lower),complex=/\b(multi[- ]system|cross[- ]realm|long[- ]horizon|production architecture|threat model|formal verification|migration strategy|distributed system|consensus|high stakes|safety critical)\b/.test(lower)||text.length>8000,structuredOutput=true;let kind='dialogue';if(code)kind='code-project';else if(planning)kind=system==='cerbanimo'?'quest-draft':system==='living-school'?'curriculum-draft':system==='anarchadia'?'governance-draft':system==='fellowfare'?'resource-draft':'campus-weave';return{schema:'civweave.ai-task.v2',kind,text,systemId:system,complexity:complex?'complex':'routine',requirements:{profile:'interactive',requiresTools:research,externalResearch:research,code,planning,structuredOutput,vision:false,complexity:complex}}}
-async function model(ctx){const rt=runtime(),config=selectedConfig(),task=taskMetadata(ctx);if(!rt?.generate)throw new Error('The shared model runtime has not loaded.');const result=await rt.generate({purpose:'civweave-guide-response-v141',executionProfile:'interactive',config,context:ctx,task,capabilityRequirements:task.requirements,responseFormat:'json',messages:prompt(ctx)});if(!['success','fallback'].includes(result?.status))throw new Error(result?.error?.message||`Provider ended with ${result?.status||'an error'}.`);return{response:normalize(result,ctx),requestedProvider:config.provider,provider:result.actual?.provider||config.provider,model:result.actual?.model||config.model,usage:result.usage||null,responseRouting:result.responseRouting||null,fallbackFrom:result.status==='fallback'||result.fallback?.used?{provider:config.provider,reason:result.fallback?.reason||'Provider failure'}:null}}
+async function model(ctx,options={}){
+  const rt=runtime(),config=options.config||selectedConfig(),task=taskMetadata(ctx);
+  if(!rt?.generate)throw new Error('The shared model runtime has not loaded.');
+  if(options.signal?.aborted)throw options.signal.reason||new Error('Generation cancelled.');
+  let accumulated='';
+  const onEvent=event=>{
+    try{options.onEvent?.(event)}catch{}
+    if(event?.phase!=='partial')return;
+    const delta=String(event.text??event.token??'');
+    accumulated=typeof event.accumulatedText==='string'?event.accumulatedText:accumulated+delta;
+    try{options.onToken?.(delta,accumulated,event)}catch{}
+  };
+  const result=await rt.generate({purpose:'civweave-guide-response-v141',executionProfile:'interactive',config,signal:options.signal,stream:typeof options.onToken==='function',onEvent,context:ctx,task,capabilityRequirements:task.requirements,responseFormat:'json',messages:prompt(ctx)});
+  if(!['success','fallback'].includes(result?.status))throw new Error(result?.error?.message||`Provider ended with ${result?.status||'an error'}.`);
+  return{response:normalize(result,ctx),requestedProvider:config.provider,provider:result.actual?.provider||config.provider,model:result.actual?.model||config.model,usage:result.usage||null,responseRouting:result.responseRouting||null,fallbackFrom:result.status==='fallback'||result.fallback?.used?{provider:config.provider,reason:result.fallback?.reason||'Provider failure'}:null};
+}
 function persistModelQuest(draft,text,ctx,out){
   const api=contracts();if(!api?.restore||!draft)return null;
   const title=clean(draft.title,160)||'Create a skilled-work quest',existing=api.items?.().find(item=>item?.system==='cerbanimo'&&['draft','clarifying','review'].includes(item.state)&&low(item.title)===low(title));if(existing)return existing;
@@ -111,7 +150,9 @@ function persistModelQuest(draft,text,ctx,out){
   return api.restore(action);
 }
 function decorateAction(out,action,system,{modelAuthored=false}={}){if(!action)return out;const missing=Array.isArray(action.missingRequired)?action.missingRequired:[];if(!out.response.answer)out.response.answer=contracts()?.answer?.(action)||`${guide(system).name} created a ${action.kind} draft.`;if(modelAuthored&&!/\b(saved|created|prepared|draft)\b/i.test(out.response.answer))out.response.answer=`${out.response.answer}\n\nI saved that model-authored plan as the Cerbanimo quest draft “${action.title}.”`;out.response.choice={mode:mode(system),system,room:out.context?.currentContext?.roomId||'',nextAction:missing.length?`Provide ${missing.join(' and ')}.`:action.approval?.required?`Review and approve “${action.title}.”`:'Continue.'};out.response.requiresConsent=Boolean(action.approval?.required);out.response.approvalGate={kind:'realm-action-approval',actionId:action.id,state:action.state,required:Boolean(action.approval?.required),label:action.approval?.label,missingRequired:[...missing]};return out}
-async function respond({text,systemId=pathSystem(),history=[]}={}){
+async function respond(options={}){
+  let{text,systemId=pathSystem(),history=[]}=options;
+  if(options.signal?.aborted)throw options.signal.reason||new Error('Generation cancelled.');
   const routedSystem=pathSystem();
   if(!SYS.includes(systemId))systemId=routedSystem;
   if(systemId==='civweave'&&routedSystem!=='civweave')systemId=routedSystem;
@@ -122,7 +163,7 @@ async function respond({text,systemId=pathSystem(),history=[]}={}){
   }
   if(systemId==='cerbanimo'){
     let out=null,error=null,action=null,modelAuthored=false;
-    try{out=await model(pre);out.context=pre}catch(caught){error=caught;try{console.warn('[Civweave guide model fallback]',systemId,clean(caught?.message||caught,1000))}catch{}}
+    try{out=await model(pre,options);out.context=pre}catch(caught){if(options.signal?.aborted||['ollama','openai-compatible'].includes((options.config||selectedConfig()).provider))throw caught;error=caught;try{console.warn('[Civweave guide model fallback]',systemId,clean(caught?.message||caught,1000))}catch{}}
     if(out?.response?.questDraft){action=persistModelQuest(out.response.questDraft,text,pre,out);modelAuthored=Boolean(action)}
     if(!action&&!type&&wantsQuest(text))action=contracts()?.compose?.(text,systemId,pre)||null;
     if(!out){const config=selectedConfig(),failure=clean(error?.message||'The selected model route could not complete this call.',1000);if(config.provider==='downloaded-local'&&!action)throw Object.assign(new Error(`Selected local model ${config.model||''} could not complete this call: ${failure}`),{code:'SELECTED_LOCAL_MODEL_FAILED',cause:error});out={response:action?{answer:contracts()?.answer?.(action)||'Kamiya created a Cerbanimo quest draft.',choice:{mode:mode(systemId),system:systemId,room:pre.currentContext.roomId,nextAction:''},assumptions:[],requiresConsent:Boolean(action.approval?.required),confidence:.92}:{answer:`Kamiya could not reach the selected mind: ${failure} Your prompt is still here; retry when capacity is available or choose another configured route.`,choice:{mode:mode(systemId),system:systemId,room:pre.currentContext.roomId,nextAction:'Review AI settings or retry this prompt.'},assumptions:[],requiresConsent:false,confidence:.99},requestedProvider:config.provider,provider:'local-contract',model:'civweave-action-contract-v141',fallbackFrom:{provider:config.provider,reason:failure},context:pre}}
@@ -130,7 +171,7 @@ async function respond({text,systemId=pathSystem(),history=[]}={}){
     return{...out,action,context:pre};
   }
   const action=systemId==='civweave'?null:contracts()?.compose?.(text,systemId,pre),ctx=await context(text,systemId,history,action);let out;
-  try{out=await model(ctx);out.context=ctx}catch(error){const config=selectedConfig();if(config.provider==='downloaded-local')throw Object.assign(new Error(`Selected local model ${config.model||''} could not complete this call: ${clean(error?.message||error,1000)}`),{code:'SELECTED_LOCAL_MODEL_FAILED',cause:error});out={response:action?{answer:contracts()?.answer?.(action),choice:{mode:mode(systemId),system:systemId,room:ctx.currentContext.roomId,nextAction:''},assumptions:[],requiresConsent:Boolean(action?.approval?.required),confidence:.92}:conversational(type,systemId,ctx),requestedProvider:config.provider,provider:'local-contract',model:'civweave-action-contract-v141',fallbackFrom:{provider:config.provider,reason:error.message},context:ctx}}
+  try{out=await model(ctx,options);out.context=ctx}catch(error){const config=options.config||selectedConfig();if(options.signal?.aborted||['ollama','openai-compatible'].includes(config.provider))throw error;if(config.provider==='downloaded-local')throw Object.assign(new Error(`Selected local model ${config.model||''} could not complete this call: ${clean(error?.message||error,1000)}`),{code:'SELECTED_LOCAL_MODEL_FAILED',cause:error});out={response:action?{answer:contracts()?.answer?.(action),choice:{mode:mode(systemId),system:systemId,room:ctx.currentContext.roomId,nextAction:''},assumptions:[],requiresConsent:Boolean(action?.approval?.required),confidence:.92}:conversational(type,systemId,ctx),requestedProvider:config.provider,provider:'local-contract',model:'civweave-action-contract-v141',fallbackFrom:{provider:config.provider,reason:error.message},context:ctx}}
   if(action)decorateAction(out,action,systemId);
   return{...out,action,context:ctx};
 }

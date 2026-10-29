@@ -5,11 +5,13 @@ import path from 'node:path';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
+import { fileURLToPath } from 'node:url';
 import { NodeAiLedger } from '../lib/node-ai-ledger-sqlite-v1.mjs';
 import { NodeAiInferenceGate } from '../lib/node-ai-inference-gate-v1.mjs';
 import { createNodeServiceManifest } from '../lib/node-ai-marketplace-v1.mjs';
 
 const workerUrl = new URL('./node-ai-process-chaos-worker-v1.mjs', import.meta.url);
+const workerPath = fileURLToPath(workerUrl);
 const NODE_ID = 'node:process-chaos';
 const OPERATOR_ID = 'operator:process-chaos';
 const BPS = 2000;
@@ -20,7 +22,7 @@ function openLedger(databasePath) {
 }
 
 async function oneShot(config) {
-  const child = spawn(process.execPath, [workerUrl.pathname, encode({ nodeId: NODE_ID, operatorId: OPERATOR_ID, platformFeeBps: BPS, ...config })], { stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, [workerPath, encode({ nodeId: NODE_ID, operatorId: OPERATOR_ID, platformFeeBps: BPS, ...config })], { stdio: ['ignore', 'pipe', 'pipe'] });
   let stdout = '';
   let stderr = '';
   child.stdout.setEncoding('utf8');
@@ -35,7 +37,7 @@ async function oneShot(config) {
 }
 
 async function startHolding(config, phase) {
-  const child = spawn(process.execPath, [workerUrl.pathname, encode({ nodeId: NODE_ID, operatorId: OPERATOR_ID, platformFeeBps: BPS, ...config })], { stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, [workerPath, encode({ nodeId: NODE_ID, operatorId: OPERATOR_ID, platformFeeBps: BPS, ...config })], { stdio: ['ignore', 'pipe', 'pipe'] });
   child.stdout.setEncoding('utf8');
   child.stderr.setEncoding('utf8');
   let buffer = '';

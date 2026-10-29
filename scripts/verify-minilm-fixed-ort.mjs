@@ -2,13 +2,10 @@ import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-await import('./sync-release-version-assets.mjs');
-await import('./verify-release-version-sync.mjs');
-
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const [pkgText,versionText,adapter,worker,manifestText,stage,materializer,serviceWorker,downloadRuntime,mobileBuilder]=await Promise.all([
+const [pkgText,versionText,adapter,worker,manifestText,stage,materializer,rootWorker,workerWrapper,serviceWorker,downloadRuntime,mobileBuilder]=await Promise.all([
   read('package.json'),
   read('VERSION'),
   read('public/app/models/all-minilm-l6-v2/adapter.js'),
@@ -17,13 +14,21 @@ const [pkgText,versionText,adapter,worker,manifestText,stage,materializer,servic
   read('scripts/stage-onnxruntime-web-assets.mjs'),
   read('scripts/ensure-minilm-fixed-ort-model.mjs'),
   read('public/service-worker.js'),
+  read('public/service-worker-v203.js'),
+  read('public/service-worker-core-v208.js'),
   read('public/extensions/civweave-model-download-v157.js'),
   read('scripts/build-mobile-install-kit.mjs')
 ]);
 const pkg=JSON.parse(pkgText),manifest=JSON.parse(manifestText),canonicalVersion=versionText.trim();
+const [appManifest,integrity,releaseContract]=await Promise.all([
+  read('public/app/manifest.webmanifest'),read('public/app/shell-integrity-v281.json'),read('config/release-contract.json')
+].map(async text=>JSON.parse(await text)));
 
 assert(/^\d+\.\d+\.\d+$/.test(canonicalVersion),'VERSION must contain a semantic release version');
 assert(pkg.version===canonicalVersion,`package.json ${pkg.version} is not aligned with canonical Civweave ${canonicalVersion}`);
+assert(appManifest.name===`Civweave v${canonicalVersion}`,'application manifest release identity is not aligned with VERSION');
+assert(integrity.version===canonicalVersion,'shell integrity release identity is not aligned with VERSION');
+assert(releaseContract.canonical?.current?.version===canonicalVersion&&releaseContract.canonical?.current?.path===`releases/${canonicalVersion}`,'canonical runtime release selector is not aligned with VERSION');
 assert(pkg.dependencies?.['onnxruntime-web']==='1.27.0','onnxruntime-web is not pinned to 1.27.0');
 assert(pkg.scripts?.prestart?.includes('stage-onnxruntime-web-assets.mjs'),'normal startup does not stage the fixed runtime');
 assert(pkg.scripts?.prestart?.includes('ensure-minilm-fixed-ort-model.mjs'),'normal startup does not materialize the fixed graph');
@@ -63,9 +68,14 @@ for(const token of ['ort.wasm.min.mjs','ort-wasm-simd-threaded.mjs','ort-wasm-si
 for(const token of ['model_quantized.onnx','22972370','afdb6f1a0e45b715d0bb9b11772f032c399babd23bfc31fed1c170afc848bdb1'])assert(materializer.includes(token),`fixed model materializer missing ${token}`);
 for(const retired of ['model_q4f16.onnx','tokenizer.json'])assert(!materializer.includes(retired),`fixed model materializer still downloads ${retired}`);
 
-for(const token of ['MODEL_FILES','MODEL_CACHE','modelOnDemand','GET_MODEL_PACKAGE_STATUS','model_quantized.onnx','ort.wasm.min.mjs','key!==MODEL_CACHE'])assert(serviceWorker.includes(token),`service worker missing fixed model delivery contract ${token}`);
-assert(serviceWorker.includes("'/app/anarchadia-sovereignty-kernel-v146.js'"),'service worker core lost the Anarchadia sovereignty kernel while adding the model corridor');
-assert(!serviceWorker.match(/const CORE=\[[\s\S]*model_quantized\.onnx/),'heavy model graph leaked into the core install list');
+assert(rootWorker.includes("importScripts('/service-worker-v203.js"),'root compatibility worker must delegate to the canonical installed worker');
+assert(workerWrapper.includes("importScripts('/service-worker-core-v208.js"),'installed worker must load the canonical model-delivery owner');
+for(const token of ['MODEL_PREFIXES','modelOnDemand',"'/app/models/'","'/app/vendor/onnxruntime/'",'civweave-model-${VERSION}-on-demand-v208','event.respondWith(modelOnDemand(request))'])assert(serviceWorker.includes(token),`canonical service worker missing model delivery contract ${token}`);
+const preserved=serviceWorker.match(/const PRESERVED_CACHE_PREFIXES = \[([\s\S]*?)\];/)?.[1]||'';
+assert(preserved.includes("'civweave-model-'"),'application cache cleanup must preserve downloaded model caches');
+assert(rootWorker.includes("'/app/anarchadia-sovereignty-kernel-v146.js'"),'installer package metadata lost the Anarchadia sovereignty kernel while adding the model corridor');
+assert(!serviceWorker.slice(0,serviceWorker.indexOf('const MODEL_PREFIXES')).includes('model_quantized.onnx'),'heavy model graph leaked into the core install list');
+for(const token of ['adapter.status()','adapter.install('])assert(downloadRuntime.includes(token),`explicit semantic-lab package management lost ${token}`);
 
 for(const token of ["settingsHooks:false","automaticStartup:false","civweave:open-semantic-lab",'fixed ONNX Runtime Web WASM'])assert(downloadRuntime.includes(token),`semantic-lab downloader missing ${token}`);
 for(const forbidden of ['civweave:open-ai-settings','#settings-button','#model-chip'])assert(!downloadRuntime.includes(forbidden),`model download still hooks the settings lifecycle through ${forbidden}`);

@@ -5,24 +5,26 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#092b23">
   <title>Living School</title>
+  <link rel="stylesheet" href="/app/shared/guide-outcome-scene-v1.css?v=1.2.0-new-guide-atlases">
+  <script src="/app/shared/guide-outcome-scene-v1.js?v=1.2.0-new-guide-atlases" defer></script>
   <script src="/app/gemini-rate-governor-v1.js?v=1.0.0-gemini-provider-budget"></script>
   <link rel="preload" as="image" href="/app/assets/ai/moss.png">
   <link rel="preload" as="image" href="/app/assets/ai/weaveling-compass.png">
-  <script src="/app/themed-system-nav-v178.js?v=family-nav-single-owner-r1" defer></script>
+  <script src="/app/themed-system-nav-v178.js?v=1.0.165-viewport-bounds" defer></script>
   <script src="/app/japanese-mode-v1.js?v=japanese-mode-v1" defer></script>
-  <script src="/app/system-radio-agent-v233.js?v=living-school-radio-entry-v233" defer></script>
-  <script src="/app/radio-track-suggestions-v240.js?v=living-school-radio-entry-v241" defer></script>
+  <script src="/app/system-radio-agent-v233.js?v=1.1.1-direct-audio-v2" defer></script>
+  <script src="/app/radio-track-suggestions-v240.js?v=1.6.1-direct-audio-v1" defer></script>
   <script src="/app/install-boundary-v146.js"></script>
-  <script src="/app/cw-reward-ledger-v2.js?v=basic-value-v1"></script>
+  <script src="/app/cw-reward-ledger-v2.js?v=2.1.1-persisted-grants"></script>
   <script src="/app/civweave-basic-value-v1.js?v=acorn-scale-v2"></script>
   <script src="/app/cw-reward-receivers-v2.js?v=basic-value-v1"></script>
-  <script src="/app/civweave-basic-value-model-v1.js?v=acorn-scale-v2"></script>
+  <script src="/app/civweave-basic-value-model-v1.js?v=1.4.1-compiled-preview-scope"></script>
   <link rel="stylesheet" href="/app/family-shell-v104.css?v=cleanroom-v218.1">
   <link rel="stylesheet" href="/app/platform-stability-v159.css?v=cleanroom-v218.1">
   <link rel="stylesheet" href="/app/platform-experience-v160.css?v=1.0.107-go-live-v300">
   <link rel="stylesheet" href="/app/mobile-regression-v170.css?v=cleanroom-v218.1">
   <link rel="stylesheet" href="/app/mobile-guide-scroll-v256.css?v=living-school-v256">
-  <link rel="stylesheet" href="/app/cabinets/living-school/living-school-cleanroom-v218.css?v=research-first-v218.1-v256">
+  <link rel="stylesheet" href="/app/cabinets/living-school/living-school-cleanroom-v218.css?v=journey-receipts-v2">
   <style>
     .lsc218-loading{margin-top:clamp(24px,5vh,56px)!important;padding:clamp(20px,3vw,32px)!important}
     .lsc218-loading p{color:#dce7d0!important;max-width:680px;margin:.55rem auto 0}
@@ -38,6 +40,7 @@
   </style>
 </head>
 <body>
+  <script defer src="/app/cabinets/living-school/living-school-pending-plan-review-v1.js?v=1.0.0-review-queue"></script>
   <main class="lsc218-app" id="living-school-app">
     <header class="lsc218-header">
       <div class="lsc218-brand">
@@ -83,7 +86,7 @@
 
   <script src="/app/local-first-policy-v131.js?v=cleanroom-v218.1" defer></script>
   <script src="/app/platform-stability-v159.js?v=cleanroom-v218.1" defer></script>
-  <script src="/app/platform-experience-v160.js?v=cleanroom-v218.1" defer></script>
+  <script src="/app/platform-experience-v160.js?v=1.0.7-review-queue" defer></script>
   <script src="/app/family-shell-v104.js?v=family-nav-single-owner-r1" defer></script>
   <script src="/app/local-object-mesh-v146.js?v=open-media-cache-v1" defer></script>
   <script type="module" src="/app/open-learning-media-cache-v1.mjs?v=open-media-cache-v1"></script>
@@ -107,16 +110,16 @@
     root.querySelector('[data-ls-bootstrap-retry]')?.addEventListener('click',()=>location.reload(),{once:true});
   };
   const supportScripts=[
-    '/app/minilm-response-router-v347.js?v=1.3.1-living-school-bypass',
-    '/app/family-ai-loader-v105.js?v=cleanroom-v218.1-v256',
+    '/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification',
+    '/app/family-ai-loader-v105.js?v=1.0.157-explicit-value-review',
     '/app/gemini-task-tier-router-v213.js?v=1.0.76-living-school-503-fallback',
     '/app/living-school-route-lock-v1.js?v=1.7.0-provider-neutral',
     '/app/living-school-grounded-design-v337.js?v=1.4.0-effort-hours',
     '/app/living-school-grounded-compiler-v336.js',
     '/app/living-school-assessment-curator-v337.js',
     '/app/living-school-runtime-route-v2.js?v=2.3.0-provider-neutral',
-    '/app/living-school-generation-budget-v3.js?v=3.0.0-provider-neutral',
-    '/app/living-school-active-run-ui-v2.js?v=2.0.0-provider-neutral',
+    '/app/living-school-generation-budget-v3.js?v=3.0.4-selected-deadline',
+    '/app/living-school-active-run-ui-v2.js?v=2.1.2-terminal-prefill',
     '/app/living-school-generation-report-ui-v1.js?v=1.0.1-provider-neutral-idempotent',
     '/app/living-school-pack-offer-authority-v1.js?v=1.0.0'
   ];
@@ -147,14 +150,14 @@
   const watchdog=setTimeout(()=>showBootFailure(new Error('The workbench module did not become ready within 12 seconds.'),true),12000);
   try{
     document.documentElement.dataset.livingSchoolWorkbench='loading';
-    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-boot-first-v2');
+    await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=structured-single-v221-exact-quest-map-selection');
     bootComplete=true;
     clearTimeout(watchdog);
     document.documentElement.dataset.livingSchoolWorkbench='ready';
     const supportReady=ensureSupportRuntime();
     globalThis.CivweaveLivingSchoolSupportRuntimeReadyV1=supportReady;
     supportReady.catch(error=>console.warn('[Living School support runtime]',error));
-    import('/app/living-school-learning-packs-v1.mjs?v=learning-packs-v1').catch(error=>console.warn('[Living School learning packs]',error));
+    import('/app/living-school-learning-packs-v1.mjs?v=learning-packs-v1.1-parent-return').catch(error=>console.warn('[Living School learning packs]',error));
   }catch(error){
     clearTimeout(watchdog);
     console.error('[Living School bootstrap]',error);

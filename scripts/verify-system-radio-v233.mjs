@@ -27,8 +27,10 @@ assert.match(radioSource,/persistentSurface:'radio-station-surface-v1'/,'stable 
 assert.doesNotMatch(radioSource,/history\[method\]=function/,'radio must not monkey-patch browser history');
 assert.doesNotMatch(radioSource,/setInterval\(/,'radio must not poll while idle');
 assert.match(radioSource,/const LAUNCHER_ID='cw-radio-station-launcher-v1'/,'universal radio launcher is missing');
-assert.match(radioSource,/bottom:calc\(var\(--cw-themed-nav-height,64px\) \+ env\(safe-area-inset-bottom\) \+ 12px\)/,'radio launcher must live above the universal navigation bar');
-assert.match(radioSource,/const MODE_KEY='civweave\.radio\.content-mode\.v1'/,'radio content mode must persist');
+assert.match(radioSource,/html\[data-radio-embedded="true"\]\{--cw-radio-dock-space:0px\}/,'an embedded viewport must not count the parent navigation height again');
+assert.match(radioSource,/bottom:calc\(var\(--cw-radio-dock-space\) \+ 8px\)/,'radio launcher must live just above its owning viewport navigation bar');
+assert.match(radioSource,/directAudio:true,directDefault:true/,'open audio must be the canonical station default');
+assert.match(radioSource,/const MODE_KEY='civweave\.radio\.playback-mode\.v1'/,'direct playback/Spotify mode must persist independently of the old Spotify-only default');
 assert.match(radioSource,/const SAFE_KEY='civweave\.safe-mode\.v1'/,'radio surface must honor S.A.F.E. mode');
 assert.match(radioSource,/Nominate track/,'station surface must expose playlist nomination without an Anarchadia-only bespoke widget');
 assert.match(radioSource,/civweave:playlist-governance-open/,'Anarchadia voting must be reached through an explicit event');

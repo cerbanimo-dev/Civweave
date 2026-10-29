@@ -181,7 +181,7 @@ self.addEventListener('message',e=>{
   const d=e.data||{};
   if(d.type==='CIVWEAVE_GUILD_RELEASE_CONFIG')e.waitUntil((async()=>{await setGuild(d.selection||d);await check(true).catch(error=>notify({type:'CIVWEAVE_GUILD_RELEASE_ERROR',error:String(error?.message||error)}))})());
   if(d.type==='CIVWEAVE_RELEASE_TRUST_ANCHOR'&&d.explicit===true)e.waitUntil((async()=>{const a=await addAnchor(d.anchor||{});await notify({type:'CIVWEAVE_RELEASE_TRUST_CHANGED',action:'added',keyId:a.keyId});await check(true).catch(()=>null)})());
-  if(d.type==='CIVWEAVE_RELEASE_TRUST_REMOVE'&&d.explicit===true)e.waitUntil((async()=>{const n=await removeAnchor(clean(d.keyId,180));await notify({type:'CIVWEAVE_RELEASE_TRUST_CHANGED',action:'removed',keyId:clean(d.keyId,180),removed:n})()) );
+  if(d.type==='CIVWEAVE_RELEASE_TRUST_REMOVE'&&d.explicit===true)e.waitUntil((async()=>{const n=await removeAnchor(clean(d.keyId,180));await notify({type:'CIVWEAVE_RELEASE_TRUST_CHANGED',action:'removed',keyId:clean(d.keyId,180),removed:n})})());
   if(d.type==='CIVWEAVE_GUILD_RELEASE_CHECK')e.waitUntil(check(true).then(result=>notify({type:'CIVWEAVE_GUILD_RELEASE_STATUS',result})).catch(error=>notify({type:'CIVWEAVE_GUILD_RELEASE_ERROR',error:String(error?.message||error)})));
 });
 self.addEventListener('fetch',e=>{

@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION = 'host-node-installer-lobby-v6-guild-terminology';
+const REVISION = 'host-node-installer-lobby-v7-explicit-mount';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
 const HOST_SELECTION_KEY = 'civweave.host-node.selection.v1';
 const STEWARD_KEY = 'civweave.host-steward.v1';
@@ -16,6 +16,10 @@ let activeNodeId = '';
 let localFederated = false;
 let refreshTimer = 0;
 let searching = false;
+let lobbyMount = null;
+let bootPromise = null;
+let booted = false;
+let pagehideBound = false;
 
 const access = () => globalThis.CivweaveHostNodeSessionV1 || null;
 
@@ -146,7 +150,11 @@ function installStyles() {
 }
 
 function buildLobby() {
-  if (el('cw-host-node-lobby')) return el('cw-host-node-lobby');
+  const existing = el('cw-host-node-lobby');
+  if (existing) {
+    if (lobbyMount?.isConnected && existing.parentElement !== lobbyMount) lobbyMount.append(existing);
+    return existing;
+  }
   const host = normalizedHost();
   const section = document.createElement('section');
   section.id = 'cw-host-node-lobby';
@@ -179,9 +187,10 @@ function buildLobby() {
   `;
   const knowledge = document.querySelector('.knowledge-card');
   const installCard = document.querySelector('.install-card');
-  if (knowledge?.parentNode) knowledge.parentNode.insertBefore(section, knowledge);
+  if (lobbyMount?.isConnected) lobbyMount.append(section);
+  else if (knowledge?.parentNode) knowledge.parentNode.insertBefore(section, knowledge);
   else if (installCard?.parentNode) installCard.insertAdjacentElement('afterend', section);
-  else document.querySelector('main')?.append(section);
+  else (document.querySelector('main') || document.body)?.append(section);
   el('cw-host-node-join')?.addEventListener('click', () => void joinHostNode());
   el('cw-host-node-refresh')?.addEventListener('click', () => loadStatus(true));
   el('cw-host-node-search-run')?.addEventListener('click', () => void searchNearest());
@@ -448,22 +457,33 @@ function scheduleRefresh() {
   }, REFRESH_MS);
 }
 
-async function boot() {
-  const explicit = queryHost();
-  if (explicit) {
-    activeHost = explicit;
-    if (explicit === location.origin) await discoverSameOriginFederatedHost();
-  } else if (!await discoverSameOriginFederatedHost()) {
-    activeHost = selectedOrigin();
+async function boot({ mount } = {}) {
+  if (mount?.ownerDocument === document && mount.isConnected) {
+    lobbyMount = mount;
+    const existing = el('cw-host-node-lobby');
+    if (existing && existing.parentElement !== mount) mount.append(existing);
   }
-  markStewardBrowser();
-  installStyles();
-  if (!buildLobby()) return false;
-  renderSelectedState();
-  if (normalizedHost()) loadStatus(false);
-  scheduleRefresh();
-  addEventListener('pagehide', () => clearInterval(refreshTimer), { once: true });
-  return true;
+  if (booted && el('cw-host-node-lobby')) { scheduleRefresh(); return true; }
+  if (bootPromise) return bootPromise;
+  bootPromise = (async () => {
+    const explicit = queryHost();
+    if (explicit) {
+      activeHost = explicit;
+      if (explicit === location.origin) await discoverSameOriginFederatedHost();
+    } else if (!await discoverSameOriginFederatedHost()) {
+      activeHost = selectedOrigin();
+    }
+    markStewardBrowser();
+    installStyles();
+    if (!buildLobby()) return false;
+    renderSelectedState();
+    if (normalizedHost()) loadStatus(false);
+    scheduleRefresh();
+    if (!pagehideBound) { pagehideBound = true; addEventListener('pagehide', () => clearInterval(refreshTimer), { once: true }); }
+    booted = true;
+    return true;
+  })().finally(() => { bootPromise = null; });
+  return bootPromise;
 }
 
 if (document.readyState === 'loading') addEventListener('DOMContentLoaded', boot, { once: true });

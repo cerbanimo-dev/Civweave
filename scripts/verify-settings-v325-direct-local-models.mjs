@@ -8,7 +8,7 @@ const v203Source=await readFile(new URL('../public/service-worker-v203.js',impor
 const rootWorker=await readFile(new URL('../public/service-worker.js',import.meta.url),'utf8');
 
 assert.match(directSource,/CIVWEAVE SETTINGS · v325/);
-assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · stable in-place actions/);
+assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · Qwen 4B phone-first performance/);
 assert.match(directSource,/hardLoadingGuardMs:900/);
 assert.match(directSource,/data-local-pack-finish/,'Premier Phone finalization must be owned directly by the card renderer.');
 assert.match(directSource,/actionsStayInPlace:true/,'Local model actions must remain in the direct renderer.');
@@ -17,7 +17,8 @@ assert.match(directSource,/premierPhoneFinalizer:true/,'Premier Phone must use t
 assert.doesNotMatch(directSource,/delegated\.click\(\)/,'Direct actions must never synthesize a second click.');
 assert.doesNotMatch(directSource,/route\.renderLocalModels\(layer\)/,'Direct actions must never swap to the full lifecycle renderer.');
 assert.doesNotMatch(directSource,/navigator\.serviceWorker/,'The direct display renderer must not touch the service worker.');
-assert.doesNotMatch(directSource,/\bcaches\./,'The direct display renderer must not inspect CacheStorage.');
+assert.match(directSource,/async function importPhoneQwenDirect/,'The Qwen file import must require a user file-picker action.');
+assert.match(directSource,/importChunkedFile/,'The selected file must be saved in cache fragments.');
 
 let managerReads=0;
 let storageWrites=0;
@@ -63,15 +64,24 @@ assert.equal(managerReads,0,'Rendering Local models must not touch the live mode
 assert.equal(storageWrites,0,'Rendering Local models must not mutate saved state.');
 assert.equal(headerLabel.textContent,'CIVWEAVE SETTINGS · v325');
 assert.match(localTarget.innerHTML,/AI Downloads/);
-assert.match(localTarget.innerHTML,/Gemma 4 E2B LiteRT/);
+assert.match(localTarget.innerHTML,/Qwen 3\.5 4B · LiteRT/);
+assert.match(localTarget.innerHTML,/Qwen 3\.5 9B · LiteRT/);
+assert.match(localTarget.innerHTML,/Gemma Phone Compatibility Pack/);
+assert.match(localTarget.innerHTML,/Premium Phone Pack/);
+assert.match(localTarget.innerHTML,/Premium phone companions/);
+assert.match(localTarget.innerHTML,/Mac mini \/ cyberdeck local AI setups/);
+assert.match(localTarget.innerHTML,/Qwen3\.8-27B · MLX 4-bit/);
+assert.match(localTarget.innerHTML,/Qwen3-Coder-Next · MLX 4-bit/);
+assert.match(localTarget.innerHTML,/Local Dream · Stable Diffusion 1\.5/);
 assert.match(localTarget.innerHTML,/renderer direct-local-v325/);
 assert.doesNotMatch(localTarget.innerHTML,/Reading saved local model choices/);
 
 assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")>0,'v203 must import the Settings override.');
 assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")<v203Source.indexOf("service-worker-release-generation-v1.js"),'Settings override must register before other fetch handlers.');
 assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")<v203Source.indexOf("service-worker-core-v208.js"),'Settings override must register before cache-first core.');
-assert.match(rootWorker,/root-worker-bridge-v25-settings-v337-direct-gateway/,'Root worker bytes must change so installed clients discover the v337 direct Settings generation.');
-assert.match(rootWorker,/service-worker-v203\.js\?v=root-worker-bridge-v25-settings-v337-direct-gateway/,'Root worker must import v203 through the v337 Settings generation boundary.');
+const bridgeRevision=rootWorker.match(/const CIVWEAVE_ROOT_WORKER_BRIDGE='([^']+)'/)?.[1];
+assert.ok(bridgeRevision,'Root worker must declare its staging generation.');
+assert.ok(rootWorker.includes(`importScripts('/service-worker-v203.js?v=${bridgeRevision}')`),'Root worker must import v203 through its declared staging generation boundary.');
 assert.match(workerSource,/stopImmediatePropagation\(\)/);
 assert.match(workerSource,/settings-gateway-v317\.js/);
 assert.match(workerSource,/settings-local-route-v331\.js/);
@@ -129,3 +139,24 @@ const actionResponse=await runFetch('https://example.test/app/settings-local-rou
 assert.match(await actionResponse.text(),/action-route/,'Explicit fallback action routes must remain available for stale clients.');
 
 console.log(JSON.stringify({ok:true,revision:'settings-v325-direct-local-models',visibleVersion:'v325',managerReads,storageWrites,gatewayTransformed:true,displayShim:true,stableInPlaceActions:true,legacyActionRouteFallback:true,rootWorkerGeneration:'v25-settings-v337-direct-gateway'},null,2));
+
+// The visible settings renderer must expose the downloadable Llama model in
+// both current direct UI and older installed-PWA fallback UI.
+for(const path of ['public/app/settings-local-route-v327.js','public/app/settings-local-route-v323.js','public/app/settings-local-route-v331.js']){
+  const legacy=await readFile(new URL('../'+path,import.meta.url),'utf8');
+  assert.match(legacy, /llama32-3b-instruct-q4f16/,path+' lacks Llama trial');
+  assert.match(legacy, /<details open><summary><b>Individual models/,path+' hides downloads');
+  assert.match(legacy, /llama32-two-pass-test-v4.html/,path+' lacks test link');
+}
+assert.match(directSource,/llama32-3b-instruct-q4f16/,'current direct Settings lacks download');
+assert.match(directSource,/<details open><summary><b>Individual Civweave models/,'current direct Settings hides downloads');
+assert.match(directSource,/await m.start\(id,\{preferBackground:false,onProgress:/,'individual models must use observable foreground downloads and progressive bytes');
+assert.match(directSource,/llama32-two-pass-test-v4.html/,'current Settings lacks trial link');
+const bridge=await readFile(new URL('../public/app/settings-local-route-v325.js',import.meta.url),'utf8');
+assert.match(bridge,/DIRECT_VERSION='1\.2\.3-settings-v325-direct-local-models-qwen-import-owner'/);
+console.log('PASS: old v324 fallback and current v325 settings expose Llama 3.2 with downloads and constrained JSON trial.');
+
+for(const file of ['public/app/settings-local-route-v327.js','public/app/settings-local-route-v323.js','public/app/settings-local-route-v331.js']){
+ const s=await readFile(new URL('../'+file,import.meta.url),'utf8');
+ assert.match(s,/FOREGROUND_PHONE_MODELS=new Set\(\['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16','llama32-3b-instruct-q4f16'\]\)/,file+' still queues invisible background downloads');
+}

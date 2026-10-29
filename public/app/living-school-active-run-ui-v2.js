@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='2.0.0-living-school-active-run-ui-v2-provider-neutral';
+const VERSION='2.1.2-terminal-prefill';
 const GENERATE='[data-ls-action="generate-curriculum"]';
 const REPORT='#lsc220-generation-recovery';
 const RAIL_ID='lsc-living-school-generation-run-rail';
 const STYLE_ID='lsc-living-school-generation-run-style-v2';
 const MODEL_EVENT='civweave:model-event';
+ const MAX_PREVIEW_CHARS=16000;
 const STAGE_EVENT='civweave:living-school-curriculum-stage';
 let queued=false,wasRunning=false,session=null,selectedRun=-1,runTimer=0;
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
@@ -16,6 +17,7 @@ function active(button){
   const label=String(button.textContent||'');
   return button.getAttribute('aria-busy')==='true'||(button.disabled&&/researching|generating|regenerating|completing/i.test(label));
 }
+function generationActive(button){return active(button)||document.documentElement.dataset.livingSchoolChatAction==='generating-curriculum'}
 function selectedRuntime(){
   let config={};try{config=globalThis.CivweaveModelRuntime?.readSharedConfig?.('interactive')||{}}catch{}
   return{provider:clean(config.provider||config.route||config.engine,120),model:clean(config.model,220)};
@@ -57,7 +59,7 @@ function phaseLabel(stage){
 function installRailStyle(){
   if(document.getElementById(STYLE_ID))return;
   const style=document.createElement('style');style.id=STYLE_ID;
-  style.textContent=`#${RAIL_ID}{margin-top:14px;padding:13px 14px;border:1px solid rgba(111,226,163,.35);border-radius:14px;background:linear-gradient(145deg,rgba(5,34,27,.96),rgba(5,21,24,.95));box-shadow:inset 0 1px 0 rgba(255,255,255,.035);color:#e9f7ed}#${RAIL_ID}[hidden]{display:none!important}#${RAIL_ID} .lsc-run-head{display:flex;align-items:center;justify-content:space-between;gap:12px}#${RAIL_ID} .lsc-run-head b{font-size:.83rem;letter-spacing:.04em;text-transform:uppercase;color:#c8f4d8}#${RAIL_ID} .lsc-run-time{font:700 .78rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;color:#9edcb5}#${RAIL_ID} .lsc-run-phase{margin-top:5px;font-size:.92rem;font-weight:780;color:#f4efd2}#${RAIL_ID} .lsc-run-dots{display:flex;align-items:center;gap:9px;min-height:28px;margin:9px 0 6px;overflow-x:auto;scrollbar-width:thin}#${RAIL_ID} .lsc-run-dot{appearance:none;display:block;flex:0 0 auto;width:14px;height:14px;padding:0;border:2px solid rgba(183,221,194,.58);border-radius:50%;background:rgba(216,238,220,.12);box-shadow:none;cursor:pointer}#${RAIL_ID} .lsc-run-dot.is-active{border-color:#f2d67f;background:#4f8e66;box-shadow:0 0 0 5px rgba(242,214,127,.10),0 0 20px rgba(111,226,163,.28);animation:lscRunPulseV2 1.25s ease-in-out infinite}#${RAIL_ID} .lsc-run-dot.is-complete{border-color:#7ce1a2;background:#376f50}#${RAIL_ID} .lsc-run-dot.is-failed{border-color:#ff988a;background:#7b3d3b}#${RAIL_ID} .lsc-run-dot.is-selected{outline:2px solid rgba(244,239,210,.62);outline-offset:3px}#${RAIL_ID} .lsc-run-detail{font-size:.78rem;line-height:1.42;color:#cfe2d5;min-height:1.15em}#${RAIL_ID} .lsc-run-detail strong{color:#f6f0d5}#${RAIL_ID} .lsc-run-summary{margin-top:4px;font-size:.72rem;color:#8eb9a0}#${RAIL_ID} .lsc-run-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:.68rem;color:#84ad95}@keyframes lscRunPulseV2{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}@media(max-width:560px){#${RAIL_ID}{padding:12px}#${RAIL_ID} .lsc-run-phase{font-size:.86rem}}@media(prefers-reduced-motion:reduce){#${RAIL_ID} .lsc-run-dot.is-active{animation:none}}`;
+  style.textContent=`#${RAIL_ID}{margin-top:14px;padding:13px 14px;border:1px solid rgba(111,226,163,.35);border-radius:14px;background:linear-gradient(145deg,rgba(5,34,27,.96),rgba(5,21,24,.95));box-shadow:inset 0 1px 0 rgba(255,255,255,.035);color:#e9f7ed}#${RAIL_ID}[hidden]{display:none!important}#${RAIL_ID} .lsc-run-head{display:flex;align-items:center;justify-content:space-between;gap:12px}#${RAIL_ID} .lsc-run-head b{font-size:.83rem;letter-spacing:.04em;text-transform:uppercase;color:#c8f4d8}#${RAIL_ID} .lsc-run-time{font:700 .78rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;color:#9edcb5}#${RAIL_ID} .lsc-run-phase{margin-top:5px;font-size:.92rem;font-weight:780;color:#f4efd2}#${RAIL_ID} .lsc-run-dots{display:flex;align-items:center;gap:9px;min-height:28px;margin:9px 0 6px;overflow-x:auto;scrollbar-width:thin}#${RAIL_ID} .lsc-run-dot{appearance:none;display:block;flex:0 0 auto;width:14px;height:14px;padding:0;border:2px solid rgba(183,221,194,.58);border-radius:50%;background:rgba(216,238,220,.12);box-shadow:none;cursor:pointer}#${RAIL_ID} .lsc-run-dot.is-active{border-color:#f2d67f;background:#4f8e66;box-shadow:0 0 0 5px rgba(242,214,127,.10),0 0 20px rgba(111,226,163,.28);animation:lscRunPulseV2 1.25s ease-in-out infinite}#${RAIL_ID} .lsc-run-dot.is-complete{border-color:#7ce1a2;background:#376f50}#${RAIL_ID} .lsc-run-dot.is-failed{border-color:#ff988a;background:#7b3d3b}#${RAIL_ID} .lsc-run-dot.is-selected{outline:2px solid rgba(244,239,210,.62);outline-offset:3px}#${RAIL_ID} .lsc-run-detail{font-size:.78rem;line-height:1.42;color:#cfe2d5;min-height:1.15em}#${RAIL_ID} .lsc-run-detail strong{color:#f6f0d5}#${RAIL_ID} .lsc-run-summary{margin-top:4px;font-size:.72rem;color:#8eb9a0}#${RAIL_ID} .lsc-run-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:.68rem;color:#84ad95}#${RAIL_ID} .lsc-run-stream{margin-top:12px;border:1px solid rgba(161,211,183,.29);border-radius:9px;padding:10px;background:rgba(0,0,0,.22)}#${RAIL_ID} .lsc-run-stream-status{font-size:.76rem;color:#b4e4c5;min-height:1.35em}#${RAIL_ID} .lsc-run-stream-text{margin:8px 0 0;min-height:3.5em;max-height:260px;padding:8px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:rgba(0,0,0,.25);border-radius:6px;color:#eff8ea;font:.78rem/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}#${RAIL_ID} .lsc-run-stream-foot{font-size:.67rem;line-height:1.4;color:#9dc7aa;margin-top:6px}@keyframes lscRunPulseV2{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}@media(max-width:560px){#${RAIL_ID}{padding:12px}#${RAIL_ID} .lsc-run-phase{font-size:.86rem}}@media(prefers-reduced-motion:reduce){#${RAIL_ID} .lsc-run-dot.is-active{animation:none}}`;
   document.head.append(style);
 }
 function ensureRail(){
@@ -72,7 +74,7 @@ function beginSession(phase='Preparing generation'){
   session={id:`ls-run-${nowMs().toString(36)}`,startedAt:nowMs(),endedAt:0,status:'running',phase,stage:'',runs:[],provider:selected.provider,model:selected.model,initialReportText:clean(document.querySelector(REPORT)?.textContent,1200)};
   selectedRun=-1;document.documentElement.dataset.livingSchoolRunRailActive='true';startTimer();renderRail();return session;
 }
-function startTimer(){if(runTimer)return;runTimer=setInterval(()=>{if(session?.status==='running')renderElapsed();else{clearInterval(runTimer);runTimer=0}},1000)}
+function startTimer(){if(runTimer)return;runTimer=setInterval(()=>{if(session?.status==='running'){renderElapsed();updateStreamView();}else{clearInterval(runTimer);runTimer=0}},1000)}
 function stopTimer(){if(runTimer){clearInterval(runTimer);runTimer=0}}
 function renderElapsed(){const rail=document.getElementById(RAIL_ID);if(!rail||!session)return;const elapsed=rail.querySelector('.lsc-run-time');if(elapsed)elapsed.textContent=formatElapsed((session.endedAt||nowMs())-session.startedAt)}
 function finishSession(status='complete'){
@@ -81,6 +83,7 @@ function finishSession(status='complete'){
   session.status=status;session.endedAt=end;
   if(status==='complete')session.phase='Curriculum ready';
   else if(status==='partial')session.phase='Partial curriculum generated';
+  else if(status==='failed')session.phase='Curriculum generation failed';
   else if(status==='preflight')session.phase='Stopped before provider call';
   else session.phase='Generation stopped';
   delete document.documentElement.dataset.livingSchoolRunRailActive;stopTimer();renderRail();
@@ -92,49 +95,100 @@ function runDetailMarkup(run){
     return session?.status==='preflight'?'No provider call started.':'No model call was recorded.';
   }
   const route=providerLabel(run.provider),model=clean(run.model,180),status=run.status==='active'?`running · ${formatElapsed(nowMs()-run.startedAt)}`:run.status==='failed'?`failed${run.errorCode?` · ${run.errorCode}`:''}`:`complete · ${formatElapsed((run.endedAt||run.startedAt)-run.startedAt)}`;
-  return`<strong>${route}${model?` · ${model}`:''}</strong> · ${purposeLabel(run.purpose)}${run.nested?' · nested':''} · ${status}`;
+  return`<strong>${route}${model?` · ${model}`:''}</strong> · ${purposeLabel(run.purpose)}${run.nested?' · nested':run.background?' · background':''} · ${status}`;
 }
-function summaryMarkup(){
+function selectedCall(){
+   const runs=session?.runs||[];
+   return runs[selectedRun>=0&&selectedRun<runs.length?selectedRun:runs.length-1]||null;
+ }
+ function updateStreamView(){
+   const rail=document.getElementById(RAIL_ID),run=selectedCall();
+   if(!rail||!run)return;
+   const status=rail.querySelector('.lsc-run-stream-status'),preview=rail.querySelector('.lsc-run-stream-text');
+   if(!status||!preview)return;
+   const age=Math.max(0,Math.floor(((run.endedAt||nowMs())-run.startedAt)/1000));
+   const chars=Number(run.generatedChars||0),first=run.firstTokenAt?formatElapsed(run.firstTokenAt-run.startedAt):'';
+   const bytesLabel=chars?chars.toLocaleString()+' characters received':'0 characters received';
+   const prefix=run.status==='failed'?'Failed'+(run.errorCode?' · '+run.errorCode:''):run.status==='complete'?'Finished':run.lastTokenAt?'Receiving streamed text':run.eventPhase==='awaiting-first-token'?'Server connected · waiting for first token':run.eventPhase==='connecting'?'Connecting to model':run.eventPhase==='repairing'?'Repairing generated output':'Waiting for first visible token';
+   const extra=run.lastTokenAt&&run.status==='active'? ' · last text '+Math.max(0,Math.floor((nowMs()-run.lastTokenAt)/1000))+'s ago':'';
+   const tokens=run.outputTokens?' · '+run.outputTokens.toLocaleString()+' output tokens':'';
+   status.textContent=prefix+' · '+bytesLabel+(first?' · first text at '+first:' · elapsed '+formatElapsed(age*1000))+extra+tokens+(run.finishReason?' · finish '+run.finishReason:'')+(run.deadlineMs?' · limit '+formatElapsed(run.deadlineMs):'')+(run.promptCharacters?' · prompt '+run.promptCharacters.toLocaleString()+' chars':'');
+   const next=run.preview||(run.status==='failed'?'No model text was received before the request failed.':run.status==='complete'?'No model text was returned by this request.':run.eventPhase==='awaiting-first-token'?'HTTP connection established. Qwen may still be evaluating the prompt; llama.cpp does not send individual prompt-processing tokens on this response stream.':'No model text received yet. The request may still be loading or processing its prompt.');
+   if(preview.textContent!==next){
+     const nearBottom=preview.scrollTop+preview.clientHeight>=preview.scrollHeight-32;
+     preview.textContent=next;
+     if(nearBottom)preview.scrollTop=preview.scrollHeight;
+   }
+ }
+ function summaryMarkup(){
   const runs=session?.runs||[],activeCount=runs.filter(run=>run.status==='active').length,providers=[...new Set(runs.map(run=>providerLabel(run.provider)).filter(Boolean))];
   const parts=[`${runs.length} model call${runs.length===1?'':'s'}`];if(providers.length)parts.push(providers.join(' + '));else if(session?.provider)parts.push(providerLabel(session.provider));if(activeCount)parts.push(`${activeCount} active`);return parts.join(' · ');
 }
 function renderRail(){
   installRailStyle();const rail=ensureRail();if(!rail)return;
   if(!session){rail.hidden=true;return}rail.hidden=false;
-  const runs=session.runs||[],picked=runs[selectedRun>=0&&selectedRun<runs.length?selectedRun:runs.length-1]||null;
-  rail.innerHTML=`<div class="lsc-run-head"><b>Generation run</b><span class="lsc-run-time">${formatElapsed((session.endedAt||nowMs())-session.startedAt)}</span></div><div class="lsc-run-phase">${clean(session.phase,180)}</div><div class="lsc-run-dots" role="list" aria-label="Model calls">${runs.map((run,index)=>`<button type="button" class="lsc-run-dot is-${run.status}${index===(selectedRun>=0?selectedRun:runs.length-1)?' is-selected':''}" data-lsc-run-index="${index}" role="listitem" aria-label="Run ${index+1}: ${providerLabel(run.provider)}, ${clean(run.model,180)||'selected model'}, ${purposeLabel(run.purpose)}, ${run.status}"></button>`).join('')}</div><div class="lsc-run-detail">${runDetailMarkup(picked)}</div><div class="lsc-run-summary">${summaryMarkup()}</div><div class="lsc-run-legend"><span>One dot = one shared runtime request</span><span>Provider and model come from Civweave Settings/runtime routing</span></div>`;
+  const runs=session.runs||[],picked=selectedCall();
+  rail.innerHTML=`<div class="lsc-run-head"><b>Generation run</b><span class="lsc-run-time">${formatElapsed((session.endedAt||nowMs())-session.startedAt)}</span></div><div class="lsc-run-phase">${clean(session.phase,180)}</div><div class="lsc-run-dots" role="list" aria-label="Model calls">${runs.map((run,index)=>`<button type="button" class="lsc-run-dot is-${run.status}${index===(selectedRun>=0?selectedRun:runs.length-1)?' is-selected':''}" data-lsc-run-index="${index}" role="listitem" aria-label="Run ${index+1}: ${providerLabel(run.provider)}, ${clean(run.model,180)||'selected model'}, ${purposeLabel(run.purpose)}, ${run.status}"></button>`).join('')}</div><div class="lsc-run-detail">${runDetailMarkup(picked)}</div>${picked?'<div class="lsc-run-stream"><div class="lsc-run-stream-status" aria-live="polite"></div><pre class="lsc-run-stream-text" aria-label="Live generated model output" aria-live="off"></pre><div class="lsc-run-stream-foot">Draft model output · not yet validated or saved as curriculum. The latest 16K characters remain visible.</div></div>':''}<div class="lsc-run-summary">${summaryMarkup()}</div><div class="lsc-run-legend"><span>One dot = one shared runtime request</span><span>Provider and model come from Civweave Settings/runtime routing</span></div>`;
   const dots=rail.querySelector('.lsc-run-dots');if(dots)dots.scrollLeft=dots.scrollWidth;
+   updateStreamView();
 }
 function updatePhase(value){const next=clean(value,180);if(!session||!next||session.phase===next)return;session.phase=next;const node=document.getElementById(RAIL_ID)?.querySelector?.('.lsc-run-phase');if(node)node.textContent=next}
 function onModelEvent(event){
   const detail=event?.detail||{},requestId=clean(detail.requestId,180),phase=clean(detail.phase,80).toLowerCase(),purpose=clean(detail.purpose,220);
-  const button=document.querySelector(GENERATE),running=active(button),relevant=running||session?.status==='running'||livingSchoolPurpose(purpose);
+  const button=document.querySelector(GENERATE),running=generationActive(button),relevant=running||session?.status==='running'||livingSchoolPurpose(purpose);
   if(!requestId||!relevant)return;
-  beginSession(session?.phase||'Generating curriculum');
-  const provider=clean(detail.provider,120),model=clean(detail.model,180);if(provider)session.provider=provider;if(model)session.model=model;
-  let run=session.runs.find(item=>item.callId===requestId);
+  let run=session?.runs.find(item=>item.callId===requestId);
   const terminal=['completed','failed','cancelled'].includes(phase);
-  if(!run&&!terminal){run={index:session.runs.length,callId:requestId,provider,model,purpose,startedAt:Date.parse(detail.at)||nowMs(),endedAt:0,status:'active',nested:!livingSchoolPurpose(purpose),errorCode:''};session.runs.push(run);selectedRun=run.index}
-  if(run){if(provider)run.provider=provider;if(model)run.model=model;if(purpose)run.purpose=purpose;if(terminal){run.status=phase==='completed'&&clean(detail.status,80).toLowerCase()!=='provider-error'?'complete':'failed';run.endedAt=Date.parse(detail.at)||nowMs();run.errorCode=clean(detail.error?.code||detail.errorCode,160)}}
+  // Duplicate or late terminal events cannot reopen a settled generation run.
+  if((terminal&&!run)||(run&&run.status!=='active'))return;
+  if(!run)beginSession(session?.phase||'Generating curriculum');
+  const provider=clean(detail.provider,120),model=clean(detail.model,180);if(provider)session.provider=provider;if(model)session.model=model;
+  if(!run&&!terminal){
+    const parentRequestId=clean(detail.parentRequestId,180),nested=Boolean(parentRequestId&&session.runs.some(item=>item.callId===parentRequestId));
+    run={index:session.runs.length,callId:requestId,provider,model,purpose,startedAt:Date.parse(detail.at)||nowMs(),endedAt:0,status:'active',nested,background:!livingSchoolPurpose(purpose)&&!nested,parentRequestId,errorCode:'',eventPhase:phase,generatedChars:0,firstTokenAt:0,lastTokenAt:0,preview:'',finishReason:'',outputTokens:0,promptCharacters:0,deadlineMs:0};session.runs.push(run);selectedRun=run.index;
+  }
+  if(run){
+     if(provider)run.provider=provider;if(model)run.model=model;if(purpose)run.purpose=purpose;
+     run.eventPhase=phase;
+     if(Number(detail.promptCharacters)>0)run.promptCharacters=Number(detail.promptCharacters);
+     if(Number(detail.deadlineMs)>0)run.deadlineMs=Number(detail.deadlineMs);
+     if(phase==='partial'&&run.status==='active'){
+       const incoming=typeof detail.accumulatedText==='string'?detail.accumulatedText:null;
+       const delta=typeof detail.text==='string'?detail.text:'';
+       if(incoming!==null){run.generatedChars=incoming.length;run.preview=incoming.slice(-MAX_PREVIEW_CHARS);}
+       else if(delta){run.generatedChars+=delta.length;run.preview=(run.preview+delta).slice(-MAX_PREVIEW_CHARS);}
+       if(delta||incoming?.length){if(!run.firstTokenAt)run.firstTokenAt=nowMs();run.lastTokenAt=nowMs();}
+       if(detail.finishReason)run.finishReason=clean(detail.finishReason,80);
+       // A text delta may arrive every 80 ms. Update text nodes, not the entire rail.
+       if(selectedCall()===run){updateStreamView();return;}
+     }
+     if(terminal){
+       run.status=phase==='completed'&&clean(detail.status,80).toLowerCase()!=='provider-error'?'complete':'failed';
+       run.endedAt=Date.parse(detail.at)||nowMs();
+       run.errorCode=clean(detail.error?.code||detail.errorCode,160);
+       run.outputTokens=Number(detail.usage?.outputTokens)||0;
+     }
+   }
   renderRail();
 }
-function onStage(event){const stage=clean(event?.detail?.stage,120);if(!stage)return;beginSession(phaseLabel(stage));session.stage=stage;session.phase=phaseLabel(stage);if(stage==='complete')finishSession('complete');else renderRail()}
+function onStage(event){const stage=clean(event?.detail?.stage,120);if(!stage)return;if(stage==='complete'){if(session?.status==='running'){session.stage=stage;finishSession('complete')}return}beginSession(phaseLabel(stage));session.stage=stage;session.phase=phaseLabel(stage);renderRail()}
 function sync(){
-  queued=false;const button=document.querySelector(GENERATE),report=document.querySelector(REPORT),running=active(button),root=document.documentElement;
+  queued=false;const button=document.querySelector(GENERATE),report=document.querySelector(REPORT),running=generationActive(button),root=document.documentElement;
   if(report){if(report.hidden!==running)report.hidden=running;report.dataset.previousRunWhileGenerating=running?'true':'false'}
   root.dataset.livingSchoolGenerationActive=running?'true':'false';
   if(running&&!wasRunning)beginSession('Preparing generation');
   if(running&&session?.status==='running'){
     const label=clean(button?.textContent,240).toLowerCase();if(label.includes('researching'))updatePhase('Researching sources');else if(label.includes('completing'))updatePhase('Completing assessments');else if(label.includes('generating')||label.includes('regenerating'))updatePhase('Generating curriculum');
-  }else if(!running&&wasRunning&&session?.status==='running'&&session.stage!=='complete'){
-    if(!(session.runs||[]).length)finishSession('preflight');else{const recovery=clean(root.dataset.livingSchoolGenerationRecovery,40).toLowerCase();if(recovery==='partial')finishSession('partial');else if(recovery==='complete')finishSession('complete');else finishSession('stopped')}
+  }else if(!running&&session?.status==='running'&&session.stage!=='complete'){
+    const runs=session.runs||[],recovery=clean(root.dataset.livingSchoolGenerationRecovery,40).toLowerCase(),settled=['partial','complete','failed'].includes(recovery)&&!runs.some(run=>run.status==='active');
+    if(wasRunning||settled){if(!runs.length)finishSession('preflight');else if(recovery==='partial')finishSession('partial');else if(recovery==='complete')finishSession('complete');else if(recovery==='failed'||runs.every(run=>run.status==='failed'))finishSession('failed');else finishSession('stopped')}
   }
   wasRunning=running;if(session&&!document.getElementById(RAIL_ID))renderRail();
 }
 function schedule(){if(queued)return;queued=true;queueMicrotask(sync)}
 function install(){
   if(!document.body)return false;
-  installRailStyle();new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['aria-busy','disabled']});
+  installRailStyle();new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['aria-busy','disabled','data-living-school-chat-action','data-living-school-generation-recovery']});
   addEventListener(MODEL_EVENT,onModelEvent);addEventListener(STAGE_EVENT,onStage);
   document.addEventListener('click',event=>{const dot=event.target?.closest?.('[data-lsc-run-index]');if(!dot)return;selectedRun=Number(dot.dataset.lscRunIndex);renderRail()},true);
   sync();return true;

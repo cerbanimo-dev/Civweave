@@ -7,6 +7,7 @@ on:
       - 'public/app/knowledge-encyclopedia-bridge-v271.js'
       - 'public/app/family-ai-loader-v105.js'
       - 'scripts/verify-knowledge-encyclopedia-v271.mjs'
+      - 'scripts/test-knowledge-encyclopedia-abort-v1.mjs'
       - '.github/workflows/verify-knowledge-encyclopedia-v271.yml'
   pull_request:
     paths:
@@ -14,6 +15,7 @@ on:
       - 'public/app/knowledge-encyclopedia-bridge-v271.js'
       - 'public/app/family-ai-loader-v105.js'
       - 'scripts/verify-knowledge-encyclopedia-v271.mjs'
+      - 'scripts/test-knowledge-encyclopedia-abort-v1.mjs'
       - '.github/workflows/verify-knowledge-encyclopedia-v271.yml'
 
 permissions:
@@ -35,3 +37,5 @@ jobs:
           node --check scripts/verify-knowledge-encyclopedia-v271.mjs
       - name: Verify encyclopedia routing
         run: node scripts/verify-knowledge-encyclopedia-v271.mjs
+      - name: Verify cancellation preserves the stopped turn
+        run: node scripts/test-knowledge-encyclopedia-abort-v1.mjs

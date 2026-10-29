@@ -9,6 +9,8 @@ const required=[
   'public/app/system-routes-v227.js',
   'public/app/themed-system-nav-v178.js',
   'public/app/persistent-shell-actions-v1.js',
+  'public/app/shared/guide-outcome-scene-v1.js',
+  'public/app/shared/guide-outcome-scene-v1.css',
   'public/service-worker-canonical-navbar-v1.js',
   'public/service-worker-direct-shell-retirement-v1.js',
   'public/service-worker-living-school-cleanroom-v218.js',
@@ -35,85 +37,155 @@ const required=[
   'public/service-worker-boot-recovery-v426.js'
 ];
 for(const relative of required)await readFile(path.join(root,relative),'utf8');
-const output=`// GENERATED: direct five-system routes + Guild login runtime + local AI coherence + lifecycle-deferred caches + canonical persistent five-guide rail + Guild/Map actions on every system + no iframe family shell.
-// direct-page-shell-v1: each realm is the top-level document. The retired family iframe wrapper is not part of the package.
-// direct-shell-retirement-v1: cached iframe-shell routes are purged and redirected to direct system pages before generic cache handling.
-// persistent-shell-actions-v1: Guilds and Map belong to the canonical rail on all five systems; human chat uses the canonical chat symbol.
-// guild-login-runtime-v1: Guild join clicks wait for the canonical capacity-session runtime instead of failing a bootstrap race.
-// lifecycle-deferred-v434: optional AI/code warming, cache-wide cleanup, chat repair, route warming, and recovery staging never block install/activate.
+const output=`// GENERATED: one persistent five-system shell + shared canonical rail + Guild/Map actions + direct realm content inside the shell.
+// cerbanimo-first-frame-v1: bump canonical registered worker bytes so installed clients reverify corrected shell-integrity metadata and fetch independently bootable parent/realm content.
+// persistent-system-shell-v1: the universal navbar is top-level and survives system changes; only the content stage changes.
+// persistent-stage-viewport-r1: the iframe stage has explicit dynamic viewport height so intrinsic iframe sizing cannot expose the parent shell as a dark card.
+// canonical-home-v1: top-level home navigation enters the persistent shell; embedded home remains the validated v440 campus.
+// five-system-pages-v1: top-level realm navigation enters the persistent shell; embedded realm content remains bounded and validated.
+// release-generation-boundary-v6: complete signed Guild releases remain exclusive; ordinary realm navigation delegates to the canonical validated page owner.
+// navigation-runtime-recovery-v3: stale navigation code/pages are purged once on every installed Civweave origin without touching user data.
+// direct-shell-retirement-v1: only retired legacy shells are purged; the current persistent-system-shell-v1 is not retired.
+// persistent-shell-actions-v1: Guilds and Map belong to the canonical rail across all five systems.
+// family-nav-single-owner-r3: themed-system-nav-v178 is mounted once by persistent-system-shell-v1 and is not recreated by realms.
+// shell-assets-v29: required navigation and optional shared outcome presentation follow their existing shell asset owners.
 'use strict';
-importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v228-direct-shell');
-importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-network-first-v4-direct-shell-actions');
+// The canonical installed PWA registers this worker directly, so current-generation AI route takeovers must be imported here rather than only from the root compatibility worker.
+importScripts('/service-worker-weave-pipeline-takeover-v1.js?v=weave-pipeline-takeover-v1-r46');
+const V203_REGISTERED_SETTINGS_GENERATION='v339-settings-saved-state-first-worker-boundary';
+// The saved-state-first Settings bootstrap must run before the historical v325 override so the Local Models tab can render without waiting for lifecycle/runtime code.
+importScripts('/service-worker-settings-v337-entrypoint.js?v=settings-v339-saved-state-first-registered-worker-v1');
+// Must run before every general fetch/cache listener. It owns only Settings/local-model display paths and stops propagation for those paths not claimed by the v339 direct-route bootstrap.
+importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-local-models-v1');
+// Staging takeover for the current Gemma phone stack. It runs before historical local-AI coherence so retired Q4 presentation scripts cannot reclaim Settings after a successful LiteRT import.
+importScripts('/service-worker-gemma4-current-phone-v1.js?v=gemma4-current-phone-worker-v5-qwen-internal');
+importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v9-navigation-response-stream');
+importScripts('/app/system-routes-v227.js?v=1.0.168-five-system-route-contract-v230-shared-navbar-owner');
+importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v11-current-rail');
+importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');
+importScripts('/service-worker-canonical-home-v1.js?v=canonical-home-v1-persistent-shell-r2');
+importScripts('/service-worker-five-system-pages-v1.js?v=five-system-pages-v1-current-realm-validation-r6');
+importScripts('/service-worker-navigation-runtime-recovery-v1.js?v=navigation-runtime-recovery-v3-all-installed-origins');
 importScripts('/service-worker-direct-shell-retirement-v1.js?v=direct-shell-retirement-v1');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v219-lifecycle-deferred');
-importScripts('/service-worker-local-ai-coherence-v307.js?v=${version}-local-ai-code-v318-guild-login-runtime');
+importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.167-local-ai-code-v322-ai-quest-source-authority');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v289-lifecycle-deferred');
-importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1');
-importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v23-direct-shell-actions');
+importScripts('/service-worker-core-v208.js?v=1.0.163-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1');
+importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v34-primary-quest-map');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v295-entry-integrity');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
-importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-safe-station-v356');
+importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-direct-audio-v1');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
 importScripts('/service-worker-offline-low-pressure-v1.js?v=offline-campus-low-pressure-v1');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-current-completion-v250');
 importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v226');
 importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224-direct-system-pages-v2');
-importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227');
-importScripts('/service-worker-chat-repair-v245.js?v=chat-avatar-visible-v346&purge=chat-avatar-visible-v346&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-long-thread-fit-v362&threads=saved-tabs-contained-v354&party=lazy-v353&model=selected-local-minilm-v357&failover=server-auto-local-failover-v358&passover=guide-capability-passover-v361');
+importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227-direct-routes-v1');
+importScripts('/service-worker-chat-repair-v245.js?v=guild-live-balance-v2&purge=guild-live-balance-v2&freeze=mobile-chat-main-thread-quiescence-v349&layout=mobile-chat-long-thread-fit-v362&threads=saved-tabs-contained-v354&party=lazy-v353&model=selected-local-minilm-v357&failover=server-auto-local-failover-v358&passover=guide-capability-passover-v361&endeavor=kamiya-provider-authority-v7&provider=selected-provider-authority-v1&sanitize=assistant-output-sanitizer-v1');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v432-lifecycle-deferred');
-// atomic-update-handoff-v427: updated workers normally remain waiting until the visible update controller explicitly activates them.
-// staging-installed-entry-takeover-v10-direct-shell-retirement: replace stale iframe-shell controllers without interrupting a visible installer.
+// staging-installed-entry-takeover-v25-cerbanimo-current-realm: reuse the staging activation lane to retire obsolete executable pages while retaining downloaded models, proofs, and saved user state.
 const V203_STAGING_RECOVERY_HOST='civweave-staging.pages.dev';
-const V203_STAGING_RECOVERY_CACHE='cwrecovery-v442-direct-shell-retirement';
-const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v10-direct-shell-retirement';
+const V203_STAGING_RECOVERY_CACHE='cwrecovery-v457-cerbanimo-current-realm';
+const V203_STAGING_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v25-cerbanimo-current-realm';
+const V203_STAGING_SOURCE_STATUS_PATHS=new Set([
+  '/app/realm-console-v140.html',
+  '/app/realm-console-v140',
+  '/app/realm-console-v140.js',
+  '/app/cerbanimo-quest-engine-v144.js',
+  '/app/cerbanimo-task-tool-links-v1.mjs',
+  '/app/cerbanimo-video-task-contract-v1.mjs',
+  '/app/cw-reward-receivers-v2.js',
+  '/app/persistent-system-shell-v1.html',
+  '/app/persistent-system-shell-v1',
+  '/app/persistent-system-shell-v1.js',
+  '/app/generation-lifecycle-v2.js',
+  '/app/local-ai/local-generation-model-policy-v1.js',
+  '/app/shell-integrity-v281.json',
+  '/app/living-school-active-run-ui-v1.js',
+  '/app/living-school-media-pack-recommender-v1.mjs',
+  '/app/learning-source-pack-runtime-v1.mjs',
+  '/app/knowledge-school-seeds-v1.js',
+  '/app/living-school-video-generation-guard-v1.mjs',
+  '/app/cabinets/living-school/index.html'
+]);
 function v203StagingRecoveryRequest(){return new Request(new URL(V203_STAGING_RECOVERY_MARKER,self.location.origin).href)}
-async function v203StagingRecoveryPending(){
-  if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;
-  try{return !(await (await caches.open(V203_STAGING_RECOVERY_CACHE)).match(v203StagingRecoveryRequest()))}catch{return true}
-}
-async function v203VisibleInstallerClient(){
-  try{
-    const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-    return windows.some(client=>{
-      if(client.visibilityState!=='visible')return false;
-      try{
-        const url=new URL(client.url);
-        return url.origin===self.location.origin&&(url.pathname==='/app/'||url.pathname==='/app/index.html');
-      }catch{return false}
-    });
-  }catch{return false}
+async function v203StagingRecoveryPending(){if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;try{return !(await(await caches.open(V203_STAGING_RECOVERY_CACHE)).match(v203StagingRecoveryRequest()))}catch{return true}}
+async function v203VisibleInstallerClient(){try{const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});return windows.some(client=>{if(client.visibilityState!=='visible')return false;try{const url=new URL(client.url);return url.origin===self.location.origin&&(url.pathname==='/app/'||url.pathname==='/app/index.html')}catch{return false}})}catch{return false}}
+async function v203PurgeStagingSourceAssets(){
+  const names=await caches.keys();
+  for(const name of names){
+    // Signed packages and the canonical realm owner retain their own cache lifecycle.
+    if(name.startsWith('cw-guild-release-v1-')||name===self.CivweaveFiveSystemPagesV1?.cache)continue;
+    const cache=await caches.open(name),requests=await cache.keys();
+    for(const request of requests){
+      let pathname='';try{pathname=new URL(request.url).pathname}catch{}
+      if(V203_STAGING_SOURCE_STATUS_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true});
+    }
+  }
 }
 if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
-  self.addEventListener('install',event=>{event.waitUntil((async()=>{
-    if(!(await v203StagingRecoveryPending()))return;
-    if(await v203VisibleInstallerClient())return;
-    await self.skipWaiting();
-  })())});
-  self.addEventListener('activate',event=>{event.waitUntil((async()=>{const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('direct-shell-retirement-v1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
+  self.addEventListener('install',event=>{event.waitUntil((async()=>{if(!(await v203StagingRecoveryPending()))return;if(await v203VisibleInstallerClient())return;await self.skipWaiting()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{await v203PurgeStagingSourceAssets();const cache=await caches.open(V203_STAGING_RECOVERY_CACHE);await cache.put(v203StagingRecoveryRequest(),new Response('cerbanimo-current-realm-v1-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
+}
+
+// staging-installed-entry-takeover-v24-settings-v339-saved-state-first: one-shot staging activation for the canonical worker bytes installed clients actually register. It purges only Settings executable assets, never saved model state or downloaded model bytes.
+const V203_STAGING_SETTINGS_RECOVERY_CACHE='cwrecovery-v456-settings-v339-saved-state-first';
+const V203_STAGING_SETTINGS_RECOVERY_MARKER='/__civweave/staging-installed-entry-takeover-v24-settings-v339-saved-state-first';
+const V203_STAGING_SETTINGS_PATHS=new Set([
+  '/app/settings-gateway-v317.js',
+  '/app/settings-direct-entry-v338.js',
+  '/app/settings-direct-entry-v339.js',
+  '/app/settings-local-models-direct-v325.js',
+  '/app/settings-local-loader-v337.js',
+  '/app/settings-local-route-v323.js',
+  '/app/settings-local-route-v325.js',
+  '/app/settings-local-route-v327.js',
+  '/app/settings-local-route-v331.js'
+]);
+function v203StagingSettingsRecoveryRequest(){return new Request(new URL(V203_STAGING_SETTINGS_RECOVERY_MARKER,self.location.origin).href)}
+async function v203StagingSettingsRecoveryPending(){if(self.location.hostname!==V203_STAGING_RECOVERY_HOST)return false;try{return !(await(await caches.open(V203_STAGING_SETTINGS_RECOVERY_CACHE)).match(v203StagingSettingsRecoveryRequest()))}catch{return true}}
+async function v203PurgeSettingsRecoveryAssets(){
+  const names=await caches.keys();
+  for(const name of names){
+    const cache=await caches.open(name),requests=await cache.keys();
+    for(const request of requests){
+      let pathname='';try{pathname=new URL(request.url).pathname}catch{}
+      if(V203_STAGING_SETTINGS_PATHS.has(pathname))await cache.delete(request,{ignoreSearch:true});
+    }
+  }
+}
+if(self.location.hostname===V203_STAGING_RECOVERY_HOST){
+  self.addEventListener('install',event=>{event.waitUntil((async()=>{if(await v203StagingSettingsRecoveryPending())await self.skipWaiting()})())});
+  self.addEventListener('activate',event=>{event.waitUntil((async()=>{if(!(await v203StagingSettingsRecoveryPending()))return;await v203PurgeSettingsRecoveryAssets();const cache=await caches.open(V203_STAGING_SETTINGS_RECOVERY_CACHE);await cache.put(v203StagingSettingsRecoveryRequest(),new Response('settings-v339-saved-state-first-activated',{headers:{'content-type':'text/plain','cache-control':'no-store'}}));await self.clients.claim()})())});
 }
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})
 `;
-await writeFile(path.join(root,'public/service-worker-v203.js'),output,'utf8');
+if(process.argv.includes('--check')){
+  const existing=await readFile(path.join(root,'public/service-worker-v203.js'),'utf8');
+  if(existing.replace(/\r\n/g,'\n')!==output.replace(/\r\n/g,'\n'))throw new Error('Registered service worker differs from its build source. Regenerate it before deployment.');
+}else await writeFile(path.join(root,'public/service-worker-v203.js'),output,'utf8');
 console.log(JSON.stringify({
   ok:true,
   version,
   output:'public/service-worker-v203.js',
-  imports:22,
-  canonicalNavbar:'network-first-v4-direct-shell-actions',
-  familyNavigation:'direct-page-shell-v1',
+  imports:(output.match(/importScripts\(/g)||[]).length,
+  canonicalNavbar:'cache-first-v11-current-rail',
+  familyNavigation:'persistent-system-shell-v1',
   persistentActions:'guilds-map-all-systems-v2-chat-icon',
-  iframeShell:false,
+  iframeShell:true,
   iframeShellRetirement:'v1-purge-and-redirect',
-  shellAssets:'shell-assets-v1-repair-v23-direct-shell-actions',
+  shellAssets:'shell-assets-v1-repair-v34-primary-quest-map',
   navigationSafety:'direct-system-pages-v2',
-  localAICodeCoherence:'v318-guild-login-runtime',
+  localAICodeCoherence:'v322-ai-quest-source-authority',
   codeCoherence:'v289-lifecycle-deferred',
   offlineLowPressure:'v1',
   bootRecovery:'v432-lifecycle-deferred',
   installedLaunch:'installed-pwa-launch-v295-entry-integrity',
+  radioCore:'radio-core-shell-v305-direct-audio-v1',
+  radioAssetHandoff:'direct-audio-v1',
   updateActivation:'explicit-waiting-worker-handoff-v427-with-one-shot-staging-recovery',
   standardModeIsolation:true,
   canonicalNavigationFinalPolicy:true,

@@ -13,7 +13,7 @@ new vm.Script(bridge,{filename:bridgePath});
 new vm.Script(worker,{filename:workerPath});
 new vm.Script(controller,{filename:controllerPath});
 
-assert.match(bridge,/1\.3\.1-browser-pack-download-v1-worker-import/,'browser-pack bridge must carry the worker-import revision');
+assert.match(bridge,/1\.4\.0-browser-pack-download-v1-qwen35-flagship/,'browser-pack bridge must carry the worker-import revision');
 assert.match(bridge,/new Worker\(IMPORT_WORKER_SRC/,'large browser files must be delegated to a dedicated worker');
 assert.match(bridge,/total>=LARGE_BYTES&&typeof Worker==='function'/,'only large browser-pack files should take the worker path');
 assert.match(bridge,/worker\.postMessage\(\{type:'CIVWEAVE_BROWSER_PACK_IMPORT_FILE_V1'/,'the selected File must be handed to the worker without reading it on the UI thread');

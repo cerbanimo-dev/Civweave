@@ -1,86 +1,1014 @@
 {
   "schema": "civweave.open-music-harvest-config.v1",
   "harvest_version": 2,
-  "accepted_licenses": ["PUBLIC-DOMAIN", "CC0", "CC-BY", "CC-BY-SA"],
-  "providers": ["ccmixter"],
-  "daily_batch_per_playlist": 20,
+  "accepted_licenses": [
+    "PUBLIC-DOMAIN",
+    "CC0",
+    "CC-BY",
+    "CC-BY-SA"
+  ],
+  "providers": [
+    "ccmixter"
+  ],
+  "daily_batch_per_playlist": 60,
   "vocal_policy": {
     "require_vocals": true,
     "reject_instrumental_only": true,
-    "automatic_discovery_publish": false,
-    "minimum_teeth_score": 2,
+    "automatic_discovery_publish": true,
+    "minimum_teeth_score": 1,
     "preferred_terms": [
-      "freedom", "share", "commons", "solidarity", "justice", "truth", "rights",
-      "labor", "work", "choice", "dignity", "community", "mutual", "change",
-      "resistance", "rise", "oppression", "sustainability", "greenwashing", "hate",
-      "open source", "creative commons", "people", "power"
-    ]
+      "freedom",
+      "share",
+      "commons",
+      "solidarity",
+      "justice",
+      "truth",
+      "rights",
+      "labor",
+      "work",
+      "choice",
+      "dignity",
+      "community",
+      "mutual",
+      "change",
+      "resistance",
+      "rise",
+      "oppression",
+      "sustainability",
+      "greenwashing",
+      "hate",
+      "open source",
+      "creative commons",
+      "people",
+      "power"
+    ],
+    "discovery_note": "Full-song vocal signal from source metadata; genre-tag selection is a station-style match, not proof of lyrical content or an explicit-language audit. Unreviewed recordings are excluded from S.A.F.E. mode."
   },
   "playlists": [
     {
       "id": "civweave",
       "name": "Civweave",
-      "queries": [],
-      "scan_queries": ["freedom share vocals", "creative commons vocals", "community freedom vocals", "open source vocals"],
+      "queries": [
+        "freedom",
+        "solidarity",
+        "community",
+        "commons",
+        "collaboration",
+        "together",
+        "sharing",
+        "people",
+        "hope",
+        "peace"
+      ],
+      "scan_queries": [
+        "freedom share vocals",
+        "creative commons vocals",
+        "community freedom vocals",
+        "open source vocals"
+      ],
       "curated_ccmixter": [
-        {"id": "28143", "title": "Mind Map This", "artist": "texasradiofish", "teeth_score": 5, "explicit": true, "themes": ["commons", "truth", "freedom", "creative rights"]},
-        {"id": "28236", "title": "Freedom in my voice", "artist": "Carosone", "teeth_score": 5, "explicit": false, "themes": ["creative freedom", "reuse", "open source"]},
-        {"id": "28039", "title": "Freedom in our Voices", "artist": "ditto ditto", "teeth_score": 5, "explicit": false, "themes": ["creative freedom", "community", "sharing"]},
-        {"id": "28448", "title": "LISA CRISTI", "artist": "Bocrew", "teeth_score": 4, "explicit": false, "themes": ["freedom", "voice", "hip hop"]},
-        {"id": "28239", "title": "yours and mine", "artist": "Tomas PhUsIoN", "teeth_score": 5, "explicit": true, "themes": ["commons", "ownership", "collective life"]}
+        {
+          "id": "28143",
+          "title": "Mind Map This",
+          "artist": "texasradiofish",
+          "teeth_score": 5,
+          "explicit": true,
+          "themes": [
+            "commons",
+            "truth",
+            "freedom",
+            "creative rights"
+          ]
+        },
+        {
+          "id": "28236",
+          "title": "Freedom in my voice",
+          "artist": "Carosone",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "creative freedom",
+            "reuse",
+            "open source"
+          ]
+        },
+        {
+          "id": "28039",
+          "title": "Freedom in our Voices",
+          "artist": "ditto ditto",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "creative freedom",
+            "community",
+            "sharing"
+          ]
+        },
+        {
+          "id": "28448",
+          "title": "LISA CRISTI",
+          "artist": "Bocrew",
+          "teeth_score": 4,
+          "explicit": false,
+          "themes": [
+            "freedom",
+            "voice",
+            "hip hop"
+          ]
+        },
+        {
+          "id": "28239",
+          "title": "yours and mine",
+          "artist": "Tomas PhUsIoN",
+          "teeth_score": 5,
+          "explicit": true,
+          "themes": [
+            "commons",
+            "ownership",
+            "collective life"
+          ]
+        }
+      ],
+      "genre_tags": [
+        "chill",
+        "indie",
+        "electronic",
+        "soul",
+        "downtempo",
+        "trip_hop",
+        "pop",
+        "funk"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "28202",
+          "title": "Our Creative Community",
+          "artist": "Mana Junkie",
+          "themes": [
+            "sharing",
+            "creative community",
+            "open culture"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/28202",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "59709",
+          "title": "Unify",
+          "artist": "Madam Snowflake",
+          "themes": [
+            "unity",
+            "respect",
+            "collective action"
+          ],
+          "source_url": "https://ccmixter.org/files/snowflake/59709",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "38248",
+          "title": "Free Hearts Connections",
+          "artist": "CSoul",
+          "themes": [
+            "sharing",
+            "creative freedom",
+            "connectedness"
+          ],
+          "source_url": "https://ccmixter.org/files/CSoul/38248",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "38385",
+          "title": "Free Hearts",
+          "artist": "Mana Junkie",
+          "themes": [
+            "community",
+            "free expression",
+            "cooperation"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/38385",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "57886",
+          "title": "Hope Is A Dangerous Thing (Vo1k1 Mix)",
+          "artist": "vo1k1",
+          "themes": [
+            "hope",
+            "resilience",
+            "creative voice"
+          ],
+          "source_url": "https://ccmixter.org/files/vo1k1/57886",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "28114",
+          "title": "The Remixin' Blues",
+          "artist": "unreal_dm",
+          "themes": [
+            "sharing",
+            "creative commons",
+            "independence"
+          ],
+          "source_url": "https://ccmixter.org/files/unreal_dm/28114",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     },
     {
       "id": "living-school",
       "name": "Living School",
-      "queries": [],
-      "scan_queries": ["truth choice vocals", "learn freedom vocals", "change justice vocals", "education community vocals"],
+      "queries": [
+        "learning",
+        "knowledge",
+        "nature",
+        "ecology",
+        "education",
+        "truth",
+        "imagine",
+        "grow",
+        "climate",
+        "change"
+      ],
+      "scan_queries": [
+        "truth choice vocals",
+        "learn freedom vocals",
+        "change justice vocals",
+        "education community vocals"
+      ],
       "curated_ccmixter": [
-        {"id": "66038", "title": "Let the Walls Come Down", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["inclusion", "anti-hate", "belonging"]},
-        {"id": "63518", "title": "Sackjo22_Indelible Choices Choices May Change II", "artist": "MalreDeszik", "teeth_score": 4, "explicit": false, "themes": ["choice", "consequence", "agency", "reflection"]},
-        {"id": "62674", "title": "Rosa's Story", "artist": "Radioontheshelf", "teeth_score": 4, "explicit": false, "themes": ["truth", "history", "justice", "the vulnerable"]},
-        {"id": "61038", "title": "Rise Up!", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["action", "change", "resilience"]},
-        {"id": "61065", "title": "Climate Change The Dirty Water Remix", "artist": "J.Lang", "teeth_score": 5, "explicit": false, "themes": ["climate", "truth", "accountability", "future"]}
+        {
+          "id": "66038",
+          "title": "Let the Walls Come Down",
+          "artist": "Stefan Kartenberg",
+          "teeth_score": 4,
+          "explicit": false,
+          "themes": [
+            "inclusion",
+            "anti-hate",
+            "belonging"
+          ]
+        },
+        {
+          "id": "63518",
+          "title": "Sackjo22_Indelible Choices Choices May Change II",
+          "artist": "MalreDeszik",
+          "teeth_score": 4,
+          "explicit": false,
+          "themes": [
+            "choice",
+            "consequence",
+            "agency",
+            "reflection"
+          ]
+        },
+        {
+          "id": "62674",
+          "title": "Rosa's Story",
+          "artist": "Radioontheshelf",
+          "teeth_score": 4,
+          "explicit": false,
+          "themes": [
+            "truth",
+            "history",
+            "justice",
+            "the vulnerable"
+          ]
+        },
+        {
+          "id": "61038",
+          "title": "Rise Up!",
+          "artist": "Stefan Kartenberg",
+          "teeth_score": 4,
+          "explicit": false,
+          "themes": [
+            "action",
+            "change",
+            "resilience"
+          ]
+        },
+        {
+          "id": "61065",
+          "title": "Climate Change The Dirty Water Remix",
+          "artist": "J.Lang",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "climate",
+            "truth",
+            "accountability",
+            "future"
+          ]
+        }
+      ],
+      "genre_tags": [
+        "folk",
+        "acoustic",
+        "jazz",
+        "chill",
+        "ambient",
+        "world",
+        "pop",
+        "blues"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "26427",
+          "title": "Suzy And Johnny Save The Planet",
+          "artist": "dwb",
+          "themes": [
+            "recycling",
+            "ecology",
+            "sustainability"
+          ],
+          "source_url": "https://ccmixter.org/files/dwb/26427",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "65367",
+          "title": "A Better Way",
+          "artist": "Rataxes",
+          "themes": [
+            "peace",
+            "change",
+            "cooperation"
+          ],
+          "source_url": "https://ccmixter.org/files/Rataxes/65367",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "45875",
+          "title": "Words of Gratitude (Summer Rain Mix) feat. SackJo",
+          "artist": "Mana Junkie",
+          "themes": [
+            "gratitude",
+            "connection",
+            "reflection"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/45875",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "40099",
+          "title": "Words of Gratitude",
+          "artist": "Mana Junkie",
+          "themes": [
+            "gratitude",
+            "connection",
+            "reflection"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/40099",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "55816",
+          "title": "Falling",
+          "artist": "Donnie Drost",
+          "themes": [
+            "introspection",
+            "care",
+            "emotion"
+          ],
+          "source_url": "https://ccmixter.org/files/donniedrost/55816",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "55608",
+          "title": "Falling",
+          "artist": "Bluemillenium",
+          "themes": [
+            "reflection",
+            "empathy",
+            "music exploration"
+          ],
+          "source_url": "https://ccmixter.org/files/Bluemillenium/55608",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33726",
+          "title": "In Peace",
+          "artist": "phasenwandler",
+          "themes": [
+            "peace",
+            "environment",
+            "restoration"
+          ],
+          "source_url": "https://ccmixter.org/files/phasenwandler/33726",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "40534",
+          "title": "The Same Light Shines",
+          "artist": "SackJo22",
+          "themes": [
+            "interdependence",
+            "care",
+            "hope"
+          ],
+          "source_url": "https://ccmixter.org/files/SackJo22/40534",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     },
     {
       "id": "cerbanimo",
       "name": "Cerbanimo",
-      "queries": [],
-      "scan_queries": ["labor freedom vocals", "work autonomy vocals", "rise change rock vocals", "technology power vocals"],
+      "queries": [
+        "work",
+        "labor",
+        "technology",
+        "create",
+        "automation",
+        "energy",
+        "power",
+        "future",
+        "build",
+        "rise"
+      ],
+      "scan_queries": [
+        "labor freedom vocals",
+        "work autonomy vocals",
+        "rise change rock vocals",
+        "technology power vocals"
+      ],
       "curated_ccmixter": [
-        {"id": "55625", "title": "This Wall", "artist": "Admiral Bob", "teeth_score": 5, "explicit": false, "themes": ["autonomy", "labor", "voice", "self-direction"]},
-        {"id": "57573", "title": "Singularity", "artist": "Stefan Kartenberg", "teeth_score": 5, "explicit": false, "themes": ["automation", "corporate power", "humanity", "technology"]},
-        {"id": "61038", "title": "Rise Up!", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["action", "change", "resilience"]},
-        {"id": "64609", "title": "Things Change", "artist": "SackJo22", "teeth_score": 3, "explicit": false, "themes": ["change", "adaptation", "resilience"]},
-        {"id": "61065", "title": "Climate Change The Dirty Water Remix", "artist": "J.Lang", "teeth_score": 5, "explicit": false, "themes": ["climate", "truth", "accountability", "future"]}
+        {
+          "id": "55625",
+          "title": "This Wall",
+          "artist": "Admiral Bob",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "autonomy",
+            "labor",
+            "voice",
+            "self-direction"
+          ]
+        },
+        {
+          "id": "57573",
+          "title": "Singularity",
+          "artist": "Stefan Kartenberg",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "automation",
+            "corporate power",
+            "humanity",
+            "technology"
+          ]
+        },
+        {
+          "id": "61038",
+          "title": "Rise Up!",
+          "artist": "Stefan Kartenberg",
+          "teeth_score": 4,
+          "explicit": false,
+          "themes": [
+            "action",
+            "change",
+            "resilience"
+          ]
+        },
+        {
+          "id": "64609",
+          "title": "Things Change",
+          "artist": "SackJo22",
+          "teeth_score": 3,
+          "explicit": false,
+          "themes": [
+            "change",
+            "adaptation",
+            "resilience"
+          ]
+        },
+        {
+          "id": "61065",
+          "title": "Climate Change The Dirty Water Remix",
+          "artist": "J.Lang",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "climate",
+            "truth",
+            "accountability",
+            "future"
+          ]
+        }
+      ],
+      "genre_tags": [
+        "electronic",
+        "rock",
+        "funk",
+        "dance",
+        "hip_hop",
+        "techno",
+        "alternative",
+        "indie"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "71219",
+          "title": "Age of AI Revisited",
+          "artist": "MikeTheBee",
+          "themes": [
+            "AI",
+            "automation",
+            "future"
+          ],
+          "source_url": "https://ccmixter.org/files/mikethebee/71219",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "59104",
+          "title": "The Revised Singularity",
+          "artist": "Apoxode",
+          "themes": [
+            "technology",
+            "future",
+            "humanity"
+          ],
+          "source_url": "https://ccmixter.org/files/Apoxode/59104",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "43036",
+          "title": "Turning Into Normal (What Once Felt Strange)",
+          "artist": "SackJo22",
+          "themes": [
+            "transition",
+            "change",
+            "experimentation"
+          ],
+          "source_url": "https://ccmixter.org/files/SackJo22/43036",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "31024",
+          "title": "Bustin Out",
+          "artist": "Benjamin Orth",
+          "themes": [
+            "creative energy",
+            "making",
+            "emergence"
+          ],
+          "source_url": "https://ccmixter.org/files/Benjamin_Orth/31024",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "56419",
+          "title": "Mother Truckers",
+          "artist": "Stefan Kartenberg",
+          "themes": [
+            "climate",
+            "action",
+            "change"
+          ],
+          "source_url": "https://ccmixter.org/files/JeffSpeed68/56419",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "68897",
+          "title": "Ghosts In The Machine (Robbero Remix) / For Science!",
+          "artist": "coruscate",
+          "themes": [
+            "science",
+            "technology",
+            "speculation"
+          ],
+          "source_url": "https://ccmixter.org/files/Coruscate/68897",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "67822",
+          "title": "PEACE WAVE",
+          "artist": "Bocrew",
+          "themes": [
+            "electronic creativity",
+            "peace",
+            "collaboration"
+          ],
+          "source_url": "https://ccmixter.org/files/BOCrew/67822",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     },
     {
       "id": "fellowfare",
       "name": "FellowFare",
-      "queries": [],
-      "scan_queries": ["mutual aid vocals", "community sharing vocals", "dignity work vocals", "sustainability consumption vocals"],
+      "queries": [
+        "community",
+        "mutual",
+        "share",
+        "sustainability",
+        "dignity",
+        "friendship",
+        "cooperative",
+        "caring",
+        "together",
+        "love"
+      ],
+      "scan_queries": [
+        "mutual aid vocals",
+        "community sharing vocals",
+        "dignity work vocals",
+        "sustainability consumption vocals"
+      ],
       "curated_ccmixter": [
-        {"id": "28057", "title": "Freedom in my Voice (the cover)", "artist": "ditto ditto", "teeth_score": 5, "explicit": false, "themes": ["sharing", "creative rights", "community"]},
-        {"id": "61065", "title": "Climate Change The Dirty Water Remix", "artist": "J.Lang", "teeth_score": 5, "explicit": false, "themes": ["sustainability", "truth", "accountability", "future"]},
-        {"id": "37764", "title": "Like A Sycamore", "artist": "Madam Snowflake", "teeth_score": 3, "explicit": false, "themes": ["recovery", "ecology", "gratitude", "care"]},
-        {"id": "66038", "title": "Let the Walls Come Down", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["inclusion", "anti-hate", "belonging"]},
-        {"id": "55625", "title": "This Wall", "artist": "Admiral Bob", "teeth_score": 5, "explicit": false, "themes": ["autonomy", "labor", "voice", "self-direction"]}
+        {
+          "id": "28057",
+          "title": "Freedom in my Voice (the cover)",
+          "artist": "ditto ditto",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "sharing",
+            "creative rights",
+            "community"
+          ]
+        },
+        {
+          "id": "61065",
+          "title": "Climate Change The Dirty Water Remix",
+          "artist": "J.Lang",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "sustainability",
+            "truth",
+            "accountability",
+            "future"
+          ]
+        },
+        {
+          "id": "37764",
+          "title": "Like A Sycamore",
+          "artist": "Madam Snowflake",
+          "teeth_score": 3,
+          "explicit": false,
+          "themes": [
+            "recovery",
+            "ecology",
+            "gratitude",
+            "care"
+          ]
+        },
+        {
+          "id": "66038",
+          "title": "Let the Walls Come Down",
+          "artist": "Stefan Kartenberg",
+          "teeth_score": 4,
+          "explicit": false,
+          "themes": [
+            "inclusion",
+            "anti-hate",
+            "belonging"
+          ]
+        },
+        {
+          "id": "55625",
+          "title": "This Wall",
+          "artist": "Admiral Bob",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "autonomy",
+            "labor",
+            "voice",
+            "self-direction"
+          ]
+        }
+      ],
+      "genre_tags": [
+        "funk",
+        "soul",
+        "reggae",
+        "jazz",
+        "pop",
+        "acoustic",
+        "chill",
+        "blues"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "59991",
+          "title": "Focus on Love - Kara Square - Nickillus remix 2019",
+          "artist": "Nickillus",
+          "themes": [
+            "care",
+            "love",
+            "connection"
+          ],
+          "source_url": "https://ccmixter.org/files/Nickillus/59991",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "60107",
+          "title": "Good Night",
+          "artist": "Siobhan Dakay",
+          "themes": [
+            "care",
+            "reflection",
+            "companionship"
+          ],
+          "source_url": "https://ccmixter.org/files/SiobhanD/60107",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "59564",
+          "title": "Come Inside",
+          "artist": "Madam Snowflake",
+          "themes": [
+            "belonging",
+            "welcome",
+            "companionship"
+          ],
+          "source_url": "https://ccmixter.org/files/snowflake/59564",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "65367",
+          "title": "A Better Way",
+          "artist": "Rataxes",
+          "themes": [
+            "cooperation",
+            "shared future",
+            "peace"
+          ],
+          "source_url": "https://ccmixter.org/files/Rataxes/65367",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "38385",
+          "title": "Free Hearts",
+          "artist": "Mana Junkie",
+          "themes": [
+            "sharing",
+            "collective care",
+            "cooperation"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/38385",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "40534",
+          "title": "The Same Light Shines",
+          "artist": "SackJo22",
+          "themes": [
+            "care",
+            "community",
+            "connection"
+          ],
+          "source_url": "https://ccmixter.org/files/SackJo22/40534",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     },
     {
       "id": "anarchadia",
       "name": "Anarchadia",
-      "queries": [],
-      "scan_queries": ["justice resistance vocals", "freedom power vocals", "solidarity rise vocals", "oppression truth vocals"],
+      "queries": [
+        "resistance",
+        "justice",
+        "liberty",
+        "protest",
+        "freedom",
+        "oppression",
+        "solidarity",
+        "organize",
+        "liberation",
+        "peace"
+      ],
+      "scan_queries": [
+        "justice resistance vocals",
+        "freedom power vocals",
+        "solidarity rise vocals",
+        "oppression truth vocals"
+      ],
       "curated_ccmixter": [
-        {"id": "28143", "title": "Mind Map This", "artist": "texasradiofish", "teeth_score": 5, "explicit": true, "themes": ["commons", "truth", "freedom", "creative rights"]},
-        {"id": "28239", "title": "yours and mine", "artist": "Tomas PhUsIoN", "teeth_score": 5, "explicit": true, "themes": ["commons", "ownership", "collective life"]},
-        {"id": "57569", "title": "The Singularity", "artist": "Aussens@iter", "teeth_score": 5, "explicit": false, "themes": ["automation", "corporate power", "humanity", "technology"]},
-        {"id": "31759", "title": "We the People", "artist": "mykleanthony", "teeth_score": 5, "explicit": false, "themes": ["oppression", "collective power", "peace", "resistance"]},
-        {"id": "61038", "title": "Rise Up!", "artist": "Stefan Kartenberg", "teeth_score": 4, "explicit": false, "themes": ["action", "change", "resilience"]}
+        {
+          "id": "28143",
+          "title": "Mind Map This",
+          "artist": "texasradiofish",
+          "teeth_score": 5,
+          "explicit": true,
+          "themes": [
+            "commons",
+            "truth",
+            "freedom",
+            "creative rights"
+          ]
+        },
+        {
+          "id": "28239",
+          "title": "yours and mine",
+          "artist": "Tomas PhUsIoN",
+          "teeth_score": 5,
+          "explicit": true,
+          "themes": [
+            "commons",
+            "ownership",
+            "collective life"
+          ]
+        },
+        {
+          "id": "57569",
+          "title": "The Singularity",
+          "artist": "Aussens@iter",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "automation",
+            "corporate power",
+            "humanity",
+            "technology"
+          ]
+        },
+        {
+          "id": "31759",
+          "title": "We the People",
+          "artist": "mykleanthony",
+          "teeth_score": 5,
+          "explicit": false,
+          "themes": [
+            "oppression",
+            "collective power",
+            "peace",
+            "resistance"
+          ]
+        },
+        {
+          "id": "61038",
+          "title": "Rise Up!",
+          "artist": "Stefan Kartenberg",
+          "teeth_score": 4,
+          "explicit": false,
+          "themes": [
+            "action",
+            "change",
+            "resilience"
+          ]
+        }
+      ],
+      "genre_tags": [
+        "rock",
+        "punk",
+        "hip_hop",
+        "reggae",
+        "dub",
+        "experimental",
+        "alternative",
+        "electronic"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "60893",
+          "title": "American Layer Cake (No War With Iran/Bernie 2020)",
+          "artist": "coruscate",
+          "themes": [
+            "anti-war",
+            "class politics",
+            "solidarity"
+          ],
+          "source_url": "https://ccmixter.org/files/Coruscate/60893",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "68853",
+          "title": "The Homeless Man",
+          "artist": "coruscate",
+          "themes": [
+            "homelessness",
+            "class",
+            "social justice"
+          ],
+          "source_url": "https://ccmixter.org/files/Coruscate/68853",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33634",
+          "title": "Spinning",
+          "artist": "Kara Square",
+          "themes": [
+            "climate",
+            "corporate accountability",
+            "peace"
+          ],
+          "source_url": "https://ccmixter.org/files/mindmapthat/33634",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33751",
+          "title": "In Peace",
+          "artist": "unreal_dm",
+          "themes": [
+            "peace",
+            "restoration",
+            "solidarity"
+          ],
+          "source_url": "https://ccmixter.org/files/unreal_dm/33751",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "34273",
+          "title": "In Peace (reprise)",
+          "artist": "Lasswell",
+          "themes": [
+            "peace",
+            "renewal",
+            "hope"
+          ],
+          "source_url": "https://ccmixter.org/files/lazztunes07/34273",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "59709",
+          "title": "Unify",
+          "artist": "Madam Snowflake",
+          "themes": [
+            "solidarity",
+            "respect",
+            "unity"
+          ],
+          "source_url": "https://ccmixter.org/files/snowflake/59709",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "68869",
+          "title": "Romantic Apathy",
+          "artist": "coruscate",
+          "themes": [
+            "personal autonomy",
+            "self-respect",
+            "relationships"
+          ],
+          "source_url": "https://ccmixter.org/files/Coruscate/68869",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     }
-  ]
+  ],
+  "target_unique_tracks": 250,
+  "max_library_tracks": 300,
+  "genre_discovery": {
+    "enabled": true,
+    "pages_per_tag": 3,
+    "results_per_page": 35,
+    "license_classes": [
+      "by",
+      "sa"
+    ],
+    "note": "Discover vocal full songs by source genre/mood tags; do not treat genre as proof of activist lyrics.",
+    "broad_vocal_tags": [
+      "female_vocals",
+      "male_vocals",
+      "vocals",
+      "spoken_word",
+      "rap"
+    ],
+    "broad_pages_per_tag": 12,
+    "broad_playlist_id": "civweave",
+    "broad_note": "Broad vocal search supplies additional songs for manual review; musical fit is inferred only from recorded tags and not assumed as an ideological match."
+  },
+  "review_candidate_policy": {
+    "enabled": true,
+    "source": "exact ccMixter upload pages; licensing and metadata independently confirmed by harvest API",
+    "mode": "stream-only, lyric content not audited",
+    "require_api_license_confirmation": true,
+    "exclude_from_safe_mode": true,
+    "note": "Web-source license review is not a listen-through. Do not infer explicit:false or human lyric audit from source-page metadata."
+  }
 }

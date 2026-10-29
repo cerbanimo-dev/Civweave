@@ -8,13 +8,14 @@ const lookup={
     {video_id:'abcDEF12345',url:'https://www.youtube.com/watch?v=abcDEF12345',title:'Introduction to Algebra and Linear Equations',creator:'Open Math',catalog_description:'Learn variables, equations, slopes, and worked algebra examples.',school_slug:'mathematics',source_datasets:['common-pile-youtube']},
     {video_id:'XYZ987abcde',url:'https://www.youtube.com/watch?v=XYZ987abcde',title:'Basic Electronics and Circuit Design',creator:'Open Engineering',catalog_description:'Resistors, voltage, current, breadboards, and practical circuits.',school_slug:'technology',source_datasets:['massive-yt-edu-queue']},
     {video_id:'wikiCRIT001',url:'https://www.youtube.com/watch?v=wikiCRIT001',title:'Teaching Research and Critical Thinking Skills Through Wikipedia',creator:'Open Conference',catalog_description:'A conference talk about research, source evaluation, Wikipedia, and critical thinking.',school_slug:'philosophy-and-religion',source_datasets:['youtube-commons']},
+    {video_id:'digitalIC01',url:'https://www.youtube.com/watch?v=digitalIC01',title:'UNIT-4 I ONE SHOT I Digital Electronics & IC Technology I Electronics Engineering I by Vimal sir',creator:'Vimal sir',catalog_description:'Digital electronics, integrated circuits, logic gates, and engineering tools.',school_slug:'technology',source_datasets:['massive-yt-edu-queue']},
   ],
 };
 const availability={
   schema:'civweave.youtube-availability-index.v1',
   status:'current',
   expires_at:'2099-09-07T22:17:28Z',
-  eligible_video_ids:['abcDEF12345','XYZ987abcde','wikiCRIT001'],
+  eligible_video_ids:['abcDEF12345','XYZ987abcde','wikiCRIT001','digitalIC01','noteDEMO001'],
   ineligible_video_ids:['deadVID1234'],
 };
 
@@ -35,6 +36,15 @@ assert(!algebra.reason.includes('privacy-enhanced embed verified'));
 const unmatched=await contract.resolveRelevantVideo('interdimensional snail choreography on Europa');
 assert.equal(unmatched.url,fallback);
 assert.equal(unmatched.source,'required-fallback');
+
+const noteTopic='Create a digital note. Open the digital note-taking tool, type READY, and save the note.';
+const unrelatedDigital=await contract.resolveRelevantVideo(noteTopic);
+assert.equal(unrelatedDigital.url,fallback,'A shared medium word such as digital must not make an electronics lecture relevant to writing a note.');
+const oneWordSubject=await contract.resolveRelevantVideo('algebra');
+assert.equal(oneWordSubject.url,'https://www.youtube.com/watch?v=abcDEF12345','A specific single-word subject still admits its relevant lesson.');
+lookup.records.push({video_id:'noteDEMO001',url:'https://www.youtube.com/watch?v=noteDEMO001',title:'Create and save a note in a note-taking tool',creator:'Notes Tutorial',catalog_description:'Open the note editor, type the required text, and save the digital note.',school_slug:'technology'});
+const noteContract=await import(`../public/app/video-learning-contract-v1.mjs?note-relevance-test=${Date.now()}`);
+assert.equal((await noteContract.resolveRelevantVideo(noteTopic)).url,'https://www.youtube.com/watch?v=noteDEMO001','A genuinely related note tutorial remains available.');
 
 const school={modules:[
   {id:'m1',title:'Linear equations',objective:'Solve algebra equations',learningObjectives:['isolate variables'],concepts:['algebra','variables'],video:{url:'https://www.youtube.com/watch?v=deadVID1234',title:'Old atlas choice',source:'civweave-video-atlas'}},

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Civweave · Llama 3.2 3B · Asyncify WebGPU diagnostic v5 · crash guard</title>
+<style>:root{color-scheme:dark;font:16px/1.5 system-ui}body{max-width:760px;margin:auto;padding:20px;background:#0c1724;color:#edf5ff}textarea,button{font:inherit;background:#1c3146;border:1px solid #6095a8;color:inherit;border-radius:8px;padding:10px}a{color:#9fddff}fieldset{border:1px solid #456880;border-radius:10px;padding:12px;margin:14px 0}input[type=file]{display:block;margin:10px 0;max-width:100%}.cw-weight-link{display:block;margin:8px 0;word-break:break-word}.cw-small{font-size:.86rem;color:#bdcddd}textarea{width:95%;height:95px}button{margin:6px 8px 6px 0}button:disabled{opacity:.45}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#06101a;border:1px solid #355067;padding:12px;border-radius:10px;max-height:55vh;overflow:auto}small{color:#bacddd}</style></head>
+<body>
+<h1>Llama 3.2 3B · Two-pass JSON trial</h1><p class="cw-small"><strong>Diagnostic generation 6:</strong> After repeated Android browser termination during large ONNX model initialization, the 3B WebGPU diagnostic is disabled on Android with this pinned Asyncify runtime. Read-only model-cache inspection and GPU limits remain available; the 2.42 GB cached weights are preserved. The model cache is preserved. The previously missing WebGPU ONNX <code>ort-wasm-simd-threaded.asyncify.mjs</code> is now deployed with its matching WASM binary in staged chunks. This page checks the actual runtime files before starting inference.</p>
+<p>Experiment only; does not modify normal Moss/Weaveling generation. Pass 1 freely drafts a short learning plan with Llama 3.2 3B Instruct. Pass 2 reuses the same loaded model with Hugging Face's token-level <strong>StructuredOutputProcessor</strong> to compile strict JSON. The schema masks invalid next tokens; independent parsing checks the completed result.</p>
+<p><strong>Model:</strong> Llama 3.2 3B Instruct · ONNX q4f16 · WebGPU · ~2.4 GB downloaded weights. Use the Download button below or Civweave Settings → AI Downloads to install the model. Download is a separate explicit action. This experiment never selects E4B or automatically downloads model weights. The compiler companion is self-hosted after the app loads it.</p>
+<p><label for="goal">Learning goal</label><br><textarea id="goal">Teach me to read and memorize tarot cards through a progressive four-week learning journey.</textarea></p>
+<button id="download">Check files / show safe browser downloads</button><button id="cancelDownload" disabled>Cancel download</button>
+<p class="cw-small"><strong>Phone-safe mode:</strong> Android ended an earlier 2.4 GB in-page foreground download at 4%. For large model weights, use the browser's native Downloads links and import them in independent 8 MiB cache chunks, preserving completed chunks across page restarts. Do NOT use a monolithic in-page cache stream. This does NOT use Background Fetch, which previously returned a misleading “Browser download started” status. Keep this tab visible while downloading. Existing cached files are reused.</p>
+<p id="downloadProgress" aria-live="polite">Checking existing offline cache entries (no model weights loaded)…</p>
+<fieldset><legend>Alternative: Android / browser Downloads</legend><p>Use the actual browser download links below for the two large model-weight files, then select the completed files to import. These links are external Hugging Face files and are not silently queued into Civweave.</p>
+<div id="weightLinks"></div><label for="importFiles">Select the downloaded model files to import</label><input id="importFiles" type="file" multiple><button id="importWeights">Import selected files into Civweave</button><p class="cw-small">Import checks exact expected sizes and saves each file to offline Cache Storage using a streaming Blob, not a 2 GB JavaScript array. Afterwards, use Direct download to fetch only remaining small metadata files. Do not delete existing model caches.</p></fieldset><br><fieldset><legend>Android GPU memory crash protection</legend>
+<p class="cw-small"><strong>Android 3B ONNX generation disabled until a safe runtime exists.</strong> The current April 2026 ONNX Runtime Asyncify build reads large external weight files into memory during session creation. <a href="https://github.com/microsoft/onnxruntime/issues/29455">Microsoft issue #29455</a> documents this loading-memory failure; <a href="https://github.com/microsoft/onnxruntime/pull/29477">PR #29477</a> fixes it for a newer <strong>JSPI + Blob-backed</strong> runtime, not this pinned Asyncify variant. Importing 8 MiB cache chunks protects downloads only; it does not lower inference memory. Inspecting cached weights is safe and never starts a GPU session.</p>
+<button type="button" id="inspect">Inspect GPU limits (no weights loaded)</button>
+<p id="crashNotice" class="cw-small" aria-live="polite"></p>
+<p id="androidStatus" class="cw-small" role="status">On Android, use Civweave Settings → AI Downloads to select a smaller compatible model for Moss. This page will not retry the crashing 3B GPU session.</p>
+</fieldset><button id="run">Run draft → constrained JSON</button><button id="stop" disabled>Stop / release worker</button>
+<p id="status" aria-live="polite">Checking model and runtime…</p>
+<p id="sessionStatus" aria-live="polite" class="cw-small">No GPU session running.</p>
+<p class="cw-small">A completed 2.42 GB download is not evidence that the ONNX/WebGPU inference session is ready. Initializing a large ONNX model can temporarily require substantial additional CPU memory. This test enforces a 4-minute per-pass diagnostic limit, stops the Worker cleanly on timeout, and never deletes cached weights.</p>
+<pre id="log" aria-live="polite"></pre>
+<p><small>PASS requires nonempty draft text, completed grammar-constrained second generation, valid complete JSON, all required fields, and 3–4 modules. It does not prove plan quality or Moss integration. If your phone reports a WebGPU limit, the diagnostic will stop without silently swapping models.</small></p>
+<script src="/app/local-ai/model-registry-v266.js"></script>
+<script type="module">
+import {LEARNING_TRIAL_SCHEMA,validateStrictJson} from '/app/local-ai/llama32-structured-constraints-v1.js';
+import {importChunkedFile,chunkedStatus} from '/app/local-ai/llama32-chunked-model-storage-v1.js?v=1';
+const MODEL='llama32-3b-instruct-q4f16',CACHE='civweave-model-generative-v266';
+const $=id=>document.getElementById(id),button=$('run'),stop=$('stop'),download=$('download'),cancelDownload=$('cancelDownload'),log=$('log'),status=$('status'),sessionStatus=$('sessionStatus'),dlStatus=$('downloadProgress'),weightLinks=$('weightLinks'),importFiles=$('importFiles'),importWeights=$('importWeights'),inspect=$('inspect'),crashNotice=$('crashNotice');
+let worker=null,pending=null,seq=0,started=0,cancelled=false,downloads=null,sessionTicker=null,phaseName='idle',lastWorkerAt=0,sessionReady=false,lastAssetKey='',previousPhase='',printedAssets=0,lastCheckpointAt=0;
+const ACTIVE_KEY='civweave.llama32.gpu-active.v1',RESULT_KEY='civweave.llama32.gpu-result.v1';
+const isMobile=/Android|Mobile|iPhone|iPad/i.test(navigator.userAgent||'');
+const loadRecord=()=>{try{return JSON.parse(localStorage.getItem(ACTIVE_KEY)||'null')}catch{return null}};
+const lastAttempt=loadRecord();
+const checkpoint=(next,force=false)=>{
+  if(!worker)return;
+  const at=Date.now();
+  if(!force&&at-lastCheckpointAt<5000)return;
+  lastCheckpointAt=at;
+  try{localStorage.setItem(ACTIVE_KEY,JSON.stringify({at,phase:next,sessionReady}))}catch{}
+};
+if(lastAttempt&&Date.now()-Number(lastAttempt.at||0)<172800000){
+  crashNotice.textContent='UNCLEAN EXIT: Prior Llama 3B run did not record completion. Last stage '+String(lastAttempt.phase||'unknown')+
+  '; GPU session ready: '+Boolean(lastAttempt.sessionReady)+'. Could be process kill, crash or abrupt tab closure. Existing model files are not deleted.';
+}else if(isMobile)crashNotice.textContent='Android detected. The pinned Asyncify ONNX 3B loader is not approved for repeated GPU initialization; no model weights deleted.';
+inspect.onclick=async()=>{
+  log.textContent='';
+  try{
+    const adapter=await navigator.gpu?.requestAdapter?.();
+    const mem=navigator.deviceMemory||null;
+    const disk=await navigator.storage?.estimate?.();
+    line('SAFE DEVICE PREFLIGHT · reported deviceMemory '+String(mem||'unavailable')+' GiB (not available RAM)');
+    if(adapter)line('WebGPU · maxBufferSize '+String(adapter.limits?.maxBufferSize||'unknown')+' · maxStorageBufferBindingSize '+String(adapter.limits?.maxStorageBufferBindingSize||'unknown'));
+    if(disk)line('Disk cache used '+Math.round((disk.usage||0)/1048576)+' MiB / quota '+Math.round((disk.quota||0)/1048576)+' MiB · disk is NOT GPU memory');
+    line('No model weights loaded. Web APIs cannot reliably report free process/GPU memory. This does NOT establish that 3B model initialization will succeed.');
+  }catch(e){line('Preflight failed: '+String(e))}
+};
+async function ensureDownloadManager(){
+  if(globalThis.CivweaveLocalModelDownloadV266?.start)return globalThis.CivweaveLocalModelDownloadV266;
+  await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='/app/local-ai/download-manager-v267.js?v=1.0.70-v323-llama-inventory';
+    script.onload=()=>globalThis.CivweaveLocalModelDownloadV266?.start?resolve():reject(Error('Downloaded model manager did not initialize'));
+    script.onerror=()=>reject(Error('Download manager could not load'));
+    document.head.append(script);
+  });
+  return globalThis.CivweaveLocalModelDownloadV266;
+}
+const WEIGHT_FILES=['onnx/model_q4f16.onnx_data','onnx/model_q4f16.onnx_data_1'];
+const fmtBytes=n=>Number(n)>=1e9?(Number(n)/1e9).toFixed(2)+' GB':(Number(n)/1e6).toFixed(1)+' MB';
+let watcher=null,lastDownloadUpdate='';
+const spec=()=>globalThis.CivweaveLocalModelRegistryV266?.byId?.(MODEL);
+function updateDownload(state={}){
+  const phase=String(state.phase||state.status||'starting');
+  const file=String(state.artifact||'').replace(/^onnx\//,'');
+  const loaded=Number(state.bytesDownloaded||0),total=Number(state.totalBytes||spec()?.estimatedBytes||0);
+  const pc=total?Math.min(100,Math.floor(loaded/total*100)):0;
+  const speed=Number(state.speedBps||0),eta=Number(state.etaSeconds||0);
+  const label='Llama 3.2 3B · '+phase+(file?' · '+file:'')+' · '+fmtBytes(loaded)+' / '+fmtBytes(total)+' ('+pc+'%)'+(speed?' · '+fmtBytes(speed)+'/s':'')+(eta?' · '+Math.ceil(eta/60)+' min estimated remaining':'');
+  if(dlStatus.textContent!==label)dlStatus.textContent=label;
+  if(['error','paused','aborted'].includes(String(state.status||''))){
+    dlStatus.textContent='Download '+state.status+' · '+String(state.error||'Check your connection. Retry to reuse completed files.');
+    stopWatch();
+  }
+  if(state.status==='ready'){
+    dlStatus.textContent='DOWNLOAD COMPLETE · '+fmtBytes(loaded)+' cached and verified. Ready to run the two-pass test.';
+    stopWatch();
+  }
+}
+function stopWatch(){
+  if(watcher){clearInterval(watcher);watcher=null}
+  cancelDownload.disabled=true;download.disabled=false;
+}
+async function checkDownloadState(){
+  const saved=downloads?.state?.(MODEL);
+  if(saved)updateDownload(saved);
+  if(saved?.status==='ready'){const verified=await downloads.status(MODEL);if(!verified.available)dlStatus.textContent='Cached state says ready but files are missing. Press Download to repair.';}
+}
+function watchProgress(){
+  if(watcher)clearInterval(watcher);
+  watcher=setInterval(()=>{void checkDownloadState().catch(e=>{dlStatus.textContent='Progress check failed: '+e.message})},1500);
+  void checkDownloadState();
+}
+function renderWeightLinks(){
+  const selected=spec();if(!selected){weightLinks.textContent='Registry unavailable; refresh staging.';return}
+  weightLinks.replaceChildren();
+  for(const path of WEIGHT_FILES){
+    const row=selected.artifacts.find(x=>x.path===path);
+    if(!row?.sizeBytes){weightLinks.textContent='Expected weight-file metadata is missing. Download is disabled until the model registry is corrected.';return}
+    const link=document.createElement('a');link.className='cw-weight-link';link.href=globalThis.CivweaveLocalModelRegistryV266.directUrl(selected,path);
+    link.target='_blank';link.rel='noopener noreferrer';
+    link.textContent='Download '+path.split('/').at(-1)+' · '+fmtBytes(row.sizeBytes)+' (Hugging Face)';
+    weightLinks.append(link);
+  }
+}
+renderWeightLinks();
+async function directDownload(){
+  if(download.disabled)return;
+  download.disabled=true;
+  try{
+    if(!navigator.gpu)throw Error('WebGPU is unavailable on this device.');
+    const selected=spec();
+    if(!selected?.installable)throw Error('The current registry does not expose Llama 3.2 3B. Refresh staging.');
+    downloads=await ensureDownloadManager();
+    const existing=await downloads.status(MODEL);
+    if(existing.available){dlStatus.textContent='Llama 3.2 3B is already downloaded and ready.';download.disabled=false;return}
+    if(existing.missing.some(row=>Number(row.sizeBytes||0)>=64*1024*1024)){
+      dlStatus.textContent='ANDROID CRASH PROTECTION · Do not stream multi-GB weights into Cache Storage on this page. Use the browser download links below, then import the files in resumable 8 MiB chunks. Completed files are preserved.';
+      document.querySelector('fieldset')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+      download.disabled=false;
+      return;
+    }
+    // An old Background Fetch job can claim "downloading" without advancing
+    // and may never have shown a browser download. Cancel it before streaming.
+    const old=downloads.state(MODEL);
+    if(old?.mode==='background-fetch'){
+      dlStatus.textContent='Stopping previously queued Background Fetch before starting a visible direct transfer…';
+      try{await downloads.cancel(MODEL)}catch{}
+    }
+    dlStatus.textContent='Opening a direct streaming download; progress will display actual cached bytes…';
+    cancelDownload.disabled=false;
+    const state=await downloads.start(MODEL,{preferBackground:false,onProgress:p=>updateDownload(p)});
+    if(state?.mode==='background-fetch')throw Error('Unexpected Background Fetch path: refusing to display an unverified download.');
+    updateDownload(state||downloads.state(MODEL));
+    watchProgress();
+  }catch(error){dlStatus.textContent='DOWNLOAD FAILED · '+String(error?.message||error);stopWatch()}
+}
+download.onclick=()=>void directDownload();
+cancelDownload.onclick=async()=>{
+  if(!downloads)return;
+  try{await downloads.cancel(MODEL);dlStatus.textContent='Download cancelled; completed cached files preserved.'}
+  catch(error){dlStatus.textContent='Cancel failed · '+String(error?.message||error)}
+  finally{stopWatch()}
+};
+importWeights.onclick=async()=>{
+  const selected=spec(),files=[...(importFiles.files||[])];
+  if(!selected?.installable){dlStatus.textContent='Download registry unavailable. Refresh staging.';return}
+  if(!files.length){dlStatus.textContent='Choose completed browser download files first.';return}
+  if(worker){dlStatus.textContent='Stop model inference before importing files.';return}
+  importWeights.disabled=true;download.disabled=true;
+  try{
+    const cache=await caches.open(CACHE),seen=new Set();
+    for(const file of files){
+      // Only accept an exact recognized filename and size. Never trust a
+      // browser-downloaded LFS/Xet pointer or a truncated partial download.
+      const row=selected.artifacts.find(a=>a.path.split('/').at(-1)===file.name);
+      if(!row||!row.required)throw Error('Unrecognized or optional model file: '+file.name);
+      if(seen.has(row.path))throw Error('Duplicate model file: '+file.name);
+      seen.add(row.path);
+      if(row.sizeBytes&&file.size!==row.sizeBytes)throw Error(file.name+' has '+fmtBytes(file.size)+' but expected '+fmtBytes(row.sizeBytes)+'; do not import a partial download.');
+      if(file.size<row.minBytes)throw Error(file.name+' is too small; download the actual model file, not a Git LFS pointer.');
+      const url=globalThis.CivweaveLocalModelRegistryV266.directUrl(selected,row.path);
+      if(file.size>=64*1024*1024){
+        dlStatus.textContent='Importing '+file.name+' · safely copying 8 MiB fragments…';
+        await importChunkedFile(cache,url,file,{onProgress:p=>{
+          if(p.chunk===1||p.chunk%4===0||p.chunk===p.chunks)
+            dlStatus.textContent='LOW-MEMORY IMPORT · '+file.name+' · '+fmtBytes(p.bytes)+' / '+fmtBytes(p.totalBytes)+' · fragment '+p.chunk+'/'+p.chunks+' saved; completed fragments survive a retry.';
+        }});
+        const saved=await chunkedStatus(cache,url,file.size);
+        if(!saved.available)throw Error('Chunked cache did not retain '+file.name+'; '+saved.reason);
+      }else{
+        await cache.put(url,new Response(file,{status:200,headers:{'content-type':file.type||'application/octet-stream','content-length':String(file.size)}}));
+        const saved=await cache.match(url);
+        if(!saved?.ok||Number(saved.headers.get('content-length'))!==file.size)throw Error('Cache did not retain '+file.name+' at the expected size.');
+      }
+      dlStatus.textContent='Saved '+file.name+' · '+fmtBytes(file.size)+' using low-memory offline storage.';
+    }
+    const manager=await ensureDownloadManager();
+    const state=await manager.status(MODEL);
+    if(state.available)dlStatus.textContent='All required files imported. Ready to test.';
+    else if(state.missing.some(row=>Number(row.sizeBytes||0)>=64*1024*1024))
+      dlStatus.textContent='Imported '+files.length+' file(s). Other large model weight file(s) are still missing: '+state.missing.filter(row=>Number(row.sizeBytes||0)>=64*1024*1024).map(row=>row.path).join(', ')+'. Use browser Downloads and import those files.';
+    else{
+      dlStatus.textContent='Large weight files imported. Fetching only '+state.missing.length+' small metadata file(s) safely…';
+      await manager.start(MODEL,{preferBackground:false,onProgress:updateDownload});
+      watchProgress();
+    }
+  }catch(error){dlStatus.textContent='IMPORT FAILED · '+String(error?.message||error)}
+  finally{importWeights.disabled=false;download.disabled=false;importFiles.value=''}
+};
+function line(message){
+  // Keep the diagnostic UI bounded even if the worker emits thousands of events.
+  const old=log.textContent;
+  log.textContent=(old.length>24000?old.slice(-16000):old)+String(message).slice(0,900)+'\n';
+  log.scrollTop=log.scrollHeight;
+}
+function tick(){
+  if(!worker)return;
+  const elapsed=Math.floor((performance.now()-started)/1000),silent=Math.floor((performance.now()-lastWorkerAt)/1000);
+  sessionStatus.textContent='Phase '+phaseName+' · elapsed '+elapsed+'s · last worker event '+silent+'s ago'+
+    (!sessionReady&&['loading-model','initializing-onnx-session'].includes(phaseName)?
+      ' · weight files cached, WebGPU session not yet confirmed initialized':'')+
+    (silent>=20?' · worker event loop may be occupied by ONNX initialization':'');
+}
+function handleProgress(p){
+  lastWorkerAt=performance.now();
+  const next=String(p.phase||'unknown');
+  if(next!==phaseName){phaseName=next;checkpoint(next,true);line('['+Math.round((performance.now()-started)/1000)+'s] '+next+
+    (p.backend?' · '+p.backend:''));}
+  if(next==='initializing-onnx-session')line('ONNX inference session requested; model weight-file completion is not GPU readiness.');
+  if(next==='loading-model'){
+    const file=String(p.artifact||p.file||'cached assets').slice(-68),
+      percent=Number(p.assetPercent??p.artifactProgress??-1),
+      key=file+'|'+Math.floor(percent/10)+'|'+String(p.assetStatus||p.status||'');
+    if(key!==lastAssetKey&&printedAssets<25){
+      lastAssetKey=key;printedAssets++;
+      line('Asset '+file+(percent>=0?' · '+Math.floor(percent)+'%':'')+' · session still initializing.');
+      if(printedAssets===25)line('Further model asset updates suppressed; only phase transitions will print.');
+    }
+  }
+  if(next==='model-ready'){
+    sessionReady=true;checkpoint(next,true);
+    line('GPU SESSION READY · model setup '+Number(p.modelLoadMs||0)+' ms; model can now generate tokens.');
+  }
+  tick();
+}
+
+function finish(message){if(worker){try{localStorage.setItem(RESULT_KEY,JSON.stringify({at:Date.now(),phase:phaseName,sessionReady,report:String(message).slice(0,300)}));localStorage.removeItem(ACTIVE_KEY)}catch{}}status.textContent=message;try{worker?.terminate()}catch{}worker=null;if(pending){pending.reject(Error(message));pending=null}if(sessionTicker){clearInterval(sessionTicker);sessionTicker=null}sessionStatus.textContent=sessionReady?'ONNX session initialized during this run.':'No ONNX GPU session confirmed during this run.';button.disabled=!isMobile;stop.disabled=true}
+function call(spec,messages,maxNewTokens,structuredOutputSchema=null,timeoutMs=240000){
+  return new Promise((resolve,reject)=>{
+    if(!worker)return reject(Error('Worker was stopped'));
+    const id='llama32-'+(++seq);
+    const timer=setTimeout(()=>{if(pending?.id===id){pending=null;const phase=phaseName,silent=Math.floor((performance.now()-lastWorkerAt)/1000);finish('DIAGNOSTIC_TIMEOUT at '+phase+' · '+Math.floor(timeoutMs/1000)+'s · last worker event '+silent+'s ago. The model remains cached; GPU session compatibility is still unverified.');reject(Error('Timeout at '+phase))}},timeoutMs);
+    pending={id,resolve:value=>{clearTimeout(timer);resolve(value)},reject:error=>{clearTimeout(timer);reject(error)}};
+    worker.postMessage({id,type:'generate',spec,messages,stream:true,thinking:false,temperature:.3,maxNewTokens,promptTokenBudget:1300,structuredOutputSchema});
+  });
+}
+async function available(spec){
+ const cache=await caches.open(CACHE),missing=[];
+ for(const artifact of spec.artifacts.filter(x=>x.required)){
+   const url=globalThis.CivweaveLocalModelRegistryV266.directUrl(spec,artifact.path);
+   if(!(await cache.match(url))?.ok){
+     if(Number(artifact.sizeBytes||0)>=64*1024*1024&&/\.onnx_data(?:_\d+)?$/.test(artifact.path)){
+       const row=await chunkedStatus(cache,url,Number(artifact.sizeBytes||0));
+       if(row.available)continue;
+     }
+     missing.push(artifact.path);
+   }
+ }
+ return missing;
+}
+async function preflightAsyncify(){
+  const root='/app/vendor/transformers-v4/wasm/';
+  const manifestResponse=await fetch('/app/vendor/transformers-v4/stage-manifest-asyncify-v8.json',{cache:'no-store'});
+  if(!manifestResponse.ok)throw Error('ONNX runtime manifest returned HTTP '+manifestResponse.status+'; model files are still cached.');
+  const type=String(manifestResponse.headers.get('content-type')||'').toLowerCase();
+  if(type.includes('text/html'))throw Error('ONNX runtime manifest is an HTML fallback; staging has not published the new runtime.');
+  const manifest=await manifestResponse.json();
+  if(manifest.schema!=='civweave.transformers-stage.v8'||
+     manifest.asyncifyModule!=='ort-wasm-simd-threaded.asyncify.mjs'||
+     !Array.isArray(manifest.asyncifyWasmChunks)||manifest.asyncifyWasmChunks.length<2)
+    throw Error('Staging is still serving the old JSEP-only ONNX runtime. Expected v8 manifest with Asyncify JS and WASM shards; do not redownload Llama weights.');
+  line('RUNTIME MANIFEST PASS · ONNX Runtime '+manifest.backendVersion+' · Asyncify WASM '+Math.round(Number(manifest.asyncifyWasmBytes||0)/1048576)+' MiB · '+manifest.asyncifyWasmChunks.length+' shards');
+  const scriptResponse=await fetch(root+manifest.asyncifyModule,{cache:'no-store'});
+  if(!scriptResponse.ok)throw Error('Missing ONNX Asyncify module · HTTP '+scriptResponse.status+' · '+manifest.asyncifyModule);
+  const jsType=String(scriptResponse.headers.get('content-type')||'').toLowerCase();
+  if(jsType.includes('text/html'))throw Error('Asyncify module route returned HTML rather than JavaScript; staging needs a corrected runtime deployment.');
+  const javascript=await scriptResponse.text();
+  if(javascript.length<1000||/^\s*<(?:!doctype|html)/i.test(javascript))throw Error('Asyncify module is empty or an HTML fallback.');
+  line('ASYNCIFY MODULE PASS · '+manifest.asyncifyModule+' · '+javascript.length+' text bytes');
+  for(let i=0;i<manifest.asyncifyWasmChunks.length;i++){
+    const name=manifest.asyncifyWasmChunks[i],expected='ort-wasm-simd-threaded.asyncify.wasm.part'+i;
+    if(name!==expected)throw Error('Unexpected Asyncify shard '+name);
+    const file=await fetch(root+name,{method:'HEAD',cache:'no-store'});
+    if(!file.ok)throw Error('Missing Asyncify WASM shard '+name+' · HTTP '+file.status);
+    if(String(file.headers.get('content-type')||'').toLowerCase().includes('text/html'))
+      throw Error('Asyncify WASM shard '+name+' returned HTML; expected the binary fragment.');
+  }
+  line('ASYNCIFY WASM SHARDS PASS · '+manifest.asyncifyWasmChunks.length+' available; browser can attempt ONNX inference.');
+}
+async function start(){
+ if(worker)return;
+ if(isMobile){status.textContent='ANDROID_RUNTIME_BLOCKED: the pinned ONNX Asyncify build lacks Blob-backed JSPI external-data loading. Prior 2.42 GB WebGPU initialization repeatedly killed this browser. No worker started; model weights remain cached.';return}
+ log.textContent='';button.disabled=true;stop.disabled=false;cancelled=false;started=performance.now();lastWorkerAt=started;phaseName='starting';sessionReady=false;lastAssetKey='';previousPhase='';printedAssets=0;
+ const spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(MODEL);
+ if(!spec){finish('Registry missing Llama 3.2 3B. Refresh staging.');return}
+ try{
+   if(!navigator.gpu)throw Error('This browser has no WebGPU interface.');
+   const missing=await available(spec);
+   if(missing.length)throw Error('Model not fully downloaded on this origin. Use Download Llama 3.2 3B above, then retry. Missing: '+missing.slice(0,5).join(', '));
+   status.textContent='Checking deployed ONNX WebGPU Asyncify runtime before loading the model';
+   await preflightAsyncify();
+   const companion=await fetch('/app/vendor/transformers-structured-output-v4/stage-manifest.json',{cache:'no-store'});
+   if(!companion.ok)throw Error('Constrained decoding companion was not staged on this deployment.');
+   const manifest=await companion.json();if(manifest.version!=='4.3.1')throw Error('Unexpected companion version: '+manifest.version);
+   worker=new Worker('/app/local-ai/llama32-diagnostic-worker-v4.js?v=1.0.130-resumable-parts',{type:'module'});checkpoint('worker-start',true);sessionTicker=setInterval(tick,1000);tick();
+   worker.onmessage=event=>{
+     const r=event.data||{};
+     if(!pending||r.id!==pending.id)return;
+     if(r.type==='progress')handleProgress(r.progress||{});
+     if(r.type==='token'&&r.token?.text){lastWorkerAt=performance.now();line('TEXT '+String(r.token.text).slice(0,180))}
+     if(r.type==='error'){const error=r.error||{};const p=pending;pending=null;p.reject(Error((error.code||'LOCAL_ERROR')+' at '+(error.phase||'?')+': '+(error.rawMessage||error.message||'unknown')))}
+     if(r.type==='done'){const p=pending;pending=null;p.resolve(r.result)}
+   };
+   worker.onerror=e=>finish('Worker script error at '+phaseName+': '+String(e.message||'unknown'));worker.onmessageerror=()=>finish('Worker transport error at '+phaseName);
+   status.textContent='Pass 1 · free-form draft';
+   line('PASS 1 · free-form Llama 3.2 3B drafting');
+   const goal=$('goal').value.trim().slice(0,1500)||'Learn tarot';
+   const draft=await call(spec,[
+     {role:'system',content:'You are Moss, a concise curriculum planner. Write a short free-form draft containing a learning capability and 3 or 4 progressive modules. Do not use JSON.'},
+     {role:'user',content:goal}
+   ],220);
+   if(!sessionReady)throw Error('Draft returned but ONNX session readiness was never observed.');if(!draft?.text?.trim())throw Error('Draft returned no visible text.');
+   line('DRAFT COMPLETE · '+draft.text.slice(0,2200));
+   status.textContent='Pass 2 · token-constrained JSON compile';
+   line('PASS 2 · compile with 4.3.1 schema token masking; NO fallback to prompt-only JSON');
+   const compiled=await call(spec,[
+     {role:'system',content:'Convert the supplied learning draft to the specified JSON schema. Return a complete object with title, capability, modules (3–4 items with title/outcome), and assumptions (array). Preserve the draft, do not invent learner details. No markdown.'},
+     {role:'user',content:JSON.stringify({goal,draft:draft.text.slice(0,2200),schema:LEARNING_TRIAL_SCHEMA})}
+   ],640,LEARNING_TRIAL_SCHEMA);
+   const checked=validateStrictJson(compiled?.text||'',LEARNING_TRIAL_SCHEMA);
+   if(!compiled?.strictJson||!compiled?.jsonValidated||!checked.ok)throw Error('Strict compilation did not validate: '+checked.errors.join('; '));
+   line('JSON PASS · '+JSON.stringify(checked.value,null,2));
+   line('TIMINGS · free draft '+Number(draft.metrics?.totalMs||0)+' ms · constrained compile '+Number(compiled.metrics?.totalMs||0)+' ms');
+   finish('PASS · both Llama 3.2 3B runs completed, second pass constrained and validated. Model cache preserved.');
+ }catch(error){if(!cancelled){line('FAIL · '+String(error?.message||error));finish('FAIL · '+String(error?.message||error))}}
+}
+button.onclick=start;stop.onclick=()=>{cancelled=true;finish('Stopped by user; worker terminated; model cache preserved.')};
+// Blob-backed range data requires the newer JSPI runtime; do not start
+// an unsafe Asyncify inference session even if earlier diagnostics passed.
+if(isMobile){button.disabled=isMobile;status.textContent='ANDROID_RUNTIME_BLOCKED · Only safe preflight and cache inventory enabled on this device.';}
+// An inventory check must report what this origin actually has rather than
+// claiming that a previously cached 2.42 GB download vanished. Checking
+// CacheStorage response metadata and 8 MiB chunk manifests never creates a GPU
+// session, reads full model weights, or starts a network download.
+async function refreshArtifactStatus(){
+  const selected=spec();
+  if(!selected){dlStatus.textContent='Model registry unavailable. Reopen current staging.';status.textContent='Registry not ready';return}
+  try{
+    const missing=await available(selected);
+    const total=selected.artifacts.filter(row=>row.required).length;
+    const retained=Math.max(0,total-missing.length);
+    if(missing.length){
+      dlStatus.textContent='OFFLINE CACHE INCOMPLETE · '+retained+'/'+total+' required entries found on this origin. Missing/incomplete: '+missing.join(', ')+'. No model weights were loaded. Cached files were not deleted.';
+      status.textContent='Model installation incomplete on this origin. Use existing browser Downloads or import missing files, not another GPU retry.';
+    }else{
+      dlStatus.textContent='OFFLINE CACHE ENTRIES PRESENT · '+total+'/'+total+' required files found, including model weights. No model weights were loaded into RAM; GPU initialization is not verified.';
+      status.textContent=isMobile?'ANDROID_RUNTIME_BLOCKED · 8/8 cached files are present, but the pinned ONNX loader cannot safely start Llama 3B on Android.':'Cached files present. ONNX GPU session readiness is still unverified.';
+    }
+    if(lastAttempt&&Date.now()-Number(lastAttempt.at||0)<172800000)
+      status.textContent+=' Previous session ended uncleanly at '+String(lastAttempt.phase||'unknown')+'.';
+  }catch(error){
+    dlStatus.textContent='CACHE INVENTORY ERROR · '+String(error?.message||error)+'; nothing was deleted or downloaded.';
+    status.textContent='Unable to verify offline model inventory. No GPU session started.';
+  }
+}
+void refreshArtifactStatus();
+</script>
+</body></html>

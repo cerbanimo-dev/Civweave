@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
+globalThis.document={getElementById:()=>null};globalThis.localStorage={getItem:()=>null,setItem(){}};
+const {assertGenerationActive,generationCancelled}=await import('../public/app/cabinets/living-school/living-school-cleanroom-core-v218-base.mjs');
 
 const path='public/app/living-school-local-research-v243.mjs';
 const source=fs.readFileSync(path,'utf8');
@@ -13,7 +15,7 @@ assert.ok(source.includes('Treat every returned note as model-derived and unveri
 
 const transformed=source
   .replace("import * as core from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';","const core=globalThis.__core;")
-  .replace("import {searchDownloadedKnowledge} from './knowledge-school-runtime-v243.mjs?v=subject-links-v266';","const {searchDownloadedKnowledge}=globalThis.__knowledge;")
+  .replace("import {searchDownloadedKnowledge,stageMissingSupplementalForQuery} from './knowledge-school-runtime-v243.mjs?v=topic-gap-recovery-v268';","const {searchDownloadedKnowledge,stageMissingSupplementalForQuery}=globalThis.__knowledge;")
   .replace('export async function researchCapability','async function researchCapability')
   +'\nglobalThis.__livingSchoolResearchTestApi={researchCapability};\n';
 
@@ -24,6 +26,7 @@ const persistRows=[];
 const generateCalls=[];
 let uid=0;
 const core={
+  assertGenerationActive,generationCancelled,
   clean(value,max=12000){return String(value??'').trim().slice(0,max)},
   state(){return state},
   uid(prefix='id'){uid+=1;return `${prefix}-${uid}`},
@@ -61,7 +64,7 @@ const sandbox={
   clearTimeout,
   globalThis:null,
   __core:core,
-  __knowledge:{async searchDownloadedKnowledge(){return[]}},
+  __knowledge:{async searchDownloadedKnowledge(){return[]},async stageMissingSupplementalForQuery(){return{attempted:0,stored:0,cached:0,failed:0,errors:[]}}},
   CivweaveFamilyAILoaderV105:{async ensure(){}},
   CivweaveModelRuntime:runtime
 };
@@ -81,4 +84,41 @@ assert.equal(state.research.mode,'model-derived-unverified');
 assert.equal(state.research.sourceCount,2);
 assert.ok(!persistRows.some(row=>row.type==='living-school-research-unavailable'),'Successful selected-AI fallback must not persist research-unavailable.');
 
-console.log('Living School selected-AI research fallback regression checks passed.');
+
+const localState={sources:[],research:null},localEvents=[];
+let topicRecoveryCalls=0,unexpectedModelCalls=0;
+const localSandbox={
+  ...sandbox,
+  __core:{...core,state(){return localState},persist(type,payload){localEvents.push({type,payload});return payload}},
+  __knowledge:{
+    async searchDownloadedKnowledge(){return[];},
+    async stageMissingSupplementalForQuery(query){
+      topicRecoveryCalls++;
+      assert.match(query,/arcana/i);
+      return{attempted:1,stored:1,cached:0,failed:0,errors:[],rows:[{
+        title:'Major Arcana',articleTitle:'Major Arcana',canonicalUrl:'https://en.wikipedia.org/wiki/Major_Arcana',
+        schoolSlug:'philosophy-and-religion',schoolName:'School of Philosophy and Religion',
+        notes:'The Major Arcana are twenty-two named cards in a tarot deck. The Fool, Magician and High Priestess are examples. Many tarot decks distinguish the Major Arcana from the four-suited Minor Arcana. These symbols and correspondences vary between tarot traditions, so named meanings need to be compared against a specified deck and tradition. An instructional source can explain the visual symbolism and the way the cards are arranged.'
+      }]};
+    }
+  },
+  document:{documentElement:{dataset:{livingSchoolGenerationActive:'true'}},querySelector:()=>null},
+  CivweaveModelRuntime:{
+    readSharedConfig(profile){return profile==='agentic'?{model:'server-auto',provider:'server-auto'}:null},
+    async generate(){unexpectedModelCalls++;throw new Error('Model must not run when downloaded subject sources are usable.')}
+  }
+};
+localSandbox.globalThis=localSandbox;
+vm.runInNewContext(transformed,localSandbox,{filename:path});
+const localPacket=await localSandbox.__livingSchoolResearchTestApi.researchCapability('Understand the Major and Minor Arcana and elemental correspondences',{force:true});
+assert.equal(localPacket.mode,'local-downloaded');
+assert.equal(localPacket.sources.length,1);
+assert.equal(localPacket.sources[0].url,'https://en.wikipedia.org/wiki/Major_Arcana');
+assert.equal(localPacket.sources[0].provenance,'knowledge-school-downloaded');
+assert.equal(topicRecoveryCalls,1);
+assert.equal(unexpectedModelCalls,0);
+assert.ok(localEvents.some(event=>event.type==='living-school-subject-source-recovery'&&event.payload.downloaded===1));
+assert.equal(localState.research.sourceCount,1);
+assert.ok(localEvents.some(event=>event.type==='living-school-subject-source-recovery'&&event.payload.recoveredPassages===1));
+
+console.log('Living School selected-AI research fallback and catalog-backed local gap recovery checks passed.');

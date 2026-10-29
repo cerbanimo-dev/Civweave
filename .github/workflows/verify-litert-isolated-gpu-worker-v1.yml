@@ -1,0 +1,38 @@
+name: Verify isolated LiteRT GPU worker
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/local-ai/litert-gpu-worker-smoke-v1.js'
+      - 'public/app/local-ai/litert-gpu-worker-test-v1.html'
+      - 'public/app/guide-generation-tracker-v1.js'
+      - 'scripts/verify-litert-isolated-gpu-worker-v1.mjs'
+      - '.github/workflows/verify-litert-isolated-gpu-worker-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/local-ai/litert-gpu-worker-smoke-v1.js'
+      - 'public/app/local-ai/litert-gpu-worker-test-v1.html'
+      - 'public/app/guide-generation-tracker-v1.js'
+      - 'scripts/verify-litert-isolated-gpu-worker-v1.mjs'
+      - '.github/workflows/verify-litert-isolated-gpu-worker-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check isolated worker JavaScript syntax
+        run: |
+          node --check public/app/local-ai/litert-gpu-worker-smoke-v1.js
+          node --check scripts/verify-litert-isolated-gpu-worker-v1.mjs
+      - name: Verify GPU limit and complete WASM config contracts
+        run: node scripts/verify-litert-isolated-gpu-worker-v1.mjs

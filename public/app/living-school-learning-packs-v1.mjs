@@ -1,4 +1,4 @@
-import './cabinets/living-school/living-library-panel-v1.js?v=living-library-v1';
+import './cabinets/living-school/living-library-panel-v1.js?v=living-library-v1.2-parent-return';
 import * as packs from './shared/learning-pack-runtime-v1.mjs?v=learning-packs-v1';
 import * as resolver from './shared/learning-pack-resolver-v1.mjs?v=learning-packs-v1';
 import * as labor from './shared/labor-intelligence-core-v1.mjs?v=core-labor-v1';

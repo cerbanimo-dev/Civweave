@@ -85,7 +85,10 @@ includes(fastExtension,'legacyDirectDownloadDisabled:true','LiteRT retired direc
 excludes(fastExtension,'downloadManager.start(','LiteRT must not use the retired multi-gigabyte direct downloader');
 
 const fastRuntime=read(fastRuntimePath);
-includes(fastRuntime,"VERSION='1.3.0-litert-gemma4-fast-runtime-v1-dual-phone-mtp-jspi'",'LiteRT runtime');
+includes(fastRuntime,"VERSION='1.5.0-litert-phone-runtime-v1-qwen35-flagships'",'LiteRT runtime');
+includes(fastRuntime,"const QWEN_FAST='qwen35-4b-litert-web'",'Qwen phone flagship runtime');
+includes(fastRuntime,"const QWEN_DEEP='qwen35-9b-litert-web'",'Qwen phone flagship runtime');
+includes(fastRuntime,'qwen35GemmaRoleBridge:true','Qwen/Gemma role bridge');
 includes(fastRuntime,'oneEngineAtATime:true','LiteRT runtime');
 
 const deep=read(deepPath);

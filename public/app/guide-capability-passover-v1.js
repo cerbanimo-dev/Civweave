@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.3-guide-capability-passover-v1-canonical-prompt';
+const VERSION='1.1.4-guide-capability-passover-v1-explicit-change-requests';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 
@@ -21,8 +21,8 @@ const MODE=Object.freeze({civweave:'Plan','living-school':'Learn',cerbanimo:'Bui
 const DECLARED_KIND=Object.freeze({weave:'campus-weave',curriculum:'learning-path',quest:'quest-draft',resource:'resource-manifest',governance:'governance-draft'});
 const STORE_PREFIX='civweave.guide-capability-passover.v1';
 const STYLE_ID='cw-guide-capability-passover-v1-style';
-const BUILD=/\b(build|create|make|generate|draft|design|develop|structure|prepare|start|plan|produce|write|compose|set up|implement|ship|revise|update|want|need|help)\b/i;
-const DIRECT_CANONICAL=/\b(?:build|create|make|generate|draft|design|develop|structure|prepare|start|plan|produce|write|compose|set up|revise|update|want(?:\s+to)?|need(?:\s+to)?)\s+(?:me\s+|us\s+)?(?:(?:a|an|the|this|that|new)\s+)?(learning journey|endeavou?r|manifest|quest)s?\b/i;
+const BUILD=/\b(build|create|make|generate|draft|design|develop|structure|prepare|start|plan|produce|write|compose|file|submit|set up|implement|ship|revise|update|want|need|help)\b/i;
+const DIRECT_CANONICAL=/\b(?:build|create|make|generate|draft|design|develop|structure|prepare|start|plan|produce|write|compose|file|submit|set up|revise|update|want(?:\s+to)?|need(?:\s+to)?)\s+(?:me\s+|us\s+)?(?:(?:a|an|the|this|that|new)\s+)?(learning journey|endeavou?r|manifest|quest|feature[- ]request|bug report|bug[- ]?fix(?: request)?)s?\b/i;
 const TINY_LOCAL_MODELS=new Set(['smollm2-135m-instruct-q8-wasm','smollm2-360m-instruct-q4f16']);
 let assistantPatched=false;
 let clickBound=false;
@@ -43,6 +43,7 @@ function canonicalTermArtifact(term){
   if(value==='endeavor'||value==='endeavour')return'quest';
   if(value==='manifest')return'resource';
   if(value==='quest')return'weave';
+  if(/^(?:feature[- ]request|bug report|bug[- ]?fix(?: request)?)$/.test(value))return'governance';
   return'';
 }
 function technicalManifestContext(t){return/\b(web|pwa|package|npm|json|xml|app|application|deployment|docker|kubernetes|webmanifest|manifest\.json)\b/.test(t)}

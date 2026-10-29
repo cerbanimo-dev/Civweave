@@ -1,0 +1,26 @@
+name: Verify Staging Guild Worker Recovery
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/guild-release-recovery.html'
+      - 'public/_headers'
+      - 'scripts/verify-staging-guild-worker-recovery-entry-v1.mjs'
+      - '.github/workflows/verify-staging-guild-worker-recovery-v1.yml'
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/guild-release-recovery.html'
+      - 'public/_headers'
+      - 'scripts/verify-staging-guild-worker-recovery-entry-v1.mjs'
+      - '.github/workflows/verify-staging-guild-worker-recovery-v1.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify self-contained root recovery and no data loss
+        run: node scripts/verify-staging-guild-worker-recovery-entry-v1.mjs

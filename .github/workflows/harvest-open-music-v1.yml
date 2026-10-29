@@ -6,6 +6,7 @@ on:
       - main
       - staging
       - 'agent/canonical-playlist-hub-music-*'
+      - 'feature/open-radio-streaming-library-*'
     paths:
       - config/open-music-harvest-v1.json
       - scripts/harvest-open-music-v1.py
@@ -14,7 +15,7 @@ on:
       - scripts/test-open-vocal-music-v2.py
       - .github/workflows/harvest-open-music-v1.yml
   schedule:
-    - cron: '37 5 * * *'
+    - cron: '37 5 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -27,7 +28,7 @@ concurrency:
 jobs:
   harvest:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
         with:
@@ -38,7 +39,7 @@ jobs:
         run: python scripts/test-open-vocal-music-v2.py
       - name: Build rights-cleared vocal music references
         env:
-          OPEN_MUSIC_RESULTS_PER_QUERY: '10'
+          OPEN_MUSIC_RESULTS_PER_QUERY: '35'
           OPEN_MUSIC_WORKERS: '6'
         run: python scripts/harvest-open-vocal-music-v2.py
       - name: Commit validated vocal batch and lazy manifest

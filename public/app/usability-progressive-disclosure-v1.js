@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-usability-progressive-disclosure-v1';
+const VERSION='1.0.2-primary-civic-work-map';
 const WORKING_KEY='civweave.working-campus.v1';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const STYLE_ID='cw-usability-progressive-disclosure-v1-style';
@@ -181,7 +181,9 @@ function syncAnarchadia(){
     if(proposal||governed){const primary=document.createElement('div');primary.className='cw-pd-civic-primary';grid.parentNode.insertBefore(primary,grid);if(proposal)primary.append(proposal);if(governed&&governed!==proposal)primary.append(governed)}
     wrap(grid,{id:'anarchadia-civic-tools',kicker:'Less frequent',label:'More civic tools',open:false});
   }
-  const pulse=q('.ac-pulse');if(pulse){const count=Number(text(q('#ac-proposal-count')))||0;wrap(pulse,{id:'anarchadia-civic-pulse',kicker:'Community status',label:'Civic pulse',open:count>0,forceOpen:count>0})}
+  // The primary work map includes navigation and next actions. Only the old
+  // optional status pulse follows the reference disclosure policy.
+  const pulse=q('.ac-pulse:not(.ac-civic-flow)');if(pulse){const count=Number(text(q('#ac-proposal-count')))||0;wrap(pulse,{id:'anarchadia-civic-pulse',kicker:'Community status',label:'Civic pulse',open:count>0,forceOpen:count>0})}
 }
 
 function sync(){

@@ -6,14 +6,14 @@
 // service worker is still controlling the page and serving the v324 Settings
 // gateway. Displaying saved state never waits on the model manager, caches,
 // service-worker readiness, GPU detection, or inference code.
-const VERSION='1.1.5-settings-local-route-v326-local-selection-authority';
+const VERSION='1.1.6-settings-local-route-v326-llama32-download';
 const REVISION='settings-v325-parent-source-recovery-v4-local-selection-authority';
 const ROUTE='downloaded-local';
 const LAYER_ID='cw-settings-v320';
-const DIRECT_VERSION='1.1.0-settings-v325-direct-local-models-stable-actions';
-const DIRECT_SRC='/app/settings-local-models-direct-v325.js?v=1.1.0-stable-in-place-actions';
-const FULL_ROUTE='/app/settings-local-route-v327.js?v=1.1.4-settings-local-route-v325-parent-bridge';
-const ACTION_ROUTE='/app/settings-local-route-v331.js?cwAction=1&v=settings-v325-parent-action-v1';
+const DIRECT_VERSION='1.2.3-settings-v325-direct-local-models-qwen-import-owner';
+const DIRECT_SRC='/app/settings-local-models-direct-v325.js?v=1.2.3-qwen-import-owner';
+const FULL_ROUTE='/app/settings-local-route-v327.js?v=1.1.5-qwen-phone-fast';
+const ACTION_ROUTE='/app/settings-local-route-v331.js?cwAction=1&v=1.2.3-qwen-import-owner';
 const STATUS_PLACEMENT_VERSION='1.0.1-settings-local-progress-card-owned-direct-aware';
 const STATUS_PLACEMENT_SRC='/app/settings-local-progress-placement-v1.js?v=1.0.1-settings-local-progress-card-owned-direct-aware';
 const PANEL_ID='cw-local-ai-v325-parent';

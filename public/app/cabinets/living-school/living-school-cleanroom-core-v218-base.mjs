@@ -1,6 +1,6 @@
 import * as gate from '../../services/living-school/modules/project-gate.mjs';
 
-export const VERSION='living-school-cleanroom-v218.1-research-first-curriculum';
+export const VERSION='living-school-cleanroom-v218.4-complete-course-gate';
 export const STATE_KEY='civweave.living-school.cabinet.v151';
 const OLD_KEY='civweave.living-school.cabinet.v150';
 const INTAKE_KEY='civweave.living-school.intake.v152';
@@ -14,6 +14,11 @@ const progressLabel=document.getElementById('lsc218-progress-label');
 const progressBar=document.getElementById('lsc218-progress-bar');
 
 export const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
+export function generationCancelled(error,options={}){return Boolean(options.signal?.aborted||error?.name==='AbortError'||error?.code==='CANCELLED')}
+export function assertGenerationActive(options={},result=null){
+  if(options.signal?.aborted){options.signal.throwIfAborted?.();const error=new Error('Learning Journey materialization cancelled.');error.name='AbortError';throw error}
+  if(String(result?.status||'').toLowerCase()==='cancelled'){const error=new Error(clean(result?.error?.message,1200)||'Learning Journey materialization cancelled.');error.name='AbortError';throw error}
+}
 export const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 export const now=()=>new Date().toISOString();
 export const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
@@ -47,7 +52,9 @@ function quizBank(index,title,capability){
 }
 export function isDeterministicQuizQuestion(question,index=-1){
   const id=clean(question?.id,160),provenance=clean(question?.provenance,120).toLowerCase();
-  if(provenance==='deterministic-compiler'||/-fallback-\d+$/i.test(id))return true;
+  if(provenance==='deterministic-compiler')return true;
+  if(provenance==='ai-generated')return false;
+  if(/-fallback-\d+$/i.test(id))return true;
   if(index<0)return false;
   const match=id.match(/^m(\d+)-(.+)$/i);
   return Boolean(match&&Number(match[1])===index+1&&DETERMINISTIC_QUIZ_IDS.has(match[2].toLowerCase()));
@@ -142,7 +149,7 @@ export function freshState(){
   return{
     schema:'living-school-cabinet-v151',runtimeSchema:VERSION,version:4,appVersion:VERSION,
     school:null,sources:[],research:null,activeModuleId:'module-1',progress:{},practicum:null,visualInspection:null,
-    projectGate:freshGate(),receipts:[],final:null,credential:null,
+    projectGate:freshGate(),receipts:[],final:null,credential:null,learningHistory:[],
     activePathId:'',pathContext:null,
     passport:{learnerId:uid('learner'),displayName:'Local learner',xp:0,ledger:[]},
     settings:{modelRoute:'shared',mode:'guided'},events:[]
@@ -155,6 +162,7 @@ export function normalizeState(value){
   next.sources=Array.isArray(source.sources)?source.sources:[];
   next.progress=source.progress&&typeof source.progress==='object'?source.progress:{};
   next.receipts=Array.isArray(source.receipts)?source.receipts:[];
+  next.learningHistory=Array.isArray(source.learningHistory)?source.learningHistory:[];
   next.events=Array.isArray(source.events)?source.events.slice(-300):[];
   next.passport={...base.passport,...(source.passport||{}),ledger:Array.isArray(source.passport?.ledger)?source.passport.ledger.slice(-800):[]};
   next.settings={...base.settings,...(source.settings||{})};
@@ -186,7 +194,14 @@ export function setProgress(percent){if(progressLabel)progressLabel.textContent=
 export const activeModule=()=>currentState.school?.modules?.find(item=>item.id===currentState.activeModuleId)||currentState.school?.modules?.[0]||null;
 export const progressFor=moduleId=>currentState.progress[moduleId]||{lessonComplete:false,assessmentPassed:false,attempts:[],evidence:[]};
 export const completedModules=()=>currentState.school?.modules?.filter(item=>progressFor(item.id).assessmentPassed).length||0;
-export const finalUnlocked=()=>gate.canUnlockFinalTest?.(currentState.projectGate)||Boolean(currentState.projectGate?.status==='accepted'&&currentState.projectGate?.lastReceipt);
+export function allModuleAssessmentsPassed(){
+  const modules=currentState.school?.modules||[],ids=modules.map(module=>clean(module?.id,180));
+  return Boolean(ids.length&&ids.every(Boolean)&&new Set(ids).size===ids.length&&ids.every(id=>currentState.progress[id]?.assessmentPassed===true));
+}
+export function finalUnlocked(){
+  const project=currentState.projectGate,receipt=project?.lastReceipt,schoolId=clean(currentState.school?.id,180),practicumId=clean(currentState.practicum?.id,180),requestId=clean(project?.requestId,180);
+  return Boolean(allModuleAssessmentsPassed()&&schoolId&&practicumId&&requestId&&gate.canUnlockFinalTest(project)&&receipt?.status==='accepted'&&receipt.schoolId===schoolId&&receipt.projectRef===practicumId&&project.projectRef===practicumId&&receipt.requestId===requestId);
+}
 export function award(amount,reason,ref){currentState.passport={...currentState.passport,xp:Number(currentState.passport.xp||0)+amount,ledger:[...(currentState.passport.ledger||[]),{id:uid('xp'),amount,reason,ref,at:now()}].slice(-800)}}
 export function progressPercent(){
   const modules=currentState.school?.modules||[],count=Math.max(1,modules.length);
@@ -197,9 +212,36 @@ export function availablePaths(){
   const map=new Map(),intake=readJson(INTAKE_KEY,[]);
   for(const item of Array.isArray(intake)?intake:[]){const id=clean(item?.sourcePlanId||item?.intentionId||item?.id,180);if(!id)continue;map.set(id,{id,title:clean(item.title||item.capability||'Learning path',180),capability:clean(item.purpose||item.capability||item.title,1200),proof:clean(item.completionCriteria||item.proof||'A fresh demonstration and reviewable evidence.',2000),state:clean(item.status||item.state||'ready',80)})}
   const intentions=readJson(INTENTION_KEY,[]);
-  for(const item of Array.isArray(intentions)?intentions:[]){const plan=item.plan&&typeof item.plan==='object'?item.plan:item,candidates=Array.isArray(plan.paths)?plan.paths:Object.values(plan.paths||{}),route=candidates.find(candidate=>candidate?.realm==='living-school'),id=clean(plan.id||item.id,180);if(!route||!id||map.has(id))continue;map.set(id,{id,title:clean(route.title||plan.title||'Learning path',180),capability:clean(route.purpose||plan.outcome||plan.wish||route.title,1200),proof:clean(route.completionCriteria||plan.completionCriteria||'A fresh demonstration and reviewable evidence.',2000),state:clean(plan.state||item.state||'review',80)})}
+  for(const item of Array.isArray(intentions)?intentions:[]){
+    const plan=item.plan&&typeof item.plan==='object'?item.plan:item,candidates=(Array.isArray(plan.paths)?plan.paths:Object.values(plan.paths||{})).filter(candidate=>candidate?.realm==='living-school'),weaveId=clean(plan.id||item.id,180);if(!weaveId)continue;
+    candidates.forEach((route,index)=>{const id=index===0?weaveId:`${weaveId}:${clean(route.id,180)}`;map.set(id,{id,...weavePathIdentity({weaveId,pathId:route.id}),title:clean(route.title||plan.title||'Learning path',180),capability:clean(route.purpose||plan.outcome||plan.wish||route.title,1200),proof:clean(route.completionCriteria||plan.completionCriteria||'A fresh demonstration and reviewable evidence.',2000),state:clean(plan.state||item.state||'review',80)})});
+  }
   if(currentState.pathContext?.id&&!map.has(currentState.pathContext.id))map.set(currentState.pathContext.id,currentState.pathContext);
   return[...map.values()];
+}
+// Only explicit route IDs can link learning proof to a saved, activated Quest.
+// Campus focus, titles, and the last Passport handoff are not identity authority.
+export function weavePathIdentity(candidate={}){
+  const weaveId=clean(candidate?.weaveId,180),pathId=clean(candidate?.pathId,180);
+  if(!weaveId||!pathId)return{};
+  const intentions=readJson(INTENTION_KEY,[]),item=(Array.isArray(intentions)?intentions:[]).find(item=>clean(item?.plan?.id||item?.id,180)===weaveId),plan=item?.plan&&typeof item.plan==='object'?item.plan:item;
+  if(!plan||!['active','completed'].includes(clean(plan.state||item?.state,80)))return{};
+  const paths=Array.isArray(plan.paths)?plan.paths:Object.values(plan.paths||{});
+  return paths.some(path=>clean(path?.id,180)===pathId&&path?.realm==='living-school')?{weaveId,pathId}:{};
+}
+export function selectRoutedQuestPath(candidate={}){
+  const identity=weavePathIdentity(candidate);if(!identity.weaveId)return false;
+  const path=availablePaths().find(row=>row.weaveId===identity.weaveId&&row.pathId===identity.pathId);if(!path)return false;
+  if(currentState.activePathId===path.id&&currentState.pathContext?.weaveId===identity.weaveId&&currentState.pathContext?.pathId===identity.pathId)return true;
+  currentState.activePathId=path.id;currentState.pathContext=path;currentState.settings={...currentState.settings,selectedJourneyPlanId:''};
+  persist('learning-path-selected',{pathId:path.id,weaveId:identity.weaveId,questPathId:identity.pathId,source:'quest-pathway-map'});return true;
+}
+export function curriculumWeaveIdentity(input={}){
+  if(input.weaveId||input.pathId)return weavePathIdentity(input);
+  if(input.newPath===true||input.intent==='new'||input.replaceExisting===true)return{};
+  const capability=clean(input.capability,2400),selected=currentState.pathContext;
+  if(capability&&currentState.activePathId&&selected?.id===currentState.activePathId&&capability===clean(selected.capability,2400))return weavePathIdentity(selected);
+  return capability&&capability===clean(currentState.school?.capability,2400)?weavePathIdentity(currentState.school):{};
 }
 
 const cssEscape=name=>globalThis.CSS?.escape?globalThis.CSS.escape(name):String(name).replace(/[\\"]/g,'\\$&');

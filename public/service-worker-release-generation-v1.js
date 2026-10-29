@@ -1,8 +1,12 @@
 'use strict';
 (()=>{
-const REVISION='release-generation-boundary-v3-decentralized-guild-release-20260917';
-const CACHE='cw-live-runtime-release-generation-v3-20260917';
+const REVISION='release-generation-boundary-v9-navigation-response-stream';
+const CACHE='cw-live-runtime-release-generation-v6-20261021';
 const CACHE_PREFIX='cw-live-runtime-release-generation-';
+const ORIGIN_CACHE_PREFIXES=Object.freeze([CACHE_PREFIX,'civweave-shell-','civweave-runtime-','civweave-offline-']);
+// Must not treat an unsigned/partial Guild cache as the origin's installed release.
+// Require every current executable path to be warmed before pruning the old
+// complete runtime generation; four entry documents alone are insufficient.
 const GUILD_CACHE_PREFIX='cw-guild-release-v1-';
 const DB_NAME='civweave-decentralized-release-v1';
 const DB_VERSION=1;
@@ -29,7 +33,27 @@ const WARM_PATHS=Object.freeze([
   '/app/five-system-direct-navigation-v1.js',
   '/app/persistent-system-context-v1.js',
   '/app/persistent-shell-actions-v1.js',
+  '/app/generation-lifecycle-v2.js',
   '/app/subsystem-avatar-state-v347.js',
+  '/app/settings-local-route-v331.js',
+  '/app/settings-local-loader-v337.js',
+  '/app/settings-local-route-v325.js',
+  '/app/settings-gateway-v317.js',
+  '/app/shared-guide-surface-v236.js',
+  '/app/guide-chat-surface-v350.js',
+  '/app/local-ai/gemma4-current-registry-authority-v1.js',
+  '/app/local-ai/gemma4-structured-quest-completion-v1.js',
+  '/app/local-ai/gemma4-litert-request-authority-v1.js',
+  '/app/local-ai/gemma4-structured-quest-compact-envelope-v1.js',
+  '/app/local-ai/gemma4-structured-task-authority-v1.js',
+  '/app/local-ai/gemma4-weave-draft-pipeline-v1.js',
+  '/app/local-ai/gemma4-first-request-intake-bridge-v1.js',
+  '/app/local-ai/gemma4-route-integrity-v1.js',
+  '/app/local-ai/gemma4-learning-plan-entry-authority-v1.js',
+  '/app/generation-failure-inspector-v1.js',
+  '/app/human-message-bubble-v1.js',
+  '/app/human-chat-network-v1.js',
+  '/app/human-chat-guild-context-v1.js',
   '/app/platform-experience-v160.css',
   '/app/working-campus-v440.html',
   '/app/realm-console-v140.html',
@@ -158,6 +182,27 @@ async function setGuildConfig(input={}){
   return config;
 }
 async function guildConfig(){return await dbGet('guild')||null}
+const guildCompatibility=new Map();
+async function activeGuildRelease(){
+  const active=await dbGet('activeRelease');
+  if(!active?.cacheName)return null;
+  if(guildCompatibility.has(active.cacheName))return guildCompatibility.get(active.cacheName)?active:null;
+  let complete=true;
+  try{
+    const cache=await caches.open(active.cacheName);
+    for(const pathname of WARM_PATHS){
+      const response=await cache.match(cacheKey(pathname),{ignoreSearch:true});
+      if(!valid(response,pathname)){complete=false;break}
+    }
+  }catch{complete=false}
+  guildCompatibility.set(active.cacheName,complete);
+  if(!complete){
+    await dbDelete('activeRelease').catch(()=>{});
+    try{await notifyClients({type:'CIVWEAVE_GUILD_RELEASE_INCOMPATIBLE',releaseId:active.releaseId||'',cacheName:active.cacheName,requiredGeneration:REVISION})}catch{}
+    return null;
+  }
+  return active;
+}
 async function remoteTrustBundle(guild){
   const response=await boundedFetch(new Request(`${guild.origin}/api/civweave-trust/bundle`,{cache:'no-store'}),NETWORK_TIMEOUT_MS);
   if(response.status===404)return{schema:TRUST_BUNDLE_SCHEMA,delegations:[],revocations:[]};
@@ -275,6 +320,7 @@ async function installGuildRelease(guild,manifest){
       await cache.put(cacheKey(pathname),response.clone());
     }
     await dbPut('activeRelease',{schema:'civweave.active-guild-release.v1',releaseId:manifest.releaseId,cacheName,signerKeyId:manifest.signerKeyId,activatedAt:new Date().toISOString(),guildOrigin:guild.origin});
+    guildCompatibility.set(cacheName,true);
     const names=await caches.keys();
     await Promise.all(names.filter(name=>name.startsWith(GUILD_CACHE_PREFIX)&&name!==cacheName&&name!==stagingName).map(name=>caches.delete(name)));
     return{releaseId:manifest.releaseId,cacheName};
@@ -303,27 +349,35 @@ async function checkGuildRelease({force=false}={}){
 async function notifyClients(message){
   try{for(const client of await self.clients.matchAll({type:'window',includeUncontrolled:true}))client.postMessage(message)}catch{}
 }
-async function activeGuildResponse(pathname,method){
-  const guild=await guildConfig();
-  if(!guild)return null;
-  const active=await dbGet('activeRelease');
-  if(active?.cacheName){
-    const response=await(await caches.open(active.cacheName)).match(cacheKey(pathname),{ignoreSearch:true});
-    if(valid(response,pathname))return method==='HEAD'?head(response):response;
-  }
-  const fresh=await freshCached(pathname,method);
-  if(fresh)return fresh;
-  const legacy=await legacyFallback(pathname,method);
-  if(legacy)return legacy;
-  return new Response('Civweave is connected to a Guild, but this runtime asset is not present in a verified Guild release on this device.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION}});
+async function activeGuildResponse(pathname,method,active){
+  if(!active?.cacheName)return null;
+  const response=await(await caches.open(active.cacheName)).match(cacheKey(pathname),{ignoreSearch:true});
+  if(valid(response,pathname))return method==='HEAD'?head(response):response;
+  return new Response('The active signed Guild release is incomplete for this runtime generation.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION,'x-civweave-guild-release':String(active.releaseId||'')}});
 }
 async function network(request,pathname){
+  // A navigation-mode Request is not equivalent to the normal same-origin
+  // resource fetch used by the browser's recovery diagnostic. Some installed
+  // mobile workers fail the nested navigation-mode fetch with ERR_FAILED even
+  // when a regular fetch of the identical document returns HTTP 200.
+  // Fetch current origin bytes as a standard same-origin GET; the signed
+  // Guild release path is checked BEFORE this function can be invoked.
+  let response;
   try{
-    const response=await boundedFetch(request,NETWORK_TIMEOUT_MS);
+    const source=request.mode==='navigate'
+      ?new Request(cacheKey(pathname),{method:'GET',cache:'no-store',credentials:'same-origin'})
+      :request;
+    response=await boundedFetch(source,NETWORK_TIMEOUT_MS);
     if(!valid(response,pathname))return null;
-    if(request.method==='GET')await(await caches.open(CACHE)).put(cacheKey(pathname),response.clone());
-    return request.method==='HEAD'?head(response):response;
   }catch{return null}
+  if(request.method==='GET'){
+    // A full browser storage quota may prevent this redundant shell write.
+    // Never discard successfully fetched executable HTML because a Cache
+    // Storage write failed; model caches must not be touched to make room.
+    try{await(await caches.open(CACHE)).put(cacheKey(pathname),response.clone())}
+    catch(error){try{console.warn('[Civweave release] Origin shell cache write failed; serving verified network response.',error?.message||error)}catch{}}
+  }
+  return request.method==='HEAD'?head(response):response;
 }
 async function freshCached(pathname,method){
   const response=await(await caches.open(CACHE)).match(cacheKey(pathname),{ignoreSearch:true});
@@ -331,19 +385,38 @@ async function freshCached(pathname,method){
   return method==='HEAD'?head(response):response;
 }
 async function legacyFallback(pathname,method){
-  const response=await caches.match(cacheKey(pathname),{ignoreSearch:true});
-  if(!valid(response,pathname))return null;
-  return method==='HEAD'?head(response):response;
+  // The current installed, same-origin shell is a valid *pre-cutover*
+  // fallback. Search only known origin-created runtime caches. A global
+  // caches.match could inadvertently serve fragments of a partial or revoked
+  // signed Guild release, defeating complete-release cutover.
+  const key=cacheKey(pathname);
+  for(const name of await caches.keys()){
+    if(!ORIGIN_CACHE_PREFIXES.some(prefix=>name.startsWith(prefix)))continue;
+    try{
+      const response=await(await caches.open(name)).match(key,{ignoreSearch:true});
+      if(valid(response,pathname)&&!response.headers.has('x-civweave-guild-release'))
+        return method==='HEAD'?head(response):response;
+    }catch{}
+  }
+  return null;
 }
 async function responseFor(request,pathname){
-  if(await guildConfig())return activeGuildResponse(pathname,request.method);
+  const guild=await guildConfig();
+  if(guild){
+    const active=await activeGuildRelease();
+    if(active)return activeGuildResponse(pathname,request.method,active);
+  }
+  // A selected Guild does not become exclusive application transport until a complete signed release is installed.
+  // This keeps legacy/partially-upgraded Guilds from pinning clients to incomplete shell generations.
+  const realm=request.mode==='navigate'?self.CivweaveFiveSystemPagesV1?.responseFor?.(request):null;
+  if(realm)return realm;
   const live=await network(request,pathname);
   if(live)return live;
   const fresh=await freshCached(pathname,request.method);
   if(fresh)return fresh;
   const legacy=await legacyFallback(pathname,request.method);
   if(legacy)return legacy;
-  return new Response('Civweave runtime asset is unavailable offline on this device.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION}});
+  return new Response(guild?'The selected Guild has no compatible signed release, and the existing origin install could not be loaded. Reopen Civweave online to repair the installed shell. Do not clear app storage or cached models.':'Civweave runtime asset is unavailable offline on this device. Reopen online to repair the installed shell without clearing app storage.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION,'x-civweave-recovery':'origin-install-missing'}});
 }
 async function warmOne(cache,pathname){
   try{
@@ -354,10 +427,15 @@ async function warmOne(cache,pathname){
     return pathname;
   }catch{return null}
 }
-async function warm(){
-  if(await guildConfig()){
-    await checkGuildRelease({force:true}).catch(()=>null);
-    return[];
+async function warm({guildChecked=false}={}){
+  const guild=await guildConfig();
+  if(guild){
+    // A selected Guild is only exclusive after a fully verified, compatible
+    // signed release is installed. Legacy/mobile Guilds may have no release
+    // endpoint. Previously returning [] here left the origin's new live
+    // cache empty; activation then erased its previous working shell.
+    if(!guildChecked)await checkGuildRelease({force:true}).catch(()=>null);
+    if(await activeGuildRelease())return[];
   }
   const cache=await caches.open(CACHE),queue=[...WARM_PATHS],warmed=[];
   async function worker(){
@@ -370,26 +448,33 @@ async function warm(){
   await Promise.all(Array.from({length:count},()=>worker()));
   return warmed;
 }
+async function originFallbackReady(){
+  // The new release must be usable before deleting any old origin-shell
+  // fallback. Opening an offline PWA with an unsigned selected Guild must
+  // never erase its only installed executable entrypoint.
+  for(const path of WARM_PATHS)if(!await freshCached(path,'GET'))return false;
+  return true;
+}
 async function purgeStaleRuntimeEntries(){
-  const names=await caches.keys();
   const active=await dbGet('activeRelease');
-  for(const name of names){
-    if(name===CACHE||name===active?.cacheName)continue;
+  const signedReady=Boolean(active&&await activeGuildRelease());
+  if(!signedReady&&!await originFallbackReady())return;
+  for(const name of await caches.keys()){
+    if(name===CACHE||name===active?.cacheName||name===self.CivweaveFiveSystemPagesV1?.cache)continue;
     if(name.startsWith(CACHE_PREFIX)){await caches.delete(name);continue;}
     if(name.startsWith(GUILD_CACHE_PREFIX)){await caches.delete(name);continue;}
-    const cache=await caches.open(name);
-    const requests=await cache.keys();
-    await Promise.all(requests.map(async request=>{
-      let url;try{url=new URL(request.url)}catch{return}
-      if(url.origin!==self.location.origin||!ownedRuntimePath(url.pathname))return;
-      await cache.delete(request,{ignoreSearch:true});
-    }));
+    // Installed origin shell, offline campus, and independently managed
+    // model caches are never invalidated by a Guild release check. Separate
+    // versioned package managers own their own asset lifecycle.
   }
 }
 async function activationRepair(){
+  // A Guild with no signed package must retain its current origin shell
+  // while we attempt to refresh it. Avoid erasing caches before a safe
+  // replacement exists, including when the network is unavailable.
   await purgeStaleRuntimeEntries();
   if(await guildConfig())await checkGuildRelease({force:true}).catch(()=>null);
-  await new Promise(resolve=>setTimeout(resolve,750));
+  if(!await activeGuildRelease()&&!await originFallbackReady())await warm({guildChecked:true}).catch(()=>[]);
   await purgeStaleRuntimeEntries();
   await self.clients.claim();
 }
@@ -398,6 +483,7 @@ self.addEventListener('activate',event=>event.waitUntil(activationRepair()));
 self.addEventListener('message',event=>{
   const data=event.data||{};
   if(data.type==='CIVWEAVE_GUILD_RELEASE_CONFIG')event.waitUntil((async()=>{const config=await setGuildConfig(data.selection||data);await checkGuildRelease({force:true}).catch(error=>notifyClients({type:'CIVWEAVE_GUILD_RELEASE_ERROR',error:String(error?.message||error)}));return config})());
+  if(data.type==='CIVWEAVE_GUILD_RELEASE_CLEAR')event.waitUntil((async()=>{await dbDelete('guild').catch(()=>{});await dbDelete('activeRelease').catch(()=>{});guildCompatibility.clear();await notifyClients({type:'CIVWEAVE_GUILD_RELEASE_STATUS',result:{ok:true,reason:'release-source-cleared'}})})());
   if(data.type==='CIVWEAVE_RELEASE_TRUST_ANCHOR'&&data.explicit===true)event.waitUntil((async()=>{const anchor=await addAnchor(data.anchor||{});await notifyClients({type:'CIVWEAVE_RELEASE_TRUST_CHANGED',action:'added',keyId:anchor.keyId});await checkGuildRelease({force:true}).catch(()=>null)})());
   if(data.type==='CIVWEAVE_RELEASE_TRUST_REMOVE'&&data.explicit===true)event.waitUntil((async()=>{const removed=await removeAnchor(clean(data.keyId,180));await notifyClients({type:'CIVWEAVE_RELEASE_TRUST_CHANGED',action:'removed',keyId:clean(data.keyId,180),removed})})());
   if(data.type==='CIVWEAVE_GUILD_RELEASE_CHECK')event.waitUntil(checkGuildRelease({force:true}).then(result=>notifyClients({type:'CIVWEAVE_GUILD_RELEASE_STATUS',result})).catch(error=>notifyClients({type:'CIVWEAVE_GUILD_RELEASE_ERROR',error:String(error?.message||error)})));
@@ -412,7 +498,25 @@ self.addEventListener('fetch',event=>{
   if(request.mode==='navigate'&&!(pathname==='/'||pathname==='/index.html'||OWNED_PREFIXES.some(prefix=>pathname.startsWith(prefix))))return;
   event.stopImmediatePropagation();
   if(request.mode==='navigate')event.waitUntil(checkGuildRelease().catch(()=>null));
-  event.respondWith(responseFor(request,pathname));
+  // Never reject a navigation's respondWith promise: in Chromium this is
+  // surfaced as a blank ERR_FAILED page even when the origin itself is up.
+  // This response is a recovery message, not an unsigned release cutover.
+  event.respondWith(Promise.resolve().then(()=>responseFor(request,pathname)).then(response=>{
+    // Pages clean-URL redirects leave redirect history on fetched and cached
+    // Responses. Fetch rejects that history for a navigation's manual redirect
+    // mode after respondWith resolves, outside the promise catch below. Rewrap
+    // the existing body stream without buffering HTML or altering signed bytes.
+    if(request.mode!=='navigate'||!response.redirected)return response;
+    const headers=new Headers(response.headers);
+    headers.delete('content-length');headers.delete('content-encoding');
+    return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+  }).catch(error=>{
+    const reason=String(error?.message||error||'unknown error').slice(0,280);
+    try{console.warn('[Civweave release] Navigation boundary failure',pathname,reason)}catch{}
+    if(request.mode!=='navigate')return new Response('Civweave runtime request failed: '+reason,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION}});
+    const body='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Civweave navigation recovery</title></head><body style="font:16px/1.5 system-ui;background:#07131e;color:#e8f5fc;padding:28px"><h1>Civweave could not open this page</h1><p>The installed Guild release boundary encountered a navigation error. Your models and saved data were not changed.</p><p><a style="color:#9eeeff" href="/guild-release-recovery.html">Open non-destructive service-worker recovery</a></p><p>Diagnostic: '+reason.replace(/[<>&"']/g,'')+'</p></body></html>';
+    return new Response(body,{status:503,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION,'x-civweave-navigation-recovery':'worker-failure'}});
+  }));
 });
-self.CivweaveReleaseGenerationV1=Object.freeze({revision:REVISION,cache:CACHE,warmPaths:[...WARM_PATHS],networkTimeoutMs:NETWORK_TIMEOUT_MS,warmTimeoutMs:WARM_TIMEOUT_MS,warmConcurrency:WARM_CONCURRENCY,policy:'guild-selected-means-guild-only-signed-release-transport-local-trust-anchors-delegated-partner-keys-no-central-key-or-release-fallback'});
+self.CivweaveReleaseGenerationV1=Object.freeze({revision:REVISION,cache:CACHE,warmPaths:[...WARM_PATHS],networkTimeoutMs:NETWORK_TIMEOUT_MS,warmTimeoutMs:WARM_TIMEOUT_MS,warmConcurrency:WARM_CONCURRENCY,policy:'complete-signed-guild-release-is-exclusive-transport-legacy-or-incomplete-guilds-remain-on-current-origin-release-until-compatible-cutover'});
 })();

@@ -17,3 +17,9 @@ jobs:
           node-version: '22'
       - name: Verify startup and human chat contracts
         run: node scripts/verify-living-school-startup-human-chat-v1.mjs
+      - name: Verify persistent content cannot recreate parent human chrome
+        run: node --test scripts/test-persistent-human-chrome-v1.mjs
+      - name: Verify pending chat observers release the UI thread
+        run: node --test scripts/test-chat-observer-work-v1.mjs
+      - name: Verify chat launchers and responsive window chrome
+        run: node --test scripts/test-chat-chrome-layout-v1.mjs

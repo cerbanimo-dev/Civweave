@@ -55,7 +55,10 @@
       "humanValidationNeuronClient": "public/app/human-validation-neuron-client-v1.js",
       "humanValidationNeuronPolicy": {
         "requestNeurons": 30,
-        "validatorCounts": [2, 3],
+        "validatorCounts": [
+          2,
+          3
+        ],
         "twoValidatorShareNeurons": 15,
         "threeValidatorShareNeurons": 10,
         "unusedSourceCapacityRollsOver": false,
@@ -194,6 +197,32 @@
       "bootstrap": "public/app/local-ai/bootstrap-v266.js",
       "rule": "Settings may manage downloaded models but must never start inference on open."
     },
+    "guild-quest-publication": {
+      "capability": "Explicit member submission and shared Guild viewing of saved Weaveling Quests",
+      "owner": "cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs",
+      "browserOwner": "public/app/guild-quest-client-v1.js",
+      "canonicalApi": "globalThis.CivweaveGuildQuestsV1",
+      "canonicalRoute": "/api/node/quests",
+      "presentationCaller": "public/app/cerbanimo-intention-landscape-v1.js",
+      "authenticationOwner": "public/app/host-node-session-v1.js",
+      "cloudAdapters": [
+        "cloudflare/node-cloud/src/server-ai-entry-v6.mjs",
+        "cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs"
+      ],
+      "executableContracts": [
+        "scripts/test-guild-quest-publications-v1.mjs",
+        "scripts/test-guild-quest-publication-ui-v1.mjs"
+      ],
+      "rules": [
+        "Any currently authenticated member may explicitly submit a saved Weaveling weave-plan to their own Guild.",
+        "The Guild authority assigns the publishing member, destination, publication identifier, and revision; client identity fields never grant authority.",
+        "Only the publishing member may revise or withdraw a publication, and stale revisions fail visibly.",
+        "Shared Quest records contain an allowlisted snapshot, never original conversation, private wish, evidence, profile, session token, or credential fields.",
+        "Local drafts remain device-owned and never become published merely because a Guild is selected.",
+        "The browser transport reuses host-node sessions and owns no parallel membership or publication store.",
+        "Both existing Guild deployment adapters execute the same portable publication domain contract."
+      ]
+    },
     "host-node-access": {
       "capability": "Device-bound Guild login, capacity sessions, membership admission, and neuron quota telemetry",
       "owner": "public/app/host-node-session-v1.js",
@@ -262,7 +291,103 @@
     },
     "review": {
       "capability": "Shared review surface and review handoffs",
-      "owner": "public/app/shared-review-surface-v234.js"
+      "owner": "public/app/shared-review-surface-v234.js",
+      "presentationHelper": "public/app/shared/guide-outcome-scene-v1.js",
+      "presentationStyles": "public/app/shared/guide-outcome-scene-v1.css",
+      "presentationApi": "globalThis.CivweaveGuideOutcomeSceneV1",
+      "allowedPresentationCallers": [
+        "public/app/shared-review-surface-v234.js",
+        "public/app/cerbanimo-quest-engine-v144.js",
+        "public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs",
+        "public/app/services/fellowfare/marketplace-v2.js",
+        "public/app/anarchadia-console-v158.js"
+      ],
+      "presentationRules": [
+        "Capability owners supply corroborated persisted receipt IDs and scoped outcomes; the helper never accepts work or grants rewards.",
+        "Replay, Stop, map focus, and refresh do not invoke AI, publish, vote, transfer, or change review state.",
+        "Canonical reward append events animate only a new persisted eligible grant for the current account; bootstrap, duplicates, migrations, and failed writes remain silent.",
+        "An installed child delegates reward presentation only to its exact same-origin persistent parent; no duplicate child toast.",
+        "Finite motion, reduced-motion support, Lud text presentation, and stable same-receipt DOM survive redraws."
+      ],
+      "questMapPresentationHelper": "public/app/shared/quest-pathway-map-v1.js",
+      "questMapPresentationStyles": "public/app/shared/quest-pathway-map-v1.css",
+      "questMapPresentationApi": "globalThis.CivweaveQuestPathwayMapV1",
+      "allowedQuestMapCallers": [
+        "public/app/guide-chat-surface-v350.js",
+        "public/app/shared-review-surface-v234.js",
+        "public/app/cerbanimo-intention-landscape-v1.js"
+      ],
+      "questMapRules": [
+        "The map renderer owns no Quest store, inference, activation, proof or Guild posting.",
+        "The shared review owner validates saved Quest and path identifiers before map actions; Guild submission opens the existing named preview and final confirmation.",
+        "All four subsystem lanes remain visible; unknown and ambiguous dependencies never become inferred proof or unlocked work."
+      ]
+    },
+    "survival-assessment": {
+      "capability": "Offline first safety prioritization from user-reported conditions and locally stored references",
+      "owner": "public/app/survival/survival-mode.mjs",
+      "canonicalApi": "ES module: planAssessment, buildReferenceQuery, normalizeReferenceCards",
+      "presentationCaller": "public/app/survival/app.mjs",
+      "entrySurface": "public/app/survival/index.html",
+      "entryNavigationOwner": "public/app/persistent-shell-actions-v1.js",
+      "offlineManifest": "public/app/offline-package-v208.json",
+      "allowedCallers": [
+        "public/app/survival/app.mjs",
+        "scripts/test-survival-mode-v1.mjs"
+      ],
+      "rules": [
+        "Cross-realm capability, not an additional chat system or realm.",
+        "No image bytes are persisted, uploaded, analyzed, or claimed as identification in v1.",
+        "Unknown is never safe; use only user-reported concerns and supplies.",
+        "Life-threatening hazards override repair, foraging, and research.",
+        "Never authorize edibility from a photograph or local source excerpt.",
+        "Show offline source provenance and errors without inventing verification.",
+        "Basic guidance requires no Guild, paid compute, model, or network."
+      ]
+    },
+    "starling-collective": {
+      "capability": "Bounded visible Collective planning and explicitly confirmed Guild proposals",
+      "owner": "public/app/starling-collective-v1.js",
+      "canonicalApi": "globalThis.CivweaveStarlingCollectiveV1",
+      "integrationOwner": "public/app/starling-integration-v1.js",
+      "guildAuthority": "cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs",
+      "guildTransport": "cloudflare/mobile-guild-edge/src/guild-starling-transport-v1.mjs",
+      "browserTransport": "public/app/guild-starling-client-v1.js",
+      "route": "/api/node/starling",
+      "modelOwner": "public/app/shared/civweave-model-runtime.js",
+      "questOwner": "public/app/intention-planner-v141.js",
+      "completionOwner": "public/extensions/civweave-proof-progress-v158.js",
+      "allowedCallers": [
+        "public/app/persistent-shell-actions-v1.js",
+        "public/app/starling-integration-v1.js"
+      ],
+      "rules": [
+        "One user-started sequential planning batch with visible public role contributions and no always-on inference.",
+        "At most three reserved, proposed, blocked or published AI Quest lines per device and shared Guild.",
+        "At most six new lines per rolling 24 hours; failure, cancellation and abandonment do not refund history.",
+        "Model dialogue never completes work, votes, grants roles, activates a Quest or posts to a Guild.",
+        "Shared posting requires the exact saved proposal revision, hash and explicit human confirmation.",
+        "Passport claims require consent and distinguish declared skills, authenticated residents and verified capability.",
+        "Mesh discovery and billing seats never grant Guildmaster authority.",
+        "Shared completion requires trusted canonical proof; local model claims cannot attest it.",
+        "Guild local worker opt-in permits bounded signed persona turns and assistance offers, not claims, completed Quest beats, Guild votes or hosted spending.",
+        "The worker and the existing Collective planning workbench share the browser Starling inference lock.",
+        "Both Android native and Termux execution hosts accept only local draft jobs and issue non-authoritative receipts; host outputs require explicit Guildkeeper import into the canonical signed mesh.",
+        "Android native source is not an installed APK; Termux host runs separately and reuses existing paired Companion and llama.cpp server."
+      ],
+      "localPersonaCatalog": "public/app/shared/starling-collective-v1.mjs",
+      "cooperativeWorker": "public/app/shared/starling-collective-worker-v1.mjs",
+      "signedTurnService": "public/app/shared/starling-collective-turns-v1.mjs",
+      "loungePresenter": "public/app/starling-lounge-v1.mjs",
+      "foundingIntentionCapture": "public/app/mobile-guild-create-v1.mjs",
+      "toolPolicy": "public/app/shared/starling-collective-tools-v1.mjs",
+      "aiderAdapter": "tools/starling/aider-adapter-v1.mjs",
+      "cooperativeWorkerContract": "docs/contracts/starling-collective-guild-service-v1.md",
+      "executionHostContract": "docs/contracts/starling-dual-host-v1.md",
+      "termuxExecutionHost": "public/termux/civweave_starling_host.py",
+      "androidExecutionBridge": "native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeBridge.kt",
+      "androidScheduledWorker": "native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeWorker.kt",
+      "hostProtocolClient": "public/app/shared/starling-execution-transport-v1.mjs"
     }
   }
 }

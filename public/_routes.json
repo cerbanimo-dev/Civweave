@@ -9,7 +9,9 @@
     "/api/ai/node/capacity",
     "/api/ai/node/generate",
     "/api/ai/node/manifest",
-    "/api/ai/node/session"
+    "/api/ai/node/session",
+    "/app/vendor/litert-lm/wasm/litertlm_wasm_asyncify_internal.wasm",
+    "/app/vendor/litert-lm/wasm/litertlm_wasm_compat_asyncify_internal.wasm"
   ],
   "exclude": []
 }

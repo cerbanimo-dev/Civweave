@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-fellowfare-quest-path-v266';
+const VERSION='1.0.1-exact-quest-selection';
 if(globalThis.CivweaveFellowFareQuestPathV266?.version===VERSION)return;
 const KEYS={campus:'civweave.working-campus.v1',intentions:'civweave.intentions.v127',handoff:'civweave.active-handoff.v1',work:'civweave.fellowfare.quest-work.v1',market:'fellowfare.marketplace.v2'};
 const PANEL='ff-quest-path-v266',STYLE='ff-quest-path-style-v266',DONE='evidence-recorded';
@@ -18,11 +18,14 @@ function params(){return new URLSearchParams(location.search)}
 function planFromLedger(id){const row=list(read(KEYS.intentions,[])).find(item=>item?.id===id||item?.plan?.id===id);return row?.plan||null}
 function resolveContext(){
   const query=params(),handoff=read(KEYS.handoff,{}),campus=read(KEYS.campus,{});
-  const weaveId=clean(query.get('weave')||handoff?.weaveId||campus?.plan?.id,220),pathId=clean(query.get('path')||handoff?.pathId,220);
-  let plan=weaveId?planFromLedger(weaveId):null;if(!plan&&handoff?.plan?.id)plan=handoff.plan;if(!plan&&campus?.plan?.id)plan=campus.plan;
-  if(!plan||plan.state==='review')return null;
+  const requestedWeave=clean(query.get('weave'),220),requestedPath=clean(query.get('path'),220);
+  const weaveId=requestedWeave||clean(campus?.plan?.id||handoff?.weaveId,220),pathId=requestedPath||(String(handoff?.weaveId||'')===weaveId?clean(handoff?.pathId,220):'');
+  let plan=weaveId?planFromLedger(weaveId):null;
+  if(!plan&&String(campus?.plan?.id||'')===weaveId)plan=campus.plan;
+  if(!plan&&String(handoff?.plan?.id||'')===weaveId)plan=handoff.plan;
+  if(!plan||!['active','completed'].includes(plan.state))return null;
   const paths=list(plan.paths).filter(path=>String(path?.realm||'').toLowerCase()==='fellowfare');
-  const path=paths.find(item=>String(item.id)===pathId)||paths[0]||null;
+  const path=pathId?paths.find(item=>String(item.id)===pathId)||null:paths[0]||null;
   return path?{plan,path}:null;
 }
 function workStore(){const raw=read(KEYS.work,{schema:'civweave.fellowfare.quest-work-store.v1',records:[]});return{schema:'civweave.fellowfare.quest-work-store.v1',...(raw&&typeof raw==='object'?raw:{}),records:list(raw?.records)}}

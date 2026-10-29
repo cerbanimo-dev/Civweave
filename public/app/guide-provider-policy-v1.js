@@ -73,7 +73,7 @@ function patchAssistant(){
     patchRuntime();
     try{const result=await previousRespond(args);return resultShowsServerFailure(result)?unavailableResult(args,null,result):result}catch(error){return unavailableResult(args,error,null)}
   };
-  globalThis.CivweaveAssistantV141=Object.freeze({...assistant,respond,selectedConfig:()=>effectiveSelectedConfig(previousSelected),__civweaveGuideProviderPolicyV1:true,providerPolicyVersion:VERSION,serverAutoPreservesSelectedLocal:true,serverAutoFailureIsExplicit:true});
+  globalThis.CivweaveAssistantV141={...assistant,respond,selectedConfig:()=>effectiveSelectedConfig(previousSelected),__civweaveGuideProviderPolicyV1:true,providerPolicyVersion:VERSION,serverAutoPreservesSelectedLocal:true,serverAutoFailureIsExplicit:true};
   patchedAssistant=globalThis.CivweaveAssistantV141;
   emit('civweave:guide-provider-policy-assistant',{installed:true});
   return true;

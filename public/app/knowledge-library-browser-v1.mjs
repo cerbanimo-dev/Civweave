@@ -1,7 +1,7 @@
 import {searchDownloadedKnowledge} from './knowledge-school-runtime-v243.mjs?v=wikimedia-direct-v1';
 import * as upstreamRuntime from './knowledge-library-upstream-v1.mjs?v=wikimedia-direct-v1';
 
-const VERSION='knowledge-library-browser-v1.2-wikimedia-direct';
+const VERSION='knowledge-library-browser-v1.3-parent-return';
 const FOUNDATION_SCRIPT='/app/knowledge-school-seeds-v1.js?v=knowledge-schools-v2';
 const PAGE_SIZE=100;
 const indexByKey=new Map();
@@ -28,6 +28,36 @@ const requestedSchool=clean(new URLSearchParams(location.search).get('school'),1
 function loadClassic(src){return new Promise((resolve,reject)=>{const pathname=new URL(src,location.href).pathname,existing=[...document.scripts].find(node=>node.src&&new URL(node.src,location.href).pathname===pathname);if(existing){if(globalThis.CivweaveKnowledgeSchools)return resolve();existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',()=>reject(new Error(`Could not load ${src}`)),{once:true});return}const script=document.createElement('script');script.src=src;script.async=true;script.addEventListener('load',resolve,{once:true});script.addEventListener('error',()=>reject(new Error(`Could not load ${src}`)),{once:true});document.head.append(script)})}
 async function foundation(){if(foundationApi)return foundationApi;if(!globalThis.CivweaveKnowledgeSchools)await loadClassic(FOUNDATION_SCRIPT);foundationApi=globalThis.CivweaveKnowledgeSchools;if(!foundationApi)throw new Error('Knowledge Schools storage did not initialize.');return foundationApi}
 function setHelp(message){const node=$('#library-help');if(node)node.textContent=message}
+
+function returnToCivweave(event){
+  if(event.defaultPrevented||event.button>0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+  if(window.parent===window)return; // The ordinary link is the standalone route.
+  event.preventDefault();
+  const unavailable=()=>setHelp('Could not return to Civweave from this embedded view. Close Living Library and use the main navigation.');
+  try{
+    const host=window.parent,hostUrl=new URL(host.location.href),frame=window.frameElement;
+    const hostPath=hostUrl.pathname.replace(/\/index\.html$/,'/');
+    const modalFrame=host.document.getElementById('living-library-panel-v1')?.querySelector('iframe');
+    const library=host.CivweaveLivingLibraryV1;
+    if(new URLSearchParams(location.search).get('embed')!=='living-school'||hostUrl.origin!==location.origin||
+      hostPath!=='/app/cabinets/living-school/'||host.document.documentElement.dataset.civweaveSystem!=='living-school'||
+      !frame||frame!==modalFrame||frame.contentWindow!==window||typeof library?.close!=='function')return unavailable();
+    const shellWindow=host.parent;
+    if(shellWindow!==host){
+      const shellUrl=new URL(shellWindow.location.href),shell=shellWindow.CivweavePersistentSystemShellV1;
+      const stage=shellWindow.document.getElementById('cw-persistent-system-stage');
+      if(shellUrl.origin!==location.origin||shellUrl.pathname!=='/app/persistent-system-shell-v1.html'||
+        !shellWindow.document.documentElement.hasAttribute('data-persistent-system')||stage?.contentWindow!==host||
+        shell?.persistentNavbar!==true||shell?.chromeOwner!==true||shell?.current?.()!=='living-school'||typeof shell.navigate!=='function')return unavailable();
+      if(!shell.navigate('civweave',{source:'living-library-return'}))return unavailable();
+    }else{
+      const routes=host.CivweaveSystemRoutesV227;
+      if(typeof routes?.navigate==='function')routes.navigate('civweave',{source:'living-library-return'});
+      else host.location.assign(new URL('/app/persistent-system-shell-v1.html?system=civweave&installed=1',location.origin).href);
+    }
+    library.close('return-to-civweave');
+  }catch{unavailable()}
+}
 
 function u16(view,offset){return view.getUint16(offset,true)}
 function u32(view,offset){return view.getUint32(offset,true)}
@@ -66,6 +96,7 @@ function passageHtml(text){return escapeHtml(text).replace(/\n{2,}/g,'</p><p>').
 function renderReader(row,{loading=false,excerpts=[],fullText='',error=''}={}){const reader=$('#library-reader'),source=row.url?`<a class="reader-source" href="${escapeHtml(row.url)}" target="_blank" rel="noopener external">Open canonical source ↗</a>`:'<span class="reader-source" aria-disabled="true">Canonical source unavailable</span>',local=fullText?[fullText]:row.notes?[row.notes]:excerpts,sourceMeta=row.source?`<span>${escapeHtml(row.source)}</span>`:'',license=row.license?`<span>${escapeHtml(row.license)}</span>`:'';reader.innerHTML=`<small>LOCAL READER</small><h2>${escapeHtml(row.title)}</h2><div class="reader-meta"><span class="badge ${escapeHtml(row.tier)}">${escapeHtml(tierLabel(row.tier))}</span><span class="badge">${escapeHtml(row.schoolName||schoolLabel(row.schoolSlug))}</span>${sourceMeta}${license}</div>${source}${loading?'<p>Opening the locally saved article…</p>':''}${error?`<p>${escapeHtml(error)}</p>`:''}${local.length?local.map((text,index)=>`<section class="excerpt"><small>${fullText?'Downloaded article':'Downloaded passage'}${local.length>1?` ${index+1}`:''}</small><p>${passageHtml(text)}</p></section>`).join(''):loading||error?'':'<p>No local passage is available for this article.</p>'}`}
 
 function bind(){
+  $('.library-header .back')?.addEventListener('click',returnToCivweave);
   $('#library-search-form')?.addEventListener('submit',event=>{event.preventDefault();runSearch($('#library-query')?.value||'')});
   $('#library-clear-search')?.addEventListener('click',()=>browse());
   $('#library-school-filter')?.addEventListener('change',()=>activeMode==='search'?runSearch(activeQuery):browse());

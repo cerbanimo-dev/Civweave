@@ -16,14 +16,16 @@ on:
       - 'public/app/host-node-session-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'lib/emergency-ai-share-v1.mjs'
-      - 'cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs'
-      - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
+      - 'cloudflare/node-cloud/src/**'
       - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'cloudflare/node-cloud/wrangler.staging.jsonc'
       - 'cloudflare/mobile-guild-edge/**'
+      - '.github/workflows/guild-host-resilience-v1.yml'
       - 'scripts/test-guild-host-resilience-v1.mjs'
       - 'scripts/test-guild-host-onboarding-v1.mjs'
       - 'scripts/test-mobile-guild-create-v1.mjs'
       - 'scripts/test-mobile-guild-auto-update-v1.mjs'
+      - 'scripts/test-node-cloud-release-discovery-v1.mjs'
       - 'scripts/test-emergency-ai-mesh-v1.mjs'
       - 'scripts/test-guildkeeper-capacity-v1.mjs'
   push:
@@ -43,14 +45,16 @@ on:
       - 'public/app/host-node-session-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'lib/emergency-ai-share-v1.mjs'
-      - 'cloudflare/node-cloud/src/capacity-guildkeeper-v1.mjs'
-      - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
+      - 'cloudflare/node-cloud/src/**'
       - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'cloudflare/node-cloud/wrangler.staging.jsonc'
       - 'cloudflare/mobile-guild-edge/**'
+      - '.github/workflows/guild-host-resilience-v1.yml'
       - 'scripts/test-guild-host-resilience-v1.mjs'
       - 'scripts/test-guild-host-onboarding-v1.mjs'
       - 'scripts/test-mobile-guild-create-v1.mjs'
       - 'scripts/test-mobile-guild-auto-update-v1.mjs'
+      - 'scripts/test-node-cloud-release-discovery-v1.mjs'
       - 'scripts/test-emergency-ai-mesh-v1.mjs'
       - 'scripts/test-guildkeeper-capacity-v1.mjs'
 jobs:
@@ -85,5 +89,6 @@ jobs:
       - run: node scripts/test-guild-host-onboarding-v1.mjs
       - run: node scripts/test-mobile-guild-create-v1.mjs
       - run: node scripts/test-mobile-guild-auto-update-v1.mjs
+      - run: node --test scripts/test-node-cloud-release-discovery-v1.mjs
       - run: node scripts/test-emergency-ai-mesh-v1.mjs
       - run: node scripts/test-guildkeeper-capacity-v1.mjs

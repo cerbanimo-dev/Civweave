@@ -7,6 +7,8 @@ import { readFile } from 'node:fs/promises';
 // ships, otherwise a stale generated radio import can repair itself in CI and
 // hide the regression from review.
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+const radioRevision='radio-core-shell-v305-direct-audio-v1';
+const starterManifest='/downloads/hub-media/open-music/starter-catalog.json';
 const requiredRadioAssets = [
   '/app/install-boundary-v146.js',
   '/app/experience-orchestrator-v232.js',
@@ -20,7 +22,8 @@ const requiredRadioAssets = [
   '/app/radio-directory-v240/living-school.txt',
   '/app/radio-directory-v240/cerbanimo.txt',
   '/app/radio-directory-v240/fellowfare.txt',
-  '/app/radio-directory-v240/anarchadia.txt'
+  '/app/radio-directory-v240/anarchadia.txt',
+  starterManifest
 ];
 
 const [versionText, layer, wrapper, builder, radioAgent, safeStations, trackSuggestions, governance, ...assetContents] = await Promise.all([
@@ -41,7 +44,7 @@ new Function(layer);
 for (const pathname of requiredRadioAssets) {
   assert(layer.includes(`'${pathname}'`), `Radio shell layer is missing ${pathname}.`);
 }
-assert(layer.includes("const V305_REVISION = 'radio-core-shell-v305'"), 'Radio shell revision drifted.');
+assert(layer.includes(`const V305_REVISION = '${radioRevision}'`), 'Radio shell must declare the current direct-audio metadata revision.');
 assert(layer.includes('const V305_BASE_CACHE_SHELL = cacheShell;'), 'Radio shell no longer extends the verified shell cache transaction.');
 assert(layer.includes('cacheShell = async function cacheShellWithRadioCoreV305()'), 'Radio shell no longer owns required install/repair completion.');
 assert(layer.includes('const base = await V305_BASE_CACHE_SHELL();'), 'Radio shell bypasses the existing verified shell transaction.');
@@ -58,11 +61,11 @@ for (const source of [wrapper, builder]) {
   assert(source.indexOf('/service-worker-shell-integrity-v281.js') < source.indexOf(radioImport), 'Radio shell must wrap the integrity-owned cacheShell implementation.');
   assert(source.indexOf(radioImport) < source.indexOf('/service-worker-shell-repair-v293.js'), 'Installed shell repair must observe the radio-wrapped cacheShell implementation.');
 }
-assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305-safe-station-v356`), `Committed worker is stale: radio shell must carry the S.A.F.E. station handoff for release ${version}.`);
-assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-safe-station-v356');"), 'Worker builder must preserve the S.A.F.E. radio cache-bust token.');
+assert(wrapper.includes(`${radioImport}?v=${version}-${radioRevision}`), `Committed worker is stale: radio shell must carry direct-audio metadata and S.A.F.E. support for release ${version}.`);
+assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-direct-audio-v1');"), 'Worker builder must generate the committed direct-audio radio import.');
 assert(builder.includes("'public/service-worker-radio-core-v305.js'"), 'Worker builder does not require the radio shell source file.');
-assert(builder.includes("radioCore:'radio-core-shell-v305'"), 'Worker builder does not report the radio shell revision.');
-assert(builder.includes("radioAssetHandoff:'safe-station-v356'"), 'Worker builder must report the active S.A.F.E. radio handoff revision.');
+assert(builder.includes(`radioCore:'${radioRevision}'`), 'Worker builder must report the same radio revision it generates.');
+assert(builder.includes("radioAssetHandoff:'direct-audio-v1'"), 'Worker builder must report the current direct-audio handoff revision.');
 assert(builder.includes('party=lazy-v353'), 'Worker builder must preserve lazy party-chat activation while rotating the radio shell.');
 assert(wrapper.includes('party=lazy-v353'), 'Committed worker must preserve lazy party-chat activation while rotating the radio shell.');
 
@@ -95,8 +98,12 @@ assert(trackSuggestions.includes('spotifyPlaylistTrackUrl'), 'Original-mode trac
 assert(!trackSuggestions.includes("const CARD_ID='cw-radio-suggestion-v233'"), 'Installed track suggestions must not depend on the retired transient card.');
 assert(!trackSuggestions.includes('location.assign'), 'Installed radio core must never navigate the PWA away to Spotify.');
 
-function makeRuntime({ failPath = '' } = {}) {
-  const stores = new Map();
+const starterCatalog=assetContents[requiredRadioAssets.indexOf(starterManifest)];
+assert.equal(JSON.parse(starterCatalog).records.length,3,'Required starter metadata must describe the published recordings.');
+assert(Buffer.byteLength(starterCatalog)<32768,'Required shell caching must be limited to the small audio catalog.');
+
+function makeRuntime({ failPath = '', baseReady = true } = {}) {
+  const stores = new Map(), fetched = [];
   const cacheFor = name => {
     if (!stores.has(name)) stores.set(name, new Map());
     const entries = stores.get(name);
@@ -121,26 +128,32 @@ function makeRuntime({ failPath = '' } = {}) {
     cacheKey: pathname => pathname,
     responseLooksValid: response => Boolean(response?.ok),
     fetchFresh: async pathname => {
+      fetched.push(pathname);
       if (pathname === failPath) throw new Error(`synthetic failure for ${pathname}`);
-      return new Response(`asset:${pathname}`, { status: 200, headers: { 'content-type': pathname.endsWith('.json') ? 'application/json' : 'text/plain' } });
+      return new Response(pathname===starterManifest?starterCatalog:`asset:${pathname}`, { status: 200, headers: { 'content-type': pathname.endsWith('.json') ? 'application/json' : 'text/plain' } });
     },
     caches: {
       async open(name) { return cacheFor(name); },
       async delete(name) { return stores.delete(name); }
     },
     cacheShell: async () => ({ integrity: 'verified' }),
-    shellStatus: async () => ({ ready: true })
+    shellStatus: async () => ({ ready: baseReady })
   });
   vm.runInContext(layer, scope, { filename: 'service-worker-radio-core-v305.js' });
-  return { scope, stores };
+  return { scope, stores, fetched };
 }
 
 const success = makeRuntime();
+assert.deepEqual(Array.from(success.scope.self.CivweaveRadioCoreV305.requiredAssets).sort(),[...requiredRadioAssets].sort(),'The executable radio asset list must contain exactly the required metadata and owners.');
+assert(!requiredRadioAssets.some(path=>/\.mp3(?:\?|$)|\/open-music\/audio\//i.test(path)),'Audio bytes must never become required shell assets.');
 const installResult = await success.scope.cacheShell();
 assert.equal(installResult.radioCore, 'required-cached');
 assert.equal(installResult.radioRequiredAssetCount, requiredRadioAssets.length);
 const shellStore = success.stores.get('civweave-shell-test');
 for (const pathname of requiredRadioAssets) assert(shellStore?.has(pathname), `Successful shell install did not cache ${pathname}.`);
+assert.equal((await shellStore.get(starterManifest).clone().json()).records.length,3,'The actual starter catalog must survive required offline caching.');
+assert.equal(success.fetched.length,requiredRadioAssets.length,'Radio install must fetch only the declared shell assets.');
+assert(!success.fetched.some(path=>/\.mp3(?:\?|$)/i.test(path)),'Radio install must leave all recording downloads lazy.');
 let status = await success.scope.shellStatus();
 assert.equal(status.ready, true);
 assert.equal(status.radioCoreReady, true);
@@ -152,15 +165,30 @@ assert.equal(status.ready, false, 'Device package remained ready after the requi
 assert.equal(status.radioCoreReady, false);
 assert(status.radioMissing.includes('/app/radio-safe-stations-v1.js'));
 
+await success.scope.self.CivweaveRadioCoreV305.repair();
+shellStore.delete(starterManifest);
+status=await success.scope.shellStatus();
+assert.equal(status.ready,false,'A missing required starter catalog must make the device package incomplete.');
+assert.equal(status.radioCoreReady,false);
+assert.equal(status.radioPresentCount,requiredRadioAssets.length-1);
+assert.deepEqual(Array.from(status.radioMissing),[starterManifest]);
+
 const failure = makeRuntime({ failPath: '/app/radio-track-map-v241.json' });
 await assert.rejects(() => failure.scope.cacheShell(), /Radio core incomplete/);
 assert.equal(failure.stores.has('civweave-shell-test-radio-v305-staging'), false, 'Failed radio install left its staging cache behind.');
 
+const starterFailure=makeRuntime({failPath:starterManifest});
+await assert.rejects(()=>starterFailure.scope.cacheShell(),error=>error.message.includes('Radio core incomplete')&&error.failures.some(row=>row.pathname===starterManifest));
+assert.equal(starterFailure.stores.has('civweave-shell-test-radio-v305-staging'),false,'Failed starter metadata must discard the staging transaction.');
+assert.equal(starterFailure.stores.has('civweave-shell-test'),false,'Failed starter metadata must not publish partial radio assets.');
+const failedBase=makeRuntime({baseReady:false});await failedBase.scope.cacheShell();
+status=await failedBase.scope.shellStatus();assert.equal(status.radioCoreReady,true);assert.equal(status.ready,false,'A complete radio cache cannot override an incomplete owning shell.');
+
 console.log(JSON.stringify({
   ok: true,
   version,
-  revision: 'radio-core-shell-v305',
-  radioAssetHandoff: 'safe-station-v356',
+  revision: radioRevision,
+  radioAssetHandoff: 'direct-audio-v1',
   committedWorkerCurrent: true,
   requiredAssetCount: requiredRadioAssets.length,
   freshInstallRequired: true,

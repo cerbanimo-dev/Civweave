@@ -1,4 +1,4 @@
-const REVISION='living-school-quiz-contract-guard-v264-pedagogy';
+const REVISION='living-school-quiz-contract-guard-v264-pedagogy-bounded-assessments';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
 const REPAIR_PURPOSE='living-school-quiz-question-contract-repair-v263';
 const REQUIRED_TYPES=['multiple-choice','multi-select','short-answer'];
@@ -124,7 +124,7 @@ async function enforceQuizContract(baseGenerate,request,initial){
       seen.add(key);questions.push(question);
     }
     let attempts=0;
-    while((questions.length<target||missingTypes(module,questions).length)&&attempts<12){
+    while((questions.length<target||missingTypes(module,questions).length)&&attempts<(request?.context?.automaticQuizRepairCallsMax===0?0:12)){
       attempts+=1;
       const missing=missingTypes(module,questions);
       const type=missing[0]||REQUIRED_TYPES[(questions.length+attempts-1)%REQUIRED_TYPES.length];

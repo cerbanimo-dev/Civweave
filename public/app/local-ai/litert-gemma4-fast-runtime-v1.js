@@ -1,25 +1,69 @@
 (()=>{
 'use strict';
-const VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
-const PRIOR_VERSION='1.3.0-litert-gemma4-fast-runtime-v1-dual-phone-mtp-jspi';
+const VERSION='1.8.5-litert-runtime-v1-qwen4-chunked-phone-loader';
+const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
-const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.14.0-civweave-v1';
+// The current E4B -web GPU bundle uses a 160 MiB storage buffer binding.
+// A browser reporting a lower adapter maxStorageBufferBindingSize cannot
+// execute that GPU graph; maxBufferSize and available RAM are unrelated.
+const E4B_OBSERVED_BINDING_BYTES=167772160;
+const E4B_WEB_MODEL='gemma4-e4b-it-litert-web';
+const MODULE_URL='/app/vendor/litert-lm/dist/index.js?v=0.17.1-civweave-qwen35';
 const WASM_ROOT='/app/vendor/litert-lm/wasm/';
+const QWEN_FAST='qwen35-4b-litert-web';
+const QWEN_DEEP='qwen35-9b-litert-web';
 const PROFILES=Object.freeze({
-  'gemma4-e2b-it-litert-web':Object.freeze({id:'gemma4-e2b-it-litert-web',aliases:Object.freeze(['gemma4-e2b-it-litert-web','gemma4-e2b-it-q4f16','gemma4-e2b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E2B-it-litert-lm',contextTokens:4096,maxOutputTokens:2400,label:'Gemma 4 E2B LiteRT'}),
-  'gemma4-e4b-it-litert-web':Object.freeze({id:'gemma4-e4b-it-litert-web',aliases:Object.freeze(['gemma4-e4b-it-litert-web','gemma4-e4b-it-q4f16','gemma4-e4b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E4B-it-litert-lm',contextTokens:4096,maxOutputTokens:2800,label:'Gemma 4 E4B LiteRT'})
+  'gemma4-e2b-it-litert-web':Object.freeze({id:'gemma4-e2b-it-litert-web',aliases:Object.freeze(['gemma4-e2b-it-litert-web','gemma4-e2b-it-q4f16','gemma4-e2b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E2B-it-litert-lm',contextTokens:4096,maxOutputTokens:2400,label:'Gemma 4 E2B LiteRT',family:'gemma4',constrainedTools:true,sampler:Object.freeze({k:64,p:.95,temperature:1})}),
+  'gemma4-e4b-it-litert-web':Object.freeze({id:'gemma4-e4b-it-litert-web',aliases:Object.freeze(['gemma4-e4b-it-litert-web','gemma4-e4b-it-q4f16','gemma4-e4b-it-q2f16-mobile']),repo:'litert-community/gemma-4-E4B-it-litert-lm',contextTokens:2048,maxOutputTokens:2800,label:'Gemma 4 E4B LiteRT',family:'gemma4',constrainedTools:true,sampler:Object.freeze({k:64,p:.95,temperature:1})}),
+  [QWEN_FAST]:Object.freeze({id:QWEN_FAST,aliases:Object.freeze([QWEN_FAST]),repo:'litert-community/Qwen3.5-4B',contextTokens:4096,maxOutputTokens:2400,label:'Qwen 3.5 4B LiteRT',family:'qwen35',constrainedTools:false,sampler:Object.freeze({k:20,p:.95,temperature:.6})}),
+  [QWEN_DEEP]:Object.freeze({id:QWEN_DEEP,aliases:Object.freeze([QWEN_DEEP]),repo:'litert-community/Qwen3.5-9B-LiteRT',contextTokens:3072,maxOutputTokens:3200,label:'Qwen 3.5 9B LiteRT',family:'qwen35',constrainedTools:false,sampler:Object.freeze({k:20,p:.95,temperature:.6})})
 });
 const ALIAS_TO_FAST=new Map(Object.values(PROFILES).flatMap(profile=>profile.aliases.map(id=>[id,profile.id])));
+const GEMMA_FAST_ALIASES=new Set(PROFILES['gemma4-e2b-it-litert-web'].aliases);
+const GEMMA_DEEP_ALIASES=new Set(PROFILES['gemma4-e4b-it-litert-web'].aliases);
 if(globalThis.CivweaveLiteRTGemma4FastRuntimeV1?.version===VERSION)return;
 let pendingUnloadReason='',engineReleasePromise=null;
-let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,wrapped=null,generationActive=false,lastMetrics=null;
+let modulePromise=null,enginePromise=null,enginePromiseModelId='',engine=null,engineModelId='',engineUsesMtp=false,engineMode='',wrapped=null,generationActive=false,lastMetrics=null,activeChat=null,cancelRequested=false,gpuQuarantine=null,lastPhase='idle';
 const now=()=>performance.now();
 const clean=(value,max=200000)=>String(value??'').slice(0,max);
+// A QueueWorkDoneStatus error or lost WebGPU device is a failed GPU context,
+// not a formatting or model-answer error. Retrying on the same WASM module
+// can reuse that failed device and has repeatedly hung this app.
+function gpuQueueError(error){
+  const message=String(error?.message||error||'');
+  return /Unknown wgpu::QueueWorkDoneStatus\d*|GPUDevice(?:Lost|Error)|device[\s_-]*lost|webgpu.{0,50}(?:lost|queue|out.of.memory)|queue.{0,50}(?:lost|failed|error)|out.of.memory|GPU validation error/i.test(message);
+}
+function gpuFailure(error,phase=lastPhase){
+  const detail=clean(error?.message||error,500);
+  const result=Object.assign(new Error('The local WebGPU inference queue failed. The model did not complete a GPU operation. Restart the app runtime before trying this model again.'),{code:'CIVWEAVE_LOCAL_GPU_QUEUE_FAILED',gpuFault:true,restartRequired:true,rawGpuError:detail,runtimePhase:phase});
+  return result;
+}
+function quarantineGpu(error,phase=lastPhase){
+  if(!gpuQuarantine){
+    gpuQuarantine={code:'CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED',phase,message:clean(error?.message||error,300),at:new Date().toISOString()};
+    emit('civweave:litert-gemma4-gpu-quarantined',gpuQuarantine);
+  }
+  cancelRequested=true;
+  try{activeChat?.cancel?.()}catch{}
+  return gpuQuarantine;
+}
+function healthyGpu(){
+  if(gpuQuarantine)throw Object.assign(new Error('The previous WebGPU session failed or stalled. Restart the Civweave app runtime to initialize a new GPU device; retries are blocked until restart.'),{code:gpuQuarantine.code,restartRequired:true,gpuFault:true,runtimePhase:gpuQuarantine.phase});
+}
+
 const emit=(type,detail={})=>{try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}};
 const selected=()=>{try{return globalThis.CivweaveLocalModelDownloadV266?.selection?.()||null}catch{return null}};
 const registry=()=>globalThis.CivweaveLocalModelRegistryV266;
 const manager=()=>globalThis.CivweaveLocalModelDownloadV266;
-const profileFor=id=>PROFILES[ALIAS_TO_FAST.get(id)||id]||null;
+const qwenFlagshipSelected=()=>{const id=String(selected()?.id||'');return id===QWEN_FAST||id===QWEN_DEEP};
+const profileFor=id=>{
+  let key=String(id||'');
+  if(qwenFlagshipSelected()){
+    if(GEMMA_FAST_ALIASES.has(key))key=QWEN_FAST;
+    else if(GEMMA_DEEP_ALIASES.has(key))key=QWEN_DEEP;
+  }
+  return PROFILES[ALIAS_TO_FAST.get(key)||key]||null;
+};
 const supportsJspi=()=>typeof globalThis.WebAssembly?.Suspending==='function'&&typeof globalThis.WebAssembly?.promising==='function';
 async function fastStatus(id){try{return await manager()?.status?.(id)}catch{return{available:false}}}
 function modelUrl(modelId){
@@ -28,9 +72,17 @@ function modelUrl(modelId){
   return{spec,artifact,url:registry().directUrl(spec,artifact.path)};
 }
 async function modelStream(modelId){
-  if(!('caches'in globalThis))throw new Error('Cache Storage is unavailable for the LiteRT Gemma 4 model.');
-  const {url}=modelUrl(modelId),cache=await caches.open(MODEL_CACHE),response=await cache.match(url);
-  if(!response?.ok||!response.body)throw Object.assign(new Error(`${profileFor(modelId)?.label||modelId} is not downloaded yet. Install its performance upgrade from Local models first.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:modelId});
+  if(!('caches'in globalThis))throw new Error('Cache Storage is unavailable for the selected LiteRT model.');
+  const {url,artifact}=modelUrl(modelId),cache=await caches.open(MODEL_CACHE);
+  let response=await cache.match(url);
+  // Qwen 4B phone imports are saved as independent 8 MiB Cache Storage
+  // fragments. Supply LiteRT-LM a lazy ReadableStream without rebuilding
+  // a 2.75 GB JS ArrayBuffer or Cache.put() response before model launch.
+  if(!response?.ok&&modelId===QWEN_FAST){
+    const {chunkedResponse}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
+    response=await chunkedResponse(cache,url,Number(artifact.sizeBytes||0));
+  }
+  if(!response?.ok||!response.body)throw Object.assign(new Error(`${profileFor(modelId)?.label||modelId} is not fully imported. Use native browser Downloads and the 8 MiB importer in Settings; do not redownload completed chunks.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:modelId});
   return response.body;
 }
 async function loadModule(){
@@ -44,13 +96,37 @@ async function loadModule(){
   }).catch(error=>{modulePromise=null;throw error});
   return modulePromise;
 }
-function artisanConfig(useSubmodel=true){return{num_output_candidates:1,wait_for_weight_uploads:true,num_decode_steps_per_sync:1,sequence_batch_size:0,supported_lora_ranks:[],max_top_k:64,enable_decode_logits:false,enable_external_embeddings:false,use_submodel:Boolean(useSubmodel)}}
+function artisanConfig(useSubmodel=true){
+  // LiteRT-LM 0.17.1 passes the complete GPU_ARTISAN struct to WebAssembly.
+  // Omitted Boolean fields cause "Missing field" errors before model initialization.
+  return {
+    num_output_candidates:1,
+    wait_for_weight_uploads:true,
+    num_decode_steps_per_sync:1,
+    sequence_batch_size:0,
+    supported_lora_ranks:[],
+    max_top_k:64,
+    enable_decode_logits:false,
+    enable_external_embeddings:false,
+    use_submodel:Boolean(useSubmodel),
+    prefer_texture_weights:!(/Mac/i.test(globalThis.navigator?.platform||'')),
+    set_enable_host_mapped_pointer:true,
+    disallow_8bit_convs:true,
+    use_autosized_ringbuffers:false
+  };
+}
 async function unloadEngine(reason='model-switch',{afterGeneration=false}={}){
+  if(gpuQuarantine){
+    // Never await native delete() after a GPU queue is poisoned.
+    // Only a top-level app restart can reclaim the WASM/device.
+    engine=null;engineModelId='';engineUsesMtp=false;engineMode='';
+    pendingUnloadReason='';return true;
+  }
   if(generationActive&&!afterGeneration&&reason!=='switch-model'){pendingUnloadReason=reason;return false}
   if(engineReleasePromise)return engineReleasePromise;
   if(enginePromise){try{await enginePromise}catch{}}
   const prior=engine,priorId=engineModelId,priorMtp=engineUsesMtp;
-  engine=null;engineModelId='';engineUsesMtp=false;
+  engine=null;engineModelId='';engineUsesMtp=false;engineMode='';
   engineReleasePromise=(async()=>{
     if(prior)try{await prior.delete?.()}catch{}
     if(priorId)emit('civweave:litert-gemma4-engine-released',{model:priorId,reason,mtpEnabled:priorMtp});
@@ -58,43 +134,112 @@ async function unloadEngine(reason='model-switch',{afterGeneration=false}={}){
   })();
   try{return await engineReleasePromise}finally{engineReleasePromise=null}
 }
-async function instantiateEngine(mod,profile,useSubmodel){
-  const stream=await modelStream(profile.id);
-  return mod.Engine.create({model:stream,backend:mod.Backend.GPU_ARTISAN,mainExecutorSettings:{maxNumTokens:profile.contextTokens,backendConfig:artisanConfig(useSubmodel)},benchmarkEnabled:true},'Civweave local assistant');
+async function instantiateEngine(mod,profile,mode='standard'){
+  const model=await modelStream(profile.id);
+  // The supported Web SDK uses Engine.create({model,mainExecutorSettings})
+  // and selects WebGPU automatically. Explicit GPU_ARTISAN backendConfig
+  // values were copied from a private struct and are unsafe across phones.
+  const settings={model,mainExecutorSettings:{maxNumTokens:profile.contextTokens},benchmarkEnabled:false};
+  if(mode==='compat'){
+    settings.backend=mod.Backend.GPU_ARTISAN;
+    settings.mainExecutorSettings.backendConfig=artisanConfig(false);
+  }
+  return mod.Engine.create(settings);
+}
+async function validateStorageBindingLimit(profile){
+  if(profile.id!==E4B_WEB_MODEL)return null;
+  const adapter=await globalThis.navigator?.gpu?.requestAdapter?.({powerPreference:'high-performance'});
+  if(!adapter)throw Object.assign(new Error('A WebGPU adapter is unavailable for the selected E4B model.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webgpu-adapter',executionModel:profile.id});
+  const maximum=Number(adapter.limits?.maxStorageBufferBindingSize)||0;
+  if(maximum&&maximum<E4B_OBSERVED_BINDING_BYTES){
+    const detail={requiredBindingBytes:E4B_OBSERVED_BINDING_BYTES,maximumBindingBytes:maximum,maxBufferSize:Number(adapter.limits?.maxBufferSize)||null,model:profile.id,modelArtifact:'gemma-4-E4B-it-web.litertlm',requiresRebuiltArtifact:true};
+    emit('civweave:litert-gemma4-gpu-incompatible',detail);
+    throw Object.assign(new Error('The selected E4B WebGPU artifact requires a 160 MiB shader storage binding, but this device permits only '+Math.round(maximum/1048576)+' MiB. This is a hardware/WebGPU per-binding limit, not a memory, token-limit, JSON, or Moss problem. The current E4B bundle needs a compatible GPU-compiled variant or upstream tiling fix; it cannot generate on this adapter.'),{
+      code:'CIVWEAVE_LITERT_E4B_STORAGE_BINDING_UNSUPPORTED',
+      executionModel:profile.id,capability:'maxStorageBufferBindingSize',...detail
+    });
+  }
+  return {maxStorageBufferBindingSize:maximum,requiredBindingBytes:E4B_OBSERVED_BINDING_BYTES};
 }
 async function createEngine(modelId){
-  const profile=profileFor(modelId);if(!profile)throw new Error(`Unsupported LiteRT Gemma 4 model: ${modelId}`);
+  const profile=profileFor(modelId);if(!profile)throw new Error(`Unsupported LiteRT local model: ${modelId}`);
   if(!globalThis.navigator?.gpu)throw Object.assign(new Error(`${profile.label} requires WebGPU.`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webgpu'});
-  if(!supportsJspi())throw Object.assign(new Error(`${profile.label} fast mode requires WebAssembly JSPI (Chromium 137+). Civweave will use the existing compatibility runtime instead.`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webassembly-jspi'});
+  if(!supportsJspi())throw Object.assign(new Error(`${profile.label} requires WebAssembly JSPI.`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE',capability:'webassembly-jspi'});
+  await validateStorageBindingLimit(profile);
   const mod=await loadModule();
   if(engine&&engineModelId!==profile.id)await unloadEngine('switch-model');
-  const started=now();emit('civweave:litert-gemma4-progress',{phase:'loading-model',model:profile.id,backend:'webgpu-gpu-artisan',phoneProfile:'12gb-dual',mtpRequested:true,jspi:true});
-  let value,mtpEnabled=true;
-  try{value=await instantiateEngine(mod,profile,true)}catch(mtpError){mtpEnabled=false;emit('civweave:litert-gemma4-mtp-fallback',{model:profile.id,message:String(mtpError?.message||mtpError),reason:'engine-create-with-submodel-failed'});value=await instantiateEngine(mod,profile,false)}
-  engine=value;engineModelId=profile.id;engineUsesMtp=mtpEnabled;
-  emit('civweave:litert-gemma4-progress',{phase:'model-ready',model:profile.id,backend:'webgpu-gpu-artisan',loadMs:Math.round(now()-started),maxNumTokens:profile.contextTokens,webBindingSettings:'official-v0.14-gpu-artisan',oneEngineAtATime:true,mtpEnabled,jspi:true});
+  const started=now();emit('civweave:litert-gemma4-progress',{phase:'loading-model',model:profile.id,backend:'webgpu',mtpRequested:false,jspi:true});
+  let value,mode='standard';
+  try{value=await instantiateEngine(mod,profile,'standard')}
+  catch(standardError){
+    if(gpuQueueError(standardError))throw gpuFailure(standardError,'loading-model');
+    mode='compat';
+    emit('civweave:litert-gemma4-backend-fallback',{model:profile.id,reason:'standard-engine-create-failed',message:String(standardError?.message||standardError),mtpEnabled:false});
+    // Preserve device compatibility without activating untested MTP.
+    try{value=await instantiateEngine(mod,profile,'compat')}catch(error){
+      error.standardEngineError=String(standardError?.message||standardError);throw error;
+    }
+  }
+  engine=value;engineModelId=profile.id;engineUsesMtp=false;engineMode=mode;
+  emit('civweave:litert-gemma4-progress',{phase:'model-ready',model:profile.id,backend:'webgpu',engineMode:mode,loadMs:Math.round(now()-started),maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:false,jspi:true});
   return value;
 }
 async function ensureEngine(modelId){
   if(engineReleasePromise)await engineReleasePromise;
-  const profile=profileFor(modelId);if(!profile)throw new Error(`Unsupported LiteRT Gemma 4 model: ${modelId}`);
+  const profile=profileFor(modelId);if(!profile)throw new Error(`Unsupported LiteRT local model: ${modelId}`);
   if(engine&&engineModelId===profile.id)return engine;
   if(enginePromise&&enginePromiseModelId===profile.id)return enginePromise;
   if(enginePromise&&enginePromiseModelId!==profile.id){try{await enginePromise}catch{}}
   if(engine&&engineModelId!==profile.id)await unloadEngine('switch-model');
   enginePromiseModelId=profile.id;
-  enginePromise=createEngine(profile.id).catch(error=>{engine=null;engineModelId='';engineUsesMtp=false;throw error}).finally(()=>{enginePromise=null;enginePromiseModelId=''});
+  enginePromise=createEngine(profile.id).catch(error=>{engine=null;engineModelId='';engineUsesMtp=false;engineMode='';throw error}).finally(()=>{enginePromise=null;enginePromiseModelId=''});
   return enginePromise;
 }
 function messageText(value){if(typeof value==='string')return clean(value,12000);return clean(value?.content??value?.text??'',12000)}
-function normalizedMessages(systemPrompt,messages=[]){
-  const rows=[];const system=clean(systemPrompt,12000).trim();if(system)rows.push({role:'system',content:system});
-  for(const row of (Array.isArray(messages)?messages:[]).slice(-10)){const role=/^(assistant|model)$/i.test(String(row?.role||''))?'assistant':'user',content=messageText(row).trim();if(content)rows.push({role,content})}
-  let chars=rows.reduce((sum,row)=>sum+row.content.length,0);
-  while(rows.length>2&&chars>16000){const removed=rows.splice(rows[0]?.role==='system'?1:0,1)[0];chars-=removed?.content?.length||0}
-  return rows;
+function normalizedMessages(systemPrompt,messages=[],maxInputChars=5000){
+  // Preserve complete system / current user instructions. Drop old chat
+  // turns rather than overflowing a small on-device KV cache.
+  const available=Math.max(900,Number(maxInputChars)||5000);
+  const system=clean(systemPrompt,Math.min(1700,Math.floor(available*.35))).trim();
+  const tail=(Array.isArray(messages)?messages:[]).slice(-4).map(row=>({
+    role:/^(assistant|model)$/i.test(String(row?.role||''))?'assistant':'user',
+    content:messageText(row).trim()
+  })).filter(row=>row.content);
+  const latest=tail.pop()||{role:'user',content:''};
+  // The final user instruction is mandatory. If it is itself longer than
+  // the available context, report this rather than sending broken JSON.
+  const maxLatest=available-system.length-96;
+  if(latest.content.length>maxLatest)throw Object.assign(
+    new Error(`The local prompt is too long (${latest.content.length} characters for a ${maxLatest} character budget). A shorter request or smaller schema is required.`),
+    {code:'LOCAL_PROMPT_CONTEXT_OVERFLOW',inputCharacters:latest.content.length,maxInputCharacters:maxLatest}
+  );
+  let remaining=available-system.length-latest.content.length;
+  const history=[];
+  while(tail.length&&remaining>200){
+    const row=tail.pop();if(row.content.length+64>remaining)break;
+    history.unshift(row);remaining-=row.content.length+64;
+  }
+  return [...(system?[{role:'system',content:system}]:[]),...history,latest];
 }
-function chunkText(chunk){if(!chunk)return'';if(typeof chunk==='string')return chunk;if(typeof chunk.content==='string')return chunk.content;if(Array.isArray(chunk.content))return chunk.content.map(part=>clean(part?.text??part?.content??'',12000)).join('');return clean(chunk.text??chunk.delta??'',12000)}
+function chunkText(chunk){
+  if(!chunk)return'';
+  if(typeof chunk==='string')return chunk;
+  if(typeof chunk.content==='string')return chunk.content;
+  if(Array.isArray(chunk.content))return chunk.content.map(part=>{
+    // Only forward visible text parts; a tool call or thinking channel is not
+    // equivalent to user-facing output.
+    if(!part||typeof part!=='object')return typeof part==='string'?part:'';
+    if(part.type&&part.type!=='text')return'';
+    return String(part.text??part.content??'').slice(0,12000);
+  }).join('');
+  if(chunk.message)return chunkText(chunk.message);
+  return clean(chunk.text??chunk.delta??'',12000);
+}
+function structuredJsonContract(tool){
+  const name=clean(tool?.function?.name||'civweave_result',120),schema=tool?.function?.parameters||{type:'object'};
+  let serialized='{}';try{serialized=JSON.stringify(schema)}catch{}
+  return `Return exactly one JSON object for ${name}. Do not use markdown fences, commentary, analysis, or <think> tags. The JSON must satisfy this schema: ${serialized}`;
+}
 function normalizeStructuredTool(value){
   if(!value||typeof value!=='object')return null;
   if(value.type==='function'&&value.function?.name)return value;
@@ -112,43 +257,98 @@ function benchmarkMetrics(info){
 }
 async function runFast(args={},forcedModelId=''){
   const pick=selected(),profile=profileFor(forcedModelId||pick?.id);
-  if(!profile)throw Object.assign(new Error('No supported Gemma 4 LiteRT profile is selected.'),{code:'LITERT_GEMMA4_PROFILE_MISSING'});
-  if(generationActive)throw Object.assign(new Error('The LiteRT Gemma 4 engine is already generating.'),{code:'LOCAL_MODEL_BUSY'});
-  generationActive=true;
-  const started=now();let chat=null,firstTokenAt=0,index=0,text='',toolCall=null;
+  if(!profile)throw Object.assign(new Error('No supported LiteRT model profile is selected.'),{code:'LITERT_GEMMA4_PROFILE_MISSING'});
+  healthyGpu();
+  if(generationActive)throw Object.assign(new Error('The selected LiteRT model engine is already generating.'),{code:'LOCAL_MODEL_BUSY'});
+  generationActive=true;cancelRequested=false;
+  const progress=(phase,detail={})=>{lastPhase=phase;const payload={phase,model:profile.id,...detail};emit('civweave:litert-gemma4-progress',payload);try{args.onProgress?.(payload)}catch{}};
+  const ensureNotCancelled=()=>{if(cancelRequested)throw Object.assign(new Error('LiteRT generation cancelled.'),{code:'CIVWEAVE_GENERATION_STOPPED',executionModel:profile.id,cancelled:true})};
+  const started=now();let chat=null,firstTokenAt=0,index=0,text='',toolCall=null,chunkCount=0,nontextChunks=0;
+  const rawDiagnostics=()=>({model:profile.id,chunksObserved:chunkCount,textDeltas:index,nontextChunks,outputCharacters:text.length});
   try{
+    progress('checking-model');
     const status=await fastStatus(profile.id);if(!status?.available)throw Object.assign(new Error(`${profile.label} is not installed.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:profile.id});
-    const activeEngine=await ensureEngine(profile.id),rows=normalizedMessages(args.systemPrompt,args.messages),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
-    const maxOutputTokens=Math.max(64,Math.min(profile.maxOutputTokens,Number(args.maxNewTokens)||1024));
-    const formattedTool=normalizeStructuredTool(args.structuredTool),prefaceConfig={messages:preface};
-    if(formattedTool){prefaceConfig.tools=[formattedTool];prefaceConfig.extra_context={enable_thinking:false}}
-    const conversationConfig={sessionConfig:{maxOutputTokens,samplerParams:{k:64,p:.95,temperature:formattedTool?0.2:1}},preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
+    progress('loading-engine');
+    const activeEngine=await ensureEngine(profile.id);ensureNotCancelled();
+    progress('engine-ready',{engineModelId,mtpEnabled:engineUsesMtp,contextTokens:profile.contextTokens});
+    const requestedTool=normalizeStructuredTool(args.structuredTool),formattedTool=profile.constrainedTools===false?null:requestedTool,systemPrompt=requestedTool&&!formattedTool?`${clean(args.systemPrompt,12000)}\n\n${structuredJsonContract(requestedTool)}`.trim():args.systemPrompt,maxOutputTokens=Math.max(64,Math.min(profile.maxOutputTokens,Number(args.maxNewTokens)||1024)),maxInputChars=Math.max(1500,Math.min(5000,Math.floor((profile.contextTokens-maxOutputTokens-128)*2.5))),rows=normalizedMessages(systemPrompt,args.messages,maxInputChars),latestIndex=[...rows].map(row=>row.role).lastIndexOf('user'),latest=latestIndex>=0?rows[latestIndex]:{role:'user',content:''},preface=latestIndex>=0?rows.filter((_,i)=>i!==latestIndex):rows;
+    // Disable Gemma 4 thinking in the *free-streaming* stages as well as tool calls.
+    // Otherwise a mobile token budget can be consumed by a non-user-visible
+    // thought channel and the application sees no answer text at all.
+    const prefaceConfig={messages:preface};
+    if(profile.family==='gemma4'||formattedTool)prefaceConfig.extra_context={enable_thinking:false};
+    if(formattedTool)prefaceConfig.tools=[formattedTool];
+    const sampler=profile.sampler||{k:64,p:.95,temperature:1};
+    // Planning stages use the model-packaged sampler. A partial custom sampler
+    // without an explicit type is not necessary for inference and may make
+    // first-turn decode less portable across Android WebGPU implementations.
+    const sdkDefaultSampler=Boolean(args.__civweaveStage||args.__civweaveProbe||args.preferModelDefaultSampling);
+    const sessionConfig={maxOutputTokens};
+    if(!sdkDefaultSampler)sessionConfig.samplerParams={k:sampler.k??64,p:sampler.p??.95,temperature:formattedTool?0.2:(sampler.temperature??1)};
+    const conversationConfig={sessionConfig,preface:prefaceConfig,prefillPrefaceOnInit:true,filterChannelContentFromKvCache:true};
+    // LiteRT's documented minimal WebGPU path uses one sendMessageStreaming()
+    // turn. On some mobile GPUs prefilled multi-message E4B sessions complete
+    // createConversation but never produce their first token. Keep the same
+    // E4B model, instructions, and thinking-off contract, but send the local
+    // Learning Journey stages as single-turn prompts instead of prefilled turns.
+    const leanLearningStage=Boolean(args.__civweaveStage&&args.__civweavePlanKind==='learning'&&profile.family==='gemma4'&&!formattedTool);
+    const leanPrompt=leanLearningStage?['Instructions:',systemPrompt.trim(),'Request:',latest.content].join('\n\n'):'';
+    if(leanLearningStage&&leanPrompt.length>maxInputChars-96)throw Object.assign(
+      new Error('The lightweight local learning prompt exceeds the model context. Reduce the learning material.'),
+      {code:'LOCAL_PROMPT_CONTEXT_OVERFLOW',inputCharacters:leanPrompt.length,maxInputCharacters:maxInputChars-96}
+    );
+    const leanConversationConfig={sessionConfig:{maxOutputTokens},preface:{extra_context:{enable_thinking:false}},prefillPrefaceOnInit:false};
     if(formattedTool)conversationConfig.enableConstrainedDecoding=true;
-    chat=await activeEngine.createConversation(conversationConfig);
-    emit('civweave:litert-gemma4-progress',{phase:'generating',model:profile.id,backend:'webgpu-gpu-artisan',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool)});
+    // The diagnostic probe deliberately uses Google's minimal public API:
+    // Engine.create({model, maxNumTokens}) -> createConversation() -> sendMessageStreaming('READY').
+    // If even this fails, the GPU queue/model is unavailable independent
+    // of Civweave's planning preface, tools, sampler, or learning schema.
+    const minimalProbe=Boolean(args.__civweaveProbe)&&!formattedTool;
+    progress(minimalProbe?'creating-minimal-conversation':leanLearningStage?'creating-lean-learning-conversation':'prefilling-preface',{prefaceCharacters:minimalProbe||leanLearningStage?0:preface.reduce((n,row)=>n+row.content.length,0),maxOutputTokens,maxInputChars,prefillPrefaceOnInit:!minimalProbe&&!leanLearningStage,engineMode,sdkDefaultSampler,leanLearningStage});
+    chat=await activeEngine.createConversation(minimalProbe?undefined:leanLearningStage?leanConversationConfig:conversationConfig);activeChat=chat;ensureNotCancelled();
+    progress('conversation-ready',{backend:'webgpu',maxOutputTokens,maxNumTokens:profile.contextTokens,oneEngineAtATime:true,mtpEnabled:engineUsesMtp,jspi:true,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),sdkDefaultSampler,minimalProbe,leanLearningStage});
     if(formattedTool){
-      const response=await chat.sendMessage(latest);
+      progress('prompt-submitted',{inputCharacters:latest.content.length,constrainedDecoding:true});
+      const response=await chat.sendMessage(latest);ensureNotCancelled();
       firstTokenAt=now();
       const calls=chunkToolCalls(response);if(calls.length)toolCall=calls.at(-1);
       text=chunkText(response);
     }else{
-      const stream=chat.sendMessageStreaming(latest);
-      for await(const chunk of stream){const piece=chunkText(chunk);if(!piece)continue;if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
+      progress('prompt-submitted',{inputCharacters:leanLearningStage?leanPrompt.length:latest.content.length,constrainedDecoding:false,leanLearningStage});
+      // Text-only streaming follows the documented LiteRT Web SDK call shape.
+      const stream=chat.sendMessageStreaming(leanLearningStage?leanPrompt:latest.content);
+      progress('awaiting-first-token',{inputCharacters:leanLearningStage?leanPrompt.length:latest.content.length,prefaceCharacters:leanLearningStage?0:preface.reduce((n,row)=>n+row.content.length,0),engineMode,mtpEnabled:false,leanLearningStage});
+      for await(const chunk of stream){ensureNotCancelled();chunkCount++;if(chunkCount===1)progress('first-stream-chunk',{containsVisibleText:Boolean(chunkText(chunk))});const piece=chunkText(chunk);if(!piece){nontextChunks++;continue}if(!firstTokenAt)firstTokenAt=now();text+=piece;try{args.onToken?.({text:piece,index:index++,model:profile.id,backend:'litert-webgpu',mtpEnabled:engineUsesMtp,formattedOutput:false})}catch{}}
     }
+    ensureNotCancelled();
     const formattedText=formattedTool?toolArgumentText(toolCall):'';
     if(formattedTool&&!formattedText)throw Object.assign(new Error(`LiteRT-LM constrained decoding completed without the required ${formattedTool.function.name} tool call.`),{code:'LITERT_FORMATTED_OUTPUT_MISSING',formattedOutput:true,toolName:formattedTool.function.name});
-    const outputText=(formattedTool?formattedText:text).trim();
-    if(!outputText)throw Object.assign(new Error('Gemma completed without a usable answer. Retry with a smaller request.'),{code:'LOCAL_MODEL_EMPTY_OUTPUT'});
+    const outputText=(formattedTool?formattedText:text).replace(/^\s*<think>[\s\S]*?<\/think>\s*/i,'').trim();
+    if(!outputText)throw Object.assign(new Error(`${profile.label} emitted no visible output (${chunkCount} chunks, ${index} text deltas). The raw stage diagnostics are available in Show failing message.`),{code:'LOCAL_MODEL_EMPTY_OUTPUT',rawDiagnostics:rawDiagnostics(),executionModel:profile.id,rejectedText:text});
     let benchmark={};try{benchmark=benchmarkMetrics(await chat.getBenchmarkInfo())}catch{}
     const completed=now(),generationMs=Math.round(completed-started),ttftMs=firstTokenAt?Math.round(firstTokenAt-started):null,decodeSeconds=Math.max(.001,(completed-(firstTokenAt||started))/1000),approxTokens=Math.max(1,Math.round(outputText.length/3.7)),measuredApproxTokensPerSecond=Number((approxTokens/decodeSeconds).toFixed(2));
-    const metrics={runtime:'litert-lm-web-0.14.0',backend:'webgpu-gpu-artisan',model:profile.id,generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),...benchmark};
+    const metrics={runtime:'litert-lm-web-0.17.1',backend:'webgpu',engineMode,model:profile.id,modelFamily:profile.family||'local',generationMs,ttftMs,maxNumTokens:profile.contextTokens,maxOutputTokens,approxGeneratedTokens:approxTokens,approxTokensPerSecond:measuredApproxTokensPerSecond,oneEngineAtATime:true,phoneProfile:profile.family==='qwen35'?'qwen35-flagship':'12gb-dual',mtpEnabled:engineUsesMtp,jspi:true,leanLearningStage,webBindingSpeculativeDecodingConfigured:engineUsesMtp,formattedOutput:Boolean(formattedTool),constrainedDecoding:Boolean(formattedTool),structuredJsonPrompt:Boolean(requestedTool&&!formattedTool),...benchmark};
     lastMetrics=metrics;emit('civweave:litert-gemma4-complete',metrics);
     return{status:'success',outputText,text:outputText,toolCall:toolCall||null,formattedOutput:formattedTool?{used:true,constrainedDecoding:true,toolName:formattedTool.function.name,toolCall:toolCall||null}:null,model:{id:profile.id,repo:profile.repo,runtime:'litert-lm-web'},backend:'webgpu',streamed:formattedTool?false:Boolean(args.onToken),metrics,executionId:profile.id,usage:null};
+  }catch(error){
+    if(gpuQueueError(error)){
+      const original=error;
+      error=gpuFailure(original,lastPhase);
+      quarantineGpu(error,lastPhase);
+    }
+    // Propagate the actual executing model, not the model selected for chat.
+    if(error&&typeof error==='object')try{error.executionModel=profile.id;error.rawDiagnostics=error.rawDiagnostics||rawDiagnostics();error.rejectedText=error.rejectedText??text}catch{}
+    emit('civweave:litert-gemma4-failed',{model:profile.id,code:error?.code||'LOCAL_LITERT_EXECUTION_FAILED',message:clean(error?.message||error,500),rawDiagnostics:error?.rawDiagnostics||null});
+    throw error;
   }finally{
     try{
-      if(chat)try{await chat.delete()}catch{}
-      if(pendingUnloadReason){const reason=pendingUnloadReason;pendingUnloadReason='';await unloadEngine(reason,{afterGeneration:true})}
-    }finally{generationActive=false}
+      if(chat&&!gpuQuarantine)try{await chat.delete()}catch{}
+      if(activeChat===chat)activeChat=null;
+      if(gpuQuarantine){
+        engine=null;engineModelId='';engineUsesMtp=false;engineMode='';
+        pendingUnloadReason='';
+      }else if(pendingUnloadReason){const reason=pendingUnloadReason;pendingUnloadReason='';await unloadEngine(reason,{afterGeneration:true})}
+    }finally{generationActive=false;cancelRequested=false}
   }
 }
 async function accelerationTarget(selectedId){const profile=profileFor(selectedId);if(!profile)return null;if(selectedId===profile.id)return profile;return Boolean((await fastStatus(profile.id))?.available)?profile:null}
@@ -164,14 +364,25 @@ function install(){
     if(!target){if(pick.id===profile.id)throw Object.assign(new Error(`${profile.label} is selected but its optimized model file is not installed.`),{code:'LITERT_GEMMA4_NOT_INSTALLED',model:profile.id});return base.generate(args)}
     try{return await runFast(args,target.id)}catch(error){emit('civweave:litert-gemma4-fallback',{model:target.id,selectedModel:pick.id,message:String(error?.message||error),capability:error?.capability||null,formattedOutput:Boolean(args?.structuredTool)});if(pick.id!==profile.id)return base.generate(args);throw error}
   };
-  const next=Object.freeze({...base,generate,__civweaveLiteRTGemma4FastV1:VERSION,litertGemma4Fast:true,litertGemma4Dual:true,litertGemma4Mtp:true,litertGemma4Jspi:true,litertGemma4FormattedOutput:true,litertGemma4ConstrainedDecoding:true,litertModelId:PROFILES['gemma4-e2b-it-litert-web'].id,litertModelIds:Object.freeze(Object.keys(PROFILES)),legacyAcceleratedModelId:'gemma4-e2b-it-q4f16',legacyAcceleratedModelIds:Object.freeze([...ALIAS_TO_FAST.keys()].filter(id=>!PROFILES[id])),oneEngineAtATime:true,phoneProfile:'12gb-dual'});
+  const next=Object.freeze({...base,generate,__civweaveLiteRTGemma4FastV1:VERSION,litertGemma4Fast:true,litertGemma4Dual:true,litertGemma4Mtp:false,litertGemma4Jspi:true,litertGemma4FormattedOutput:true,litertGemma4ConstrainedDecoding:true,litertQwen35Phone:true,qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,get litertModelId(){return profileFor(selected()?.id)?.id||''},litertModelIds:Object.freeze(Object.keys(PROFILES)),legacyAcceleratedModelId:'gemma4-e2b-it-q4f16',legacyAcceleratedModelIds:Object.freeze([...ALIAS_TO_FAST.keys()].filter(id=>!PROFILES[id])),oneEngineAtATime:true,get phoneProfile(){return profileFor(selected()?.id)?.family||'none'}});
   try{globalThis.CivweaveLocalChatRuntimeV295=next}catch{return false}
-  wrapped=next;emit('civweave:litert-gemma4-fast-runtime-ready',{models:Object.keys(PROFILES),transparentAliases:[...ALIAS_TO_FAST.keys()],oneEngineAtATime:true,phoneProfile:'12gb-dual',mtpRequested:true,jspiRequired:true,formattedOutput:true,constrainedDecoding:true});return true;
+  wrapped=next;emit('civweave:litert-gemma4-fast-runtime-ready',{models:Object.keys(PROFILES),transparentAliases:[...ALIAS_TO_FAST.keys()],qwen35Models:[QWEN_FAST,QWEN_DEEP],qwen35GemmaRoleBridge:true,oneEngineAtATime:true,phoneProfile:profileFor(selected()?.id)?.family||'none',mtpRequested:false,jspiRequired:true,formattedOutput:true,constrainedDecoding:true});return true;
 }
-async function unload(){await unloadEngine('manual-unload');lastMetrics=null;return true}
+function cancel(reason='user-stop'){
+  if(reason==='no-first-token'||reason==='stage-limit')quarantineGpu(new Error(reason==='no-first-token'?'No first token arrived before the local watchdog deadline.':'Local GPU stage timed out.'),lastPhase);
+  if(!generationActive)return Boolean(gpuQuarantine);
+  cancelRequested=true;
+  try{activeChat?.cancel?.()}catch{}
+  emit('civweave:litert-gemma4-cancel-requested',{model:engineModelId||enginePromiseModelId||'',reason:'user-or-no-progress'});
+  return true;
+}
+async function unload(){
+  if(generationActive)cancel();
+  await unloadEngine('manual-unload');lastMetrics=null;return true;
+}
 for(const name of ['civweave:local-model-runtime-ready','civweave:gemma4-litert-fast-extension-ready','civweave:guide-loader-reset','pageshow'])addEventListener(name,()=>queueMicrotask(install));
 addEventListener('civweave:local-model-selection',()=>{const pick=selected(),target=profileFor(pick?.id);if(engine&&(!pick?.active||!target||target.id!==engineModelId))void unloadEngine('selection-change')});
 addEventListener('pagehide',()=>{void unloadEngine('pagehide')});
 install();
-globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,fastModelId:'gemma4-e2b-it-litert-web',fastModelIds:Object.freeze(Object.keys(PROFILES)),legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,engineContextTokens:4096,oneEngineAtATime:true,mtpRequested:true,jspiRequired:true,phoneProfile:'12gb-dual',formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics})});
+globalThis.CivweaveLiteRTGemma4FastRuntimeV1=Object.freeze({version:VERSION,priorVersion:PRIOR_VERSION,get fastModelId(){return globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('fast')||selected()?.id||''},fastModelIds:Object.freeze(Object.keys(PROFILES)),qwen35FastModelId:QWEN_FAST,qwen35DeepModelId:QWEN_DEEP,qwen35GemmaRoleBridge:true,legacyQ4Id:'gemma4-e2b-it-q4f16',profiles:PROFILES,moduleUrl:MODULE_URL,wasmRoot:WASM_ROOT,get engineContextTokens(){return profileFor(selected()?.id)?.contextTokens||0},oneEngineAtATime:true,mtpRequested:false,jspiRequired:true,get phoneProfile(){return profileFor(selected()?.id)?.family||'none'},formattedOutput:true,constrainedDecoding:true,structuredToolCalling:true,supportsJspi,install,runFast,cancel,quarantineGpu,fastStatus,accelerationTarget,shouldAccelerate,unload,state:()=>Object.freeze({installed:Boolean(wrapped),engineReady:Boolean(engine),engineMode,engineLoading:Boolean(enginePromise),engineLoadingModelId:enginePromiseModelId,engineModelId,engineUsesMtp,jspiAvailable:supportsJspi(),generationActive,lastMetrics,lastPhase,gpuQuarantine:gpuQuarantine?{...gpuQuarantine}:null})});
 })();

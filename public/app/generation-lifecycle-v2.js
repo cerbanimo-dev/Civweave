@@ -1,14 +1,16 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-generation-lifecycle-v2-event-bounded-frame-binding';
+const VERSION='1.3.3-generation-lifecycle-v2-preserve-stream-text';
 const HISTORY_KEY='civweave.generation-lifecycle.v1.history';
-const MAX_HISTORY=160;
+const MAX_HISTORY=220;
 const STOP_GRACE_MS=120000;
 const IDLE_WAIT_MS=90000;
 const SOURCE_EVENTS=Object.freeze([
   'civweave:weaveling-intake-progress',
   'civweave:weave-pipeline',
   'civweave:litert-gemma4-progress',
+  'civweave:local-model-stage-progress',
+  'civweave:litert-gemma4-failed',
   'civweave:litert-gemma4-complete',
   'civweave:generation-stop-requested',
   'civweave:generation-cancelled'
@@ -69,21 +71,20 @@ function record(type,detail={},source='window'){
 }
 function latest(type=''){for(let i=history.length-1;i>=0;i-=1)if(!type||history[i].type===type)return history[i];return null}
 function inferRuntimeStage(args={},forcedModelId=''){
-  const explicit=clean(args.__civweaveStage||args.stage||args.stageLabel,180);if(explicit)return explicit;
-  const prompt=clean(args.systemPrompt,16000).toLowerCase(),model=clean(forcedModelId,160).toLowerCase();
-  if(prompt.includes('fast e2b intake')||prompt.includes('route_civweave_request')||model.includes('e2b'))return'E2B Intake';
-  if(prompt.includes('targeted repair'))return'E4B Repair';
-  if(prompt.includes("civweave's compiler")||prompt.includes('convert a completed weave draft'))return'E4B JSON Compile';
-  if(prompt.includes('draft mode')||prompt.includes('planning artifact'))return'E4B Plan Draft';
-  if(model.includes('e4b'))return'E4B Generation';
+  const explicit=clean(args.__civweaveStage||args.stage||args.stageLabel,180);
+  if(explicit)return explicit;
+  const prompt=clean(args.systemPrompt,16000).toLowerCase();
+  if(/intake|route_civweave_request|classify this intake/.test(prompt))return'Intake';
+  if(/targeted repair|repair this payload/.test(prompt))return'Targeted repair';
+  if(/compiler|convert a completed weave draft|compile this payload/.test(prompt))return'JSON compile';
+  if(/draft|planning artifact/.test(prompt))return'Plan draft';
   return'Local generation';
 }
 function stageId(label=''){
   const value=clean(label,220).toLowerCase();
-  if(value.includes('intake')||value.includes('e2b'))return'intake';
+  if(value.includes('intake'))return'intake';
   if(value.includes('repair'))return'repair';
   if(value.includes('compile')||value.includes('json'))return'compile';
-  if(value.includes('draft')||value.includes('plan')||value.includes('e4b'))return'draft';
   return'draft';
 }
 function windows(){
@@ -112,15 +113,15 @@ function patchRuntime(win=globalThis){
         if(!idle)throw Object.assign(new Error('The previous local generation is still shutting down after Stop. Retry once shutdown completes.'),{code:'CIVWEAVE_PREVIOUS_GENERATION_STOPPING'});
       }
       const priorToken=args?.onToken;
-      const nextArgs={...args,onToken:token=>{const text=clean(token?.text??token,12000);record('runtime-token',{stage,label,model,text,state:'streaming'},'litert');try{priorToken?.(token)}catch{}}};
-      record('runtime-stage',{stage,label,model,state:'start'},'litert');
+      const nextArgs={...args,onToken:token=>{const text=String(token?.text??token??'').slice(0,12000);if(!args.__civweaveProbe)record('runtime-token',{stage,label,model,text,state:'streaming'},'litert');try{priorToken?.(token)}catch{}}};
+      if(!args.__civweaveProbe)record('runtime-stage',{stage,label,model,state:'start'},'litert');
       try{
         const result=await baseRunFast(nextArgs,forcedModelId);
-        record('runtime-stage',{stage,label,model,state:'complete'},'litert');
+        if(!args.__civweaveProbe)record('runtime-stage',{stage,label,model,state:'complete'},'litert');
         return result;
       }catch(error){
         const stopped=error?.cancelled||error?.code==='CIVWEAVE_GENERATION_STOPPED'||now()-lastStopAt<3000;
-        record('runtime-stage',{stage,label,model,state:stopped?'stopped':'failed',code:error?.code||'',message:clean(error?.message||error,1200)},'litert');
+        if(!args.__civweaveProbe)record('runtime-stage',{stage,label,model,state:stopped?'stopped':'failed',code:error?.code||'',message:clean(error?.message||error,1200)},'litert');
         throw error;
       }
     };
@@ -128,6 +129,46 @@ function patchRuntime(win=globalThis){
     const next=Object.freeze({...api,runFast,unload,__civweaveGenerationLifecycleV1:VERSION});
     win.CivweaveLiteRTGemma4FastRuntimeV1=next;patchedWindows.set(win,next);return true;
   }catch{return false}
+}
+async function probeLocalModel({timeoutMs=90000}={}){
+  const target=globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep')||'';
+  const candidates=windows().map(win=>({win,api:win?.CivweaveLiteRTGemma4FastRuntimeV1})).filter(row=>typeof row.api?.runFast==='function');
+  const picked=candidates.find(row=>row.api?.state?.()?.engineModelId===target)||candidates.find(row=>row.api?.state?.()?.engineReady)||candidates[0];
+  if(!target||!picked){
+    const result={ok:false,model:target,code:'LOCAL_INFERENCE_PROBE_NOT_READY',message:'The configured local runtime is not loaded.'};
+    record('runtime-probe',result,'probe');return result;
+  }
+  const health=picked.api?.state?.();
+  if(health?.gpuQuarantine){
+    const result={ok:false,model:target,code:'CIVWEAVE_LOCAL_GPU_RESTART_REQUIRED',phase:health.gpuQuarantine.phase,message:'The prior inference timed out or the WebGPU queue failed. Restart the full Civweave runtime before testing again.',restartRequired:true};
+    record('runtime-probe',result,'probe');return result;
+  }
+  if(health?.generationActive){
+    const result={ok:false,model:target,code:'LOCAL_INFERENCE_PROBE_ENGINE_BUSY',message:'The previous inference has not released its GPU session. Restart the local runtime to recover.'};
+    record('runtime-probe',result,'probe');return result;
+  }
+  let timer=null,completed=false,phase='loading-engine',started=now(),firstTokenAt=0,output='';
+  const errorFor=()=>Object.assign(new Error(`The minimal local inference probe did not return a token within its deadline (last phase: ${phase}).`),{code:'LOCAL_INFERENCE_PROBE_TIMEOUT',executionModel:target,runtimePhase:phase});
+  const watchdog=new Promise((_,reject)=>{
+    timer=setTimeout(()=>{if(completed)return;try{picked.api.cancel?.()}catch{};reject(errorFor())},Math.max(20000,Math.min(150000,Number(timeoutMs)||90000)));
+  });
+  try{
+    const generation=picked.api.runFast({
+      __civweaveStage:'Local inference probe',__civweaveProbe:true,systemPrompt:'Reply with the single word READY. No explanation.',
+      messages:[{role:'user',content:'Reply READY.'}],maxNewTokens:24,structuredTool:null,
+      onProgress:detail=>{phase=clean(detail?.phase||phase,120)},
+      onToken:detail=>{if(!firstTokenAt)firstTokenAt=now();output+=String(detail?.text??'')}
+    },target);
+    const answer=await Promise.race([generation,watchdog]);
+    completed=true;clearTimeout(timer);
+    const text=clean(answer?.outputText||output,200);
+    const result={ok:Boolean(text),model:answer?.model?.id||target,code:text?'OK':'LOCAL_INFERENCE_PROBE_EMPTY',phase,firstTokenMs:firstTokenAt?firstTokenAt-started:null,elapsedMs:now()-started,output:text};
+    record('runtime-probe',result,'probe');return result;
+  }catch(error){
+    completed=true;clearTimeout(timer);
+    const result={ok:false,model:error?.executionModel||target,code:error?.code||'LOCAL_INFERENCE_PROBE_FAILED',phase:error?.runtimePhase||phase,message:clean(error?.message||error,400),elapsedMs:now()-started,restartRequired:Boolean(error?.restartRequired)};
+    record('runtime-probe',result,'probe');return result;
+  }
 }
 function releaseWindow(win){try{const api=win.CivweaveLiteRTGemma4FastRuntimeV1;if(api?.unload)void api.unload()}catch{}}
 function handleStop(){lastStopAt=now();for(const win of windows())releaseWindow(win)}
@@ -159,7 +200,7 @@ function install(){
   }else refreshBindings();
   return true;
 }
-const api=Object.freeze({version:VERSION,install,record,history:()=>history.map(plain),latest,artifactName,inferArtifacts,normalizeArtifacts,mergeArtifacts,artifactKey,stageId,patchRuntime,lastStopAt:()=>lastStopAt});
+const api=Object.freeze({version:VERSION,install,record,history:()=>history.map(plain),latest,artifactName,inferArtifacts,normalizeArtifacts,mergeArtifacts,artifactKey,stageId,patchRuntime,probeLocalModel,lastStopAt:()=>lastStopAt});
 globalThis.CivweaveGenerationLifecycleV1=api;
 globalThis.CivweaveGenerationLifecycleV2=api;
 install();

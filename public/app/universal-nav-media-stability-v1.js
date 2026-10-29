@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-canonical-ai-portraits-bounded';
+const VERSION='1.0.1-sprite-first-full-button-art';
 const NAV_ID='cw-themed-system-nav';
 const PORTRAITS=Object.freeze({
   civweave:['/app/assets/ai/weaveling.png','W'],
@@ -16,8 +16,8 @@ function ensureStyle(){
   const style=document.createElement('style');
   style.id='cw-universal-nav-media-stability-v1-style';
   style.textContent=`
-#${NAV_ID} .cw-themed-system-avatar{display:none!important}
-#${NAV_ID} .cw-themed-system-fallback{display:block!important;z-index:3!important;opacity:1!important;visibility:visible!important;filter:none!important;object-fit:contain!important;object-position:center!important;background:transparent!important}
+#${NAV_ID} .cw-themed-system-link[data-sprite-ready="false"] .cw-themed-system-avatar{display:none!important}
+#${NAV_ID} .cw-themed-system-fallback{display:block!important;z-index:0!important;opacity:1!important;visibility:visible!important;filter:none!important;object-fit:contain!important;object-position:center!important;background:transparent!important}
 #${NAV_ID} .cw-nav-canonical-monogram{position:absolute;inset:2px;z-index:2;display:grid;place-items:center;border-radius:18px;color:#271c31;font:900 24px/1 system-ui,sans-serif;background:linear-gradient(145deg,#fff8,#ffffff22)}
 #${NAV_ID} .cw-nav-canonical-monogram[hidden]{display:none!important}
 `;
@@ -29,7 +29,7 @@ function repair(){
   for(const link of nav.querySelectorAll('a[data-system]')){
     const system=String(link.dataset.system||''),spec=PORTRAITS[system];if(!spec)continue;
     const wrap=link.querySelector('.cw-themed-system-avatar-wrap');if(!wrap)continue;
-    const sprite=wrap.querySelector('.cw-themed-system-avatar');if(sprite)sprite.style.setProperty('display','none','important');
+    const sprite=wrap.querySelector('.cw-themed-system-avatar');if(sprite)sprite.style.removeProperty('display');
     let fallback=wrap.querySelector('.cw-nav-canonical-monogram');
     if(!fallback){fallback=document.createElement('span');fallback.className='cw-nav-canonical-monogram';fallback.textContent=spec[1];fallback.setAttribute('aria-hidden','true');wrap.prepend(fallback)}
     let img=wrap.querySelector('img.cw-themed-system-fallback');
@@ -37,7 +37,7 @@ function repair(){
     const desired=new URL(spec[0],location.origin).href;
     if(img.src!==desired)img.src=desired;
     img.removeAttribute('srcset');img.removeAttribute('sizes');img.hidden=false;
-    img.style.setProperty('display','block','important');img.style.setProperty('opacity','1','important');img.style.setProperty('visibility','visible','important');img.style.setProperty('z-index','3','important');img.style.setProperty('object-fit','contain','important');img.style.setProperty('object-position','center','important');
+    img.style.setProperty('display','block','important');img.style.setProperty('opacity','1','important');img.style.setProperty('visibility','visible','important');img.style.setProperty('z-index','0','important');img.style.setProperty('object-fit','contain','important');img.style.setProperty('object-position','center','important');
     const loaded=()=>{fallback.hidden=true;link.dataset.cwCanonicalPortrait='loaded'};
     const failed=()=>{img.hidden=true;fallback.hidden=false;link.dataset.cwCanonicalPortrait='fallback'};
     img.onload=loaded;img.onerror=failed;

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-direct-quest-copy';
+const VERSION='1.0.7-map-focus-review';
 const REVISION='shared-review-surface-v234';
 const STYLE_ID='cw-shared-review-style-v234';
 const SURFACE_ID='cw-shared-review-surface-v234';
@@ -14,6 +14,12 @@ const CONTRACT_SCRIPT='/app/guide-contracts-v141.js';
 const SYSTEM_LABEL={civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'};
 const GUIDE_NAME={civweave:'Weaveling','living-school':'Moss',cerbanimo:'Kamiya',fellowfare:'Rook',anarchadia:'Merlin'};
 const SUPPORTED_GATES=new Set(['open-plan','activate-plan','open-action','approve-action']);
+const MAP_LANES=Object.freeze([
+  {id:'living-school',label:'Living School',color:'#aeea57'},
+  {id:'cerbanimo',label:'Cerbanimo',color:'#e85dff'},
+  {id:'fellowfare',label:'FellowFare',color:'#efb452'},
+  {id:'anarchadia',label:'Anarchadia',color:'#ff3d96'}
+]);
 
 if(globalThis.CivweaveSharedReviewSurfaceV234?.version===VERSION)return;
 
@@ -45,12 +51,12 @@ function installStyle(){
 #${SURFACE_ID} .cwsr234-head>div{min-width:0;flex:1}#${SURFACE_ID} .cwsr234-head small{display:block;color:var(--accent,#8de5ef);font-size:10px;font-weight:900;letter-spacing:.11em}#${SURFACE_ID} .cwsr234-head h2{margin:3px 0 0;font:800 19px/1.15 Georgia,serif}#${SURFACE_ID} .cwsr234-close{width:36px;height:36px;border:1px solid var(--line,#ffffff2b);border-radius:10px;background:#ffffff0d;color:inherit;font-size:20px;cursor:pointer}
 #${SURFACE_ID} .cwsr234-state{display:inline-flex;margin-top:7px;padding:3px 8px;border:1px solid color-mix(in srgb,var(--accent,#8de5ef) 55%,transparent);border-radius:999px;color:var(--accent,#8de5ef);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
 #${SURFACE_ID} .cwsr234-summary{padding:12px 2px 4px}#${SURFACE_ID} .cwsr234-summary p{margin:0 0 8px;color:var(--muted,#b8c6df)}
-#${SURFACE_ID} .cwsr234-block{margin-top:10px;padding:11px;border:1px solid color-mix(in srgb,var(--line,#ffffff2b) 70%,transparent);border-radius:14px;background:#ffffff08}#${SURFACE_ID} .cwsr234-block>small{display:block;color:var(--accent,#8de5ef);font-size:9px;font-weight:900;letter-spacing:.1em;margin-bottom:5px}#${SURFACE_ID} .cwsr234-block h3{margin:0 0 6px;font-size:14px}#${SURFACE_ID} .cwsr234-block p{margin:0 0 7px;color:var(--muted,#b8c6df)}#${SURFACE_ID} ol,#${SURFACE_ID} ul{margin:7px 0 0;padding-left:20px}#${SURFACE_ID} li+li{margin-top:5px}
+#${SURFACE_ID} .cwsr234-block{margin-top:10px;padding:11px;border:1px solid color-mix(in srgb,var(--line,#ffffff2b) 70%,transparent);border-radius:14px;background:#ffffff08}#${SURFACE_ID} .cwsr234-block>small{display:block;color:var(--accent,#8de5ef);font-size:9px;font-weight:900;letter-spacing:.1em;margin-bottom:5px}#${SURFACE_ID} .cwsr234-block h3{margin:0 0 6px;font-size:14px}#${SURFACE_ID} .cwsr234-block p{margin:0 0 7px;color:var(--muted,#b8c6df)}#${SURFACE_ID} .cwsr234-block ol,#${SURFACE_ID} .cwsr234-block ul{margin:7px 0 0;padding-left:20px}#${SURFACE_ID} li+li{margin-top:5px}
 #${SURFACE_ID} .cwsr234-fields{display:grid;gap:7px;margin:0}#${SURFACE_ID} .cwsr234-fields>div{display:grid;gap:2px;padding:7px 0;border-top:1px solid #ffffff0e}#${SURFACE_ID} .cwsr234-fields>div:first-child{border-top:0}#${SURFACE_ID} dt{font-size:10px;font-weight:900;color:var(--accent,#8de5ef);text-transform:uppercase;letter-spacing:.06em}#${SURFACE_ID} dd{margin:0;color:var(--muted,#b8c6df);white-space:pre-wrap}
 #${SURFACE_ID} .cwsr234-warning{margin-top:10px;padding:9px 10px;border:1px solid #ffd36e66;border-radius:12px;background:#ffd36e12;color:#ffe7a8}
+#${SURFACE_ID} [data-guide-outcome]{margin:12px 0}#${SURFACE_ID} .cwsr234-change-request{margin:10px 0;border:1px solid #ffffff24;border-radius:12px;background:#ffffff06;padding:0 10px}#${SURFACE_ID} .cwsr234-change-request>summary{min-height:44px;padding:11px 0;cursor:pointer;font-weight:800}#${SURFACE_ID} [data-review-revision-form]{display:grid;gap:8px;padding:0 0 12px}#${SURFACE_ID} [data-review-revision-form] label{font-weight:800;font-size:12px}#${SURFACE_ID} [data-review-revision-form] textarea{box-sizing:border-box;width:100%;min-height:90px;resize:vertical;border:1px solid #ffffff33;border-radius:10px;padding:9px;background:#07111f;color:inherit;font:inherit}#${SURFACE_ID} [data-review-revision-form] p{margin:0;color:var(--muted,#b8c6df);font-size:11px}#${SURFACE_ID} [data-review-revision-form] button{min-height:44px;border:1px solid #8af5d266;border-radius:10px;background:#8af5d215;color:inherit;font-weight:800;cursor:pointer}#${SURFACE_ID} .cwsr234-change-request>summary:focus-visible,#${SURFACE_ID} [data-review-revision-form] :focus-visible{outline:2px solid #8af5d2;outline-offset:3px}
 #${SURFACE_ID} .cwsr234-actions{position:sticky;bottom:-13px;display:flex;flex-wrap:wrap;gap:8px;margin:13px -13px -13px;padding:11px 13px;background:color-mix(in srgb,var(--panel,#081225) 96%,#000);border-top:1px solid var(--line,#ffffff2b)}#${SURFACE_ID} .cwsr234-actions button{min-height:40px;padding:0 13px;border:1px solid var(--line,#ffffff2b);border-radius:999px;background:#ffffff0d;color:inherit;font-weight:800;cursor:pointer}#${SURFACE_ID} .cwsr234-actions .primary{background:var(--accent,#d8dde7);color:#09111d;border-color:transparent}
 #${PENDING_ID}{border-color:#d8dde755!important}#${PENDING_ID} .cwsr234-pending-list{display:grid}#${PENDING_ID} details{border-top:1px solid #ffffff10}#${PENDING_ID} details:first-child{border-top:0}#${PENDING_ID} summary{list-style:none;cursor:pointer;padding:11px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}#${PENDING_ID} summary::-webkit-details-marker{display:none}#${PENDING_ID} summary strong{display:block;font-size:13px}#${PENDING_ID} summary small{display:block;color:var(--mint,#8af5d2);font-size:9px;font-weight:900;letter-spacing:.09em}#${PENDING_ID} summary b{font-size:10px;color:var(--muted,#9eb0c6);text-transform:uppercase}#${PENDING_ID} .cwsr234-pending-body{padding:0 12px 12px}#${PENDING_ID} .cwsr234-pending-body p{margin:0 0 8px;color:var(--muted,#9eb0c6);font-size:12px}#${PENDING_ID} .cwsr234-path-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}#${PENDING_ID} .cwsr234-path-list span{padding:3px 7px;border-radius:999px;background:#ffffff0b;border:1px solid #ffffff18;font-size:10px}#${PENDING_ID} .cwsr234-review-button{min-height:34px;padding:0 10px;border:1px solid #8af5d255;border-radius:999px;background:#8af5d214;color:inherit;font-weight:800;cursor:pointer}
-@media(max-width:560px){#${SURFACE_ID}[data-host="body"]{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:auto}}
 `;
   document.head.append(style);
 }
@@ -82,8 +88,50 @@ function listMarkup(label,items){
   const list=Array.isArray(items)?items.map(item=>clean(item,1400)).filter(Boolean):[];
   return list.length?`<section class="cwsr234-block"><small>${esc(label)}</small><ol>${list.map(item=>`<li>${esc(item)}</li>`).join('')}</ol></section>`:'';
 }
+function pathSteps(path){return Array.isArray(path?.steps)&&path.steps.length?path.steps:Array.isArray(path?.tasks)?path.tasks:[]}
+function stepTitle(step){return typeof step==='string'?clean(step,500):clean(step?.title||step?.name||step?.label||step?.description,500)}
+function mapRealm(path){
+  const raw=clean(path?.realm||path?.system||path?.type,80),id=raw.toLowerCase().replace(/[ _]+/g,'-');
+  const known=MAP_LANES.find(lane=>lane.id===id);
+  if(known)return{id:known.id,label:known.label};
+  if(['learning','learn'].includes(id))return{id:'living-school',label:'Living School'};
+  if(['skilled-labor','making','build'].includes(id))return{id:'cerbanimo',label:'Cerbanimo'};
+  if(['resource','resources','exchange','outsource'].includes(id))return{id:'fellowfare',label:'FellowFare'};
+  if(['governance','consent'].includes(id))return{id:'anarchadia',label:'Anarchadia'};
+  return{id:'unassigned',label:raw||'Unassigned'};
+}
+function questPathwayMarkup(plan){return globalThis.CivweaveQuestPathwayMapV1?.render?.(plan,{actions:['inspect','edit','open-native','submit-guild'],scope:'Saved Quest · private on this device'})||'<p class="cwsr234-warning">The Quest map is unavailable. Full saved path details are below.</p>'}
+function focusPath(surface,detail){
+  const target=detail.governance?surface?.querySelector('[data-review-governance]'):surface?.querySelector(`[data-review-path="${detail.pathIndex}"]`);
+  target?.focus({preventScroll:true});target?.scrollIntoView?.({block:'nearest',behavior:'auto'});return Boolean(target);
+}
+function navigateMap(system,options){
+  let shell=globalThis.CivweavePersistentSystemShellV1;
+  try{const host=globalThis.parent;if(!shell&&host!==globalThis&&host.location.origin===location.origin&&host.document.getElementById('cw-persistent-system-stage')?.contentWindow===globalThis)shell=host.CivweavePersistentSystemShellV1}catch{}
+  if(shell?.navigate)return shell.navigate(system,options);
+  if(!options.nativePage&&globalThis.CivweaveSystemRoutesV227?.navigate)return globalThis.CivweaveSystemRoutesV227.navigate(system,options);
+  const target=new URL('/app/persistent-system-shell-v1.html',location.origin);target.searchParams.set('system',system);target.searchParams.set('installed','1');for(const [key,value]of Object.entries(options))if(value)target.searchParams.set(key,String(value));location.assign(target.href);return true;
+}
+function handleMapAction(detail={},options={}){
+  const id=String(detail.questId||'');if(!id||id.length>180)return false;const item=findPlanItem(id),plan=item?.plan;if(!plan)return false;
+  const path=Number.isInteger(detail.pathIndex)?plan.paths?.[detail.pathIndex]:null;
+  if(['inspect','open-native'].includes(detail.action)&&!detail.governance&&(!path||String(path.id||'')!==String(detail.pathId||'')))return false;
+  if(detail.action==='inspect')return focusPath(openPlan(item.id||plan.id,{source:options.source}),detail);
+  if(detail.action==='edit'){
+    const surface=openPlan(item.id||plan.id,{source:options.source}),section=surface?.querySelector('.cwsr234-change-request'),input=section?.querySelector('[name="revisionNote"]');if(section)section.open=true;input?.focus();input?.scrollIntoView?.({block:'nearest',behavior:'auto'});return Boolean(input);
+  }
+  if(detail.action==='submit-guild')return navigateMap('civweave',{nativePage:'guild-quests',submitQuest:plan.id,source:'quest-pathway-map'});
+  if(detail.action==='open-native'){
+    const system=mapRealm(path).id;if(!['active','completed'].includes(String(item.state||plan.state))||!MAP_LANES.some(lane=>lane.id===system)||system!==detail.realm)return false;
+    const evaluator=globalThis.CivweaveQuestPathwayMapV1?.canOpenPath;
+    if(typeof evaluator==='function'){try{if(evaluator(plan,path.id)!==true)return false}catch{return false}}
+    else if((Array.isArray(plan.paths)?plan.paths:[]).some(record=>[record,...(Array.isArray(record.steps)?record.steps:[])].some(node=>node&&typeof node==='object'&&['dependsOn','dependencies','dependencyIds'].some(key=>Object.hasOwn(node,key)))))return false;
+    return navigateMap(system,{...(system==='anarchadia'?{nativePage:'workbench',nativeRoute:'overview'}:{}),weave:plan.id,path:path.id,source:'quest-pathway-map'});
+  }
+  return false;
+}
 function openPersistentChat(system){
-  try{return globalThis.CivweavePersistentGuideChatV215?.open?.({guide:realm(system)})||null}catch{return null}
+  try{return globalThis.CivweavePersistentGuideChatV215?.open?.({guide:realm(system),focus:false})||null}catch{return null}
 }
 function chooseHost(source=null){
   const persistent=document.getElementById('cw-persistent-guide-chat-v215');
@@ -101,23 +149,57 @@ function notify(system,text){
   try{globalThis.CivweavePersistentGuideChatV215?.notify?.(realm(system),text,{open:true});return}catch{}
   try{dispatchEvent(new CustomEvent('civweave:guide-notification',{detail:{system:realm(system),text,open:true}}))}catch{}
 }
+function planReviewOutcome(item){
+  const plan=item?.plan||item,decision=plan?.reviewDecision,id=clean(plan?.id||item?.id,180),state=String(item?.state||plan?.state||'');
+  if(!id||!decision?.id||decision.planId!==id||decision.scope!=='plan'||!Date.parse(decision.at)||state!==plan.state)return null;
+  if(decision.decision==='accepted'&&state==='active')return{guide:'civweave',receiptId:decision.id,outcome:'accepted',label:'Quest plan activated',title:plan.title||'Quest plan',scope:'Quest plan review',note:'Paths unlocked; execution and completion still need evidence',progressText:'Plan accepted · Quest work remains to be demonstrated',fresh:false};
+  if(decision.decision==='revision'&&state==='review'&&clean(decision.note,2000))return{guide:'civweave',receiptId:decision.id,outcome:'revision',label:'Quest plan changes requested',title:plan.title||'Quest plan',scope:'Quest plan review',note:clean(decision.note,2000),progressText:'Saved under review · describe the next revision with Weaveling',fresh:false};
+  return null;
+}
+function planReviewScene(item){
+  const outcome=planReviewOutcome(item);if(!outcome)return'';
+  const art=globalThis.CivweaveLudModeV1?.isEnabled?.()!==true&&document.documentElement.dataset.civweaveOperatingMode!=='lud';
+  return globalThis.CivweaveGuideOutcomeSceneV1?.render?.({...outcome,art})||`<section class="cwsr234-block" role="status"><small>${esc(outcome.scope)}</small><h3>${esc(outcome.label)}</h3><p>${esc(outcome.progressText)}</p><p>${esc(outcome.note)}</p></section>`;
+}
+function reviewFailure(message){
+  const error=clean(message,900),status=document.querySelector(`#${SURFACE_ID} [data-review-decision-status]`);
+  if(status){status.textContent=error;status.hidden=false}
+  return{ok:false,error};
+}
+function commitReviewWrites(entries){
+  const previous=new Map(),written=[];
+  try{for(const[key]of entries)previous.set(key,localStorage.getItem(key))}catch{return reviewFailure('The saved Quest could not be read. No decision was recorded.')}
+  for(const[key,value]of entries){
+    if(write(key,value)){written.push(key);continue}
+    let restored=true;
+    for(const changed of written.reverse())try{const old=previous.get(changed);if(old===null)localStorage.removeItem(changed);else localStorage.setItem(changed,old)}catch{restored=false}
+    return reviewFailure(restored?'The Quest decision could not be saved. Your previous review state was restored.':'The Quest decision could not be saved completely. Reopen the saved Quest to inspect its current state before trying again.');
+  }
+  return{ok:true};
+}
 function renderPlan(item,source=null){
   const plan=item?.plan||item;
   if(!plan)return false;
   openPersistentChat('civweave');
   installStyle();
-  const host=chooseHost(source),surface=document.createElement('section');
+  const host=chooseHost(source),surface=document.createElement('section'),previous=document.getElementById(SURFACE_ID);
   removeSurface();
   surface.id=SURFACE_ID;surface.dataset.host=host.type;surface.dataset.kind='weave';surface.dataset.id=clean(item.id||plan.id,180);
   const paths=Array.isArray(plan.paths)?plan.paths:[];
-  const governance=plan.governance&&typeof plan.governance==='object'?plan.governance:null;
+  const g=plan.governance,governance=g&&typeof g==='object'&&!Array.isArray(g)&&g.included!==false&&(clean(g.title)||clean(g.purpose)||clean(g.reviewQuestion)||Array.isArray(g.agreements)&&g.agreements.some(value=>clean(value)))?g:null;
   surface.innerHTML=`
     <header class="cwsr234-head"><div><small>QUEST REVIEW</small><h2>${esc(plan.title||item.text||'Untitled Quest')}</h2><span class="cwsr234-state">${esc(item.state||plan.state||'review')}</span></div><button class="cwsr234-close" type="button" data-review-command="close" aria-label="Close review">×</button></header>
+    ${questPathwayMarkup({...plan,state:item.state||plan.state||'review'})}
     <div class="cwsr234-summary">${plan.wish?`<p><strong>Quest goal:</strong> ${esc(plan.wish)}</p>`:''}${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}</div>
-    ${paths.map((path,index)=>`<section class="cwsr234-block"><small>${esc(`${index+1} · ${SYSTEM_LABEL[realm(path.realm)]||humanKey(path.realm)} · ${path.status||'ready'}`)}</small><h3>${esc(path.title||'Untitled path')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}${listMarkup('STEPS',path.steps)}${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
+    ${planReviewScene(item)}
+    <details class="cwsr234-change-request"><summary>Request changes to this plan</summary><form data-review-revision-form><label for="cwsr234-revision-note">What needs to change?</label><textarea id="cwsr234-revision-note" name="revisionNote" required maxlength="2000" rows="3">${esc(plan.reviewDecision?.decision==='revision'?clean(plan.reviewDecision.note,2000):'')}</textarea><p>Saving returns this plan to review and keeps its existing work records. Continue with Weaveling when you are ready.</p><button type="button" data-review-command="request-plan-changes" data-id="${esc(item.id||plan.id)}">Save revision request</button></form></details><p class="cwsr234-warning" role="alert" data-review-decision-status hidden></p>
+    ${paths.map((path,index)=>`<section class="cwsr234-block" data-review-path="${index}" tabindex="-1"><small>${esc(`${index+1} · ${mapRealm(path).label} · ${path.status||'ready'}`)}</small><h3>${esc(path.title||'Untitled path')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}${listMarkup('STEPS',pathSteps(path).map(stepTitle))}${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
     ${listMarkup('ASSUMPTIONS',plan.assumptions)}
-    ${governance?`<section class="cwsr234-block"><small>ANARCHADIA · PASSPORT AND CONSENT</small><h3>${esc(governance.title||'Governance layer')}</h3>${governance.purpose?`<p>${esc(governance.purpose)}</p>`:''}${Array.isArray(governance.agreements)&&governance.agreements.length?`<ul>${governance.agreements.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`:''}</section>`:''}
-    <div class="cwsr234-actions"><button type="button" data-review-command="close">Keep under review</button>${String(item.state||plan.state||'review')==='review'?`<button type="button" class="primary" data-review-command="activate-plan" data-id="${esc(item.id||plan.id)}">Activate Quest</button>`:''}</div>`;
+    ${governance?`<section class="cwsr234-block" data-review-governance tabindex="-1"><small>ANARCHADIA · PASSPORT AND CONSENT</small><h3>${esc(governance.title||'Governance layer')}</h3>${governance.purpose?`<p>${esc(governance.purpose)}</p>`:''}${Array.isArray(governance.agreements)&&governance.agreements.length?`<ul>${governance.agreements.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>`:''}${governance.reviewQuestion?`<p><strong>Review:</strong> ${esc(governance.reviewQuestion)}</p>`:''}</section>`:''}
+    <div class="cwsr234-actions"><button type="button" data-review-command="close">${String(item.state||plan.state||'review')==='review'?'Keep under review':'Close review'}</button>${plan.reviewDecision?.decision==='revision'?'<button type="button" data-review-command="focus-chat">Continue with Weaveling</button>':''}${String(item.state||plan.state||'review')==='review'?`<button type="button" class="primary" data-review-command="activate-plan" data-id="${esc(item.id||plan.id)}">Activate Quest</button>`:''}</div>`;
+  globalThis.CivweaveGuideOutcomeSceneV1?.preserve?.(previous,surface);
+  globalThis.CivweaveGuideOutcomeSceneV1?.bind?.(surface);
+  globalThis.CivweaveQuestPathwayMapV1?.bind?.(surface,(detail,event)=>handleMapAction(detail,{source:event.target}));
   host.node.append(surface);current={kind:'weave',id:surface.dataset.id,source};return surface;
 }
 function renderAction(action,source=null){
@@ -155,21 +237,41 @@ function buildHandoffs(plan){
 }
 function activatePlan(id){
   const items=arr(INTENTIONS_KEY),index=items.findIndex(item=>item?.id===id||item?.plan?.id===id);
-  if(index<0)return{ok:false,error:'The saved Quest could not be found.'};
+  if(index<0)return reviewFailure('The saved Quest could not be found.');
   const item=items[index],plan=structuredClone(item.plan||item);
+  if(String(item.state||plan.state)==='active'&&plan.state==='active')return{ok:true,unchanged:true,item,plan};
+  if(String(item.state||plan.state)!=='review'||plan.state!=='review')return reviewFailure('Only a saved Quest under review can be activated.');
   const at=now();
-  plan.state='active';plan.updatedAt=at;
+  plan.state='active';plan.updatedAt=at;plan.reviewDecision={id:uid('quest-review'),planId:plan.id||item.id,decision:'accepted',at,scope:'plan'};
   if(Array.isArray(plan.paths))for(const path of plan.paths){if(!path.status||path.status==='draft'||path.status==='review')path.status='ready';if(!Array.isArray(path.progress))path.progress=[]}
   item.plan=plan;item.state='active';item.done=false;item.updatedAt=at;items[index]=item;
-  write(INTENTIONS_KEY,items.slice(0,100));
   const oldInbox=arr(REALM_INBOX_KEY).filter(packet=>packet?.payload?.weaveId!==plan.id);
-  write(REALM_INBOX_KEY,[...buildHandoffs(plan),...oldInbox].slice(0,120));
   const working=obj(WORKING_KEY);
-  write(WORKING_KEY,{...working,wish:plan.wish||working.wish||'',plan,stage:'active',view:'quest',updatedAt:at});
+  const committed=commitReviewWrites([[INTENTIONS_KEY,items],[REALM_INBOX_KEY,[...buildHandoffs(plan),...oldInbox].slice(0,120)],[WORKING_KEY,{...working,wish:plan.wish||working.wish||'',plan,stage:'active',view:'quest',updatedAt:at}]]);
+  if(!committed.ok)return committed;
   try{dispatchEvent(new CustomEvent('civweave:intentions-changed',{detail:{items}}))}catch{}
   try{dispatchEvent(new CustomEvent('civweave:working-campus-plan-built',{detail:{plan,state:'active',source:REVISION}}))}catch{}
   try{dispatchEvent(new CustomEvent('civweave:review-plan-activated',{detail:{id:plan.id,plan,source:REVISION}}))}catch{}
-  removeSurface();mountPendingWeaves();notify('civweave',`The Quest “${plan.title||'Untitled Quest'}” is active. Its realm handoffs are ready.`);
+  const source=current?.source||null;mountPendingWeaves();notify('civweave',`The Quest “${plan.title||'Untitled Quest'}” is active. Its realm handoffs are ready.`);
+  globalThis.CivweaveGuideOutcomeSceneV1?.markFresh?.(plan.reviewDecision.id);renderPlan(item,source);
+  return{ok:true,item,plan};
+}
+function requestPlanChanges(id,note){
+  note=clean(note,2000);if(!note)return reviewFailure('Describe the change before saving a revision request.');
+  const items=arr(INTENTIONS_KEY),index=items.findIndex(item=>item?.id===id||item?.plan?.id===id);
+  if(index<0)return reviewFailure('The saved Quest could not be found.');
+  const item=items[index],plan=structuredClone(item.plan||item),state=String(item.state||plan.state||'');
+  if(!['review','active'].includes(state))return reviewFailure('Only a saved plan under review or active can receive a revision request.');
+  if(planReviewOutcome(item)?.outcome==='revision'&&plan.reviewDecision.note===note)return{ok:true,unchanged:true,item,plan};
+  const at=now();plan.state='review';plan.updatedAt=at;plan.reviewDecision={id:uid('quest-review'),planId:plan.id||item.id,decision:'revision',note,at,scope:'plan'};
+  item.plan=plan;item.state='review';item.updatedAt=at;items[index]=item;
+  const working=obj(WORKING_KEY),selected=working.plan?.id===(plan.id||item.id),entries=[[INTENTIONS_KEY,items]];
+  if(selected)entries.push([WORKING_KEY,{...working,plan,stage:'review',updatedAt:at}]);
+  const committed=commitReviewWrites(entries);if(!committed.ok)return committed;
+  try{dispatchEvent(new CustomEvent('civweave:intentions-changed',{detail:{items}}))}catch{}
+  if(selected)try{dispatchEvent(new CustomEvent('civweave:working-campus-plan-built',{detail:{plan,state:'review',source:REVISION}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:review-plan-revision-requested',{detail:{id:plan.id,plan,source:REVISION}}))}catch{}
+  globalThis.CivweaveGuideOutcomeSceneV1?.markFresh?.(plan.reviewDecision.id);renderPlan(item,current?.source||null);
   return{ok:true,item,plan};
 }
 function ensureGuideContracts(){
@@ -199,6 +301,11 @@ async function handleSurfaceClick(event){
   if(command==='close')return removeSurface();
   if(command==='focus-chat')return focusChat();
   if(command==='activate-plan')return activatePlan(id);
+  if(command==='request-plan-changes'){
+    const input=button.closest('form')?.querySelector('[name="revisionNote"]'),note=clean(input?.value,2000);
+    if(!note){input?.setCustomValidity('Describe the change before saving.');input?.reportValidity?.();return reviewFailure('Describe the change before saving a revision request.')}
+    input?.setCustomValidity('');return requestPlanChanges(id,note);
+  }
   if(command==='approve-action')return approveAction(id);
 }
 function onGateCapture(event){
@@ -263,7 +370,7 @@ function start(){
   try{dispatchEvent(new CustomEvent('civweave:shared-review-ready',{detail:{version:VERSION,revision:REVISION,at:now()}}))}catch{}
 }
 
-const api=Object.freeze({version:VERSION,revision:REVISION,openPlan,activatePlan,openAction,approveAction,close:removeSurface,reviewWeaves,mountPendingWeaves,start});
+const api=Object.freeze({version:VERSION,revision:REVISION,openPlan,activatePlan,requestPlanChanges,handleMapAction,openAction,approveAction,close:removeSurface,reviewWeaves,mountPendingWeaves,start});
 globalThis.CivweaveSharedReviewSurfaceV234=api;
 document.readyState==='loading'?addEventListener('DOMContentLoaded',start,{once:true}):start();
 })();

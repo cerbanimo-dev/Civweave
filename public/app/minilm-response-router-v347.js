@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.3.1-minilm-primary-response-router-v347-living-school-bypass';
+const VERSION='1.3.2-minilm-primary-response-router-v347-bounded-classification';
 const ADAPTER='/app/models/all-minilm-l6-v2/adapter.js';
 const ROUTER='/app/minilm-context-router-v344.js?v=1.0.0';
 const SERVER_ROUTER='/app/server-ai-router-v301.js?v=1.0.116-server-ai-router-v301';
@@ -118,7 +118,26 @@ function fallbackLength(text){
   const t=clean(text,8000).toLowerCase();if(/\b(deep dive|comprehensive|exhaustive|long form|long-form|very detailed)\b/.test(t))return'smart';if(c>=7)return'fast';if(c>=4)return'medium';if(String(text||'').length<=180)return'short';return'medium';
 }
 async function semanticRank(text,prototypes,cacheKey,timeoutMs=650){
-  try{const context=await semanticRouter();if(context?.status?.().available&&!context.status().ready)await Promise.race([context.warm?.(),sleep(900)]);const api=await adapter(),status=await api.status();if(!status.available)return null;if(!status.ready)await Promise.race([api.prewarm({explicit:true,installIfMissing:false,timeoutMs:45000}),sleep(900)]);const ranked=await Promise.race([api.rank(clean(text,8000),prototypes,{limit:6,cacheKey,timeoutMs:1800}),sleep(timeoutMs).then(()=>null)]);return ranked?.matches?.length?ranked.matches:null}catch{return null}
+  // Cache inventory and dependency readiness can stall before rank begins.
+  // One deadline bounds the whole semantic lookup; callers retain their
+  // existing deterministic routing rules when semantic evidence is unavailable.
+  let expired=false,timer;
+  const budget=Number.isFinite(Number(timeoutMs))?Math.max(1,Number(timeoutMs)):650;
+  const deadline=new Promise(resolve=>{timer=setTimeout(()=>{expired=true;resolve(null)},budget)});
+  const lookup=(async()=>{
+    try{
+      const context=await semanticRouter();if(expired)return null;
+      if(context?.status?.().available&&!context.status().ready)await context.warm?.();
+      if(expired)return null;
+      const api=await adapter();if(expired)return null;
+      const status=await api.status();if(expired||!status.available)return null;
+      if(!status.ready)await api.prewarm({explicit:true,installIfMissing:false,timeoutMs:45000});
+      if(expired)return null;
+      const ranked=await api.rank(clean(text,8000),prototypes,{limit:6,cacheKey,timeoutMs:1800});
+      return expired?null:ranked?.matches?.length?ranked.matches:null;
+    }catch{return null}
+  })();
+  try{return await Promise.race([lookup,deadline])}finally{expired=true;clearTimeout(timer)}
 }
 function semanticEvidence(rows,scoreFloor,marginFloor){
   if(!rows?.[0])return{available:false,confident:false,id:'',score:0,margin:0};

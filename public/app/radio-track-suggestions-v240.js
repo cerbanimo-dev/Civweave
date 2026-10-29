@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
+try{if(globalThis.parent!==globalThis&&globalThis.parent.document?.documentElement?.hasAttribute('data-persistent-system')){const inherit=()=>{const inherited=globalThis.parent.CivweaveRadioTrackSuggestionsV247;for(const version of [247,246,245,244,243,242,241,240])globalThis[`CivweaveRadioTrackSuggestionsV${version}`]=inherited};if(globalThis.parent.CivweaveRadioTrackSuggestionsV247)inherit();else globalThis.parent.addEventListener('civweave:radio-track-suggestions-ready',inherit,{once:true});return}}catch{}
 
-const VERSION='1.6.0';
+const VERSION='1.6.1';
 const REVISION='radio-track-suggestions-v247-persistent-station-v1';
 const PICK_KEY='civweave.radio.track-picks.v247';
 const TRACK_MAP_PATH='/app/radio-track-map-v241.json';
@@ -175,6 +176,7 @@ function configureStationLink(link,track,system,tag){
 }
 function externalizeSpotifyLink(link){if(!link)return null;link.target='_blank';link.rel='noopener noreferrer external';return link}
 async function renderSuggestion(systemId=activeSystem()){
+  if(surface()?.mode?.()==='direct')return null;
   const panel=document.getElementById(PANEL_ID),body=panel?.querySelector?.('[data-radio-body]');if(!panel||panel.hidden||!body)return null;
   body.querySelector('[data-radio-persistent-suggestion]')?.remove();
   const system=normalizeSystemId(systemId||activeSystem()),mode=activeMode(),track=await pickSuggestion(system);if(!track||!body.isConnected)return null;

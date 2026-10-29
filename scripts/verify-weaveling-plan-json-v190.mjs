@@ -63,7 +63,9 @@ const wish='I want a plan to make a community garden with my friends';
 const result=await sandbox.CivweaveAssistantV141.respond({text:wish,systemId:'civweave',history:[{role:'user',text:wish}]});
 assert(captured,'AI structured planning request was not made.');
 assert(captured.purpose==='civweave-weaveling-intention-json-v190','Structured Quest purpose was not selected.');
-assert(captured.schema?.properties?.paths?.items?.properties?.realm,'Quest JSON schema was not supplied to the AI runtime.');
+assert(captured.schema?.properties?.subsystems?.required?.length===4,'All four subsystem decisions were not supplied to the AI runtime.');
+assert(Object.values(captured.schema.properties.subsystems.properties).every(slot=>slot.required.includes('included')&&slot.required.includes('reason')&&!slot.properties.order&&!slot.properties.realm&&!slot.properties.type),'Each subsystem must own one decision and canonical routing without redundant model choices.');
+assert(captured.schema.required.includes('pathOrder')&&captured.schema.properties.pathOrder.uniqueItems&&captured.schema.properties.pathOrder.items.enum.length===4,'The model must author one ordered sequence of included subsystems.');
 assert(typeof captured.transport==='function','Downloaded-local Quest generation did not receive the local-AI transport adapter.');
 assert(!('fallback'in captured),'Deterministic Quest fallback is still attached to the AI request.');
 assert(/user-specific Quest content/.test(captured.messages?.[0]?.content||''),'Quest prompt does not make the AI responsible for customization.');
@@ -81,6 +83,26 @@ const activation=await sandbox.CivweaveAssistantV141.respond({text:'Activate',sy
 assert(activateCalls===1,'Plain-language Activate did not operate the latest saved Quest.');
 assert(activation.planControl?.action==='activate'&&activation.plan?.state==='active','Activation response did not expose the active Quest state.');
 assert(generateCalls===1,'Activation incorrectly made another AI generation call.');
+
+// A request to learn a skill AND later build a product is one cross-system
+// Quest with both learning and skilled-work lanes, not a Moss-only journey.
+const composite='Can you teach me how to read and memorize the tarot, then create a plan to create my own tarot app';
+const orchestrator=sandbox.CivweaveWeavelingPlanJsonV190;
+assert(orchestrator.combinedLearningProductionIntent(composite)===true,'Sequential learn-and-build request was not classified as a composite Quest.');
+assert(orchestrator.combinedLearningProductionIntent('Can you teach me how to read and memorize the tarot?')===false,'Pure learning request was incorrectly classified as a composite Quest.');
+assert(orchestrator.combinedLearningProductionIntent('Teach me how to create a tarot app.')===false,'A learning request about app development was incorrectly classified as a production request.');
+storage.setItem('civweave.intentions.v127','[]');
+sandbox.CivweaveModelRuntime.generate=async request=>{
+  captured=request;generateCalls++;
+  return {status:'provider-error',error:{message:'Composite routing probe stops before persistence.'},actual:{provider:'downloaded-local',model:'gemma4-e2b-it-q4f16'}};
+};
+await sandbox.CivweaveAssistantV141.respond({text:composite,systemId:'civweave',history:[]});
+assert(captured?.purpose==='civweave-weaveling-intention-json-v190','Composite request was swallowed by Moss instead of Weaveling Quest planning.');
+const slots=captured?.schema?.properties?.subsystems?.properties;
+assert(slots?.['living-school']?.properties?.included?.enum?.[0]===true,'Composite Quest must require the learning lane.');
+assert(slots?.cerbanimo?.properties?.included?.enum?.[0]===true,'Composite Quest must require the production lane.');
+assert(captured.schema.properties.pathOrder.minItems>=2,'Composite Quest must order both required subsystem paths.');
+assert(JSON.parse(storage.getItem('civweave.intentions.v127')||'[]').length===0,'Failed composite generation must not persist a Quest.');
 
 storage.setItem('civweave.intentions.v127','[]');
 sandbox.CivweaveModelRuntime.generate=async request=>{generateCalls++;captured=request;return{status:'provider-error',structured:{requested:true,valid:false},outputText:'',error:{code:'LOCAL_MODEL_FAILED',message:'Selected AI failed to generate the Quest.'},actual:{provider:'downloaded-local',model:'gemma4-e2b-it-q4f16'}}};

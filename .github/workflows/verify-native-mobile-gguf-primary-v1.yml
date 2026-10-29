@@ -1,0 +1,34 @@
+name: Verify native mobile GGUF primary
+on:
+  pull_request:
+    paths:
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'scripts/verify-mobile-qwen-gguf-primary-v1.mjs'
+      - 'package.json'
+      - '.github/workflows/verify-native-mobile-gguf-primary-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'scripts/verify-mobile-qwen-gguf-primary-v1.mjs'
+      - 'package.json'
+      - '.github/workflows/verify-native-mobile-gguf-primary-v1.yml'
+permissions:
+  contents: read
+jobs:
+  native-gguf-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check shared runtime and settings syntax
+        run: |
+          node --check public/app/settings-gateway-v317.js
+          node --check public/app/shared/civweave-model-runtime.js
+          node --check scripts/verify-mobile-qwen-gguf-primary-v1.mjs
+      - name: Verify native phone primary identity and helper isolation
+        run: npm run verify:mobile-qwen-gguf

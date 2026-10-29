@@ -1,4 +1,4 @@
-name: Verify Gemma 4 Learning Plan Passoff
+name: Verify Gemma 4 E4B Learning Plan
 
 on:
   pull_request:
@@ -32,5 +32,5 @@ jobs:
           node-version: '22'
       - name: Check pass-off syntax
         run: node --check public/app/local-ai/gemma4-weave-draft-pipeline-v1.js
-      - name: Verify E2B draft to E4B compile handoff
+      - name: Verify E4B-only draft and compile pipeline
         run: node scripts/verify-gemma4-learning-plan-passoff-v1.mjs

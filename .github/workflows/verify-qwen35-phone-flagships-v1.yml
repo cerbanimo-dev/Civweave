@@ -1,0 +1,32 @@
+name: Verify Qwen 3.5 phone flagships
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/model-packs-v1.js'
+      - 'public/app/settings-local-route-v331.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
+      - 'scripts/stage-litert-lm-web-assets.mjs'
+      - 'scripts/verify-qwen35-phone-flagships-v1.mjs'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/model-packs-v1.js'
+      - 'public/app/settings-local-route-v331.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/local-ai/gemma4-litert-request-authority-v1.js'
+      - 'scripts/stage-litert-lm-web-assets.mjs'
+      - 'scripts/verify-qwen35-phone-flagships-v1.mjs'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/verify-qwen35-phone-flagships-v1.mjs

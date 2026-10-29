@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.2-canonical-local-settings-refresh';
+const VERSION='1.1.21-guild-quest-map-route';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -9,6 +9,10 @@ const ROUTES=Object.freeze({
   fellowfare:['/app/fellowfare-cabinet-v144.html',{cabinet:'1'}],
   anarchadia:['/app/anarchadia-console-v139.html',{cabinet:'1'}]
 });
+const CIVWEAVE_NATIVE_PAGES=Object.freeze({'guild-quests':'/app/civweave-guild-quest-v1.html'});
+const ANARCHADIA_NATIVE_PAGES=Object.freeze({governance:'/app/anarchadia-governance-v145.html',workbench:'/app/services/anarchadia/workbench.html'});
+const ANARCHADIA_GOVERNANCE_ROUTES=new Set(['overview','identity','changes','ballots','federation','execution']);
+const ANARCHADIA_WORKBENCH_ROUTES=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);
 const FRAME_ID='cw-persistent-system-stage';
 const HUMAN_LAUNCHER_ID='cw-human-message-launcher-v1';
 const AI_LAUNCHER_ID='cwp215-launcher';
@@ -16,10 +20,10 @@ const GUIDE_ROOT_ID='cw-persistent-guide-chat-v215';
 const UPDATE_STYLE_ID='cw-persistent-platform-update-backlights-v1';
 const SUBSYSTEM_STATE_KEY='civweave.subsystem-avatar-state.v347';
 const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
-const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.133-settings-v324-direct-local-model-view';
-const SETTINGS_LOCAL_ROUTE_VERSION='1.1.3-settings-local-route-v326-canonical-inert-hard-local';
+const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.138-generation-timeout';
+const SETTINGS_LOCAL_ROUTE_VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
 const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
-const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.170-guide-chat-surface-v350-parakeet-no-proxy-worker';
+const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.200-interwoven-quest-map';
 const UPDATE_COLORS=Object.freeze({
   civweave:'#fff8ff',
   'living-school':'#9cff73',
@@ -34,6 +38,7 @@ const errorBox=()=>document.getElementById('cw-persistent-system-error');
 let current='';
 let loadToken=0;
 let loadTimer=0;
+let readyPollTimer=0;
 let chromeObserver=null;
 let chromeTimers=[];
 let settingsPromise=null;
@@ -42,15 +47,28 @@ let backlightTimers=[];
 
 function cleanSystem(value){const id=String(value||'').toLowerCase();return SYSTEMS.has(id)?id:'civweave'}
 function parse(value,fallback={}){try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}}
-function contentUrl(system,{feature=''}={}){
-  system=cleanSystem(system);const [path,params]=ROUTES[system];const url=new URL(path,location.origin);
+function nativeOptions(system,options={}){
+  if(system==='civweave'&&options.nativePage==='guild-quests'){const id=String(options.submitQuest||'');return{nativePage:'guild-quests',...(/^[A-Za-z0-9:_-]{1,180}$/.test(id)?{submitQuest:id}:{})}}
+  const nativePage=system==='anarchadia'&&Object.prototype.hasOwnProperty.call(ANARCHADIA_NATIVE_PAGES,options.nativePage)?options.nativePage:'';
+  if(!nativePage)return{};
+  const id=value=>String(value||'').slice(0,240);
+  return nativePage==='governance'?{nativePage,nativeRoute:ANARCHADIA_GOVERNANCE_ROUTES.has(options.nativeRoute)?options.nativeRoute:'overview',proposal:id(options.proposal)}:{nativePage,nativeRoute:ANARCHADIA_WORKBENCH_ROUTES.has(options.nativeRoute)?options.nativeRoute:'workbench',weave:id(options.weave),path:id(options.path)};
+}
+function requestedOptions(query){return Object.fromEntries(['feature','nativePage','nativeRoute','proposal','weave','path','submitQuest'].map(key=>[key,query.get(key)||'']))}
+function lineageOptions(options={}){return Object.fromEntries(['weave','path'].map(key=>[key,String(options[key]||'').slice(0,240)]).filter(([,value])=>value))}
+function contentUrl(system,options={}){
+  system=cleanSystem(system);const {feature=''}=options,native={...lineageOptions(options),...nativeOptions(system,options)},[path,params]=ROUTES[system];const url=new URL((system==='civweave'?CIVWEAVE_NATIVE_PAGES:ANARCHADIA_NATIVE_PAGES)[native.nativePage]||path,location.origin);
   for(const [key,value] of Object.entries(params))url.searchParams.set(key,value);
   url.searchParams.set('installed','1');url.searchParams.set('embed','1');url.searchParams.set('persistentShell','1');
   if(feature)url.searchParams.set('feature',String(feature));
+  for(const key of ['proposal','weave','path','submitQuest'])if(native[key])url.searchParams.set(key,native[key]);
+  if(native.nativeRoute)url.hash=native.nativeRoute;
   return url;
 }
-function shellUrl(system,{feature=''}={}){
-  const url=new URL('/app/persistent-system-shell-v1.html',location.origin);url.searchParams.set('system',cleanSystem(system));url.searchParams.set('installed','1');if(feature)url.searchParams.set('feature',String(feature));return url;
+function shellUrl(system,options={}){
+  system=cleanSystem(system);const {feature=''}=options,native={...lineageOptions(options),...nativeOptions(system,options)},url=new URL('/app/persistent-system-shell-v1.html',location.origin);url.searchParams.set('system',system);url.searchParams.set('installed','1');if(feature)url.searchParams.set('feature',String(feature));
+  for(const [key,value] of Object.entries(native))if(value)url.searchParams.set(key,value);
+  return url;
 }
 function mark(system){
   current=cleanSystem(system);document.documentElement.dataset.civweaveSystem=current;document.documentElement.dataset.cwThemedCurrent=current;document.documentElement.dataset.persistentSystem=current;
@@ -59,7 +77,26 @@ function mark(system){
 }
 function showLoading(){const node=loading();if(node)node.hidden=false;const error=errorBox();if(error)error.dataset.open='0'}
 function hideLoading(){const node=loading();if(node)node.hidden=true}
-function showError(message){hideLoading();const node=errorBox();if(node){node.textContent=String(message||'System did not finish loading.');node.dataset.open='1'}}
+function childReadyEnough(host=frame(),expectedHref=''){
+  if(!host||!frameMatchesExpected(host,expectedHref))return false;
+  try{
+    const doc=host.contentDocument;
+    return Boolean(doc?.documentElement&&doc?.body&&doc.contentType==='text/html'&&doc.documentElement.dataset.civweaveSystem===current&&(doc.readyState==='interactive'||doc.readyState==='complete'));
+  }catch{return false}
+}
+function watchChildInteractive({token=loadToken,expectedHref='' }={}){
+  clearInterval(readyPollTimer);
+  readyPollTimer=setInterval(()=>{
+    if(token!==loadToken){clearInterval(readyPollTimer);readyPollTimer=0;return}
+    const host=frame();
+    if(!childReadyEnough(host,expectedHref))return;
+    clearInterval(readyPollTimer);readyPollTimer=0;
+    clearTimeout(loadTimer);clearInterval(readyPollTimer);readyPollTimer=0;hideLoading();
+    const node=errorBox();if(node)node.dataset.open='0';
+    scheduleChildChrome('frame-interactive',{token,expectedHref});scheduleBacklights();
+  },80);
+}
+function showError(message){clearInterval(readyPollTimer);readyPollTimer=0;if(globalThis.CivweaveShellRescueV1?.fail?.(message))return;hideLoading();const node=errorBox();if(node){node.textContent=String(message||'System did not finish loading.');node.dataset.open='1'}}
 
 function installBacklightStyle(){
   if(document.getElementById(UPDATE_STYLE_ID))return;
@@ -117,7 +154,13 @@ function loadScript(src,ready,label){
   });
 }
 function settingsApi(){return globalThis.CivweaveSettingsV320||globalThis.CivweaveSettingsGatewayV317||null}
-function settingsLocalRouteReady(){return globalThis.CivweaveSettingsLocalRouteV323?.version===SETTINGS_LOCAL_ROUTE_VERSION}
+function settingsLocalRouteReady(){
+  const api=globalThis.CivweaveSettingsLocalRouteV323;
+  return Boolean(api&&api.settingsV325DisplayShim!==true&&(
+    api.version===SETTINGS_LOCAL_ROUTE_VERSION||
+    api.version==='1.1.6-settings-local-route-v326-llama32-download'
+  ));
+}
 function ensureSettings(){
   if(settingsApi()?.open&&settingsLocalRouteReady())return Promise.resolve(settingsApi());
   if(settingsPromise)return settingsPromise;
@@ -164,9 +207,11 @@ function frameMatchesExpected(host=frame(),expectedHref=''){
   if(!expected)return true;
   try{
     const actual=new URL(host.contentWindow?.location?.href||'',location.href),target=new URL(expected,location.href);
-    // Pages redirects .html documents to clean URLs; retain origin and query checks.
-    const path=url=>url.pathname.replace(/\.html$/,'');
-    return actual.origin===target.origin&&path(actual)===path(target)&&actual.search===target.search&&actual.hash===target.hash;
+    // Native tabs own hashes and may add view parameters. Launch identity stays
+    // anchored to the system, embedding flags, and requested feature.
+    const path=url=>url.pathname.replace(/\/index\.html$/,'/').replace(/\.html$/,'');
+    const keys=new Set([...target.searchParams.keys(),'system','cabinet','installed','embed','persistentShell','feature']);
+    return actual.origin===target.origin&&path(actual)===path(target)&&[...keys].every(key=>actual.searchParams.get(key)===target.searchParams.get(key));
   }catch{return false}
 }
 function suppressChildChrome(reason='frame-load',{token=loadToken,expectedHref=''}={}){
@@ -193,14 +238,15 @@ function scheduleChildChrome(reason='frame-load',{token=loadToken,expectedHref='
   return true;
 }
 
-function navigate(system,{feature='',replace=false,source='persistent-navbar'}={}){
-  system=cleanSystem(system);mark(system);const url=shellUrl(system,{feature});history[replace?'replaceState':'pushState']({system,feature},'',`${url.pathname}${url.search}`);
-  const target=contentUrl(system,{feature}),host=frame();if(!host)return false;
+function navigate(system,options={}){
+  const {feature='',replace=false,source='persistent-navbar'}=options;
+  system=cleanSystem(system);const route={feature,...lineageOptions(options),...nativeOptions(system,options)};mark(system);const url=shellUrl(system,route);history[replace?'replaceState':'pushState']({system,...route},'',`${url.pathname}${url.search}`);
+  const target=contentUrl(system,route),host=frame();if(!host)return false;
   clearChildChromeWork();
-  const token=++loadToken;showLoading();clearTimeout(loadTimer);loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
-  host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;host.title=`${system} · Civweave`;host.src=target.href;
+  const token=++loadToken;showLoading();clearTimeout(loadTimer);clearInterval(readyPollTimer);loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
+  host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;host.title=`${system} · Civweave`;host.src=target.href;watchChildInteractive({token,expectedHref:target.href});
   scheduleBacklights();
-  try{dispatchEvent(new CustomEvent('civweave:system-route-changed',{detail:{system,feature,source,version:VERSION,persistent:true}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:system-route-changed',{detail:{system,...route,source,version:VERSION,persistent:true}}))}catch{}
   return true;
 }
 function intercept(event){
@@ -228,15 +274,24 @@ function boot(){
   const host=frame();host?.addEventListener('load',()=>{
     const token=Number(host.dataset.cwLoadToken||0),expectedHref=String(host.dataset.cwExpectedHref||'');
     if(token!==loadToken||!frameMatchesExpected(host,expectedHref))return;
+    if(!childReadyEnough(host,expectedHref))return;
     clearTimeout(loadTimer);hideLoading();const node=errorBox();if(node)node.dataset.open='0';scheduleChildChrome('frame-load',{token,expectedHref});scheduleBacklights();
   });
-  const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{feature:query.get('feature')||'',replace:true,source:'shell-boot'});
-  addEventListener('popstate',()=>{const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{feature:query.get('feature')||'',replace:true,source:'history'});});
+  const query=new URLSearchParams(location.search),system=cleanSystem(query.get('system')),options=requestedOptions(query);
+  const target=contentUrl(system,options);
+  if(host?.dataset.cwBootstrapHref===target.href){
+    // Adopt the independent first-frame load rather than reloading a healthy realm.
+    mark(system);const token=++loadToken;
+    host.dataset.cwLoadToken=String(token);host.dataset.cwExpectedHref=target.href;
+    loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);
+    watchChildInteractive({token,expectedHref:target.href});scheduleChildChrome('preloaded-frame',{token,expectedHref:target.href});scheduleBacklights();
+  }else navigate(system,{...options,replace:true,source:'shell-boot'});
+  addEventListener('popstate',()=>{const query=new URLSearchParams(location.search);navigate(cleanSystem(query.get('system')),{...requestedOptions(query),replace:true,source:'history'});});
   scheduleBacklights();
 }
 
 globalThis.CivweavePersistentSystemShellV1=Object.freeze({
-  version:VERSION,navigate,contentUrl,shellUrl,current:()=>current,systems:[...SYSTEMS],persistentNavbar:true,stage:'iframe-content-only',
+  version:VERSION,navigate,contentUrl,shellUrl,current:()=>current,systems:[...SYSTEMS],anarchadiaNativePages:Object.freeze(Object.keys(ANARCHADIA_NATIVE_PAGES)),civweaveNativePages:Object.freeze(Object.keys(CIVWEAVE_NATIVE_PAGES)),persistentNavbar:true,stage:'iframe-content-only',
   chromeOwner:true,sharedQuickFeatures:Object.freeze(['settings','chat']),updateSignal:'platform-backlight-v2',childChatLauncherPolicy:'parent-only',
   openSettings,openGuide,syncBacklights,suppressChildChrome
 });

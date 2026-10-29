@@ -112,6 +112,14 @@ Realm code may call the canonical API or host a presentation surface. It may not
 
 The v1 P-256 ECDH + HKDF + AES-GCM envelope is a baseline transport-privacy layer. Do not describe it as a mature Signal-equivalent protocol until forward secrecy, multi-device fanout, key transparency, prekeys/rotation, and verification UX are implemented and reviewed.
 
+## Guild Quest publication
+
+`cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs` owns the portable publication contract. The node-cloud Guild Durable Object and the standalone mobile Guild capacity Durable Object use that same contract with their existing authenticated member authorities and storage. The standalone template keeps this source inside its deploy directory; node-cloud imports it directly.
+
+`public/app/guild-quest-client-v1.js` is the browser transport. It reads existing `CivweaveHostNodeSessionV1` sessions and delegates explicit submission and listing to `/api/node/quests`. The existing Guild Quest Tracker presents that capability. It must not substitute device-local drafts for published Guild records or create a second membership/publication store. Every current member may submit; only the publishing member may revise or withdraw. Publication never activates the local plan, and its allowlist excludes private conversation, wish, profile, evidence, and credentials.
+
+The API and privacy boundaries are defined in `docs/contracts/guild-quest-publication-v1.md` and exercised by `scripts/test-guild-quest-publications-v1.mjs` and `scripts/test-guild-quest-publication-ui-v1.mjs`.
+
 ## Radio and review
 
 - Radio owner: `public/app/system-radio-agent-v233.js`
@@ -119,6 +127,12 @@ The v1 P-256 ECDH + HKDF + AES-GCM envelope is a baseline transport-privacy laye
 - Review owner: `public/app/shared-review-surface-v234.js`
 
 Extend these systems at their owners. Do not attach duplicate launchers or parallel global listeners from realm code.
+
+Review presentation uses `public/app/shared/guide-outcome-scene-v1.js` and its matching stylesheet. `CivweaveGuideOutcomeSceneV1.render/bind/preserve/markFresh` presents a capability-supplied persisted receipt; it cannot accept work, generate plans, publish, issue credentials, or grant rewards. The five callers are the shared Quest review, learning renderer, Cerbanimo engine, FellowFare marketplace, and Anarchadia console. Each retains its authoritative state and names the scope of its outcome. The obsolete Cerbanimo-only scene renderer is removed.
+
+The helper also subscribes once to `civweave:canonical-rewards-changed`. Only `{reason: 'append', persisted: true, grantDelta}` from `cw-reward-ledger-v2.js` can request a celebration, after account/asset/positive-amount checks and bounded receipt deduplication. Startup snapshots and legacy imports carry no delta. The exact installed child delegates this display to the same-origin persistent parent. Replay never repeats a grant. Animation is finite; reduced motion and Lud retain readable state. Scene sound is off by default and enabled only by the visible Sound control for the current document. The presenter owns one lazy WebAudio context and at most three quiet synthesized notes per cue; Stop and page exit cancel playback. No media download, radio control, new preference store or audio prewarm is involved. Deterministic contracts live in `scripts/test-guide-outcome-scene-v1.mjs` and `scripts/test-canonical-reward-grant-notification-v1.mjs`.
+
+Subsystem maps are projections of their existing capability owners: four private Quest lanes with expandable beats and governance kept distinct; Cerbanimo task dependencies and accepted proof; Living School plan-to-credential gates; FellowFare listing-to-fulfillment counts; Anarchadia local requests plus separately read governance vault decisions and prepared packets. Focus controls route to existing actions. A route, selection, replay, or map expansion supplies no authorization to perform the underlying action.
 
 ## When a new shared system is genuinely necessary
 
@@ -134,3 +148,30 @@ A new cross-cutting owner requires all of the following in the same PR:
 If those artifacts are absent, the correct default is to find and extend an existing system.
 
 The objective is not fewer files for aesthetic reasons. It is one source of behavioral authority, with callers and subscribers orbiting it instead of a swarm of competing event handlers.
+
+## Survival Mode
+
+Canonical assessment and reference policy: public/app/survival/survival-mode.mjs. Mobile caller: public/app/survival/app.mjs. The existing persistent-shell-actions-v1.js owns its launcher; this does not fork guide chat, navigation, or Settings. Offline seed/package: public/app/offline-package-v208.json. Photographs remain local previews, and downloaded passages never prove identification or edibility. The governing contract is docs/contracts/survival-mode-v1.md and its executable test is scripts/test-survival-mode-v1.mjs.
+
+
+Living School places module quiz receipt scenes next to the active assessment, using its saved attempt ID, score, pass target and criterion feedback. A full Learning Journey completion receipt requires the current unique module set, passed assessments, matching accepted practicum, matching final pass and issued credential. Partial, fallback, demo, foreign and inconsistent records cannot produce that completed-journey receipt. The controller corroborates action-specific receipts against saved state before marking them fresh; storage failure restores the saved state and displays the failure.
+
+## Starling Collective
+
+The optional Collective capability belongs to `public/app/starling-collective-v1.js`, exposed through the shared rail by `starling-integration-v1.js`. It uses the existing selected model runtime for a user-started, sequential public planning session. Its activity journal shows actual role contributions, errors and model provenance; it is not a second guide chat or a background inference loop. Quests import through the canonical intention planner for review, and proof progress remains authoritative.
+
+The portable Guild authority is `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`, with authenticated browser transport `guild-starling-client-v1.js`. Slot reservation and rolling creation limits are transactional. Publication delegates to the existing Guild Quest owner only after exact preview confirmation. Passport sharing is optional and explicitly distinguishes device-declared skills from verified member identity; missing roster coverage stays unknown. Founder authority and human-only Intention voting are not inferred from billing seats or AI consensus.
+
+### Guild local worker extension
+
+The canonical Starling planner remains `public/app/starling-collective-v1.js` and its authenticated Guild authority remains `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`. The optional Guildkeeper-controlled cooperative worker at `public/app/shared/starling-collective-worker-v1.mjs` is an extension using the existing signed mesh and model runtime. It shares Starling's inference Web Lock and creates signed, reviewable local persona turns and Guild Quest assistance offers. `public/app/starling-lounge-v1.mjs` presents those reports, not a second chat data owner. No Quest task claims, work completion, Guild member votes or hosted spending are authorized by this extension. Details: `docs/contracts/starling-collective-guild-service-v1.md`.
+
+### Local Starling execution hosts
+
+The Guild Collective can delegate bounded, non-authoritative local drafting jobs to either a paired Termux daemon (`public/termux/civweave_starling_host.py`, using the existing Companion generation queue) or an optional Android WorkManager bridge (`native/android/civweave-starling-v1/`). Both implement `civweave.starling-host-job.v1`; the Lounge explicitly imports completed drafts into the existing signed object mesh. Hosts cannot claim tasks, spend Guild resources, vote, or mark Cerbanimo completion. `docs/contracts/starling-dual-host-v1.md` defines host setup, permission scope and device testing requirements. The existing canonical Starling planning and Guild Quest authorities remain unchanged.
+
+## Quest pathway presentation
+
+`public/app/shared/quest-pathway-map-v1.js` and its stylesheet are the shared bounded game-map presenter for the generated chat result, canonical review, and Guild Quest tracker. Its interwoven SVG diagram keeps all four canonical subsystem colors while host themes change the surrounding chart. Declared dependencies, cycle locks and plain semantic details share one bounded projection. It owns no state or inference. `CivweaveSharedReviewSurfaceV234.handleMapAction` validates the current saved Quest and path before inspection, revision requests, native navigation, or submission-preview navigation. The Guild tracker owns publication inspection and delegates existing explicit submission to its publication client. The removed private review map is not a second renderer.
+
+Civweave's fixed `nativePage=guild-quests` destination stays within the persistent shell. Its bounded `submitQuest` selects an exact local Quest for the existing named Guild preview; it never posts automatically. All four native tools retain their own work and proof owners. Living School selects exact activated `weave` / `path` IDs without generation; FellowFare and Anarchadia reject stale fallback identities and stopped Quests. Anarchadia paths open the existing Workbench. See `docs/contracts/quest-pathway-map-v1.md`.

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-local-ai-model-packs-v1-browser-guard';
+const VERSION='1.2.0-local-ai-model-packs-v1-premium-phone';
 const CACHE='civweave-specialized-model-packs-v1';
 const STATE_KEY='civweave.local-ai.packs.v1';
 const EVENT='civweave:local-model-pack-progress';
@@ -68,7 +68,7 @@ const SPECIALIZED=freeze({
   })
 });
 
-const pack=(id,value)=>freeze({id,...value,generative:freeze([...(value.generative||[])]),specialized:freeze([...(value.specialized||[])]),installOrder:freeze([...(value.installOrder||[])])});
+const pack=(id,value)=>freeze({id,...value,generative:freeze([...(value.generative||[])]),specialized:freeze([...(value.specialized||[])]),installOrder:freeze([...(value.installOrder||[])]),roles:freeze((value.roles||[]).map(row=>freeze({...row}))),companionLinks:freeze((value.companionLinks||[]).map(row=>freeze({...row})))});
 const PACKS=freeze({
   'minimum-spec':pack('minimum-spec',{
     label:'Minimum Spec Pack',
@@ -82,15 +82,43 @@ const PACKS=freeze({
     specialized:['silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8'],
     installOrder:['qwen3-0.6b-q8-wasm','smollm2-135m-instruct-q8-wasm','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8']
   }),
+  'qwen-flagship-phone':pack('qwen-flagship-phone',{
+    label:'Premium Phone Pack',
+    target:'12+ GB RAM · modern high-memory Android phone · LiteRT-LM / WebGPU',
+    storage:'About 19.7 GB core download; keep at least 28 GB free. Optional coding and image companions download separately.',
+    estimatedBytes:19_667_000_000,
+    primaryModel:'qwen35-4b-litert-web',
+    deepModel:'qwen35-9b-litert-web',
+    alternateFastModel:'gemma4-e2b-it-q2f16-mobile',
+    alternateDeepModel:'gemma4-e4b-it-q2f16-mobile',
+    fallbackModel:'qwen3-0.6b-q8-wasm',
+    summary:'Full premium phone-local stack: Qwen 3.5 4B for everyday chat and voice, Qwen 3.5 9B for deep planning and architecture/code, Gemma 4 E2B/E4B alternates, offline speech, and a CPU-safe fallback.',
+    roles:[
+      {role:'General chat + voice reasoning',model:'qwen35-4b-litert-web'},
+      {role:'Complex logic + Civweave planning',model:'qwen35-9b-litert-web'},
+      {role:'Complex architecture + code',model:'qwen35-9b-litert-web'},
+      {role:'Fast alternate reasoning',model:'gemma4-e2b-it-q2f16-mobile'},
+      {role:'Deep alternate reasoning',model:'gemma4-e4b-it-q2f16-mobile'},
+      {role:'Voice-to-voice',model:'silero-vad-onnx + parakeet-tdt-0.6b-v3-int8 + supertonic-3-tts-int8'}
+    ],
+    companionLinks:[
+      {kind:'code',label:'Qwen2.5-Coder-7B-Instruct Q4_K_M',note:'Optional dedicated coding model for llama.cpp / Pocket Constellary; not loaded by the browser runtime.',url:'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/blob/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'},
+      {kind:'image',label:'Local Dream · Stable Diffusion 1.5',note:'Optional Snapdragon NPU image-generation companion. Keep image generation out of RAM while a large LLM is active.',url:'https://github.com/xororz/local-dream'},
+      {kind:'image-reference',label:'Qualcomm AI Hub · Stable Diffusion 1.5',note:'Reference deployment for Snapdragon 7 Gen 4 and other supported Snapdragon targets.',url:'https://aihub.qualcomm.com/mobile/models/stable_diffusion_v1_5'}
+    ],
+    generative:['qwen35-4b-litert-web','qwen35-9b-litert-web','gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-0.6b-q8-wasm'],
+    specialized:['silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'],
+    installOrder:['qwen3-0.6b-q8-wasm','qwen35-4b-litert-web','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8','omnilingual-asr-300m-int8','gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen35-9b-litert-web']
+  }),
   'premier-phone':pack('premier-phone',{
-    label:'Premier Phone Pack',
+    label:'Gemma Phone Compatibility Pack',
     target:'12 GB RAM · modern Android-class WebGPU',
     storage:'About 7.6 GB download; keep at least 11 GB free',
     estimatedBytes:7_577_000_000,
     primaryModel:'gemma4-e2b-it-q2f16-mobile',
     deepModel:'gemma4-e4b-it-q2f16-mobile',
     fallbackModel:'qwen3-0.6b-q8-wasm',
-    summary:'Full phone-local multimodel ladder with fast Gemma 4, deep Gemma 4, multilingual speech, and a CPU-safe fallback.',
+    summary:'Alternate Gemma phone-local ladder retained for compatibility, with multilingual speech and a CPU-safe fallback.',
     generative:['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile','qwen3-0.6b-q8-wasm'],
     specialized:['silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','omnilingual-asr-300m-int8','supertonic-3-tts-int8'],
     installOrder:['qwen3-0.6b-q8-wasm','gemma4-e2b-it-q2f16-mobile','silero-vad-onnx','parakeet-tdt-0.6b-v3-int8','supertonic-3-tts-int8','omnilingual-asr-300m-int8','gemma4-e4b-it-q2f16-mobile']
@@ -111,7 +139,7 @@ const PACKS=freeze({
   })
 });
 
-const BROWSER_MANAGED_PACK_IDS=freeze(['premier-phone','server-quality']);
+const BROWSER_MANAGED_PACK_IDS=freeze(['qwen-flagship-phone','premier-phone','server-quality']);
 const BROWSER_INSTALL_ERROR='CIVWEAVE_AI_PACK_BROWSER_DOWNLOAD_REQUIRED';
 
 function save(force=false){const t=Date.now();if(!force&&t-lastSave<500)return;lastSave=t;try{localStorage.setItem(STATE_KEY,JSON.stringify(states))}catch{}}

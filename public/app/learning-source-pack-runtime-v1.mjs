@@ -57,6 +57,36 @@ const tokenWords=value=>[...new Set(clean(value,2400).toLowerCase().replace(/[^a
 function supplementalScore(article,tokens){const title=String(article?.title||'').toLowerCase(),body=String(article?.extract||'').toLowerCase();let score=0;for(const token of tokens){if(title.includes(token))score+=18;if(body.includes(token))score+=3}return score}
 function passageFor(extract,tokens){const text=clean(extract,160000);if(!text)return'';const lower=text.toLowerCase();let hit=-1;for(const token of tokens){const index=lower.indexOf(token);if(index>=0&&(hit<0||index<hit))hit=index}if(hit<0)return clean(text,3600);const start=Math.max(0,hit-700),end=Math.min(text.length,hit+2900);return clean(`${start?'…':''}${text.slice(start,end)}${end<text.length?'…':''}`,3800)}
 export async function searchSupplementalArticles(query,{schoolSlugs=[],limit=10}={}){assertStorage();const catalogs=await loadCatalogs(),tokens=tokenWords(query);if(!tokens.length)return[];const schools=new Set(uniq(schoolSlugs)),cache=await caches.open(SUPPLEMENTAL_CACHE_NAME),results=[];for(const record of supplementalRows(catalogs.supplemental)){if(schools.size&&!schools.has(record.school_slug))continue;const response=await cache.match(supplementalKey(record.id));if(!response)continue;let article;try{article=await response.json()}catch{continue}const score=supplementalScore(article,tokens);if(score<=0)continue;results.push({title:article.title,url:article.canonicalUrl,notes:passageFor(article.extract,tokens),score:score+6,schoolSlug:article.schoolSlug,schoolName:(catalogs.articles.schools||[]).find(row=>row.school_slug===article.schoolSlug)?.school_name||article.schoolSlug,table:'supplemental-article-cache',articleTitle:article.title,canonicalUrl:article.canonicalUrl,linkProvenance:'supplemental-wikipedia-canonical',topicSlugs:article.topicSlugs||[]})}return results.sort((a,b)=>b.score-a.score).slice(0,Math.max(1,limit))}
+// Fill narrow catalog-backed source gaps without re-downloading foundation ZIPs or video atlases.
+export async function stageMissingSupplementalForQuery(query,{limit=4,schoolSlugs=[]}={}){
+  assertStorage();
+  const catalogs=await loadCatalogs(),tokens=tokenWords(query).filter(word=>word.length>=4);
+  if(!tokens.length)return{attempted:0,stored:0,cached:0,failed:0,errors:[]};
+  const allowed=new Set(uniq(schoolSlugs));
+  const matches=supplementalRows(catalogs.supplemental).filter(row=>!allowed.size||allowed.has(row.school_slug)).map(row=>{
+    const title=clean(row.title,320).toLowerCase(),id=clean(row.id,160).replaceAll('-',' ').toLowerCase();
+    const titleHits=tokens.filter(token=>title.includes(token)||id.includes(token)).length;
+    const exact=title.length>=6&&clean(query,2400).toLowerCase().includes(title);
+    return{row,score:titleHits*20+(exact?45:0)};
+  }).filter(item=>item.score>=20).sort((a,b)=>b.score-a.score||a.row.id.localeCompare(b.row.id)).slice(0,Math.max(1,Math.min(6,Number(limit)||4)));
+  // Bounded parallel requests: three unavailable reference endpoints must not
+  // cause three consecutive 12-second timeouts before Moss reports failure.
+  const results=await Promise.all(matches.map(({row})=>fetchWikipediaArticle(row)));
+  // Return inspected passages directly. A downloaded article must remain usable
+  // even if a subsequent foundation-status lookup or broad search fails.
+  const schoolNames=new Map((catalogs.articles.schools||[]).map(row=>[row.school_slug,row.school_name]));
+  const rows=results.filter(item=>item.ok&&clean(item.article?.extract,160000)).map((item,index)=>{
+    const article=item.article,title=clean(article.title||item.record.title,320),url=clean(article.canonicalUrl,2400);
+    return{title,articleTitle:title,url,canonicalUrl:url,notes:passageFor(article.extract,tokens),
+      score:100-index,schoolSlug:item.record.school_slug,
+      schoolName:schoolNames.get(item.record.school_slug)||item.record.school_slug,
+      table:'supplemental-article-cache',linkProvenance:'supplemental-wikipedia-canonical'};
+  });
+  return{attempted:results.length,stored:results.filter(item=>item.ok&&!item.cached).length,
+    cached:results.filter(item=>item.ok&&item.cached).length,
+    failed:results.filter(item=>!item.ok).length,
+    errors:results.filter(item=>!item.ok).map(item=>({id:item.record.id,error:item.error})),rows};
+}
 export function schoolSlugsForTopics(topicSlugs,topicMeta={}){return uniq((topicSlugs||[]).map(topic=>topicMeta?.[topic]?.school_slug).filter(Boolean))}
 export const revision=REVISION;
 export const cachesUsed=Object.freeze({video:VIDEO_CACHE_NAME,videoMirror:VIDEO_MIRROR_CACHE_NAME,supplemental:SUPPLEMENTAL_CACHE_NAME,meta:META_CACHE_NAME});

@@ -1,0 +1,71 @@
+name: Verify Llama 3.2 two-pass JSON experiment
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/worker-v266.js'
+      - 'public/app/local-ai/llama32-structured-constraints-v1.js'
+      - 'public/app/local-ai/llama32-two-pass-test-v1.html'
+      - 'public/app/local-ai/llama32-two-pass-test-v3.html'
+      - 'public/app/local-ai/llama32-diagnostic-worker-v3.js'
+      - 'public/app/local-ai/llama32-diagnostic-worker-v4.js'
+      - 'public/app/local-ai/llama32-two-pass-test-v4.html'
+      - 'public/app/local-ai/llama32-chunked-model-storage-v1.js'
+      - 'public/app/local-ai/download-manager-v267.js'
+      - 'scripts/verify-llama32-chunked-model-storage-v1.mjs'
+      - 'scripts/verify-llama32-asyncify-runtime-v1.mjs'
+      - 'scripts/stage-transformers-v4-assets.mjs'
+      - 'scripts/verify-llama32-session-progress-v3.mjs'
+      - 'scripts/stage-llama-structured-output-v1.mjs'
+      - 'scripts/verify-llama32-two-pass-v1.mjs'
+      - 'scripts/build-cloudflare-pages.mjs'
+      - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/local-ai/runtime-v266.js'
+      - '.github/workflows/verify-llama32-two-pass-v1.yml'
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/gemma4-structured-task-authority-v1.js'
+      - 'public/app/local-ai/gemma4-weave-draft-pipeline-v1.js'
+      - 'public/app/local-ai/runtime-v266.js'
+      - 'scripts/verify-llama32-two-pass-v1.mjs'
+      - '.github/workflows/verify-llama32-two-pass-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static engine and JSON constraint checks
+        run: |
+          node --check public/app/local-ai/worker-v266.js
+          node --check public/app/local-ai/llama32-structured-constraints-v1.js
+          node --check scripts/stage-llama-structured-output-v1.mjs
+          node --check scripts/build-cloudflare-pages.mjs
+          node scripts/verify-llama32-two-pass-v1.mjs
+          node scripts/verify-llama32-chunked-model-storage-v1.mjs
+          node scripts/verify-llama32-session-progress-v3.mjs
+          node scripts/verify-llama32-asyncify-runtime-v1.mjs
+          node --check public/app/local-ai/llama32-diagnostic-worker-v4.js
+      - name: Verify pinned WebGPU Asyncify runtime packaging
+        run: |
+          node scripts/stage-transformers-v4-assets.mjs --force
+          node scripts/verify-llama32-asyncify-runtime-v1.mjs --built
+      - name: Stage pinned, self-hosted token masking companion
+        run: |
+          node scripts/stage-llama-structured-output-v1.mjs --force
+          test -s public/app/vendor/transformers-structured-output-v4/index.js
+          node --check public/app/vendor/transformers-structured-output-v4/index.js
+          node --input-type=module -e "const [{StructuredOutputProcessor},{LogitsProcessorList}]=await Promise.all([import('./public/app/vendor/transformers-structured-output-v4/index.js'),import('./public/app/vendor/transformers-v4/transformers.min.js')]); if(typeof StructuredOutputProcessor!=='function'||!(StructuredOutputProcessor.prototype instanceof LogitsProcessorList))throw Error('StructuredOutputProcessor does not extend the self-hosted Transformers.js LogitsProcessorList'); console.log('PASS: same self-hosted generation runtime classes');"
+          node -e "const m=require('./public/app/vendor/transformers-structured-output-v4/stage-manifest.json');if(m.version!=='4.3.1')process.exit(2)"

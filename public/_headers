@@ -18,9 +18,6 @@
 /app/manifest.webmanifest
   Cache-Control: no-store, max-age=0, must-revalidate
 
-/app/manifest-v436.webmanifest
-  Cache-Control: no-store, max-age=0, must-revalidate
-
 /app/pwa-start-v436.html
   Cache-Control: no-store, max-age=0, must-revalidate
 
@@ -29,6 +26,10 @@
 
 /service-worker-v203.js
   Cache-Control: no-store, max-age=0, must-revalidate
+
+/guild-release-recovery.html
+  Cache-Control: no-store, max-age=0, must-revalidate
+  X-Robots-Tag: noindex, nofollow
 
 /service-worker-weave-pipeline-takeover-v1.js
   Cache-Control: no-store, max-age=0, must-revalidate
@@ -106,6 +107,12 @@
   Cache-Control: no-store, max-age=0, must-revalidate
 
 /app/guide-generation-tracker-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/litert-gpu-worker-smoke-v1.js
+  Cache-Control: no-store, max-age=0, must-revalidate
+
+/app/local-ai/litert-gpu-worker-test-v1.html
   Cache-Control: no-store, max-age=0, must-revalidate
 
 /app/local-guide-control-bypass-v1.js

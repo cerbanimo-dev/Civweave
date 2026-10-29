@@ -3,7 +3,11 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const source=await readFile('public/app/local-ai/gemma4-first-request-intake-bridge-v1.js','utf8');
-assert.match(source,/1\.0\.1-gemma4-first-request-intake-bridge-v1-living-school-intake/);
+assert.match(source,/1\.2\.10-first-request-intake-bridge-v1-runtime-family-gate/);
+const pipelineSource=await readFile('public/app/local-ai/gemma4-weave-draft-pipeline-v1.js','utf8');
+const pipelineVersion=pipelineSource.match(/const VERSION='([^']+)'/)?.[1];
+assert.ok(pipelineVersion,'canonical planning compiler version must be declared');
+assert.ok(source.includes(`const PIPELINE_VERSION='${pipelineVersion}'`),'first-request intake bridge must target the canonical planning compiler');
 assert.match(source,/livingSchoolLearningIntake:true/);
 const order=[];
 let priorCalls=0;
@@ -26,7 +30,7 @@ const context={
 };
 context.globalThis=context;
 context.CivweaveGemma4WeaveDraftPipelineV1={
-  version:'1.0.0-gemma4-weave-draft-pipeline-v1-plan-compile-repair',
+  version:pipelineVersion,
   install(){order.push('pipeline-install');const prior=context.CivweaveModelRuntime.generate;const generate=async request=>prior(request);generate.__civweaveWeaveDraftPipelineV1=this.version;generate.__prior=prior;context.CivweaveModelRuntime.generate=generate;return true},
   installRuntime(){return this.install()}
 };
@@ -53,7 +57,7 @@ assert.deepEqual(JSON.parse(JSON.stringify(result)),expected);
 assert.equal(priorCalls,0,'eligible local Weaveling request fell through to the stale selected-model path');
 assert.ok(order.indexOf('ensure')>=0,'first-request authority was not ensured');
 assert.ok(order.indexOf('pipeline-install')>order.indexOf('ensure'),'Weave pipeline was not installed after first-request bootstrap');
-assert.ok(order.indexOf('intake')>order.indexOf('pipeline-install'),'E2B intake started before the Weave runtime was authoritative');
+assert.ok(order.indexOf('intake')>order.indexOf('pipeline-install'),'E4B intake started before the Weave runtime was authoritative');
 assert.equal(context.CivweaveGemma4FirstRequestIntakeBridgeV1.state().pipelineActive,true,'Weave pipeline is not visible in the runtime chain');
 
 const ordinary=await context.CivweaveAssistantV141.respond({systemId:'living-school',text:'hello'});
@@ -64,9 +68,9 @@ intakeArgsSeen=null;
 const mossLearning=await context.CivweaveAssistantV141.respond({systemId:'living-school',text:'Can you teach me how to read and memorize the tarot?'});
 assert.deepEqual(JSON.parse(JSON.stringify(mossLearning)),expected);
 assert.equal(priorCalls,1,'Living School learning intent fell through to the old direct strict-JSON path');
-assert.equal(intakeArgsSeen?.systemId,'civweave','Living School learning intent was not normalized into the mandatory Weaveling E2B intake route');
+assert.equal(intakeArgsSeen?.systemId,'civweave','Living School learning intent was not normalized into the mandatory Weaveling E4B intake route');
 assert.equal(intakeArgsSeen?.sourceSystemId,'living-school','Living School source system was not preserved across intake normalization');
 assert.equal(intakeArgsSeen?.sourceGuide,'Moss','Moss source identity was not preserved across intake normalization');
 assert.equal(context.CivweaveGemma4FirstRequestIntakeBridgeV1.livingSchoolLearningIntake,true);
 
-console.log('PASS: local Gemma learning intent from both Weaveling and Moss enters E2B intake before E4B Weave generation, while ordinary Living School chat keeps its prior route.');
+console.log('PASS: local Gemma learning intent from both Weaveling and Moss enters E4B intake before E4B Weave generation, while ordinary Living School chat keeps its prior route.');

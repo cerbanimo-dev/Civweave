@@ -1,9 +1,12 @@
 'use strict';
-const WORKER_REVISION='1.0.126-v315-gemma4-template-logits';
+const WORKER_REVISION='1.0.130-v319-llama32-resumable-model-parts';
 const CACHE='civweave-model-generative-v266';
 const RUNTIME_CACHE='civweave-local-runtime-v287';
 const TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js';
 const WASM_V3='/app/vendor/transformers/wasm/';
+const LLAMA32_COMPILER='llama32-3b-instruct-q4f16';
+const STRUCTURED_PROCESSOR_URL='/app/vendor/transformers-structured-output-v4/index.js';
+const STRUCTURED_VALIDATOR_URL='/app/local-ai/llama32-structured-constraints-v1.js';
 const runtimeModules=new Map();
 const wasmBinaryCache=new Map();
 let hfRuntime=null,tokenizer=null,model=null,loaded=null,loading=null;
@@ -22,7 +25,17 @@ function cacheAdapter(cache,spec){
   const localPrefix=`/models/${spec.repo}/`,repoPrefix=`https://huggingface.co/${spec.repo}/resolve/`;
   const miss=()=>new Response('',{status:404,statusText:'Downloaded model cache miss'});
   const withKnownLength=(response,path)=>{const known=Math.max(0,Number(artifactFor(spec,path)?.sizeBytes)||0);if(!response?.ok||response.headers.get('content-length')||!known)return response;const headers=new Headers(response.headers);headers.set('content-length',String(known));headers.set('x-civweave-artifact-length','registry-v300');return new Response(response.body,{status:response.status,statusText:response.statusText,headers})};
-  const find=async path=>{const hit=await cache.match(remoteUrl(spec,path));return hit?.ok?withKnownLength(hit,path):miss()};
+  const find=async path=>{
+    const url=remoteUrl(spec,path),hit=await cache.match(url);
+    if(hit?.ok)return withKnownLength(hit,path);
+    if(spec.id===LLAMA32_COMPILER&&/\.onnx_data(?:_\d+)?$/.test(path)){
+      const {chunkedResponse}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
+      const expected=Number(artifactFor(spec,path)?.sizeBytes||0);
+      const streamed=await chunkedResponse(cache,url,expected);
+      if(streamed)return streamed;
+    }
+    return miss();
+  };
   return{async match(request){const key=requestUrl(request);if(key.startsWith(localPrefix))return find(key.slice(localPrefix.length));if(key.startsWith(repoPrefix)){const rest=key.slice(repoPrefix.length),slash=rest.indexOf('/');if(slash>=0)return find(rest.slice(slash+1))}try{const hit=await cache.match(request);return hit?.ok?hit:undefined}catch{return undefined}},put:(request,response)=>cache.put(request,response)};
 }
 function friendlyError(error,spec,stage='inference'){
@@ -102,23 +115,74 @@ async function backendProfile(spec){
   if(spec.requiresShaderF16&&!shaderF16)throw Object.assign(new Error('WebGPU shader-f16 is required by this mobile q2f16 model, but the active adapter does not expose shader-f16.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'});
   return{backend:'webgpu',gpu:{available:true,shaderF16,vendor:clean(info.vendor||'',120),architecture:clean(info.architecture||'',120),device:clean(info.device||'',120),description:clean(info.description||'',180),maxBufferSize:Number(adapter.limits?.maxBufferSize||0),maxStorageBufferBindingSize:Number(adapter.limits?.maxStorageBufferBindingSize||0)}};
 }
+async function configuredWasmChunks(spec){
+  if(spec?.id!==LLAMA32_COMPILER)return spec;
+  const manifestUrl='/app/vendor/transformers-v4/stage-manifest-asyncify-v8.json';
+  let response;
+  try{response=await fetch(manifestUrl,{cache:'no-store'})}
+  catch(error){throw new Error('Llama WebGPU Asyncify runtime manifest is unreachable: '+String(error?.message||error))}
+  if(!response.ok)throw new Error('Llama WebGPU Asyncify runtime manifest HTTP '+response.status);
+  let manifest;
+  try{manifest=await response.json()}catch{throw new Error('Llama WebGPU Asyncify runtime manifest returned invalid JSON (possibly an app-shell HTML fallback).')}
+  if(manifest.schema!=='civweave.transformers-stage.v8'||
+     manifest.asyncifyModule!=='ort-wasm-simd-threaded.asyncify.mjs'||
+     manifest.asyncifyWasmSource!=='ort-wasm-simd-threaded.asyncify.wasm'||
+     !Array.isArray(manifest.asyncifyWasmChunks)||manifest.asyncifyWasmChunks.length<2)
+     throw new Error('This deployment is missing the pinned ONNX Runtime Asyncify WebGPU module. The existing model weights are fine. Rebuild staging with both Asyncify JS and WASM artifacts.');
+  const names=manifest.asyncifyWasmChunks;
+  if(names.some((name,index)=>name!=='ort-wasm-simd-threaded.asyncify.wasm.part'+index))
+    throw new Error('Asyncify runtime WASM shards have an unexpected name or order.');
+  const chunks=names.map(name=>'/app/vendor/transformers-v4/wasm/'+name);
+  return{...spec,wasmChunks:chunks,wasmRuntimeBytes:Number(manifest.asyncifyWasmBytes||0)};
+}
 async function configureRuntime(hf,cache,spec){
   hf.env.allowLocalModels=true;
   hf.env.allowRemoteModels=false;
   hf.env.useBrowserCache=false;
   hf.env.useCustomCache=true;
   hf.env.customCache=cacheAdapter(cache,spec);
-  const profile=runtimeProfile(hf,spec),wasm=hf.env.backends?.onnx?.wasm||null;
-  if(wasm&&spec.wasmChunks?.length){
-    const binary=await splitWasmBinary(spec);
+  const runnableSpec=await configuredWasmChunks(spec);
+  const profile=runtimeProfile(hf,runnableSpec),wasm=hf.env.backends?.onnx?.wasm||null;
+  if(wasm&&runnableSpec.wasmChunks?.length){
+    const binary=await splitWasmBinary(runnableSpec);
+    if(runnableSpec.wasmRuntimeBytes&&binary?.byteLength!==runnableSpec.wasmRuntimeBytes)
+      throw new Error('Asyncify WASM bytes incomplete: got '+(binary?.byteLength||0)+' but the staged manifest requires '+runnableSpec.wasmRuntimeBytes);
     wasm.wasmBinary=binary;
     profile.wasmBinaryBytes=binary?.byteLength||0;
-    profile.wasmChunkCount=spec.wasmChunks.length;
+    profile.wasmChunkCount=runnableSpec.wasmChunks.length;
     profile.wasmBinaryCached=true;
+    profile.wasmFlavor=spec.id===LLAMA32_COMPILER?'asyncify':'jsep';
   }
   return profile;
 }
-function progressReporter(id,name,started,base={}){let high=0;return value=>{const p=value||{},raw=Number(p.progress_total??p.progress),detail={...base,...p};if(Number.isFinite(raw)&&raw>=0){const pct=Math.max(0,Math.min(100,raw<=1?raw*100:raw));high=Math.max(high,pct);detail.artifactProgress=Number.isFinite(Number(p.progress))?Number(p.progress):null;detail.progress=high;detail.progressOverall=high}if(!detail.artifact&&p.file)detail.artifact=p.file;phase(id,name,started,detail)}}
+function progressReporter(id,name,started,base={}){
+  let high=0,lastAt=0,lastKey='',suppressed=0,lastArtifact='';
+  const isLlamaTrial=base.model===LLAMA32_COMPILER;
+  return value=>{
+    const p=value||{},raw=Number(p.progress_total??p.progress),detail={...base,...p};
+    if(Number.isFinite(raw)&&raw>=0){
+      const pct=Math.max(0,Math.min(100,raw<=1?raw*100:raw));
+      high=Math.max(high,pct);
+      detail.artifactProgress=Number.isFinite(Number(p.progress))?Number(p.progress):null;
+      detail.progress=high;
+      // Per-file 100% means bytes are found, NOT that an ONNX GPU session exists.
+      detail.progressOverall=isLlamaTrial?null:high;
+    }
+    if(!detail.artifact&&p.file)detail.artifact=p.file;
+    if(!isLlamaTrial){phase(id,name,started,detail);return}
+    const artifact=String(detail.artifact||'unknown').slice(-100);
+    const status=String(p.status||'loading');
+    const percent=Number.isFinite(raw)?Math.floor(Math.max(0,Math.min(100,raw<=1?raw*100:raw))):-1;
+    const key=name+'|'+artifact+'|'+status+'|'+Math.floor(percent/10);
+    const t=now(),significant=key!==lastKey&&(artifact!==lastArtifact||status==='done'||percent===0||percent>=100);
+    if(!significant&&t-lastAt<750){suppressed++;return}
+    if(key===lastKey&&t-lastAt<1000){suppressed++;return}
+    lastKey=key;lastArtifact=artifact;lastAt=t;
+    phase(id,name,started,{...detail,assetStatus:status,assetPercent:percent,suppressedProgressEvents:suppressed,
+      inferenceSessionReady:false,detail:'Cached/downloaded weight bytes do not mean the WebGPU inference session is initialized.'});
+    suppressed=0;
+  };
+}
 function externalDataSetting(spec){
   const counts={};
   for(const row of spec?.artifacts||[]){
@@ -220,7 +284,12 @@ async function ensure(spec,id,{benchmark=false}={}){
     tokenizer=await atStage('loading-tokenizer',spec,()=>hf.AutoTokenizer.from_pretrained(spec.repo,{revision:spec.revision,progress_callback:progressReporter(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend})}));
     const tokenizerLoadMs=Math.round(now()-tokenizerStarted),gemma4ChatTemplate=repairGemma4ChatTemplate(spec);
     if(isGemma4(spec))phase(id,'gemma4-chat-template',started,{model:spec.id,backend:profile.backend,...gemma4ChatTemplate});
-    phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,textOnly:Boolean(spec.textOnly),progress:0,progressOverall:0});const modelStarted=now();
+    phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,textOnly:Boolean(spec.textOnly),
+      progress:0,progressOverall:spec.id===LLAMA32_COMPILER?null:0,inferenceSessionReady:false});
+    if(spec.id===LLAMA32_COMPILER)phase(id,'initializing-onnx-session',started,{model:spec.id,backend:profile.backend,
+      message:'Model files are already cached; initializing a WebGPU ONNX inference session may require substantial temporary system memory.',
+      inferenceSessionReady:false});
+    const modelStarted=now();
     const modelOptions={revision:spec.revision,device:spec.device||profile.backend,dtype:spec.dtype,progress_callback:progressReporter(id,'loading-model',started,{model:spec.id,backend:profile.backend})};
     const externalData=externalDataSetting(spec);if(externalData)modelOptions.use_external_data_format=externalData;
     if(spec.textOnly)modelOptions.textOnly=true;
@@ -259,12 +328,28 @@ async function generate(message,id){
   if(working&&promptTokens>working)phase(id,'context-warning',requestStarted,{model:spec.id,promptTokens,workingContextTokens:working,contextWindowTokens:window});
   const timing={firstTokenAt:0,generatedTokens:0,index:0,decoded:''},generationStarted=now(),streamer=makeStreamer(id,Boolean(message.stream)&&!message.thinking,timing),temperature=Math.max(.01,Math.min(2,Number(message.temperature??.7)));
   currentPhase='generating';phase(id,currentPhase,requestStarted,{model:spec.id,backend:load.backend,streaming:Boolean(message.stream),thinking:Boolean(message.thinking),promptTokens,maxNewTokens,contextWindowTokens:window,workingContextTokens:working,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,wasmThreads:load.wasmThreads,crossOriginIsolated:load.crossOriginIsolated,wasmSimd:load.wasmSimd,runtime:load.runtime,gemma4ChatTemplate:load.gemma4ChatTemplate,gemma4LogitsSessions:load.gemma4LogitsSessions,nextTokenLogitsOnly:Boolean(isGemma4(spec))});
-  const options={...inputs,max_new_tokens:maxNewTokens,do_sample:true,temperature,top_k:Number(spec.generation?.topK||20),top_p:Number(spec.generation?.topP??.95),use_cache:true,return_dict_in_generate:true};
+  const structuredSchema=message.structuredOutputSchema||null;
+   if(structuredSchema&&spec.id!==LLAMA32_COMPILER)throw Object.assign(new Error('Strict schema-constrained generation is available only in the explicitly selected Llama 3.2 3B trial.'),{code:'STRUCTURED_COMPILER_MODEL_MISMATCH'});
+   const options={...inputs,max_new_tokens:maxNewTokens,do_sample:!structuredSchema,temperature,top_k:Number(spec.generation?.topK||20),top_p:Number(spec.generation?.topP??.95),use_cache:true,return_dict_in_generate:true};
+   if(structuredSchema){
+     currentPhase='preparing-grammar';phase(id,currentPhase,requestStarted,{model:spec.id,constrainedDecoding:true,schemaType:structuredSchema.type,companion:'huggingface-structured-output-4.3.1'});
+     const {StructuredOutputProcessor}=await import(STRUCTURED_PROCESSOR_URL);
+     if(typeof StructuredOutputProcessor!=='function')throw Object.assign(new Error('The local constrained-decoding companion was not staged.'),{code:'LOCAL_STRUCTURED_PROCESSOR_UNAVAILABLE'});
+     options.logits_processor=[new StructuredOutputProcessor(tokenizer,{type:'json_schema',json_schema:structuredSchema})];
+   }
   if(isGemma4(spec)&&hfRuntime?.Tensor)options.num_logits_to_keep=new hfRuntime.Tensor('int64',[1n],[]);
   if(streamer)options.streamer=streamer;
   const output=await model.generate(options),completed=now(),ids=generatedIds(output?.sequences,promptTokens);let text='';try{text=visibleAnswer(tokenizer.decode(ids,{skip_special_tokens:false}))}catch{}if(!text)text=visibleAnswer(timing.decoded);if(!text)throw new Error('The local model returned no final answer. Its output ended before a usable response.');
+   let structured=null;
+   if(structuredSchema){
+     currentPhase='validating-json';
+     const {validateStrictJson}=await import(STRUCTURED_VALIDATOR_URL);
+     structured=validateStrictJson(text,structuredSchema);
+     if(!structured.ok)throw Object.assign(new Error('Constrained JSON compilation failed validation: '+structured.errors.slice(0,5).join('; ')),{code:'LOCAL_STRUCTURED_JSON_INVALID',rejectedText:text,validationErrors:structured.errors});
+     phase(id,'json-validated',requestStarted,{model:spec.id,strict:true,constrainedDecoding:true,valid:true});
+   }
   const tokenCount=ids.length||timing.generatedTokens,generationMs=Math.round(completed-generationStarted),ttftMs=timing.firstTokenAt?Math.round(timing.firstTokenAt-generationStarted):null,decodeMs=Math.max(1,completed-(timing.firstTokenAt||generationStarted)),tokensPerSecond=tokenCount?Number((tokenCount/(decodeMs/1000)).toFixed(2)):0;
-  return{text,json:parseJsonLoose(text),model:{id:spec.id,repo:spec.repo,revision:spec.revision,runtime:spec.runtime||'transformers-js-v3'},backend:load.backend,streamed:Boolean(message.stream&&!message.thinking&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,prefillAndFirstTokenMs:ttftMs,decodeMs:Math.round(decodeMs),generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted),kvCache:true,nextTokenLogitsOnly:Boolean(isGemma4(spec)),workerRevision:WORKER_REVISION}};
+  return{text,json:structuredSchema?structured.value:parseJsonLoose(text),strictJson:Boolean(structuredSchema),jsonValidated:Boolean(structured?.ok),model:{id:spec.id,repo:spec.repo,revision:spec.revision,runtime:spec.runtime||'transformers-js-v3'},backend:load.backend,streamed:Boolean(message.stream&&!message.thinking&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,prefillAndFirstTokenMs:ttftMs,decodeMs:Math.round(decodeMs),generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted),kvCache:true,nextTokenLogitsOnly:Boolean(isGemma4(spec)),workerRevision:WORKER_REVISION}};
   }catch(error){throw annotate(error,currentPhase,spec)}
 }
 self.addEventListener('message',async event=>{const message=event.data||{},id=message.id;if(!id)return;try{if(message.type==='shutdown'){await unload();post(id,'done',{result:{shutdown:true}});return}if(message.type==='prewarm'){post(id,'done',{result:await prewarm(message,id)});return}if(message.type!=='generate')throw new Error(`Unsupported local-model worker request: ${message.type}`);post(id,'done',{result:await generate(message,id)})}catch(error){const stage=error?.code==='LOCAL_MODEL_CONTEXT_EXCEEDED'?'context check':error?.phase||'inference',detail={message:friendlyError(error,message.spec,stage),name:error?.name||'Error',code:error?.code||'LOCAL_MODEL_FAILED',phase:error?.phase||stage,model:error?.model||message.spec?.id||'',modelLabel:error?.modelLabel||message.spec?.label||message.spec?.id||'',backend:error?.backend||message.spec?.device||'',rawMessage:clean(error?.message||error,1000),stack:clean(error?.stack,4000),sessionReleased:true};await unload();post(id,'error',{error:detail})}});

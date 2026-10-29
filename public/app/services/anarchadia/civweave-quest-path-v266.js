@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-anarchadia-quest-path-v266';
+const VERSION='1.0.3-exact-quest-selection';
 if(globalThis.AnarchadiaQuestPathV266?.version===VERSION)return;
 
 const KEYS={
@@ -40,15 +40,15 @@ function planFromLedger(id){
 }
 function resolveContext(){
   const params=query(),handoff=read(KEYS.activeHandoff,{}),campus=read(KEYS.campus,{});
-  const weaveId=clean(params.get('weave')||handoff?.weaveId||campus?.plan?.id,240);
-  const pathId=clean(params.get('path')||handoff?.pathId,240);
-  let plan=null;
-  if(weaveId)plan=planFromLedger(weaveId);
-  if(!plan&&handoff?.plan?.id)plan=handoff.plan;
-  if(!plan&&campus?.plan?.id)plan=campus.plan;
-  if(!plan||plan.state==='review')return null;
+  const requestedWeave=clean(params.get('weave'),240),requestedPath=clean(params.get('path'),240);
+  const weaveId=requestedWeave||clean(campus?.plan?.id||handoff?.weaveId,240),pathId=requestedPath||(String(handoff?.weaveId||'')===weaveId?clean(handoff?.pathId,240):'');
+  let plan=weaveId?planFromLedger(weaveId):null;
+  if(!plan&&String(campus?.plan?.id||'')===weaveId)plan=campus.plan;
+  if(!plan&&String(handoff?.plan?.id||'')===weaveId)plan=handoff.plan;
+  if(!plan||!['active','completed'].includes(plan.state))return null;
   const paths=list(plan.paths).filter(path=>String(path?.realm||'').toLowerCase()==='anarchadia');
-  let path=paths.find(item=>String(item.id)===pathId)||paths[0]||null;
+  let path=pathId?paths.find(item=>String(item.id)===pathId)||null:paths[0]||null;
+  if(pathId&&!path)return null;
   let synthetic=false;
   if(!path&&plan.governance){
     synthetic=true;
@@ -258,11 +258,20 @@ function render(){
     if(target.dataset.questRecord!=null)return recordManual(Number(target.dataset.questRecord));
     if(target.dataset.questReopen!=null)return reopenStep(Number(target.dataset.questReopen));
     if(target.hasAttribute('data-quest-approval'))return refreshApproval();
-    if(target.hasAttribute('data-quest-passport'))location.assign('/app/anarchadia-console-v139.html?cabinet=1');
+    if(target.hasAttribute('data-quest-passport'))openPassport();
   };
   return true;
 }
 function queueRender(){if(renderQueued)return;renderQueued=true;queueMicrotask(()=>{renderQueued=false;render()})}
+function openPassport(){
+  try{
+    const parent=globalThis.parent,shell=parent&&parent!==globalThis?parent.CivweavePersistentSystemShellV1:null;
+    if(shell?.navigate?.('anarchadia',{replace:true,source:'anarchadia-quest-path-v266'}))return;
+  }catch{}
+  const target=new URL('/app/anarchadia-console-v139.html',location.href),current=new URLSearchParams(location.search);target.searchParams.set('cabinet','1');
+  for(const key of ['installed','embed','persistentShell'])if(current.get(key))target.searchParams.set(key,current.get(key));
+  location.assign(target.href);
+}
 function start(){
   render();
   addEventListener('hashchange',queueRender);

@@ -1,6 +1,6 @@
-import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v1';
+import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v12-extensible';
 
-const REVISION='living-school-generation-guard-v264-pedagogy';
+const REVISION='living-school-generation-guard-v265-first-call-module-material';
 const MAX_PACKET_CHARS=52000;
 const CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1';
 const STRUCTURE_PURPOSE='living-school-structure-single-v221';
@@ -297,6 +297,7 @@ function modulePrompt(module,needed,types,round){
     'Make the prompt self-contained and explicitly anchored to the module subject or one of its named concepts.',
     'For selected-response questions, use plausible subject-matter misconceptions as distractors.',
     'Never use skipping practice, confidence alone, invented citations, ignoring objectives, unrelated artifacts, reviewable evidence, or module-completion compliance as distractors or answers.',
+    `MODULE MATERIAL:\n${clean(JSON.stringify(module||{}),26000)}`,
     `Completion round: ${round}.`
   ].join('\n');
 }
@@ -310,7 +311,7 @@ async function completeQuizPerModule(original,request){
   for(const module of modules){
     const moduleId=clean(module?.moduleId,180),target=Math.max(1,Number(module?.minimumAdditionalQuestions||0),Array.isArray(module?.missingTypes)?module.missingTypes.length:0);
     const collected=[],seen=new Set((Array.isArray(module?.existingQuestions)?module.existingQuestions:[]).map(questionKey).filter(Boolean));
-    const maxRounds=Math.min(8,Math.max(4,target+3));
+    const maxRounds=request?.context?.quizProviderCallsPerModuleMax===1?1:Math.min(8,Math.max(4,target+3));
     let forceSingle=false;
     for(let round=1;round<=maxRounds;round++){
       const outstanding=missingTypes(module?.missingTypes,collected),remaining=Math.max(0,target-collected.length);
@@ -322,7 +323,7 @@ async function completeQuizPerModule(original,request){
       perRequest=appendUserMessage(perRequest,modulePrompt(oneModule,needed,requestedTypes,round));
       const result=await original(perRequest);
       if(result?.status!=='success'){
-        lastFailure=result;
+        lastFailure=result||{status:'error',error:{code:'LIVING_SCHOOL_QUIZ_EMPTY_RESPONSE',message:'The selected AI returned no assessment response.'}};
         forceSingle=true;
         continue;
       }

@@ -13,6 +13,7 @@ on:
       - 'scripts/verify-reward-model-contract-v2.mjs'
       - 'scripts/verify-basic-value-guide-v1.mjs'
       - 'scripts/verify-economic-valuation-review-v1.mjs'
+      - 'scripts/test-economic-valuation-demand-v1.mjs'
       - '.github/workflows/verify-canonical-rewards-v2.yml'
   push:
     branches: [main, staging]
@@ -26,6 +27,7 @@ on:
       - 'scripts/verify-reward-model-contract-v2.mjs'
       - 'scripts/verify-basic-value-guide-v1.mjs'
       - 'scripts/verify-economic-valuation-review-v1.mjs'
+      - 'scripts/test-economic-valuation-demand-v1.mjs'
       - '.github/workflows/verify-canonical-rewards-v2.yml'
   workflow_dispatch:
 
@@ -56,12 +58,14 @@ jobs:
           node --check scripts/verify-reward-model-contract-v2.mjs
           node --check scripts/verify-basic-value-guide-v1.mjs
           node --check scripts/verify-economic-valuation-review-v1.mjs
+          node --check scripts/test-economic-valuation-demand-v1.mjs
       - name: Verify ledger, Passport, prompts, receivers, basic value, and valuation governance
         run: |
           node scripts/verify-canonical-rewards-v2.mjs
           node scripts/verify-reward-model-contract-v2.mjs
           node scripts/verify-basic-value-guide-v1.mjs
           node scripts/verify-economic-valuation-review-v1.mjs
+          node --test scripts/test-economic-valuation-demand-v1.mjs
       - name: Verify offline package seeds
         run: |
           node - <<'NODE'

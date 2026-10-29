@@ -10,6 +10,8 @@ must prove vocals from source metadata and score against the configured themes.
 from __future__ import annotations
 
 import importlib.util
+import concurrent.futures
+import threading
 import json
 import urllib.parse
 from pathlib import Path
@@ -98,6 +100,30 @@ def ccmixter_rows(params: dict) -> list[dict]:
     return []
 
 
+DETAIL_CACHE: dict[str, dict] = {}
+DETAIL_LOCK = threading.Lock()
+
+
+def detailed_upload(row: dict) -> dict:
+    """Resolve listing rows to the source site's detailed single-upload view."""
+    uid = base.clean(row.get("upload_id") or row.get("id"), 120)
+    if not uid:
+        return row
+    with DETAIL_LOCK:
+        cached = DETAIL_CACHE.get(uid)
+    if cached is not None:
+        return cached
+    detailed = row
+    try:
+        matches = ccmixter_rows({"f": "json", "dataview": "info", "ids": uid, "limit": 1})
+        detailed = next((candidate for candidate in matches if base.clean(candidate.get("upload_id") or candidate.get("id"), 120) == uid), row)
+    except Exception:
+        pass
+    with DETAIL_LOCK:
+        DETAIL_CACHE[uid] = detailed
+    return detailed
+
+
 def record_from_item(
     playlist: dict,
     item: dict,
@@ -107,6 +133,8 @@ def record_from_item(
     curated: dict | None = None,
     preferred_terms: list[str],
     minimum_teeth: int,
+    genre_tag: str | None = None,
+    review_seed: dict | None = None,
 ) -> dict | None:
     lic = base.ccmixter_license(item, requested_license)
     files = base.ccmixter_files(item)
@@ -122,12 +150,20 @@ def record_from_item(
     if curated is None:
         if not has_vocal_signal(item):
             return None
-        score, themes = teeth_score(item, preferred_terms)
-        if score < minimum_teeth:
+        name = normalized_text(item.get("upload_name") or item.get("name") or item.get("title"))
+        if any(part in name for part in ("vocal stem", "instrumental stem", "acappella stem", "acapella", "sample pack", "sample set", "stems only", "loop pack", "demo snippet", "vocal only", "instrumental only")):
             return None
-        explicit = False
-        curation = "metadata-discovered"
-        vocal_evidence = "ccMixter source metadata contains an affirmative vocal/voice/lyric marker"
+        score, themes = teeth_score(item, preferred_terms)
+        if genre_tag is None and review_seed is None and score < minimum_teeth:
+            return None
+        if genre_tag is not None:
+            themes.append("genre:" + genre_tag)
+        if review_seed is not None:
+            curated_themes = [base.clean(value, 80) for value in review_seed.get("themes") or [] if base.clean(value, 80)]
+            themes = list(dict.fromkeys(curated_themes + themes))
+        explicit = None  # Lyrical language unreviewed; never imply family-safe.
+        curation = "web-source-candidate" if review_seed is not None else ("genre-discovered" if genre_tag is not None else "metadata-discovered")
+        vocal_evidence = "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited"
     else:
         score = max(minimum_teeth, min(5, int(curated.get("teeth_score") or minimum_teeth)))
         themes = [base.clean(value, 80) for value in curated.get("themes") or [] if base.clean(value, 80)]
@@ -197,6 +233,48 @@ def harvest_curated(playlist: dict, policy: dict) -> tuple[list[dict], list[dict
     return records, failures
 
 
+def harvest_review_candidates(playlist: dict, policy: dict) -> tuple[list[dict], list[dict]]:
+    """Import exact source-page-discovered candidates without claiming a listening review.
+
+    Each upload must independently pass the upstream license check, contain a
+    qualifying direct audio file, and exhibit affirmative vocal source metadata.
+    A web-page attribution statement alone never bypasses these checks.
+    """
+    records, failures = [], []
+    preferred = list(policy.get("preferred_terms") or [])
+    minimum = max(1, min(5, int(policy.get("minimum_teeth_score") or 2)))
+    for seed in playlist.get("review_candidates_ccmixter") or []:
+        uid = base.clean(seed.get("id"), 120)
+        if not uid or not uid.isdigit():
+            continue
+        try:
+            rows = ccmixter_rows({"f": "json", "dataview": "info", "ids": uid, "limit": 1})
+            matched = None
+            for item in rows:
+                if base.clean(item.get("upload_id") or item.get("id"), 120) != uid:
+                    continue
+                candidate = record_from_item(
+                    playlist, item, "by", f"source-page:{uid}", review_seed=seed,
+                    preferred_terms=preferred, minimum_teeth=minimum,
+                )
+                if candidate and candidate["license"]["spdx"] == "CC-BY":
+                    matched = candidate
+                    break
+            if matched:
+                records.append(matched)
+            else:
+                failures.append({
+                    "provider": "ccmixter", "playlist_id": playlist["id"], "query": f"source-page:{uid}",
+                    "error": "No CC-BY-licensed, audio-bearing, source-metadata-confirmed vocal recording for exact source upload ID",
+                })
+        except Exception as exc:
+            failures.append({
+                "provider": "ccmixter", "playlist_id": playlist["id"], "query": f"source-page:{uid}",
+                "error": base.clean(exc, 900),
+            })
+    return records, failures
+
+
 def harvest_discovery(playlist: dict, policy: dict) -> tuple[list[dict], list[dict]]:
     records, failures = [], []
     preferred = list(policy.get("preferred_terms") or [])
@@ -221,6 +299,109 @@ def harvest_discovery(playlist: dict, policy: dict) -> tuple[list[dict], list[di
     return records, failures
 
 
+def harvest_genre_discovery(playlist: dict, policy: dict, settings: dict) -> tuple[list[dict], list[dict]]:
+    """Find additional genuinely licensed vocal recordings by source genre tags.
+
+    Genre can support a station's musical character, not its lyrical ideology.
+    No lyrics are presumed safe without a separate lyric audit.
+    """
+    records, failures = [], []
+    preferred = list(policy.get("preferred_terms") or [])
+    minimum = max(1, min(5, int(policy.get("minimum_teeth_score") or 2)))
+    per_page = max(5, min(40, int(settings.get("results_per_page") or 35)))
+    pages = max(1, min(5, int(settings.get("pages_per_tag") or 3)))
+    classes = [value for value in (settings.get("license_classes") or ["by", "sa"]) if value in ("by", "sa", "pd")]
+    for genre in (playlist.get("genre_tags") or []):
+        for requested in classes:
+            inspected = 0
+            for offset in range(0, per_page * pages, per_page):
+                try:
+                    rows = ccmixter_rows({
+                        "f": "json", "dataview": "default", "limit": per_page,
+                        "offset": offset, "tags": genre, "type": "any", "lic": requested,
+                        "sort": "num_scores", "ord": "desc",
+                    })
+                    if not rows:
+                        break
+                    for item in rows:
+                        if inspected >= 10:
+                            break
+                        inspected += 1
+                        record = record_from_item(
+                            playlist, detailed_upload(item), requested, f"genre:{genre}",
+                            curated=None, preferred_terms=preferred,
+                            minimum_teeth=minimum, genre_tag=genre,
+                        )
+                        if record:
+                            records.append(record)
+                    if len(rows) < per_page or inspected >= 10:
+                        break
+                except Exception as exc:
+                    failures.append({
+                        "provider": "ccmixter", "playlist_id": playlist["id"],
+                        "query": f"genre:{genre}", "license_class": requested,
+                        "offset": offset, "error": base.clean(exc, 900),
+                    })
+                    break
+    return records, failures
+
+
+def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[list[dict], list[dict]]:
+    """Long-tail source-tag discovery for review, not automatic lyric approval."""
+    records, failures = [], []
+    diagnostics = []
+    per_page = max(5, min(40, int(settings.get("results_per_page") or 35)))
+    pages = max(1, min(20, int(settings.get("broad_pages_per_tag") or 12)))
+    preferred = list(policy.get("preferred_terms") or [])
+    minimum = max(1, min(5, int(policy.get("minimum_teeth_score") or 2)))
+    for tag in settings.get("broad_vocal_tags") or []:
+        for requested in settings.get("license_classes") or ["by", "sa"]:
+            if requested not in ("by", "sa", "pd"):
+                continue
+            scanned, accepted, pages_seen, inspected = 0, 0, 0, 0
+            for offset in range(0, per_page * pages, per_page):
+                try:
+                    rows = ccmixter_rows({
+                        "f": "json", "dataview": "default", "limit": per_page,
+                        "offset": offset, "tags": tag, "lic": requested,
+                        "sort": "date", "ord": "desc",
+                    })
+                    if not rows:
+                        break
+                    scanned += len(rows)
+                    pages_seen += 1
+                    for item in rows:
+                        if inspected >= 30:
+                            break
+                        inspected += 1
+                        record = record_from_item(
+                            playlist, detailed_upload(item), requested, f"vocal-pool:{tag}",
+                            preferred_terms=preferred, minimum_teeth=minimum,
+                            genre_tag="vocal-pool:" + tag,
+                        )
+                        if record:
+                            record["curation"] = "vocal-pool-unreviewed"
+                            records.append(record)
+                            accepted += 1
+                    if len(rows) < per_page or inspected >= 30:
+                        break
+                except Exception as exc:
+                    failures.append({
+                        "provider": "ccmixter", "playlist_id": playlist["id"],
+                        "query": f"vocal-pool:{tag}", "license_class": requested,
+                        "offset": offset, "error": base.clean(exc, 900),
+                    })
+                    break
+            diagnostics.append({"tag": tag, "license_class": requested, "pages_seen": pages_seen, "scanned": scanned, "inspected": inspected, "accepted": accepted})
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    (OUTPUT_DIR / "vocal-pool-scan.json").write_text(json.dumps({
+        "schema": "civweave.open-music-vocal-pool-scan.v1",
+        "at": base.now_iso(), "diagnostics": diagnostics,
+        "note": "Source API result totals are pre-license and pre-quality filtering; these are candidate counts, not approved tracks.",
+    }, indent=2) + "\n", encoding="utf-8")
+    return records, failures
+
+
 def enrich_outputs(config: dict) -> None:
     catalog_path = OUTPUT_DIR / "catalog.json"
     daily_path = OUTPUT_DIR / "daily-batch.json"
@@ -233,7 +414,7 @@ def enrich_outputs(config: dict) -> None:
     policy = json.loads(policy_path.read_text(encoding="utf-8"))
 
     by_id = {row.get("candidate_id"): row for row in catalog.get("records") or []}
-    fields = ("vocal_verified", "vocal_evidence", "instrumental_only", "teeth_score", "themes", "explicit", "curation")
+    fields = ("vocal_verified", "vocal_evidence", "instrumental_only", "teeth_score", "themes", "explicit", "curation", "playlist_id", "playlist_matches", "provider")
     for collection in (daily.get("candidates") or [], manifest.get("entries") or []):
         for row in collection:
             source = by_id.get(row.get("candidate_id")) or {}
@@ -246,7 +427,7 @@ def enrich_outputs(config: dict) -> None:
         "vocal_required": True,
         "instrumental_only_rejected": True,
         "minimum_teeth_score": max(1, min(5, int(vocal_policy.get("minimum_teeth_score") or 2))),
-        "selection_rule": "Every published candidate has verified vocals and lyrical substance; instrumental-only candidates are rejected.",
+        "selection_rule": "Source license and vocal metadata are checked before discovery. Genre and vocal tags are signals, not listening or lyric audits. Only hand-seeded recordings were manually reviewed; other recordings remain unreviewed candidates and are excluded from S.A.F.E. playback.",
         "discovery_provider_scope": list(config.get("providers") or ["ccmixter"]),
     })
 
@@ -289,14 +470,30 @@ def main() -> None:
         raise SystemExit("Vocal harvester requires require_vocals=true and reject_instrumental_only=true.")
 
     records, failures = [], []
-    for playlist in config.get("playlists") or []:
-        curated, curated_failures = harvest_curated(playlist, policy)
-        discovered, discovery_failures = harvest_discovery(playlist, policy)
-        print(f"{playlist['id']:15} curated={len(curated):2} discovered={len(discovered):3}")
-        records.extend(curated)
-        records.extend(discovered)
-        failures.extend(curated_failures)
-        failures.extend(discovery_failures)
+    playlists = config.get("playlists") or []
+    genre_settings = config.get("genre_discovery") or {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {}
+        for playlist in playlists:
+            futures[executor.submit(harvest_discovery, playlist, policy)] = ("themed", playlist)
+            if genre_settings.get("enabled") is True:
+                futures[executor.submit(harvest_genre_discovery, playlist, policy, genre_settings)] = ("genre", playlist)
+                if playlist["id"] == genre_settings.get("broad_playlist_id", "civweave"):
+                    futures[executor.submit(harvest_broad_vocals, playlist, policy, genre_settings)] = ("vocal-pool", playlist)
+        for playlist in playlists:
+            curated, curated_failures = harvest_curated(playlist, policy)
+            records.extend(curated)
+            failures.extend(curated_failures)
+            review_candidates, review_failures = harvest_review_candidates(playlist, policy)
+            print(f"{playlist['id']:15} web-sourced candidates={len(review_candidates):3}")
+            records.extend(review_candidates)
+            failures.extend(review_failures)
+        for future in concurrent.futures.as_completed(futures):
+            lane, playlist = futures[future]
+            discovered, discovery_failures = future.result()
+            print(f"{playlist['id']:15} {lane} discovered={len(discovered):3}")
+            records.extend(discovered)
+            failures.extend(discovery_failures)
 
     summary = base.build_outputs(records, failures, config)
     enrich_outputs(config)

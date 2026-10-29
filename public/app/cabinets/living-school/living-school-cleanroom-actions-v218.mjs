@@ -3,7 +3,7 @@ import '../../shared/civweave-validation-confidence-v1.js';
 import * as rubric from '../../services/living-school/modules/rubric-engine.mjs';
 import * as gate from '../../services/living-school/modules/project-gate.mjs';
 import * as bridge from '../../services/living-school/modules/cerbanimo-bridge.mjs';
-import{state,replaceState,persist,toast,award,activeModule,progressFor,availablePaths,fields,field,formFor,clean,uid,now,copy,readJson,writeJson,STATE_KEY,OUTBOX_KEY,freshState,normalizeState,researchCapability,generateSchool,quizQuestions}from'./living-school-cleanroom-core-v218.mjs';
+import{state,replaceState,persist,toast,award,activeModule,progressFor,availablePaths,fields,field,formFor,clean,uid,now,copy,readJson,writeJson,STATE_KEY,OUTBOX_KEY,freshState,normalizeState,researchCapability,generateSchool,quizQuestions,allModuleAssessmentsPassed,finalUnlocked}from'./living-school-cleanroom-core-v218.mjs';
 
 const answerNodes=(scope,index)=>[...scope.querySelectorAll(`[name="quiz-${index}"]`)];
 const quizAnswer=(scope,index,type)=>{
@@ -29,10 +29,42 @@ const validationForFinal=(evaluation,gateReceipt,finalId)=>confidenceApi().aggre
   {id:`cerbanimo-receipt:${gateReceipt?.receiptId||finalId}`,validatorId:`cerbanimo-receipt:${gateReceipt?.receiptId||finalId}`,family:'artifact-inspection',provenance:'accepted-cerbanimo-project-receipt',verdict:gateReceipt?'pass':'fail',confidence:.9,score:gateReceipt?1:0,threshold:.6,correlationId:gateReceipt?.receiptId||finalId}
 ]);
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
+const PROJECT_RECEIPTS_KEY='civweave.cerbanimo.project-receipts.v1';
+function practicumRequest(s,requestId=uid('request')){
+  if(!s.school?.id||!s.practicum?.id)throw new Error('Save a Learning Journey and practicum before sending a Cerbanimo request.');
+  return bridge.createProjectHandoffRequest({requestId,schoolId:s.school.id,learnerId:s.passport?.id||'local-learner',projectRef:s.practicum.id,title:s.practicum.title,creativeIntention:s.school.capability||s.practicum.proof,project:{schema:'civweave.learning-practicum.v1',...copy(s.practicum),schoolId:s.school.id,capability:s.school.capability||''}});
+}
+function upgradePendingPracticumRequests(s){
+  const outbox=readJson(OUTBOX_KEY,[]);if(!Array.isArray(outbox)||!s.school?.id||!s.practicum?.id)return[];
+  let changed=false;
+  const updated=outbox.map(request=>{
+    if(request?.schema!=='civweave.cerbanimo.project-request.v1'||request.practicum?.id!==s.practicum.id)return request;
+    changed=true;return practicumRequest(s,request.requestId||uid('request'));
+  });
+  if(changed){writeJson(OUTBOX_KEY,updated.slice(-100));persist('cerbanimo-handoff-upgraded');}
+  return updated;
+}
+function matchingProjectReceipt(s,raw){
+  const receipt=bridge.normalizeProjectReceipt(raw);
+  if(!receipt)throw new Error('Invalid Cerbanimo project receipt.');
+  if(receipt.schoolId!==s.school?.id||receipt.projectRef!==(s.projectGate?.projectRef||s.practicum?.id)||receipt.requestId!==s.projectGate?.requestId)throw new Error('The Cerbanimo receipt does not match the current Learning Journey practicum request.');
+  return receipt;
+}
+function applyProjectReceipt(s,raw){
+  const receipt=matchingProjectReceipt(s,raw),result=gate.applyReceipt(s.projectGate,receipt);
+  if(!result.changed)throw new Error(`Receipt rejected: ${result.reason||'invalid'}`);
+  const currentReceiptId=result.gate.lastReceipt?.receiptId,accepted=gate.canUnlockFinalTest(result.gate);
+  if((s.final||s.credential)&&(!accepted||(s.final&&s.final.receiptId!==currentReceiptId)||(s.credential&&s.credential.receiptId!==currentReceiptId))){
+    const supersededAt=now();
+    s.learningHistory=[...(Array.isArray(s.learningHistory)?s.learningHistory:[]),{school:copy(s.school),progress:copy(s.progress||{}),practicum:copy(s.practicum),projectGate:copy(s.projectGate),receipts:copy(s.receipts||[]),final:s.final?{...copy(s.final),status:'superseded',supersededAt}:null,credential:s.credential?{...copy(s.credential),status:'superseded',supersededAt}:null,archivedAt:supersededAt,invalidatedByReceipt:receipt.receiptId}];
+    s.final=null;s.credential=null;
+  }
+  s.projectGate=result.gate;s.receipts=[...s.receipts,receipt].slice(-100);persist('cerbanimo-receipt-applied');toast(`Project gate: ${result.gate.status}`);
+}
 
 export const actions={
   'apply-path':async target=>{
-    const id=clean(field('pathId',formFor(target)),180),path=availablePaths().find(item=>item.id===id);
+    const id=clean(field('pathId',formFor(target)),400),path=availablePaths().find(item=>item.id===id);
     if(!path)throw new Error('That path is unavailable.');
     const s=state();s.activePathId=id;s.pathContext=path;persist('learning-path-selected',{pathId:id});toast(`Using ${path.title}`);
   },
@@ -129,27 +161,39 @@ export const actions={
   },
   'create-handoff':async()=>{
     const s=state();if(!s.practicum)throw new Error('Save a practicum first.');
-    const request={schema:'civweave.cerbanimo.project-request.v1',requestId:uid('request'),sourceSystem:'living-school',targetSystem:'cerbanimo',capability:s.school?.capability||'',practicum:copy(s.practicum),createdAt:now(),status:'ready'},outbox=readJson(OUTBOX_KEY,[]);
-    writeJson(OUTBOX_KEY,[...(Array.isArray(outbox)?outbox:[]),request].slice(-100));
-    s.projectGate=gate.normalizeProjectGate?.({...s.projectGate,status:'submitted',requestId:request.requestId,updatedAt:now()})||s.projectGate;
+    const outbox=upgradePendingPracticumRequests(s),existing=outbox.find(request=>request?.type==='civweave:project-handoff-requested'&&request.schoolId===s.school?.id&&request.projectRef===s.practicum.id),request=existing||practicumRequest(s);
+    if(existing&&s.projectGate?.requestId===request.requestId&&s.projectGate?.projectRef===request.projectRef){toast('The Cerbanimo request is already saved. Open the linked Endeavor to continue.');return;}
+    if(!existing)writeJson(OUTBOX_KEY,[...outbox,request].slice(-100));
+    s.projectGate=gate.normalizeProjectGate({...s.projectGate,status:'submitted',requestId:request.requestId,projectRef:request.projectRef,brief:copy(s.practicum),updatedAt:now()});
     persist('cerbanimo-handoff-created');toast('Cerbanimo request created.');
   },
   'import-receipt':async target=>{
     const text=clean(field('receiptJson',formFor(target)),30000);if(!text)throw new Error('Paste a receipt.');
-    const raw=JSON.parse(text),receipt=bridge.normalizeProjectReceipt?.(raw)||raw,s=state(),result=gate.applyReceipt?.(s.projectGate,receipt)||{changed:true,gate:{...s.projectGate,status:receipt.status||'accepted',lastReceipt:receipt}};
-    if(!result.changed)throw new Error(`Receipt rejected: ${result.reason||'invalid'}`);
-    s.projectGate=result.gate;s.receipts=[...s.receipts,receipt].slice(-100);persist('cerbanimo-receipt-applied');toast(`Project gate: ${result.gate.status}`);
+    applyProjectReceipt(state(),JSON.parse(text));
   },
-  'open-cerbanimo':async()=>location.assign('/app/cabinet-only-v144.html?system=cerbanimo&from=living-school&capability=cerbanimo.create-quest'),
+  'check-cerbanimo-receipt':async()=>{
+    const s=state();upgradePendingPracticumRequests(s);
+    const saved=readJson(PROJECT_RECEIPTS_KEY,[]),matches=(Array.isArray(saved)?saved:[]).filter(raw=>{try{matchingProjectReceipt(s,raw);return true}catch{return false}}).sort((left,right)=>Number(right.statusRevision||0)-Number(left.statusRevision||0)||Date.parse(right.lastEventAt||right.acknowledgedAt||0)-Date.parse(left.lastEventAt||left.acknowledgedAt||0));
+    const receipt=matches[0];
+    if(!receipt||s.projectGate?.receiptIds?.includes(receipt.receiptId))throw new Error('No new matching Cerbanimo receipt is available. Complete or review the linked Endeavor, then check again.');
+    applyProjectReceipt(s,receipt);
+  },
+  'open-cerbanimo':async()=>{
+    if(globalThis.CivweaveSystemRoutesV227?.navigate)return globalThis.CivweaveSystemRoutesV227.navigate('cerbanimo',{source:'living-school-practicum'});
+    location.assign('/app/realm-console-v140.html?system=cerbanimo&cabinet=1&source=living-school-practicum');
+  },
   'evaluate-final':async target=>{
-    const s=state();if(!(gate.canUnlockFinalTest?.(s.projectGate)||Boolean(s.projectGate?.status==='accepted'&&s.projectGate?.lastReceipt)))throw new Error('An accepted Cerbanimo receipt is required.');
+    const s=state();if(!allModuleAssessmentsPassed())throw new Error('Pass every current module assessment before the final competency check.');
+    if(!finalUnlocked())throw new Error('A current accepted Cerbanimo receipt matching this Learning Journey practicum request is required.');
     const answer=clean(field('finalAnswer',formFor(target)),16000);if(!answer)throw new Error('Write the final explanation.');
     const evaluation=rubric.evaluateShortAnswer?.({prompt:'Explain capability, evidence, uncertainty, and revision.',response:answer,lessonExcerpt:`Capability: ${s.school?.capability||''}. Artifact: ${s.practicum?.artifact||''}.`,criteria:[{id:'capability',label:'Capability',points:3,role:'principle',required:true},{id:'evidence',label:'Evidence',points:4,role:'evidence',required:true},{id:'limits',label:'Limits',points:3,role:'action',required:true}],minWords:30,maxWords:420})||{ok:answer.split(/\s+/).length>=30,uncertain:false,score:80,feedback:'Local final review.'};
     const finalId=uid('final'),validation=validationForFinal(evaluation,s.projectGate.lastReceipt,finalId),passed=validation.verifiedPass&&!evaluation.uncertain,first=passed&&!s.final?.passed;s.final={id:finalId,answer,score:Number(evaluation.score||0),passed,validationConfidence:validation,feedback:evaluation.feedback,receiptId:s.projectGate.lastReceipt?.receiptId,at:now()};
     if(first)award(25,'Final competency passed',s.final.id);persist('final-assessment-evaluated',{passed});toast(passed?'Final competency passed.':'Saved for revision.');
   },
   'issue-credential':async()=>{
-    const s=state();if(!s.final?.passed)throw new Error('Pass the final competency check first.');
+    const s=state();if(!allModuleAssessmentsPassed())throw new Error('Pass every current module assessment before issuing a credential.');
+    if(!s.final?.passed)throw new Error('Pass the final competency check first.');
+    if(!finalUnlocked()||s.final.receiptId!==s.projectGate.lastReceipt?.receiptId)throw new Error('A current accepted Cerbanimo receipt matching the final competency check is required.');
     s.credential=s.credential||{schema:'civweave.learning-credential.v1',credentialId:uid('credential'),title:s.school?.title||'Living School capability',capability:s.school?.capability||'',learner:s.passport.displayName,schoolId:s.school?.id||'',receiptId:s.projectGate.lastReceipt?.receiptId||'',issuedAt:now()};
     persist('credential-issued',{credentialId:s.credential.credentialId});toast('Portable credential issued.');
   },

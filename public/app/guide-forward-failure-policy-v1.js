@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-guide-forward-failure-policy-v1-local-provider-pin';
+const VERSION='1.0.2-guide-forward-failure-policy-v1-http-capabilities';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const PROFILES_KEY='civweave-model-profiles-v1';
 const LEGACY_KEY='civweave.universal-ai.v127';
@@ -23,6 +23,7 @@ function configuredInteractive(){
 function configuredRoute(){const raw=configuredInteractive();return clean(raw.provider||raw.route,80).toLowerCase()}
 function serverAutoConfigured(){return configuredRoute()==='server-auto'}
 function localConfigured(){return LOCAL_ROUTES.has(configuredRoute())}
+function selectedHttpConfigured(){return['ollama','openai-compatible'].includes(configuredRoute())}
 function guideName(system){return system==='living-school'?'Moss':system==='cerbanimo'?'Kamiya':system==='fellowfare'?'Rook':system==='anarchadia'?'Merlin':'Weaveling'}
 function guideMode(system){return system==='living-school'?'Learn':system==='cerbanimo'?'Build':system==='fellowfare'?'Acquire':system==='anarchadia'?'Govern':'Reflect'}
 
@@ -89,6 +90,9 @@ function installAssistant(){
   if(wrappedAssistant===assistant)return true;
   const previous=assistant.respond.bind(assistant);
   const respond=async args=>{
+    // A configured HTTP model and its capability controls already own this
+    // request. Route classification is not evidence that it is unavailable.
+    if(selectedHttpConfigured())return previous(args);
     const route=await classifyForAssistant(args||{});
     if(route?.networkRequired&&!serverAutoConfigured()&&!localConfigured())return handoffResult(args,'structured-request-needs-network-ai');
     try{
@@ -101,7 +105,7 @@ function installAssistant(){
       return handoffResult(args,clean(error?.message||error||'generative-route-failed',900));
     }
   };
-  globalThis.CivweaveAssistantV141=Object.freeze({...assistant,respond,__civweaveGuideForwardPolicyV1:true,forwardFailurePolicyVersion:VERSION,deterministicAnswerFallback:false,guildHandoffOnFailure:true,localProviderPinned:true});
+  globalThis.CivweaveAssistantV141={...assistant,respond,__civweaveGuideForwardPolicyV1:true,forwardFailurePolicyVersion:VERSION,deterministicAnswerFallback:false,guildHandoffOnFailure:true,localProviderPinned:true};
   wrappedAssistant=globalThis.CivweaveAssistantV141;
   return true;
 }
@@ -134,7 +138,7 @@ function installLocalRuntime(){
 function realmApi(){return globalThis.CivweaveRealmSessionIntegrityV237}
 function precedingUser(messages,index){for(let i=index-1;i>=0;i--)if(messages[i]?.role==='user'&&clean(messages[i].text))return clean(messages[i].text,12000);return''}
 function upgradeTerminalFailures(system){
-  if(threadRewrite||serverAutoConfigured()||localConfigured()||!SYSTEMS.has(system))return false;
+  if(threadRewrite||serverAutoConfigured()||localConfigured()||selectedHttpConfigured()||!SYSTEMS.has(system))return false;
   const api=realmApi(),thread=api?.readThread?.(system);if(!thread||!Array.isArray(thread.messages))return false;
   let changed=false;const messages=thread.messages.map((row,index)=>{
     if(row?.role!=='assistant'||row?.provider!=='local-recovery'||row?.queueCancelled)return row;

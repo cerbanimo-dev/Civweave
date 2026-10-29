@@ -1,0 +1,30 @@
+name: Verify Moss native SSE runtime readiness
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - public/app/shared/civweave-model-runtime.js
+      - public/app/local-ai/native-server-guide-fastpath-v1.js
+      - public/app/working-campus-v440.html
+      - scripts/verify-moss-runtime-streaming-readiness-v1.mjs
+      - .github/workflows/verify-moss-runtime-streaming-readiness-v1.yml
+  pull_request:
+    paths:
+      - public/app/shared/civweave-model-runtime.js
+      - public/app/local-ai/native-server-guide-fastpath-v1.js
+      - public/app/working-campus-v440.html
+      - scripts/verify-moss-runtime-streaming-readiness-v1.mjs
+      - .github/workflows/verify-moss-runtime-streaming-readiness-v1.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check public/app/shared/civweave-model-runtime.js
+      - run: node scripts/verify-moss-runtime-streaming-readiness-v1.mjs
+      - run: node scripts/verify-native-termux-streaming-v1.mjs

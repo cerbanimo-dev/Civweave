@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-action-followthrough-v165';
+const VERSION='1.0.5-action-followthrough-v165-material-revisions';
 if(globalThis.CivweaveActionFollowthroughV165?.version===VERSION)return;
 const ACTION_KEY='civweave.realm-actions.v141';
 const ACTIVE_STATES=new Set(['active','published','completed']);
@@ -18,10 +18,14 @@ const actions=()=>{const value=parse(localStorage.getItem(ACTION_KEY),[]);return
 function save(rows){localStorage.setItem(ACTION_KEY,JSON.stringify(rows.slice(0,120)));try{dispatchEvent(new CustomEvent('civweave:actions-changed',{detail:{items:rows}}))}catch{}}
 function latestPending(system){return actions().filter(item=>item?.system===system&&PENDING_STATES.has(item.state)).sort((a,b)=>(Date.parse(b.updatedAt||b.createdAt||0)||0)-(Date.parse(a.updatedAt||a.createdAt||0)||0))[0]||null}
 function explicitApproval(text){const value=clean(text,600);return value.length>0&&value.length<220&&APPROVAL_PATTERNS.some(pattern=>pattern.test(value))}
-function materialItems(text){
-  const raw=clean(text,4000).replace(/\r/g,'');
-  const lines=raw.split(/\n|;/).map(value=>value.replace(/^\s*(?:[-*•]|\d+[.)])\s*/,'').trim()).filter(Boolean);
-  const candidates=lines.length>1?lines:raw.split(',').map(value=>value.trim()).filter(Boolean);
+function materialItems(text,{revision=false}={}){
+  let raw=clean(text,4000).replace(/\r/g,'');
+  const explicit=raw.match(/(?:^|[;:\n])\s*(?:materials?|resources?|supplies)\s*:\s*([^;\n]+)/i);
+  if(explicit)return explicit[1].split(',').map(value=>clean(value,240)).filter(Boolean).slice(0,24);
+  if(revision)return[];
+  raw=raw.replace(/^\s*(?:(?:please|can you|could you|would you)\s+)*(?:(?:create|make|draft|prepare)\s+)?(?:(?:a|an|the)\s+)?(?:manifest|materials? request|trade request)\s*(?::\s*|\s+for\s+)/i,'');
+  const lines=raw.split(/\n|;/).map(value=>value.replace(/^\s*(?:[-*•]|\d+[.)])\s*/,'').trim()).filter(value=>value&&!/^(?:quantity|area|location|pickup area|delivery area|timing|when|budget|exchange|exchange method)\s*:/i.test(value));
+  const candidates=lines.length>1?lines:lines.flatMap(value=>value.split(',')).map(value=>value.trim()).filter(Boolean);
   return candidates.filter(value=>MATERIAL_TERMS.test(value)||/\b\d+\b/.test(value)).map(value=>clean(value,240)).slice(0,24);
 }
 function normalizeFellowFareAction(action,text=''){
@@ -30,7 +34,8 @@ function normalizeFellowFareAction(action,text=''){
   if(!MATERIAL_TERMS.test(source)&&action.fields?.category!=='Materials')return action;
   action.kind='materials-request';
   action.fields={...(action.fields||{}),category:'Materials'};
-  const items=materialItems(source);
+  const revision=source!==clean(action.sourceText,4000)||/^\s*(?:(?:please|can you|could you|would you)\s+)*(?:revise|update|change|edit|modify)\b/i.test(source);
+  const items=revision||!Array.isArray(action.fields.materials)||!action.fields.materials.length?materialItems(source,{revision}):[];
   if(items.length)action.fields.materials=items;
   if(!action.fields.need||/^(other|not yet specified)$/i.test(action.fields.need))action.fields.need=source;
   if(!action.title||/^(resource request|other)$/i.test(action.title)){

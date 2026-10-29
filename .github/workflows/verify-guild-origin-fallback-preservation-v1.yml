@@ -1,0 +1,45 @@
+name: Verify Guild Origin Fallback Preservation
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/service-worker-release-generation-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker.js'
+      - 'scripts/verify-guild-origin-fallback-preservation-v1.mjs'
+      - 'scripts/verify-guild-navigation-resource-fetch-v1.mjs'
+      - 'scripts/test-release-navigation-response-v1.mjs'
+      - 'scripts/test-mobile-guild-auto-update-v1.mjs'
+      - '.github/workflows/verify-guild-origin-fallback-preservation-v1.yml'
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/service-worker-release-generation-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker.js'
+      - 'scripts/verify-guild-origin-fallback-preservation-v1.mjs'
+      - 'scripts/verify-guild-navigation-resource-fetch-v1.mjs'
+      - 'scripts/test-release-navigation-response-v1.mjs'
+      - 'scripts/test-mobile-guild-auto-update-v1.mjs'
+      - '.github/workflows/verify-guild-origin-fallback-preservation-v1.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify offline legacy Guild origin fallback and signed-release isolation
+        run: node scripts/verify-guild-origin-fallback-preservation-v1.mjs
+      - name: Verify browser navigation, cache quota fallback and signed release isolation
+        run: node scripts/verify-guild-navigation-resource-fetch-v1.mjs
+      - name: Verify mobile Guild trust and auto-update contracts
+        run: node scripts/test-mobile-guild-auto-update-v1.mjs
+      - name: Verify redirected origin responses remain valid for browser navigation
+        run: node --test scripts/test-release-navigation-response-v1.mjs
+      - name: Parse service workers
+        run: |
+          node --check public/service-worker-release-generation-v1.js
+          node --check public/service-worker-v203.js
+          node --check public/service-worker.js

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-import('/app/safe-mode-v1.mjs?v=safe-mode-v1')
+import('/app/safe-mode-v1.mjs?v=safe-mode-v12-extensible')
   .then(module=>module.default?.install?.())
   .catch(error=>console.warn('[Civweave S.A.F.E.]',error));
 

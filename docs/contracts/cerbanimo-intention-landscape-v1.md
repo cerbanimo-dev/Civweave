@@ -4,7 +4,7 @@ The Civweave Guild Quest Tracker is the canonical three-tier browser for Civweav
 
 - **Guild = community host record.** A local, nearby, saved, or boosted Civweave community host is presented to people as a Guild.
 - **Quest = Shared intention.** An intention published by a Guild is presented as a Quest.
-- **Quest Map = Intention plan.** The Quest's existing Living School, Cerbanimo, and FellowFare paths are rendered as the three execution lanes of one map.
+- **Quest Map = Intention plan.** The Quest's existing Living School, Cerbanimo, FellowFare, and Anarchadia paths are rendered as the four subsystem lanes of one map.
 
 The user-facing hierarchy is therefore **Guilds → Quests (shared intentions) → Quest Maps**.
 
@@ -12,16 +12,21 @@ The user-facing hierarchy is therefore **Guilds → Quests (shared intentions) �
 
 1. **Guild level** shows live, nearby, saved, boosted, and selected Guilds in the mobile-first 3D carousel. The centered Guild owns the detail card. Swipe, wheel, arrow keys, and direct card selection rotate the rail. Selecting the centered Guild descends to its Quests.
 2. **Quest level** keeps the parent Guild rail visible in a compressed state while the Guild's shared intentions rotate in their own carousel. The selected Quest shows its outcome, progress, and open needs. Selecting it descends to the Quest Map.
-3. **Quest Map level** keeps the selected Quest available as context and renders exactly three execution lanes from the Quest's existing plan paths:
+3. **Quest Map level** keeps the selected Quest available as context and renders four subsystem lanes from the Quest's existing plan paths:
    - **Living School** — canonical `#aeea57`, Learn & Grow.
    - **Cerbanimo** — canonical `#e85dff`, Design & Build.
    - **FellowFare** — canonical `#efb452`, Support & Share.
+   - **Anarchadia** — canonical `#ff3d96`, Agree & Govern.
+
+Unknown subsystem paths remain explicitly labeled under **Unassigned paths**, with their original path title and subsystem identifier. They are never silently routed into Cerbanimo. The mobile map scrolls horizontally when its lanes exceed the viewport.
 
 The tier selector follows Civweave's current palette: Civweave mint for Guilds, Cerbanimo purple for Quests, and FellowFare amber for the Quest Map. House colors remain community identity accents and do not replace realm lane colors.
 
 ## Progress semantics
 
 Quest Map steps are not a second task ledger. Each lane reads the Quest's existing `plan.paths` / `tracks` and uses path/task status plus stored `path.progress` to determine completion. Proof-driven progress events may refresh the view, but the tracker does not award completion by itself.
+
+Shared publication progress is explicitly **member-reported**. A published state or completed-step marker does not establish verified proof, and the published snapshot contains no proof contents. The submission preview shows the exact projected state, path progress, step text/status, completion criteria, and open needs before the member submits. When blank steps are removed from a snapshot, progress indices are remapped to the same remaining source steps rather than changing which step is complete.
 
 Open needs are read directly when a Quest publishes them. When explicit needs are absent, unfinished path steps may be summarized as needs. The tracker must never invent Guilds, Quests, tasks, progress, community activity, titles, descriptions, or House assignments. Missing records render as explicit empty states rather than demo content.
 
@@ -30,13 +35,17 @@ Open needs are read directly when a Quest publishes them. When explicit needs ar
 The tracker uses the same actual Guild identity sources as the Guild Map:
 
 - `/api/hub-map-nodes` is the live directory source and `civweave.hub-map.directory.v1` is its offline cache.
-- `civweave.host-node.selection.v1` identifies this device's selected Guild. Device-local `civweave.intentions.v127` Quests may be attached only to that selected real Guild identity.
+- `civweave.host-node.selection.v1` identifies this device's selected Guild. Device-local `civweave.intentions.v127` Quests remain drafts until a current member explicitly submits an allowlisted snapshot through the canonical Guild publication API. Selecting a Guild must never attach all local drafts to its shared Quest board.
 - `civweave.hub-discovery.v1` remains an accepted source for existing saved/discovered Guild records.
 - `federation-finder.mesh-nodes.v1` remains an accepted source for saved and nearby Civweave mesh records.
 
 Records are merged by their real Guild/node ID. Directory fields such as the Guild's published display name, status, public origin, capacity slots, location, and Rally Point remain authoritative when present. The tracker must not inject a synthetic "Your Civweave Guild" record when no Guild is selected or discoverable.
 
 Existing persistence fields remain valid. The interface calls these communities Guilds; legacy hub/node identifiers and fields remain internal compatibility inputs only and are not canonical user-facing terminology.
+
+Member submission, hosted listing, author revisions, and withdrawal follow `docs/contracts/guild-quest-publication-v1.md`. The browser transport is `CivweaveGuildQuestsV1`; the Tracker keeps its existing three-tier carousel and presents shared records returned by that authority. An unavailable Guild remains an explicit loading/error/offline state, never a successful local-only publication.
+
+Packages without the connected publication client show an explicit unavailable-board state. Lud Mode continues to use its canonical human-authored discovery gate; unknown or AI-generated provenance is not admitted. The v1 publication snapshot does not transfer provenance, so it is not a new Lud content source or a bypass of that gate.
 
 ## Houses remain orthogonal
 
@@ -54,7 +63,7 @@ A House change remains governed. The **Guild House vote** action creates a `civw
 
 ## Anarchadia vote identity badges
 
-Quest Map steps can carry Anarchadia vote references directly. The tracker also reads the governance vault (`civweave-anarchadia-governance-v145`) and `civweave.anarchadia.vote-index.v1`. Each open vote receives a stable color derived from its vote ID. The same numbered/color badge appears on every related step so one governance question can be followed across all three lanes.
+Quest Map steps can carry Anarchadia vote references directly. The tracker also reads the governance vault (`civweave-anarchadia-governance-v145`) and `civweave.anarchadia.vote-index.v1`. Each open vote receives a stable color derived from its vote ID. The same numbered/color badge appears on every related step so one governance question can be followed across all four subsystem lanes.
 
 ## Canonical access and compatibility
 

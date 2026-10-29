@@ -1,0 +1,40 @@
+name: Starling dual local execution hosts
+on:
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - 'public/termux/civweave_starling_host.py'
+      - 'public/app/shared/starling-execution-transport-v1.mjs'
+      - 'public/app/shared/starling-collective-turns-v1.mjs'
+      - 'public/app/starling-lounge-v1.mjs'
+      - 'native/android/civweave-starling-v1/**'
+      - 'scripts/test-starling-dual-host-v1.mjs'
+      - 'scripts/test-starling-termux-host-v1.py'
+      - 'scripts/test-starling-collective-turns-v1.mjs'
+      - '.github/workflows/starling-dual-host-v1.yml'
+  workflow_dispatch:
+jobs:
+  dual-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and JS contracts
+        run: |
+          node --check public/app/shared/starling-execution-transport-v1.mjs
+          node --check public/app/shared/starling-collective-turns-v1.mjs
+          node --check public/app/starling-lounge-v1.mjs
+          node --test scripts/test-starling-dual-host-v1.mjs scripts/test-starling-collective-turns-v1.mjs scripts/test-starling-lounge-contract-v1.mjs
+      - name: Termux Python host and existing Companion contracts
+        run: |
+          python3 scripts/test-starling-termux-host-v1.py
+          python3 scripts/test-termux-companion-v1.py
+      - name: Native integration is source-only
+        run: |
+          test -f native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeBridge.kt
+          test -f native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeWorker.kt

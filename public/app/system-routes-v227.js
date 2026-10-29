@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.167';
+const VERSION='1.0.168';
 const REVISION='five-system-route-contract-v230-shared-navbar-owner';
 const SHELL_REVISION='direct-first-class-routes-v4-shared-navbar-owner';
 const LEGACY_SHELL_PATH='/app/working-campus-v156.html';
@@ -61,6 +61,7 @@ function directUrlFor(id,options={}){
   url.searchParams.set('version',String(options.version||VERSION));
   if(options.source)url.searchParams.set('source',String(options.source));
   if(options.weave)url.searchParams.set('weave',String(options.weave));
+  if(options.path)url.searchParams.set('path',String(options.path));
   if(options.feature)url.searchParams.set('feature',String(options.feature));
   if(options.developer)url.searchParams.set('developer','1');
   if(options.recovery)url.searchParams.set('recovery',String(options.recovery));
@@ -69,9 +70,18 @@ function directUrlFor(id,options={}){
 function shellUrlFor(id,options={}){return directUrlFor(id,options)}
 function shouldUseDirect(){return true}
 function urlFor(id,options={}){return directUrlFor(id,options)}
+function ownedPersistentHost(){
+  try{
+    const host=globalThis.parent,query=new URLSearchParams(globalThis.location?.search||'');
+    if(host&&host!==globalThis&&host.location.origin===globalThis.location?.origin&&query.get('embed')==='1'&&query.get('persistentShell')==='1'&&typeof host.CivweavePersistentSystemShellV1?.navigate==='function'&&host.document.getElementById('cw-persistent-system-stage')?.contentWindow===globalThis)return host;
+  }catch{}
+  return null;
+}
 function navigate(id,options={}){
   const system=routeFor(id)?.id||'civweave';
   authorize();rememberContext(system);
+  const host=ownedPersistentHost();
+  if(host){const owner=host.CivweavePersistentSystemShellV1;if(owner.navigate(system,options)===false)return false;return owner.shellUrl?.(system,options)?.href||urlFor(system,options).href}
   const url=urlFor(system,options);
   if(options.replace)globalThis.location?.replace?.(url.href);else globalThis.location?.assign?.(url.href);
   return url.href;

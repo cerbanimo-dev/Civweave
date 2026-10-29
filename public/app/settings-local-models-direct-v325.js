@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-settings-v325-direct-local-models-stable-actions';
+const VERSION='1.2.3-settings-v325-direct-local-models-qwen-import-owner';
 const LAYER_ID='cw-settings-v320';
 const PANEL_ID='cw-local-models-direct-v325';
 const STYLE_ID='cw-local-models-direct-v325-style';
@@ -8,35 +8,54 @@ const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
 const PACK_STATE_KEY='civweave.local-ai.packs.v1';
 const HEALTH_KEY='civweave.local-ai.health.v286';
+const PERF_KEY='civweave.local-ai.performance.v1';
+const PHONE_IMPORT_KEY='civweave.qwen35-4b.import-progress.v1';
+let phoneImportInFlight=false;
+function phoneImportRecord(phase,message,chunk=0,chunks=0){try{localStorage.setItem(PHONE_IMPORT_KEY,JSON.stringify({phase,text:String(message).slice(0,400),chunk,chunks,at:Date.now()}))}catch{}}
+function phoneImportState(){try{return JSON.parse(localStorage.getItem(PHONE_IMPORT_KEY)||'{}')}catch{return{}}}
 const PREMIER='premier-phone';
 const FAST_E2='gemma4-e2b-it-litert-web';
 const FAST_E4='gemma4-e4b-it-litert-web';
 const FINALIZER_SRC='/app/local-ai/premier-phone-finalizer-v1.js?v=1.0.0-idempotent-existing-components';
-const BUILD_LABEL='Settings v325 · renderer direct-local-v325.2 · stable in-place actions';
+const BUILD_LABEL='Settings v325 · renderer direct-local-v325.4 · Qwen 4B phone-first performance';
 const PACKS=Object.freeze([
   {id:'minimum-spec',label:'Minimum Spec Pack',tier:'MINIMUM',size:'~1.7 GB',summary:'Smallest complete offline voice + chat bundle, with CPU/WASM as the primary text path.',primaryModel:'qwen3-0.6b-q8-wasm'},
-  {id:PREMIER,label:'Premier Phone Pack',tier:'PREMIER PHONE',size:'~6.9 GB',summary:'Current phone pack: Gemma 4 E2B LiteRT for fast work, Gemma 4 E4B LiteRT for deeper work, multilingual speech, and a CPU-safe fallback.',primaryModel:FAST_E2},
+  {id:'qwen-flagship-phone',label:'Legacy mixed-engine phone pack',tier:'LEGACY · NON-GGUF',size:'~19.7 GB core',summary:'Historical LiteRT/ONNX phone package kept only for existing users. GGUF is the new on-device phone-primary path above; this pack does not install GGUF.',primaryModel:'qwen35-4b-litert-web'},
+  {id:PREMIER,label:'Gemma Phone Compatibility Pack',tier:'PHONE ALTERNATE',size:'~6.9 GB',summary:'Alternate Gemma phone-local ladder retained for compatibility, multilingual speech, and a CPU-safe fallback.',primaryModel:FAST_E2},
   {id:'server-quality',label:'Server Quality Pack',tier:'SERVER QUALITY',size:'~13.0 GB',summary:'Higher-quality Guild/server bundle using Civweave’s strongest currently executable local models.',primaryModel:'gemma4-e4b-it-q2f16-mobile'}
 ]);
 const MODELS=Object.freeze([
+  {id:'llama32-3b-instruct-q4f16',label:'Llama 3.2 3B Instruct · JSON compiler trial',tier:'PHONE TEST',size:'~2.4 GB',trial:true},
   {id:'smollm2-135m-instruct-q8-wasm',label:'SmolLM2 135M Instruct',tier:'Phone Tiny',size:'140 MB'},
   {id:'smollm2-360m-instruct-q4f16',label:'SmolLM2 360M Instruct',tier:'Phone Light',size:'272 MB'},
   {id:'qwen3-0.6b-q4f16',label:'Qwen 3 0.6B',tier:'Small',size:'610 MB'},
   {id:'gemma3-1b-it-q4f16',label:'Gemma 3 1B IT',tier:'Standard',size:'884 MB'},
   {id:'qwen3-1.7b-q4f16',label:'Qwen 3 1.7B',tier:'Large',size:'1.5 GB'},
-  {id:'gemma4-e2b-it-q4f16',label:'Gemma 4 E2B IT Q4F16',tier:'Gemma compatibility',size:'compatibility fallback'},
-  {id:'gemma4-e4b-it-q4f16',label:'Gemma 4 E4B IT Q4F16',tier:'Gemma compatibility',size:'compatibility fallback'},
+  {id:'qwen35-4b-litert-web',label:'Qwen 3.5 4B · LiteRT (legacy)',tier:'Legacy browser engine',size:'2.75 GB',browserPackId:'qwen-flagship-phone'},
+  {id:'qwen35-9b-litert-web',label:'Qwen 3.5 9B · LiteRT',tier:'Phone Flagship Max',size:'9.5 GB',browserPackId:'qwen-flagship-phone'},
+  {id:'gemma4-e2b-it-q2f16-mobile',label:'Gemma 4 E2B IT',tier:'Phone Alternate Fast',size:'~2.3 GB',browserPackId:'qwen-flagship-phone'},
   {id:'smollm3-3b-q4f16',label:'SmolLM3 3B',tier:'Mini PC',size:'2.2 GB'},
   {id:'qwen3-4b-q4f16',label:'Qwen 3 4B',tier:'PC 12',size:'2.9 GB'}
 ]);
+const PHONE_COMPANIONS=Object.freeze([
+  Object.freeze({label:'Qwen2.5-Coder-7B-Instruct Q4_K_M',use:'Dedicated coding companion · llama.cpp / Pocket Constellary',url:'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/blob/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf'}),
+  Object.freeze({label:'Local Dream · Stable Diffusion 1.5',use:'Snapdragon NPU image generation companion',url:'https://github.com/xororz/local-dream'}),
+  Object.freeze({label:'Qualcomm AI Hub · Stable Diffusion 1.5',use:'Snapdragon 7 Gen 4 deployment reference',url:'https://aihub.qualcomm.com/mobile/models/stable_diffusion_v1_5'})
+]);
+const MAC_MINI_SETUPS=Object.freeze([
+  Object.freeze({hardware:'M4 / M6 · 16 GB',summary:'Constrained local reasoning/chat. Keep contexts modest and leave headroom for macOS.',links:Object.freeze([{label:'gpt-oss-20B · Ollama',url:'https://ollama.com/library/gpt-oss:20b'}])}),
+  Object.freeze({hardware:'M4 / M6 · 24–32 GB',summary:'Best value dense reasoning tier for planning, architecture, and coding.',links:Object.freeze([{label:'Qwen3.8-27B · MLX 4-bit',url:'https://huggingface.co/mlx-community/Qwen3.8-27B-4bit'}])}),
+  Object.freeze({hardware:'M4 Pro / M5 Pro · 48 GB',summary:'Higher-fidelity planning plus a fast MoE worker; swap models rather than keeping both resident.',links:Object.freeze([{label:'Qwen3.8-27B · MLX 8-bit',url:'https://huggingface.co/mlx-community/Qwen3.8-27B-8bit'},{label:'Qwen3.6-35B-A3B · MLX 4-bit',url:'https://huggingface.co/mlx-community/Qwen3.6-35B-A3B-4bit'}])}),
+  Object.freeze({hardware:'M4 Pro / M5 Pro · 64 GB',summary:'Full cyberdeck tier: high-fidelity planning plus the dedicated 80B-total coding MoE.',links:Object.freeze([{label:'Qwen3.8-27B · MLX 8-bit',url:'https://huggingface.co/mlx-community/Qwen3.8-27B-8bit'},{label:'Qwen3-Coder-Next · MLX 4-bit',url:'https://huggingface.co/mlx-community/Qwen3-Coder-Next-4bit'}])})
+]);
 const ACTION_FILES=Object.freeze([
-  ['/app/local-ai/model-registry-v266.js?v=1.0.115-v302-gemma3-v4',()=>Boolean(globalThis.CivweaveLocalModelRegistryV266?.byId)],
-  ['/app/local-ai/download-manager-v267.js?v=1.0.68-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
+  ['/app/local-ai/model-registry-v266.js?v=1.0.119-v306-qwen35-4b',()=>Boolean(String(globalThis.CivweaveLocalModelRegistryV266?.version||'').startsWith('1.0.119-')&&globalThis.CivweaveLocalModelRegistryV266?.byId?.('qwen35-4b-litert-web'))],
+  ['/app/local-ai/download-manager-v267.js?v=1.0.71-v324-qwen4-chunked-import',()=>Boolean(String(globalThis.CivweaveLocalModelDownloadV266?.version||'').startsWith('1.0.71-')&&globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/download-policy-v278.js?v=1.0.82-v322-explicit-sync',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.autoSyncOnLoad===false)],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true)],
   ['/app/local-ai/specialized-model-capabilities-v1.js?v=1.1.0-model-packs',()=>Boolean(globalThis.CivweaveLocalSpecializedAI?.preferredTts==='supertonic-3-tts-int8')],
-  ['/app/local-ai/model-packs-v1.js?v=1.0.1-browser-guard',()=>Boolean(globalThis.CivweaveLocalModelPacksV1?.byId&&globalThis.CivweaveLocalModelPacksV1?.install)],
-  ['/app/local-ai/browser-pack-download-v1.js?v=1.3.1-worker-import',()=>Boolean(globalThis.CivweaveBrowserPackDownloadV1?.queue&&globalThis.CivweaveBrowserPackDownloadV1?.pickAndImport)]
+  ['/app/local-ai/model-packs-v1.js?v=1.2.0-premium-phone',()=>Boolean(globalThis.CivweaveLocalModelPacksV1?.byId&&globalThis.CivweaveLocalModelPacksV1?.install)],
+  ['/app/local-ai/browser-pack-download-v1.js?v=1.4.0-qwen35-flagship',()=>Boolean(globalThis.CivweaveBrowserPackDownloadV1?.queue&&globalThis.CivweaveBrowserPackDownloadV1?.pickAndImport)]
 ]);
 if(globalThis.CivweaveSettingsLocalDirectV325?.version===VERSION)return;
 let actionPromise=null,gemmaPromise=null;
@@ -54,7 +73,7 @@ function installStyle(){
 #${PANEL_ID}{display:grid;gap:12px}
 #${PANEL_ID} .cw-direct-build{font:800 .72rem/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;color:#90efd8;letter-spacing:.03em;overflow-wrap:anywhere}
 #${PANEL_ID} .cw-direct-note{padding:12px 13px;border:1px solid #77e9cf35;border-radius:12px;background:#081b20;color:#c9fff2}
-#${PANEL_ID} .cw-direct-pack-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#${PANEL_ID} .cw-direct-pack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px}
 #${PANEL_ID} .cw-direct-card,#${PANEL_ID} .cw-direct-model{display:grid;gap:7px;padding:12px;border:1px solid #ffffff20;border-radius:13px;background:#091329}
 #${PANEL_ID} .cw-direct-card[data-active="true"],#${PANEL_ID} .cw-direct-model[data-active="true"]{outline:2px solid #90efd8}
 #${PANEL_ID} .cw-direct-card h4,#${PANEL_ID} .cw-direct-model b{margin:0;color:#fff}
@@ -67,6 +86,11 @@ function installStyle(){
 #${PANEL_ID} details{border-top:1px solid #ffffff17;padding-top:9px}
 #${PANEL_ID} summary{cursor:pointer;color:#eef2ff}
 #${PANEL_ID} .cw-direct-model-list{display:grid;gap:8px;margin-top:9px}
+#${PANEL_ID} .cw-direct-link-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px;margin-top:9px}
+#${PANEL_ID} .cw-direct-link-card{display:grid;gap:7px;padding:11px;border:1px solid #ffffff1c;border-radius:12px;background:#071226}
+#${PANEL_ID} .cw-direct-link-card b{color:#fff}
+#${PANEL_ID} .cw-direct-link-card p{margin:0;color:#bdc9e3;font-size:.84rem}
+#${PANEL_ID} .cw-direct-link-card a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 9px;border:1px solid #ffffff33;border-radius:8px;background:#ffffff0d;color:#dffcf6;text-decoration:none;font-size:.82rem;font-weight:800}
 @media(max-width:820px){#${PANEL_ID} .cw-direct-pack-grid{grid-template-columns:1fr}}
 `;
   document.head?.append(style);
@@ -101,9 +125,21 @@ function packAction(pack,state,active){
 function modelAction(model,state,active){
   const ready=String(state?.status||'')==='ready'||active,value=String(state?.status||'');
   if(ready)return`<button type="button" data-cw-direct-local-action data-local-use="${esc(model.id)}">${active?'Using locally':'Use locally'}</button><button type="button" data-cw-direct-local-action data-local-remove="${esc(model.id)}">Remove</button>`;
+  if(model.id==='qwen35-4b-litert-web')return'<a href="https://huggingface.co/litert-community/Qwen3.5-4B/resolve/main/Qwen3.5-4B_mixed_int4.litertlm" target="_blank" rel="noopener noreferrer">Download 2.75 GB in browser</a><label>Import Qwen 4B file<input type="file" accept=".litertlm" data-local-phone-import="'+esc(model.id)+'"></label>';
+  if(model.id==='qwen35-9b-litert-web')return'<span>9B requires a separate experimental installation; the 4B selection never starts it.</span>';
+  if(model.browserPackId)return`<button type="button" data-cw-direct-local-action data-local-pack-download="${esc(model.browserPackId)}">Download flagship pack</button>`;
   if(['downloading','finalizing'].includes(value))return`<button type="button" data-cw-direct-local-action data-local-cancel="${esc(model.id)}">Cancel</button>`;
   if(['paused','error','aborted'].includes(value))return`<button type="button" data-cw-direct-local-action data-local-download="${esc(model.id)}">Resume</button><button type="button" data-cw-direct-local-action data-local-remove="${esc(model.id)}">Clear</button>`;
   return`<button type="button" data-cw-direct-local-action data-local-download="${esc(model.id)}">Download</button>`;
+}
+function externalLinks(rows){
+  return rows.map(row=>`<a href="${esc(row.url)}" target="_blank" rel="noopener noreferrer">${esc(row.label)}</a>`).join('');
+}
+function phoneCompanionMarkup(){
+  return PHONE_COMPANIONS.map(row=>`<article class="cw-direct-link-card"><b>${esc(row.label)}</b><p>${esc(row.use)}</p><div class="cw-direct-actions"><a href="${esc(row.url)}" target="_blank" rel="noopener noreferrer">Open setup</a></div></article>`).join('');
+}
+function macMiniMarkup(){
+  return MAC_MINI_SETUPS.map(row=>`<article class="cw-direct-link-card"><b>${esc(row.hardware)}</b><p>${esc(row.summary)}</p><div class="cw-direct-actions">${externalLinks(row.links)}</div></article>`).join('');
 }
 function updateHeader(layer=document.getElementById(LAYER_ID)){
   if(!layer)return false;
@@ -114,17 +150,22 @@ function render(layer=document.getElementById(LAYER_ID)){
   if(!layer?.isConnected||layer.hidden)return false;
   installStyle();updateHeader(layer);
   const form=layer.querySelector('[data-cw-settings-form]'),target=form?.querySelector('[data-settings-tab-panel="local-models"]');if(!target)return false;
-  const snap=snapshot();
+  const snap=snapshot();const perf=(()=>{try{return JSON.parse(localStorage.getItem(PERF_KEY)||'{}')}catch{return{}}})();const phoneImport=phoneImportState();
+  const gguf=read('civweave.mobile.gguf-primary.v2',{});
+  const ggufStatus=gguf?.enabled?'Selected GGUF primary: '+esc(gguf.label||gguf.model||'Qwen GGUF'):'No embedded GGUF primary selected';
+  const embeddedGGUFMarkup=`<article class="cw-direct-card" data-gguf-phone-primary><span class="cw-direct-badge">RECOMMENDED · GGUF ONLY</span><h4>On-device GGUF · Phone Primary</h4><p>Download GGUF weights into Civweave. Inference uses bundled browser Wllama/WebGPU/WASM. No LiteRT, no llama-server and no API endpoint.</p><p>${ggufStatus}</p><div class="cw-direct-actions"><button type="button" data-direct-open-gguf>Manage GGUF download and activate</button></div></article>`;
   const packMarkup=PACKS.map(pack=>{
     const state=snap.packs[pack.id]||{},active=Boolean(snap.selection?.active&&state.status==='ready'&&state.selectedModel===snap.selection.id);
-    return`<article class="cw-direct-card" data-pack-id="${esc(pack.id)}" data-active="${active?'true':'false'}"><span class="cw-direct-badge">${esc(pack.tier)}</span><h4>${esc(pack.label)}</h4><p>${esc(pack.summary)}</p><p><b>${esc(statusCopy(state,state.status==='ready'))}</b> · ${esc(pack.size)}</p><div class="cw-direct-actions">${packAction(pack,state,active)}</div></article>`;
+    const premium=pack.id==='qwen-flagship-phone'?'<p><b>Roles:</b> general chat · voice-to-voice · deep logic/planning · architecture/code · optional image generation</p>':'';
+    return`<article class="cw-direct-card" data-pack-id="${esc(pack.id)}" data-active="${active?'true':'false'}"><span class="cw-direct-badge">${esc(pack.tier)}</span><h4>${esc(pack.label)}</h4><p>${esc(pack.summary)}</p>${premium}<p><b>${esc(statusCopy(state,state.status==='ready'))}</b> · ${esc(pack.size)}</p><div class="cw-direct-actions">${packAction(pack,state,active)}</div></article>`;
   }).join('');
   const modelMarkup=MODELS.map(model=>{
     const state=snap.downloads[model.id]||{},active=Boolean(snap.selection?.active&&snap.selection.id===model.id),health=snap.health[model.id],healthText=health?(health.ok?'Last health check passed':'Last health check failed'):'No measured run yet';
-    return`<article class="cw-direct-model" data-model-id="${esc(model.id)}" data-active="${active?'true':'false'}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.size)} · ${esc(statusCopy(state,active))}${active?' · ACTIVE':''}</p><p>${esc(healthText)}</p></div><div class="cw-direct-actions">${modelAction(model,state,active)}</div></article>`;
+    const row=perf[model.id]||{},recent=(Array.isArray(row.samples)?row.samples:[]).slice(-5),speeds=recent.filter(x=>Number.isFinite(x.tokensPerSecond)),ttfts=recent.filter(x=>Number.isFinite(x.ttftMs)),speed=speeds.length?(speeds.reduce((n,x)=>n+x.tokensPerSecond,0)/speeds.length).toFixed(1)+' tokens/s'+(speeds.some(x=>x.approximate)?' (approx)':''):'Not measured yet',ttft=ttfts.length?' · first token '+(ttfts.reduce((n,x)=>n+x.ttftMs,0)/ttfts.length/1000).toFixed(1)+'s':'';
+    return`<article class="cw-direct-model" data-model-id="${esc(model.id)}" data-active="${active?'true':'false'}"><div><b>${esc(model.tier)} · ${esc(model.label)}</b><p>${esc(model.size)} · ${esc(statusCopy(state,active))}${active?' · ACTIVE':''}</p><p>${esc(healthText)}</p><p>Actual speed: ${esc(speed+ttft)}${row.lastPlan?' · '+(row.lastPlan.validated?'Moss structure PASS':'Moss structure failed'):''}</p>${model.id==='qwen35-4b-litert-web'&&phoneImport?.text?`<p data-qwen-phone-import-progress role="status">File import: ${esc(phoneImport.phase==='importing'&&!phoneImportInFlight?'Previous attempt · '+phoneImport.text+' · Reselect the file to resume.':phoneImport.text)}</p>`:''}</div><div class="cw-direct-actions">${modelAction(model,state,active)}</div></article>`;
   }).join('');
-  target.innerHTML=`<section id="${PANEL_ID}" class="cw-clean-panel" data-cw-direct-local-panel><div><h3>AI Downloads</h3><p>Saved choices are rendered immediately by Settings. Runtime and download code loads only when you choose an action.</p></div><div class="cw-direct-build">${esc(BUILD_LABEL)}</div><div class="cw-direct-note">Pack actions now stay on this card. They do not swap in the older lifecycle screen, so download/finalization progress remains attached to the pack you touched.</div><div class="cw-direct-status" data-cw-direct-local-status role="status">Saved local model state loaded.</div><div class="cw-direct-pack-grid">${packMarkup}</div><details><summary><b>Individual models</b></summary><div class="cw-direct-model-list">${modelMarkup}</div></details>${snap.selection?.active?'<div class="cw-direct-actions"><button type="button" data-cw-direct-local-action data-local-disable>Stop using downloaded AI</button></div>':''}</section>`;
-  form.dataset.directLocalModels='v325';layer.dataset.localModelsRenderer='direct-local-v325.2';return true;
+  target.innerHTML=`<section id="${PANEL_ID}" class="cw-clean-panel" data-cw-direct-local-panel><div><h3>AI Downloads</h3><p>Saved choices are rendered immediately by Settings. Runtime and download code loads only when you choose an action.</p></div><div class="cw-direct-build">${esc(BUILD_LABEL)}</div><div class="cw-direct-note">The Premium Phone Pack keeps the executable chat/reasoning and voice stack in Civweave. Dedicated GGUF coding and Snapdragon diffusion remain optional companion installs so they do not compete for phone RAM.</div><div class="cw-direct-status" data-cw-direct-local-status role="status">Saved local model state loaded.</div><div class="cw-direct-pack-grid">${embeddedGGUFMarkup}${packMarkup}</div><details open><summary><b>Premium phone companions</b></summary><p>Optional tools for dedicated coding and local image generation. These links open outside Civweave; they are not claimed as browser-runtime models.</p><div class="cw-direct-link-grid">${phoneCompanionMarkup()}</div></details><details><summary><b>Mac mini / cyberdeck local AI setups</b></summary><p>Apple Silicon model suggestions by unified-memory tier. These are external MLX/Ollama setups, useful for Guild servers, workstations, and portable cyberdecks.</p><div class="cw-direct-link-grid">${macMiniMarkup()}</div></details><div class="cw-direct-note"><b>New: Llama 3.2 3B two-pass test</b><br>Download the ~2.4 GB ONNX model from Individual Civweave models below, then <a href="/app/local-ai/llama32-two-pass-test-v4.html">run constrained JSON compilation</a>. This does not remove your installed Gemma models.</div><details open><summary><b>Individual Civweave models</b></summary><div class="cw-direct-model-list">${modelMarkup}</div></details>${snap.selection?.active?'<div class="cw-direct-actions"><button type="button" data-cw-direct-local-action data-local-disable>Stop using downloaded AI</button></div>':''}</section>`;
+  form.dataset.directLocalModels='v325';layer.dataset.localModelsRenderer='direct-local-v325.5';return true;
 }
 function status(layer,text,error=false){const node=layer?.querySelector?.('[data-cw-direct-local-status]');if(!node)return;node.textContent=String(text||'');node.classList?.toggle?.('cw-direct-error',Boolean(error))}
 function actionDescriptor(button){
@@ -137,7 +178,18 @@ function ensureScript(src,ready,label='Local model action module'){
   return new Promise((resolve,reject)=>{
     const path=new URL(src,location.href).pathname,existing=[...document.scripts].find(node=>{try{return new URL(node.src,location.href).pathname===path}catch{return false}});
     const done=()=>ready?.()?resolve(true):reject(new Error(`${label} loaded without becoming ready.`));
-    if(existing){existing.addEventListener('load',done,{once:true});existing.addEventListener('error',()=>reject(new Error(`${label} could not load.`)),{once:true});queueMicrotask(()=>{if(ready?.())resolve(true)});return}
+    if(existing){
+      if(ready?.())return resolve(true);
+      if(path==='/app/local-ai/model-registry-v266.js'||path==='/app/local-ai/download-manager-v267.js'){
+        // Replace a stale registry on user action; a completed old script will
+        // never fire its load event again. Do not touch caches on view.
+        try{existing.remove()}catch{}
+      }else{
+        existing.addEventListener('load',done,{once:true});
+        existing.addEventListener('error',()=>reject(new Error(`${label} could not load.`)),{once:true});
+        return;
+      }
+    }
     const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveDirectLocalAction='v325';script.onload=done;script.onerror=()=>reject(new Error(`${label} could not load.`));document.head?.append(script);
   });
 }
@@ -196,7 +248,16 @@ async function executeAction(descriptor,button,layer){
     if([FAST_E2,FAST_E4].includes(id)){
       await ensureGemmaRuntime();const handoff=globalThis.CivweaveGemma4BrowserPackCoherenceV1;if(!handoff?.startModelDownload)throw new Error('Gemma 4 browser download controls are unavailable.');return handoff.startModelDownload(id,button);
     }
-    status(layer,`Starting ${spec.label}…`);await m.start(id,{preferBackground:false});status(layer,`${spec.label} download started.`);return true;
+    status(layer,`Starting ${spec.label} · direct streaming transfer…`);
+    await m.start(id,{preferBackground:false,onProgress:progress=>{
+      const loaded=Number(progress?.bytesDownloaded||0),total=Number(progress?.totalBytes||spec.estimatedBytes||0);
+      const pct=total?Math.floor(loaded/total*100):0,file=String(progress?.artifact||'');
+      const state=String(progress?.status||'');
+      if(state==='error'||state==='paused')status(layer,`${spec.label} · ${state} · ${String(progress.error||'')}`,true);
+      else if(state==='ready'){status(layer,`${spec.label} · download complete. Select Use locally.`);if(layer?.isConnected&&!layer.hidden)preserveScroll(layer,()=>render(layer))}
+      else status(layer,`${spec.label} · ${file||'downloading'} · ${pct}% · ${(loaded/1e6).toFixed(1)} / ${(total/1e6).toFixed(1)} MB`);
+    }});
+    status(layer,`${spec.label} · direct download running; the transfer status above updates as bytes arrive. Keep Settings open.`);return true;
   }
   if(descriptor.name==='localCancel'){await m.cancel(id);status(layer,'Download cancelled.');return true}
   if(descriptor.name==='localUse'){
@@ -218,7 +279,38 @@ async function delegateAction(button,layer=document.getElementById(LAYER_ID)){
 function hardGuard(layer=document.getElementById(LAYER_ID)){
   setTimeout(()=>{if(!layer?.isConnected||layer.hidden)return;const form=layer.querySelector('[data-cw-settings-form]'),target=form?.querySelector('[data-settings-tab-panel="local-models"]'),selected=form?.querySelector('[data-settings-tab="local-models"]')?.getAttribute('aria-selected')==='true';if(!selected)return;if(target?.querySelector('[data-local-model-slot-placeholder]')||/Reading saved local model choices/i.test(target?.textContent||''))target.innerHTML=`<section class="cw-clean-panel"><h3>Local models could not open</h3><p>The direct Settings renderer did not replace the loading placeholder.</p><div class="cw-direct-build">${esc(BUILD_LABEL)}</div></section>`},900);
 }
-function onDocumentClick(event){const layer=document.getElementById(LAYER_ID);if(!layer)return;const action=event.target?.closest?.(`#${LAYER_ID} [data-cw-direct-local-action]`);if(action){event.preventDefault();event.stopImmediatePropagation();void delegateAction(action,layer);return}const tab=event.target?.closest?.(`#${LAYER_ID} [data-settings-tab="local-models"]`);if(tab)queueMicrotask(()=>{render(layer);hardGuard(layer)})}
+async function importPhoneQwenDirect(event){
+  // Both the v324 full route and this v325 direct fallback can be loaded in
+  // the same document. Capture only this renderer's own input. Previously this
+  // global capture listener cleared input.value before the v324 change handler
+  // could read files[0], making the import appear to flash and do nothing.
+  const input=event.target?.closest?.('input[data-local-phone-import]');
+  if(!input||!input.closest('#'+PANEL_ID)||phoneImportInFlight)return;
+  const file=input.files?.[0];input.value='';if(!file)return;
+  phoneImportInFlight=true;
+  const layer=document.getElementById(LAYER_ID);
+  try{
+    const id=input.dataset.localPhoneImport;
+    if(id!=='qwen35-4b-litert-web'||file.name!=='Qwen3.5-4B_mixed_int4.litertlm'||file.size!==2754070624)throw Error('Select the complete 2,754,070,624-byte Qwen3.5-4B_mixed_int4.litertlm file.');
+    phoneImportRecord('importing','Importing Qwen 4B as resumable 8 MiB fragments.');status(layer,'Importing Qwen 4B in resumable 8 MiB fragments…');
+    for(const [src,ready]of ACTION_FILES.slice(0,2))await ensureScript(src,ready,'Qwen phone import component');
+    const m=manager(),r=registry(),spec=r?.byId?.(id),artifact=spec?.artifacts?.find(x=>x.required);
+    if(!m||artifact?.sizeBytes!==file.size||artifact.path!==file.name)throw Error('Current Qwen 4B registry/download manager does not match this file.');
+    const {importChunkedFile}=await import('/app/local-ai/llama32-chunked-model-storage-v1.js?v=1');
+    let last=0;
+    await importChunkedFile(await caches.open(m.cache),r.directUrl(spec,artifact.path),file,{onProgress:p=>{
+      if(Date.now()-last>250||p.chunk===p.chunks){last=Date.now();const msg='Qwen 4B '+p.chunk+'/'+p.chunks+' cached fragments';phoneImportRecord('importing',msg,p.chunk,p.chunks);status(layer,msg);}
+    }});
+    const verified=await m.status(id);
+    if(!verified.available)throw Error('Model cache still incomplete after import.');
+    phoneImportRecord('ready','Qwen 4B verified; select Use locally. No GPU inference started.');
+    preserveScroll(layer,()=>render(layer));
+    status(layer,'Qwen 4B verified. Select Use locally; no GPU inference was started.');
+  }catch(error){const msg=String(error?.message||error);phoneImportRecord('error','Import failed: '+msg+' · Reselect the downloaded file to resume retained fragments.');status(layer,msg,true)}
+  finally{phoneImportInFlight=false}
+}
+document.addEventListener('change',event=>void importPhoneQwenDirect(event),true);
+function onDocumentClick(event){const layer=document.getElementById(LAYER_ID);if(!layer)return;if(event.target?.closest?.('[data-direct-open-gguf]')){event.preventDefault();layer.querySelector('[data-settings-tab="general"]')?.click();layer.querySelector('[data-mobile-gguf-panel]')?.scrollIntoView?.({block:'nearest'});return}const action=event.target?.closest?.(`#${LAYER_ID} [data-cw-direct-local-action]`);if(action){event.preventDefault();event.stopImmediatePropagation();void delegateAction(action,layer);return}const tab=event.target?.closest?.(`#${LAYER_ID} [data-settings-tab="local-models"]`);if(tab)queueMicrotask(()=>{render(layer);hardGuard(layer)})}
 function onSettingsOpened(){const layer=document.getElementById(LAYER_ID);if(!layer)return;updateHeader(layer);const selected=layer.querySelector('[data-settings-tab="local-models"]')?.getAttribute('aria-selected')==='true';if(selected){render(layer);hardGuard(layer)}}
 document.addEventListener('click',onDocumentClick,true);
 addEventListener('civweave:model-settings-opened',onSettingsOpened);

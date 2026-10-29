@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.163-five-system-navigation-v232-canonical-rail';
+const VERSION='1.0.165-five-system-navigation-v235-viewport-bounds';
 const NAV_ID='cw-themed-system-nav';
 const MENU_ID='cw-themed-system-nav-menu';
 const STYLE_ID='cw-themed-system-nav-style';
@@ -30,6 +30,8 @@ const FALLBACK=Object.freeze({
   fellowfare:'/app/assets/ai/chat/rook-face-v255.webp',
   anarchadia:'/app/assets/ai/chat/merlin-face-v255.webp'
 });
+/* Full-bleed artwork is independent of the expressive 5x4 sprite atlas. */
+const ART=Object.freeze({civweave:'/app/assets/ai/weaveling.png','living-school':'/app/assets/ai/moss.png',cerbanimo:'/app/assets/ai/kamiya.png',fellowfare:'/app/assets/ai/rook.png',anarchadia:'/app/assets/ai/merlin.png'});
 const EX=Object.freeze({
   civweave:Object.freeze(['neutral','happy','excited','laughing','curious','thinking','confused','surprised','worried','sad','shy','determined','proud','mischievous','sleepy','cheering','waving','pointing','magical','hopeful']),
   'living-school':Object.freeze(['neutral','happy','excited','laughing','curious','thinking','confused','surprised','worried','sad','crying','shy','determined','proud','mischievous','sleepy','cheering','waving','pointing','encouraging']),
@@ -91,7 +93,7 @@ let menuSystem='';
 let hold=null;
 let suppressClickUntil=0;
 let onboardingSystem='';
-let requestedRetry=0;
+let consumedFeature='';
 
 function itemFor(system){return SYSTEMS.find(item=>item.id===system)||null}
 function quickFor(system){const actions=QUICK[system]||[];return actions.some(action=>action.id==='settings')?actions:[...actions,{id:'settings',label:'Settings',hint:'AI pipeline, local models, and preferences'}]}
@@ -104,6 +106,10 @@ function clearEmbedded(){
   delete document.documentElement.dataset.cwThemedCurrent;
   document.body?.style.removeProperty('padding-bottom');
 }
+// Destination activation belongs to shared navigation even when its chrome is
+// hosted by the persistent parent. Async capabilities announce their own readiness.
+installRequestedFeatureLifecycle();
+globalThis.CivweaveFamilyNavigationV178=Object.freeze({version:VERSION,owner:true,domOwner:NAV_ID,menuOwner:MENU_ID,geometryOwner:'responsive-dock-v2',systems:SYSTEMS.map(item=>item.id),routeContract:'system-routes-v227',interaction:'tap-system-hold-shortcuts',holdMilliseconds:HOLD_MS,currentSystem,mount,ensureMounted,syncCurrentSelection,setExpression,quickActions:system=>quickFor(system).map(action=>({...action})),openQuickMenu,closeQuickMenu,activateFeature:launchFeature,applyRequestedFeature});
 if(EMBEDDED){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',clearEmbedded,{once:true}):clearEmbedded();return}
 function currentSystem(){
   const path=location.pathname,query=new URLSearchParams(location.search),found=ROUTES?.identify?.(path);
@@ -120,10 +126,10 @@ function currentSystem(){
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
   const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`
-/* Canonical five-guide rail geometry lives here. Do not reintroduce a compact fallback in another stylesheet. */
-:root{--cw-themed-nav-height:clamp(92px,10vw,100px);--cw-themed-nav-bottom-gap:0px}
+/* Both navigation and its utility row fit inside this one reserved dock. */
+:root{--cw-themed-nav-height:132px;--cw-themed-nav-bottom-gap:0px}
 html{scroll-padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 16px)}
-html.cw-themed-system-nav-active body{padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 12px)!important}
+html.cw-themed-system-nav-active:not([data-persistent-system]) body{padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 12px)!important}
 html.cw-themed-system-nav-active nav.bottom,
 html.cw-themed-system-nav-active .rc-bottom,
 html.cw-themed-system-nav-active .ls-tray,
@@ -134,38 +140,42 @@ html.cw-themed-system-nav-active[data-cw-themed-current="civweave"] details[data
 html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-app{grid-template-rows:54px minmax(0,1fr)!important}
 html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-moss,
 html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-compass{bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 10px)!important}
-#${NAV_ID}{all:unset;box-sizing:border-box;position:fixed!important;z-index:2147483600!important;left:50%!important;right:auto!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + var(--cw-themed-nav-bottom-gap))!important;transform:translateX(-50%)!important;width:min(780px,calc(100vw - 8px))!important;min-width:0!important;height:var(--cw-themed-nav-height)!important;min-height:var(--cw-themed-nav-height)!important;max-height:var(--cw-themed-nav-height)!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;align-items:stretch!important;padding:0!important;margin:0!important;border:1px solid #d6ab4f88!important;border-radius:15px!important;background:linear-gradient(180deg,#17121de8,#0e0b13e8)!important;box-shadow:0 6px 18px #0008!important;overflow:visible!important;contain:layout style!important;isolation:isolate!important;font:inherit!important;color:inherit!important;pointer-events:auto!important}
-#${NAV_ID} .cw-nav-tools{position:absolute;bottom:calc(100% + 64px);left:50%;transform:translateX(-50%);min-height:44px;padding:8px 16px;border:1px solid #d6ab4f88;border-radius:12px;background:#17121d;color:#fff4d6;font:600 13px system-ui;cursor:pointer;white-space:nowrap}
-#${NAV_ID} .cw-themed-system-link{all:unset;box-sizing:border-box;position:relative!important;min-width:0!important;width:100%!important;height:100%!important;display:grid!important;place-items:center!important;border-right:1px solid #d6ab4f38!important;background:color-mix(in srgb,var(--system-shade) 38%,#17131c)!important;box-shadow:inset 0 1px 0 #f6dda044,inset 0 -1px 0 #765018!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;overflow:hidden!important;opacity:.82!important;filter:saturate(.82) brightness(.9)!important;transition:opacity .16s ease,filter .16s ease,transform .16s ease,box-shadow .16s ease!important}
-#${NAV_ID} .cw-themed-system-link:first-child{border-radius:13px 0 0 13px!important}#${NAV_ID} .cw-themed-system-link:last-of-type{border-right:0!important;border-radius:0 13px 13px 0!important}
-#${NAV_ID} .cw-themed-system-link::before{content:"";position:absolute;z-index:-1;inset:3px 2px;border-radius:11px;opacity:.16;background:var(--system-panel);box-shadow:inset 0 0 10px var(--system-glow),0 0 12px var(--system-glow)}
+#${NAV_ID}{all:unset;box-sizing:border-box;position:fixed!important;z-index:2147483600!important;left:50%!important;right:auto!important;top:auto!important;bottom:0!important;transform:translateX(-50%)!important;width:min(900px,calc(100vw - 12px))!important;min-width:0!important;height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;min-height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;max-height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:minmax(0,1fr) 36px!important;gap:4px!important;align-items:stretch!important;padding:6px 6px calc(6px + env(safe-area-inset-bottom))!important;margin:0!important;border:1px solid #d6ab4f88!important;border-radius:14px 14px 0 0!important;background:linear-gradient(180deg,#17121df7,#0e0b13fa)!important;box-shadow:0 -4px 18px #0008!important;overflow:visible!important;contain:layout style!important;isolation:isolate!important;font:inherit!important;color:inherit!important;pointer-events:auto!important}
+#${NAV_ID} .cw-nav-utilities{grid-column:1/-1;grid-row:2;min-width:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;align-items:stretch}
+#${NAV_ID} .cw-nav-tools{grid-column:4;min-width:0;min-height:36px;padding:4px 6px;box-sizing:border-box;border:1px solid #d6ab4f66;border-radius:8px;background:#ffffff0a;color:#fff4d6;font:700 12px/1.1 system-ui;cursor:pointer;touch-action:manipulation;white-space:normal}
+#${NAV_ID} .cw-themed-system-link{all:unset;box-sizing:border-box;position:relative!important;min-width:0!important;width:100%!important;height:100%!important;display:grid!important;place-items:center!important;border-right:1px solid #d6ab4f38!important;background:var(--system-panel)!important;box-shadow:inset 0 1px 0 #f6dda044,inset 0 -1px 0 #765018!important;text-decoration:none!important;cursor:pointer!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important;overflow:hidden!important;opacity:1!important;filter:none!important;transition:opacity .16s ease,filter .16s ease,transform .16s ease,box-shadow .16s ease!important}
+#${NAV_ID} .cw-themed-system-link{grid-row:1;border:1px solid #d6ab4f38!important;border-radius:9px!important}
+#${NAV_ID} .cw-themed-system-link::before{content:"";position:absolute;z-index:0;inset:0;border-radius:inherit;opacity:.72;pointer-events:none;background-image:linear-gradient(180deg,color-mix(in srgb,var(--system-shade) 26%,transparent),color-mix(in srgb,#08070d 46%,transparent)),var(--system-art);background-size:cover;background-position:center;background-repeat:no-repeat;filter:saturate(1.16);transition:opacity .18s ease}
 #${NAV_ID} .cw-themed-system-link::after{content:"";position:absolute;z-index:0;inset:6px 5px;border-radius:11px;opacity:0;pointer-events:none;background:radial-gradient(ellipse at 28% 68%,color-mix(in srgb,var(--system-glow) 42%,transparent) 0 8%,transparent 48%),radial-gradient(ellipse at 72% 35%,color-mix(in srgb,var(--system-glow) 30%,transparent) 0 7%,transparent 45%),linear-gradient(180deg,color-mix(in srgb,var(--system-shade) 34%,transparent),transparent 76%);filter:blur(10px) saturate(1.16);transform:scale(.94);transition:opacity .28s ease,transform .34s ease}
 #${NAV_ID} .cw-themed-system-link[data-sprite-ready="true"]::after{opacity:.74;transform:scale(1.03)}
 #${NAV_ID} .cw-themed-system-link[data-sprite-ready="true"].is-current::after{opacity:.92}
-#${NAV_ID} .cw-themed-system-link.is-current{z-index:2;opacity:1!important;filter:none!important;transform:translateY(-3px)!important;box-shadow:inset 0 0 0 2px var(--system-ring),0 -4px 13px color-mix(in srgb,var(--system-glow) 68%,transparent),0 4px 12px #0008!important}
+#${NAV_ID} .cw-themed-system-link[data-sprite-ready="false"] .cw-themed-system-avatar{display:none!important}
+#${NAV_ID} .cw-themed-system-link.is-current{z-index:2;opacity:1!important;filter:none!important;box-shadow:inset 0 0 0 2px var(--system-ring),0 0 9px color-mix(in srgb,var(--system-glow) 36%,transparent)!important}
 #${NAV_ID} .cw-themed-system-link.is-current::before{opacity:.92}
 #${NAV_ID} .cw-themed-system-link.is-menu-open{z-index:3;opacity:1!important;filter:none!important;box-shadow:inset 0 0 0 2px #fff2b5,0 -4px 15px color-mix(in srgb,var(--system-glow) 72%,transparent)!important}
 #${NAV_ID} .cw-themed-system-link.is-onboarding-highlight{z-index:4;opacity:1!important;filter:none!important;animation:cw-nav-guide-pulse 1.05s ease-in-out infinite alternate}
 #${NAV_ID} .cw-themed-system-link:focus-visible{outline:3px solid #fff8c7!important;outline-offset:-4px!important}
 #${NAV_ID} .cw-themed-system-button{box-sizing:border-box;position:relative;z-index:1;width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:3px 7px;pointer-events:none}
-#${NAV_ID} .cw-themed-system-avatar-wrap{position:relative;flex:0 0 auto;width:84px;height:84px;border-radius:20px;padding:2px;background:linear-gradient(180deg,var(--system-shell),#ffffff99);border:1px solid var(--system-ring);box-shadow:0 2px 8px #0006;overflow:hidden;transition:background .18s ease,box-shadow .18s ease,border-color .18s ease}
+#${NAV_ID} .cw-themed-system-avatar-wrap{position:relative;flex:0 0 auto;width:60px;height:60px;border-radius:12px;padding:2px;background:linear-gradient(180deg,var(--system-shell),#ffffff99);border:1px solid var(--system-ring);box-shadow:0 2px 8px #0006;overflow:hidden;transition:background .18s ease,box-shadow .18s ease,border-color .18s ease}
 #${NAV_ID} .cw-themed-system-avatar-wrap::after{content:"";position:absolute;inset:2px;border-radius:18px;z-index:1;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 58%,color-mix(in srgb,var(--system-update) 94%,white 6%) 0 20%,color-mix(in srgb,var(--system-update) 78%,transparent) 45%,color-mix(in srgb,var(--system-update) 42%,transparent) 68%,transparent 86%);mix-blend-mode:screen;filter:saturate(1.35) brightness(1.15);transition:opacity .18s ease,filter .18s ease}
 #${NAV_ID} .cw-themed-system-link[data-has-update="true"] .cw-themed-system-avatar-wrap{background:linear-gradient(180deg,color-mix(in srgb,var(--system-update) 58%,white 42%),color-mix(in srgb,var(--system-update) 36%,var(--system-shell) 64%));border-color:color-mix(in srgb,var(--system-update) 78%,white 22%);box-shadow:inset 0 0 18px color-mix(in srgb,var(--system-update) 58%,transparent),0 0 18px color-mix(in srgb,var(--system-update) 82%,transparent),0 2px 8px #0006}
 #${NAV_ID} .cw-themed-system-link[data-has-update="true"] .cw-themed-system-avatar-wrap::after{opacity:.92}
 #${NAV_ID} .cw-themed-system-link[data-has-update="true"].is-current .cw-themed-system-avatar-wrap::after{opacity:1}
-#${NAV_ID} .cw-themed-system-fallback,#${NAV_ID} .cw-themed-system-avatar{position:absolute;inset:2px;display:block;width:calc(100% - 4px);height:calc(100% - 4px);border-radius:18px}
+#${NAV_ID} .cw-themed-system-fallback,#${NAV_ID} .cw-themed-system-avatar{position:absolute;inset:2px;display:block;width:calc(100% - 4px);height:calc(100% - 4px);border-radius:7px}
 #${NAV_ID} .cw-themed-system-fallback{object-fit:cover;object-position:center;z-index:0}
 #${NAV_ID} .cw-themed-system-avatar{z-index:2;background-image:var(--system-sheet);background-size:500% 400%;background-position:calc(var(--sprite-col)*25%) calc(var(--sprite-row)*33.333333%);background-repeat:no-repeat;filter:saturate(.98) brightness(1.02);transition:transform .18s ease,filter .18s ease}
 #${NAV_ID} .cw-themed-system-link:hover .cw-themed-system-avatar,#${NAV_ID} .cw-themed-system-link.is-current .cw-themed-system-avatar{filter:saturate(1.06) brightness(1.05);transform:scale(1.04)}
 #${NAV_ID} .cw-themed-system-monogram{display:none!important}
-#${NAV_ID} .cw-themed-system-copy{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+#${NAV_ID} .cw-themed-system-copy{display:grid;gap:2px;min-width:0;text-align:left;color:#fff8e5;text-shadow:0 2px 5px #06040a,0 1px 2px #06040a;font:800 13px/1.1 system-ui,sans-serif}
+#${NAV_ID} .cw-themed-system-copy b{font-size:10px;font-weight:600;opacity:.72}
+#${NAV_ID} .cw-themed-system-copy small{font:inherit;white-space:normal;overflow-wrap:normal}
 #${MENU_ID}{all:unset;box-sizing:border-box;position:fixed!important;z-index:2147483640!important;top:auto!important;right:auto!important;min-width:220px!important;width:min(282px,calc(100vw - 20px))!important;height:auto!important;min-height:0!important;max-height:min(60dvh,480px)!important;overflow:auto!important;padding:8px!important;border:1px solid #f1cf7a88!important;border-radius:14px!important;background:linear-gradient(160deg,#17121ff7,#090b12fa)!important;box-shadow:0 18px 55px #000c,0 0 24px color-mix(in srgb,var(--menu-glow,#fff) 22%,transparent)!important;color:#fff!important;font:13px/1.35 system-ui,sans-serif!important;overscroll-behavior:contain!important;pointer-events:auto!important;contain:layout style paint!important}
 #${MENU_ID}[hidden]{display:none!important}#${MENU_ID} .cw-nav-menu-head{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:9px;padding:6px 7px 9px;border-bottom:1px solid #ffffff17}#${MENU_ID} .cw-nav-menu-head img{width:38px;height:38px;border:1px solid #f1cf7a88;border-radius:11px;object-fit:cover}#${MENU_ID} .cw-nav-menu-head b,#${MENU_ID} .cw-nav-menu-head small{display:block}#${MENU_ID} .cw-nav-menu-head small{margin-top:2px;color:#aebac9;font-size:10px}
 #${MENU_ID} .cw-nav-menu-list{display:grid;gap:4px;padding-top:7px}#${MENU_ID} [role="menuitem"]{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:10px 11px;border:1px solid transparent;border-radius:10px;background:#ffffff08;color:#fff;text-align:left;cursor:pointer}#${MENU_ID} [role="menuitem"]:hover,#${MENU_ID} [role="menuitem"]:focus-visible{border-color:#f1cf7a77;background:#ffffff13;outline:0}#${MENU_ID} [role="menuitem"] span{min-width:0}#${MENU_ID} [role="menuitem"] b,#${MENU_ID} [role="menuitem"] small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#${MENU_ID} [role="menuitem"] small{margin-top:2px;color:#9eacbe;font-size:10px}#${MENU_ID} [role="menuitem"] i{font-style:normal;color:#f2d57f;font-weight:900}
 #cwp215-launcher,#cw-radio-suggestion-v233{bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 10px)!important}
 @keyframes cw-nav-guide-pulse{from{transform:translateY(-2px) scale(1)}to{transform:translateY(-5px) scale(1.03)}}
-@media(max-width:680px){:root{--cw-themed-nav-height:clamp(88px,22vw,96px);--cw-themed-nav-bottom-gap:0px}#${NAV_ID}{bottom:0!important;height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;min-height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;max-height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important;padding-bottom:env(safe-area-inset-bottom)!important;box-sizing:border-box!important;width:calc(100vw - 6px)!important}#${NAV_ID} .cw-themed-system-button{gap:4px;padding:2px 4px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:76px;height:76px}}
-@media(max-width:430px){:root{--cw-themed-nav-height:clamp(80px,22vw,88px);--cw-themed-nav-bottom-gap:0px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:68px;height:68px}#${MENU_ID}{width:calc(100vw - 16px)!important;max-height:56dvh!important}}
+@media(max-width:680px){:root{--cw-themed-nav-height:146px}#${NAV_ID}{grid-template-rows:minmax(0,1fr) 44px!important;width:100vw!important;border-left:0!important;border-right:0!important;gap:4px!important;padding-left:max(4px,env(safe-area-inset-left))!important;padding-right:max(4px,env(safe-area-inset-right))!important}#${NAV_ID} .cw-themed-system-button{flex-direction:column;gap:3px;padding:3px 2px}#${NAV_ID} .cw-themed-system-avatar-wrap{width:52px;height:52px;border-radius:11px}#${NAV_ID} .cw-themed-system-copy{text-align:center;font-size:11px;line-height:1.05}#${NAV_ID} .cw-themed-system-copy b{display:none}#${NAV_ID} .cw-nav-tools{font-size:11px;min-height:44px}}
+@media(max-width:430px){#${NAV_ID} .cw-themed-system-copy{font-size:10px}#${MENU_ID}{width:calc(100vw - 16px)!important;max-height:56dvh!important}}
 @media(prefers-reduced-motion:reduce){#${NAV_ID} .cw-themed-system-link,#${NAV_ID} .cw-themed-system-link::after,#${NAV_ID} .cw-themed-system-avatar,#${NAV_ID} .cw-themed-system-avatar-wrap,#${NAV_ID} .cw-themed-system-avatar-wrap::after{transition:none}#${NAV_ID} .cw-themed-system-link.is-onboarding-highlight{animation:none}}
 `;
   document.head.append(style);
@@ -207,7 +217,7 @@ function ensureMenu(){
   if(!menu.isConnected)document.body.append(menu);return menu;
 }
 function positionMenu(link){
-  if(!menu||!link)return;const rect=link.getBoundingClientRect(),width=Math.min(282,Math.max(220,innerWidth-20)),left=Math.max(8,Math.min(innerWidth-width-8,rect.left+rect.width/2-width/2)),bottom=Math.max(8,Math.min(innerHeight-8,innerHeight-rect.top+8));menu.style.width=`${width}px`;menu.style.left=`${Math.round(left)}px`;menu.style.bottom=`${Math.round(bottom)}px`;
+  if(!menu||!link)return;const rect=link.getBoundingClientRect(),width=menu.getBoundingClientRect().width,left=Math.max(8,Math.min(innerWidth-width-8,rect.left+rect.width/2-width/2)),bottom=Math.max(8,Math.min(innerHeight-8,innerHeight-rect.top+8));menu.style.left=`${Math.round(left)}px`;menu.style.bottom=`${Math.round(bottom)}px`;
 }
 function openQuickMenu(system,{focus=true}={}){
   const item=itemFor(system),link=linkFor(system);if(!item||!link)return false;ensureMenu();closeQuickMenu({restoreFocus:false});menuSystem=system;menu.style.setProperty('--menu-glow',item.glow);menu.setAttribute('aria-label',`${item.character} shortcuts`);
@@ -235,44 +245,49 @@ function activateLocalFeature(system,feature){
 }
 function launchFeature(system,feature){closeQuickMenu({restoreFocus:false});if(feature==='settings'&&openSettings())return true;if(system===currentSystem()&&activateLocalFeature(system,feature))return true;return routeSystem(system,feature)}
 function clearRequestedFeature(){const url=new URL(location.href);if(!url.searchParams.has('feature'))return;url.searchParams.delete('feature');history.replaceState(history.state,'',`${url.pathname}${url.search}${url.hash}`)}
-function applyRequestedFeature(){const feature=String(new URLSearchParams(location.search).get('feature')||'').trim();if(!feature)return true;const system=currentSystem();if(!system)return false;if(activateLocalFeature(system,feature)){clearRequestedFeature();requestedRetry=0;return true}if(requestedRetry<1){requestedRetry+=1;setTimeout(()=>applyRequestedFeature(),720)}return false}
+function applyRequestedFeature(){const feature=String(new URLSearchParams(location.search).get('feature')||'').trim();if(!feature)return true;const system=currentSystem();if(!system)return false;const request=`${system}:${feature}`;if(EMBEDDED&&consumedFeature===request)return true;if(activateLocalFeature(system,feature)){if(EMBEDDED)consumedFeature=request;else clearRequestedFeature();return true}return false}
+function installRequestedFeatureLifecycle(){
+  for(const name of ['pageshow','popstate','civweave:working-campus-runtime-ready','civweave:living-school-workbench-ready','civweave:realm-console-ready','civweave:guide-chat-ready'])addEventListener(name,applyRequestedFeature);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyRequestedFeature,{once:true});else applyRequestedFeature();
+}
 function syncChrome(){syncCurrentSelection();syncUnread();syncOnboarding()}
 function mount(){
+  if(EMBEDDED){clearEmbedded();return false}
   const current=currentSystem();if(!current)return false;if(!document.body){document.addEventListener('DOMContentLoaded',mount,{once:true});return false}
   installStyle();document.documentElement.classList.add('cw-themed-system-nav-active');document.documentElement.dataset.cwThemedCurrent=current;document.documentElement.dataset.familyNavigationOwner='themed-system-nav-v178';
   let nav=document.getElementById(NAV_ID);
   if(!nav){
-    ROUTES?.authorize?.();nav=document.createElement('nav');nav.id=NAV_ID;nav.dataset.navigationRevision=VERSION;nav.dataset.shellRevision='v306-current-quest';nav.dataset.geometryRevision='canonical-tall-v1';nav.dataset.spriteFogRevision='load-aware-v1';nav.dataset.updateSignalRevision='sprite-backlight-v1';nav.setAttribute('aria-label','Civweave five-guide rail');
-    nav.innerHTML=SYSTEMS.map(item=>{const selected=item.id===current;return `<a class="cw-themed-system-link${selected?' is-current':''}" data-system="${item.id}" href="${href(item)}" target="_top" aria-label="${item.character} · ${item.label}. Tap to open ${item.label}. Press and hold for shortcuts." aria-haspopup="menu" aria-expanded="false"${selected?' aria-current="page"':''} style="--system-glow:${item.glow};--system-update:${item.update};--system-shade:${item.shade};--system-label:${item.labelColor};--system-shell:${item.shell};--system-ring:${item.ring};--system-panel:${item.panel};--system-sheet:url('${SHEETS[item.id]}');--sprite-col:0;--sprite-row:0"><span class="cw-themed-system-button"><span class="cw-themed-system-avatar-wrap"><img class="cw-themed-system-fallback" src="${FALLBACK[item.id]}" alt=""><span class="cw-themed-system-avatar" role="img" aria-label="${item.character}"></span></span><span class="cw-themed-system-monogram" aria-hidden="true">${item.monogram}</span><span class="cw-themed-system-copy"><b>${item.character}</b><small>${item.label}</small></span></span></a>`}).join('');
+    ROUTES?.authorize?.();nav=document.createElement('nav');nav.id=NAV_ID;nav.dataset.navigationRevision=VERSION;nav.dataset.shellRevision='v306-current-quest';nav.dataset.geometryRevision='responsive-dock-v2';nav.dataset.spriteFogRevision='load-aware-v1';nav.dataset.artRevision='full-tile-portraits-all-breakpoints-v1';nav.dataset.updateSignalRevision='sprite-backlight-v1';nav.setAttribute('aria-label','Civweave five-guide rail');
+    nav.innerHTML=SYSTEMS.map(item=>{const selected=item.id===current;return `<a class="cw-themed-system-link${selected?' is-current':''}" data-system="${item.id}" href="${href(item)}" target="_top" aria-label="${item.character} · ${item.label}. Tap to open ${item.label}. Press and hold for shortcuts." aria-haspopup="menu" aria-expanded="false"${selected?' aria-current="page"':''} style="--system-glow:${item.glow};--system-update:${item.update};--system-shade:${item.shade};--system-label:${item.labelColor};--system-shell:${item.shell};--system-ring:${item.ring};--system-panel:${item.panel};--system-art:url('${ART[item.id]}');--system-sheet:url('${SHEETS[item.id]}');--sprite-col:0;--sprite-row:0"><span class="cw-themed-system-button"><span class="cw-themed-system-avatar-wrap"><img class="cw-themed-system-fallback" src="${FALLBACK[item.id]}" alt=""><span class="cw-themed-system-avatar" role="img" aria-label="${item.character}"></span></span><span class="cw-themed-system-monogram" aria-hidden="true">${item.monogram}</span><span class="cw-themed-system-copy"><b>${item.character}</b><small>${item.label}</small></span></span></a>`}).join('');
     nav.addEventListener('pointerdown',event=>{const link=event.target.closest?.('a[data-system]');if(link)startHold(event,link)});nav.addEventListener('pointermove',moveHold);nav.addEventListener('pointerup',finishHold);nav.addEventListener('pointercancel',cancelHold);
     nav.addEventListener('contextmenu',event=>{const link=event.target.closest?.('a[data-system]');if(!link)return;event.preventDefault();cancelHold();suppressClickUntil=Date.now()+500;openQuickMenu(link.dataset.system,{focus:true})});
     nav.addEventListener('keydown',event=>{const link=event.target.closest?.('a[data-system]');if(!link)return;if(event.key==='ContextMenu'||event.key==='ArrowUp'||(event.key==='Enter'&&event.shiftKey)){event.preventDefault();openQuickMenu(link.dataset.system,{focus:true})}});
     nav.addEventListener('click',event=>{const link=event.target.closest?.('a[data-system]');if(!link)return;event.preventDefault();if(Date.now()<suppressClickUntil)return;closeQuickMenu({restoreFocus:false});const target=String(link.dataset.system||'');syncCurrentSelection(target);routeSystem(target)});document.body.append(nav);
-  }else{nav.dataset.navigationRevision=VERSION;nav.dataset.geometryRevision='canonical-tall-v1';nav.dataset.spriteFogRevision='load-aware-v1';nav.dataset.updateSignalRevision='sprite-backlight-v1'}
+  }else{nav.dataset.navigationRevision=VERSION;nav.dataset.geometryRevision='responsive-dock-v2';nav.dataset.spriteFogRevision='load-aware-v1';nav.dataset.artRevision='full-tile-portraits-all-breakpoints-v1';nav.dataset.updateSignalRevision='sprite-backlight-v1'}
+  let utilities=nav.querySelector('.cw-nav-utilities');
+  if(!utilities){utilities=document.createElement('div');utilities.className='cw-nav-utilities';utilities.setAttribute('role','group');utilities.setAttribute('aria-label','Shared tools');nav.append(utilities)}
   if(!nav.querySelector('.cw-nav-tools')){
     const tools=document.createElement('button');tools.type='button';tools.className='cw-nav-tools';tools.textContent='Tools & shortcuts';tools.setAttribute('aria-haspopup','menu');tools.setAttribute('aria-controls',MENU_ID);
-    tools.addEventListener('click',()=>openQuickMenu(currentSystem(),{focus:true}));nav.append(tools);
+    tools.addEventListener('click',()=>openQuickMenu(currentSystem(),{focus:true}));utilities.append(tools);
   }
-  ensureMenu();for(const item of SYSTEMS)armSpriteFog(item.id);syncChrome();for(const item of SYSTEMS)if(!linkFor(item.id)?.dataset.expression)setExpression(item.id,'neutral','boot');hydrate();void ensureStateMapper().then(hydrate);requestAnimationFrame(()=>applyRequestedFeature());return true;
+  ensureMenu();for(const item of SYSTEMS)armSpriteFog(item.id);syncChrome();for(const item of SYSTEMS)if(!linkFor(item.id)?.dataset.expression)setExpression(item.id,'neutral','boot');hydrate();void ensureStateMapper().then(hydrate);return true;
 }
 function ensureMounted(){if(EMBEDDED){clearEmbedded();return false}return mount()}
 
 addEventListener('civweave:subsystem-avatar-state',event=>applySubsystem(event.detail||{}));
 addEventListener('civweave:subsystem-avatar-state-ready',hydrate);
 addEventListener('civweave:avatar-expression',event=>applyChat(event.detail||{}));
-addEventListener('civweave:system-route-changed',()=>syncCurrentSelection());
+addEventListener('civweave:system-route-changed',()=>{cancelHold();closeQuickMenu({restoreFocus:false});syncCurrentSelection()});
 addEventListener('civweave:guide-chat-state',syncUnread);
 addEventListener('civweave:realm-guide-thread-changed',syncUnread);
-addEventListener('civweave:guide-chat-ready',()=>{syncUnread();applyRequestedFeature()});
-addEventListener('civweave:living-school-workbench-ready',applyRequestedFeature);
+addEventListener('civweave:guide-chat-ready',syncUnread);
 addEventListener('civweave:onboarding-step',event=>{onboardingSystem=String(event.detail?.system||'');syncOnboarding()});
 for(const name of ['civweave:onboarding-completed','civweave:onboarding-skipped'])addEventListener(name,()=>{onboardingSystem='';syncOnboarding()});
 addEventListener('storage',event=>{if(String(event.key||'').startsWith('civweave.guide-thread.'))syncUnread()});
-addEventListener('popstate',()=>{syncCurrentSelection();applyRequestedFeature()});addEventListener('hashchange',()=>syncCurrentSelection());
-addEventListener('pageshow',()=>{ensureMounted();syncUnread();applyRequestedFeature()});addEventListener('focus',()=>{ensureMounted();syncUnread()});
+addEventListener('popstate',()=>syncCurrentSelection());addEventListener('hashchange',()=>syncCurrentSelection());
+addEventListener('pageshow',()=>{ensureMounted();syncUnread()});addEventListener('focus',()=>{ensureMounted();syncUnread()});
 addEventListener('resize',()=>{if(menu&&!menu.hidden&&menuSystem)positionMenu(linkFor(menuSystem))},{passive:true});
 document.addEventListener('pointerdown',event=>{if(menu?.hidden)return;if(menu?.contains(event.target)||document.getElementById(NAV_ID)?.contains(event.target))return;closeQuickMenu({restoreFocus:false})},true);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureMounted,{once:true});else ensureMounted();setTimeout(ensureMounted,120);setTimeout(ensureMounted,900);
 
-globalThis.CivweaveFamilyNavigationV178=Object.freeze({version:VERSION,owner:true,domOwner:NAV_ID,menuOwner:MENU_ID,geometryOwner:'canonical-tall-v1',systems:SYSTEMS.map(item=>item.id),routeContract:'system-routes-v227',interaction:'tap-system-hold-shortcuts',holdMilliseconds:HOLD_MS,currentSystem,mount,ensureMounted,syncCurrentSelection,setExpression,quickActions:system=>quickFor(system).map(action=>({...action})),openQuickMenu,closeQuickMenu,activateFeature:launchFeature,applyRequestedFeature});
 })();
