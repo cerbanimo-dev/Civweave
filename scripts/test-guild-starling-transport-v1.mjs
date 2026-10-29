@@ -30,7 +30,7 @@ function harness(){
 }
 test('authenticated Starling transport enforces three slots across concurrent members and refuses forged completion',async()=>{
  const h=harness(); assert.equal((await h.call()).status,200);
- const made=await Promise.all(Array.from({length:4},(_,i)=>h.call('reserve',{idempotencyKey:'test:'+i,title:'Test '+i},token('fictional-member-'+i))));
+ const made=await Promise.all(Array.from({length:4},(_,i)=>h.call('reserve',{idempotencyKey:'test:'+i,title:'Test '+i,mode:'autonomous'},token('fictional-member-'+i))));
  assert.equal(made.filter(x=>x.status===201).length,3); assert.equal(made.filter(x=>x.status===409).length,1);
  const first=made[0].data.line;
  const forged=await h.call('complete',{id:first.id,expectedRevision:first.revision,verifiedCompletion:{authority:'canonical-quest-proof',state:'completed',receiptId:'forged'}},token('fictional-member-0'));
@@ -55,8 +55,8 @@ test('mobile starter nodes share the same authenticated Guild reservations and r
   const a=await capacity.joinResident({requestedNodeId:'fictional-mobile-guild-a',userId:'fictional-alice',credentialHash:'fictional-alice-credential',origin:'https://mobile.example.test'});
   const b=await capacity.joinResident({requestedNodeId:'fictional-mobile-guild-b',userId:'fictional-bobby',credentialHash:'fictional-bobby-credential',origin:'https://mobile.example.test'});
   const call=async(member,action='',input)=>{const r=await mobile.default.fetch(new Request('https://mobile.example.test/api/node/starling'+(action?'/'+action:'')+'?nodeId='+member.nodeId,{method:input?'POST':'GET',headers:{authorization:'Bearer '+member.token,'content-type':'application/json'},...(input?{body:JSON.stringify(input)}:{})}),env,{});return{status:r.status,data:await r.json()}};
-  for(let i=0;i<3;i++)assert.equal((await call(i%2?a:b,'reserve',{idempotencyKey:'mobile:'+i,title:'Line '+i})).status,201);
-  assert.equal((await call(b,'reserve',{idempotencyKey:'mobile:4',title:'Fourth'})).status,409);
+  for(let i=0;i<3;i++)assert.equal((await call(i%2?a:b,'reserve',{idempotencyKey:'mobile:'+i,title:'Line '+i,mode:'autonomous'})).status,201);
+  assert.equal((await call(b,'reserve',{idempotencyKey:'mobile:4',title:'Fourth',mode:'autonomous'})).status,409);
   await call(a,'passport',{passportId:'AC-FICTIONAL-A',skills:[{skillId:'repair',name:'Repair',xp:12}],consent:'guild-planning'});
   const snapshot=await call(b);assert.equal(snapshot.data.activeCount,3);assert.equal(snapshot.data.guildId,'fictional-mobile-guild');
   assert.equal(snapshot.data.context.knownMemberCount,2);assert.equal(snapshot.data.context.reportedPassportHeroes,1);assert.equal(snapshot.data.context.heroCount,null);
