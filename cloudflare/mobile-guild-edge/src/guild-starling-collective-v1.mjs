@@ -62,6 +62,7 @@ export async function executeGuildStarlingAction(storage, member, action, input 
   if (['intention-found', 'intention-vote', 'intention-adopt'].includes(action)) fail('Founder authority and human intention voting must be verified by the Guild governance owner.', 403, 'STARLING_GOVERNANCE_REQUIRED');
   if (!['status', 'reserve', 'propose', 'confirm', 'abandon', 'complete', 'passport', 'passport-revoke', 'intention-propose'].includes(action)) fail('Unsupported Collective action.', 405);
   const reservationHash = action === 'reserve' ? await digest(`${who.guildId}\n${who.userId}\n${identifier(input.idempotencyKey, 'idempotency key')}`) : null;
+  const reservationMode=action==='reserve'?(input.mode==='autonomous'?'autonomous':input.mode==null||input.mode==='manual'?'manual':fail('Invalid Collective creation mode.')):null;
   const proposed = action === 'propose' ? projectGuildQuest(input.quest) : null;
   const proposalHash = proposed ? await digest(JSON.stringify(proposed)) : null;
   const skills = action === 'passport' ? normalizeSkills(input.skills) : null;
@@ -86,13 +87,13 @@ export async function executeGuildStarlingAction(storage, member, action, input 
     if (action === 'reserve') {
       const title = clean(input.title, 240); if (!title) fail('A Collective Quest line title is required.');
       const id = `starling-line:${reservationHash}`, key = lineKey(id), prior = await tx.get(key);
-      if (prior) { if (prior.title !== title) fail('That idempotency key already names a different Quest line.', 409); return { ok: true, line: clone(prior), idempotent: true }; }
+      if (prior) { if (prior.title !== title||prior.creationMode!==reservationMode) fail('That idempotency key already names a different Quest line or mode.', 409); return { ok: true, line: clone(prior), idempotent: true }; }
       const events = currentEvents(state.creationEvents, at);
-      if (state.activeIds.length >= STARLING_POLICY.maxActiveLines) fail('Complete or abandon an active Collective Quest line before creating another.', 409, 'STARLING_ACTIVE_LIMIT');
-      if (events.length >= STARLING_POLICY.maxCreatedPerWindow) fail('This Guild has reached its six Collective Quest lines per rolling 24 hours. Abandoning a line does not refund creation allowance.', 429, 'STARLING_CREATION_LIMIT');
+      if (reservationMode==='autonomous'&&state.activeIds.length >= STARLING_POLICY.maxActiveLines) fail('Complete or abandon an active autonomous Collective project before creating another.', 409, 'STARLING_ACTIVE_LIMIT');
+      if (reservationMode==='autonomous'&&events.length >= STARLING_POLICY.maxCreatedPerWindow) fail('This Guild has reached six autonomous project creations in the rolling last 24 hours. Manual plans remain unlimited.', 429, 'STARLING_CREATION_LIMIT');
       if (state.retainedLines >= STARLING_POLICY.maxRetainedLines) fail('Collective Quest history storage is full. Existing work remains available.', 409, 'STARLING_HISTORY_LIMIT');
-      const line = { schema: 'civweave.guild-starling-line.v1', id, ...who, title, state: 'reserved', revision: 1, origin: 'ai-generated', createdAt: iso, updatedAt: iso };
-      state.activeIds.push(id); state.recentIds = [id, ...state.recentIds.filter(value => value !== id)].slice(0, 40); state.creationEvents = [...events, at]; state.retainedLines++;
+      const line = { schema: 'civweave.guild-starling-line.v1', id, ...who, title, state: 'reserved', revision: 1, origin: reservationMode==='autonomous'?'ai-generated-autonomous':'human-requested-ai-draft', creationMode:reservationMode, createdAt: iso, updatedAt: iso };
+      if(reservationMode==='autonomous')state.activeIds.push(id); state.recentIds = [id, ...state.recentIds.filter(value => value !== id)].slice(0, 40); state.creationEvents = reservationMode==='autonomous'?[...events, at]:events; state.retainedLines++;
       await saveLine(line); return { ok: true, line: clone(line), idempotent: false };
     }
     if (action === 'passport') {
