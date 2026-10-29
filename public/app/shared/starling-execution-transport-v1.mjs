@@ -74,6 +74,7 @@ export function createStarlingHostTransport({kind,token='',nativePort,fetcher=fe
     kind,
     status:()=>request('GET','/v1/starling/status'),
     submit:job=>request('POST','/v1/starling/jobs',validateStarlingJob(job)),
+    listJobs:()=>request('GET','/v1/starling/jobs'),
     job:jobId=>{if(!JOB.test(jobId))throw new TypeError('Invalid job ID.');return request('GET','/v1/starling/jobs/'+jobId)},
     cancel:jobId=>{if(!JOB.test(jobId))throw new TypeError('Invalid job ID.');return request('POST','/v1/starling/jobs/'+jobId+'/cancel')},
     schedule:input=>request('POST','/v1/starling/schedule',validateStarlingSchedule(input))
