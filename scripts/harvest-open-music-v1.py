@@ -65,7 +65,7 @@ def request_json(url: str, attempts: int = 3) -> Any:
         try:
             request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
             with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
-                return json.loads(response.read().decode("utf-8"))
+                return json.loads(response.read().decode("utf-8", errors="replace"))
         except Exception as exc:  # network failures are recorded per source/query
             last = exc
             if attempt + 1 < attempts:
