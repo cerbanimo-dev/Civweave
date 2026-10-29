@@ -366,6 +366,8 @@ def build_outputs(records: list[dict], failures: list[dict], config: dict) -> di
         record["candidate_id"] = candidate_id(record)
         record["quality_score"] = quality_score(record)
     records.sort(key=lambda row: (-row["quality_score"], row["provider"], row["title"].lower()))
+    max_tracks = max(1, min(300, int(config.get("max_library_tracks") or 300)))
+    records = records[:max_tracks]
 
     lookup = {}
     for record in records:
@@ -402,7 +404,8 @@ def build_outputs(records: list[dict], failures: list[dict], config: dict) -> di
     catalog = {"schema": "civweave.open-music-catalog.v1", "built_at": built_at, "record_count": len(records), "failure_count": len(failures), "failures": failures, "provider_counts": dict(Counter(row["provider"] for row in records)), "records": records}
     manifest = {"schema": "civweave.open-music-lazy-manifest.v1", "built_at": built_at, "entry_count": len(records), "entries": [{"candidate_id": row["candidate_id"], "title": row["title"], "artist": row["artist"], "source_url": row["source_url"], "license": row["license"], "attribution": row["attribution"], "files": row["files"], "content_hash": None, "hash_state": "compute-sha256-on-cache", "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"} for row in records]}
     daily = {"schema": "civweave.open-music-daily-batch.v1", "built_at": built_at, "candidate_count": len(batch), "candidates": batch}
-    summary = {"schema": "civweave.open-music-harvest-summary.v1", "built_at": built_at, "records": len(records), "daily_candidates": len(batch), "providers": dict(Counter(row["provider"] for row in records)), "failures": len(failures)}
+    target = max(1, int(config.get("target_unique_tracks") or 250))
+    summary = {"schema": "civweave.open-music-harvest-summary.v1", "built_at": built_at, "records": len(records), "target_unique_tracks": target, "target_reached": len(records) >= target, "daily_candidates": len(batch), "providers": dict(Counter(row["provider"] for row in records)), "failures": len(failures)}
     for name, payload in (("policy.json", policy), ("catalog.json", catalog), ("lazy-manifest.json", manifest), ("daily-batch.json", daily), ("summary.json", summary)):
         (OUTPUT_DIR / name).write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return summary
