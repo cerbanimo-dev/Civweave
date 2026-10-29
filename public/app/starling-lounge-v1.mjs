@@ -112,7 +112,14 @@ async function refresh(){
     state.snapshot=guildQuestBeatSnapshot({guildId:packet.guildId,publications:all});
     // No authoritative human-author validator or live tool registry is installed
     // here yet. Never fabricate matched opportunities from public text alone.
-    state.opportunities=discoverGuildOpportunities({snapshot:state.snapshot,capabilities:[],verifyHumanPublisher:()=>false});
+    const memberRows=new Map(all.filter(p=>p?.schema==='civweave.guild-quest-publication.v1'&&p.status==='published'&&p.guildId===packet.guildId&&typeof p.authorUserId==='string').map(p=>[p.id,p]));
+    // The connected Quest publication owner derives authorUserId from a
+    // verified current Guild-member session; Collective personas have no
+    // member identities. This is suggestion provenance, not claim authority.
+    state.opportunities=discoverGuildOpportunities({snapshot:state.snapshot,capabilities:[{id:'writing',enabled:true},{id:'project-planning',enabled:true}],verifyHumanPublisher:({guildId,userId,publicationId})=>{
+      const entry=memberRows.get(publicationId);
+      return guildId===packet.guildId&&Boolean(entry&&entry.authorUserId===userId&&userId);
+    }});
     state.status=cursor?'partial':'synced';
   }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
@@ -252,7 +259,19 @@ async function ensureWorker(){
     mesh:state.turnMesh,
     turnService:service,
     founder:mobile.mobileGuildStatus,
-    withExclusiveLock:(name,action)=>navigator.locks.request(name,{mode:'exclusive',ifAvailable:true},lock=>lock?action():{status:'another-tab-active',executed:0})
+    withExclusiveLock:(name,action)=>navigator.locks.request(name,{mode:'exclusive',ifAvailable:true},lock=>lock?action():{status:'another-tab-active',executed:0}),
+    readTaskOpportunities:async guildId=>{
+      const guild=state.guild,client=globalThis.CivweaveGuildQuestsV1;
+      if(!guild||guild.id!==guildId||!client?.sessionForGuild?.(guild))return[];
+      return state.worker.discover(guildId,{
+        guild,questClient:client,
+        capabilities:[{id:'writing',enabled:true},{id:'project-planning',enabled:true}],
+        // The authenticated node derives every publisher from current
+        // Guild membership. This is only authority for an offer to assist,
+        // never for claiming or executing a human's task.
+        verifyHumanPublisher:({guildId:scoped,userId})=>scoped===guildId&&typeof userId==='string'&&userId.length>0
+      });
+    }
   });
   return state.worker;
 }
