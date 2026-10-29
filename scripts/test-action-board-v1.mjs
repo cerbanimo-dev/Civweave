@@ -60,3 +60,12 @@ test('normalization rejects corrupt and duplicate personal action ids',()=>{
   assert.equal(items[1].status,'inbox');
   assert.equal(normalizeAction({status:'done',title:'Ok'},NOW).completedAt,NOW);
 });
+
+
+test('explicit Quest IDs keep Focus identity stable when beats are reordered',()=>{
+  const p={id:'focus-quest',state:'active',paths:[{id:'path-one',status:'active',steps:[
+    {id:'step-a',title:'First',status:'ready'},{id:'step-b',title:'Second',status:'ready'}]}]};
+  const first=projectPlanActions([p],NOW).find(x=>x.title==='Second').key;
+  p.paths[0].steps.reverse();
+  assert.equal(projectPlanActions([p],NOW).find(x=>x.title==='Second').key,first);
+});
