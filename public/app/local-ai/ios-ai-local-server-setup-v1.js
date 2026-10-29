@@ -2,7 +2,7 @@
 // download, provider switch or network request occurs when Settings opens.
 (()=>{
 'use strict';
-const VERSION='1.0.0-ios-ai-local-openai-sse';
+const VERSION='1.0.1-ios-ai-local-openai-sse-stream-timeout';
 if(globalThis.CivweaveIOSAiLocalSetupV1?.version===VERSION)return;
 const DEFAULT_BASE='http://127.0.0.1:11434';
 const APP_URL='https://apps.apple.com/us/app/ai-local/id6741479958';
@@ -67,6 +67,7 @@ async function streamTest(base,model,{fetcher=fetch,onToken}={}){
   const contentType=response.headers?.get?.('content-type')||'';
   if(!/text\/event-stream/i.test(contentType))throw new Error('ai.local did not return text/event-stream; use its /v1/chat/completions endpoint, not /api/chat.');
   const reader=response.body.getReader(),decoder=new TextDecoder();
+  let expired=false;const streamTimer=setTimeout(()=>{expired=true;void reader.cancel('stream-timeout').catch(()=>{})},180000);
   let buffer='',answer='',deltas=0,sawDone=false,bytes=0;
   function processFrame(frame){
     const event=frame.split(/\r?\n/).find(line=>line.startsWith('event:'))?.slice(6).trim()||'';
@@ -91,7 +92,8 @@ async function streamTest(base,model,{fetcher=fetch,onToken}={}){
       for(const frame of frames)processFrame(frame);
     }
     buffer+=decoder.decode();if(buffer.trim())processFrame(buffer);
-  }finally{try{reader.releaseLock()}catch{}}
+  }finally{clearTimeout(streamTimer);try{reader.releaseLock()}catch{}}
+  if(expired)throw new Error('The ai.local SSE stream timed out after three minutes. Keep ai.local open and try a smaller model. Nothing was activated.');
   if(!sawDone||!deltas||!answer.trim())throw new Error('The server did not complete a real streamed answer with [DONE] and visible text. Nothing was activated.');
   return{model:id,endpoint:root+'/v1',deltas,answer:clean(answer.trim(),180),streamed:true};
 }
