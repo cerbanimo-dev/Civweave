@@ -64,7 +64,7 @@ test('signed daily generation cap is enforced even across restarts',async()=>{
 });
 test('unfinished durable started receipt blocks automatic retry after interruption',async()=>{
  const h=harness();await h.worker.enable('garden',{confirmConsent:()=>true,intervalMinutes:15,dailyLimit:2});
- await h.mesh.createObject({id:'starling-work-receipt:garden:run1:started',kind:'civweave.starling-collective-work-receipt.v1',consent:'group',audience:['guild:garden'],payload:{schema:'civweave.starling-work-receipt.v1',guildId:'garden',runId:'run1',status:'started',at:new Date(h.nowRef.value).toISOString()}});
+ await h.mesh.createObject({id:'starling-work-receipt:garden:run1:started',kind:'civweave.starling-collective-work-receipt.v1',consent:'group',audience:['guild:garden'],payload:{schema:'civweave.starling-work-receipt.v1',guildId:'garden',policyRevision:1,runId:'run1',status:'started',at:new Date(h.nowRef.value).toISOString()}});
  assert.equal((await h.worker.tick('garden')).status,'interrupted-review-required');
  assert.equal(h.calls.length,0);
 });
