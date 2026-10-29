@@ -13,7 +13,7 @@ async function setup({safe=false, records=[record('one'),record('two')],failAudi
   w.Response=Response;w.Blob=Blob;w.AbortController=AbortController;
   Object.defineProperty(w.crypto,'subtle',{value:webcrypto.subtle});
   w.URL.createObjectURL=()=> 'blob:qa-local-audio';w.URL.revokeObjectURL=()=>{};
-  w.fetch=async (url,options={})=>{calls.push({url:String(url),options});if(String(url).includes('catalog.json'))return Response.json({records});if(failAudio)throw new Error('QA offline');return new Response(new Uint8Array([73,68,51,4]),{headers:{'content-type':'audio/mpeg'}})};
+  w.fetch=async (url,options={})=>{calls.push({url:String(url),options});if(String(url).includes('lazy-manifest.json'))return Response.json({schema:'civweave.open-music-lazy-manifest.v1',entries:[]});if(String(url).includes('catalog.json'))return Response.json({records});if(failAudio)throw new Error('QA offline');return new Response(new Uint8Array([73,68,51,4]),{headers:{'content-type':'audio/mpeg'}})};
   const cache={match:async key=>store.get(String(key))?.clone(),put:async(key,response)=>{store.set(String(key),response.clone())},delete:async key=>store.delete(String(key))};
   w.caches={open:async()=>cache};
   w.HTMLMediaElement.prototype.play=function(){plays++;this.dispatchEvent(new w.Event('play'));return Promise.resolve()};
@@ -35,7 +35,7 @@ test('radio opens direct music without fetching media or autoplay; extensions le
   assert.equal(x.api.mode(),'direct');assert.equal(x.calls.length,0);
   x.api.open();await x.settle();
   assert.equal(x.w.document.querySelectorAll('audio').length,1);
-  assert.equal(x.plays,0);assert.equal(x.calls.filter(c=>!c.url.includes('catalog.json')).length,0);
+  assert.equal(x.plays,0);assert.equal(x.calls.filter(c=>!c.url.includes('catalog.json')&&!c.url.includes('lazy-manifest.json')).length,0);
   assert.match(x.w.document.querySelector('[data-radio-body]').textContent,/Track one/);
   assert.equal(x.w.document.querySelector('[data-radio-persistent-suggestion]'),null);
   assert.equal(x.w.document.querySelector('audio').getAttribute('preload'),'none');
