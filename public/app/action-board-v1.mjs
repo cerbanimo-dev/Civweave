@@ -160,12 +160,12 @@ function installLauncher(){
   button.addEventListener('click',()=>open(button));head.append(button);return true;
 }
 function installMenuAction(){
-  const menu=document.querySelector('#cw-home-menu-v1 .cw-home-menu-actions');
+  const menu=document.querySelector('#cw-working-campus-home-menu-v1 .cw-home-menu-actions');
   if(!menu||menu.querySelector('[data-cw-action-board-menu]'))return;
   const button=document.createElement('button');button.className='cw-home-menu-action';button.type='button';
   button.dataset.cwActionBoardMenu='true';button.innerHTML='<span>Ready Now</span><small>Capture actions and see what is possible next.</small>';
   button.addEventListener('click',()=>{
-    document.querySelector('#cw-home-menu-v1 .cw-home-menu-close')?.click();open(button);
+    document.querySelector('#cw-working-campus-home-menu-v1 .cw-home-menu-close')?.click();open(button);
   });menu.insertBefore(button,menu.firstChild);
 }
 function boot(){installLauncher();installMenuAction();}
