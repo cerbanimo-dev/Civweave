@@ -13,6 +13,10 @@ assert.equal(request.privacy.styleDetectionForbidden, true);
 assert.equal(request.privacy.retainRawPacket, false);
 assert.ok(request.rubric.some(row => /Never infer AI authorship from style/.test(row)));
 assert.equal(routeProvenanceReview(sample, analysis, { allowModelReview: true }), 'model');
+assert.equal(routeProvenanceReview(sample, analysis, {allowModelReview:false}),'deterministic','a clean receipt should not require a model when cryptographic verification is sufficient');
+assert.equal(routeProvenanceReview({...sample,reviewLane:'human'},analysis,{allowModelReview:false}),'human','explicit human review remains authoritative');
+assert.equal(routeProvenanceReview(sample,{...analysis,outcome:'anomalous',anomalyCount:1,anomalies:[{code:'untrusted-origin',severity:'medium'}]},{allowModelReview:false}),'human','anomalous receipts cannot bypass review when no model is available');
+
 
 const severe = { outcome: 'anomalous', anomalies: [{ code: 'ai-attribution-incomplete', severity: 'high' }] };
 assert.equal(routeProvenanceReview(sample, severe, { allowModelReview: true }), 'human');
