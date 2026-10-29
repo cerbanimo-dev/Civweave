@@ -1,5 +1,6 @@
 import {VERSION,STORAGE_KEY,OUTBOX_KEY,newDraft,validateDraft,livingSchoolPlan,guildBundle,normaliseSource,normaliseMedia,externalUrl,videoEmbed,downloadableJson} from './living-library-seedling-core-v1.mjs';
 import {stageManualDraft,stageBundleForReview} from './living-library-seedling-bridge-v1.mjs';
+import {exportSeedlingEpub} from './living-library-seedling-epub-v1.mjs';
 
 const el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const read=(key,f)=>{try{return JSON.parse(localStorage.getItem(key))||f}catch{return f}};
@@ -64,6 +65,17 @@ function mediaPreview(medium,container){
   else{const link=document.createElement('a');link.href=medium.url;link.textContent='Watch linked video';link.target='_blank';link.rel='noopener noreferrer';figure.append(link)}
  }
  const caption=document.createElement('figcaption');caption.textContent=[medium.title,medium.credit,medium.rights].filter(Boolean).join(' · ');figure.append(caption);container.append(figure)
+}
+async function exportForX4Pro(){
+ if(!valid())return;
+ try{
+  const bytes=exportSeedlingEpub(draft);
+  const title=(draft.title||'learning-journey').replace(/[^a-z0-9_-]+/gi,'-').replace(/^-|-$/g,'').slice(0,70)||'seedling';
+  const url=URL.createObjectURL(new Blob([bytes],{type:'application/epub+zip'}));
+  const a=document.createElement('a');a.href=url;a.download='Seedling-'+title+'.epub';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),10_000);
+  status('Exported a reflowable EPUB for CrossPoint Reader on the X4 Pro. External image/video URLs are preserved as links, not offline assets. Copy the downloaded EPUB to the device’s microSD card.');
+ }catch(error){status('EPUB export failed: '+String(error.message||error))}
 }
 function output(filename,data){
  const blob=new Blob([downloadableJson(data)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);
@@ -231,6 +243,7 @@ el('validate').addEventListener('click',valid);
 el('stage-moss').addEventListener('click',()=>stageForMoss());
 el('export-plan').addEventListener('click',()=>{if(valid())output('seedling-living-school-plan.json',livingSchoolPlan(draft))});
 el('export-bundle').addEventListener('click',()=>{if(valid())output('seedling-guild-learning-bundle.json',guildBundle(draft))});
+el('export-x4pro').addEventListener('click',exportForX4Pro);
 el('send-guild').addEventListener('click',sendGuild);
 el('refresh-guild').addEventListener('click',refreshGuildInbox);el('reset').addEventListener('click',reset);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)renderGuild()});
