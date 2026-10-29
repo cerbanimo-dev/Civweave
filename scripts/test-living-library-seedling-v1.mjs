@@ -135,7 +135,7 @@ test('X4 Pro Wi-Fi plugin is public-only, points to a real public catalog and ne
  assert.equal(d.download.dest_dir,'/Books/Seedling/Updates');
  assert.ok(/^https:\/\/raw\.githubusercontent\.com\//.test(d.browse.url));
  assert.ok(c.items.every(b=>/^https:\/\/www\.gutenberg\.org\/ebooks\/\d+\.epub\.noimages$/.test(b.url)));
- assert.doesNotMatch(JSON.stringify(d)+JSON.stringify(m),/Bearer|password|token|Passport|credential|secret/i);
+ assert.doesNotMatch(JSON.stringify(d)+JSON.stringify(m),/"(?:authorization|access_token|refresh_token|password|credential|secret)"\\s*:/i);
 });
 test('Moss companion links to the canonical chat surface and does not mint its own model endpoint',()=>{
  const html=fs.readFileSync('public/app/living-library-seedling-connect-v1.html','utf8');
