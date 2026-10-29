@@ -119,7 +119,7 @@ test('Moss companion only uses canonical logged-in chat and never handles Passpo
  assert.deepEqual(calls[1],['submit','Help me build a garden Learning Journey','living-school',{skipAddress:true}]);
  assert.equal(getMossThread(frame)[0].text,'Moss response');
  assert.match(transcript(result.thread),/Moss response/);
- assert.doesNotMatch(JSON.stringify(result),'sensitive-secret');
+ assert.doesNotMatch(JSON.stringify(result),/sensitive-secret/);
  await assert.rejects(()=>sendToMoss({},'Hello'),/Sign in/);
 });
 test('X4 Pro Wi-Fi plugin is public-only, points to a real public catalog and never carries credentials',()=>{
