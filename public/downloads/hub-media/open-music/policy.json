@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-policy.v1",
-  "built_at": "2026-09-22T10:15:34Z",
+  "built_at": "2026-10-29T16:20:42Z",
   "accepted_licenses": [
     "CC-BY",
     "CC-BY-SA",
@@ -26,8 +26,8 @@
   },
   "vocal_required": true,
   "instrumental_only_rejected": true,
-  "minimum_teeth_score": 2,
-  "selection_rule": "Every published candidate has verified vocals and lyrical substance; instrumental-only candidates are rejected.",
+  "minimum_teeth_score": 1,
+  "selection_rule": "Source license and vocal metadata are checked before discovery. Genre and vocal tags are signals, not listening or lyric audits. Only hand-seeded recordings were manually reviewed; other recordings remain unreviewed candidates and are excluded from S.A.F.E. playback.",
   "discovery_provider_scope": [
     "ccmixter"
   ]

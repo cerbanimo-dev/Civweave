@@ -137,13 +137,14 @@ try{dispatchEvent(new CustomEvent('civweave:radio-agent-ready',{detail:{version:
 (()=>{
 'use strict';
 
-const VERSION='1.1.1-direct-audio-v2';
+const VERSION='1.2.0-direct-open-radio-v1';
 const LAUNCHER_ID='cw-radio-station-launcher-v1';
 const PANEL_ID='cw-radio-station-panel-v1';
 const STYLE_ID='cw-radio-station-surface-v1-style';
 const MODE_KEY='civweave.radio.playback-mode.v1';
 const SAFE_KEY='civweave.safe-mode.v1';
 const CATALOG_PATH='/downloads/hub-media/open-music/starter-catalog.json';
+const STREAM_MANIFEST_PATH='/downloads/hub-media/open-music/lazy-manifest.json';
 const AUDIO_CACHE='civweave.radio.offline-audio.v1';
 const MAX_AUDIO_BYTES=16*1024*1024;
 const PALETTES=Object.freeze({civweave:['#cfabed','#21152e'],'living-school':['#a1dc79','#14251c'],cerbanimo:['#c8a2ff','#241735'],fellowfare:['#ffc463','#2b2114'],anarchadia:['#ff90c2','#2e1626']});
@@ -174,6 +175,9 @@ let pendingSeek=null;
 let objectUrl='';
 let isPlaying=false;
 let statusText='Choose a track to listen.';
+let searchTerm='';
+let shuffleEnabled=false;
+const recentTrackIds=[];
 let started=false;
 const savedIds=new Set();
 const busyIds=new Set();
@@ -233,17 +237,32 @@ function normalizeRecord(row){
   const systems=[...new Set([row.playlist_id,...(row.playlist_matches||[]).map(item=>item.playlist_id)].filter(id=>SYSTEMS.includes(id)))];
   return Object.freeze({id,title:clean(row.title,240),artist:clean(row.artist,240),url:href,source,licenseUrl,license:clean(license.label||license.spdx,100),credits:clean(row.attribution?.credit_line||row.attribution?.creator||row.artist,1200),bytes,sha256:clean(file.sha256||row.content_hash,64),systems,safeAudit:row.safeAudit==='SAFE-PASS-V1',changes:clean(row.attribution?.changes||'Unmodified source recording.',200)});
 }
+function normalizeStreamRecord(row){
+  const license=row?.license||{},file=(row?.files||[]).find(item=>/\.mp3(?:\?|$)/i.test(item?.url||''));
+  if(row?.explicit===true||row?.vocal_verified!==true||row?.instrumental_only===true||!row?.candidate_id||!file||!['CC-BY','CC-BY-SA','CC0','PUBLIC-DOMAIN'].includes(license.spdx)||license.redistribution!==true||license.commercial_use!==true||!clean(license.evidence))return null;
+  let url;try{url=new URL(file.url)}catch{return null}
+  if(url.protocol!=='https:'||url.hostname!=='ccmixter.org'||!url.pathname.startsWith('/content/')||!url.pathname.toLowerCase().endsWith('.mp3'))return null;
+  const source=safeUrl(row.source_url),licenseUrl=safeUrl(String(license.url||'').replace(/^http:\/\/creativecommons\.org\//,'https://creativecommons.org/')),bytes=Number(file.bytes)||0;
+  if(!source||!licenseUrl||bytes<=0||bytes>MAX_AUDIO_BYTES||!/^https:\/\/ccmixter\.org\/files\//.test(source)||!/^https:\/\/creativecommons\.org\//.test(licenseUrl))return null;
+  const systems=[...new Set([row.playlist_id,...(row.playlist_matches||[]).map(item=>item.playlist_id)].filter(id=>SYSTEMS.includes(id)))];
+  return Object.freeze({id:clean(row.candidate_id,120),title:clean(row.title,240),artist:clean(row.artist,240),url:url.href,source,licenseUrl,license:clean(license.label||license.spdx,100),credits:clean(row.attribution?.creator||row.artist,1200),bytes,sha256:'',systems,safeAudit:false,streamOnly:true,changes:row.curation==='hand-seeded'?'Unmodified CC-licensed recording; streaming only.':row.curation==='web-source-candidate'?'Source-page CC-BY candidate · vocal and lyric listening review pending.':row.curation==='vocal-pool-unreviewed'?'Vocal-tag candidate · full-song and lyric review pending.':row.curation==='genre-discovered'?'Genre-matched candidate · lyric review pending.':'Themed metadata candidate · lyric review pending.'});
+}
 function directTracksFor(system=currentSystem){return catalog.filter(row=>!safeModeEnabled()||row.safeAudit).sort((a,b)=>Number(b.systems.includes(system))-Number(a.systems.includes(system)))}
 async function loadCatalog(){
   if(catalogPromise)return catalogPromise;
   catalogPromise=(async()=>{
     try{
-      const response=await fetch(CATALOG_PATH,{cache:'force-cache'});if(!response.ok)throw new Error(`Catalog unavailable (${response.status}).`);
-      const packet=await response.json();if(!Array.isArray(packet.records))throw new Error('Invalid music catalog.');
-      const unique=new Map();for(const row of packet.records.slice(0,100)){const track=normalizeRecord(row);if(track&&!unique.has(track.id))unique.set(track.id,track)}
+      const unique=new Map();let received=false;
+      const verified=await fetch(CATALOG_PATH,{cache:'force-cache'});
+      if(verified.ok){const packet=await verified.json();if(Array.isArray(packet.records)){received=true;for(const row of packet.records){const track=normalizeRecord(row);if(track&&!unique.has(track.id))unique.set(track.id,track)}}}
+      try{
+        const response=await fetch(STREAM_MANIFEST_PATH,{cache:'no-store'});
+        if(response.ok){const packet=await response.json();if(packet.schema==='civweave.open-music-lazy-manifest.v1'&&Array.isArray(packet.entries)){received=true;for(const row of packet.entries.slice(0,350)){const track=normalizeStreamRecord(row);if(track&&!unique.has(track.id))unique.set(track.id,track);if(unique.size>=300)break}}}
+      }catch(error){console.warn('[Civweave Radio] Remote library unavailable; using verified local catalog.',error)}
+      if(!received)throw new Error('No open music catalog available.');
       catalog=[...unique.values()];catalogError='';catalogLoaded=true;
-      if(globalThis.caches)try{const cache=await caches.open(AUDIO_CACHE);await Promise.all(catalog.map(async track=>{if(await cache.match(track.url))savedIds.add(track.id)}))}catch{}
-    }catch(error){catalogError='Music catalog could not be loaded. Reopen the station to retry.';catalogPromise=null}
+      if(globalThis.caches)try{const cache=await caches.open(AUDIO_CACHE);await Promise.all(catalog.filter(track=>!track.streamOnly).map(async track=>{if(await cache.match(track.url))savedIds.add(track.id)}))}catch{}
+    }catch(error){catalogError='Music catalog could not be loaded. Select Retry to load it again.';catalogLoaded=true;catalogPromise=null}
     render();return catalog;
   })();return catalogPromise;
 }
@@ -254,7 +273,7 @@ function stopTrack(){playbackToken++;cancelSeek();audio?.pause();audio?.removeAt
 async function playTrack(id){
   if(!audio)ensureSurface();
   const track=directTracksFor().find(row=>row.id===id);if(!track){status('This track is unavailable in the current station.');return false}
-  const token=++playbackToken;cancelSeek();audio.pause();revokeObjectUrl();currentTrack=track;status(`Loading ${track.title}…`);updatePlaybackUi();
+  const token=++playbackToken;cancelSeek();audio.pause();revokeObjectUrl();currentTrack=track;recentTrackIds.unshift(track.id);if(recentTrackIds.length>12)recentTrackIds.length=12;status(`Loading ${track.title}…`);updatePlaybackUi();
   try{
     let source=track.url;
     if(globalThis.caches)try{const cached=await(await caches.open(AUDIO_CACHE)).match(track.url);if(cached){const blob=await cached.blob();if(token!==playbackToken)return false;objectUrl=URL.createObjectURL(blob);source=objectUrl;savedIds.add(track.id)}}catch{}
@@ -263,7 +282,7 @@ async function playTrack(id){
     isPlaying=true;status(`Playing ${track.title}${savedIds.has(track.id)?' · saved offline':''}.`);renderTrackList();return true;
   }catch(error){if(token===playbackToken){isPlaying=false;status('Playback could not start. Try Play again, or save the track while online.')}return false}
 }
-function nextTrack(direction=1){const rows=directTracksFor();if(!rows.length)return false;const index=rows.findIndex(row=>row.id===currentTrack?.id);return playTrack(rows[index<0?(direction>0?0:rows.length-1):(index+direction+rows.length)%rows.length].id)}
+function nextTrack(direction=1){const rows=directTracksFor();if(!rows.length)return false;const index=rows.findIndex(row=>row.id===currentTrack?.id);if(shuffleEnabled&&direction>0&&rows.length>1){let pool=rows.filter(row=>row.id!==currentTrack?.id&&!recentTrackIds.includes(row.id));if(!pool.length){recentTrackIds.length=0;pool=rows.filter(row=>row.id!==currentTrack?.id)}const picked=pool[Math.floor(Math.random()*pool.length)];return playTrack(picked.id)}return playTrack(rows[index<0?(direction>0?0:rows.length-1):(index+direction+rows.length)%rows.length].id)}
 async function togglePlayback(){if(!currentTrack)return playTrack(directTracksFor()[0]?.id);if(isPlaying){audio.pause();isPlaying=false;status('Paused.');return true}try{await audio.play();isPlaying=true;status(`Playing ${currentTrack.title}.`);return true}catch{status('Playback could not start. Try selecting the track again.');return false}}
 async function verifiedAudio(track,signal){
   const response=await fetch(track.url,{cache:'no-store',signal});if(signal.aborted||!response.ok||response.type==='opaque')throw new Error('Audio unavailable.');
@@ -299,6 +318,7 @@ function loadSeekSource(source,signal){
 async function seekTrack(value){
   if(!audio||!currentTrack||!Number.isFinite(audio.duration))return false;
   const target=Math.min(audio.duration,Math.max(0,Number(value)||0));
+  if(currentTrack.streamOnly){try{for(let i=0;i<audio.seekable.length;i++)if(target>=audio.seekable.start(i)&&target<=audio.seekable.end(i)){audio.currentTime=target;updatePlaybackUi();return true}}catch{}status('Seeking is unavailable on this source stream.');return false}
   if(pendingSeek&&pendingSeek.token===playbackToken&&pendingSeek.track.id===currentTrack.id){pendingSeek.target=target;updatePlaybackUi();return pendingSeek.promise}
   if(canSeekTo(target)){audio.currentTime=target;updatePlaybackUi();return true}
   const request={token:++playbackToken,track:currentTrack,target,wasPlaying:isPlaying,controller:new AbortController(),promise:null};
@@ -320,6 +340,7 @@ async function seekTrack(value){
 }
 async function saveOffline(id){
   const track=directTracksFor().find(row=>row.id===id);if(!track||busyIds.has(id))return false;
+  if(track.streamOnly){status('This recording streams from the artist’s source. Offline saving requires a verified local copy.');return false}
   if(!globalThis.caches||!globalThis.crypto?.subtle){status('Offline audio storage is unavailable in this browser. You can still stream.');return false}
   busyIds.add(id);status(`Saving ${track.title} for offline listening…`);renderTrackList();
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);
@@ -350,8 +371,8 @@ function updatePlaybackUi(){
 function renderTrackList(){
   if(!panel||mode()!=='direct')return;
   const body=panel.querySelector('[data-radio-body]');if(!body)return;
-  const rows=directTracksFor();
-  body.innerHTML=catalogError?`<p>${esc(catalogError)}</p><button type="button" data-radio-retry>Retry catalog</button>`:!catalogLoaded?'<p>Loading open music…</p>':!rows.length?`<p>${safeModeEnabled()?'No direct recordings have a complete S.A.F.E. audit yet. The S.A.F.E. Spotify extension remains available below.':'No open recordings are available for this station yet.'}</p>`:`<p class="cw-radio-note">${rows.length} open recordings · stream now, or save individual tracks for offline listening. Nothing plays or downloads automatically.</p>${rows.map(track=>`<article class="cw-radio-direct-track" data-radio-track="${esc(track.id)}"><strong>${esc(track.title)}</strong><span>${esc(track.credits)}</span><div class="cw-radio-direct-actions"><button type="button" data-radio-track-play="${esc(track.id)}" aria-label="Play ${esc(track.title)}">Play</button><button type="button" ${busyIds.has(track.id)?'disabled':''} data-radio-offline="${esc(track.id)}">${busyIds.has(track.id)?'Saving…':savedIds.has(track.id)?'Remove offline':'Save offline'} · ${(track.bytes/1048576).toFixed(1)} MB</button></div><small><a href="${esc(track.source)}" target="_blank" rel="noopener noreferrer external">Source &amp; full credits</a> · <a href="${esc(track.licenseUrl)}" target="_blank" rel="noopener noreferrer external">${esc(track.license)}</a> · ${esc(track.changes)}</small></article>`).join('')}`;
+  const rows=directTracksFor().filter(track=>(track.title+' '+track.artist).toLowerCase().includes(searchTerm));
+  body.innerHTML=catalogError?`<p>${esc(catalogError)}</p><button type="button" data-radio-retry>Retry catalog</button>`:!catalogLoaded?'<p>Loading open music…</p>':!rows.length?`<p>${safeModeEnabled()?'No direct recordings have a complete S.A.F.E. audit yet. The S.A.F.E. Spotify extension remains available below.':'No open recordings are available for this station yet.'}</p>`:`<p class="cw-radio-note">${rows.length} of ${directTracksFor().length} open recordings · continues after Play · local verified downloads available offline; source streams require internet and are not individually lyric-audited.</p>${rows.map(track=>`<article class="cw-radio-direct-track" data-radio-track="${esc(track.id)}"><strong>${esc(track.title)}</strong><span>${esc(track.credits)}</span><div class="cw-radio-direct-actions"><button type="button" data-radio-track-play="${esc(track.id)}" aria-label="Play ${esc(track.title)}">Play</button>${track.streamOnly?'<span class="cw-radio-stream-only">Stream only</span>':`<button type="button" ${busyIds.has(track.id)?'disabled':''} data-radio-offline="${esc(track.id)}">${busyIds.has(track.id)?'Saving…':savedIds.has(track.id)?'Remove offline':'Save offline'} · ${(track.bytes/1048576).toFixed(1)} MB</button>`}</div><small><a href="${esc(track.source)}" target="_blank" rel="noopener noreferrer external">Source &amp; full credits</a> · <a href="${esc(track.licenseUrl)}" target="_blank" rel="noopener noreferrer external">${esc(track.license)}</a> · ${esc(track.changes)}</small></article>`).join('')}`;
   updatePlaybackUi();
 }
 
@@ -402,7 +423,7 @@ html:not([data-radio-embedded="true"]){--cw-radio-dock-space:calc(var(--cw-theme
 #${PANEL_ID} [data-radio-status]{margin:0;font-size:11px;color:#d5d5df}#${PANEL_ID} [data-radio-current-credits]{font-size:10px;overflow-wrap:anywhere}#${PANEL_ID} a{color:var(--cw-radio-accent,#cfabed)}
 #${PANEL_ID} .cw-radio-body{min-height:0;overflow:auto;overscroll-behavior:contain}#${PANEL_ID} .cw-radio-note{color:#d0cbd6}
 #${PANEL_ID} .cw-radio-direct-track{display:grid;gap:6px;padding:12px 0;border-bottom:1px solid #ffffff20;overflow-wrap:anywhere}#${PANEL_ID} .cw-radio-direct-track>span,#${PANEL_ID} .cw-radio-direct-track>small{font-size:11px;color:#d5d5df}
-#${PANEL_ID} .cw-radio-direct-actions{display:flex;gap:7px;flex-wrap:wrap}
+#${PANEL_ID} .cw-radio-direct-actions{display:flex;gap:7px;flex-wrap:wrap}#${PANEL_ID} .cw-radio-stream-only{font-size:11px;opacity:.72;align-self:center}#${PANEL_ID} [data-radio-search]{min-width:0;width:100%;border-radius:8px;background:#ffffff12;border:1px solid #ffffff30;color:inherit;padding:7px 9px;min-height:40px}
 @media(max-width:360px){#${PANEL_ID} .cw-radio-controls{grid-column:1/-1}#${PANEL_ID} .cw-radio-volume{grid-column:1/-1;grid-row:4;flex-direction:row;justify-content:flex-start;gap:8px}#${PANEL_ID} [data-radio-status]{grid-row:5}#${PANEL_ID} [data-radio-current-credits]{grid-row:6}}
 /* When even compact controls cannot fit, preserve a sticky Close and expose all content through one scrollable fallback. */
 @media(max-height:520px){#${PANEL_ID}{display:block;overflow:auto}#${PANEL_ID}>header{position:sticky;top:0;z-index:2;background:var(--cw-radio-background,#21152e)}#${PANEL_ID} .cw-radio-body{overflow:visible}#${PANEL_ID} .cw-radio-modebar{max-height:none;overflow-y:visible}}
@@ -459,13 +480,15 @@ function ensureSurface(){
   if(!panel?.isConnected){
     panel=document.getElementById(PANEL_ID)||document.createElement('section');
     panel.id=PANEL_ID;panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Civweave radio station');
-    panel.innerHTML=`<header><div><small>Open music</small><strong data-radio-system>Radio</strong></div><button type="button" data-radio-close aria-label="Close station">×</button></header><div class="cw-radio-modebar"><button type="button" data-radio-mode="direct" aria-pressed="true">Listen here</button><details><summary>Spotify extension</summary><div><button type="button" data-radio-mode="clean" aria-pressed="false">Clean station</button><button type="button" data-radio-mode="original" aria-pressed="false">Original / uncensored</button><button type="button" data-radio-nominate>Nominate track</button></div></details><span class="cw-radio-safe" data-radio-safe hidden></span></div><section class="cw-radio-player" aria-label="Music player"><audio preload="none" data-radio-audio></audio><strong data-radio-current>Choose a track</strong><div class="cw-radio-controls"><button type="button" data-radio-previous aria-label="Previous track">Previous</button><button type="button" data-radio-play>Play</button><button type="button" data-radio-next aria-label="Next track">Next</button></div><div class="cw-radio-seek"><input type="range" min="0" max="1" value="0" step="1" data-radio-seek aria-label="Seek in track" disabled><span data-radio-time>0:00 / 0:00</span></div><label class="cw-radio-volume">Volume<input type="range" min="0" max="1" step="0.05" value="0.7" data-radio-volume></label><p data-radio-status role="status" aria-live="polite"></p><div data-radio-current-credits></div></section><div class="cw-radio-body" data-radio-body></div>`;
+    panel.innerHTML=`<header><div><small>Open music</small><strong data-radio-system>Radio</strong></div><button type="button" data-radio-close aria-label="Close station">×</button></header><div class="cw-radio-modebar"><button type="button" data-radio-mode="direct" aria-pressed="true">Listen here</button><button type="button" data-radio-shuffle aria-pressed="false">Shuffle off</button><input type="search" data-radio-search aria-label="Search recordings" placeholder="Search songs or artists"><details><summary>Spotify extension</summary><div><button type="button" data-radio-mode="clean" aria-pressed="false">Clean station</button><button type="button" data-radio-mode="original" aria-pressed="false">Original / uncensored</button><button type="button" data-radio-nominate>Nominate track</button></div></details><span class="cw-radio-safe" data-radio-safe hidden></span></div><section class="cw-radio-player" aria-label="Music player"><audio preload="none" data-radio-audio></audio><strong data-radio-current>Choose a track</strong><div class="cw-radio-controls"><button type="button" data-radio-previous aria-label="Previous track">Previous</button><button type="button" data-radio-play>Play</button><button type="button" data-radio-next aria-label="Next track">Next</button></div><div class="cw-radio-seek"><input type="range" min="0" max="1" value="0" step="1" data-radio-seek aria-label="Seek in track" disabled><span data-radio-time>0:00 / 0:00</span></div><label class="cw-radio-volume">Volume<input type="range" min="0" max="1" step="0.05" value="0.7" data-radio-volume></label><p data-radio-status role="status" aria-live="polite"></p><div data-radio-current-credits></div></section><div class="cw-radio-body" data-radio-body></div>`;
     audio=panel.querySelector('audio');audio.volume=0.7;
     for(const event of ['timeupdate','loadedmetadata','durationchange'])audio.addEventListener(event,updatePlaybackUi);
     audio.addEventListener('play',()=>{isPlaying=true;updatePlaybackUi()});audio.addEventListener('pause',()=>{isPlaying=false;updatePlaybackUi()});
-    audio.addEventListener('ended',()=>{isPlaying=false;status('Track finished. Choose Next to continue.');updatePlaybackUi()});
+    audio.addEventListener('ended',()=>{isPlaying=false;status('Track finished. Playing next…');nextTrack(1);updatePlaybackUi()});
     audio.addEventListener('error',()=>{isPlaying=false;status('This recording could not be played. Try saving it while online, or choose another track.')});
     panel.querySelector('[data-radio-play]').addEventListener('click',togglePlayback);
+    panel.querySelector('[data-radio-shuffle]').addEventListener('click',event=>{shuffleEnabled=!shuffleEnabled;event.currentTarget.textContent=shuffleEnabled?'Shuffle on':'Shuffle off';event.currentTarget.setAttribute('aria-pressed',String(shuffleEnabled))});
+    panel.querySelector('[data-radio-search]').addEventListener('input',event=>{searchTerm=event.target.value.trim().toLowerCase().slice(0,120);renderTrackList()});
     panel.querySelector('[data-radio-previous]').addEventListener('click',()=>nextTrack(-1));panel.querySelector('[data-radio-next]').addEventListener('click',()=>nextTrack(1));
     panel.querySelector('[data-radio-seek]').addEventListener('input',event=>{seekTrack(event.target.value)});
     panel.querySelector('[data-radio-volume]').addEventListener('input',event=>{audio.volume=Math.min(1,Math.max(0,Number(event.target.value)||0))});
@@ -500,7 +523,7 @@ function start(){
   addEventListener('civweave:radio-station-open-request',open);
   try{dispatchEvent(new CustomEvent('civweave:radio-station-ready',{detail:{version:VERSION,system:currentSystem,cleanDefault:true,trackCount:tracksFor().length}}))}catch{}
 }
-const api=Object.freeze({version:VERSION,directAudio:true,directDefault:true,cleanDefault:true,catalogPath:CATALOG_PATH,audioCache:AUDIO_CACHE,systems:Object.freeze([...SYSTEMS]),stations:STATIONS,detectSystem,radioEnabled,safeModeEnabled,mode,setMode,station,tracksFor,directTracksFor,playTrack,saveOffline,removeOffline,open,close,toggle,refresh,ensureSurface});
+const api=Object.freeze({version:VERSION,directAudio:true,directDefault:true,cleanDefault:true,catalogPath:CATALOG_PATH,streamManifestPath:STREAM_MANIFEST_PATH,audioCache:AUDIO_CACHE,systems:Object.freeze([...SYSTEMS]),stations:STATIONS,detectSystem,radioEnabled,safeModeEnabled,mode,setMode,station,tracksFor,directTracksFor,playTrack,saveOffline,removeOffline,open,close,toggle,refresh,ensureSurface});
 globalThis.CivweaveRadioStationSurfaceV1=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

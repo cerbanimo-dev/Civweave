@@ -7,13 +7,13 @@ import { JSDOM } from 'jsdom';
 const read = name => readFile(new URL(`../public/app/${name}`, import.meta.url), 'utf8');
 const sources = await Promise.all(['system-radio-agent-v233.js', 'radio-safe-stations-v1.js', 'radio-track-suggestions-v240.js'].map(read));
 const record = (id, overrides = {}) => ({candidate_id:id,title:`Track ${id}`,artist:'QA musician',source_url:`https://ccmixter.org/files/qa/${id}`,license:{spdx:'CC-BY',label:'CC BY 3.0',url:'https://creativecommons.org/licenses/by/3.0/',evidence:'source page',redistribution:true},attribution:{creator:'QA musician',source_title:`Track ${id}`},files:[{url:`/downloads/hub-media/open-music/audio/${id}.mp3`,mime:'audio/mpeg',bytes:4}],playlist_matches:[{playlist_id:'civweave'},{playlist_id:'fellowfare'}],download_enabled:true,mesh_redistributable:true,explicit:false,...overrides});
-async function setup({safe=false, records=[record('one'),record('two')],failAudio=false,extensions=true,childFirst=false,legacyMode=''}={}) {
+async function setup({safe=false, records=[record('one'),record('two')],failAudio=false,extensions=true,childFirst=false,legacyMode='',manifestRecords=[]}={}) {
   const dom=new JSDOM('<!doctype html><html data-civweave-system="civweave" data-persistent-system="civweave"><head></head><body></body></html>',{url:'https://civweave.test/app/persistent-system-shell-v1.html?system=civweave&installed=1',runScripts:'outside-only'});
   const w=dom.window,calls=[],store=new Map();let plays=0,pauses=0;
   w.Response=Response;w.Blob=Blob;w.AbortController=AbortController;
   Object.defineProperty(w.crypto,'subtle',{value:webcrypto.subtle});
   w.URL.createObjectURL=()=> 'blob:qa-local-audio';w.URL.revokeObjectURL=()=>{};
-  w.fetch=async (url,options={})=>{calls.push({url:String(url),options});if(String(url).includes('catalog.json'))return Response.json({records});if(failAudio)throw new Error('QA offline');return new Response(new Uint8Array([73,68,51,4]),{headers:{'content-type':'audio/mpeg'}})};
+  w.fetch=async (url,options={})=>{calls.push({url:String(url),options});if(String(url).includes('lazy-manifest.json'))return Response.json({schema:'civweave.open-music-lazy-manifest.v1',entries:manifestRecords});if(String(url).includes('catalog.json'))return Response.json({records});if(failAudio)throw new Error('QA offline');return new Response(new Uint8Array([73,68,51,4]),{headers:{'content-type':'audio/mpeg'}})};
   const cache={match:async key=>store.get(String(key))?.clone(),put:async(key,response)=>{store.set(String(key),response.clone())},delete:async key=>store.delete(String(key))};
   w.caches={open:async()=>cache};
   w.HTMLMediaElement.prototype.play=function(){plays++;this.dispatchEvent(new w.Event('play'));return Promise.resolve()};
@@ -35,7 +35,7 @@ test('radio opens direct music without fetching media or autoplay; extensions le
   assert.equal(x.api.mode(),'direct');assert.equal(x.calls.length,0);
   x.api.open();await x.settle();
   assert.equal(x.w.document.querySelectorAll('audio').length,1);
-  assert.equal(x.plays,0);assert.equal(x.calls.filter(c=>!c.url.includes('catalog.json')).length,0);
+  assert.equal(x.plays,0);assert.equal(x.calls.filter(c=>!c.url.includes('catalog.json')&&!c.url.includes('lazy-manifest.json')).length,0);
   assert.match(x.w.document.querySelector('[data-radio-body]').textContent,/Track one/);
   assert.equal(x.w.document.querySelector('[data-radio-persistent-suggestion]'),null);
   assert.equal(x.w.document.querySelector('audio').getAttribute('preload'),'none');
@@ -158,5 +158,53 @@ test('the real published starter manifest produces three playable choices with t
     const tracks=x.api.directTracksFor(system);assert.equal(tracks.length,3);assert.ok(tracks[0].systems.includes(system));
     assert.equal(x.w.document.querySelectorAll('[data-radio-track-play]').length,3);
   }
-  assert.equal(x.plays,0);assert.equal(x.calls.filter(call=>!call.url.includes('catalog.json')).length,0);
+  assert.equal(x.plays,0);assert.equal(x.calls.filter(call=>!call.url.includes('catalog.json')&&!call.url.includes('lazy-manifest.json')).length,0);
+});
+
+
+const remote=id=>({
+  candidate_id:id,title:`Remote ${id}`,artist:'Creative Commons Artist',
+  source_url:`https://ccmixter.org/files/qa/${id}`,
+  license:{spdx:'CC-BY',label:'Attribution (3.0)',url:'http://creativecommons.org/licenses/by/3.0/',evidence:'ccMixter source page',redistribution:true,commercial_use:true},
+  attribution:{creator:'Creative Commons Artist'},
+  files:[{url:`https://ccmixter.org/content/qa/${id}.mp3`,bytes:4096}],
+  vocal_verified:true,instrumental_only:false,explicit:null,curation:'metadata-discovered',
+  playlist_matches:[{playlist_id:'civweave'}]
+});
+
+test('radio accepts up to 300 metadata-screened CC source recordings without autoplay, bulk fetches, or offline misrepresentation',async t=>{
+  const tracks=Array.from({length:250},(_,i)=>remote(`cc-${i+1}`));
+  const x=await setup({manifestRecords:tracks});t.after(()=>x.dom.window.close());x.api.open();await x.settle();
+  assert.equal(x.api.directTracksFor().length,252);
+  assert.equal(x.plays,0);
+  assert.equal(x.calls.filter(call=>!call.url.includes('catalog.json')&&!call.url.includes('lazy-manifest.json')).length,0);
+  assert.match(x.w.document.querySelector('[data-radio-body]').textContent,/252 of 252/);
+  assert.equal(x.w.document.querySelectorAll('[data-radio-offline]').length,2);
+  assert.equal(await x.api.saveOffline('cc-1'),false);
+  assert.equal(x.store.size,0);
+  await x.api.playTrack('cc-1');
+  assert.match(x.w.document.querySelector('audio').src,/ccmixter.org\/content\/qa\/cc-1.mp3$/);
+  x.w.document.querySelector('audio').dispatchEvent(new x.w.Event('ended'));await x.settle();
+  assert.equal(x.plays,2);
+  x.w.document.querySelector('[data-radio-shuffle]').click();
+  assert.equal(x.w.document.querySelector('[data-radio-shuffle]').getAttribute('aria-pressed'),'true');
+  const search=x.w.document.querySelector('[data-radio-search]');
+  search.value='Remote cc-99';search.dispatchEvent(new x.w.Event('input',{bubbles:true}));
+  assert.equal(x.w.document.querySelectorAll('[data-radio-track-play]').length,1);
+});
+
+test('radio refuses unsafe, unlicensed, non-CC and non-audio remote manifest entries',async t=>{
+  const entries=[
+    remote('valid'),remote('bad-license'),
+    {...remote('bad-url'),files:[{url:'https://example.org/file.mp3',bytes:4096}]},
+    {...remote('bad-unsafe'),explicit:true},
+    {...remote('bad-source'),source_url:'https://wrong-domain.test/source'},
+    {...remote('bad-noncommercial'),license:{...remote('bad').license,commercial_use:false}}
+  ];
+  entries[1].license={...entries[1].license,spdx:'CC-BY-NC'};
+  const x=await setup({manifestRecords:entries});t.after(()=>x.dom.window.close());x.api.open();await x.settle();
+  assert.equal(x.api.directTracksFor().length,3);
+  assert.ok(x.api.directTracksFor().some(row=>row.id==='valid'));
+  assert.ok(!x.api.directTracksFor().some(row=>row.id==='bad-license'));
+  assert.equal(await x.api.playTrack('bad-unsafe'),false);
 });
