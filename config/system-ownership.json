@@ -3,6 +3,20 @@
   "policy": "extend-existing-owner-never-add-parallel-owner",
   "requiredForAgentWork": true,
   "systems": {
+    "action-board": {
+      "capability": "Offline-first capture and context-filtered next-action projection over saved Quests",
+      "owner": "public/app/action-board-v1.mjs",
+      "model": "public/app/shared/action-board-core-v1.mjs",
+      "canonicalApi": "globalThis.CivweaveActionBoardV1",
+      "storageKey": "civweave.action-board.v1",
+      "questLedgerReadOnly": "civweave.intentions.v127",
+      "rules": [
+        "Manual lightweight actions and Focus flags are local, never duplicate or mutate canonical saved Quests.",
+        "Saved Quest statuses, dependencies, activation, proofs and completion remain owned by their existing Quest workflow.",
+        "Unknown and ambiguous dependencies fail closed into Waiting; no sequential dependency is invented.",
+        "Action projection and filtering work without AI or network access."
+      ]
+    },
     "content-provenance": {
       "capability": "Immutable creation provenance for Civweave artifacts and additive human-validation history",
       "owner": "public/app/content-provenance-v1.js",
