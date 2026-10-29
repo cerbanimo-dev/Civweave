@@ -1,6 +1,6 @@
 # Quest pathway map
 
-`public/app/shared/quest-pathway-map-v1.js` and CSS present a saved Weaveling Quest as four subsystem regions with connected beat trails. A generated response displays the map immediately using the current saved Quest. Its transcript snapshot is an identifier hint, never authority to restore deleted work. Ordinary transcript updates preserve the unchanged map and streamed answer DOM.
+`public/app/shared/quest-pathway-map-v1.js` and CSS present a saved Weaveling Quest as four subsystem regions with connected beat trails. A generated response displays the map immediately using the current saved Quest. The main Current Quest screen places that same map before its conventional cards; those cards remain in expandable details, with a direct fallback if the presenter is unavailable. Its transcript snapshot is an identifier hint, never authority to restore deleted work. Ordinary transcript updates preserve the unchanged map and streamed answer DOM.
 
 `CivweaveQuestPathwayMapV1.render(plan, options)` returns bounded inert markup: at most 12 paths/layers and 96 beats. All four subsystems remain visible, even when a goal needs no path there. Unrecognized subsystems remain visible in an unassigned region. Saved accepted/completed labels and member-reported publication labels are distinct. Declared dependencies resolve only against unique visible saved identifiers; unknown, ambiguous, and incomplete references remain locked. Ordered trails are explicitly labelled as order, not invented dependencies.
 

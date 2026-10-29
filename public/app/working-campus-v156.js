@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const REVISION='canonical-campus-startup-v231-optional-governance';
+const REVISION='canonical-campus-startup-v232-preserve-governance';
 const BRAND_REVISION='compact-shell-v235';
 const BRAND_CYCLE_REVISION='day-night-clock-v236';
 const BRAND_DAY='/app/logos/civweave-day-logo.jpg';
 const BRAND_NIGHT='/app/logos/civweave-night-logo.jpg';
 const WEB_ENTRY_REVISION='web-install-entry-v232';
 const HUB_REVISION='weaveling-hub-v233-current-selection';
-const STATE_REPAIR_REVISION='working-campus-state-repair-v239-current-quest';
+const STATE_REPAIR_REVISION='working-campus-state-repair-v240-preserve-governance';
 const HUB_SCRIPT='/app/weaveling-hub-v233.js';
 const routeScript='/app/system-routes-v227.js?v=1.0.164-single-shell-context';
 const parts=['/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
@@ -39,8 +39,9 @@ function recoveredPlan(source={},fallback={}){
     progress:Array.isArray(path?.progress)?path.progress:[],
     status:path?.status||'ready'
   })):[];
-  const governance=value.governance&&typeof value.governance==='object'?value.governance:{};
   return{
+    // Recovery repairs structural fields; it cannot invent a consent layer or
+    // discard metadata from a layer the Hero actually saved.
     ...value,
     schema:value.schema||'civweave.intention-weave.v1',
     id:value.id||fallback.id||`recovered-weave-${Date.now().toString(36)}`,
@@ -53,12 +54,6 @@ function recoveredPlan(source={},fallback={}){
     profile:value.profile&&typeof value.profile==='object'?value.profile:{},
     assumptions:Array.isArray(value.assumptions)?value.assumptions:[],
     paths,
-    governance:{
-      realm:'anarchadia',
-      title:String(governance.title||'Recovered passport entry'),
-      purpose:String(governance.purpose||'Review recovered participation, boundaries, and commitments before activation.'),
-      agreements:Array.isArray(governance.agreements)?governance.agreements:[]
-    },
     requiresExplicitActivation:value.requiresExplicitActivation!==false,
     recoveredBy:STATE_REPAIR_REVISION
   };
@@ -74,13 +69,13 @@ function repairPersistedCampusState(){
     if(!row||row.kind!=='weave-plan')return row;
     const existing=row.plan&&typeof row.plan==='object'?row.plan:null;
     const next=recoveredPlan(existing||{},row);
-    if(!existing||!existing.title||!Array.isArray(existing.paths)||!existing.governance){ledgerChanged=true;return{...row,text:row.text||next.title,state:row.state||next.state,plan:next,updatedAt:next.updatedAt}}
+    if(!existing||!existing.title||!Array.isArray(existing.paths)){ledgerChanged=true;return{...row,text:row.text||next.title,state:row.state||next.state,plan:next,updatedAt:next.updatedAt}}
     return row;
   });
   const planValid=state.plan&&typeof state.plan==='object';
   if(planValid){
     const repaired=recoveredPlan(state.plan,{wish:state.wish});
-    if(!state.plan.title||!Array.isArray(state.plan.paths)||!state.plan.governance){state.plan=repaired;changed=true}
+    if(!state.plan.title||!Array.isArray(state.plan.paths)){state.plan=repaired;changed=true}
   }else if(['review','active'].includes(state.stage)){
     const candidate=ledger.find(row=>row?.kind==='weave-plan'&&row?.plan&&typeof row.plan==='object');
     if(candidate){state.plan=safeClone(candidate.plan)||recoveredPlan(candidate.plan,candidate);state.wish=state.plan.wish||state.wish||'';state.stage=state.plan.state==='review'?'review':'active';changed=true}

@@ -110,7 +110,7 @@ test('the actual shared Moss scene plays only a fresh receipt, stops, and surviv
   delete h.context.CivweaveGuideOutcomeSceneV1;vm.runInContext(scenePresenter,h.context);
   h.context.CivweaveGuideOutcomeSceneV1.markFresh('attempt-actual');h.render();
   const scene=h.root.querySelector('[data-guide-outcome]');assert.equal(scene.dataset.guide,'living-school');assert.equal(scene.dataset.receiptId,'attempt-actual');assert.equal(scene.dataset.playing,'true');
-  assert.match(scene.innerHTML,/Living-School-moss-sprites\.png/);assert.match(scene.innerHTML,/lari-review-sprites-v1\.png/);
+  assert.match(scene.innerHTML,/moss-review-sprites-v1\.png/);assert.match(scene.innerHTML,/lari-review-sprites-v1\.png/);
   h.render();assert.equal(h.root.querySelector('[data-guide-outcome]'),scene);assert.equal(scene.dataset.playing,'true');
   scene.querySelector('[data-guide-scene-action="stop"]').click();assert.equal(scene.dataset.playing,'false');
   h.render();assert.equal(scene.dataset.playing,'false','ordinary rerender must not replay a stopped scene');

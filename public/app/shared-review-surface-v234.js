@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.5-quest-dependency-actions';
+const VERSION='1.0.6-map-first-review';
 const REVISION='shared-review-surface-v234';
 const STYLE_ID='cw-shared-review-style-v234';
 const SURFACE_ID='cw-shared-review-surface-v234';
@@ -186,12 +186,12 @@ function renderPlan(item,source=null){
   removeSurface();
   surface.id=SURFACE_ID;surface.dataset.host=host.type;surface.dataset.kind='weave';surface.dataset.id=clean(item.id||plan.id,180);
   const paths=Array.isArray(plan.paths)?plan.paths:[];
-  const governance=plan.governance&&typeof plan.governance==='object'?plan.governance:null;
+  const g=plan.governance,governance=g&&typeof g==='object'&&!Array.isArray(g)&&g.included!==false&&(clean(g.title)||clean(g.purpose)||clean(g.reviewQuestion)||Array.isArray(g.agreements)&&g.agreements.some(value=>clean(value)))?g:null;
   surface.innerHTML=`
     <header class="cwsr234-head"><div><small>QUEST REVIEW</small><h2>${esc(plan.title||item.text||'Untitled Quest')}</h2><span class="cwsr234-state">${esc(item.state||plan.state||'review')}</span></div><button class="cwsr234-close" type="button" data-review-command="close" aria-label="Close review">×</button></header>
+    ${questPathwayMarkup({...plan,state:item.state||plan.state||'review'})}
     <div class="cwsr234-summary">${plan.wish?`<p><strong>Quest goal:</strong> ${esc(plan.wish)}</p>`:''}${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}</div>
     ${planReviewScene(item)}
-    ${questPathwayMarkup({...plan,state:item.state||plan.state||'review'})}
     <details class="cwsr234-change-request"><summary>Request changes to this plan</summary><form data-review-revision-form><label for="cwsr234-revision-note">What needs to change?</label><textarea id="cwsr234-revision-note" name="revisionNote" required maxlength="2000" rows="3">${esc(plan.reviewDecision?.decision==='revision'?clean(plan.reviewDecision.note,2000):'')}</textarea><p>Saving returns this plan to review and keeps its existing work records. Continue with Weaveling when you are ready.</p><button type="button" data-review-command="request-plan-changes" data-id="${esc(item.id||plan.id)}">Save revision request</button></form></details><p class="cwsr234-warning" role="alert" data-review-decision-status hidden></p>
     ${paths.map((path,index)=>`<section class="cwsr234-block" data-review-path="${index}" tabindex="-1"><small>${esc(`${index+1} · ${mapRealm(path).label} · ${path.status||'ready'}`)}</small><h3>${esc(path.title||'Untitled path')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}${listMarkup('STEPS',pathSteps(path).map(stepTitle))}${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
     ${listMarkup('ASSUMPTIONS',plan.assumptions)}

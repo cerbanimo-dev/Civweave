@@ -36,3 +36,6 @@ test('Lud details expose cyclic and transitive locks even when stored beats clai
 test('canonical dependsOn takes the same precedence as Guild privacy projection',()=>{
  const f=fixture();try{const p=plan();p.paths[1].dependsOn=['missing'];p.paths[1].dependencies=[];assert.equal(f.api.canOpenPath(p,'learn'),false);assert.ok(f.api.project(p).unresolved.some(r=>r.id==='missing'));p.paths[1].dependsOn=[];p.paths[1].dependencies=['missing'];assert.equal(f.api.canOpenPath(p,'learn'),true)}finally{f.close()}
 });
+test('an empty or explicitly excluded governance value never adds a phantom subsystem node',()=>{
+ const f=fixture();try{const p=plan();for(const governance of [null,{}, {included:false,title:'Excluded governance'}]){p.governance=governance;f.host.innerHTML=f.api.render(p);assert.equal(f.api.project(p).nodes.length,8);assert.doesNotMatch(f.host.textContent,/\+ governance/);assert.equal(f.host.querySelector('[data-governance="true"]'),null)}p.governance={title:'An actual agreement',agreements:['Share access']};assert.equal(f.api.project(p).nodes.length,9)}finally{f.close()}
+});
