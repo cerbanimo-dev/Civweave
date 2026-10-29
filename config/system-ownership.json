@@ -331,6 +331,33 @@
         "Show offline source provenance and errors without inventing verification.",
         "Basic guidance requires no Guild, paid compute, model, or network."
       ]
+    },
+    "starling-collective": {
+      "capability": "Bounded visible Collective planning and explicitly confirmed Guild proposals",
+      "owner": "public/app/starling-collective-v1.js",
+      "canonicalApi": "globalThis.CivweaveStarlingCollectiveV1",
+      "integrationOwner": "public/app/starling-integration-v1.js",
+      "guildAuthority": "cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs",
+      "guildTransport": "cloudflare/mobile-guild-edge/src/guild-starling-transport-v1.mjs",
+      "browserTransport": "public/app/guild-starling-client-v1.js",
+      "route": "/api/node/starling",
+      "modelOwner": "public/app/shared/civweave-model-runtime.js",
+      "questOwner": "public/app/intention-planner-v141.js",
+      "completionOwner": "public/extensions/civweave-proof-progress-v158.js",
+      "allowedCallers": [
+        "public/app/persistent-shell-actions-v1.js",
+        "public/app/starling-integration-v1.js"
+      ],
+      "rules": [
+        "One user-started sequential planning batch with visible public role contributions and no always-on inference.",
+        "At most three reserved, proposed, blocked or published AI Quest lines per device and shared Guild.",
+        "At most six new lines per rolling 24 hours; failure, cancellation and abandonment do not refund history.",
+        "Model dialogue never completes work, votes, grants roles, activates a Quest or posts to a Guild.",
+        "Shared posting requires the exact saved proposal revision, hash and explicit human confirmation.",
+        "Passport claims require consent and distinguish declared skills, authenticated residents and verified capability.",
+        "Mesh discovery and billing seats never grant Guildmaster authority.",
+        "Shared completion requires trusted canonical proof; local model claims cannot attest it."
+      ]
     }
   }
 }

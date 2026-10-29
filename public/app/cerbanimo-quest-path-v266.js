@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-cerbanimo-quest-path-v266-lazy-boot';
+const VERSION='1.0.2-cerbanimo-quest-path-v266-current-selection';
 if(globalThis.CivweaveCerbanimoQuestPathV266?.version===VERSION)return;
 const KEYS={campus:'civweave.working-campus.v1',intentions:'civweave.intentions.v127',handoff:'civweave.active-handoff.v1'};
 const MATERIALIZED_KEY='civweave.cerbanimo.quest-path.materialized.v1';
@@ -16,14 +16,14 @@ function planFromLedger(id){const row=list(read(KEYS.intentions,[])).find(item=>
 function resolveContext(){
   const query=params(),handoff=read(KEYS.handoff,{}),campus=read(KEYS.campus,{});
   const requestedWeave=clean(query.get('weave'),220),requestedPath=clean(query.get('path'),220);
-  const weaveId=requestedWeave||clean(handoff?.weaveId||campus?.plan?.id,220),pathId=requestedPath||clean(handoff?.pathId,220);
+  const weaveId=requestedWeave||clean(campus?.plan?.id||handoff?.weaveId,220),pathId=requestedPath||(String(handoff?.weaveId||'')===weaveId?clean(handoff?.pathId,220):'');
   let plan=null;
-  if(handoff?.plan?.id&&String(handoff.plan.id)===weaveId)plan=handoff.plan;
-  if(!plan&&campus?.plan?.id&&String(campus.plan.id)===weaveId)plan=campus.plan;
+  if(campus?.plan?.id&&String(campus.plan.id)===weaveId)plan=campus.plan;
   if(!plan&&weaveId)plan=planFromLedger(weaveId);
-  if(!plan||plan.state==='review')return null;
+  if(!plan&&handoff?.plan?.id&&String(handoff.plan.id)===weaveId)plan=handoff.plan;
+  if(!plan||!['active','completed'].includes(plan.state))return null;
   const paths=list(plan.paths).filter(path=>String(path?.realm||'').toLowerCase()==='cerbanimo');
-  const path=paths.find(item=>String(item.id)===pathId)||paths[0]||null;
+  const path=pathId?paths.find(item=>String(item.id)===pathId)||null:paths[0]||null;
   return path?{plan,path,explicit:Boolean(requestedWeave||requestedPath)}:null;
 }
 function proofRequirements(path){return list(path.steps).map(step=>`Attach inspectable evidence that this work unit is complete: ${clean(step,500)}`)}

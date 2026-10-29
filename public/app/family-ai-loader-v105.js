@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.156-moss-multi-plan-library'
+const VERSION='1.0.157-explicit-value-review'
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -9,7 +9,7 @@ const PREREQUISITES=[
   ['/app/shared/civweave-parity-runtime.js?v=1.0.4',()=>globalThis.CivweaveParity],
   ['/app/shared/civweave-model-runtime.js?v=1.0.17-termux-durable-jobs',()=>globalThis.CivweaveModelRuntime],
   ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryV191],
-  ['/app/intention-planner-v141.js?v=1.0.4',()=>globalThis.CivweaveIntentionPlanner],
+  ['/app/intention-planner-v141.js?v=1.1.1-collective-line-identity',()=>globalThis.CivweaveIntentionPlanner],
   ['/app/guide-contracts-v141.js?v=1.0.6-manifest-revision',()=>globalThis.CivweaveGuideContractsV141]
 ];
 const VALUE_CORE=[
@@ -19,7 +19,7 @@ const VALUE_CORE=[
 const VALUE_MODEL=[
   ['/app/civweave-basic-value-model-v1.js?v=1.4.1-compiled-preview-scope',()=>globalThis.CivweaveBasicValueModelV1],
   ['/app/civweave-basic-value-review-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueReviewV1],
-  ['/app/civweave-basic-value-systems-v1.js?v=economic-review-v1-idle-safe-v1',()=>globalThis.CivweaveBasicValueSystemsV1?.eventDriven===true]
+  ['/app/civweave-basic-value-systems-v1.js?v=1.2.0-explicit-subject-review',()=>globalThis.CivweaveBasicValueSystemsV1?.explicitSubjectDemand===true]
 ];
 const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.118-http-stream',()=>globalThis.CivweaveFastInteractiveV192];
 const SERVER_AI_ROUTER=['/app/server-ai-router-v301.js?v=1.0.117-guild-handoff',()=>globalThis.CivweaveServerAIRouterV301?.status?.().registered===true];
@@ -161,7 +161,12 @@ async function ensure(){
   })().catch(error=>{if(ticket===generation)reset(error.message);throw error});
   return promise;
 }
-function requestEconomicReview(reason='realm-work-created'){if(economicReviewQueued)return false;economicReviewQueued=true;queueMicrotask(async()=>{try{await ensure();globalThis.CivweaveBasicValueSystemsV1?.schedule?.(0);try{dispatchEvent(new CustomEvent('civweave:economic-review-requested',{detail:{reason,system:detect(),at:new Date().toISOString()}}))}catch{}}catch(error){console.info('[Civweave economic review deferred]',error.message)}finally{economicReviewQueued=false}});return true}
+function requestEconomicReview(request){
+  const keys=['civweave.working-campus.v1','civweave.living-school.cabinet.v151','cerbanimo.quest-engine.v144'];
+  if(!request||typeof request!=='object'||!keys.includes(request.key)||!Array.isArray(request.ids)||!request.ids.length||request.ids.length>24||request.ids.some(id=>typeof id!=='string'||!id.trim()||id.length>220)||economicReviewQueued)return false;
+  const demand={key:request.key,ids:[...new Set(request.ids)]};economicReviewQueued=true;
+  return(async()=>{try{await ensure();return await globalThis.CivweaveBasicValueSystemsV1?.run?.(demand)||false}finally{economicReviewQueued=false}})();
+}
 function patchHeader(){const button=document.querySelector('#cwf104-head [data-cwf-chat]');if(!button)return;const system=detect(),guide=guideFor(system);button.setAttribute('aria-label',`Talk to ${guide.name} in ${LABEL[system]}`);button.title=`Talk to ${guide.name}`;button.removeAttribute('disabled')}
 function canonicalChatApi(){if(globalThis.CivweaveGuideWorkspaceV242?.openWindow)return{kind:'workspace',api:globalThis.CivweaveGuideWorkspaceV242};const api=globalThis.CivweavePersistentGuideChatV215;if(api?.canonicalOwner&&typeof api.open==='function')return{kind:'compat',api};return null}
 function openCanonical(target,prefill=''){const owner=canonicalChatApi();if(!owner)return null;if(owner.kind==='workspace')return owner.api.openWindow(target,{prefill,focus:true});return owner.api.open({guide:target,prefill,focus:true})}
@@ -172,6 +177,6 @@ function workspaceSnapshot(system=detect(),query=''){const living=obj('civweave.
 async function openSettings(launcher){const gateway=globalThis.CivweaveSettingsGatewayV317;if(!gateway?.open){console.error('Civweave Settings gateway is unavailable.');try{dispatchEvent(new CustomEvent('civweave:model-settings-open-failed',{detail:{message:'Settings gateway unavailable',system:detect()}}))}catch{}return null}return gateway.open(launcher)}
 function warm(){return ensure()}
 function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civweave economic value core]',error.message));installStructuredFallbackGuard()}
-document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();addEventListener('pageshow',boot);addEventListener('civweave:guide-workspace-ready',patchHeader);addEventListener('civweave:working-campus-plan-built',()=>requestEconomicReview('working-campus-plan-built'));addEventListener('cerbanimo:quest-engine-changed',()=>requestEconomicReview('cerbanimo-quest-changed'));for(const name of ['civweave:response-router-installed','civweave:model-runtime-ready','civweave:local-model-runtime-ready','civweave:local-model-bridge-installed'])addEventListener(name,()=>queueMicrotask(installStructuredFallbackGuard));
-globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,configuredOllama,respondOllama,ensureLocalAI,tryEnsureLocalAI,warmLocalAIOptional,installStructuredFallbackGuard,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v352-structured-fallback-network-gate',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:false,structuredFallbackPolicy:'network-only-for-structured-artifacts',knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-model-estimate-plus-rubric-review-idle-safe',aiAllowed:()=>true,standardAIOnly:true,eagerWarm:false};
+document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();addEventListener('pageshow',boot);addEventListener('civweave:guide-workspace-ready',patchHeader);for(const name of ['civweave:response-router-installed','civweave:model-runtime-ready','civweave:local-model-runtime-ready','civweave:local-model-bridge-installed'])addEventListener(name,()=>queueMicrotask(installStructuredFallbackGuard));
+globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,configuredOllama,respondOllama,ensureLocalAI,tryEnsureLocalAI,warmLocalAIOptional,installStructuredFallbackGuard,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v352-structured-fallback-network-gate',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:false,structuredFallbackPolicy:'network-only-for-structured-artifacts',knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-explicit-identified-subjects-only',aiAllowed:()=>true,standardAIOnly:true,eagerWarm:false};
 })();

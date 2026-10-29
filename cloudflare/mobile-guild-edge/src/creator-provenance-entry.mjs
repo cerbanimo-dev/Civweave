@@ -1,3 +1,5 @@
+import {GUILD_STARLING_ROUTE,executeGuildStarlingAction} from './guild-starling-collective-v1.mjs';
+import {guildStarlingAction} from './guild-starling-transport-v1.mjs';
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
 import {GUILD_QUEST_ROUTE,GUILD_QUEST_CORS,guildQuestAction,readGuildQuestInput,executeGuildQuestAction,guildQuestJson,guildQuestError} from './guild-quest-publications-v1.mjs';
 
@@ -35,6 +37,12 @@ function nodeCloudOrigin(env,nodeId){const explicit=clean(env.CIVWEAVE_NODE_CLOU
 async function forwardReceipt(env,object){const nodeId=receiptGuildId(object);if(!nodeId)return{forwarded:false,reason:'not-guild-receipt'};const target=new URL('/api/node/creator-provenance/receipt',nodeCloudOrigin(env,nodeId));target.searchParams.set('nodeId',nodeId);const response=await fetch(target,{method:'POST',headers:{'content-type':'application/json','x-civweave-node-id':nodeId},body:JSON.stringify({object})});if(!response.ok){const body=await response.text().catch(()=>'');throw new Error(`Guild provenance receipt forward failed (${response.status})${body?`: ${body.slice(0,300)}`:''}`)}return{forwarded:true,nodeId}}
 
 export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
+  async guildStarlingAction({tokenHash,requestedNodeId,action,input}={}){
+    if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))throw Object.assign(new Error('Guild session belongs to a different Guild.'),{status:403});
+    const session=this.sessionForHash({tokenHash,requestedNodeId});
+    if(!session?.ok)throw Object.assign(new Error(session?.error||'Guild session is invalid.'),{status:session?.status||401});
+    return executeGuildStarlingAction(this.ctx.storage,{guildId:this.baseStatus().guildId,nodeId:session.nodeId,userId:session.userId},action,input,{knownMemberCount:this.status().memberCount});
+  }
   async guildQuestAction({tokenHash,requestedNodeId,action,input}={}){
     if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))throw Object.assign(new Error('Guild capacity session belongs to a different Guild.'),{status:403});
     const session=this.sessionForHash({tokenHash,requestedNodeId});
@@ -108,6 +116,10 @@ async function handleSessionGenerate(request,env){
 export default{
   async fetch(request,env,ctx){
     const questUrl=new URL(request.url);
+    if(questUrl.pathname===GUILD_STARLING_ROUTE||questUrl.pathname.startsWith(GUILD_STARLING_ROUTE+'/')){
+      if(request.method==='OPTIONS')return new Response(null,{status:204,headers:GUILD_QUEST_CORS});
+      try{const action=guildStarlingAction(request),input=request.method==='POST'?await readGuildQuestInput(request):{},result=await capacityStub(env).guildStarlingAction({tokenHash:await sessionTokenHash(bearer(request)),requestedNodeId:requestedNodeId(request),action,input});return guildQuestJson(result,action==='reserve'&&!result.idempotent?201:200)}catch(error){return guildQuestError(error)}
+    }
     if(questUrl.pathname===GUILD_QUEST_ROUTE||questUrl.pathname.startsWith(GUILD_QUEST_ROUTE+'/')){
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:GUILD_QUEST_CORS});
       try{const route=guildQuestAction(request),body=request.method==='POST'?await readGuildQuestInput(request):{},result=await capacityStub(env).guildQuestAction({tokenHash:await sessionTokenHash(bearer(request)),requestedNodeId:requestedNodeId(request),action:route.action,input:{...body,...route.input}});return guildQuestJson(result,result.created?201:200)}catch(error){return guildQuestError(error)}

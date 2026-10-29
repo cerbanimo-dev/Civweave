@@ -98,3 +98,24 @@ test('an enabled governance boundary retains its actual content and activation h
   const packets=app.read('civweave.realm-inbox.v1').filter(row=>row.kind==='intention-passport');assert.equal(packets.length,1);assert.deepEqual(packets[0].payload.governance,governance);
   assert.match(window.document.getElementById('workspace').textContent,/Agreed local QA boundary/);
 });
+
+test('an external parent selection and activation replaces stale campus memory before its next render or save',t=>{
+  const app=fixture(t),{window}=app,activated=plan('parent-qwen','active','2026-10-28T12:00:00Z');activated.collective={id:'starling',lineId:'line-parent',scope:'guild'};
+  window.localStorage.setItem(campusKey,JSON.stringify({...app.read(campusKey),plan:activated,wish:activated.wish,stage:'active',updatedAt:activated.updatedAt}));
+  window.CivweaveWorkingCampusV156.openQuest();
+  assert.equal(app.read(campusKey).plan.id,activated.id);assert.equal(app.read(campusKey).plan.state,'active');assert.equal(app.read(campusKey).plan.collective.lineId,'line-parent');
+  assert.match(window.document.getElementById('workspace').textContent,/Quest parent-qwen/);assert.equal(window.document.getElementById('state-label').textContent,'active');
+  window.document.querySelector('[data-quest-mode="roam"]').click();assert.equal(app.read(campusKey).plan.id,activated.id,'A normal child view control must not restore stale in-memory REVIEW state.');
+});
+
+test('a storage activation of the same Quest updates its current interface while preserving an unsent message',t=>{
+  const app=fixture(t),{window}=app;window.document.getElementById('weaveling-chat-input').value='Keep this unsent message';
+  const saved=app.read(campusKey);saved.plan.state='active';saved.plan.updatedAt='2026-10-28T12:00:00Z';saved.stage='active';saved.updatedAt=saved.plan.updatedAt;window.localStorage.setItem(campusKey,JSON.stringify(saved));
+  window.dispatchEvent(new window.StorageEvent('storage',{key:campusKey}));
+  assert.equal(window.document.getElementById('state-label').textContent,'active');assert.match(window.document.getElementById('workspace').textContent,/ACTIVE QUEST/);assert.equal(window.document.getElementById('weaveling-chat-input').value,'Keep this unsent message');assert.equal(app.read(campusKey).plan.state,'active');
+});
+
+test('a stopped selected Quest is visibly abandoned and offers no next execution rail',t=>{
+  const app=fixture(t),{window}=app,saved=app.read(campusKey);saved.plan.state='abandoned';saved.stage='active';window.localStorage.setItem(campusKey,JSON.stringify(saved));window.dispatchEvent(new window.StorageEvent('storage',{key:campusKey}));
+  const workspace=window.document.getElementById('workspace');assert.match(workspace.textContent,/QUEST ABANDONED/);assert.doesNotMatch(workspace.textContent,/ACTIVE QUEST/);assert.equal(workspace.querySelector('[data-open]'),null);assert.equal(window.document.getElementById('state-label').textContent,'abandoned');
+});

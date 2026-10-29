@@ -1,4 +1,5 @@
 export { CivweaveCapacityAccount } from './capacity.mjs';
+import { handleGuildStarlingInternal } from '../../mobile-guild-edge/src/guild-starling-transport-v1.mjs';
 import { handleGuildQuestInternal } from '../../mobile-guild-edge/src/guild-quest-publications-v1.mjs';
 
 export const CLOUD_NODE_SCHEMA = 'civweave.node.v1';
@@ -193,6 +194,7 @@ export class CivweaveCloudNode {
 
   async fetch(request) {
     const url = new URL(request.url), nodeId = normalizeNodeId(request.headers.get('x-civweave-node-id') || url.searchParams.get('nodeId'));
+    if (url.pathname === '/internal/guild-starling') return handleGuildStarlingInternal(request, this);
     if (url.pathname === '/internal/guild-quests') return handleGuildQuestInternal(request, this);
     if (!nodeId) return json({ ok: false, error: 'node-id-missing' }, 400);
     const manifest = await this.manifest(nodeId);

@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.19-governance-tab-routes';
+const VERSION='1.1.20-quest-lineage-routes';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -53,8 +53,9 @@ function nativeOptions(system,options={}){
   return nativePage==='governance'?{nativePage,nativeRoute:ANARCHADIA_GOVERNANCE_ROUTES.has(options.nativeRoute)?options.nativeRoute:'overview',proposal:id(options.proposal)}:{nativePage,nativeRoute:ANARCHADIA_WORKBENCH_ROUTES.has(options.nativeRoute)?options.nativeRoute:'workbench',weave:id(options.weave),path:id(options.path)};
 }
 function requestedOptions(query){return Object.fromEntries(['feature','nativePage','nativeRoute','proposal','weave','path'].map(key=>[key,query.get(key)||'']))}
+function lineageOptions(options={}){return Object.fromEntries(['weave','path'].map(key=>[key,String(options[key]||'').slice(0,240)]).filter(([,value])=>value))}
 function contentUrl(system,options={}){
-  system=cleanSystem(system);const {feature=''}=options,native=nativeOptions(system,options),[path,params]=ROUTES[system];const url=new URL(ANARCHADIA_NATIVE_PAGES[native.nativePage]||path,location.origin);
+  system=cleanSystem(system);const {feature=''}=options,native={...lineageOptions(options),...nativeOptions(system,options)},[path,params]=ROUTES[system];const url=new URL(ANARCHADIA_NATIVE_PAGES[native.nativePage]||path,location.origin);
   for(const [key,value] of Object.entries(params))url.searchParams.set(key,value);
   url.searchParams.set('installed','1');url.searchParams.set('embed','1');url.searchParams.set('persistentShell','1');
   if(feature)url.searchParams.set('feature',String(feature));
@@ -63,7 +64,7 @@ function contentUrl(system,options={}){
   return url;
 }
 function shellUrl(system,options={}){
-  system=cleanSystem(system);const {feature=''}=options,native=nativeOptions(system,options),url=new URL('/app/persistent-system-shell-v1.html',location.origin);url.searchParams.set('system',system);url.searchParams.set('installed','1');if(feature)url.searchParams.set('feature',String(feature));
+  system=cleanSystem(system);const {feature=''}=options,native={...lineageOptions(options),...nativeOptions(system,options)},url=new URL('/app/persistent-system-shell-v1.html',location.origin);url.searchParams.set('system',system);url.searchParams.set('installed','1');if(feature)url.searchParams.set('feature',String(feature));
   for(const [key,value] of Object.entries(native))if(value)url.searchParams.set(key,value);
   return url;
 }
@@ -237,7 +238,7 @@ function scheduleChildChrome(reason='frame-load',{token=loadToken,expectedHref='
 
 function navigate(system,options={}){
   const {feature='',replace=false,source='persistent-navbar'}=options;
-  system=cleanSystem(system);const route={feature,...nativeOptions(system,options)};mark(system);const url=shellUrl(system,route);history[replace?'replaceState':'pushState']({system,...route},'',`${url.pathname}${url.search}`);
+  system=cleanSystem(system);const route={feature,...lineageOptions(options),...nativeOptions(system,options)};mark(system);const url=shellUrl(system,route);history[replace?'replaceState':'pushState']({system,...route},'',`${url.pathname}${url.search}`);
   const target=contentUrl(system,route),host=frame();if(!host)return false;
   clearChildChromeWork();
   const token=++loadToken;showLoading();clearTimeout(loadTimer);clearInterval(readyPollTimer);loadTimer=setTimeout(()=>{if(token===loadToken)showError(`${system} is taking too long to open.`)},9000);

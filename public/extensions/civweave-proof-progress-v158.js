@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveProofProgressV158)return;
-const VERSION='1.0.8-proof-progress-v158-campus-projection';
+const VERSION='1.0.9-proof-progress-v158-stored-quest-projection';
 const KEYS={
   campus:'civweave.working-campus.v1',
   intentions:'civweave.intentions.v127',
@@ -15,6 +15,7 @@ const KEYS={
   anarchadia:'civweave.anarchadia.quest-work.v1'
 };
 const COMPLETE=new Set(['completed','complete','fulfilled','settled','accepted','delivered','verified','passed','closed']);
+const TERMINAL=new Set(['abandoned','archived','cancelled','canceled']);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const read=(key,fallback)=>parse(localStorage.getItem(key),fallback);
 const list=value=>Array.isArray(value)?value:[];
@@ -124,6 +125,19 @@ function proofState(){
   if(!plan)return{campus,plan:null,paths:[]};
   return{campus,plan,paths:list(plan.paths).map(path=>({path,result:completionFor(path,plan)}))};
 }
+function storedPlans(){
+  const campus=read(KEYS.campus,null),plans=new Map();
+  if(campus?.plan?.id)plans.set(String(campus.plan.id),campus.plan);
+  for(const row of list(read(KEYS.intentions,[])).slice(0,100))if(row?.plan?.id&&!plans.has(String(row.plan.id)))plans.set(String(row.plan.id),row.plan);
+  return{campus,plans:[...plans.values()]};
+}
+function planCompletion(planId){
+  const plan=storedPlans().plans.find(plan=>String(plan.id)===String(planId)),state=clean(plan?.state),terminal=TERMINAL.has(state);
+  if(!plan)return{planId:String(planId||''),state:'missing',terminal:false,complete:false,paths:[],reason:'No saved Quest has that exact identity.'};
+  const paths=list(plan.paths).map(path=>({pathId:path.id,realm:path.realm,...completionFor(path,plan)}));
+  const complete=!terminal&&['active','completed'].includes(state)&&paths.length>0&&paths.every(path=>path.complete===true);
+  return{planId:plan.id,state,terminal,complete,paths,reason:terminal?'The Quest was explicitly stopped.':state==='review'?'The Quest still requires explicit activation.':complete?'Every path has current accepted native proof.':'Accepted native proof is still required for every path.'};
+}
 function updateIntentions(plan){
   const rows=list(read(KEYS.intentions,[]));
   let changed=false;
@@ -148,10 +162,12 @@ function syncProgress(){
   if(syncing)return{changed:false,reason:'already syncing'};
   syncing=true;
   try{
-    const snapshot=proofState(),campus=snapshot.campus,plan=snapshot.plan;
-    if(!campus||!plan)return{changed:false,reason:'no active plan'};
+    const {campus,plans}=storedPlans(),changedPlans=[];
+    for(const plan of plans){
+    if(TERMINAL.has(clean(plan.state)))continue;
     let changed=false;
-    for(const {path,result} of snapshot.paths){
+    for(const path of list(plan.paths)){
+      const result=completionFor(path,plan);
       const allIndexes=list(path.steps).map((_,index)=>index);
       const partial=list(result.completedIndexes).map(Number).filter(index=>Number.isInteger(index)&&index>=0&&index<allIndexes.length);
       const nextProgress=result.complete?allIndexes:[...new Set(partial)].sort((a,b)=>a-b);
@@ -163,16 +179,18 @@ function syncProgress(){
       if(JSON.stringify(path.proofProgress||{})!==JSON.stringify(comparable)){path.proofProgress=nextProof;changed=true}
     }
     const paths=list(plan.paths),allDone=paths.length>0&&paths.every(path=>path.status==='completed');
-    const nextPlanState=allDone?'completed':(plan.state==='review'?'review':'active');
+    const nextPlanState=plan.state==='review'?'review':allDone?'completed':'active';
     if(plan.state!==nextPlanState){plan.state=nextPlanState;changed=true}
     if(changed){
-      plan.updatedAt=now();campus.updatedAt=plan.updatedAt;
-      localStorage.setItem(KEYS.campus,JSON.stringify(campus));
+      plan.updatedAt=now();
+      if(campus?.plan?.id===plan.id){campus.plan=plan;campus.updatedAt=plan.updatedAt;localStorage.setItem(KEYS.campus,JSON.stringify(campus))}
       updateIntentions(plan);updateInbox(plan);
+      changedPlans.push(plan.id);
       dispatchEvent(new CustomEvent('civweave:proof-progress-synced',{detail:{planId:plan.id,state:plan.state,paths:paths.map(path=>({id:path.id,realm:path.realm,status:path.status,progress:path.progress})),at:plan.updatedAt}}));
     }
+    }
     lockCheckpointInputs();
-    return{changed,plan};
+    return{changed:changedPlans.length>0,plan:campus?.plan||null,changedPlans};
   }finally{syncing=false}
 }
 function lockCheckpointInputs(root=document){
@@ -206,5 +224,5 @@ function boot(){
   for(const name of ['civweave:rewards-changed','civweave:reward-bridge','civweave:peer-review-recorded','civweave:domain-synced','civweave:intentions-changed','civweave:working-campus-plan-built','civweave:anarchadia-quest-work-changed','civweave:fellowfare-quest-work-changed','civweave:cerbanimo-quest-path-materialized','cerbanimo:quest-engine-changed','fellowfare:marketplace-changed'])addEventListener(name,syncProgress);
 }
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-globalThis.CivweaveProofProgressV158=Object.freeze({VERSION,KEYS,proofState,syncProgress,lockCheckpointInputs,completionFor,cerbanimoCompletion,fellowfareCompletion,anarchadiaCompletion});
+globalThis.CivweaveProofProgressV158=Object.freeze({VERSION,KEYS,proofState,planCompletion,syncProgress,lockCheckpointInputs,completionFor,cerbanimoCompletion,fellowfareCompletion,anarchadiaCompletion});
 })();

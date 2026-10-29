@@ -159,6 +159,7 @@ The canonical ownership list lives in `docs/architecture/systems-of-practice.md`
 | Local AI bootstrap | `public/app/local-ai/bootstrap-v266.js` |
 | Private messaging | `public/app/civweave-private-messaging-v1.js` |
 | Offline object mesh | `public/app/local-object-mesh-v146.js` |
+| Starling Collective | `public/app/starling-collective-v1.js`; `starling-integration-v1.js` exposes the shared rail action. Guild limits and confirmed proposals use `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`. |
 | Guild Quest publication | `cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs`; `public/app/guild-quest-client-v1.js` calls it through existing member sessions |
 | Radio | `public/app/system-radio-agent-v233.js` |
 | Review surface | `public/app/shared-review-surface-v234.js`; receipt presentation helper `public/app/shared/guide-outcome-scene-v1.js` and matching CSS |

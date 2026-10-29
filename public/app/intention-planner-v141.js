@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.0-intention-planner-v141-ai-authority-only';
+const VERSION='1.1.1-intention-planner-v141-collective-line-identity';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const PLAN_SCHEMA='civweave.intention-weave.v1';
 const EXPLICIT_PLAN_TRIGGER=/\b(plan|roadmap|routine|program|curriculum|pathway|steps|practice schedule|daily practice|weekly practice|reviewable quest|reviewable weave|set (?:an )?intention)\b|\bteach me\b|\bhelp me learn\b|\bcreate (?:me )?(?:a )?plan\b/i;
@@ -58,11 +58,22 @@ function aiAuthoredPlan(plan){
   return Boolean(plan?.id&&plan?.schema===PLAN_SCHEMA&&authoring?.aiGenerated===true&&authoring?.mode==='model-structured-json'&&provider&&!NON_AI_PROVIDER_RE.test(provider));
 }
 function savedItems(){const value=parse(localStorage.getItem(INTENTIONS_KEY),[]);return Array.isArray(value)?value:[]}
+function collectiveLine(plan){return plan?.collective?.id==='starling'?clean(plan.collective.lineId):''}
+function existingCollective(items,plan){
+  const line=collectiveLine(plan),sameId=items.find(item=>item?.id===plan.id||item?.plan?.id===plan.id);
+  if(sameId&&(line||collectiveLine(sameId.plan))&&line!==collectiveLine(sameId.plan)){
+    const error=new Error('That Quest ID belongs to a different Collective line.');error.code='QUEST_COLLECTIVE_LINE_CONFLICT';throw error;
+  }
+  return line?items.find(item=>collectiveLine(item?.plan)===line)||null:null;
+}
 function persist(plan){
   if(!aiAuthoredPlan(plan)){
     const error=new Error('Quest persistence requires validated AI-authored structured output.');error.code='QUEST_AI_AUTHORING_REQUIRED';emit('civweave:quest-ai-authority-rejected',{surface:'intention-planner.persist',planId:clean(plan?.id),title:clean(plan?.title)});throw error;
   }
-  const items=savedItems(),fingerprint=lower(`${plan.title}|${plan.wish}`).slice(0,500),duplicate=items.find(item=>item?.kind==='weave-plan'&&item?.fingerprint===fingerprint&&item?.state!=='completed'),at=new Date().toISOString();
+  const items=savedItems(),line=collectiveLine(plan),existing=existingCollective(items,plan),fingerprint=lower(`${plan.title}|${plan.wish}`).slice(0,500),duplicate=existing||(!line&&items.find(item=>item?.kind==='weave-plan'&&!collectiveLine(item.plan)&&item?.fingerprint===fingerprint&&!['completed','abandoned','archived','cancelled','canceled'].includes(item?.state))),at=new Date().toISOString();
+  // Re-importing a Collective line must never reset its accepted work, path IDs,
+  // or terminal decision. Revisions are editable only while the Quest is REVIEW.
+  if(existing&&String(existing.plan?.state||existing.state)!=='review')return existing;
   if(duplicate){
     plan.id=duplicate.id;plan.createdAt=duplicate.plan?.createdAt||duplicate.createdAt||plan.createdAt;plan.updatedAt=at;duplicate.plan=plan;duplicate.text=plan.title;duplicate.state='review';duplicate.done=false;duplicate.updatedAt=at;
     localStorage.setItem(INTENTIONS_KEY,JSON.stringify(items.slice(0,100)));dispatchChanged(items);return duplicate;
@@ -70,9 +81,23 @@ function persist(plan){
   const item={id:plan.id,kind:'weave-plan',fingerprint,text:plan.title,state:'review',done:false,createdAt:plan.createdAt||at,updatedAt:plan.updatedAt||at,plan};items.unshift(item);localStorage.setItem(INTENTIONS_KEY,JSON.stringify(items.slice(0,100)));dispatchChanged(items);return item;
 }
 function restore(plan){
-  if(!plan?.id)return null;const items=savedItems(),existing=items.find(item=>item?.id===plan.id||item?.plan?.id===plan.id);if(existing)return existing;
+  if(!plan?.id)return null;const items=savedItems(),existing=existingCollective(items,plan)||items.find(item=>item?.id===plan.id||item?.plan?.id===plan.id);if(existing)return existing;
   if(!aiAuthoredPlan(plan)){emit('civweave:quest-ai-authority-rejected',{surface:'intention-planner.restore',planId:clean(plan?.id),title:clean(plan?.title)});return null}
   const restored=structuredClone(plan);restored.state=restored.state||'review';const at=new Date().toISOString(),item={id:restored.id,kind:'weave-plan',fingerprint:lower(`${restored.title}|${restored.wish}`).slice(0,500),text:restored.title||'Restored Quest',state:restored.state,done:false,createdAt:restored.createdAt||at,updatedAt:at,plan:restored};items.unshift(item);localStorage.setItem(INTENTIONS_KEY,JSON.stringify(items.slice(0,100)));dispatchChanged(items);return item;
+}
+function abandon(planId,{collectiveLineId,reason=''}={}){
+  const items=savedItems(),item=items.find(item=>item?.id===planId||item?.plan?.id===planId),plan=item?.plan,line=clean(collectiveLineId);
+  if(!plan||!line||collectiveLine(plan)!==line)return{ok:false,code:'QUEST_COLLECTIVE_LINE_CONFLICT',error:'Abandonment requires the exact saved Collective line and Quest.'};
+  if(plan.state==='completed'||item.state==='completed'||globalThis.CivweaveProofProgressV158?.planCompletion?.(plan.id)?.complete===true)return{ok:false,code:'QUEST_ALREADY_COMPLETED',error:'Completed work cannot be rewritten as abandoned.'};
+  if(plan.state==='abandoned')return{ok:true,unchanged:true,item,plan};
+  const at=new Date().toISOString(),next=structuredClone(plan);next.state='abandoned';next.updatedAt=at;next.abandonedAt=at;next.abandonment={at,collectiveLineId:line,reason:clean(reason).slice(0,1200)};
+  item.plan=next;item.state='abandoned';item.done=false;item.updatedAt=at;
+  const entries=[[INTENTIONS_KEY,items]],campusKey='civweave.working-campus.v1',inboxKey='civweave.realm-inbox.v1',campus=parse(localStorage.getItem(campusKey),{}),inbox=parse(localStorage.getItem(inboxKey),[]);
+  if(campus?.plan?.id===plan.id)entries.push([campusKey,{...campus,plan:next,updatedAt:at}]);
+  if(Array.isArray(inbox)&&inbox.some(row=>row?.payload?.weaveId===plan.id))entries.push([inboxKey,inbox.map(row=>row?.payload?.weaveId===plan.id?{...row,status:'abandoned',updatedAt:at}:row)]);
+  const before=entries.map(([key])=>[key,localStorage.getItem(key)]);
+  try{for(const [key,value] of entries)localStorage.setItem(key,JSON.stringify(value))}catch(error){for(const [key,value] of before.reverse())try{value===null?localStorage.removeItem(key):localStorage.setItem(key,value)}catch{}return{ok:false,code:'QUEST_ABANDON_SAVE_FAILED',error:`The Quest could not be stopped: ${clean(error?.message||error)}`}}
+  dispatchChanged(items);emit('civweave:quest-abandoned',{planId:plan.id,collectiveLineId:line,at});return{ok:true,item,plan:next};
 }
 function format(plan){
   if(!plan)return'';const paths=(plan.paths||[]).map((path,index)=>[`${index+1}. ${clean(path.title)} · ${clean(path.realm)}`,clean(path.purpose),`First step: ${clean(path.steps?.[0])||'Review the AI-generated first checkpoint.'}`,`Completion: ${clean(path.completionCriteria)||'Review the AI-generated completion criterion.'}`].join('\n')).join('\n\n'),governance=plan.governance?`\n\nConsent layer · ${clean(plan.governance.realm||'anarchadia')}\n${clean(plan.governance.purpose)}`:'';
@@ -85,6 +110,6 @@ function maybeCreate(options={}){
   if(shouldCreate(options))emit('civweave:quest-ai-generation-required',{surface:'intention-planner.maybeCreate',text:clean(options?.text)});return null;
 }
 
-globalThis.CivweaveIntentionPlanner={version:VERSION,schema:PLAN_SCHEMA,triggers:{explicit:EXPLICIT_PLAN_TRIGGER,wish:WISH_TRIGGER,direct:DIRECT_INTENTION_TRIGGER,retry:RETRY_TRIGGER,correction:CORRECTION_TRIGGER},stripGreeting,projectIntent,shouldCreate,activeIntentionTurns,aiAuthoredPlan,buildPlan,maybeCreate,persist,restore,format,deterministicQuestCreation:false,aiQuestOnly:true};
+globalThis.CivweaveIntentionPlanner={version:VERSION,schema:PLAN_SCHEMA,triggers:{explicit:EXPLICIT_PLAN_TRIGGER,wish:WISH_TRIGGER,direct:DIRECT_INTENTION_TRIGGER,retry:RETRY_TRIGGER,correction:CORRECTION_TRIGGER},stripGreeting,projectIntent,shouldCreate,activeIntentionTurns,aiAuthoredPlan,buildPlan,maybeCreate,persist,restore,abandon,format,deterministicQuestCreation:false,aiQuestOnly:true};
 emit('civweave:intention-planner-ready',{aiQuestOnly:true,deterministicQuestCreation:false});
 })();

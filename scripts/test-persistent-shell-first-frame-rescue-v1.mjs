@@ -40,6 +40,16 @@ test('all five systems start without external JavaScript or DOMContentLoaded',()
   }
 });
 
+test('Quest lineage survives the persistent shell first-frame and runtime routes for every subsystem',()=>{
+  const runtimeContext={URL,URLSearchParams,location:{origin:'https://civweave-staging.pages.dev'},document:{readyState:'loading',addEventListener(){}},addEventListener(){}};
+  vm.runInNewContext(runtime,runtimeContext);const owner=runtimeContext.CivweavePersistentSystemShellV1;
+  for(const system of ['living-school','cerbanimo','fellowfare','anarchadia']){
+    const options={weave:'qa-weave',path:'qa-path'},h=harness({system,query:'&'+new URLSearchParams(options)});
+    for(const url of [new URL(h.frame.src),owner.contentUrl(system,options),owner.shellUrl(system,options)]){assert.equal(url.searchParams.get('weave'),'qa-weave');assert.equal(url.searchParams.get('path'),'qa-path');}
+    assert.equal(h.frame.src,owner.contentUrl(system,options).href);
+  }
+});
+
 test('healthy embedded HTML hides startup overlay without shared runtime',()=>{
   const h=harness();h.frame.handlers.load();
   assert.equal(h.loading.hidden,true);
