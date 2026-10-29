@@ -33,7 +33,7 @@ async function bound(){
 const row=value=>value?.line||value;
 const transport=Object.freeze({
  async read(){const chosen=await selected(),packet=await globalThis.CivweaveGuildStarlingV1.read(chosen.nodeId);scope=chosen;return {...packet,...packet.context,guildId:packet.guildId,memberUserId:chosen.userId,source:'authenticated-guild',limits:packet.policy};},
- async reserve({lineId,title}){return globalThis.CivweaveGuildStarlingV1.reserve(await bound(),{idempotencyKey:lineId,title});},
+ async reserve({lineId,title,creationMode='manual'}){return globalThis.CivweaveGuildStarlingV1.reserve(await bound(),{idempotencyKey:lineId,title,mode:creationMode});},
  async propose({reservation,quest,provider,model}){return globalThis.CivweaveGuildStarlingV1.propose(await bound(),{id:row(reservation).id,expectedRevision:row(reservation).revision,quest,provider,model});},
  async confirm({reservation,expectedRevision,proposalHash,confirmed}){return globalThis.CivweaveGuildStarlingV1.confirm(await bound(),{id:row(reservation).id,expectedRevision,proposalHash,confirmed});},
  async abandon({reservation,reason}){return globalThis.CivweaveGuildStarlingV1.abandon(await bound(),{id:row(reservation).id,expectedRevision:row(reservation).revision,reason});},
