@@ -42,7 +42,7 @@
       "people",
       "power"
     ],
-    "discovery_note": "Full-song vocal signal from source metadata; genre-tag selection is a station-style match, not proof of lyrical content or an explicit-language audit. Unreviewed recordings are excluded from S.A.F.E. mode."
+    "discovery_note": "The 200-track discovery expansion uses exact community playlist source pages first; thematic and genre queries are supplementary to reduce API load. Source metadata is not a human listening or lyric review."
   },
   "playlists": [
     {
@@ -54,11 +54,7 @@
         "community",
         "commons",
         "collaboration",
-        "together",
-        "sharing",
-        "people",
-        "hope",
-        "peace"
+        "together"
       ],
       "scan_queries": [
         "freedom share vocals",
@@ -132,12 +128,7 @@
       "genre_tags": [
         "chill",
         "indie",
-        "electronic",
-        "soul",
-        "downtempo",
-        "trip_hop",
-        "pop",
-        "funk"
+        "electronic"
       ],
       "review_candidates_ccmixter": [
         {
@@ -217,6 +208,41 @@
           "source_url": "https://ccmixter.org/files/unreal_dm/28114",
           "source_license_seen": "CC-BY",
           "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "58199",
+          "title": "Turn Up the Peace",
+          "artist": "Mr_Yesterday",
+          "themes": [
+            "peace",
+            "hope",
+            "cooperation"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "61846",
+          "title": "We are Them",
+          "artist": "Mr_Yesterday",
+          "themes": [
+            "solidarity",
+            "community",
+            "action"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "28096",
+          "title": "Freedom To Share",
+          "artist": "Mana Junkie",
+          "themes": [
+            "sharing",
+            "creative commons"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
         }
       ]
     },
@@ -229,11 +255,7 @@
         "nature",
         "ecology",
         "education",
-        "truth",
-        "imagine",
-        "grow",
-        "climate",
-        "change"
+        "truth"
       ],
       "scan_queries": [
         "truth choice vocals",
@@ -309,12 +331,7 @@
       "genre_tags": [
         "folk",
         "acoustic",
-        "jazz",
-        "chill",
-        "ambient",
-        "world",
-        "pop",
-        "blues"
+        "jazz"
       ],
       "review_candidates_ccmixter": [
         {
@@ -420,6 +437,18 @@
           "source_url": "https://ccmixter.org/files/SackJo22/40534",
           "source_license_seen": "CC-BY",
           "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33699",
+          "title": "The Right Voice",
+          "artist": "SackJo22",
+          "themes": [
+            "learning",
+            "choices",
+            "self-reflection"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
         }
       ]
     },
@@ -432,11 +461,7 @@
         "technology",
         "create",
         "automation",
-        "energy",
-        "power",
-        "future",
-        "build",
-        "rise"
+        "energy"
       ],
       "scan_queries": [
         "labor freedom vocals",
@@ -512,12 +537,7 @@
       "genre_tags": [
         "electronic",
         "rock",
-        "funk",
-        "dance",
-        "hip_hop",
-        "techno",
-        "alternative",
-        "indie"
+        "funk"
       ],
       "review_candidates_ccmixter": [
         {
@@ -622,11 +642,7 @@
         "share",
         "sustainability",
         "dignity",
-        "friendship",
-        "cooperative",
-        "caring",
-        "together",
-        "love"
+        "friendship"
       ],
       "scan_queries": [
         "mutual aid vocals",
@@ -702,12 +718,7 @@
       "genre_tags": [
         "funk",
         "soul",
-        "reggae",
-        "jazz",
-        "pop",
-        "acoustic",
-        "chill",
-        "blues"
+        "reggae"
       ],
       "review_candidates_ccmixter": [
         {
@@ -799,11 +810,7 @@
         "liberty",
         "protest",
         "freedom",
-        "oppression",
-        "solidarity",
-        "organize",
-        "liberation",
-        "peace"
+        "oppression"
       ],
       "scan_queries": [
         "justice resistance vocals",
@@ -879,12 +886,7 @@
       "genre_tags": [
         "rock",
         "punk",
-        "hip_hop",
-        "reggae",
-        "dub",
-        "experimental",
-        "alternative",
-        "electronic"
+        "hip_hop"
       ],
       "review_candidates_ccmixter": [
         {
@@ -977,6 +979,51 @@
           "source_url": "https://ccmixter.org/files/Coruscate/68869",
           "source_license_seen": "CC-BY",
           "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33646",
+          "title": "Rooted In Peace",
+          "artist": "Admiral Bob",
+          "themes": [
+            "peace",
+            "ecology",
+            "mutual care"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "64910",
+          "title": "Bodies In The Street",
+          "artist": "Radioontheshelf",
+          "themes": [
+            "solidarity",
+            "justice"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "56027",
+          "title": "J'ai un rêve (mixage de sensation)",
+          "artist": "Bluemillenium",
+          "themes": [
+            "freedom",
+            "justice"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "27917",
+          "title": "The Remixin' Blues",
+          "artist": "Admiral Bob",
+          "themes": [
+            "creative freedom",
+            "sharing"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
         }
       ]
     }
@@ -985,7 +1032,7 @@
   "max_library_tracks": 300,
   "genre_discovery": {
     "enabled": true,
-    "pages_per_tag": 3,
+    "pages_per_tag": 2,
     "results_per_page": 35,
     "license_classes": [
       "by",
@@ -993,13 +1040,11 @@
     ],
     "note": "Discover vocal full songs by source genre/mood tags; do not treat genre as proof of activist lyrics.",
     "broad_vocal_tags": [
-      "female_vocals",
-      "male_vocals",
       "vocals",
-      "spoken_word",
-      "rap"
+      "rap",
+      "spoken_word"
     ],
-    "broad_pages_per_tag": 12,
+    "broad_pages_per_tag": 4,
     "broad_playlist_id": "civweave",
     "broad_note": "Broad vocal search supplies additional songs for manual review; musical fit is inferred only from recorded tags and not assumed as an ideological match."
   },
@@ -1010,5 +1055,58 @@
     "require_api_license_confirmation": true,
     "exclude_from_safe_mode": true,
     "note": "Web-source license review is not a listen-through. Do not infer explicit:false or human lyric audit from source-page metadata."
+  },
+  "community_playlist_discovery": {
+    "enabled": true,
+    "max_uploads_per_playlist": 85,
+    "source_playlists": [
+      {
+        "id": "11087",
+        "name": "Tubed BY You CC BY",
+        "system": "civweave",
+        "themes": [
+          "creative commons",
+          "collaborative music",
+          "sharing"
+        ],
+        "evidence": "ccMixter community playlist compiled for CC BY music for film and video; uploader licenses separately verified"
+      },
+      {
+        "id": "9158",
+        "name": "By and By: Remixes",
+        "system": "living-school",
+        "themes": [
+          "transformation",
+          "resilience",
+          "hope",
+          "creative commons"
+        ],
+        "evidence": "ccMixter community remix project requiring CC BY contributions; actual upload license independently verified"
+      },
+      {
+        "id": "43545",
+        "name": "Community music playlist",
+        "system": "fellowfare",
+        "themes": [
+          "community",
+          "music",
+          "connection"
+        ],
+        "evidence": "ccMixter playlist of independently licensed tracks; every source upload is re-checked"
+      },
+      {
+        "id": "10742",
+        "name": "Tubed BY You-Mixes",
+        "system": "cerbanimo",
+        "themes": [
+          "making",
+          "collaboration",
+          "creative technology"
+        ],
+        "evidence": "ccMixter project playlist; not every track is CC BY, so non-allowlisted entries are rejected"
+      }
+    ],
+    "require_vocal_source_metadata": true,
+    "selection_note": "Community playlist membership supports the style fit only. Each full recording must have its own allowlisted CC BY/CC BY-SA license, MP3, voice signal, and no known explicit flag. Listening and lyric review remain pending."
   }
 }

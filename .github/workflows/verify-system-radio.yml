@@ -87,6 +87,11 @@ jobs:
           node --check scripts/verify-radio-shell-guarantee-v305.mjs
       - name: Verify direct audio, offline playback, licensing, and shared ownership
         run: node --test scripts/test-radio-direct-audio-v1.mjs scripts/test-radio-core-starter-cache-v1.mjs scripts/test-radio-panel-layout-v1.mjs scripts/test-radio-seek-fallback-v1.mjs
+      - name: Verify open-song license gates and community playlist parser
+        run: |
+          python -m py_compile scripts/harvest-open-music-v1.py scripts/harvest-open-vocal-music-v2.py
+          python scripts/test-open-music-harvest-v1.py
+          python scripts/test-open-vocal-music-v2.py
       - name: Verify radio contract
         run: |
           node scripts/verify-system-radio-v233.mjs

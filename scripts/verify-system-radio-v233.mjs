@@ -28,7 +28,7 @@ assert.doesNotMatch(radioSource,/history\[method\]=function/,'radio must not mon
 assert.doesNotMatch(radioSource,/setInterval\(/,'radio must not poll while idle');
 assert.match(radioSource,/const LAUNCHER_ID='cw-radio-station-launcher-v1'/,'universal radio launcher is missing');
 assert.match(radioSource,/html\[data-radio-embedded="true"\]\{--cw-radio-dock-space:0px\}/,'an embedded viewport must not count the parent navigation height again');
-assert.match(radioSource,/bottom:calc\(var\(--cw-radio-dock-space\) \+ 8px\)/,'radio launcher must live just above its owning viewport navigation bar');
+assert.match(radioSource,/bottom:calc\(var\(--cw-radio-dock-space\) \+ 10px\)/,'radio launcher must live just above its owning viewport navigation bar');
 assert.match(radioSource,/directAudio:true,directDefault:true/,'open audio must be the canonical station default');
 assert.match(radioSource,/const MODE_KEY='civweave\.radio\.playback-mode\.v1'/,'direct playback/Spotify mode must persist independently of the old Spotify-only default');
 assert.match(radioSource,/const SAFE_KEY='civweave\.safe-mode\.v1'/,'radio surface must honor S.A.F.E. mode');
