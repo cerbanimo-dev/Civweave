@@ -91,7 +91,7 @@ export async function executeGuildStarlingAction(storage, member, action, input 
     if (action === 'reserve') {
       const title = clean(input.title, 240); if (!title) fail('A Collective Quest line title is required.');
       const id = `starling-line:${reservationHash}`, key = lineKey(id), prior = await tx.get(key);
-      if (prior) { if (prior.title !== title||prior.creationMode!==reservationMode) fail('That idempotency key already names a different Quest line or mode.', 409); return { ok: true, line: clone(prior), idempotent: true }; }
+      if (prior) { if (prior.title !== title||!(prior.creationMode===reservationMode||prior.creationMode==null&&reservationMode==='manual')) fail('That idempotency key already names a different Quest line or mode.', 409); return { ok: true, line: clone(prior), idempotent: true }; }
       const events = currentEvents(state.creationEvents, at);
       if (reservationMode==='autonomous'&&state.activeIds.length >= STARLING_POLICY.maxActiveLines) fail('Complete or abandon an active autonomous Collective project before creating another.', 409, 'STARLING_ACTIVE_LIMIT');
       if (reservationMode==='autonomous'&&events.length >= STARLING_POLICY.maxCreatedPerWindow) fail('This Guild has reached six autonomous project creations in the rolling last 24 hours. Manual plans remain unlimited.', 429, 'STARLING_CREATION_LIMIT');
