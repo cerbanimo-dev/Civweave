@@ -66,6 +66,23 @@ require(mod.record_from_item(
     {'id':'civweave'}, vocal_stem, 'by', 'source-page:900001',
     review_seed={'themes':['cooperation']}, preferred_terms=[], minimum_teeth=1,
 ) is None, 'A vocal-only stem should not be represented as a finished song')
+playlist_html = '''
+<main><a href="/files/art_ist/41001">Licensed mix</a>
+<a href="https://ccmixter.org/files/musicmaker/41002">Another mix</a>
+<a href="/files/art_ist/41001">Duplicate</a>
+<a href="https://bad.example/files/evil/1234">Wrong domain</a>
+<a href="/files/artist/profile">Not a track</a>
+<a href="/files/artist/41003?playlist=1">Track with query</a>
+</main>'''
+links = mod.SourcePlaylistLinks()
+links.feed(playlist_html)
+require(links.ids == ['41001', '41002', '41003'], 'Playlist browsing must capture only unique on-site exact upload IDs')
+require(mod.record_from_item(
+    {'id':'civweave'}, source_item, 'by', 'community-playlist:11087',
+    preferred_terms=[], minimum_teeth=1, genre_tag='community-playlist:11087',
+)['explicit'] is None, 'Playlist inclusion must never imply a successful lyric audit')
+print('open-vocal-music community playlist URL and safety gates: ok')
+
 print('open-vocal-music source-page candidate license + audit controls: ok')
 
 print('open-vocal-music vocal + teeth gate: ok')
