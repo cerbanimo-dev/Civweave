@@ -239,11 +239,11 @@ function normalizeRecord(row){
 }
 function normalizeStreamRecord(row){
   const license=row?.license||{},file=(row?.files||[]).find(item=>/\.mp3(?:\?|$)/i.test(item?.url||''));
-  if(row?.provider!=='ccmixter'||row?.explicit!==false||row?.vocal_verified!==true||row?.instrumental_only===true||!row?.candidate_id||!file||!['CC-BY','CC-BY-SA','CC0','PUBLIC-DOMAIN'].includes(license.spdx)||license.redistribution!==true||license.commercial_use!==true||!clean(license.evidence))return null;
+  if(row?.explicit!==false||row?.vocal_verified!==true||row?.instrumental_only===true||!row?.candidate_id||!file||!['CC-BY','CC-BY-SA','CC0','PUBLIC-DOMAIN'].includes(license.spdx)||license.redistribution!==true||license.commercial_use!==true||!clean(license.evidence))return null;
   let url;try{url=new URL(file.url)}catch{return null}
   if(url.protocol!=='https:'||url.hostname!=='ccmixter.org'||!url.pathname.startsWith('/content/')||!url.pathname.toLowerCase().endsWith('.mp3'))return null;
-  const source=safeUrl(row.source_url),licenseUrl=safeUrl(license.url),bytes=Number(file.bytes)||0;
-  if(!source||!licenseUrl||bytes<=0||bytes>MAX_AUDIO_BYTES||!/^https:\/\/ccmixter\.org\/files\//.test(source)||!/^https:\/\/creativecommons\.org\//.test(licenseUrl.replace('http://','https://')))return null;
+  const source=safeUrl(row.source_url),licenseUrl=safeUrl(String(license.url||'').replace(/^http:\/\/creativecommons\.org\//,'https://creativecommons.org/')),bytes=Number(file.bytes)||0;
+  if(!source||!licenseUrl||bytes<=0||bytes>MAX_AUDIO_BYTES||!/^https:\/\/ccmixter\.org\/files\//.test(source)||!/^https:\/\/creativecommons\.org\//.test(licenseUrl))return null;
   const systems=[...new Set([row.playlist_id,...(row.playlist_matches||[]).map(item=>item.playlist_id)].filter(id=>SYSTEMS.includes(id)))];
   return Object.freeze({id:clean(row.candidate_id,120),title:clean(row.title,240),artist:clean(row.artist,240),url:url.href,source,licenseUrl,license:clean(license.label||license.spdx,100),credits:clean(row.attribution?.creator||row.artist,1200),bytes,sha256:'',systems,safeAudit:false,streamOnly:true,changes:'Streamed from the original CC-licensed source; offline copy unavailable.'});
 }
