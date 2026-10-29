@@ -91,6 +91,25 @@ function selectedConfig(runtime){
   const seconds=Number(settings.timeoutSeconds),timeoutMs=Number.isFinite(seconds)&&seconds>=5&&seconds<=600?seconds*1000:Number(config.timeoutMs)||90000;
   return{...config,provider,route:provider,timeoutMs,stream:true,maxTokens:Math.max(900,Math.min(2200,Number(config.maxTokens)||1600)),temperature:Math.min(.35,Math.max(.1,Number(config.temperature)||.25))};
 }
+/** Starling's three structured turns are a longer-running task than chat.
+ * Check reachable local APIs before consuming a non-refundable Quest creation.
+ * Reachability is not proof of model loading, successful streaming, or final JSON.
+ */
+async function preparePlannerRuntime(){
+  const runtime=await ensureRuntime(),selected=selectedConfig(runtime);
+  const local=['ollama','openai-compatible','downloaded-local'].includes(selected.provider)
+    &&(runtime.endpointLeavesDevice?.(selected)===false || /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?\//.test(selected.endpoint||''));
+  if(local && selected.endpoint && typeof runtime.detectCapabilities==='function'){
+    const result=await runtime.detectCapabilities(selected,{probe:true});
+    if(result?.available===false){
+      const detail=list(result.notes).map(note=>clean(note,160)).filter(Boolean).join(' · ');
+      throw new Error('Local AI server is unreachable. Check the Termux llama-server or Ollama endpoint in Settings before creating a Starling Quest line.'+(detail?' Diagnostic: '+detail:''));
+    }
+  }
+  // 90s interactive defaults are not enough to load/evaluate local 4B JSON
+  // plans. No change to server/hosted inference or member/Guild quotas.
+  return{runtime,config:local?{...selected,timeoutMs:Math.max(900000,selected.timeoutMs||0)}:selected,local};
+}
 async function ensureRuntime(){
   if(!globalThis.CivweaveModelRuntime?.generate){const loader=globalThis.CivweaveFamilyAILoaderV105;if(!loader?.ensure)throw new Error('Open the shared AI service before starting Starling.');await loader.ensure()}
   if(!globalThis.CivweaveModelRuntime?.generate)throw new Error('The selected AI runtime did not become ready.');return globalThis.CivweaveModelRuntime;
@@ -121,13 +140,16 @@ async function reserve({intention,scope,shareIntention}){
 }
 async function runLine({intention='',scope='local',shareIntention=false,signal}={}){
   intention=clean(intention,4000);if(intention.length<12)throw new Error('Describe a concrete Guild Intention of at least 12 characters.');if(!['local','guild'].includes(scope))throw new Error('Choose local or Guild planning.');
-  const reserved=await reserve({intention,scope,shareIntention}),id=reserved.id,controller=new AbortController();running.set(id,controller);let runtime,config;
+  // Select and probe the model before reserving a local creation slot.
+  // The actual Guild reservation still precedes every AI inference call.
+  const prepared=await preparePlannerRuntime();
+  const reserved=await reserve({intention,scope,shareIntention}),id=reserved.id,controller=new AbortController();
+  running.set(id,controller);const {runtime,config,local}=prepared;
   const forwardAbort=()=>controller.abort(signal?.reason||new Error('Starling planning cancelled.'));if(signal?.aborted)forwardAbort();else signal?.addEventListener?.('abort',forwardAbort,{once:true});
   const active=()=>{if(controller.signal.aborted)throw controller.signal.reason||new Error('Starling planning cancelled.')};
   try{return await navigator.locks.request(INFERENCE_LOCK,{mode:'exclusive',signal:controller.signal},async()=>{
     active();if(scope==='guild'){const reservation=await transport.reserve({lineId:id,title:intention.slice(0,150),intention});if(!reservation?.line?.id&&!reservation?.id)throw new Error('The Guild did not confirm a Quest-line reservation.');await update(id,line=>{line.reservation=copy(reservation);event(line,{kind:'authority',text:'The Guild reserved a shared slot. Your intention was shared with your explicit consent.'})})}
-    active();runtime=await ensureRuntime();active();config=selectedConfig(runtime);
-    await update(id,line=>{line.state='planning';line.requested={provider:config.provider,model:clean(config.model,240)};event(line,{kind:'started',text:'Three bounded public planning turns started. Models can propose work; they cannot activate, publish or complete a Quest.'})});
+    active();await update(id,line=>{line.state='planning';line.requested={provider:config.provider,model:clean(config.model,240)};event(line,{kind:'started',text:'Three bounded public planning turns started. Models can propose work; they cannot activate, publish or complete a Quest.'+(local?' Local models can take several minutes per turn; keep this planning window open.':'')})});
     const outputs=[];
     for(const role of ROLES){
       active();await update(id,line=>{line.currentRole=role.label;event(line,{kind:'stage',role:role.label,text:'Waiting for the selected AI.'})});

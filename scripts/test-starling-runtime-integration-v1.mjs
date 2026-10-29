@@ -13,7 +13,7 @@ function fixture(){
   w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;w.AbortController=AbortController;w.structuredClone=structuredClone;w.setInterval=()=>0;w.clearInterval=()=>{};
   Object.defineProperty(w.navigator,'locks',{value:{request:async(_name,_options,fn)=>fn()}});
   w.localStorage.setItem('civweave-model-profiles-v1',JSON.stringify({interactive:{provider:'ollama',route:'ollama',model:'qwen3.5:4b',endpoint:'http://127.0.0.1:11434/api/chat',timeoutMs:300000,maxTokens:2200}}));
-  w.fetch=async(url,init)=>{const body=JSON.parse(init.body);calls.push({url:String(url),body});const output=calls.length===3?plan:brief;return new Response(JSON.stringify({model:'qwen3.5:4b',message:{role:'assistant',content:JSON.stringify(output)},done:true,done_reason:'stop'})+'\n',{headers:{'content-type':'application/x-ndjson'}})};
+  w.fetch=async(url,init)=>{if(String(url).endsWith('/api/tags'))return new Response(JSON.stringify({models:[{name:'qwen3.5:4b'}]}),{headers:{'content-type':'application/json'}});const body=JSON.parse(init.body);calls.push({url:String(url),body});const output=calls.length===3?plan:brief;return new Response(JSON.stringify({model:'qwen3.5:4b',message:{role:'assistant',content:JSON.stringify(output)},done:true,done_reason:'stop'})+'\n',{headers:{'content-type':'application/x-ndjson'}})};
   for(const source of sources)w.eval(source);
   return{w,calls,api:w.CivweaveStarlingCollectiveV1,close:()=>w.close()};
 }
