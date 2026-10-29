@@ -1,0 +1,49 @@
+name: Build Seedling Public-Domain Book Shelf
+on:
+  pull_request:
+    paths:
+      - 'scripts/build_seedling_public_domain_shelf.py'
+      - 'scripts/test_seedling_shelf_builder.py'
+      - '.github/workflows/build-seedling-public-domain-shelf.yml'
+  push:
+    branches:
+      - feature/living-library-seedling-manual-journeys
+    paths:
+      - 'scripts/build_seedling_public_domain_shelf.py'
+      - 'scripts/test_seedling_shelf_builder.py'
+      - '.github/workflows/build-seedling-public-domain-shelf.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-books:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test EPUB integrity and catalog export
+        run: python -m unittest scripts/test_seedling_shelf_builder.py -v
+      - name: Download validated public-domain editions
+        run: python scripts/build_seedling_public_domain_shelf.py --out dist/seedling --limit 14
+      - name: Show actual included-book count
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('dist/seedling/catalog.json'))
+          print('Full books included:',d['includedCount'],'of',d['catalogCount'])
+          for item in d['books']:
+              if not item['included']:print('Not included:',item['id'],item['title'])
+          PY
+      - name: Publish SD-card-ready archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: Living-Library-Seedling-v0.2-Public-Domain-Books
+          path: |
+            dist/seedling/Living-Library-Seedling-Edition-v0.2-Full-Books.zip
+            dist/seedling/catalog.opds.xml
+            dist/seedling/catalog.json
+          if-no-files-found: error
+          retention-days: 90

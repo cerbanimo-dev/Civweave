@@ -1,0 +1,163 @@
+{
+  "schema": "civweave.seedling.public-library.v1",
+  "version": "0.3.0",
+  "updatedAt": "2026-10-29T00:00:00Z",
+  "scope": "public-domain-full-books",
+  "notes": "Wi-Fi updates are a manual browse-and-download operation; do not claim automatic background updates or Passport access. No credential needed. No-image historical editions. License rules may vary outside the US.",
+  "items": [
+    {
+      "id": "201",
+      "title": "Flatland: A Romance of Many Dimensions",
+      "author": "Edwin Abbott Abbott",
+      "description": "Geometry and satire",
+      "url": "https://www.gutenberg.org/ebooks/201.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/201",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "22298",
+      "title": "Practical Mechanics for Boys",
+      "author": "James Slough Zerbe",
+      "description": "Historical mechanics; diagrams absent",
+      "url": "https://www.gutenberg.org/ebooks/22298.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/22298",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "39863",
+      "title": "The Montessori Method",
+      "author": "Maria Montessori",
+      "description": "Education theory",
+      "url": "https://www.gutenberg.org/ebooks/39863.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/39863",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "852",
+      "title": "Democracy and Education",
+      "author": "John Dewey",
+      "description": "Community learning",
+      "url": "https://www.gutenberg.org/ebooks/852.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/852",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "205",
+      "title": "Walden and On the Duty of Civil Disobedience",
+      "author": "Henry David Thoreau",
+      "description": "Nature and independence",
+      "url": "https://www.gutenberg.org/ebooks/205.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/205",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "147",
+      "title": "Common Sense",
+      "author": "Thomas Paine",
+      "description": "Political history",
+      "url": "https://www.gutenberg.org/ebooks/147.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/147",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "18",
+      "title": "The Federalist Papers",
+      "author": "Hamilton, Madison and Jay",
+      "description": "Government systems",
+      "url": "https://www.gutenberg.org/ebooks/18.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/18",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "408",
+      "title": "The Souls of Black Folk",
+      "author": "W. E. B. Du Bois",
+      "description": "Culture and history",
+      "url": "https://www.gutenberg.org/ebooks/408.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/408",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "23",
+      "title": "Narrative of the Life of Frederick Douglass",
+      "author": "Frederick Douglass",
+      "description": "History and memoir",
+      "url": "https://www.gutenberg.org/ebooks/23.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/23",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "34901",
+      "title": "On Liberty",
+      "author": "John Stuart Mill",
+      "description": "Civil liberty",
+      "url": "https://www.gutenberg.org/ebooks/34901.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/34901",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "769",
+      "title": "The Book of Tea",
+      "author": "Kakuzo Okakura",
+      "description": "Culture and arts",
+      "url": "https://www.gutenberg.org/ebooks/769.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/769",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "11",
+      "title": "Alice's Adventures in Wonderland",
+      "author": "Lewis Carroll",
+      "description": "Literature",
+      "url": "https://www.gutenberg.org/ebooks/11.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/11",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "1661",
+      "title": "The Adventures of Sherlock Holmes",
+      "author": "Arthur Conan Doyle",
+      "description": "Observation and story",
+      "url": "https://www.gutenberg.org/ebooks/1661.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/1661",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    },
+    {
+      "id": "21",
+      "title": "Aesop's Fables",
+      "author": "Aesop",
+      "description": "Stories and learning",
+      "url": "https://www.gutenberg.org/ebooks/21.epub.noimages",
+      "source": "https://www.gutenberg.org/ebooks/21",
+      "format": "epub",
+      "rights": "Public domain in the United States (Project Gutenberg listing)",
+      "version": "1.0.0"
+    }
+  ]
+}
