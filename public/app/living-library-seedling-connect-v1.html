@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Seedling Edition — Moss & Civweave</title>
+<meta name="theme-color" content="#143329"/>
+<style>
+:root{font:16px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;color:#e9f5ed;background:#0c1815}*{box-sizing:border-box}
+body{margin:0}header{padding:19px max(14px,calc((100vw - 1060px)/2));background:#18382d}
+header small{color:#bbdfc9;text-transform:uppercase;letter-spacing:.12em}h1{font-size:clamp(1.4rem,4vw,2rem);margin:.2em 0}h2{font-size:1.15rem}
+main{max-width:1080px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,1.2fr);gap:18px;padding:16px}section{background:#172820;border:1px solid #3d6555;border-radius:12px;padding:17px;margin-bottom:15px}button,textarea{font:inherit}button{cursor:pointer;background:#2e6751;color:white;border:1px solid #82ad8a;border-radius:9px;padding:9px 12px}button:disabled{opacity:.55}textarea{width:100%;min-height:106px;background:#0c1c17;color:white;border:1px solid #658475;border-radius:8px;padding:11px;resize:vertical}textarea:focus{outline:2px solid #cee7c9}
+a{color:#b7f1c8}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}#status{white-space:pre-line;border:1px solid #50745d;background:#233b30;border-radius:9px;padding:12px;min-height:60px}
+#thread{min-height:100px;max-height:420px;overflow:auto}.message{border-bottom:1px solid #405849;padding:10px 0}.message strong{display:block;margin-bottom:4px}.message p{white-space:pre-wrap;margin:0}.small{font-size:.85rem;color:#c3d8cb}
+iframe{width:100%;height:670px;min-height:60vh;border:1px solid #466756;border-radius:9px;background:#f5f7f1}
+@media(max-width:820px){main{display:block}iframe{height:68vh}}
+</style>
+</head><body>
+<header><small>Civweave / Living Library</small><h1>Seedling Edition · Moss connection</h1>
+<p>Chat with Moss using your real Civweave session, then export notes for the X4 Pro. The reader can update its public library over Wi-Fi separately.</p></header>
+<main>
+<div><section><h2>Passport and AI route</h2>
+<p class="small">This panel embeds your normal Civweave campus from the same website. It does not collect or copy Passport credentials, Cloudflare secrets, or billing tokens.</p>
+<div class="actions"><button id="connect">Check Civweave connection</button><button id="open-moss">Open Moss in campus</button></div>
+<div id="status" role="status">Checking…</div>
+<p class="small">AI provider and remaining allowance are controlled by your existing Civweave Settings. The presence of a Passport does not itself prove that Cloudflare inference is selected or funded.</p></section>
+<section><h2>Ask Moss</h2><label for="prompt">Question or Learning Journey request</label>
+<textarea id="prompt" placeholder="Moss, help me make a Learning Journey about edible garden design."></textarea>
+<div class="actions"><button id="send" disabled>Send to Moss</button><button id="refresh">Refresh conversation</button><button id="export">Save chat as TXT</button></div>
+<p class="small">Generation is performed by the existing Moss runtime, preserving its model selection, AI budget controls and human approval gates. Messages require a signed-in Guild session.</p>
+<div id="thread" aria-live="polite"></div></section>
+<section><h2>Transfer learning to the reader</h2><p>Use <a href="/app/living-library-seedling-v1.html">Seedling Journey Studio</a> to author a plan and export a reflowable EPUB. Transfer the file to the X4 Pro using CrossPoint File Transfer while on the same Wi-Fi.</p>
+<p class="small">Moss runs on the browser companion for now. This page does not claim a native on-reader AI chat, unattended syncing, or direct hardware pairing. Never enter a Passport credential in CrossPoint's device-side public plugin.</p></section></div>
+<div><section><h2>Live Civweave campus</h2><p class="small">Sign in here if needed. The native chat, review buttons and approval process run inside this campus.</p>
+<iframe id="campus" title="Authenticated Civweave campus and Moss chat" src="/app/working-campus-v440.html" referrerpolicy="same-origin" loading="eager"></iframe>
+</section></div>
+</main>
+<script type="module">
+import {sessionStatus,getMossThread,sendToMoss,transcript} from '/app/living-library-seedling-connect-core-v1.mjs';
+const el=id=>document.getElementById(id),frame=el('campus');let sending=false;
+const campus=()=>{try{const w=frame.contentWindow;if(w.location.origin!==location.origin)return null;return w}catch{return null}};
+function status(message){el('status').textContent=message}
+function update(){
+ const w=campus();if(!w){status('Civweave must load from the same origin. Open this page from your normal Civweave host.');el('send').disabled=true;return}
+ const s=sessionStatus(w);
+ status('Passport session: '+(s.session?'Authenticated — '+s.accountName:'Not authenticated on the selected Guild')+'\nMoss chat runtime: '+(s.chatReady?'Ready':'Loading/unavailable')+'\nAI route: '+s.provider+(s.model?' · '+s.model:'')+'\nWi-Fi library: available separately through CrossPoint OPDS or the public Seedling plugin.');
+ el('send').disabled=sending||!s.session||!s.chatReady;
+ renderMessages(getMossThread(w));
+}
+function renderMessages(rows){
+ const target=el('thread');target.replaceChildren();if(!rows.length){target.textContent='No completed Moss messages saved in this browser session.';return}
+ for(const message of rows.slice(-18)){
+  const div=document.createElement('div');div.className='message';
+  const label=document.createElement('strong');label.textContent=message.role==='assistant'?'Moss':'You';
+  const body=document.createElement('p');body.textContent=message.text;
+  div.append(label,body);
+  if(message.error){const error=document.createElement('p');error.className='small';error.textContent='Generation issue: '+message.error;div.append(error)}
+  target.append(div)
+ }
+}
+el('connect').addEventListener('click',update);
+el('open-moss').addEventListener('click',()=>{const w=campus();if(!w)return status('Civweave campus is unavailable');const api=w.CivweaveGuideChatSurfaceV350; if(!api?.open)return status('Moss chat has not loaded yet');api.open({guide:'living-school',focus:true});update()});
+el('refresh').addEventListener('click',update);
+el('send').addEventListener('click',async()=>{
+ const w=campus();if(!w)return;const prompt=el('prompt').value.trim();if(sending)return;sending=true;el('send').disabled=true;status('Moss is processing your request through Civweave…');
+ try{await sendToMoss(w,prompt);el('prompt').value='';update()}
+ catch(error){status('Moss request not accepted: '+String(error?.message||error))}
+ finally{sending=false;update()}
+});
+el('export').addEventListener('click',()=>{
+ const w=campus();if(!w)return status('No Civweave campus available');
+ const content=transcript(getMossThread(w));if(!content)return status('No completed Moss messages to export');
+ const url=URL.createObjectURL(new Blob([content],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='Seedling-Moss-Chat.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);
+});
+frame.addEventListener('load',()=>{update();setTimeout(update,1500);setTimeout(update,4000)});
+setTimeout(update,2500);
+</script></body></html>
