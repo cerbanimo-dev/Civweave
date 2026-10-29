@@ -145,6 +145,8 @@ Anarchadia's Governance and Workbench are native content destinations within the
 
 FellowFare's active entry renders its marketplace in the same document. `fellowfare-cabinet-v144.js` delegates commands and reviewed imports directly to the existing `services/fellowfare/cabinet-bridge.js` API. `services/fellowfare/marketplace-v2.js` owns marketplace state, order persistence, rendering, and current-tab state; `marketplace-v2-capabilities.js` delegates order mutations to it. The retained iframe boundary uses `postMessage` only with matching origin and parent sender checks. The native host does not emulate an iframe's `contentWindow` or `contentDocument`.
 
+Action management is implemented by `public/app/action-board-v1.mjs` and its pure projection helpers in `public/app/shared/action-board-core-v1.mjs`. The canonical Working Campus only exposes its launcher; saved Quest authority stays with the existing owner. See `docs/contracts/action-board-v1.md`.
+
 ## Shared capability landmarks
 
 The canonical ownership list lives in `docs/architecture/systems-of-practice.md` and `config/system-ownership.json`. Current high-value landmarks include:
