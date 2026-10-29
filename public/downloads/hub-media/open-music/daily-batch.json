@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-daily-batch.v1",
-  "built_at": "2026-10-29T10:30:57Z",
-  "candidate_count": 48,
+  "built_at": "2026-10-29T10:33:41Z",
+  "candidate_count": 83,
   "candidates": [
     {
       "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
@@ -357,160 +357,12 @@
           "matched_query": "people"
         },
         {
-          "playlist_id": "anarchadia",
-          "matched_query": "freedom"
-        },
-        {
           "playlist_id": "fellowfare",
           "matched_query": "share"
-        }
-      ]
-    },
-    {
-      "candidate_id": "openmusic:fdbe9b800cdbc01804a65899",
-      "playlist_id": "civweave",
-      "title": "Power to Strike - Vocal Stems",
-      "artist": "Kara Square",
-      "album": "",
-      "provider": "ccmixter",
-      "provider_id": "31430",
-      "source_url": "https://ccmixter.org/files/mindmapthat/31430",
-      "matched_query": "people",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Power_to_Strike_-_Vocal_Stems.mp3",
-          "mime": "",
-          "bytes": 10969383,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Kara Square",
-        "source_title": "Power to Strike - Vocal Stems",
-        "source_url": "https://ccmixter.org/files/mindmapthat/31430",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "quality_score": 77,
-      "governance_state": "anarchadia-nomination-candidate",
-      "spotify_required": false,
-      "rights_gate": "passed-explicit-redistribution",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 2,
-      "themes": [
-        "share",
-        "power"
-      ],
-      "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "people"
         },
         {
-          "playlist_id": "living-school",
-          "matched_query": "grow"
-        }
-      ]
-    },
-    {
-      "candidate_id": "openmusic:2ff7c407f94dbc16c6e41af5",
-      "playlist_id": "civweave",
-      "title": "Vocal Stems- Happy (Team Smile and Nod)",
-      "artist": "Kara Square",
-      "album": "",
-      "provider": "ccmixter",
-      "provider_id": "28322",
-      "source_url": "https://ccmixter.org/files/mindmapthat/28322",
-      "matched_query": "hope",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike",
-        "url": "http://creativecommons.org/licenses/by-sa/2.5/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike; url=http://creativecommons.org/licenses/by-sa/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod).mp3",
-          "mime": "",
-          "bytes": 7674810,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_5.mp3",
-          "mime": "",
-          "bytes": 7673775,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_1.mp3",
-          "mime": "",
-          "bytes": 7673775,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_2.mp3",
-          "mime": "",
-          "bytes": 7673664,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_3.mp3",
-          "mime": "",
-          "bytes": 7673664,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Kara Square",
-        "source_title": "Vocal Stems- Happy (Team Smile and Nod)",
-        "source_url": "https://ccmixter.org/files/mindmapthat/28322",
-        "license": "Attribution Share-Alike",
-        "license_url": "http://creativecommons.org/licenses/by-sa/2.5/"
-      },
-      "quality_score": 77,
-      "governance_state": "anarchadia-nomination-candidate",
-      "spotify_required": false,
-      "rights_gate": "passed-explicit-redistribution",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 2,
-      "themes": [
-        "share",
-        "work"
-      ],
-      "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "hope"
-        },
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "work"
-        },
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "love"
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
         }
       ]
     },
@@ -592,8 +444,74 @@
       ]
     },
     {
-      "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+      "candidate_id": "openmusic:64440c7e11114879d9855b8c",
       "playlist_id": "civweave",
+      "title": "How it is",
+      "artist": "Jeris",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "33819",
+      "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
+      "matched_query": "genre:soul",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is.mp3",
+          "mime": "",
+          "bytes": 4684322,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is_2.mp3",
+          "mime": "",
+          "bytes": 4684322,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Jeris",
+        "source_title": "How it is",
+        "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:soul"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:soul"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:soul"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+      "playlist_id": "cerbanimo",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -659,12 +577,12 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "civweave",
-          "matched_query": "collaboration"
-        },
-        {
           "playlist_id": "cerbanimo",
           "matched_query": "labor"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "collaboration"
         }
       ]
     },
@@ -724,6 +642,374 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "together"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:bd5c21f423ffec59aa02e451",
+      "playlist_id": "civweave",
+      "title": "Strike",
+      "artist": "Cezary Ostrowski",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "33004",
+      "source_url": "https://ccmixter.org/files/ditri23/33004",
+      "matched_query": "genre:trip_hop",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/ditri23/ditri23_-_Strike.mp3",
+          "mime": "",
+          "bytes": 1760488,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Cezary Ostrowski",
+        "source_title": "Strike",
+        "source_url": "https://ccmixter.org/files/ditri23/33004",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:trip_hop"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:trip_hop"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:4ef39c8e26d3577ef48f3949",
+      "playlist_id": "living-school",
+      "title": "Twilight of the Cinema",
+      "artist": "septahelix",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "33343",
+      "source_url": "https://ccmixter.org/files/septahelix/33343",
+      "matched_query": "genre:chill",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/septahelix/septahelix_-_Twilight_of_the_Cinema.mp3",
+          "mime": "",
+          "bytes": 7555851,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "septahelix",
+        "source_title": "Twilight of the Cinema",
+        "source_url": "https://ccmixter.org/files/septahelix/33343",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:chill"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:chill"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:bb35bfe9dc00cc05134ea191",
+      "playlist_id": "living-school",
+      "title": "Blessed are the Greedy",
+      "artist": "Scott Altham",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "16099",
+      "source_url": "https://ccmixter.org/files/scottaltham/16099",
+      "matched_query": "genre:pop",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/scottaltham/scottaltham_-_Blessed_are_the_Greedy.mp3",
+          "mime": "",
+          "bytes": 7941896,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Scott Altham",
+        "source_title": "Blessed are the Greedy",
+        "source_url": "https://ccmixter.org/files/scottaltham/16099",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:pop"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:pop"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:pop"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:pop"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:a07122b593c5a6ea3cd0ee58",
+      "playlist_id": "civweave",
+      "title": "Making Me Nervous (Cyberpest Mix 3.9)",
+      "artist": "Budapest BluesBoy",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "2887",
+      "source_url": "https://ccmixter.org/files/hepepe/2887",
+      "matched_query": "genre:indie",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/hepepe/hepepe_-_Making_Me_Nervous_(Cyberpest_Mix_3.9).mp3",
+          "mime": "",
+          "bytes": 4615890,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Budapest BluesBoy",
+        "source_title": "Making Me Nervous (Cyberpest Mix 3.9)",
+        "source_url": "https://ccmixter.org/files/hepepe/2887",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:indie"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:indie"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:indie"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:c3457eeaf446ecb7314fff83",
+      "playlist_id": "civweave",
+      "title": "Scandinavian Sky",
+      "artist": "sunbyrn",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "1205",
+      "source_url": "https://ccmixter.org/files/sunbyrn/1205",
+      "matched_query": "genre:funk",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/sunbyrn/sunbyrn_-_Scandinavian_Sky.mp3",
+          "mime": "",
+          "bytes": 3513597,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "sunbyrn",
+        "source_title": "Scandinavian Sky",
+        "source_url": "https://ccmixter.org/files/sunbyrn/1205",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:funk"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:funk"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:c639883ea73364db8ebc4217",
+      "playlist_id": "living-school",
+      "title": "Wreckless (U53-Mix)",
+      "artist": "Djaii (as \"Kyro\")",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "579",
+      "source_url": "https://ccmixter.org/files/kyro_sk/579",
+      "matched_query": "genre:chill",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/kyro_sk/kyro_sk_-_Wreckless_(U53-Mix).mp3",
+          "mime": "",
+          "bytes": 9582592,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Djaii (as \"Kyro\")",
+        "source_title": "Wreckless (U53-Mix)",
+        "source_url": "https://ccmixter.org/files/kyro_sk/579",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:chill"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:chill"
         }
       ]
     },
@@ -1111,66 +1397,6 @@
       ]
     },
     {
-      "candidate_id": "openmusic:fdbe9b800cdbc01804a65899",
-      "playlist_id": "civweave",
-      "title": "Power to Strike - Vocal Stems",
-      "artist": "Kara Square",
-      "album": "",
-      "provider": "ccmixter",
-      "provider_id": "31430",
-      "source_url": "https://ccmixter.org/files/mindmapthat/31430",
-      "matched_query": "grow",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Power_to_Strike_-_Vocal_Stems.mp3",
-          "mime": "",
-          "bytes": 10969383,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Kara Square",
-        "source_title": "Power to Strike - Vocal Stems",
-        "source_url": "https://ccmixter.org/files/mindmapthat/31430",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "quality_score": 77,
-      "governance_state": "anarchadia-nomination-candidate",
-      "spotify_required": false,
-      "rights_gate": "passed-explicit-redistribution",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 2,
-      "themes": [
-        "share",
-        "power"
-      ],
-      "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "people"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "grow"
-        }
-      ]
-    },
-    {
       "candidate_id": "openmusic:7cc6cadff15789af28c53c1e",
       "playlist_id": "living-school",
       "title": "100 Paper Washingtons",
@@ -1236,6 +1462,72 @@
       ]
     },
     {
+      "candidate_id": "openmusic:0284a7078fa2894918b9a54b",
+      "playlist_id": "living-school",
+      "title": "America Mad & Naked",
+      "artist": "Stefan Kartenberg",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "52291",
+      "source_url": "https://ccmixter.org/files/JeffSpeed68/52291",
+      "matched_query": "genre:blues",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_America_Mad_Naked.mp3",
+          "mime": "",
+          "bytes": 11795904,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_America_Mad_Naked.flac",
+          "mime": "",
+          "bytes": 33642144,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Stefan Kartenberg",
+        "source_title": "America Mad & Naked",
+        "source_url": "https://ccmixter.org/files/JeffSpeed68/52291",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:blues"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:blues"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:blues"
+        }
+      ]
+    },
+    {
       "candidate_id": "openmusic:a867d261c1261699a060058d",
       "playlist_id": "living-school",
       "title": "Norleans Lovas",
@@ -1287,6 +1579,126 @@
         {
           "playlist_id": "living-school",
           "matched_query": "truth"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:eaa7e50705f69c0f35c22bf7",
+      "playlist_id": "living-school",
+      "title": "Soul pilot Boceto Vocal Guitarra",
+      "artist": "mudwalker",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31616",
+      "source_url": "https://ccmixter.org/files/mudwalker/31616",
+      "matched_query": "genre:folk",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mudwalker/mudwalker_-_Soul_pilot_Boceto_Vocal_Guitarra.ogg",
+          "mime": "",
+          "bytes": 2693149,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "mudwalker",
+        "source_title": "Soul pilot Boceto Vocal Guitarra",
+        "source_url": "https://ccmixter.org/files/mudwalker/31616",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:folk"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:folk"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:4ef39c8e26d3577ef48f3949",
+      "playlist_id": "living-school",
+      "title": "Twilight of the Cinema",
+      "artist": "septahelix",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "33343",
+      "source_url": "https://ccmixter.org/files/septahelix/33343",
+      "matched_query": "genre:chill",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/septahelix/septahelix_-_Twilight_of_the_Cinema.mp3",
+          "mime": "",
+          "bytes": 7555851,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "septahelix",
+        "source_title": "Twilight of the Cinema",
+        "source_url": "https://ccmixter.org/files/septahelix/33343",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:chill"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:chill"
         }
       ]
     },
@@ -1372,6 +1784,360 @@
         {
           "playlist_id": "living-school",
           "matched_query": "imagine"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:bb35bfe9dc00cc05134ea191",
+      "playlist_id": "living-school",
+      "title": "Blessed are the Greedy",
+      "artist": "Scott Altham",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "16099",
+      "source_url": "https://ccmixter.org/files/scottaltham/16099",
+      "matched_query": "genre:pop",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/scottaltham/scottaltham_-_Blessed_are_the_Greedy.mp3",
+          "mime": "",
+          "bytes": 7941896,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Scott Altham",
+        "source_title": "Blessed are the Greedy",
+        "source_url": "https://ccmixter.org/files/scottaltham/16099",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:pop"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:pop"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:pop"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:pop"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:e1f10a3395b5c24a6ff1f533",
+      "playlist_id": "living-school",
+      "title": "Cuckoo Folklore (VynilRobMix)",
+      "artist": "VynilRob",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "2502",
+      "source_url": "https://ccmixter.org/files/vynilrob/2502",
+      "matched_query": "genre:folk",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/vynilrob/vynilrob_-_Cuckoo_Folklore_(VynilRobMix).mp3",
+          "mime": "",
+          "bytes": 3757871,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "VynilRob",
+        "source_title": "Cuckoo Folklore (VynilRobMix)",
+        "source_url": "https://ccmixter.org/files/vynilrob/2502",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:folk"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:folk"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:106eac49ecafcf3c893d798f",
+      "playlist_id": "living-school",
+      "title": "I Can't Hold it Down",
+      "artist": "Andy Sullivan",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "670",
+      "source_url": "https://ccmixter.org/files/stickymcbiscuit/670",
+      "matched_query": "genre:ambient",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/stickymcbiscuit/stickymcbiscuit_-_I_Can_t_Hold_it_Down.mp3",
+          "mime": "",
+          "bytes": 3269770,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Andy Sullivan",
+        "source_title": "I Can't Hold it Down",
+        "source_url": "https://ccmixter.org/files/stickymcbiscuit/670",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:ambient"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:ambient"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:a47328fef83a3c9ac6d8620d",
+      "playlist_id": "living-school",
+      "title": "Payola Moon Shot Blues",
+      "artist": "Ran Dumb Dots...... .. .",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "3109",
+      "source_url": "https://ccmixter.org/files/randumbdots/3109",
+      "matched_query": "genre:blues",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/randumbdots/randumbdots_-_Payola_Moon_Shot_Blues.mp3",
+          "mime": "",
+          "bytes": 4613477,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Ran Dumb Dots...... .. .",
+        "source_title": "Payola Moon Shot Blues",
+        "source_url": "https://ccmixter.org/files/randumbdots/3109",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:blues"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:blues"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:blues"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:a8e10bf5a805f2e793dfdcba",
+      "playlist_id": "living-school",
+      "title": "Undertow",
+      "artist": "sunbyrn",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "210",
+      "source_url": "https://ccmixter.org/files/sunbyrn/210",
+      "matched_query": "genre:jazz",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/sunbyrn/sunbyrn_-_Undertow.mp3",
+          "mime": "",
+          "bytes": 3346309,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "sunbyrn",
+        "source_title": "Undertow",
+        "source_url": "https://ccmixter.org/files/sunbyrn/210",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:jazz"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:jazz"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:jazz"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:c639883ea73364db8ebc4217",
+      "playlist_id": "living-school",
+      "title": "Wreckless (U53-Mix)",
+      "artist": "Djaii (as \"Kyro\")",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "579",
+      "source_url": "https://ccmixter.org/files/kyro_sk/579",
+      "matched_query": "genre:chill",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/kyro_sk/kyro_sk_-_Wreckless_(U53-Mix).mp3",
+          "mime": "",
+          "bytes": 9582592,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Djaii (as \"Kyro\")",
+        "source_title": "Wreckless (U53-Mix)",
+        "source_url": "https://ccmixter.org/files/kyro_sk/579",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:chill"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:chill"
         }
       ]
     },
@@ -1702,94 +2468,6 @@
       ]
     },
     {
-      "candidate_id": "openmusic:2ff7c407f94dbc16c6e41af5",
-      "playlist_id": "civweave",
-      "title": "Vocal Stems- Happy (Team Smile and Nod)",
-      "artist": "Kara Square",
-      "album": "",
-      "provider": "ccmixter",
-      "provider_id": "28322",
-      "source_url": "https://ccmixter.org/files/mindmapthat/28322",
-      "matched_query": "work",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike",
-        "url": "http://creativecommons.org/licenses/by-sa/2.5/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike; url=http://creativecommons.org/licenses/by-sa/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod).mp3",
-          "mime": "",
-          "bytes": 7674810,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_5.mp3",
-          "mime": "",
-          "bytes": 7673775,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_1.mp3",
-          "mime": "",
-          "bytes": 7673775,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_2.mp3",
-          "mime": "",
-          "bytes": 7673664,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_3.mp3",
-          "mime": "",
-          "bytes": 7673664,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Kara Square",
-        "source_title": "Vocal Stems- Happy (Team Smile and Nod)",
-        "source_url": "https://ccmixter.org/files/mindmapthat/28322",
-        "license": "Attribution Share-Alike",
-        "license_url": "http://creativecommons.org/licenses/by-sa/2.5/"
-      },
-      "quality_score": 77,
-      "governance_state": "anarchadia-nomination-candidate",
-      "spotify_required": false,
-      "rights_gate": "passed-explicit-redistribution",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 2,
-      "themes": [
-        "share",
-        "work"
-      ],
-      "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "hope"
-        },
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "work"
-        },
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "love"
-        }
-      ]
-    },
-    {
       "candidate_id": "openmusic:7cc6cadff15789af28c53c1e",
       "playlist_id": "living-school",
       "title": "100 Paper Washingtons",
@@ -1855,8 +2533,124 @@
       ]
     },
     {
+      "candidate_id": "openmusic:50b02aff25eae68022a847cc",
+      "playlist_id": "cerbanimo",
+      "title": "700 Billion Dollar Belief",
+      "artist": "annabloom",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31538",
+      "source_url": "https://ccmixter.org/files/annabloom/31538",
+      "matched_query": "genre:techno",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/annabloom/annabloom_-_700_Billion_Dollar_Belief_1.mp3",
+          "mime": "",
+          "bytes": 10533870,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "annabloom",
+        "source_title": "700 Billion Dollar Belief",
+        "source_url": "https://ccmixter.org/files/annabloom/31538",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:techno"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:techno"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:729b3951f4837a0078354778",
+      "playlist_id": "cerbanimo",
+      "title": "Dirty Money Money Money Ft. Scomber & Duckett",
+      "artist": "coruscate",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "35441",
+      "source_url": "https://ccmixter.org/files/Coruscate/35441",
+      "matched_query": "genre:hip_hop",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Coruscate/Coruscate_-_Dirty_Money_Money_Money_Ft._Scomber_Duckett.mp3",
+          "mime": "",
+          "bytes": 7475256,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "coruscate",
+        "source_title": "Dirty Money Money Money Ft. Scomber & Duckett",
+        "source_url": "https://ccmixter.org/files/Coruscate/35441",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:hip_hop"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:hip_hop"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:hip_hop"
+        }
+      ]
+    },
+    {
       "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-      "playlist_id": "civweave",
+      "playlist_id": "cerbanimo",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -1922,12 +2716,12 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "civweave",
-          "matched_query": "collaboration"
-        },
-        {
           "playlist_id": "cerbanimo",
           "matched_query": "labor"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "collaboration"
         }
       ]
     },
@@ -1987,6 +2781,302 @@
         {
           "playlist_id": "cerbanimo",
           "matched_query": "future"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:efee2b7d70e3b7ebd635c026",
+      "playlist_id": "cerbanimo",
+      "title": "Naked",
+      "artist": "CSoul",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "46804",
+      "source_url": "https://ccmixter.org/files/CSoul/46804",
+      "matched_query": "genre:dance",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/CSoul/CSoul_-_Naked.mp3",
+          "mime": "",
+          "bytes": 6258180,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "CSoul",
+        "source_title": "Naked",
+        "source_url": "https://ccmixter.org/files/CSoul/46804",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:dance"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:dance"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:fed9bef957af00ec5d6f67d1",
+      "playlist_id": "cerbanimo",
+      "title": "Against Yourself",
+      "artist": "The Null Pointer Exceptions",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "566",
+      "source_url": "https://ccmixter.org/files/jaybill/566",
+      "matched_query": "genre:hip_hop",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/jaybill/jaybill_-_Against_Yourself.mp3",
+          "mime": "",
+          "bytes": 8484161,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "The Null Pointer Exceptions",
+        "source_title": "Against Yourself",
+        "source_url": "https://ccmixter.org/files/jaybill/566",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:hip_hop"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:hip_hop"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:hip_hop"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:b0700aa4d8eae3dccffc05f8",
+      "playlist_id": "cerbanimo",
+      "title": "DORKO",
+      "artist": "curious",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "701",
+      "source_url": "https://ccmixter.org/files/curious/701",
+      "matched_query": "genre:rock",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/curious/curious_-_DORKO.mp3",
+          "mime": "",
+          "bytes": 3533845,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "curious",
+        "source_title": "DORKO",
+        "source_url": "https://ccmixter.org/files/curious/701",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:rock"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:rock"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:rock"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:a07122b593c5a6ea3cd0ee58",
+      "playlist_id": "civweave",
+      "title": "Making Me Nervous (Cyberpest Mix 3.9)",
+      "artist": "Budapest BluesBoy",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "2887",
+      "source_url": "https://ccmixter.org/files/hepepe/2887",
+      "matched_query": "genre:indie",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/hepepe/hepepe_-_Making_Me_Nervous_(Cyberpest_Mix_3.9).mp3",
+          "mime": "",
+          "bytes": 4615890,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Budapest BluesBoy",
+        "source_title": "Making Me Nervous (Cyberpest Mix 3.9)",
+        "source_url": "https://ccmixter.org/files/hepepe/2887",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:indie"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:indie"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:indie"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:c3457eeaf446ecb7314fff83",
+      "playlist_id": "civweave",
+      "title": "Scandinavian Sky",
+      "artist": "sunbyrn",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "1205",
+      "source_url": "https://ccmixter.org/files/sunbyrn/1205",
+      "matched_query": "genre:funk",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/sunbyrn/sunbyrn_-_Scandinavian_Sky.mp3",
+          "mime": "",
+          "bytes": 3513597,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "sunbyrn",
+        "source_title": "Scandinavian Sky",
+        "source_url": "https://ccmixter.org/files/sunbyrn/1205",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:funk"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:funk"
         }
       ]
     },
@@ -2372,100 +3462,12 @@
           "matched_query": "people"
         },
         {
-          "playlist_id": "anarchadia",
-          "matched_query": "freedom"
-        },
-        {
           "playlist_id": "fellowfare",
           "matched_query": "share"
-        }
-      ]
-    },
-    {
-      "candidate_id": "openmusic:2ff7c407f94dbc16c6e41af5",
-      "playlist_id": "civweave",
-      "title": "Vocal Stems- Happy (Team Smile and Nod)",
-      "artist": "Kara Square",
-      "album": "",
-      "provider": "ccmixter",
-      "provider_id": "28322",
-      "source_url": "https://ccmixter.org/files/mindmapthat/28322",
-      "matched_query": "love",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike",
-        "url": "http://creativecommons.org/licenses/by-sa/2.5/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike; url=http://creativecommons.org/licenses/by-sa/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod).mp3",
-          "mime": "",
-          "bytes": 7674810,
-          "role": "source-download"
         },
         {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_5.mp3",
-          "mime": "",
-          "bytes": 7673775,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_1.mp3",
-          "mime": "",
-          "bytes": 7673775,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_2.mp3",
-          "mime": "",
-          "bytes": 7673664,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_3.mp3",
-          "mime": "",
-          "bytes": 7673664,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Kara Square",
-        "source_title": "Vocal Stems- Happy (Team Smile and Nod)",
-        "source_url": "https://ccmixter.org/files/mindmapthat/28322",
-        "license": "Attribution Share-Alike",
-        "license_url": "http://creativecommons.org/licenses/by-sa/2.5/"
-      },
-      "quality_score": 77,
-      "governance_state": "anarchadia-nomination-candidate",
-      "spotify_required": false,
-      "rights_gate": "passed-explicit-redistribution",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 2,
-      "themes": [
-        "share",
-        "work"
-      ],
-      "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "hope"
-        },
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "work"
-        },
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "love"
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
         }
       ]
     },
@@ -2549,6 +3551,138 @@
       ]
     },
     {
+      "candidate_id": "openmusic:0284a7078fa2894918b9a54b",
+      "playlist_id": "living-school",
+      "title": "America Mad & Naked",
+      "artist": "Stefan Kartenberg",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "52291",
+      "source_url": "https://ccmixter.org/files/JeffSpeed68/52291",
+      "matched_query": "genre:blues",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_America_Mad_Naked.mp3",
+          "mime": "",
+          "bytes": 11795904,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_America_Mad_Naked.flac",
+          "mime": "",
+          "bytes": 33642144,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Stefan Kartenberg",
+        "source_title": "America Mad & Naked",
+        "source_url": "https://ccmixter.org/files/JeffSpeed68/52291",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:blues"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:blues"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:blues"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:64440c7e11114879d9855b8c",
+      "playlist_id": "civweave",
+      "title": "How it is",
+      "artist": "Jeris",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "33819",
+      "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
+      "matched_query": "genre:soul",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is.mp3",
+          "mime": "",
+          "bytes": 4684322,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is_2.mp3",
+          "mime": "",
+          "bytes": 4684322,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Jeris",
+        "source_title": "How it is",
+        "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:soul"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:soul"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:soul"
+        }
+      ]
+    },
+    {
       "candidate_id": "openmusic:c88269baa603cd85bbb76e9f",
       "playlist_id": "civweave",
       "title": "Like Music DubStep Mix",
@@ -2604,6 +3738,436 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "together"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:4ef39c8e26d3577ef48f3949",
+      "playlist_id": "living-school",
+      "title": "Twilight of the Cinema",
+      "artist": "septahelix",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "33343",
+      "source_url": "https://ccmixter.org/files/septahelix/33343",
+      "matched_query": "genre:chill",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/septahelix/septahelix_-_Twilight_of_the_Cinema.mp3",
+          "mime": "",
+          "bytes": 7555851,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "septahelix",
+        "source_title": "Twilight of the Cinema",
+        "source_url": "https://ccmixter.org/files/septahelix/33343",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:chill"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:chill"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:bb35bfe9dc00cc05134ea191",
+      "playlist_id": "living-school",
+      "title": "Blessed are the Greedy",
+      "artist": "Scott Altham",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "16099",
+      "source_url": "https://ccmixter.org/files/scottaltham/16099",
+      "matched_query": "genre:pop",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/scottaltham/scottaltham_-_Blessed_are_the_Greedy.mp3",
+          "mime": "",
+          "bytes": 7941896,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Scott Altham",
+        "source_title": "Blessed are the Greedy",
+        "source_url": "https://ccmixter.org/files/scottaltham/16099",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:pop"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:pop"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:pop"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:pop"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:3c086d34ad290a976c25db07",
+      "playlist_id": "fellowfare",
+      "title": "Jambulani Freestyle",
+      "artist": "deliveReasurrance",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "3437",
+      "source_url": "https://ccmixter.org/files/deliveReasurrance/3437",
+      "matched_query": "genre:reggae",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/deliveReasurrance/deliveReasurrance_-_Jambulani_Freestyle.mp3",
+          "mime": "",
+          "bytes": 2760894,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "deliveReasurrance",
+        "source_title": "Jambulani Freestyle",
+        "source_url": "https://ccmixter.org/files/deliveReasurrance/3437",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:reggae"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:reggae"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:reggae"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:a47328fef83a3c9ac6d8620d",
+      "playlist_id": "living-school",
+      "title": "Payola Moon Shot Blues",
+      "artist": "Ran Dumb Dots...... .. .",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "3109",
+      "source_url": "https://ccmixter.org/files/randumbdots/3109",
+      "matched_query": "genre:blues",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/randumbdots/randumbdots_-_Payola_Moon_Shot_Blues.mp3",
+          "mime": "",
+          "bytes": 4613477,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Ran Dumb Dots...... .. .",
+        "source_title": "Payola Moon Shot Blues",
+        "source_url": "https://ccmixter.org/files/randumbdots/3109",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:blues"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:blues"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:blues"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:c3457eeaf446ecb7314fff83",
+      "playlist_id": "civweave",
+      "title": "Scandinavian Sky",
+      "artist": "sunbyrn",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "1205",
+      "source_url": "https://ccmixter.org/files/sunbyrn/1205",
+      "matched_query": "genre:funk",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/sunbyrn/sunbyrn_-_Scandinavian_Sky.mp3",
+          "mime": "",
+          "bytes": 3513597,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "sunbyrn",
+        "source_title": "Scandinavian Sky",
+        "source_url": "https://ccmixter.org/files/sunbyrn/1205",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:funk"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:funk"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:a8e10bf5a805f2e793dfdcba",
+      "playlist_id": "living-school",
+      "title": "Undertow",
+      "artist": "sunbyrn",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "210",
+      "source_url": "https://ccmixter.org/files/sunbyrn/210",
+      "matched_query": "genre:jazz",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/sunbyrn/sunbyrn_-_Undertow.mp3",
+          "mime": "",
+          "bytes": 3346309,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "sunbyrn",
+        "source_title": "Undertow",
+        "source_url": "https://ccmixter.org/files/sunbyrn/210",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:jazz"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:jazz"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:jazz"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:c639883ea73364db8ebc4217",
+      "playlist_id": "living-school",
+      "title": "Wreckless (U53-Mix)",
+      "artist": "Djaii (as \"Kyro\")",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "579",
+      "source_url": "https://ccmixter.org/files/kyro_sk/579",
+      "matched_query": "genre:chill",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/kyro_sk/kyro_sk_-_Wreckless_(U53-Mix).mp3",
+          "mime": "",
+          "bytes": 9582592,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Djaii (as \"Kyro\")",
+        "source_title": "Wreckless (U53-Mix)",
+        "source_url": "https://ccmixter.org/files/kyro_sk/579",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:chill"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:chill"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:chill"
         }
       ]
     },
@@ -3041,12 +4605,125 @@
           "matched_query": "people"
         },
         {
-          "playlist_id": "anarchadia",
-          "matched_query": "freedom"
-        },
-        {
           "playlist_id": "fellowfare",
           "matched_query": "share"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:ec5fe36e7f050adf833b51f8",
+      "playlist_id": "anarchadia",
+      "title": "Power to Strike",
+      "artist": "daniloprates",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31913",
+      "source_url": "https://ccmixter.org/files/daniloprates/31913",
+      "matched_query": "genre:dub",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/daniloprates/daniloprates_-_Power_to_Strike.mp3",
+          "mime": "",
+          "bytes": 5017152,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "daniloprates",
+        "source_title": "Power to Strike",
+        "source_url": "https://ccmixter.org/files/daniloprates/31913",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 77,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 2,
+      "themes": [
+        "share",
+        "power",
+        "genre:dub"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:dub"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:b2a6a9c15a5ce35a31cfb23b",
+      "playlist_id": "anarchadia",
+      "title": "My Life",
+      "artist": "Colin Mutchler",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "166",
+      "source_url": "https://ccmixter.org/files/commonsplice/166",
+      "matched_query": "genre:experimental",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_My_Life.mp3",
+          "mime": "",
+          "bytes": 3282078,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Colin Mutchler",
+        "source_title": "My Life",
+        "source_url": "https://ccmixter.org/files/commonsplice/166",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 74,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "commons",
+        "genre:experimental"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:experimental"
         }
       ]
     },
@@ -3124,6 +4801,66 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "freedom"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:729b3951f4837a0078354778",
+      "playlist_id": "cerbanimo",
+      "title": "Dirty Money Money Money Ft. Scomber & Duckett",
+      "artist": "coruscate",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "35441",
+      "source_url": "https://ccmixter.org/files/Coruscate/35441",
+      "matched_query": "genre:hip_hop",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Coruscate/Coruscate_-_Dirty_Money_Money_Money_Ft._Scomber_Duckett.mp3",
+          "mime": "",
+          "bytes": 7475256,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "coruscate",
+        "source_title": "Dirty Money Money Money Ft. Scomber & Duckett",
+        "source_url": "https://ccmixter.org/files/Coruscate/35441",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:hip_hop"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:hip_hop"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:hip_hop"
         }
       ]
     },
@@ -3209,6 +4946,293 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "liberation"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:fed9bef957af00ec5d6f67d1",
+      "playlist_id": "cerbanimo",
+      "title": "Against Yourself",
+      "artist": "The Null Pointer Exceptions",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "566",
+      "source_url": "https://ccmixter.org/files/jaybill/566",
+      "matched_query": "genre:hip_hop",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/jaybill/jaybill_-_Against_Yourself.mp3",
+          "mime": "",
+          "bytes": 8484161,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "The Null Pointer Exceptions",
+        "source_title": "Against Yourself",
+        "source_url": "https://ccmixter.org/files/jaybill/566",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:hip_hop"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:hip_hop"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:hip_hop"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:d08e6fd8e086925dc2d58d5a",
+      "playlist_id": "anarchadia",
+      "title": "Ananke",
+      "artist": "nimmo",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "2413",
+      "source_url": "https://ccmixter.org/files/nimmo/2413",
+      "matched_query": "genre:dub",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/nimmo/nimmo_-_Ananke.mp3",
+          "mime": "",
+          "bytes": 8431909,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "nimmo",
+        "source_title": "Ananke",
+        "source_url": "https://ccmixter.org/files/nimmo/2413",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:dub"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:dub"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:b0700aa4d8eae3dccffc05f8",
+      "playlist_id": "cerbanimo",
+      "title": "DORKO",
+      "artist": "curious",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "701",
+      "source_url": "https://ccmixter.org/files/curious/701",
+      "matched_query": "genre:rock",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/curious/curious_-_DORKO.mp3",
+          "mime": "",
+          "bytes": 3533845,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "curious",
+        "source_title": "DORKO",
+        "source_url": "https://ccmixter.org/files/curious/701",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:rock"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:rock"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:rock"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:3c086d34ad290a976c25db07",
+      "playlist_id": "fellowfare",
+      "title": "Jambulani Freestyle",
+      "artist": "deliveReasurrance",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "3437",
+      "source_url": "https://ccmixter.org/files/deliveReasurrance/3437",
+      "matched_query": "genre:reggae",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/deliveReasurrance/deliveReasurrance_-_Jambulani_Freestyle.mp3",
+          "mime": "",
+          "bytes": 2760894,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "deliveReasurrance",
+        "source_title": "Jambulani Freestyle",
+        "source_url": "https://ccmixter.org/files/deliveReasurrance/3437",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:reggae"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:reggae"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:reggae"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:f072b117a6fab18f7c7e6d8b",
+      "playlist_id": "anarchadia",
+      "title": "The Most Beautiful Girl I've Ever Seen (Acapella)",
+      "artist": "Moe Train",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "7961",
+      "source_url": "https://ccmixter.org/files/moetrain/7961",
+      "matched_query": "genre:punk",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/moetrain/moetrain_-_The_Most_Beautiful_Girl_I_ve_Ever_Seen_(Acapella)_1.mp3",
+          "mime": "",
+          "bytes": 2831718,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Moe Train",
+        "source_title": "The Most Beautiful Girl I've Ever Seen (Acapella)",
+        "source_url": "https://ccmixter.org/files/moetrain/7961",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:punk"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:punk"
         }
       ]
     }
