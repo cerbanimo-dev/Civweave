@@ -35,7 +35,7 @@ assert.equal(source.split(actualImport).length,3,'mock exactly two SDK imports f
 const instrumented=source.replaceAll(actualImport,'Promise.resolve(globalThis.__civweaveMockHF)');
 let processorLoads=0,modelLoads=0,lastGenerationArgs=null,lastPrompt='',modelDisposed=false;
 const mock={
-  env:{},
+  env:{backends:{onnx:{wasm:{}}}},
   AutoProcessor:{async from_pretrained(repo){processorLoads++;assert.match(repo,/Qwen3\.5-0\.8B/);
     const proc=async(prompt)=>{lastPrompt=prompt;return{input_ids:'tokens'}};
     proc.tokenizer={};return proc;}},
@@ -52,6 +52,8 @@ const originalNavigator=Object.getOwnPropertyDescriptor(globalThis,'navigator');
 const originalSecure=Object.getOwnPropertyDescriptor(globalThis,'isSecureContext');
 const originalCache=Object.getOwnPropertyDescriptor(globalThis,'caches');
 const originalMock=Object.getOwnPropertyDescriptor(globalThis,'__civweaveMockHF');
+const originalFetch=Object.getOwnPropertyDescriptor(globalThis,'fetch');
+const wasmPaths=[];
 function globalSet(name,value){Object.defineProperty(globalThis,name,{value,configurable:true,writable:true})}
 try{
   globalSet('navigator',{userAgent:'iPhone OS 26',maxTouchPoints:5,
@@ -59,6 +61,11 @@ try{
   globalSet('isSecureContext',true);
   globalSet('caches',{open:async()=>({})});
   globalSet('__civweaveMockHF',mock);
+  globalSet('fetch',async url=>{
+    wasmPaths.push(String(url));
+    const bytes=String(url).endsWith('part0')?[0,97]:[115,109];
+    return{ok:true,arrayBuffer:async()=>new Uint8Array(bytes).buffer};
+  });
   const m=await import('data:text/javascript;base64,'+Buffer.from(instrumented).toString('base64'));
   assert.equal(m.status().resident,false,'module import must not load weights');
   assert.equal(modelLoads,0);
@@ -69,6 +76,10 @@ try{
   assert.equal(modelLoads,0,'invalid model must never download weights');
   await m.prepare('qwen35-08b-onnx-webgpu');
   assert.equal(modelLoads,1);
+  assert.equal(wasmPaths.length,2,'must use both bundled WebGPU WASM parts');
+  assert.ok(wasmPaths.every(x=>x.startsWith('/app/vendor/transformers-v4/wasm/')));
+  assert.deepEqual(Array.from(mock.env.backends.onnx.wasm.wasmBinary),[0,97,115,109]);
+  assert.equal(mock.env.backends.onnx.wasm.numThreads,1);
   const live=[];
   const result=await m.generate({modelId:'qwen35-08b-onnx-webgpu',
     messages:[{role:'user',content:'Say READY only.'}],maxTokens:32,structured:true,
@@ -84,7 +95,7 @@ try{
   assert.equal(mock.env.useBrowserCache,true);
   assert.equal(mock.env.useCustomCache,false);
 }finally{
-  for(const [name,descriptor] of [['navigator',originalNavigator],['isSecureContext',originalSecure],['caches',originalCache],['__civweaveMockHF',originalMock]]){
+  for(const [name,descriptor] of [['navigator',originalNavigator],['isSecureContext',originalSecure],['caches',originalCache],['__civweaveMockHF',originalMock],['fetch',originalFetch]]){
     if(descriptor)Object.defineProperty(globalThis,name,descriptor);else delete globalThis[name];
   }
 }
