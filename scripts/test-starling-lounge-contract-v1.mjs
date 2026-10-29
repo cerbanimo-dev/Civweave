@@ -40,3 +40,14 @@ test('Guildkeeper submits founding Intention in signed Pocket Guild genesis',()=
  assert.match(creator,/normalizeFoundingIntention\(foundingIntention\)/);
  assert.match(creator,/foundingIntention:initialIntention/);
 });
+
+test('Lounge reloads signed Collective turns and only starts inference by explicit control',()=>{
+ const src=read('public/app/starling-lounge-v1.mjs');
+ assert.match(src,/createCollectiveTurnService/);
+ assert.match(src,/\.readTurns\(/);
+ assert.match(src,/\.runOneTurn\(/);
+ assert.match(src,/data-sl-action="turn"/);
+ assert.match(src,/data-sl-turn-status/);
+ assert.doesNotMatch(src,/civweave:starling-turn-recorded/);
+ assert.match(src,/CivweaveModelRuntime/);
+});
