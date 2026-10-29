@@ -13,9 +13,15 @@ export const STARLING_TURN_SCHEMA='civweave.starling-collective-turn.v1';
 const clean=(value,max=4000)=>typeof value==='string'?value.trim().slice(0,max):'';
 const id=value=>clean(value,180);
 const allowed=new Set(['ollama','openai-compatible','downloaded-local']);
+const PROJECT_DRAFT_SCHEMA={type:'object',additionalProperties:false,required:['title','outcome','tasks'],properties:{
+  title:{type:'string'},outcome:{type:'string'},tasks:{type:'array',minItems:1,maxItems:4,items:{type:'object',
+    additionalProperties:false,required:['assignee','kind','title','deliverable'],
+    properties:{assignee:{type:'string',enum:['ai','human']},kind:{type:'string'},title:{type:'string'},
+      deliverable:{type:'string'},requiredSkill:{type:'string'}}}}
+}};
 const readableOutput=result=>{
   if(result?.status!=='success')throw new Error(clean(result?.error?.message,400)||'Local model generation did not finish successfully.');
-  const text=clean(result?.outputText||result?.text||result?.response,3500);
+  const text=clean(result?.outputText||(result?.outputJson?JSON.stringify(result.outputJson):'')||result?.text||result?.response,3500);
   if(!text)throw new Error('The local model produced no readable turn.');
   return text;
 };
@@ -89,7 +95,7 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
         workMode==='project'?'Keep JSON compact, with 1–4 tasks and no extra explanation.':workMode==='task-draft'?'Deliver useful content within 450 words.':'Stay under 220 words.'
       ].join('\n');
       const messages=[{role:'system',content:system},...prior.map(row=>({role:'assistant',content:row.personaId+': '+row.text.slice(0,1000)})),{role:'user',content:clean(taskPrompt,2600)||'Suggest one useful next action for the Guild, taking previous Collective turns into account.'}];
-      const result=await model.generate({purpose:'starling-collective-local-turn-v1',executionProfile:'interactive',config,messages,maxTokens:workMode==='conversation'?440:workMode==='project'?900:1100,requireExternalConsent:true});
+      const result=await model.generate({purpose:'starling-collective-local-turn-v1',executionProfile:'interactive',config,messages,maxTokens:workMode==='conversation'?440:workMode==='project'?900:1100,requireExternalConsent:true,...(workMode==='project'?{responseFormat:'json',schema:PROJECT_DRAFT_SCHEMA,maxRepairAttempts:0}:{})});
       const text=readableOutput(result);
       if(result?.actual?.provider&& !allowed.has(result.actual.provider))throw new Error('Unexpected nonlocal model completed the request. No Collective turn was saved.');
       const turnId='starling-turn:'+guild+':'+crypto.randomUUID(),at=new Date().toISOString();
