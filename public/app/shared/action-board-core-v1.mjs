@@ -73,7 +73,7 @@ export function projectPlanActions(plans, now=new Date().toISOString()){
     });
     for(const node of records){
       if(node.kind==='path'&&records.some(x=>x.kind==='step'&&x.pi===node.pi))continue;
-      if(node.done)continue;
+      if(node.done||(node.kind==='step'&&node.pathNode.done))continue;
       const path=node.path,step=node.kind==='step'?node.step:path;
       const title=node.kind==='step'?titleOf(step):clean(path.title,300);
       if(!title)continue;
