@@ -6,6 +6,9 @@ on:
     paths:
       - 'public/app/local-ai/ios-webgpu-qwen-v1.js'
       - 'public/app/settings-gateway-v317.js'
+      - 'public/app/settings-local-models-direct-v325.js'
+      - 'public/app/settings-local-route-v325.js'
+      - 'public/app/ios-webgpu-qwen-test-v1.html'
       - 'public/app/shared/civweave-model-runtime.js'
       - 'public/app/working-campus-v440.html'
       - 'scripts/verify-ios-webgpu-qwen-v1.mjs'
@@ -14,6 +17,9 @@ on:
     paths:
       - 'public/app/local-ai/ios-webgpu-qwen-v1.js'
       - 'public/app/settings-gateway-v317.js'
+      - 'public/app/settings-local-models-direct-v325.js'
+      - 'public/app/settings-local-route-v325.js'
+      - 'public/app/ios-webgpu-qwen-test-v1.html'
       - 'public/app/shared/civweave-model-runtime.js'
       - 'public/app/working-campus-v440.html'
       - 'scripts/verify-ios-webgpu-qwen-v1.mjs'
