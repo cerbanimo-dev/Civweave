@@ -312,11 +312,11 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
         for requested in settings.get("license_classes") or ["by", "sa"]:
             if requested not in ("by", "sa", "pd"):
                 continue
-            scanned, accepted, pages_seen = 0, 0, 0
+            scanned, accepted, pages_seen, inspected = 0, 0, 0, 0
             for offset in range(0, per_page * pages, per_page):
                 try:
                     rows = ccmixter_rows({
-                        "f": "json", "dataview": "info", "limit": per_page,
+                        "f": "json", "dataview": "default", "limit": per_page,
                         "offset": offset, "tags": tag, "lic": requested,
                         "sort": "date", "ord": "desc",
                     })
@@ -325,8 +325,11 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
                     scanned += len(rows)
                     pages_seen += 1
                     for item in rows:
+                        if inspected >= 30:
+                            break
+                        inspected += 1
                         record = record_from_item(
-                            playlist, item, requested, f"vocal-pool:{tag}",
+                            playlist, detailed_upload(item), requested, f"vocal-pool:{tag}",
                             preferred_terms=preferred, minimum_teeth=minimum,
                             genre_tag="vocal-pool:" + tag,
                         )
@@ -334,7 +337,7 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
                             record["curation"] = "vocal-pool-unreviewed"
                             records.append(record)
                             accepted += 1
-                    if len(rows) < per_page:
+                    if len(rows) < per_page or inspected >= 30:
                         break
                 except Exception as exc:
                     failures.append({
@@ -343,7 +346,7 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
                         "offset": offset, "error": base.clean(exc, 900),
                     })
                     break
-            diagnostics.append({"tag": tag, "license_class": requested, "pages_seen": pages_seen, "scanned": scanned, "accepted": accepted})
+            diagnostics.append({"tag": tag, "license_class": requested, "pages_seen": pages_seen, "scanned": scanned, "inspected": inspected, "accepted": accepted})
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUTPUT_DIR / "vocal-pool-scan.json").write_text(json.dumps({
         "schema": "civweave.open-music-vocal-pool-scan.v1",
