@@ -13,6 +13,7 @@ on:
       - 'lib/starling-collective-v1.mjs'
       - 'tools/starling/**'
       - 'scripts/test-starling-*.mjs'
+      - 'public/app/shared/starling-collective-worker-v1.mjs'
       - 'scripts/test-mobile-guild-create-v1.mjs'
       - 'package.json'
       - '.github/workflows/starling-native-contract.yml'
@@ -33,10 +34,11 @@ jobs:
         run: |
           node --check public/app/shared/starling-collective-v1.mjs
           node --check public/app/shared/starling-collective-turns-v1.mjs
+          node --check public/app/shared/starling-collective-worker-v1.mjs
           node --check public/app/shared/starling-collective-tools-v1.mjs
           node --check public/app/starling-lounge-v1.mjs
           node --check public/app/mobile-guild-create-v1.mjs
           node --check tools/starling/aider-adapter-v1.mjs
-          node --test scripts/test-starling-collective-v1.mjs scripts/test-starling-collective-turns-v1.mjs scripts/test-starling-collective-tools-v1.mjs scripts/test-starling-aider-adapter-v1.mjs scripts/test-starling-lounge-contract-v1.mjs
+          node --test scripts/test-starling-collective-v1.mjs scripts/test-starling-collective-turns-v1.mjs scripts/test-starling-collective-worker-v1.mjs scripts/test-starling-collective-tools-v1.mjs scripts/test-starling-aider-adapter-v1.mjs scripts/test-starling-lounge-contract-v1.mjs
       - name: Verify real Guild creation path
         run: node scripts/test-mobile-guild-create-v1.mjs
