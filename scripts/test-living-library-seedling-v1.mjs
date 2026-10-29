@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {REVIEW_PLAN_KEY,EVIDENCE_PREFIX,STAGED_KEY,stageManualDraft,stageBundleForReview,evidenceForPlan,validateSubmission} from '../public/app/living-library-seedling-bridge-v1.mjs';
+import {exportSeedlingEpub} from '../public/app/living-library-seedling-epub-v1.mjs';
 import {newDraft,livingSchoolPlan,guildBundle,validateDraft,normaliseSource,normaliseMedia,videoEmbed,externalUrl} from '../public/app/living-library-seedling-core-v1.mjs';
 
 const fixture=()=>{const d=newDraft();d.title='Read and memorize tarot';d.capability='Independently recognize and explain Major Arcana symbols';d.proof='Name a random card, identify three symbols, and explain the interpretation without looking';d.modules.forEach((m,i)=>Object.assign(m,{title:'Module '+(i+1),focus:'Learn topic '+(i+1),outcome:'Identify and explain topic '+(i+1)}));d.sources=[normaliseSource({title:'Historical article',url:'https://example.org/tarot-history',type:'article'})];d.media=[normaliseMedia({kind:'video',url:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',title:'Demonstration'})];return d};
@@ -75,4 +76,26 @@ test('review staging rolls back storage on any write failure',()=>{
  const storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>{writes++;if(writes===2)throw Error('simulated quota failure');data.set(k,String(v))},removeItem:k=>data.delete(k)};
  assert.throws(()=>stageManualDraft(fixture(),{storage}),/simulated quota failure/);
  assert.equal(data.get(REVIEW_PLAN_KEY),undefined);
+});
+
+test('X4 Pro EPUB export has correct ZIP/EPUB layout and true offline article text',()=>{
+ const d=fixture(),epub=exportSeedlingEpub(d);
+ assert.ok(epub instanceof Uint8Array);
+ assert.equal(Buffer.from(epub.subarray(0,4)).toString('hex'),'504b0304');
+ const label=Buffer.from(epub).toString('utf8');
+ assert.match(label,/application\/epub\+zip/);
+ assert.match(label,/META-INF\/container.xml/);
+ assert.match(label,/OEBPS\/content.opf/);
+ assert.match(label,/OEBPS\/nav.xhtml/);
+ assert.match(label,/Module 1/);
+ assert.match(label,/Historical article/);
+ assert.match(label,/Demonstration/);
+ assert.match(label,/dQw4w9WgXcQ/);
+});
+test('EPUB optional images enforce actual file signatures',()=>{
+ const d=fixture();
+ const mediaId=d.media[0].id;
+ d.media[0].kind='image';
+ const fake=new Uint8Array([0,1,2,3,4]);
+ assert.throws(()=>exportSeedlingEpub(d,{images:[{mediaId,name:'fake.png',bytes:fake}]}),/valid PNG or JPEG/);
 });
