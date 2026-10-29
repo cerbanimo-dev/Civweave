@@ -15,6 +15,7 @@ import threading
 import re
 import urllib.request
 from html.parser import HTMLParser
+from datetime import datetime, timezone, timedelta
 import json
 import urllib.parse
 from pathlib import Path
@@ -483,6 +484,42 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
     return records, failures
 
 
+def recently_verified_catalog(max_days: int = 10) -> list[dict]:
+    """Protect the radio against transient upstream harvest failures.
+
+    Previously licensed entries only survive within a short bounded verification
+    window; stale source claims never become permanent permission to stream.
+    """
+    path = OUTPUT_DIR / "catalog.json"
+    if not path.is_file():
+        return []
+    try:
+        packet = json.loads(path.read_text(encoding="utf-8"))
+        stamp = datetime.fromisoformat(str(packet.get("built_at", "")).replace("Z", "+00:00"))
+        if stamp.tzinfo is None or datetime.now(timezone.utc) - stamp > timedelta(days=max_days):
+            return []
+        accepted = []
+        for row in packet.get("records") or []:
+            lic, files = row.get("license") or {}, row.get("files") or []
+            if row.get("provider") != "ccmixter" or not base.validate_record(row):
+                continue
+            if lic.get("commercial_use") is not True or lic.get("redistribution") is not True:
+                continue
+            if not str(row.get("source_url") or "").startswith("https://ccmixter.org/files/"):
+                continue
+            if not any(str(f.get("url") or "").startswith("https://ccmixter.org/content/") and str(f.get("url") or "").lower().endswith(".mp3") for f in files):
+                continue
+            if row.get("vocal_verified") is not True or row.get("explicit") is True:
+                continue
+            old = dict(row)
+            old["carried_forward"] = True
+            old["last_verified_at"] = packet["built_at"]
+            accepted.append(old)
+        return accepted
+    except (ValueError, OSError, KeyError, TypeError):
+        return []
+
+
 def enrich_outputs(config: dict) -> None:
     catalog_path = OUTPUT_DIR / "catalog.json"
     daily_path = OUTPUT_DIR / "daily-batch.json"
@@ -495,7 +532,7 @@ def enrich_outputs(config: dict) -> None:
     policy = json.loads(policy_path.read_text(encoding="utf-8"))
 
     by_id = {row.get("candidate_id"): row for row in catalog.get("records") or []}
-    fields = ("vocal_verified", "vocal_evidence", "instrumental_only", "teeth_score", "themes", "explicit", "curation", "playlist_id", "playlist_matches", "provider")
+    fields = ("vocal_verified", "vocal_evidence", "instrumental_only", "teeth_score", "themes", "explicit", "curation", "playlist_id", "playlist_matches", "provider", "carried_forward", "last_verified_at")
     for collection in (daily.get("candidates") or [], manifest.get("entries") or []):
         for row in collection:
             source = by_id.get(row.get("candidate_id")) or {}
@@ -580,6 +617,9 @@ def main() -> None:
             records.extend(discovered)
             failures.extend(discovery_failures)
 
+    previous = recently_verified_catalog()
+    print(f"Previously source-verified MP3 candidates retained (10-day cap): {len(previous)}")
+    records.extend(previous)
     summary = base.build_outputs(records, failures, config)
     enrich_outputs(config)
     if summary["records"] <= 0:
