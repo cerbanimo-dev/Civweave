@@ -232,14 +232,14 @@ function safeUrl(value,{audioFile=false}={}){
 function normalizeRecord(row){
   const license=row?.license,id=clean(row?.candidate_id,120),file=row?.files?.find(item=>item?.url&&item?.role==='redistributed-source-download')||row?.files?.[0];
   const href=safeUrl(file?.url,{audioFile:true}),source=safeUrl(row?.source_url),licenseUrl=safeUrl(license?.url);
-  if(!id||!href||!source||!licenseUrl||!['CC-BY','CC-BY-SA','CC0','PUBLIC-DOMAIN'].includes(license?.spdx)||license?.redistribution!==true||!clean(license?.evidence)||row?.download_enabled!==true||row?.mesh_redistributable!==true||row?.explicit===true)return null;
+  if(!id||!href||!source||!licenseUrl||!['CC-BY','CC-BY-SA','CC0','PUBLIC-DOMAIN'].includes(license?.spdx)||license?.redistribution!==true||!clean(license?.evidence)||row?.download_enabled!==true||row?.mesh_redistributable!==true||row?.explicit!==false)return null;
   const bytes=Number(file?.bytes)||0;if(bytes<=0||bytes>MAX_AUDIO_BYTES)return null;
   const systems=[...new Set([row.playlist_id,...(row.playlist_matches||[]).map(item=>item.playlist_id)].filter(id=>SYSTEMS.includes(id)))];
   return Object.freeze({id,title:clean(row.title,240),artist:clean(row.artist,240),url:href,source,licenseUrl,license:clean(license.label||license.spdx,100),credits:clean(row.attribution?.credit_line||row.attribution?.creator||row.artist,1200),bytes,sha256:clean(file.sha256||row.content_hash,64),systems,safeAudit:row.safeAudit==='SAFE-PASS-V1',changes:clean(row.attribution?.changes||'Unmodified source recording.',200)});
 }
 function normalizeStreamRecord(row){
   const license=row?.license||{},file=(row?.files||[]).find(item=>/\.mp3(?:\?|$)/i.test(item?.url||''));
-  if(row?.explicit!==false||row?.vocal_verified!==true||row?.instrumental_only===true||!row?.candidate_id||!file||!['CC-BY','CC-BY-SA','CC0','PUBLIC-DOMAIN'].includes(license.spdx)||license.redistribution!==true||license.commercial_use!==true||!clean(license.evidence))return null;
+  if(row?.explicit===true||row?.vocal_verified!==true||row?.instrumental_only===true||!row?.candidate_id||!file||!['CC-BY','CC-BY-SA','CC0','PUBLIC-DOMAIN'].includes(license.spdx)||license.redistribution!==true||license.commercial_use!==true||!clean(license.evidence))return null;
   let url;try{url=new URL(file.url)}catch{return null}
   if(url.protocol!=='https:'||url.hostname!=='ccmixter.org'||!url.pathname.startsWith('/content/')||!url.pathname.toLowerCase().endsWith('.mp3'))return null;
   const source=safeUrl(row.source_url),licenseUrl=safeUrl(String(license.url||'').replace(/^http:\/\/creativecommons\.org\//,'https://creativecommons.org/')),bytes=Number(file.bytes)||0;
