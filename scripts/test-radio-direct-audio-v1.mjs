@@ -30,6 +30,25 @@ async function setup({safe=false, records=[record('one'),record('two')],failAudi
   return{w,dom,api,calls,store,settle,child,get plays(){return plays},get pauses(){return pauses}};
 }
 
+test('the mobile music launcher is a visible, accessible vector control above the shared dock',async t=>{
+  const x=await setup();t.after(()=>x.dom.window.close());
+  const launcher=x.w.document.getElementById('cw-radio-station-launcher-v1');
+  assert.ok(launcher,'The music launcher must exist immediately on a supported mobile shell');
+  assert.match(launcher.getAttribute('aria-label')||'',/music and playlists/i);
+  assert.ok(launcher.querySelector('svg[aria-hidden="true"] path'),'The launcher must not depend on mobile music-note font glyph support');
+  assert.equal(launcher.textContent,'');
+  const style=x.w.document.getElementById('cw-radio-station-surface-v1-style').textContent;
+  assert.match(style,/visibility:visible!important/);
+  assert.match(style,/width:54px;height:54px/);
+  assert.match(style,/bottom:calc\(var\(--cw-radio-dock-space\) \+ 14px\)/);
+  launcher.click();assert.equal(x.w.document.getElementById('cw-radio-station-panel-v1').hidden,false,'The icon should actually open the station');
+  x.w.document.querySelector('[data-radio-close]').click();
+  assert.equal(x.w.document.getElementById('cw-radio-station-panel-v1').hidden,true);
+  x.w.history.replaceState(null,'','/app/persistent-system-shell-v1.html?system=civweave&embed=1');
+  x.api.refresh();assert.equal(x.w.document.documentElement.dataset.radioEmbedded,'true');
+  assert.ok(x.w.document.getElementById('cw-radio-station-launcher-v1'),'Embedded shell must keep its own visible launcher');
+});
+
 test('radio opens direct music without fetching media or autoplay; extensions leave its single audio owner intact',async t=>{
   const x=await setup();t.after(()=>x.dom.window.close());
   assert.equal(x.api.mode(),'direct');assert.equal(x.calls.length,0);
