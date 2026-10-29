@@ -1,75 +1,85 @@
 {
   "schema": "civweave.open-music-vocal-pool-scan.v1",
-  "at": "2026-10-29T10:40:32Z",
+  "at": "2026-10-29T16:19:49Z",
   "diagnostics": [
     {
       "tag": "female_vocals",
       "license_class": "by",
-      "pages_seen": 1,
-      "scanned": 1,
-      "accepted": 1
+      "pages_seen": 0,
+      "scanned": 0,
+      "inspected": 0,
+      "accepted": 0
     },
     {
       "tag": "female_vocals",
       "license_class": "sa",
-      "pages_seen": 1,
-      "scanned": 1,
+      "pages_seen": 0,
+      "scanned": 0,
+      "inspected": 0,
       "accepted": 0
     },
     {
       "tag": "male_vocals",
       "license_class": "by",
-      "pages_seen": 1,
-      "scanned": 1,
-      "accepted": 1
+      "pages_seen": 0,
+      "scanned": 0,
+      "inspected": 0,
+      "accepted": 0
     },
     {
       "tag": "male_vocals",
       "license_class": "sa",
-      "pages_seen": 1,
-      "scanned": 1,
+      "pages_seen": 0,
+      "scanned": 0,
+      "inspected": 0,
       "accepted": 0
     },
     {
       "tag": "vocals",
       "license_class": "by",
-      "pages_seen": 1,
-      "scanned": 1,
-      "accepted": 1
+      "pages_seen": 0,
+      "scanned": 0,
+      "inspected": 0,
+      "accepted": 0
     },
     {
       "tag": "vocals",
       "license_class": "sa",
       "pages_seen": 1,
-      "scanned": 1,
-      "accepted": 1
+      "scanned": 6,
+      "inspected": 6,
+      "accepted": 6
     },
     {
       "tag": "spoken_word",
       "license_class": "by",
-      "pages_seen": 1,
-      "scanned": 1,
-      "accepted": 1
+      "pages_seen": 0,
+      "scanned": 0,
+      "inspected": 0,
+      "accepted": 0
     },
     {
       "tag": "spoken_word",
       "license_class": "sa",
       "pages_seen": 1,
-      "scanned": 1,
-      "accepted": 0
+      "scanned": 10,
+      "inspected": 10,
+      "accepted": 9
     },
     {
       "tag": "rap",
       "license_class": "by",
       "pages_seen": 1,
-      "scanned": 1,
-      "accepted": 1
+      "scanned": 7,
+      "inspected": 7,
+      "accepted": 7
     },
     {
       "tag": "rap",
       "license_class": "sa",
       "pages_seen": 0,
       "scanned": 0,
+      "inspected": 0,
       "accepted": 0
     }
   ],
