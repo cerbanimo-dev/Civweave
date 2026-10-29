@@ -82,3 +82,17 @@ test('Guild reader sees only valid genesis-and-founder-authorized records',async
  mesh.getObject=async()=>({...await Promise.resolve({kind:'civweave.guild-genesis.v1',id:'guild-genesis:garden',payload:{guildId:'garden',foundingDeviceId:'device:founder'},origin:{nodeId:'device:other'},signature:'valid'})});
  await assert.rejects(()=>service.readTurns({guildId:'garden',verifyReader:()=>true}),/founding record/);
 });
+
+test('a user-supplied brief survives signed replay and is not treated as a model completion',async()=>{
+ const {service,calls}=makeHarness();
+ await service.runOneTurn({guildId:'garden',personaId:'sana',taskPrompt:'Find an accessible way for neighbors to participate.'});
+ assert.match(calls[0].messages.at(-1).content,/accessible way/);
+ const replay=await service.readTurns({guildId:'garden',verifyReader:()=>true});
+ assert.equal(replay[0].brief,'Find an accessible way for neighbors to participate.');
+ assert.equal(replay[0].completionVerified,false);
+});
+test('local client refuses to store a turn without source-bound Guild sign-off',async()=>{
+ const {service,mesh}=makeHarness();
+ mesh.validateObject=async()=>({ok:false});
+ await assert.rejects(()=>service.runOneTurn({guildId:'garden',personaId:'kami'}),/founding record/);
+});
