@@ -82,4 +82,30 @@ await assert.rejects(()=>api.streamTest('http://127.0.0.1:11434','qwen3.5-4b-mlx
   fetcher:async()=>({ok:true,headers:{get:()=> 'application/json'},
     body:{getReader:()=>({read:async()=>({done:true}),releaseLock(){}})}})
 }),/text\/event-stream/);
+
+const checkHtml=readFileSync('public/app/ios-local-webview/index.html','utf8');
+const checkWorker=readFileSync('public/app/ios-local-webview/sw.js','utf8');
+const checkData=JSON.parse(readFileSync('public/app/ios-local-webview/offline-data.json','utf8'));
+const campusHtml=readFileSync('public/app/working-campus-v440.html','utf8');
+const shellJs=readFileSync('public/app/persistent-system-shell-v1.js','utf8');
+assert.equal(checkData.schema,'civweave-ios-webview-offline-probe.v1');
+assert.match(checkHtml,/Open Civweave campus/);
+assert.match(checkHtml,/working-campus-v440\.html\?iosLocal=1/);
+assert.match(checkHtml,/navigator\.serviceWorker\.register\('\/app\/ios-local-webview\/sw\.js'/);
+assert.match(checkHtml,/Offline Mode|Airplane Mode/);
+assert.match(checkHtml,/data\.schema!=='civweave-ios-webview-offline-probe\.v1'/);
+assert.match(checkHtml,/http:\/\/127\.0\.0\.1:11434\/v1\/models/);
+assert.match(checkWorker,/const ROOT='\/app\/ios-local-webview\/'/);
+assert.match(checkWorker,/const CACHE='civweave-ios-webview-check-v1'/);
+assert.match(checkWorker,/cache\.match\(event\.request,\{ignoreSearch:true\}\)/);
+assert.doesNotMatch(checkWorker,/scope:\s*['"]\/['"]/);
+assert.match(setup,/data-ai-local-frontend-url/);
+assert.match(setup,/data-ai-local-copy-frontend/);
+assert.match(setup,/ios-local-webview\/index\.html/);
+assert.match(setup,/Frontend required/);
+assert.match(settings,/ios-ai-local-server-setup-v1\.js\?v=1\.0\.2-ios-ai-local-webview-frontend-offline-probe/);
+assert.match(campusHtml,/settings-gateway-v317\.js\?v=1\.0\.138-ios-offline-webview/);
+assert.match(shellJs,/settings-gateway-v317\.js\?v=1\.0\.138-ios-offline-webview/);
+console.log('PASS: ai.local frontend URL, isolated offline WKWebView probe and staged cache-busted Settings entry.');
+
 console.log('PASS: ai.local URL safety, explicit model discovery, true split-SSE token streaming, no premature activation, and Civweave /v1 runtime routing.');
