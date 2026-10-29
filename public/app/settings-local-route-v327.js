@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
+const VERSION='1.1.7-settings-local-route-v329-litert-metadata-warning';
 const ROUTE='downloaded-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
