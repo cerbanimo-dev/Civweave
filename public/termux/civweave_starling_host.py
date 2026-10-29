@@ -178,6 +178,11 @@ class StarlingHost:
                 "createdAt": job["createdAt"], "updatedAt": job["updatedAt"],
                 "reviewRequired": True, "claimVerified": False, "backend": "termux"}
 
+    def list_jobs(self):
+        with self.lock:
+            jobs = sorted(self.jobs.values(), key=lambda x: x.get('createdAt', 0), reverse=True)
+            return {'schema': 'civweave.starling-host-job-list.v1', 'jobs': [self.public(j) for j in jobs[:30]]}
+
     def get_job(self, jid):
         if not JOB.fullmatch(jid):
             raise ValueError("Invalid job ID.")
@@ -342,6 +347,8 @@ def make_handler(host):
             try:
                 if self.path == "/v1/starling/status":
                     return self.reply(200, host.status())
+                if self.path == "/v1/starling/jobs":
+                    return self.reply(200, host.list_jobs())
                 match = re.fullmatch(r"/v1/starling/jobs/([0-9a-f]{32})", self.path)
                 if match:
                     return self.reply(200, host.get_job(match.group(1)))
