@@ -30,6 +30,7 @@
     "finder:stage": "node scripts/stage-federation-finder-data-v274.mjs",
     "map:v1:build": "node scripts/build-civweave-map-v1.mjs",
     "test:map:v1": "node --test scripts/test-civweave-map-v1.mjs",
+    "test:action-board": "node --test scripts/test-action-board-v1.mjs",
     "anarchadia:execute": "node scripts/anarchadia-branch-executor-v145.mjs",
     "anarchadia:fork": "node scripts/anarchadia-local-fork-executor-v146.mjs",
     "test:anarchadia-governance": "node --test scripts/test-anarchadia-governance-v145.mjs",
