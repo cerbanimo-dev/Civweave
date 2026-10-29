@@ -1104,6 +1104,19 @@
           "creative technology"
         ],
         "evidence": "ccMixter project playlist; not every track is CC BY, so non-allowlisted entries are rejected"
+      },
+      {
+        "id": "8300",
+        "name": "Freedom to Share Remixes (sorted)",
+        "system": "anarchadia",
+        "themes": [
+          "creative freedom",
+          "copyright autonomy",
+          "collaboration",
+          "sharing",
+          "freedom"
+        ],
+        "evidence": "ccMixter community Freedom to Share remix event; membership is discovery evidence only, individual track licensing is independently checked"
       }
     ],
     "require_vocal_source_metadata": true,
