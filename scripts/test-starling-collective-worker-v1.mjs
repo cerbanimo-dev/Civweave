@@ -103,3 +103,17 @@ test('task discovery requires current authenticated board and separately verifie
  assert.equal(denied.length,0);
  assert.deepEqual(await h.worker.discover('garden',{guild:{id:'garden'},questClient:{...src,sessionForGuild:()=>null},verifyHumanPublisher:()=>true}),[]);
 });
+
+test('automatic scan produces a reviewable offer linked to a verified published Quest beat, not a task claim',async()=>{
+ const h=harness();
+ const offer={guildId:'garden',questId:'q1',publicationId:'pub-1',beatId:'beat-1',beatTitle:'Write a volunteer schedule',matchingCapabilities:['writing'],action:'suggest-offer-only',requiresCanonicalClaim:true};
+ const worker=createStarlingGuildWorker({mesh:h.mesh,turnService:h.model,founder:()=>({guildId:'garden',deviceId:'device:founder'}),now:()=>h.nowRef.value,randomId:()=>String(h.signed.length+1),readTaskOpportunities:async()=>[offer]});
+ await worker.enable('garden',{confirmConsent:()=>true});
+ const run=await worker.tick('garden');
+ assert.equal(run.status,'completed');
+ assert.equal(h.calls[0].questId,'q1');
+ assert.match(h.calls[0].taskPrompt,/volunteer schedule/);
+ assert.match(h.calls[0].taskPrompt,/not claim/i);
+ assert.equal(h.signed.at(-1).payload.beatId,'beat-1');
+ assert.equal(typeof worker.claimTask,'undefined');
+});
