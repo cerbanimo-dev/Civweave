@@ -59,7 +59,7 @@ assert.ok(installedEntryHtml.includes("if(params.get('installed')!=='1')return f
 assert.ok(installedEntryHtml.includes('location.replace(installer.href)'),'browser display without installed proof must fail closed to the installer');
 assert.ok(installedEntryRuntime.includes('async function installedLaunchAuthorized()'),'installed runtime must re-check launch authorization before booting');
 assert.ok(installedEntryRuntime.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session'"),'installed runtime must accept only installed display or PWA launch session');
-assert.ok(boundary.includes('function allowed(){return installedDisplay()||launchSession()||developer()}'),'Working Campus must preserve the same installed-display-or-launch-session boundary');
+assert.ok(boundary.includes('function allowed(){return installedDisplay()||launchSession()||developer()||iosBrowserSession()}'),'Working Campus must preserve installed authorization while permitting explicit iOS browser sessions');
 assert.ok(boundary.includes('installedQueryIsAuthorization:false'),'Working Campus must keep installed=1 non-authorizing');
 assert.ok(!boundary.includes('civweave.pwa.installed-capability.v1'),'fresh-install path must not restore a durable browser-visible runtime capability');
 
