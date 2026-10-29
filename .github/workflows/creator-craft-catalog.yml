@@ -1,0 +1,27 @@
+name: Creator Suite Craft Catalog
+on:
+  pull_request:
+  push:
+    branches: [staging, main]
+jobs:
+  craft-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify catalog and web assets
+        run: |
+          node --check public/creator-suite/shared/craft-catalog-v1.js
+          node --check public/creator-suite/craft-tools-v1.js
+          node --test scripts/test-creator-craft-catalog-v1.mjs
+          node --check tools/creator-craft-bridge/wordcraft.mjs
+          node --check tools/creator-craft-bridge/server.mjs
+          node --check public/creator-suite/wordcraft-connector-v1.js
+          node --test scripts/test-creator-wordcraft-bridge-v1.mjs
+          node --check tools/creator-craft-bridge/cadcraft.mjs
+          node --test scripts/test-creator-cadcraft-bridge-v1.mjs
+          node --check tools/creator-craft-bridge/pdfcraft.mjs
+          node --test scripts/test-creator-pdfcraft-bridge-v1.mjs
+          node --test scripts/test-creator-ai-tools-v1.mjs

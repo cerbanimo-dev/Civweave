@@ -141,6 +141,8 @@ jobs:
         run: node scripts/test-creator-provenance-tribunal-v1.mjs
       - name: Verify device-endorsed Guild tribunal and signed review receipt
         run: node scripts/test-cloudflare-creator-provenance-human-endorsement-v1.mjs
+      - name: Install pinned DOM-test dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Verify document naming and persistence
         run: node --test scripts/test-creator-document-naming-v1.mjs
       - name: Verify Creator audit client privacy
