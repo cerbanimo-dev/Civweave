@@ -4,7 +4,7 @@ import {COLLECTIVE_TOOL_CATALOG} from './shared/starling-collective-tools-v1.mjs
 const ID='cw-starling-lounge';
 const PEOPLE=Object.values(STARLING_PERSONAS);
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false};
+const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,autonomousProjects:[],autonomousOutputs:[],goalStatus:''};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -13,7 +13,7 @@ function setup(){
   if(state.root)return state.root;
   const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=starling-native-r1';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
-  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><div class="sl-flex sl-run"><h2 class="sl-grow">Collective conversation</h2><button type="button" class="sl-strong" data-sl-action="turn">Run one local turn</button><button type="button" data-sl-action="round">Run 3-person round</button></div><p class="sl-status" data-sl-turn-status>No local model run has started. Runs are explicitly started, one at a time, and never use hosted credits.</p><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button><small data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</small></div><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Brief for the selected persona</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Give the persona one focused task or question. Running a local turn records this brief for Guild review…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Run one local turn to deliver this brief to the selected persona through your local model. Both brief and reply are saved to the Guild mesh. Open in Civweave chat uses the existing shared chat instead.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><section class="sl-host-panel" aria-label="Local execution host"><h3>Local execution host</h3><p class="sl-sub">Run and recover drafts after closing the Lounge, using either Android native work or the paired Termux host. No task claims or spending.</p><label>Backend <select data-sl-host-kind><option value="termux">Termux companion · port 8767</option><option value="android">Android native bridge · WorkManager</option></select></label><div class="sl-flex"><button type="button" data-sl-action="host-connect">Connect</button><button type="button" data-sl-action="host-submit">Queue local draft</button><button type="button" data-sl-action="host-refresh">Refresh jobs</button></div><div class="sl-flex"><button type="button" data-sl-action="host-enable">Enable host autopilot</button><button type="button" data-sl-action="host-disable">Disable host autopilot</button></div><p class="sl-status" data-sl-host-status role="status">Choose a host and connect.</p><pre data-sl-host-output class="sl-host-output"></pre><button type="button" data-sl-action="host-import">Import completed draft for Guild review</button></section><p class="sl-status" data-sl-work-status></p></aside></div>';
+  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><div class="sl-flex sl-run"><h2 class="sl-grow">Collective conversation</h2><button type="button" class="sl-strong" data-sl-action="turn">Run one local turn</button><button type="button" data-sl-action="round">Run 3-person round</button></div><p class="sl-status" data-sl-turn-status>No local model run has started. Runs are explicitly started, one at a time, and never use hosted credits.</p><section class="sl-goal-setting"><h2>Guild main goal · autonomous projects</h2><p class="sl-sub">Set an enduring problem for the Collective to address with its own AI projects. Only AI drafting tasks are assigned when human skills are unknown or silo mode is enabled. Projects stay reviewable drafts, not activated Quests.</p><label for="cw-sl-goal">Main Guild goal</label><textarea id="cw-sl-goal" maxlength="4000" rows="3" placeholder="For example: Develop practical ways to reduce neighborhood litter, starting with educational materials, community research questions, and reusable outreach drafts."></textarea><label class="sl-flex"><input type="checkbox" data-sl-silo checked> Silo mode — AI-only project tasks</label><button type="button" class="sl-strong" data-sl-action="worker-goal">Set goal & start autonomous projects</button><p class="sl-status" data-sl-goal-status></p></section><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button><small data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</small></div><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Brief for the selected persona</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Give the persona one focused task or question. Running a local turn records this brief for Guild review…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Run one local turn to deliver this brief to the selected persona through your local model. Both brief and reply are saved to the Guild mesh. Open in Civweave chat uses the existing shared chat instead.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Autonomous project backlog</h2><div data-sl-projects></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><section class="sl-host-panel" aria-label="Local execution host"><h3>Local execution host</h3><p class="sl-sub">Run and recover drafts after closing the Lounge, using either Android native work or the paired Termux host. No task claims or spending.</p><label>Backend <select data-sl-host-kind><option value="termux">Termux companion · port 8767</option><option value="android">Android native bridge · WorkManager</option></select></label><div class="sl-flex"><button type="button" data-sl-action="host-connect">Connect</button><button type="button" data-sl-action="host-submit">Queue local draft</button><button type="button" data-sl-action="host-refresh">Refresh jobs</button></div><div class="sl-flex"><button type="button" data-sl-action="host-enable">Enable host autopilot</button><button type="button" data-sl-action="host-disable">Disable host autopilot</button></div><p class="sl-status" data-sl-host-status role="status">Choose a host and connect.</p><pre data-sl-host-output class="sl-host-output"></pre><button type="button" data-sl-action="host-import">Import completed draft for Guild review</button></section><p class="sl-status" data-sl-work-status></p></aside></div>';
   root.addEventListener('click',click);
   root.querySelector('[data-sl-form]').addEventListener('submit',send);
   root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close()}});
@@ -82,13 +82,48 @@ function renderWork(){
       offers.append(row);
     }
   }
+  renderAutonomousProjects();
   const bench=$('[data-sl-toolbench]');bench.replaceChildren();for(const tool of COLLECTIVE_TOOL_CATALOG){const entry=el('section','sl-output');entry.append(el('b','',tool.name+' · '+tool.kind),el('p','sl-sub',tool.description));entry.append(el('small','',tool.status==='migration-pending'?'Porting existing Starling adapter':'Not installed yet'));bench.append(entry)}
   $('[data-sl-work-status]').textContent=state.loading?'Loading authenticated Guild Quests…':state.error||('Guild board: '+state.status+'. Progress is member-reported, not automatically verified.');
+}
+function renderAutonomousProjects(){
+  const target=$('[data-sl-projects]');if(!target)return;
+  target.replaceChildren();
+  if(!state.autonomousProjects.length){para(target,'No autonomous projects yet. Set a main Guild goal to generate an AI-capable project backlog.','sl-sub');return}
+  const finished=new Set(state.autonomousOutputs.map(x=>x.projectId+':'+x.taskId));
+  for(const project of state.autonomousProjects.slice(-12).reverse()){
+    const card=el('section','sl-output');
+    card.append(el('h3','',project.title));
+    para(card,project.outcome);
+    para(card,project.aiOnly?'AI-only scope · no human skills or silo mode':'Verified skills present; human tasks remain unassigned','sl-sub');
+    for(const task of project.tasks){
+      const done=finished.has(project.id+':'+task.id);
+      para(card,(task.assignee==='ai'?'AI':'Human review')+' · '+task.title+' — '+(task.assignee==='ai'?(done?'Draft ready for review':'Awaiting AI drafting'):'Unassigned proposal'),'sl-sub');
+      if(done){const output=state.autonomousOutputs.find(x=>x.projectId===project.id&&x.taskId===task.id);if(output)para(card,clean(output.text,1600),'sl-sub')}
+    }
+    para(card,'Internal Guild project draft; no human task claims, purchases, public postings or canonical completion.','sl-sub');
+    target.append(card);
+  }
+}
+async function refreshAutonomousProjects(){
+  if(!state.worker||!state.guild)return;
+  const guild=state.guild;
+  try{
+    const result=await state.worker.readProjects(guild.id);
+    if(state.guild?.id!==guild.id)return;
+    state.autonomousProjects=result.projects;
+    state.autonomousOutputs=result.outputs;
+  }catch(error){
+    if(state.guild?.id===guild.id)state.goalStatus='Could not read the signed project backlog: '+clean(String(error?.message||error),220);
+  }
+  renderAutonomousProjects();
 }
 function render(){
   if(!state.root)return;
   $('[data-sl-guild]').textContent=state.guild?.name||state.guild?.displayName||state.guild?.id||'Guild not selected';
   renderSpeaker();renderFeed();renderWork();
+  const goalStatus=$('[data-sl-goal-status]');if(goalStatus)goalStatus.textContent=state.goalStatus;
+  const goalButton=$('[data-sl-action=worker-goal]');if(goalButton)goalButton.disabled=state.workerLoading;
   const button=$('[data-sl-action=turn]');if(button){button.disabled=state.turnsRunning;button.textContent=state.turnsRunning?'Generating local turn…':'Run one local turn'}
   const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning;
   const control=$('[data-sl-action=worker-toggle]');if(control){control.disabled=state.workerLoading;control.textContent=state.workerEnabled?'Disable local autopilot':'Enable local autopilot'}
@@ -131,7 +166,7 @@ function close(){if(!state.root)return;state.root.hidden=true;state.turnSubscrib
 function open(guild){
   if(!guild?.id)throw new TypeError('Select an existing Guild first.');
   setup();
-  if(state.guild?.id!==guild.id){state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  if(state.guild?.id!==guild.id){state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.autonomousProjects=[];state.autonomousOutputs=[];state.goalStatus='';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
   state.root.hidden=false;document.body.style.overflow='hidden';render();state.root.querySelector('[data-sl-action=close]').focus();void refresh();void refreshTurns();void refreshWorkerStatus();
 }
 async function send(event){
@@ -157,6 +192,7 @@ function click(event){
   if(cmd==='turn')void runLocalTurn();
   if(cmd==='round')void runLocalRound();
   if(cmd==='worker-toggle')void toggleWorker();
+  if(cmd==='worker-goal')void startAutonomousGoal();
   if(cmd==='host-connect')void connectHost();
   if(cmd==='host-submit')void submitHostDraft();
   if(cmd==='host-refresh')void refreshHost();
@@ -242,7 +278,7 @@ async function runLocalRound(){
         if(state.guild?.id===guild.id){
           state.turnMessage=completed+'/'+total+' personas have submitted signed local turns.';
           state.speaker=record.payload.personaId;
-          render();void refreshTurns();
+          render();void refreshTurns();void refreshAutonomousProjects();
         }
       }
     });
@@ -292,6 +328,8 @@ async function refreshWorkerStatus(){
     const worker=await ensureWorker(),status=await worker.status(guild.id);
     if(state.guild?.id!==guild.id||state.root?.hidden)return;
     state.workerEnabled=status.enabled;
+    if(status.goal){$('#cw-sl-goal').value=status.goal;$('[data-sl-silo]').checked=status.siloMode;state.goalStatus='Current signed goal: '+status.goal.slice(0,260)}
+    await refreshAutonomousProjects();
     state.workerMessage=status.enabled?'Enabled locally · at most '+status.dailyLimit+' turns/day; resumes while Lounge remains open.':'Off · Guildkeeper opt-in required. No background generation.';
     if(status.enabled&&!status.active&&localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id)!=='termux'&&localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id)!=='android'){
       await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
@@ -304,6 +342,29 @@ async function refreshWorkerStatus(){
   }catch(error){
     if(state.guild?.id===guild.id)state.workerMessage='Autopilot unavailable: '+clean(String(error?.message||error),300);
   }finally{state.workerLoading=false;if(state.guild?.id===guild.id)render()}
+}
+async function startAutonomousGoal(){
+  if(state.workerLoading||!state.guild)return;
+  const guild=state.guild,goal=clean($('#cw-sl-goal')?.value,4001);
+  if(goal.length<12||goal.length>4000){state.goalStatus='Enter a main goal of 12–4000 characters.';render();return}
+  state.workerLoading=true;state.goalStatus='Saving signed goal and starting a local autonomous project cycle…';render();
+  try{
+    const selected=localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id);
+    if(selected==='termux'||selected==='android')throw new Error('Disable the '+selected+' host schedule before starting the browser project worker.');
+    const worker=await ensureWorker();
+    worker.stop();
+    await worker.enable(guild.id,{confirmConsent:()=>true,goal,siloMode:$('[data-sl-silo]').checked,intervalMinutes:60,dailyLimit:12});
+    state.workerEnabled=true;
+    await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
+    state.goalStatus='Signed Guild goal saved. The Collective is generating reviewable projects and AI-only text deliverables.';
+    await refreshAutonomousProjects();
+    await worker.start(guild.id,{onStatus:result=>{
+      if(state.guild?.id!==guild.id||state.root?.hidden)return;
+      state.workerMessage='Goal work: '+result.status+(result.error?' · '+result.error:'');
+      render();void refreshTurns();void refreshAutonomousProjects();
+    }});
+  }catch(error){state.goalStatus='Could not start the Collective: '+clean(String(error?.message||error),320)}
+  finally{state.workerLoading=false;if(state.guild?.id===guild.id)render()}
 }
 async function toggleWorker(){
   if(state.workerLoading||!state.guild)return;
