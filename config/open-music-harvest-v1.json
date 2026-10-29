@@ -539,6 +539,16 @@
       "by",
       "sa"
     ],
-    "note": "Discover vocal full songs by source genre/mood tags; do not treat genre as proof of activist lyrics."
+    "note": "Discover vocal full songs by source genre/mood tags; do not treat genre as proof of activist lyrics.",
+    "broad_vocal_tags": [
+      "female_vocals",
+      "male_vocals",
+      "vocals",
+      "spoken_word",
+      "rap"
+    ],
+    "broad_pages_per_tag": 12,
+    "broad_playlist_id": "civweave",
+    "broad_note": "Broad vocal search supplies additional songs for manual review; musical fit is inferred only from recorded tags and not assumed as an ideological match."
   }
 }
