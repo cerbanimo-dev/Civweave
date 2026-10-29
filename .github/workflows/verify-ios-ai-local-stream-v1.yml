@@ -1,0 +1,29 @@
+name: Verify iOS ai.local SSE route
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/local-ai/ios-ai-local-server-setup-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/settings-gateway-v317.js'
+      - 'scripts/verify-ios-ai-local-stream-v1.mjs'
+      - '.github/workflows/verify-ios-ai-local-stream-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/local-ai/ios-ai-local-server-setup-v1.js'
+      - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/settings-gateway-v317.js'
+      - 'scripts/verify-ios-ai-local-stream-v1.mjs'
+      - '.github/workflows/verify-ios-ai-local-stream-v1.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/verify-ios-ai-local-stream-v1.mjs
