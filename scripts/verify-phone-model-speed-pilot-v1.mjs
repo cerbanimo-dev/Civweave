@@ -36,7 +36,7 @@ assert.match(downloadsSource,/x\.id==='qwen35-4b-litert-web'&&\/\\.litertlm\$\//
 assert.match(downloadsSource,/LOCAL_QWEN35_PHONE_NATIVE_IMPORT_REQUIRED/,'in-page multi-GB Android download must be blocked');
 assert.match(loaderSource,/modelId===QWEN_FAST/,'Qwen4 must accept chunked Cache Storage weights');
 assert.match(loaderSource,/chunkedResponse\(cache,url,Number\(artifact.sizeBytes\|\|0\)\)/,'LiteRT must stream real chunked bytes, never a monolithic JS allocation');
-assert.match(startupSource,/1\.8\.5-litert-runtime-v1-qwen4-chunked-phone-loader/,'local LiteRT authority must require the updated chunked runtime');
+assert.match(startupSource,/1\.8\.6-litert-runtime-v1-qwen-streaming-metadata-diagnostic/,'local LiteRT authority must require the updated chunked runtime');
 assert.match(settings,/data-local-phone-import/,'Settings must have a user-activated native file import');
 assert.match(settings,/file.size!==artifact.sizeBytes/,'reject old/incomplete 2.57GB LiteRT files');
 assert.match(settings,/importChunkedFile\(cache,url,file/,'import Qwen only in resumable fragments');

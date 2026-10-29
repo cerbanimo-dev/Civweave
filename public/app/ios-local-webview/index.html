@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123127">
+<title>Civweave · iPhone offline browser check</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#0e1d19;color:#e8f6ee}
+*{box-sizing:border-box}body{margin:0;padding:22px 16px 60px}main{max-width:760px;margin:0 auto}
+h1{font-size:1.42rem;margin:0 0 .55rem}h2{font-size:1.08rem;margin:0 0 .5rem}p{line-height:1.5}
+small{color:#b8cec3}.panel{border:1px solid #426052;border-radius:15px;padding:17px;margin:15px 0;background:#172a23}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}button,a.button{font:inherit;cursor:pointer;border:1px solid #8ab49e;color:#0d2118;background:#bce1c9;border-radius:10px;padding:11px 14px;text-decoration:none;display:inline-block}
+button:disabled{opacity:.5;cursor:not-allowed}.muted{color:#b8cec3}output{display:block;white-space:pre-wrap;line-height:1.55;overflow-wrap:anywhere}
+a{color:#ace6c1}code{overflow-wrap:anywhere;color:#c8e8d5}.bad{color:#ffc2b7}.good{color:#b9f7c9}.pending{color:#f7dca3}
+</style>
+</head>
+<body><main>
+<h1>Civweave · iPhone offline PWA check</h1>
+<p>Open this page <strong>inside ai.local's built-in browser</strong>. It tests whether that exact browser is capable of saving and reloading Civweave without a connection. Safari's separate cache is not evidence for ai.local's web view.</p>
+<div class="panel">
+<h2>1 · Open Civweave frontend</h2>
+<p>For ai.local's <strong>Frontend URL / Web View URL</strong>, use Civweave's HTTPS address. The local model server address <code>http://127.0.0.1:11434</code> is an API, not a frontend website.</p>
+<div class="row"><a class="button" href="/app/working-campus-v440.html?iosLocal=1">Open Civweave campus</a><button type="button" id="copy-campus">Copy campus URL</button></div>
+<output id="campus-url" class="muted"></output>
+</div>
+<div class="panel">
+<h2>2 · Check web view capabilities</h2>
+<p>Only run the install test deliberately. It registers an isolated service worker in <code>/app/ios-local-webview/</code>, not Civweave's main worker.</p>
+<div class="row"><button type="button" id="inspect">Inspect browser</button><button type="button" id="install">Test offline worker</button><button type="button" id="check-cache">Check cached page</button></div>
+<output id="browser-status" aria-live="polite" class="muted">Not checked.</output>
+</div>
+<div class="panel">
+<h2>3 · Check ai.local API reachability</h2>
+<p>This is a local request only. If the request is blocked in the web view, check CORS, HTTP-to-HTTPS mixed-content rules and iOS local-network restrictions. Civweave cannot override these from JavaScript.</p>
+<div class="row"><button type="button" id="check-api">Check local model list</button></div>
+<output id="api-status" class="muted" aria-live="polite">Not checked.</output>
+</div>
+<div class="panel">
+<h2>4 · Verify offline reload</h2>
+<p>After the worker and cache checks pass, <strong>turn on Airplane Mode, disable Wi-Fi, then reload this page in ai.local</strong>. If the page reloads and the cached data remains accessible, basic offline web-view navigation works. Then download Civweave's full offline campus <em>inside the same browser</em> and repeat with the campus itself.</p>
+<div class="row"><button type="button" id="reload">Reload test page</button><button type="button" id="test-data">Read bundled offline data</button></div>
+<output id="offline-status" class="muted" aria-live="polite">No offline test yet.</output>
+<p class="muted">If the service worker is unavailable, ai.local may need a native WebKit configuration update. A webpage cannot grant itself those iOS permissions.</p>
+</div>
+</main>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const base=location.origin;
+$('campus-url').textContent=base+'/app/working-campus-v440.html?iosLocal=1';
+$('copy-campus').addEventListener('click',async()=>{
+ try{await navigator.clipboard.writeText($('campus-url').textContent);$('campus-url').textContent='Copied: '+base+'/app/working-campus-v440.html?iosLocal=1'}
+ catch{$('campus-url').textContent='Copy manually: '+base+'/app/working-campus-v440.html?iosLocal=1'}
+});
+function outcome(id,message,cls=''){const node=$(id);node.className=cls;node.textContent=message}
+function support(){
+ const sw='serviceWorker' in navigator,cache='caches' in globalThis;
+ let storage=false;try{localStorage.setItem('cw-ios-webview-probe','ok');storage=localStorage.getItem('cw-ios-webview-probe')==='ok'}catch{}
+ return {secureContext:isSecureContext,serviceWorkerAPI:sw,cacheStorageAPI:cache,localStorageWritable:storage,controlledBy:navigator.serviceWorker?.controller?.scriptURL||'none',onlineHint:navigator.onLine};
+}
+$('inspect').addEventListener('click',()=>{
+ const result=support();outcome('browser-status',JSON.stringify(result,null,2),
+ result.secureContext&&result.serviceWorkerAPI&&result.cacheStorageAPI&&result.localStorageWritable?'good':'bad');
+});
+$('install').addEventListener('click',async()=>{
+ if(!('serviceWorker'in navigator))return outcome('browser-status','Service workers are not exposed in this web view. Civweave cannot supply persistent offline PWA navigation inside it. The ai.local developer must enable the required WebKit capabilities.','bad');
+ outcome('browser-status','Attempting isolated service-worker registration…','pending');
+ try{
+  const reg=await Promise.race([
+    navigator.serviceWorker.register('/app/ios-local-webview/sw.js',{scope:'/app/ios-local-webview/',updateViaCache:'none'}),
+    new Promise((_,reject)=>setTimeout(()=>reject(Error('Service-worker registration timed out after 15 seconds.')),15000))
+  ]);
+  await navigator.serviceWorker.ready;
+  outcome('browser-status','Worker registered. Scope: '+reg.scope+'\nActive: '+(reg.active?.scriptURL||'activating')+'\nTry Check cached page, then reload with connectivity disabled.','good');
+ }catch(e){outcome('browser-status','Service-worker registration failed: '+String(e?.message||e)+'\nIf this works in Safari but not ai.local, the embedded WKWebView probably needs configuration by its developer.','bad')}
+});
+$('check-cache').addEventListener('click',async()=>{
+ try{
+  const found=await caches.open('civweave-ios-webview-check-v1');
+  const page=await found.match('/app/ios-local-webview/index.html');
+  const data=await found.match('/app/ios-local-webview/offline-data.json');
+  if(!page?.ok||!data?.ok)throw Error('This page or its data has not been cached yet. Run Test offline worker first.');
+  outcome('browser-status','Both test files are in the browser cache. Offline reload still needs to be verified with connectivity switched off.','good')
+ }catch(e){outcome('browser-status','Cache test failed: '+String(e?.message||e),'bad')}
+});
+$('check-api').addEventListener('click',async()=>{
+ outcome('api-status','Trying http://127.0.0.1:11434/v1/models…','pending');
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+ try{
+  const response=await fetch('http://127.0.0.1:11434/v1/models',{signal:controller.signal,cache:'no-store',credentials:'omit',mode:'cors'});
+  if(!response.ok)throw Error('HTTP '+response.status);
+  const payload=await response.json();
+  const models=Array.isArray(payload.data)?payload.data.map(x=>x.id).filter(Boolean):[];
+  outcome('api-status','ai.local reachable; '+models.length+' installed models: '+models.slice(0,8).join(', '),'good')
+ }catch(e){outcome('api-status','Local model API unavailable: '+String(e?.message||e)+'\nThis may be a browser permission/CORS issue even if ai.local is running.','bad')}
+ finally{clearTimeout(timer)}
+});
+$('reload').addEventListener('click',()=>location.reload());
+$('test-data').addEventListener('click',async()=>{
+ try{
+  const r=await fetch('/app/ios-local-webview/offline-data.json?check='+Date.now(),{cache:'no-store'});
+  if(!r.ok)throw Error('HTTP '+r.status);
+  const data=await r.json();
+  if(data.schema!=='civweave-ios-webview-offline-probe.v1')throw Error('Unexpected probe data');
+  const controlled=navigator.serviceWorker?.controller?.scriptURL||'none';
+  outcome('offline-status','Probe data loaded. Current worker: '+controlled+'\nWhen Airplane Mode is enabled and Wi-Fi disabled, this confirms the offline fetch path.','good');
+ }catch(e){outcome('offline-status','Offline data unavailable: '+String(e?.message||e),'bad')}
+});
+$('inspect').click();
+})();
+</script>
+</body></html>

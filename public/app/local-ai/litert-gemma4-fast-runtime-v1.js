@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.8.5-litert-runtime-v1-qwen4-chunked-phone-loader';
+const VERSION='1.8.6-litert-runtime-v1-qwen-streaming-metadata-diagnostic';
 const PRIOR_VERSION='1.4.0-litert-gemma4-fast-runtime-v1-formatted-output';
 const MODEL_CACHE='civweave-model-generative-v266';
 // The current E4B -web GPU bundle uses a 160 MiB storage buffer binding.
@@ -134,6 +134,18 @@ async function unloadEngine(reason='model-switch',{afterGeneration=false}={}){
   })();
   try{return await engineReleasePromise}finally{engineReleasePromise=null}
 }
+// The LiteRT-LM 0.17.1 Web SDK always uses createStreaming() for the
+// GPU_ARTISAN backend, even if model is passed as Blob/File instead of a
+// ReadableStream. Hybrid Qwen 3.5's native .litertlm contains an executor
+// metadata section that this Web streaming loader does not support.
+function unsupportedExecutorMetadata(error){
+  return /Streaming\s+LlmExecutorMetadata\s+section\s+is\s+not\s+supported\s+yet/i.test(clean(error?.message||error,1000));
+}
+function executorMetadataFailure(profile,error){
+  return Object.assign(new Error(
+    profile.label+' cannot load with the pinned LiteRT-LM Web 0.17.1 GPU streaming engine: this .litertlm contains an LlmExecutorMetadata section unsupported by this loader. This is model-container/runtime incompatibility, not token streaming, an incomplete download, or a GPU memory error. The imported model chunks have been preserved. For local Qwen 3.5 4B generation, select the on-device GGUF route in Settings or a local OpenAI-compatible llama.cpp / ai.local server. A compatible web export/runtime is required before retrying this LiteRT model.'
+  ),{code:'LOCAL_LITERT_STREAMING_EXECUTOR_METADATA_UNSUPPORTED',executionModel:profile.id,model:profile.id,requiresCompatibleWebBundle:true,retryable:false,originalError:clean(error?.message||error,400)});
+}
 async function instantiateEngine(mod,profile,mode='standard'){
   const model=await modelStream(profile.id);
   // The supported Web SDK uses Engine.create({model,mainExecutorSettings})
@@ -172,11 +184,13 @@ async function createEngine(modelId){
   let value,mode='standard';
   try{value=await instantiateEngine(mod,profile,'standard')}
   catch(standardError){
+    if(unsupportedExecutorMetadata(standardError))throw executorMetadataFailure(profile,standardError);
     if(gpuQueueError(standardError))throw gpuFailure(standardError,'loading-model');
     mode='compat';
     emit('civweave:litert-gemma4-backend-fallback',{model:profile.id,reason:'standard-engine-create-failed',message:String(standardError?.message||standardError),mtpEnabled:false});
     // Preserve device compatibility without activating untested MTP.
     try{value=await instantiateEngine(mod,profile,'compat')}catch(error){
+      if(unsupportedExecutorMetadata(error))throw executorMetadataFailure(profile,error);
       error.standardEngineError=String(standardError?.message||standardError);throw error;
     }
   }
