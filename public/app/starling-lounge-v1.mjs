@@ -13,7 +13,7 @@ function setup(){
   if(state.root)return state.root;
   const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=starling-native-r1';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
-  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><div class="sl-flex sl-run"><h2 class="sl-grow">Collective conversation</h2><button type="button" class="sl-strong" data-sl-action="turn">Run one local turn</button></div><p class="sl-status" data-sl-turn-status>No local model run has started. Runs are explicitly started, one at a time, and never use hosted credits.</p><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Brief for the selected persona</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Give the persona one focused task or question. Running a local turn records this brief for Guild review…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Run one local turn to deliver this brief to the selected persona through your local model. Both brief and reply are saved to the Guild mesh. Open in Civweave chat uses the existing shared chat instead.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><p class="sl-status" data-sl-work-status></p></aside></div>';
+  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><div class="sl-flex sl-run"><h2 class="sl-grow">Collective conversation</h2><button type="button" class="sl-strong" data-sl-action="turn">Run one local turn</button><button type="button" data-sl-action="round">Run 3-person round</button></div><p class="sl-status" data-sl-turn-status>No local model run has started. Runs are explicitly started, one at a time, and never use hosted credits.</p><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Brief for the selected persona</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Give the persona one focused task or question. Running a local turn records this brief for Guild review…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Run one local turn to deliver this brief to the selected persona through your local model. Both brief and reply are saved to the Guild mesh. Open in Civweave chat uses the existing shared chat instead.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><p class="sl-status" data-sl-work-status></p></aside></div>';
   root.addEventListener('click',click);
   root.querySelector('[data-sl-form]').addEventListener('submit',send);
   root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close()}});
@@ -90,6 +90,7 @@ function render(){
   $('[data-sl-guild]').textContent=state.guild?.name||state.guild?.displayName||state.guild?.id||'Guild not selected';
   renderSpeaker();renderFeed();renderWork();
   const button=$('[data-sl-action=turn]');if(button){button.disabled=state.turnsRunning;button.textContent=state.turnsRunning?'Generating local turn…':'Run one local turn'}
+  const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning;
   const status=$('[data-sl-turn-status]');if(status){status.textContent=state.turnError||state.turnMessage;status.dataset.slError=state.turnError?'true':'false'}
 }
 async function refresh(){
@@ -142,6 +143,7 @@ function click(event){
   if(cmd==='close')close();
   if(cmd==='refresh'){void refresh();void refreshTurns()}
   if(cmd==='turn')void runLocalTurn();
+  if(cmd==='round')void runLocalRound();
   if(cmd==='quest'){close();globalThis.CivweaveGuildQuestTrackerV1?.openQuestMap?.()}
 }
 /* The Lounge reads signed Guild object-mesh records. An ordinary window event
@@ -203,6 +205,39 @@ async function runLocalTurn(){
     if(state.guild?.id===guild.id){$('#cw-sl-message').value='';state.turnMessage='Local model turn saved and signed to Guild mesh.';await refreshTurns()}
   }catch(error){if(state.guild?.id===guild.id)state.turnError=clean(String(error?.message||error),500)}
   finally{state.turnsRunning=false;if(state.guild?.id===guild.id)render()}
+}
+async function runLocalRound(){
+  if(state.turnsRunning||!state.guild)return;
+  const guild=state.guild;
+  const ids=Object.keys(STARLING_PERSONAS),start=ids.indexOf(state.speaker);
+  const personas=[0,1,2].map(offset=>ids[(Math.max(0,start)+offset)%ids.length]);
+  state.turnsRunning=true;state.turnError='';
+  state.turnMessage='Starting a 3-person sequential local round. Each signed response will be saved before the next persona runs.';
+  render();
+  try{
+    await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
+    const service=await turnService();
+    const result=await service.runRound({
+      guildId:guild.id,personas,taskPrompt:clean($('#cw-sl-message')?.value,1200),
+      onTurn:(record,completed,total)=>{
+        if(state.guild?.id===guild.id){
+          state.turnMessage=completed+'/'+total+' personas have submitted signed local turns.';
+          state.speaker=record.payload.personaId;
+          render();void refreshTurns();
+        }
+      }
+    });
+    if(state.guild?.id===guild.id){
+      $('#cw-sl-message').value='';
+      state.turnMessage=result.completed+' persona turns recorded. Guild members can review the signed transcript.';
+      await refreshTurns();
+    }
+  }catch(error){
+    if(state.guild?.id===guild.id){
+      state.turnError='Round stopped; previously signed turns remain saved. '+clean(String(error?.message||error),400);
+      await refreshTurns();
+    }
+  }finally{state.turnsRunning=false;if(state.guild?.id===guild.id)render()}
 }
 export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.0.0',open,close,refresh});
 if(typeof globalThis!=='undefined')globalThis.CivweaveStarlingLoungeV1=CivweaveStarlingLoungeV1;
