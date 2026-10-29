@@ -161,7 +161,7 @@ The canonical ownership list lives in `docs/architecture/systems-of-practice.md`
 | Local AI bootstrap | `public/app/local-ai/bootstrap-v266.js` |
 | Private messaging | `public/app/civweave-private-messaging-v1.js` |
 | Offline object mesh | `public/app/local-object-mesh-v146.js` |
-| Starling Collective | `public/app/starling-collective-v1.js`; `starling-integration-v1.js` exposes the shared rail action. Guild limits and confirmed proposals use `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`. |
+| Starling Collective | `public/app/starling-collective-v1.js`; `starling-integration-v1.js` exposes the shared rail action. Guild limits and confirmed proposals use `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`; optional Guild-local worker, signed turns, and Lounge are subordinate capabilities at `public/app/shared/starling-collective-worker-v1.mjs`, `public/app/shared/starling-collective-turns-v1.mjs`, and `public/app/starling-lounge-v1.mjs`; native/Termux execution host adapters: `public/app/shared/starling-execution-transport-v1.mjs` and `public/termux/civweave_starling_host.py`, with Android WorkManager bridge under `native/android/civweave-starling-v1/`. |
 | Guild Quest publication | `cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs`; `public/app/guild-quest-client-v1.js` calls it through existing member sessions |
 | Radio | `public/app/system-radio-agent-v233.js` |
 | Quest pathway presentation | `public/app/shared/quest-pathway-map-v1.js` and CSS; chat, shared review and Guild tracker delegate to canonical actions |
