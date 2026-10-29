@@ -14,7 +14,7 @@ const identifier = (value, label = 'identifier', status = 400) => { const id = c
 const clone = value => structuredClone(value);
 function publicPassport(value) { const row = clone(value); delete row.accountId; return row; }
 const digest = async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(value)))].map(byte => byte.toString(16).padStart(2, '0')).join('');
-const empty = () => ({ version: 1, activeIds: [], recentIds: [], creationEvents: [], retainedLines: 0, passportUsers: [], intentionUsers: [], intentionEvents: [] });
+const empty = () => ({ version: 1, quotaModeVersion: 2, activeIds: [], recentIds: [], creationEvents: [], retainedLines: 0, passportUsers: [], intentionUsers: [], intentionEvents: [] });
 const currentEvents = (events, at) => (Array.isArray(events) ? events : []).filter(value => Number.isFinite(value) && value > at - STARLING_POLICY.creationWindowMs);
 const revision = value => { if (!Number.isSafeInteger(value) || value < 0) fail('expectedRevision must be a nonnegative integer.'); return value; };
 function actor(member) {
@@ -70,6 +70,10 @@ export async function executeGuildStarlingAction(storage, member, action, input 
     const state = validateState(await tx.get(stateKey));
     const lineKey = id => `${base}line:${identifier(id, 'Collective line identifier')}`;
     const saveState = () => tx.put(stateKey, state);
+    // Before v2 every Starling reservation was manually requested. Retain
+    // its record and history, but don't make legacy manual work spend the
+    // new autonomous-only active/creation quotas.
+    if(state.quotaModeVersion!==2){state.activeIds=[];state.creationEvents=[];state.quotaModeVersion=2;await saveState()}
     const saveLine = async line => { await tx.put(lineKey(line.id), line); await saveState(); return line; };
     if (action === 'status') {
       const ids = [...new Set([...state.activeIds, ...state.recentIds])].slice(0, 43), lines = await Promise.all(ids.map(id => tx.get(lineKey(id))));
