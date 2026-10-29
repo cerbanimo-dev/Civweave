@@ -356,8 +356,18 @@
         "Shared posting requires the exact saved proposal revision, hash and explicit human confirmation.",
         "Passport claims require consent and distinguish declared skills, authenticated residents and verified capability.",
         "Mesh discovery and billing seats never grant Guildmaster authority.",
-        "Shared completion requires trusted canonical proof; local model claims cannot attest it."
-      ]
+        "Shared completion requires trusted canonical proof; local model claims cannot attest it.",
+        "Guild local worker opt-in permits bounded signed persona turns and assistance offers, not claims, completed Quest beats, Guild votes or hosted spending.",
+        "The worker and the existing Collective planning workbench share the browser Starling inference lock."
+      ],
+      "localPersonaCatalog": "public/app/shared/starling-collective-v1.mjs",
+      "cooperativeWorker": "public/app/shared/starling-collective-worker-v1.mjs",
+      "signedTurnService": "public/app/shared/starling-collective-turns-v1.mjs",
+      "loungePresenter": "public/app/starling-lounge-v1.mjs",
+      "foundingIntentionCapture": "public/app/mobile-guild-create-v1.mjs",
+      "toolPolicy": "public/app/shared/starling-collective-tools-v1.mjs",
+      "aiderAdapter": "tools/starling/aider-adapter-v1.mjs",
+      "cooperativeWorkerContract": "docs/contracts/starling-collective-guild-service-v1.md"
     }
   }
 }

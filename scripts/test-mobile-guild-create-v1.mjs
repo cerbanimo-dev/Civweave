@@ -37,7 +37,10 @@ const {createMobileGuild,attachCloudflareEdge,updateMobileGuildLocation,mobileGu
 const {CivweavePocketGuildNodeV1}=await import('../public/app/pocket-guild-node-v1.mjs');
 const {CivweaveEmergencyAiMeshV1}=await import('../public/app/emergency-ai-mesh-v1.mjs');
 
-const result=await createMobileGuild({displayName:'Northside Repair Guild',guildId:'northside-repair'});
+const result=await createMobileGuild({displayName:'Northside Repair Guild',guildId:'northside-repair',foundingIntention:'Build a neighborhood repair commons and teach repair skills.'});
+assert.equal(result.foundingIntention.schema,'civweave.guild-founding-intention.v1');
+assert.equal(result.foundingIntention.status,'provisional');
+assert.equal(result.foundingIntention.reviewedQuestId,null);
 assert.equal(result.guildId,'northside-repair');
 assert.equal(result.route,'pocket-node');
 assert.equal(result.cloudAttached,false);
@@ -67,6 +70,8 @@ assert.equal((await CivweavePocketGuildNodeV1.syncPrimary()).status,'no-primary-
 const genesis=objects.find(object=>object.kind==='civweave.guild-genesis.v1');
 assert.ok(genesis,'Mobile Guild creation must persist a signed Guild genesis object.');
 assert.equal(genesis.payload.guildId,'northside-repair');
+assert.deepEqual(genesis.payload.foundingIntention,result.foundingIntention);
+assert.equal(genesis.payload.foundingIntention.authorRole,'guildkeeper');
 assert.equal(genesis.payload.cloudAttached,false);
 assert.equal(genesis.payload.workerCreated,false);
 assert.equal(genesis.payload.downloadOriginUsedAsBackend,false);
