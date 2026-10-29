@@ -25,7 +25,7 @@ function normalizeTurn(payload,object){
   if(!Number.isFinite(Date.parse(payload.at)))return null;
   return Object.freeze({
     id:id(payload.turnId),guildId:id(payload.guildId),personaId:payload.personaId,
-    text:clean(payload.text,3500),at:payload.at,
+    text:clean(payload.text,3500),at:payload.at,brief:clean(payload.brief,1200),
     model:clean(payload.model,200),questId:id(payload.questId)||null,
     signatureHash:clean(object.revisionHash,200),
     signerId:id(object.origin?.nodeId),
@@ -91,7 +91,7 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
       const text=readableOutput(result);
       if(result?.actual?.provider&& !allowed.has(result.actual.provider))throw new Error('Unexpected nonlocal model completed the request. No Collective turn was saved.');
       const turnId='starling-turn:'+guild+':'+crypto.randomUUID(),at=new Date().toISOString();
-      const payload={schema:STARLING_TURN_SCHEMA,turnId,guildId:guild,personaId:person.id,text,at,model:clean(result.actual?.model||config.model,200),questId:id(questId)||null,source:'local-model',completionVerified:false};
+      const payload={schema:STARLING_TURN_SCHEMA,turnId,guildId:guild,personaId:person.id,text,brief:clean(taskPrompt,1200),at,model:clean(result.actual?.model||config.model,200),questId:id(questId)||null,source:'local-model',completionVerified:false};
       return await mesh.createObject({
         id:turnId,revision:1,kind:STARLING_TURN_KIND,
         purpose:'Signed Starling Collective local-model turn for Guild member review, not verified task completion.',
