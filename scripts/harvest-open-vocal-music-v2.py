@@ -12,6 +12,9 @@ from __future__ import annotations
 import importlib.util
 import concurrent.futures
 import threading
+import re
+import urllib.request
+from html.parser import HTMLParser
 import json
 import urllib.parse
 from pathlib import Path
@@ -230,6 +233,84 @@ def harvest_curated(playlist: dict, policy: dict) -> tuple[list[dict], list[dict
                 failures.append({"provider": "ccmixter", "playlist_id": playlist["id"], "query": f"curated:{upload_id}", "error": "exact curated upload did not return an allowlisted downloadable record"})
         except Exception as exc:
             failures.append({"provider": "ccmixter", "playlist_id": playlist["id"], "query": f"curated:{upload_id}", "error": base.clean(exc, 900)})
+    return records, failures
+
+
+class SourcePlaylistLinks(HTMLParser):
+    """Collect only concrete /files/creator/id song links from a ccMixter playlist."""
+    def __init__(self):
+        super().__init__()
+        self.ids = []
+        self.seen = set()
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag != "a":
+            return
+        href = dict(attrs).get("href") or ""
+        parsed = urllib.parse.urlparse(urllib.parse.urljoin("https://ccmixter.org/", href))
+        if parsed.hostname not in ("ccmixter.org", "www.ccmixter.org"):
+            return
+        match = re.fullmatch(r"/files/[^/]+/(\d+)", parsed.path)
+        if match and match.group(1) not in self.seen:
+            self.seen.add(match.group(1))
+            self.ids.append(match.group(1))
+
+
+def harvest_community_playlists(config: dict, policy: dict) -> tuple[list[dict], list[dict]]:
+    """Read curated community playlist pages, then enforce the upload's own license.
+
+    Playlist membership is only discovery evidence. No playlist-level statement
+    can substitute for the exact upload's license, file, and vocal checks.
+    """
+    settings = config.get("community_playlist_discovery") or {}
+    if settings.get("enabled") is not True:
+        return [], []
+    playlist_by_id = {p["id"]: p for p in config.get("playlists") or []}
+    records, failures = [], []
+    maximum = max(1, min(120, int(settings.get("max_uploads_per_playlist") or 70)))
+    for page in settings.get("source_playlists") or []:
+        source_id = base.clean(page.get("id"), 20)
+        target = playlist_by_id.get(page.get("system"))
+        if not source_id.isdigit() or not target:
+            continue
+        url = f"https://ccmixter.org/playlist/browse/{source_id}"
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": base.USER_AGENT, "Accept": "text/html"})
+            with urllib.request.urlopen(request, timeout=base.REQUEST_TIMEOUT) as response:
+                html = response.read(1_500_000).decode("utf-8", errors="replace")
+            links = SourcePlaylistLinks()
+            links.feed(html)
+            ids = links.ids[:maximum]
+            print(f"community-playlist {source_id}: {len(ids)} exact source upload IDs")
+            for uid in ids:
+                try:
+                    item = detailed_upload({"upload_id": uid})
+                    if base.clean(item.get("upload_id") or item.get("id"), 120) != uid:
+                        continue
+                    candidate = record_from_item(
+                        target, item, "by", f"community-playlist:{source_id}",
+                        preferred_terms=list(policy.get("preferred_terms") or []),
+                        minimum_teeth=1, genre_tag="community-playlist:" + source_id,
+                    )
+                    if candidate:
+                        candidate["curation"] = "community-playlist-unreviewed"
+                        candidate["themes"] = list(dict.fromkeys(
+                            [base.clean(t, 80) for t in page.get("themes") or [] if base.clean(t, 80)]
+                            + candidate.get("themes", [])
+                        ))
+                        records.append(candidate)
+                except Exception as exc:
+                    failures.append({
+                        "provider": "ccmixter", "playlist_id": target["id"],
+                        "query": f"community-playlist:{source_id}:{uid}",
+                        "error": base.clean(exc, 900),
+                    })
+        except Exception as exc:
+            failures.append({
+                "provider": "ccmixter", "playlist_id": target["id"],
+                "query": f"community-playlist:{source_id}",
+                "error": base.clean(exc, 900),
+            })
     return records, failures
 
 
@@ -488,6 +569,10 @@ def main() -> None:
             print(f"{playlist['id']:15} web-sourced candidates={len(review_candidates):3}")
             records.extend(review_candidates)
             failures.extend(review_failures)
+        community_candidates, community_failures = harvest_community_playlists(config, policy)
+        print(f"community playlists discovered={len(community_candidates):3}")
+        records.extend(community_candidates)
+        failures.extend(community_failures)
         for future in concurrent.futures.as_completed(futures):
             lane, playlist = futures[future]
             discovered, discovery_failures = future.result()
