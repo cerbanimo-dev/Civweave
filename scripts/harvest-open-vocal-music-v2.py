@@ -511,9 +511,13 @@ def recently_verified_catalog(max_days: int = 10) -> list[dict]:
                 continue
             if row.get("vocal_verified") is not True or row.get("explicit") is True:
                 continue
+            last = str(row.get("last_verified_at") or packet["built_at"])
+            verified = datetime.fromisoformat(last.replace("Z", "+00:00"))
+            if verified.tzinfo is None or datetime.now(timezone.utc) - verified > timedelta(days=max_days):
+                continue
             old = dict(row)
             old["carried_forward"] = True
-            old["last_verified_at"] = packet["built_at"]
+            old["last_verified_at"] = last
             accepted.append(old)
         return accepted
     except (ValueError, OSError, KeyError, TypeError):
