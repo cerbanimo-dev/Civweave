@@ -5,6 +5,9 @@ on:
     branches: [staging]
     paths:
       - 'public/app/local-ai/ios-ai-local-server-setup-v1.js'
+      - 'public/app/ios-local-webview/**'
+      - 'public/app/working-campus-v440.html'
+      - 'public/app/persistent-system-shell-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/shared/civweave-model-runtime.js'
       - 'public/app/settings-gateway-v317.js'
@@ -13,6 +16,9 @@ on:
   pull_request:
     paths:
       - 'public/app/local-ai/ios-ai-local-server-setup-v1.js'
+      - 'public/app/ios-local-webview/**'
+      - 'public/app/working-campus-v440.html'
+      - 'public/app/persistent-system-shell-v1.js'
       - 'public/app/local-ai/litert-gemma4-fast-runtime-v1.js'
       - 'public/app/shared/civweave-model-runtime.js'
       - 'public/app/settings-gateway-v317.js'
