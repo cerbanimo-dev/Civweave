@@ -22,7 +22,7 @@ const INTENTION_PERSONAS=Object.freeze(['kami','rosa','sana','farah','kit','jae'
 const MIN_INTERVAL=15;
 const MAX_DAILY=12;
 
-export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date.now(),randomId=()=>crypto.randomUUID(),setAlarm=(cb,ms)=>setTimeout(cb,ms),clearAlarm=handle=>clearTimeout(handle),withExclusiveLock}={}){
+export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date.now(),randomId=()=>crypto.randomUUID(),setAlarm=(cb,ms)=>setTimeout(cb,ms),clearAlarm=handle=>clearTimeout(handle),withExclusiveLock,readTaskOpportunities}={}){
   if(!mesh?.getObject||!mesh?.createObject||!mesh?.listObjects||!mesh?.validateObject||!mesh?.deviceId||!turnService?.runOneTurn||typeof founder!=='function')throw new TypeError('Canonical mesh, turn service, and founding-device owner are required.');
   let busy=false,timer=null,stopped=true,activeGuild=null,generation=0;
 
@@ -103,15 +103,24 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const latest=events.filter(x=>x.status==='completed').sort((a,b)=>Date.parse(b.at)-Date.parse(a.at))[0];
     if(latest&&now()-Date.parse(latest.at)<p.intervalMinutes*60000)return {status:'cooldown',executed:0};
     const personaId=INTENTION_PERSONAS[attempts.length%INTENTION_PERSONAS.length];
+    // Only a verified member-authenticated board adapter may return candidate
+    // human projects. A model's own claims of task permission are ignored.
+    let opportunity=null;
+    if(typeof readTaskOpportunities==='function'){
+      try{const candidates=await readTaskOpportunities(guild);
+        if(Array.isArray(candidates))opportunity=candidates.find(candidate=>candidate?.guildId===guild&&candidate.action==='suggest-offer-only'&&candidate.requiresCanonicalClaim===true&&clean(candidate.beatTitle,500))||null;
+      }catch{} // An unavailable Guild board cannot block offline intention work.
+    }
     const runId=clean(String(randomId()),80);
     if(!/^[A-Za-z0-9_-]{1,80}$/.test(runId))throw new TypeError('Worker run ID must be an opaque safe identifier.');
-    await record(guild,p.revision,runId,'started',{personaId});
+    await record(guild,p.revision,runId,'started',{personaId,questId:opportunity?.questId||null,beatId:opportunity?.beatId||null});
     try{
       // The local turn service contains the model routing and signed transcript
       // owner. A run never marks a canonical Cerbanimo Quest beat complete.
-      const output=await turnService.runOneTurn({guildId:guild,personaId,taskPrompt:'Review our Guild founding Intention and recent Collective discussion. Produce one practical, reviewable contribution. Do not claim a task or mark work complete.'});
-      await record(guild,p.revision,runId,'completed',{personaId,turnId:clean(output?.payload?.turnId||output?.id,180)});
-      return {status:'completed',executed:1,personaId,turnId:clean(output?.payload?.turnId||output?.id,180)};
+      const taskPrompt=opportunity?'Review the member-posted Quest beat "'+clean(opportunity.beatTitle,240)+'" as an opportunity to offer voluntary AI assistance. Draft a concrete proposal aligned with the Guild Intention. State that this is an offer only: do not claim the task, spend resources, or mark it completed.':'Review our Guild founding Intention and recent Collective discussion. Produce one practical, reviewable contribution. Do not claim a task or mark work complete.';
+      const output=await turnService.runOneTurn({guildId:guild,personaId,questId:opportunity?.questId||'',taskPrompt});
+      await record(guild,p.revision,runId,'completed',{personaId,questId:opportunity?.questId||null,beatId:opportunity?.beatId||null,offerOnly:Boolean(opportunity),turnId:clean(output?.payload?.turnId||output?.id,180)});
+      return {status:'completed',executed:1,personaId,offerOnly:Boolean(opportunity),turnId:clean(output?.payload?.turnId||output?.id,180)};
     }catch(error){
       await record(guild,p.revision,runId,'failed',{personaId,error:clean(String(error?.message||error),280)});
       throw error;
