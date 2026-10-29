@@ -23,7 +23,9 @@ function validQuest(value){try{return Boolean(value?.kind==='weave-plan'&&value?
 function validLine(row,guildId){
   if(row?.schema!=='civweave.guild-starling-line.v1'||!lineId(row.id)||row.guildId!==guildId||!id(row.nodeId)||!id(row.userId)||!positive(row.revision)||!states.has(row.state))return false;
   if(row.privateDraft===true)return row.proposal===undefined&&row.publicationId===undefined;
-  if(typeof row.title!=='string'||!row.title||row.title.length>240||row.origin!=='ai-generated')return false;
+  if(typeof row.title!=='string'||!row.title||row.title.length>240)return false;
+  const validOrigin=(row.creationMode==='manual'&&row.origin==='human-requested-ai-draft')||(row.creationMode==='autonomous'&&row.origin==='ai-generated-autonomous')||(row.creationMode==null&&row.origin==='ai-generated');
+  if(!validOrigin)return false;
   if(row.proposal!==undefined&&(!validQuest(row.proposal)||!hash(row.proposalHash)))return false;
   if(row.publicationId!==undefined&&!/^guild-quest:[a-f0-9]{64}$/.test(row.publicationId))return false;
   return row.state!=='published'||Boolean(row.publicationId&&row.proposal&&row.confirmedBy===row.userId);
