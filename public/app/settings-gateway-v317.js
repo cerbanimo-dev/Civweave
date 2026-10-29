@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.137-settings-v324-ios-ai-local-sse';
+const VERSION='1.0.138-settings-v324-ios-offline-webview';
 const COMPAT_VERSION='1.0.135-settings-gateway-v317-compat';
 const SELECTOR='[data-open-unified-ai-settings]';
 const LAYER_ID='cw-settings-v320';
@@ -310,7 +310,7 @@ function bind(layer){
     if(!event.target?.open)return;
     const target=form.querySelector('[data-ios-ai-local-setup]');
     if(!target||target.dataset.iosAiLocalMounted==='1')return;
-    void import('/app/local-ai/ios-ai-local-server-setup-v1.js?v=1.0.1-ios-ai-local-openai-sse-stream-timeout')
+    void import('/app/local-ai/ios-ai-local-server-setup-v1.js?v=1.0.2-ios-ai-local-webview-frontend-offline-probe')
       .then(()=>{
         const api=globalThis.CivweaveIOSAiLocalSetupV1;
         if(!api?.mount)throw new Error('iOS ai.local setup module did not initialize.');
