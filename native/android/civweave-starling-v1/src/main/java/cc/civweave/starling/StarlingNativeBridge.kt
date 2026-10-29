@@ -61,6 +61,13 @@ class StarlingNativeBridge(private val context: Context) {
         if (method == "GET" && path == "/v1/starling/status") {
             return StarlingNativeWorker.status(context)
         }
+        if (method == "GET" && path == "/v1/starling/jobs") {
+            val jobs = StarlingNativeWorker.store(context).all()
+                .filterKeys { it.startsWith("job:") }.values
+                .sortedByDescending { it.optDouble("createdAt") }.take(30)
+            return JSONObject().put("schema", "civweave.starling-host-job-list.v1")
+                .put("jobs", JSONArray(jobs.map { StarlingNativeWorker.project(it) }))
+        }
         if (method == "POST" && path == "/v1/starling/jobs") {
             val job = requireJob(body ?: throw IllegalArgumentException("Missing job."))
             val store = StarlingNativeWorker.store(context)
