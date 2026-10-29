@@ -358,7 +358,9 @@
         "Mesh discovery and billing seats never grant Guildmaster authority.",
         "Shared completion requires trusted canonical proof; local model claims cannot attest it.",
         "Guild local worker opt-in permits bounded signed persona turns and assistance offers, not claims, completed Quest beats, Guild votes or hosted spending.",
-        "The worker and the existing Collective planning workbench share the browser Starling inference lock."
+        "The worker and the existing Collective planning workbench share the browser Starling inference lock.",
+        "Both Android native and Termux execution hosts accept only local draft jobs and issue non-authoritative receipts; host outputs require explicit Guildkeeper import into the canonical signed mesh.",
+        "Android native source is not an installed APK; Termux host runs separately and reuses existing paired Companion and llama.cpp server."
       ],
       "localPersonaCatalog": "public/app/shared/starling-collective-v1.mjs",
       "cooperativeWorker": "public/app/shared/starling-collective-worker-v1.mjs",
@@ -367,7 +369,12 @@
       "foundingIntentionCapture": "public/app/mobile-guild-create-v1.mjs",
       "toolPolicy": "public/app/shared/starling-collective-tools-v1.mjs",
       "aiderAdapter": "tools/starling/aider-adapter-v1.mjs",
-      "cooperativeWorkerContract": "docs/contracts/starling-collective-guild-service-v1.md"
+      "cooperativeWorkerContract": "docs/contracts/starling-collective-guild-service-v1.md",
+      "executionHostContract": "docs/contracts/starling-dual-host-v1.md",
+      "termuxExecutionHost": "public/termux/civweave_starling_host.py",
+      "androidExecutionBridge": "native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeBridge.kt",
+      "androidScheduledWorker": "native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeWorker.kt",
+      "hostProtocolClient": "public/app/shared/starling-execution-transport-v1.mjs"
     }
   }
 }

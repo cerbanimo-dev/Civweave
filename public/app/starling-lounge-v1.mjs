@@ -4,7 +4,7 @@ import {COLLECTIVE_TOOL_CATALOG} from './shared/starling-collective-tools-v1.mjs
 const ID='cw-starling-lounge';
 const PEOPLE=Object.values(STARLING_PERSONAS);
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false};
+const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -13,7 +13,7 @@ function setup(){
   if(state.root)return state.root;
   const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=starling-native-r1';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
-  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><div class="sl-flex sl-run"><h2 class="sl-grow">Collective conversation</h2><button type="button" class="sl-strong" data-sl-action="turn">Run one local turn</button><button type="button" data-sl-action="round">Run 3-person round</button></div><p class="sl-status" data-sl-turn-status>No local model run has started. Runs are explicitly started, one at a time, and never use hosted credits.</p><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button><small data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</small></div><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Brief for the selected persona</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Give the persona one focused task or question. Running a local turn records this brief for Guild review…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Run one local turn to deliver this brief to the selected persona through your local model. Both brief and reply are saved to the Guild mesh. Open in Civweave chat uses the existing shared chat instead.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><p class="sl-status" data-sl-work-status></p></aside></div>';
+  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><div class="sl-flex sl-run"><h2 class="sl-grow">Collective conversation</h2><button type="button" class="sl-strong" data-sl-action="turn">Run one local turn</button><button type="button" data-sl-action="round">Run 3-person round</button></div><p class="sl-status" data-sl-turn-status>No local model run has started. Runs are explicitly started, one at a time, and never use hosted credits.</p><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button><small data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</small></div><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Brief for the selected persona</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Give the persona one focused task or question. Running a local turn records this brief for Guild review…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Run one local turn to deliver this brief to the selected persona through your local model. Both brief and reply are saved to the Guild mesh. Open in Civweave chat uses the existing shared chat instead.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><section class="sl-host-panel" aria-label="Local execution host"><h3>Local execution host</h3><p class="sl-sub">Run and recover drafts after closing the Lounge, using either Android native work or the paired Termux host. No task claims or spending.</p><label>Backend <select data-sl-host-kind><option value="termux">Termux companion · port 8767</option><option value="android">Android native bridge · WorkManager</option></select></label><div class="sl-flex"><button type="button" data-sl-action="host-connect">Connect</button><button type="button" data-sl-action="host-submit">Queue local draft</button><button type="button" data-sl-action="host-refresh">Refresh jobs</button></div><div class="sl-flex"><button type="button" data-sl-action="host-enable">Enable host autopilot</button><button type="button" data-sl-action="host-disable">Disable host autopilot</button></div><p class="sl-status" data-sl-host-status role="status">Choose a host and connect.</p><pre data-sl-host-output class="sl-host-output"></pre><button type="button" data-sl-action="host-import">Import completed draft for Guild review</button></section><p class="sl-status" data-sl-work-status></p></aside></div>';
   root.addEventListener('click',click);
   root.querySelector('[data-sl-form]').addEventListener('submit',send);
   root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close()}});
@@ -93,6 +93,9 @@ function render(){
   const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning;
   const control=$('[data-sl-action=worker-toggle]');if(control){control.disabled=state.workerLoading;control.textContent=state.workerEnabled?'Disable local autopilot':'Enable local autopilot'}
   const worker=$('[data-sl-worker-status]');if(worker)worker.textContent=state.workerMessage;
+  const hostLabel=$('[data-sl-host-status]');if(hostLabel)hostLabel.textContent=state.hostStatus;
+  for(const cmd of ['host-connect','host-submit','host-refresh','host-enable','host-disable','host-import']){const control=$('[data-sl-action='+cmd+']');if(control)control.disabled=state.hostBusy||((cmd!=='host-connect')&&!state.hostTransport)}
+  const imp=$('[data-sl-action=host-import]');if(imp)imp.disabled=state.hostBusy||state.hostJob?.state!=='completed';
   const status=$('[data-sl-turn-status]');if(status){status.textContent=state.turnError||state.turnMessage;status.dataset.slError=state.turnError?'true':'false'}
 }
 async function refresh(){
@@ -128,7 +131,7 @@ function close(){if(!state.root)return;state.root.hidden=true;state.turnSubscrib
 function open(guild){
   if(!guild?.id)throw new TypeError('Select an existing Guild first.');
   setup();
-  if(state.guild?.id!==guild.id){state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.'}
+  if(state.guild?.id!==guild.id){state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
   state.root.hidden=false;document.body.style.overflow='hidden';render();state.root.querySelector('[data-sl-action=close]').focus();void refresh();void refreshTurns();void refreshWorkerStatus();
 }
 async function send(event){
@@ -154,6 +157,12 @@ function click(event){
   if(cmd==='turn')void runLocalTurn();
   if(cmd==='round')void runLocalRound();
   if(cmd==='worker-toggle')void toggleWorker();
+  if(cmd==='host-connect')void connectHost();
+  if(cmd==='host-submit')void submitHostDraft();
+  if(cmd==='host-refresh')void refreshHost();
+  if(cmd==='host-enable')void setHostAutopilot(true);
+  if(cmd==='host-disable')void setHostAutopilot(false);
+  if(cmd==='host-import')void importHostDraft();
   if(cmd==='quest'){close();globalThis.CivweaveGuildQuestTrackerV1?.openQuestMap?.()}
 }
 /* The Lounge reads signed Guild object-mesh records. An ordinary window event
@@ -284,7 +293,7 @@ async function refreshWorkerStatus(){
     if(state.guild?.id!==guild.id||state.root?.hidden)return;
     state.workerEnabled=status.enabled;
     state.workerMessage=status.enabled?'Enabled locally · at most '+status.dailyLimit+' turns/day; resumes while Lounge remains open.':'Off · Guildkeeper opt-in required. No background generation.';
-    if(status.enabled&&!status.active){
+    if(status.enabled&&!status.active&&localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id)!=='termux'&&localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id)!=='android'){
       await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
       await worker.start(guild.id,{onStatus:result=>{
         if(state.guild?.id!==guild.id||state.root?.hidden)return;
@@ -306,6 +315,8 @@ async function toggleWorker(){
       state.workerEnabled=false;
       state.workerMessage='Disabled and signed on the founding Guild device. No further automatic turns will start.';
     }else{
+      const selected=localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id);
+      if(selected==='termux'||selected==='android')throw new Error('Disable the '+selected+' host scheduler before enabling browser-local autopilot.');
       // This callback runs only in response to the Guildkeeper pressing the
       // visible opt-in control. It does not grant Quest/task/tool authority.
       await worker.enable(guild.id,{confirmConsent:()=>true,intervalMinutes:60,dailyLimit:4});
@@ -320,6 +331,111 @@ async function toggleWorker(){
   }catch(error){
     if(state.guild?.id===guild.id)state.workerMessage='Autopilot could not change state: '+clean(String(error?.message||error),300);
   }finally{state.workerLoading=false;if(state.guild?.id===guild.id)render()}
+}
+
+const hostPreference=guildId=>'civweave.starling.execution-host.v1:'+guildId;
+async function selectedFoundingIntention(){
+  const mobile=await import('./mobile-guild-create-v1.mjs');
+  const guild=state.guild,founder=mobile.mobileGuildStatus();
+  // Use the existing Guild authoring record, not a model-written authority
+  // or an invented Guildkeeper vote.
+  if(founder?.guildId!==guild?.id||!founder?.foundingIntention?.text)
+    throw new Error('Only the Guild founding device with a signed provisional Intention can submit or schedule local host drafts.');
+  return founder.foundingIntention.text;
+}
+async function connectHost(){
+  if(state.hostBusy||!state.guild)return;
+  state.hostBusy=true;state.hostStatus='Connecting to paired local host…';render();
+  try{
+    const module=await import('./shared/starling-execution-transport-v1.mjs');
+    const kind=$('[data-sl-host-kind]').value;
+    const token=kind==='termux'?sessionStorage.getItem('civweave.termux-companion.session-pairing.v1')||'':'';
+    const nativePort=kind==='android'?globalThis.CivweaveStarlingNative:null;
+    const next=module.createStarlingHostTransport({kind,token,nativePort});
+    const snapshot=await next.status();
+    if(snapshot?.schema!=='civweave.starling-host-status.v1'||snapshot.backend!==kind||snapshot.mode!=='local-only')
+      throw new Error('The selected host returned an incompatible protocol response.');
+    state.hostTransport=next;state.hostKind=kind;
+    state.hostStatus=kind+' host connected · '+snapshot.jobs+' durable jobs; model execution remains local.';
+    await refreshHost();
+  }catch(error){state.hostTransport=null;state.hostKind=null;state.hostStatus='Host unavailable: '+clean(String(error?.message||error),320)}
+  finally{state.hostBusy=false;render()}
+}
+async function refreshHost(){
+  if(!state.hostTransport||!state.guild)return;
+  const guild=state.guild,client=state.hostTransport;
+  try{
+    const list=await client.listJobs();
+    if(list?.schema!=='civweave.starling-host-job-list.v1'||!Array.isArray(list.jobs))throw new Error('Invalid host job list.');
+    const jobs=list.jobs.filter(job=>job?.guildId===guild.id);
+    state.hostJob=jobs[0]||null;
+    if(state.hostJob){
+      const job=await client.job(state.hostJob.jobId);
+      if(state.guild?.id!==guild.id)return;
+      state.hostJob=job;
+      $('[data-sl-host-output]').textContent=clean(job.text||job.error||'',6000);
+      state.hostStatus=state.hostKind+' · '+jobs.length+' recent Guild jobs · latest '+job.state+'. Drafts require review.';
+    }else{
+      $('[data-sl-host-output]').textContent='';
+      state.hostStatus=state.hostKind+' host connected · no Guild drafts recorded yet.';
+    }
+  }catch(error){state.hostStatus='Host refresh failed: '+clean(String(error?.message||error),320)}
+  render();
+}
+async function submitHostDraft(){
+  if(state.hostBusy||!state.hostTransport||!state.guild)return;
+  state.hostBusy=true;render();
+  try{
+    const intention=await selectedFoundingIntention(),guildId=state.guild.id,model='qwen35-4b-native';
+    const job=await state.hostTransport.submit({
+      jobId:crypto.randomUUID().replaceAll('-',''),guildId,personaId:state.speaker,
+      model,intention,brief:clean($('#cw-sl-message')?.value,1200),maxTokens:440
+    });
+    state.hostJob=job;
+    state.hostStatus='Queued '+state.hostKind+' local '+state.speaker+' draft. You may close Civweave and return to review it.';
+    $('[data-sl-host-output]').textContent='';
+  }catch(error){state.hostStatus='Could not queue draft: '+clean(String(error?.message||error),330)}
+  finally{state.hostBusy=false;render()}
+}
+async function setHostAutopilot(enabled){
+  if(state.hostBusy||!state.hostTransport||!state.guild)return;
+  state.hostBusy=true;render();
+  const guildId=state.guild.id,kind=state.hostKind;
+  try{
+    if(enabled){
+      const intention=await selectedFoundingIntention();
+      // Disable the old in-browser scheduler before moving this Guild to an
+      // independent execution host, preventing two local inference loops.
+      const worker=await ensureWorker();
+      const prior=await worker.status(guildId);
+      if(prior.enabled)await worker.disable(guildId);
+      worker.stop();state.workerEnabled=false;
+      const selected=localStorage.getItem(hostPreference(guildId));
+      if(selected&&selected!=='browser'&&selected!==kind)
+        throw new Error('Disable the previously selected '+selected+' host schedule before switching backends.');
+      const result=await state.hostTransport.schedule({guildId,enabled:true,intention,model:'qwen35-4b-native',intervalMinutes:60,dailyLimit:4});
+      if(result.enabled!==true)throw new Error('Host did not acknowledge scheduling.');
+      localStorage.setItem(hostPreference(guildId),kind); // preference, never an authorization token
+      state.hostStatus=kind+' autopilot enabled locally: at most 4 drafts/day, minimum 60-minute interval. Review each result.';
+    }else{
+      await state.hostTransport.schedule({guildId,enabled:false});
+      if(localStorage.getItem(hostPreference(guildId))===kind)localStorage.removeItem(hostPreference(guildId));
+      state.hostStatus=kind+' host autopilot disabled.';
+    }
+  }catch(error){state.hostStatus='Schedule change failed: '+clean(String(error?.message||error),330)}
+  finally{state.hostBusy=false;render()}
+}
+async function importHostDraft(){
+  if(state.hostBusy||!state.hostJob||state.hostJob.state!=='completed'||!state.guild)return;
+  state.hostBusy=true;render();
+  try{
+    const row=await state.hostTransport.job(state.hostJob.jobId);
+    const service=await turnService();
+    await service.importHostDraft({guildId:state.guild.id,job:row});
+    state.hostStatus='Imported as a signed Guild draft. This is NOT verified task completion.';
+    await refreshTurns();
+  }catch(error){state.hostStatus='Import rejected: '+clean(String(error?.message||error),330)}
+  finally{state.hostBusy=false;render()}
 }
 export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.0.0',open,close,refresh});
 if(typeof globalThis!=='undefined')globalThis.CivweaveStarlingLoungeV1=CivweaveStarlingLoungeV1;
