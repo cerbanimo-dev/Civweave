@@ -7,7 +7,7 @@ function makeHarness({endpoint='http://127.0.0.1:11434',actor='device:founder',r
  const rows=[],calls=[];
  const mesh={
   async deviceId(){return actor},
-  async getObject(id){return id==='guild-genesis:garden'?{id,kind:'civweave.guild-genesis.v1',origin:{nodeId:'device:founder'},payload:{guildId:'garden',foundingDeviceId:'device:founder',foundingIntention:founding.foundingIntention},revisionHash:'genesis',signature:'valid'}:null},
+  async getObject(id){return id==='guild-genesis:garden'?{id,kind:'civweave.guild-genesis.v1',origin:{nodeId:'device:founder'},payload:{guildId:'garden',foundingDeviceId:'device:founder',foundingIntention:founding.foundingIntention},revisionHash:'genesis',signature:'valid'}:rows.find(row=>row.id===id)||null},
   async listObjects(){return rows},
   async validateObject(object){return {ok:Boolean(object.signature==='valid')}},
   async createObject(input){const row={...input,origin:{nodeId:actor},revisionHash:'hash-'+rows.length,signature:'valid',createdAt:new Date().toISOString()};rows.push(row);return row}
