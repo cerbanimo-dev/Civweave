@@ -200,3 +200,17 @@ test('manual shared Guild plans are unlimited and cannot consume autonomous crea
  assert.equal(first.line.creationMode,'autonomous');
  assert.equal((await call(store,alice,'status')).activeCount,1);
 });
+
+test('pre-mode legacy manually reserved Guild history survives without consuming autonomy quota',async()=>{
+ const store=new MemoryStorage();
+ const oldId='starling-line:legacy-migration';
+ const prior={schema:'civweave.guild-starling-line.v1',id:oldId,...alice,title:'Old manual work',state:'reserved',revision:1,origin:'ai-generated',createdAt:new Date(start).toISOString(),updatedAt:new Date(start).toISOString()};
+ await store.put('guild-starling:'+alice.guildId+':line:'+oldId,prior);
+ await store.put('guild-starling:'+alice.guildId+':state',{
+  version:1,activeIds:[oldId],recentIds:[oldId],creationEvents:[start],retainedLines:1,passportUsers:[],intentionUsers:[],intentionEvents:[]
+ });
+ const status=await call(store,alice,'status');
+ assert.equal(status.activeCount,0);assert.equal(status.createdInWindow,0);
+ assert.ok(status.lines.some(line=>line.id===oldId));
+ assert.equal((await store.get('guild-starling:'+alice.guildId+':state')).quotaModeVersion,2);
+});
