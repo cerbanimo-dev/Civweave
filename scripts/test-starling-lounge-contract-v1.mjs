@@ -59,3 +59,15 @@ test('Lounge can explicitly start a bounded multi-persona round without a backgr
  assert.match(src,/function runLocalRound\(/);
  assert.doesNotMatch(src,/setInterval\(|requestIdleCallback\(/);
 });
+
+test('Guildkeeper controls local automation while Lounge is open; no hidden hosted scheduling',()=>{
+ const src=read('public/app/starling-lounge-v1.mjs');
+ assert.match(src,/createStarlingGuildWorker/);
+ assert.match(src,/data-sl-action="worker-toggle"/);
+ assert.match(src,/data-sl-worker-status/);
+ assert.match(src,/\.enable\(/);
+ assert.match(src,/\.disable\(/);
+ assert.match(src,/\.start\(/);
+ assert.match(src,/\.stop\(/);
+ assert.match(src,/navigator\.locks/);
+});
