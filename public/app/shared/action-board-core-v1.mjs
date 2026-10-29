@@ -108,7 +108,7 @@ export function projectBoard(store,plans,now=new Date().toISOString()){
   const personal=safe.actions.map(a=>{
     let status=a.status;
     if(status==='next'&&a.startAt&&Date.parse(a.startAt)>stamp)status='scheduled';
-    if(status==='scheduled'&&(!a.startAt||Date.parse(a.startAt)<=stamp))status='next';
+    if(status==='scheduled'&&a.startAt&&Date.parse(a.startAt)<=stamp)status='next';
     return {...a,key:'personal:'+a.id,source:'personal',status,reason:a.waitingFor,questTitle:'',realm:''};
   });
   const focused=new Set(safe.focusedQuestKeys);
