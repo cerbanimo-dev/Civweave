@@ -43,6 +43,17 @@ class TestSeedlingBookShelf(unittest.TestCase):
             epub=[x for x in links if x.attrib.get("type")=="application/epub+zip"]
             self.assertEqual(len(epub),1)
             self.assertTrue(epub[0].attrib["href"].startswith("https://www.gutenberg.org/ebooks/"))
+    def test_published_x4pro_opds_catalog_has_all_full_books(self):
+        xml_path=Path('public/seedling/books.opds.xml')
+        self.assertTrue(xml_path.is_file())
+        root=ET.fromstring(xml_path.read_bytes())
+        entries=root.findall('a:entry',{'a':'http://www.w3.org/2005/Atom'})
+        self.assertEqual(len(entries),14)
+        ids={entry.find('a:id',{'a':'http://www.w3.org/2005/Atom'}).text for entry in entries}
+        self.assertEqual(ids,{f'urn:gutenberg:ebook:{n}' for n,*_ in mod.BOOKS})
+        for entry in entries:
+            links=entry.findall('a:link',{'a':'http://www.w3.org/2005/Atom'})
+            self.assertEqual(len([a for a in links if a.attrib.get('type')=='application/epub+zip']),1)
     def test_catalog_only_does_not_claim_downloaded_books(self):
         with tempfile.TemporaryDirectory() as temp:
             obj=mod.build(Path(temp),limit=2,skip_download=True)
