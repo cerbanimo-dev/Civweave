@@ -6,8 +6,11 @@ function campusQuestPathMarkup(active=false){
   return map?`${map}<p data-campus-quest-map-status role="status" hidden></p><details data-campus-quest-details><summary>Path details and existing controls</summary>${legacy}</details>`:legacy;
 }
 function campusQuestMapOwner(){
+  try{const host=globalThis.parent,query=new URLSearchParams(location.search);if(host!==globalThis&&query.get('embed')==='1'&&query.get('persistentShell')==='1'){
+    if(host.location.origin===location.origin&&host.document.getElementById('cw-persistent-system-stage')?.contentWindow===globalThis&&typeof host.CivweaveSharedReviewSurfaceV234?.handleMapAction==='function')return host.CivweaveSharedReviewSurfaceV234;
+    return null;
+  }}catch{return null}
   const local=globalThis.CivweaveSharedReviewSurfaceV234;if(typeof local?.handleMapAction==='function')return local;
-  try{const host=globalThis.parent,query=new URLSearchParams(location.search);if(host!==globalThis&&host.location.origin===location.origin&&query.get('embed')==='1'&&query.get('persistentShell')==='1'&&host.document.getElementById('cw-persistent-system-stage')?.contentWindow===globalThis&&typeof host.CivweaveSharedReviewSurfaceV234?.handleMapAction==='function')return host.CivweaveSharedReviewSurfaceV234}catch{}
   return null;
 }
 function bindCampusQuestMap(){
