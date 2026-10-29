@@ -92,7 +92,10 @@ export function projectPlanActions(plans, now=new Date().toISOString()){
       const dueAt=asDate(step.dueAt||step.dueDate||path.dueAt||path.dueDate);
       const waiting=blocked.length>0;
       const scheduled=!waiting&&startAt&&Date.parse(startAt)>nowMs;
-      output.push({key:'quest:'+clean(plan.id,160)+':'+node.pi+':'+(node.kind==='step'?node.si:'path'),
+      const pathToken=node.pathNode?.ref||node.ref;
+      const pathKey=pathToken&&index.get(pathToken)?.length===1?'id:'+pathToken:'index:'+node.pi;
+      const stepKey=node.kind==='step'?(node.ref&&index.get(node.ref)?.length===1?'id:'+node.ref:'index:'+node.si):'path';
+      output.push({key:'quest:'+clean(plan.id,160)+':'+pathKey+':'+stepKey,
         source:'quest',planId:clean(plan.id,160),pathId:clean(path.id,160),pathIndex:node.pi,
         stepIndex:node.kind==='step'?node.si:null, title, questTitle:clean(plan.title||plan.wish,180),
         realm:clean(path.realm,100), status:waiting?'waiting':scheduled?'scheduled':'next',
