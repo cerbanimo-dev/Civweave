@@ -271,6 +271,47 @@ def harvest_genre_discovery(playlist: dict, policy: dict, settings: dict) -> tup
     return records, failures
 
 
+def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[list[dict], list[dict]]:
+    """Long-tail source-tag discovery for review, not automatic lyric approval."""
+    records, failures = [], []
+    per_page = max(5, min(40, int(settings.get("results_per_page") or 35)))
+    pages = max(1, min(20, int(settings.get("broad_pages_per_tag") or 12)))
+    preferred = list(policy.get("preferred_terms") or [])
+    minimum = max(1, min(5, int(policy.get("minimum_teeth_score") or 2)))
+    for tag in settings.get("broad_vocal_tags") or []:
+        for requested in settings.get("license_classes") or ["by", "sa"]:
+            if requested not in ("by", "sa", "pd"):
+                continue
+            for offset in range(0, per_page * pages, per_page):
+                try:
+                    rows = ccmixter_rows({
+                        "f": "json", "dataview": "info", "limit": per_page,
+                        "offset": offset, "tags": tag, "lic": requested,
+                        "sort": "date", "ord": "desc",
+                    })
+                    if not rows:
+                        break
+                    for item in rows:
+                        record = record_from_item(
+                            playlist, item, requested, f"vocal-pool:{tag}",
+                            preferred_terms=preferred, minimum_teeth=minimum,
+                            genre_tag="vocal-pool:" + tag,
+                        )
+                        if record:
+                            record["curation"] = "vocal-pool-unreviewed"
+                            records.append(record)
+                    if len(rows) < per_page:
+                        break
+                except Exception as exc:
+                    failures.append({
+                        "provider": "ccmixter", "playlist_id": playlist["id"],
+                        "query": f"vocal-pool:{tag}", "license_class": requested,
+                        "offset": offset, "error": base.clean(exc, 900),
+                    })
+                    break
+    return records, failures
+
+
 def enrich_outputs(config: dict) -> None:
     catalog_path = OUTPUT_DIR / "catalog.json"
     daily_path = OUTPUT_DIR / "daily-batch.json"
@@ -347,6 +388,8 @@ def main() -> None:
             futures[executor.submit(harvest_discovery, playlist, policy)] = ("themed", playlist)
             if genre_settings.get("enabled") is True:
                 futures[executor.submit(harvest_genre_discovery, playlist, policy, genre_settings)] = ("genre", playlist)
+                if playlist["id"] == genre_settings.get("broad_playlist_id", "civweave"):
+                    futures[executor.submit(harvest_broad_vocals, playlist, policy, genre_settings)] = ("vocal-pool", playlist)
         for playlist in playlists:
             curated, curated_failures = harvest_curated(playlist, policy)
             records.extend(curated)
