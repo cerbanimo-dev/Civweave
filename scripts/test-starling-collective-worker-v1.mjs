@@ -127,3 +127,52 @@ test('a Quest beat already offered to is not repeatedly offered every automatic 
  assert.match(h.calls[0].taskPrompt,/accessibility guide/);
  assert.doesNotMatch(h.calls[1].taskPrompt,/accessibility guide/);
 });
+
+const generatedPlan=JSON.stringify({title:'Neighborhood anti-litter content kit',outcome:'Draft educational copy and an accessible action guide for human review',tasks:[
+ {assignee:'ai',kind:'writing',title:'Draft neighborhood litter explainer',deliverable:'Draft outreach article text'},
+ {assignee:'human',requiredSkill:'sanitation',title:'Collect litter in neighborhood',deliverable:'Clean a street'},
+ {assignee:'ai',kind:'storyboard',title:'Draft visual campaign storyboard',deliverable:'Draft storyboard script and image notes'}
+]});
+test('Guildkeeper main goal immediately creates a signed, self-initiated AI-only project',async()=>{
+ const h=harness();
+ h.model.runOneTurn=async input=>{h.calls.push(input);return{id:'turn-'+h.calls.length,payload:{personaId:input.personaId,text:generatedPlan}}};
+ const activated=await h.worker.enable('garden',{confirmConsent:()=>true,goal:'Reduce litter in our town and develop useful outreach materials.',siloMode:false,intervalMinutes:15,dailyLimit:12});
+ assert.equal(activated.goal.includes('Reduce litter'),true);
+ const result=await h.worker.tick('garden');
+ assert.equal(result.status,'project-created');assert.equal(result.aiTasks,2);
+ const board=await h.worker.readProjects('garden');
+ assert.equal(board.projects.length,1);
+ assert.equal(board.projects[0].tasks.length,2);
+ assert.equal(board.projects[0].aiOnly,true);
+ assert.equal(board.projects[0].canonicalQuestId,null);
+ assert.match(h.calls[0].taskPrompt,/Reply ONLY valid compact JSON/);
+});
+test('next autonomous cycle produces actual signed AI draft for task, never marks Quest completed',async()=>{
+ const h=harness();
+ h.model.runOneTurn=async input=>{h.calls.push(input);return{id:'turn-'+h.calls.length,payload:{personaId:input.personaId,text:h.calls.length===1?generatedPlan:'Here is a draft outline for outreach: keep litter out of streams.'}}};
+ await h.worker.enable('garden',{confirmConsent:()=>true,goal:'Reduce litter in our town and develop useful outreach materials.',siloMode:true,intervalMinutes:15,dailyLimit:12});
+ await h.worker.tick('garden');
+ h.nowRef.value+=16*60000;
+ const result=await h.worker.tick('garden');
+ assert.equal(result.status,'task-drafted');
+ const board=await h.worker.readProjects('garden');
+ assert.equal(board.outputs.length,1);assert.match(board.outputs[0].text,/draft outline/);
+ assert.equal(board.outputs[0].completed,false);
+ assert.equal(board.outputs[0].canonicalProof,false);
+ assert.equal(board.projects[0].tasks.every(x=>x.assignee==='ai'),true);
+});
+test('silo mode and unknown skills never allow AI to assign human physical work',async()=>{
+ const h=harness();
+ h.model.runOneTurn=async()=>({id:'turn',payload:{text:generatedPlan}});
+ await h.worker.enable('garden',{confirmConsent:()=>true,goal:'Organize humane solutions to the local stray cat crisis.',siloMode:true});
+ await h.worker.tick('garden');
+ const board=await h.worker.readProjects('garden');
+ assert.equal(board.projects[0].tasks.some(t=>t.assignee==='human'),false);
+});
+test('malformed autonomous project does not mint a project and is recorded as failed',async()=>{
+ const h=harness();h.model.runOneTurn=async()=>({id:'turn',payload:{text:'Not parseable structured JSON'}});
+ await h.worker.enable('garden',{confirmConsent:()=>true,goal:'Develop a range of community outreach draft materials.'});
+ await assert.rejects(()=>h.worker.tick('garden'));
+ assert.equal((await h.worker.readProjects('garden')).projects.length,0);
+ assert.equal(h.signed.at(-1).payload.status,'failed');
+});
