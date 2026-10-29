@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.3-settings-v325-direct-local-models-qwen-import-owner';
+const VERSION='1.2.4-settings-v325-direct-local-models-litert-metadata-warning';
 const LAYER_ID='cw-settings-v320';
 const PANEL_ID='cw-local-models-direct-v325';
 const STYLE_ID='cw-local-models-direct-v325-style';
