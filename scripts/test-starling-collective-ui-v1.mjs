@@ -211,3 +211,37 @@ test('planning snapshots summarize a large Guild while the inspected roster rema
   assert.match(f.w.document.body.textContent,/AC-LARGE-0/);
  }finally{f.close()}
 });
+
+
+test('unreachable local model prevents new Quest-line reservation or creation',async()=>{
+ const f=fixture();
+ try{
+  f.w.CivweaveModelRuntime.readSharedConfig=()=>({provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1',timeoutMs:90000});
+  f.w.CivweaveModelRuntime.endpointLeavesDevice=()=>false;
+  f.w.CivweaveModelRuntime.detectCapabilities=async()=>({available:false,probe:'network',notes:['Failed to fetch']});
+  await assert.rejects(f.api.runLine({intention}),/unreachable|connect|server|Settings/i);
+  assert.equal(f.api.read().lines.length,0);
+  assert.equal(f.api.read().limits.createdInWindow,0);
+  assert.equal(f.calls.length,0);
+ }finally{f.close()}
+});
+
+test('responsive local inference receives a longer planning deadline with unchanged authentication and provenance',async()=>{
+ const f=fixture();
+ try{
+  let probes=0;
+  f.w.CivweaveModelRuntime.readSharedConfig=()=>({provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1',timeoutMs:90000});
+  f.w.CivweaveModelRuntime.endpointLeavesDevice=()=>false;
+  f.w.CivweaveModelRuntime.detectCapabilities=async()=>{probes++;return {available:true,probe:'network'}};
+  f.w.CivweaveModelRuntime.generate=async request=>{
+    f.calls.push(request);
+    return{status:'success',structured:{valid:true},outputJson:request.purpose.endsWith('synthesis')?structuredClone(plan):structuredClone(brief),actual:{provider:'openai-compatible',model:'qwen35-4b-native'},usage:{completionTokens:40}};
+  };
+  const line=await f.api.runLine({intention});
+  assert.equal(line.state,'review');
+  assert.equal(probes,1);
+  assert.equal(f.calls.length,3);
+  assert.ok(f.calls.every(request=>request.config.timeoutMs>=900000));
+  assert.ok(f.calls.every(request=>request.config.model==='qwen35-4b-native'));
+ }finally{f.close()}
+});
