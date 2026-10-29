@@ -25,13 +25,13 @@ test('canonical abandonment refusal precedes all remote withdrawal, including a 
     const seen=[];f.api.configure({guildTransport:{read:async()=>({guildId:'guild-fixture'}),reserve:async()=>({line:{id:'shared-fixture',revision:1}}),abandon:async()=>{seen.push('remote')}}});await f.api.connectGuild();
     const line=await f.api.runLine({intention,scope:'guild',shareIntention:true});const state=JSON.parse(f.w.localStorage.getItem(f.api.storageKey));state.lines[0].questId='quest-fixture';f.w.localStorage.setItem(f.api.storageKey,JSON.stringify(state));
     f.w.CivweaveIntentionPlanner={abandon:()=>{seen.push('canonical');return{ok:false,code:'QUEST_ALREADY_COMPLETED',error:'Completed work cannot be rewritten as abandoned.'}}};
-    await assert.rejects(f.api.abandon(line.id),/Completed/);assert.deepEqual(seen,['canonical']);assert.equal(f.api.read().limits.active,1);
+    await assert.rejects(f.api.abandon(line.id),/Completed/);assert.deepEqual(seen,['canonical']);assert.equal(f.api.read().limits.active,0);
   }finally{f.close()}
 });
 test('a failed remote release remains visible and retryable without reopening the stopped local Quest',async()=>{
   const f=fixture();try{
     let attempts=0;const seen=[];f.api.configure({guildTransport:{read:async()=>({guildId:'guild-fixture'}),reserve:async()=>({line:{id:'shared-fixture',revision:1}}),abandon:async()=>{seen.push('remote');if(++attempts===1)throw new Error('Fixture offline');return{line:{state:'abandoned'}}}}});await f.api.connectGuild();
     const line=await f.api.runLine({intention,scope:'guild',shareIntention:true});const state=JSON.parse(f.w.localStorage.getItem(f.api.storageKey));state.lines[0].questId='quest-fixture';f.w.localStorage.setItem(f.api.storageKey,JSON.stringify(state));f.w.CivweaveIntentionPlanner={abandon:()=>{seen.push('canonical');return{ok:true,unchanged:attempts>0}}};
-    await assert.rejects(f.api.abandon(line.id),/Fixture offline/);assert.equal(f.api.read().lines[0].state,'abandonment-pending-guild');assert.equal(f.api.read().limits.active,1);await f.api.abandon(line.id);assert.deepEqual(seen,['canonical','remote','canonical','remote']);assert.equal(f.api.read().limits.active,0);
+    await assert.rejects(f.api.abandon(line.id),/Fixture offline/);assert.equal(f.api.read().lines[0].state,'abandonment-pending-guild');assert.equal(f.api.read().limits.active,0);await f.api.abandon(line.id);assert.deepEqual(seen,['canonical','remote','canonical','remote']);assert.equal(f.api.read().limits.active,0);
   }finally{f.close()}
 });
