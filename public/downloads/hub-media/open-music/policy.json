@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-policy.v1",
-  "built_at": "2026-09-22T10:15:34Z",
+  "built_at": "2026-10-29T10:27:47Z",
   "accepted_licenses": [
     "CC-BY",
     "CC-BY-SA",
@@ -26,7 +26,7 @@
   },
   "vocal_required": true,
   "instrumental_only_rejected": true,
-  "minimum_teeth_score": 2,
+  "minimum_teeth_score": 1,
   "selection_rule": "Every published candidate has verified vocals and lyrical substance; instrumental-only candidates are rejected.",
   "discovery_provider_scope": [
     "ccmixter"

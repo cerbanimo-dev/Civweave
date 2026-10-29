@@ -1,10 +1,12 @@
 {
   "schema": "civweave.open-music-harvest-summary.v1",
-  "built_at": "2026-09-22T10:15:34Z",
-  "records": 17,
-  "daily_candidates": 25,
+  "built_at": "2026-10-29T10:27:47Z",
+  "records": 31,
+  "target_unique_tracks": 250,
+  "target_reached": false,
+  "daily_candidates": 48,
   "providers": {
-    "ccmixter": 17
+    "ccmixter": 31
   },
   "failures": 0
 }

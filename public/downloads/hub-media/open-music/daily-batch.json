@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-daily-batch.v1",
-  "built_at": "2026-09-22T10:15:34Z",
-  "candidate_count": 25,
+  "built_at": "2026-10-29T10:27:47Z",
+  "candidate_count": 48,
   "candidates": [
     {
       "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
@@ -52,7 +52,13 @@
         "open source"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28236"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:0d45f18990f07b6604f736f5",
@@ -103,7 +109,13 @@
         "sharing"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28039"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:a0bdb4376631d15e442a2ab9",
@@ -155,7 +167,17 @@
         "creative rights"
       ],
       "explicit": true,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28143"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:28143"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:f07b5096cec10f2b089e33e0",
@@ -206,7 +228,17 @@
         "collective life"
       ],
       "explicit": true,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28239"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:28239"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:2d46c4b4c34c71aff58781fb",
@@ -257,7 +289,443 @@
         "hip hop"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28448"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
+      "playlist_id": "anarchadia",
+      "title": "Language of My Reality",
+      "artist": "Colin Mutchler",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "836",
+      "source_url": "https://ccmixter.org/files/commonsplice/836",
+      "matched_query": "freedom",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
+          "mime": "",
+          "bytes": 2866820,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Colin Mutchler",
+        "source_title": "Language of My Reality",
+        "source_url": "https://ccmixter.org/files/commonsplice/836",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 82,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "freedom",
+        "share",
+        "commons"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "freedom"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "people"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "share"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:fdbe9b800cdbc01804a65899",
+      "playlist_id": "civweave",
+      "title": "Power to Strike - Vocal Stems",
+      "artist": "Kara Square",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31430",
+      "source_url": "https://ccmixter.org/files/mindmapthat/31430",
+      "matched_query": "people",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Power_to_Strike_-_Vocal_Stems.mp3",
+          "mime": "",
+          "bytes": 10969383,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Kara Square",
+        "source_title": "Power to Strike - Vocal Stems",
+        "source_url": "https://ccmixter.org/files/mindmapthat/31430",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 77,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 2,
+      "themes": [
+        "share",
+        "power"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "people"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "grow"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:2ff7c407f94dbc16c6e41af5",
+      "playlist_id": "civweave",
+      "title": "Vocal Stems- Happy (Team Smile and Nod)",
+      "artist": "Kara Square",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "28322",
+      "source_url": "https://ccmixter.org/files/mindmapthat/28322",
+      "matched_query": "hope",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike",
+        "url": "http://creativecommons.org/licenses/by-sa/2.5/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike; url=http://creativecommons.org/licenses/by-sa/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod).mp3",
+          "mime": "",
+          "bytes": 7674810,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_5.mp3",
+          "mime": "",
+          "bytes": 7673775,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_1.mp3",
+          "mime": "",
+          "bytes": 7673775,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_2.mp3",
+          "mime": "",
+          "bytes": 7673664,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_3.mp3",
+          "mime": "",
+          "bytes": 7673664,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Kara Square",
+        "source_title": "Vocal Stems- Happy (Team Smile and Nod)",
+        "source_url": "https://ccmixter.org/files/mindmapthat/28322",
+        "license": "Attribution Share-Alike",
+        "license_url": "http://creativecommons.org/licenses/by-sa/2.5/"
+      },
+      "quality_score": 77,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 2,
+      "themes": [
+        "share",
+        "work"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "hope"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "work"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "love"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
+      "playlist_id": "anarchadia",
+      "title": "A Story of Striking the Root: Striking Down Public Unions",
+      "artist": "Papa_Zulu",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31513",
+      "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
+      "matched_query": "freedom",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions.mp3",
+          "mime": "",
+          "bytes": 10835218,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_4.mp3",
+          "mime": "",
+          "bytes": 761566,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_1.mp3",
+          "mime": "",
+          "bytes": 489056,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_2.mp3",
+          "mime": "",
+          "bytes": 469830,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Papa_Zulu",
+        "source_title": "A Story of Striking the Root: Striking Down Public Unions",
+        "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "freedom"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+      "playlist_id": "civweave",
+      "title": "Je ne peux pas le retenir",
+      "artist": "Bluemillenium",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "62208",
+      "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+      "matched_query": "collaboration",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+          "mime": "",
+          "bytes": 7686314,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+          "mime": "",
+          "bytes": 17472728,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
+          "mime": "",
+          "bytes": 27410552,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
+          "mime": "",
+          "bytes": 24630340,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Bluemillenium",
+        "source_title": "Je ne peux pas le retenir",
+        "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "collaboration"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:c88269baa603cd85bbb76e9f",
+      "playlist_id": "civweave",
+      "title": "Like Music DubStep Mix",
+      "artist": "coruscate",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "40708",
+      "source_url": "https://ccmixter.org/files/Coruscate/40708",
+      "matched_query": "together",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Coruscate/Coruscate_-_Like_Music_DubStep_Mix.mp3",
+          "mime": "",
+          "bytes": 11244888,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "coruscate",
+        "source_title": "Like Music DubStep Mix",
+        "source_url": "https://ccmixter.org/files/Coruscate/40708",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "together"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "together"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
@@ -309,7 +777,21 @@
         "future"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:61065"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:a0dff66c9efe6c7ac60f62fb",
@@ -366,7 +848,17 @@
         "belonging"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:66038"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:66038"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:fe12a50b8cdb32fee29327ea",
@@ -423,7 +915,21 @@
         "resilience"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61038"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61038"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:61038"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:809f1a6c063d607b1727bca3",
@@ -475,7 +981,13 @@
         "the vulnerable"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:62674"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:d30b835d2a495ab650ddcdd4",
@@ -533,11 +1045,339 @@
         "reflection"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:63518"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:48b7e4cdfaa914861fdc7f51",
+      "playlist_id": "living-school",
+      "title": "everyday choices",
+      "artist": "Colin Mutchler",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "2961",
+      "source_url": "https://ccmixter.org/files/commonsplice/2961",
+      "matched_query": "grow",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_everyday_choices.mp3",
+          "mime": "",
+          "bytes": 1507167,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Colin Mutchler",
+        "source_title": "everyday choices",
+        "source_url": "https://ccmixter.org/files/commonsplice/2961",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 82,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "commons",
+        "choice",
+        "people"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "grow"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:fdbe9b800cdbc01804a65899",
+      "playlist_id": "civweave",
+      "title": "Power to Strike - Vocal Stems",
+      "artist": "Kara Square",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31430",
+      "source_url": "https://ccmixter.org/files/mindmapthat/31430",
+      "matched_query": "grow",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Power_to_Strike_-_Vocal_Stems.mp3",
+          "mime": "",
+          "bytes": 10969383,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Kara Square",
+        "source_title": "Power to Strike - Vocal Stems",
+        "source_url": "https://ccmixter.org/files/mindmapthat/31430",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 77,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 2,
+      "themes": [
+        "share",
+        "power"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "people"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "grow"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:7cc6cadff15789af28c53c1e",
+      "playlist_id": "cerbanimo",
+      "title": "100 Paper Washingtons",
+      "artist": "ScOmBer",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31413",
+      "source_url": "https://ccmixter.org/files/scomber/31413",
+      "matched_query": "change",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/scomber/scomber_-_100_Paper_Washingtons.mp3",
+          "mime": "",
+          "bytes": 4697537,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/scomber/scomber_-_100_Paper_Washingtons_1.mp3",
+          "mime": "",
+          "bytes": 5311006,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "ScOmBer",
+        "source_title": "100 Paper Washingtons",
+        "source_url": "https://ccmixter.org/files/scomber/31413",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "power"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "change"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:a867d261c1261699a060058d",
+      "playlist_id": "living-school",
+      "title": "Norleans Lovas",
+      "artist": "Jeris",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "33400",
+      "source_url": "https://ccmixter.org/files/VJ_Memes/33400",
+      "matched_query": "truth",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_Norleans_Lovas.mp3",
+          "mime": "",
+          "bytes": 5122134,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Jeris",
+        "source_title": "Norleans Lovas",
+        "source_url": "https://ccmixter.org/files/VJ_Memes/33400",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "truth"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:850ca5a29973d8db759af800",
+      "playlist_id": "living-school",
+      "title": "We are Free (at the Root)",
+      "artist": "Madam Snowflake",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31543",
+      "source_url": "https://ccmixter.org/files/snowflake/31543",
+      "matched_query": "imagine",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root)_2.mp3",
+          "mime": "",
+          "bytes": 3261380,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root).mp3",
+          "mime": "",
+          "bytes": 3269322,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root).flac",
+          "mime": "",
+          "bytes": 50798384,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root)_1.flac",
+          "mime": "",
+          "bytes": 14518645,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root)_2.flac",
+          "mime": "",
+          "bytes": 9126397,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root)_3.flac",
+          "mime": "",
+          "bytes": 16926843,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Madam Snowflake",
+        "source_title": "We are Free (at the Root)",
+        "source_url": "https://ccmixter.org/files/snowflake/31543",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "imagine"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "living-school",
       "title": "Climate Change The Dirty Water Remix",
       "artist": "J.Lang",
       "album": "",
@@ -585,7 +1425,21 @@
         "future"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:61065"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:1203b215c04a63c86d197be1",
@@ -643,7 +1497,13 @@
         "technology"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:57573"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:4da4ba617f0ff3d64de81d5d",
@@ -701,11 +1561,21 @@
         "self-direction"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:55625"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:55625"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:fe12a50b8cdb32fee29327ea",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "living-school",
       "title": "Rise Up!",
       "artist": "Stefan Kartenberg",
       "album": "",
@@ -758,7 +1628,21 @@
         "resilience"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61038"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61038"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:61038"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:534960cbcb4bc14fc3d310a3",
@@ -809,11 +1693,306 @@
         "resilience"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:64609"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:2ff7c407f94dbc16c6e41af5",
+      "playlist_id": "civweave",
+      "title": "Vocal Stems- Happy (Team Smile and Nod)",
+      "artist": "Kara Square",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "28322",
+      "source_url": "https://ccmixter.org/files/mindmapthat/28322",
+      "matched_query": "work",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike",
+        "url": "http://creativecommons.org/licenses/by-sa/2.5/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike; url=http://creativecommons.org/licenses/by-sa/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod).mp3",
+          "mime": "",
+          "bytes": 7674810,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_5.mp3",
+          "mime": "",
+          "bytes": 7673775,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_1.mp3",
+          "mime": "",
+          "bytes": 7673775,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_2.mp3",
+          "mime": "",
+          "bytes": 7673664,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_3.mp3",
+          "mime": "",
+          "bytes": 7673664,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Kara Square",
+        "source_title": "Vocal Stems- Happy (Team Smile and Nod)",
+        "source_url": "https://ccmixter.org/files/mindmapthat/28322",
+        "license": "Attribution Share-Alike",
+        "license_url": "http://creativecommons.org/licenses/by-sa/2.5/"
+      },
+      "quality_score": 77,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 2,
+      "themes": [
+        "share",
+        "work"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "hope"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "work"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "love"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:7cc6cadff15789af28c53c1e",
+      "playlist_id": "cerbanimo",
+      "title": "100 Paper Washingtons",
+      "artist": "ScOmBer",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31413",
+      "source_url": "https://ccmixter.org/files/scomber/31413",
+      "matched_query": "power",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/scomber/scomber_-_100_Paper_Washingtons.mp3",
+          "mime": "",
+          "bytes": 4697537,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/scomber/scomber_-_100_Paper_Washingtons_1.mp3",
+          "mime": "",
+          "bytes": 5311006,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "ScOmBer",
+        "source_title": "100 Paper Washingtons",
+        "source_url": "https://ccmixter.org/files/scomber/31413",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "power"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "change"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+      "playlist_id": "civweave",
+      "title": "Je ne peux pas le retenir",
+      "artist": "Bluemillenium",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "62208",
+      "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+      "matched_query": "labor",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+          "mime": "",
+          "bytes": 7686314,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+          "mime": "",
+          "bytes": 17472728,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
+          "mime": "",
+          "bytes": 27410552,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
+          "mime": "",
+          "bytes": 24630340,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Bluemillenium",
+        "source_title": "Je ne peux pas le retenir",
+        "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "collaboration"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
+      "playlist_id": "cerbanimo",
+      "title": "Melange",
+      "artist": "musikpirat",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "65481",
+      "source_url": "https://ccmixter.org/files/musikpirat/65481",
+      "matched_query": "energy",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
+          "mime": "",
+          "bytes": 13348615,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "musikpirat",
+        "source_title": "Melange",
+        "source_url": "https://ccmixter.org/files/musikpirat/65481",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "energy"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "future"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
-      "playlist_id": "fellowfare",
+      "playlist_id": "living-school",
       "title": "Climate Change The Dirty Water Remix",
       "artist": "J.Lang",
       "album": "",
@@ -861,7 +2040,21 @@
         "future"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61065"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:61065"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:70c01ad3a2d479485b7fe223",
@@ -912,11 +2105,17 @@
         "community"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:28057"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:4da4ba617f0ff3d64de81d5d",
-      "playlist_id": "fellowfare",
+      "playlist_id": "cerbanimo",
       "title": "This Wall",
       "artist": "Admiral Bob",
       "album": "",
@@ -970,11 +2169,21 @@
         "self-direction"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:55625"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:55625"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:a0dff66c9efe6c7ac60f62fb",
-      "playlist_id": "fellowfare",
+      "playlist_id": "living-school",
       "title": "Let the Walls Come Down",
       "artist": "Stefan Kartenberg",
       "album": "",
@@ -1027,7 +2236,17 @@
         "belonging"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:66038"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:66038"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:40b65af550bc0933c90424a9",
@@ -1085,11 +2304,312 @@
         "care"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "curated:37764"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
+      "playlist_id": "anarchadia",
+      "title": "Language of My Reality",
+      "artist": "Colin Mutchler",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "836",
+      "source_url": "https://ccmixter.org/files/commonsplice/836",
+      "matched_query": "share",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
+          "mime": "",
+          "bytes": 2866820,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Colin Mutchler",
+        "source_title": "Language of My Reality",
+        "source_url": "https://ccmixter.org/files/commonsplice/836",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 82,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "freedom",
+        "share",
+        "commons"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "freedom"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "people"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "share"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:2ff7c407f94dbc16c6e41af5",
+      "playlist_id": "civweave",
+      "title": "Vocal Stems- Happy (Team Smile and Nod)",
+      "artist": "Kara Square",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "28322",
+      "source_url": "https://ccmixter.org/files/mindmapthat/28322",
+      "matched_query": "love",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike",
+        "url": "http://creativecommons.org/licenses/by-sa/2.5/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike; url=http://creativecommons.org/licenses/by-sa/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod).mp3",
+          "mime": "",
+          "bytes": 7674810,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_5.mp3",
+          "mime": "",
+          "bytes": 7673775,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_1.mp3",
+          "mime": "",
+          "bytes": 7673775,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_2.mp3",
+          "mime": "",
+          "bytes": 7673664,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/mindmapthat/mindmapthat_-_Vocal_Stems-_Happy_(Team_Smile_and_Nod)_3.mp3",
+          "mime": "",
+          "bytes": 7673664,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Kara Square",
+        "source_title": "Vocal Stems- Happy (Team Smile and Nod)",
+        "source_url": "https://ccmixter.org/files/mindmapthat/28322",
+        "license": "Attribution Share-Alike",
+        "license_url": "http://creativecommons.org/licenses/by-sa/2.5/"
+      },
+      "quality_score": 77,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 2,
+      "themes": [
+        "share",
+        "work"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "hope"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "work"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "love"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:eb7cb7b0adddfa6ac9e70f06",
+      "playlist_id": "fellowfare",
+      "title": "Harmony",
+      "artist": "Madam Snowflake",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "24553",
+      "source_url": "https://ccmixter.org/files/snowflake/24553",
+      "matched_query": "sustainability",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Harmony_2.mp3",
+          "mime": "",
+          "bytes": 3638797,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Harmony_2.flac",
+          "mime": "",
+          "bytes": 30162145,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Harmony.mp3",
+          "mime": "",
+          "bytes": 3635328,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Harmony.flac",
+          "mime": "",
+          "bytes": 32939050,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/snowflake/snowflake_-_Harmony_1.flac",
+          "mime": "",
+          "bytes": 27422505,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Madam Snowflake",
+        "source_title": "Harmony",
+        "source_url": "https://ccmixter.org/files/snowflake/24553",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "quality_score": 74,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "sustainability"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "sustainability"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:c88269baa603cd85bbb76e9f",
+      "playlist_id": "civweave",
+      "title": "Like Music DubStep Mix",
+      "artist": "coruscate",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "40708",
+      "source_url": "https://ccmixter.org/files/Coruscate/40708",
+      "matched_query": "together",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Coruscate/Coruscate_-_Like_Music_DubStep_Mix.mp3",
+          "mime": "",
+          "bytes": 11244888,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "coruscate",
+        "source_title": "Like Music DubStep Mix",
+        "source_url": "https://ccmixter.org/files/Coruscate/40708",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "together"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "together"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:a0bdb4376631d15e442a2ab9",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "title": "Mind Map This",
       "artist": "texasradiofish",
       "album": "",
@@ -1137,7 +2657,17 @@
         "creative rights"
       ],
       "explicit": true,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28143"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:28143"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:a4f43dde6f263bd73763e649",
@@ -1195,7 +2725,13 @@
         "technology"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:57569"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:d944b702c1f51fa15cf1de4f",
@@ -1247,11 +2783,17 @@
         "resistance"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:31759"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:f07b5096cec10f2b089e33e0",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "title": "yours and mine",
       "artist": "Tomas PhUsIoN",
       "album": "",
@@ -1298,11 +2840,21 @@
         "collective life"
       ],
       "explicit": true,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "curated:28239"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:28239"
+        }
+      ]
     },
     {
       "candidate_id": "openmusic:fe12a50b8cdb32fee29327ea",
-      "playlist_id": "anarchadia",
+      "playlist_id": "living-school",
       "title": "Rise Up!",
       "artist": "Stefan Kartenberg",
       "album": "",
@@ -1355,7 +2907,310 @@
         "resilience"
       ],
       "explicit": false,
-      "curation": "hand-seeded"
+      "curation": "hand-seeded",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "curated:61038"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "curated:61038"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "curated:61038"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:af4188aab800fe008b2099c3",
+      "playlist_id": "anarchadia",
+      "title": "We Hold These Truths",
+      "artist": "essesq",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "27821",
+      "source_url": "https://ccmixter.org/files/essesq/27821",
+      "matched_query": "oppression",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/essesq/essesq_-_We_Hold_These_Truths.mp3",
+          "mime": "",
+          "bytes": 2813537,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "essesq",
+        "source_title": "We Hold These Truths",
+        "source_url": "https://ccmixter.org/files/essesq/27821",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "quality_score": 86,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 4,
+      "themes": [
+        "freedom",
+        "share",
+        "commons",
+        "truth"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "oppression"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
+      "playlist_id": "anarchadia",
+      "title": "Language of My Reality",
+      "artist": "Colin Mutchler",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "836",
+      "source_url": "https://ccmixter.org/files/commonsplice/836",
+      "matched_query": "freedom",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
+          "mime": "",
+          "bytes": 2866820,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Colin Mutchler",
+        "source_title": "Language of My Reality",
+        "source_url": "https://ccmixter.org/files/commonsplice/836",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 82,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "freedom",
+        "share",
+        "commons"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "freedom"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "people"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "share"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
+      "playlist_id": "anarchadia",
+      "title": "A Story of Striking the Root: Striking Down Public Unions",
+      "artist": "Papa_Zulu",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31513",
+      "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
+      "matched_query": "freedom",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions.mp3",
+          "mime": "",
+          "bytes": 10835218,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_4.mp3",
+          "mime": "",
+          "bytes": 761566,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_1.mp3",
+          "mime": "",
+          "bytes": 489056,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_2.mp3",
+          "mime": "",
+          "bytes": 469830,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Papa_Zulu",
+        "source_title": "A Story of Striking the Root: Striking Down Public Unions",
+        "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "freedom"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:9a3dec2602e274cd46e7d08b",
+      "playlist_id": "anarchadia",
+      "title": "Love Liberation (inc stems)",
+      "artist": "stellarartwars",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "43500",
+      "source_url": "https://ccmixter.org/files/stellarartwars/43500",
+      "matched_query": "liberation",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems).mp3",
+          "mime": "",
+          "bytes": 3077894,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_4.mp3",
+          "mime": "",
+          "bytes": 3039024,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_5.mp3",
+          "mime": "",
+          "bytes": 3039024,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_6.mp3",
+          "mime": "",
+          "bytes": 3039024,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_1.mp3",
+          "mime": "",
+          "bytes": 3039024,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_2.mp3",
+          "mime": "",
+          "bytes": 3039024,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "stellarartwars",
+        "source_title": "Love Liberation (inc stems)",
+        "source_url": "https://ccmixter.org/files/stellarartwars/43500",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share"
+      ],
+      "explicit": null,
+      "curation": "metadata-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "liberation"
+        }
+      ]
     }
   ]
 }
