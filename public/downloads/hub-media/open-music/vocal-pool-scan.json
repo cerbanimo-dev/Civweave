@@ -1,0 +1,77 @@
+{
+  "schema": "civweave.open-music-vocal-pool-scan.v1",
+  "at": "2026-10-29T10:37:57Z",
+  "diagnostics": [
+    {
+      "tag": "female_vocals",
+      "license_class": "by",
+      "pages_seen": 1,
+      "scanned": 1,
+      "accepted": 1
+    },
+    {
+      "tag": "female_vocals",
+      "license_class": "sa",
+      "pages_seen": 1,
+      "scanned": 1,
+      "accepted": 0
+    },
+    {
+      "tag": "male_vocals",
+      "license_class": "by",
+      "pages_seen": 1,
+      "scanned": 1,
+      "accepted": 1
+    },
+    {
+      "tag": "male_vocals",
+      "license_class": "sa",
+      "pages_seen": 1,
+      "scanned": 1,
+      "accepted": 0
+    },
+    {
+      "tag": "vocals",
+      "license_class": "by",
+      "pages_seen": 1,
+      "scanned": 1,
+      "accepted": 1
+    },
+    {
+      "tag": "vocals",
+      "license_class": "sa",
+      "pages_seen": 1,
+      "scanned": 1,
+      "accepted": 1
+    },
+    {
+      "tag": "spoken_word",
+      "license_class": "by",
+      "pages_seen": 1,
+      "scanned": 1,
+      "accepted": 1
+    },
+    {
+      "tag": "spoken_word",
+      "license_class": "sa",
+      "pages_seen": 1,
+      "scanned": 1,
+      "accepted": 0
+    },
+    {
+      "tag": "rap",
+      "license_class": "by",
+      "pages_seen": 1,
+      "scanned": 1,
+      "accepted": 1
+    },
+    {
+      "tag": "rap",
+      "license_class": "sa",
+      "pages_seen": 0,
+      "scanned": 0,
+      "accepted": 0
+    }
+  ],
+  "note": "Source API result totals are pre-license and pre-quality filtering; these are candidate counts, not approved tracks."
+}\n
