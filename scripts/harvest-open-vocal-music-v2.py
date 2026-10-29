@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import importlib.util
 import concurrent.futures
+import threading
 import json
 import urllib.parse
 from pathlib import Path
@@ -97,6 +98,30 @@ def ccmixter_rows(params: dict) -> list[dict]:
         rows = data.get("items") or data.get("results") or []
         return [row for row in rows if isinstance(row, dict)]
     return []
+
+
+DETAIL_CACHE: dict[str, dict] = {}
+DETAIL_LOCK = threading.Lock()
+
+
+def detailed_upload(row: dict) -> dict:
+    """Resolve listing rows to the source site's detailed single-upload view."""
+    uid = base.clean(row.get("upload_id") or row.get("id"), 120)
+    if not uid:
+        return row
+    with DETAIL_LOCK:
+        cached = DETAIL_CACHE.get(uid)
+    if cached is not None:
+        return cached
+    detailed = row
+    try:
+        matches = ccmixter_rows({"f": "json", "dataview": "info", "ids": uid, "limit": 1})
+        detailed = next((candidate for candidate in matches if base.clean(candidate.get("upload_id") or candidate.get("id"), 120) == uid), row)
+    except Exception:
+        pass
+    with DETAIL_LOCK:
+        DETAIL_CACHE[uid] = detailed
+    return detailed
 
 
 def record_from_item(
