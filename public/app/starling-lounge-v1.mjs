@@ -4,7 +4,7 @@ import {COLLECTIVE_TOOL_CATALOG} from './shared/starling-collective-tools-v1.mjs
 const ID='cw-starling-lounge';
 const PEOPLE=Object.values(STARLING_PERSONAS);
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false};
+const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -13,7 +13,7 @@ function setup(){
   if(state.root)return state.root;
   const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=starling-native-r1';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
-  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><h2>Collective conversation</h2><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Communicate with the Collective</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Write a message for the Collective or selected persona…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Messages open in Civweave’s existing chat. Direct persona delivery is not enabled until the native worker is installed.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><p class="sl-status" data-sl-work-status></p></aside></div>';
+  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><div class="sl-flex sl-run"><h2 class="sl-grow">Collective conversation</h2><button type="button" class="sl-strong" data-sl-action="turn">Run one local turn</button></div><p class="sl-status" data-sl-turn-status>No local model run has started. Runs are explicitly started, one at a time, and never use hosted credits.</p><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Communicate with the Collective</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Write a message for the Collective or selected persona…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Messages open in Civweave’s existing chat. Direct persona delivery is not enabled until the native worker is installed.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><p class="sl-status" data-sl-work-status></p></aside></div>';
   root.addEventListener('click',click);
   root.querySelector('[data-sl-form]').addEventListener('submit',send);
   root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close()}});
@@ -43,13 +43,14 @@ function renderSpeaker(){
 }
 function renderFeed(){
   const node=$('[data-sl-feed]');node.replaceChildren();
-  if(!state.feed.length){para(node,'No recorded Collective turns for this Guild yet. When the native model scheduler is connected, real persona conversations and decisions will appear here.','sl-sub');return}
+  if(!state.feed.length){para(node,'No signed Collective turns recorded for this Guild yet. Select a persona and explicitly run a local model turn on the founding device.','sl-sub');return}
   for(const message of state.feed.slice(-120)){
     const entry=el('article','sl-entry');
     const who=STARLING_PERSONAS[message.personaId];
     entry.append(el('b','',who?.name||message.personaId));
     const time=el('time','',new Date(message.at).toLocaleString());entry.append(time);
     para(entry,message.text);
+    para(entry,'Signed by founding Guild device · local-model self-report; not verified Quest completion.','sl-sub');
     node.append(entry);
   }
 }
@@ -87,6 +88,8 @@ function render(){
   if(!state.root)return;
   $('[data-sl-guild]').textContent=state.guild?.name||state.guild?.displayName||state.guild?.id||'Guild not selected';
   renderSpeaker();renderFeed();renderWork();
+  const button=$('[data-sl-action=turn]');if(button){button.disabled=state.turnsRunning;button.textContent=state.turnsRunning?'Generating local turn…':'Run one local turn'}
+  const status=$('[data-sl-turn-status]');if(status){status.textContent=state.turnError||state.turnMessage;status.dataset.slError=state.turnError?'true':'false'}
 }
 async function refresh(){
   if(state.loading||!state.guild)return;
@@ -110,12 +113,12 @@ async function refresh(){
   }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
 }
-function close(){if(!state.root)return;state.root.hidden=true;document.body.style.removeProperty('overflow')}
+function close(){if(!state.root)return;state.root.hidden=true;state.turnSubscribe?.();state.turnSubscribe=null;document.body.style.removeProperty('overflow')}
 function open(guild){
   if(!guild?.id)throw new TypeError('Select an existing Guild first.');
   setup();
-  if(state.guild?.id!==guild.id){state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.snapshot=null;state.opportunities=[];state.status='idle'}
-  state.root.hidden=false;document.body.style.overflow='hidden';render();state.root.querySelector('[data-sl-action=close]').focus();void refresh();
+  if(state.guild?.id!==guild.id){state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…'}
+  state.root.hidden=false;document.body.style.overflow='hidden';render();state.root.querySelector('[data-sl-action=close]').focus();void refresh();void refreshTurns();
 }
 async function send(event){
   event.preventDefault();
@@ -136,17 +139,69 @@ function click(event){
   if(persona&&STARLING_PERSONAS[persona]){state.speaker=persona;renderSpeaker();return}
   const cmd=event.target.closest('[data-sl-action]')?.dataset.slAction;
   if(cmd==='close')close();
-  if(cmd==='refresh')void refresh();
+  if(cmd==='refresh'){void refresh();void refreshTurns()}
+  if(cmd==='turn')void runLocalTurn();
   if(cmd==='quest'){close();globalThis.CivweaveGuildQuestTrackerV1?.openQuestMap?.()}
 }
-/** Display-only runtime event hook. The future authenticated Collective runner
- * must record durable evidence itself; events alone confer no authority. */
-function activity(event){
-  const packet=event?.detail;
-  if(!packet||packet.guildId!==state.guild?.id||!STARLING_PERSONAS[packet.personaId]||typeof packet.text!=='string')return;
-  state.feed.push({personaId:packet.personaId,text:packet.text.slice(0,3500),at:new Date().toISOString()});
-  state.feed=state.feed.slice(-120);state.speaker=packet.personaId;render();
+/* The Lounge reads signed Guild object-mesh records. An ordinary window event
+ * is never admitted into the transcript as a real model turn. */
+async function turnService(){
+  if(state.turnService)return state.turnService;
+  const [mobile,turns]=await Promise.all([
+    import('./mobile-guild-create-v1.mjs'),
+    import('./shared/starling-collective-turns-v1.mjs')
+  ]);
+  const mesh=await mobile.ensurePocketMesh();
+  const proxy={
+    readSharedConfig:(...args)=>globalThis.CivweaveModelRuntime?.readSharedConfig?.(...args),
+    normalizeConfig:(...args)=>globalThis.CivweaveModelRuntime?.normalizeConfig?.(...args),
+    endpointLeavesDevice:(...args)=>globalThis.CivweaveModelRuntime?.endpointLeavesDevice?.(...args),
+    generate:(...args)=>globalThis.CivweaveModelRuntime?.generate?.(...args)??Promise.reject(new Error('The selected Civweave model runtime is unavailable.'))
+  };
+  state.turnMesh=mesh;
+  state.turnService=turns.createCollectiveTurnService({mesh,model:proxy,founder:mobile.mobileGuildStatus});
+  return state.turnService;
 }
-if(typeof globalThis.addEventListener==='function')globalThis.addEventListener('civweave:starling-turn-recorded',activity);
+async function refreshTurns(){
+  if(!state.guild||state.turnsLoading)return;
+  const guild=state.guild;state.turnsLoading=true;
+  try{
+    const service=await turnService(),mesh=state.turnMesh;
+    const mobile=await import('./mobile-guild-create-v1.mjs');
+    const founding=mobile.mobileGuildStatus();
+    const isFounder=founding?.guildId===guild.id && founding.deviceId===await mesh.deviceId();
+    const session=globalThis.CivweaveGuildQuestsV1?.sessionForGuild?.(guild);
+    const turns=await service.readTurns({guildId:guild.id,verifyReader:()=>Boolean(session||isFounder),limit:120});
+    if(state.guild?.id!==guild.id)return;
+    state.feed=turns;
+    state.turnError='';
+    state.turnMessage=turns.length?turns.length+' signed Collective turn'+(turns.length===1?'':'s')+' recovered from the Guild object mesh.':'No signed turns recorded yet. Local generations require an explicit click.';
+    if(turns.length)state.speaker=turns.at(-1).personaId;
+    if(!state.turnSubscribe){
+      state.turnSubscribe=mesh.subscribe(event=>{
+        if(state.root?.hidden)return;
+        if(['object-created','object-received'].includes(event?.type) && event.detail?.kind==='civweave.starling-collective-turn.v1')void refreshTurns();
+      });
+    }
+  }catch(error){
+    if(state.guild?.id===guild.id){
+      state.feed=[];state.turnError='Signed transcript unavailable: '+clean(String(error?.message||error),330);
+    }
+  }finally{state.turnsLoading=false;if(state.guild?.id===guild.id)render()}
+}
+async function runLocalTurn(){
+  if(state.turnsRunning||!state.guild)return;
+  const guild=state.guild,personaId=state.speaker;
+  state.turnsRunning=true;state.turnError='';
+  state.turnMessage='The selected local model is generating one turn. No cloud budget or automatic loop is enabled.';
+  render();
+  try{
+    await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
+    const service=await turnService();
+    await service.runOneTurn({guildId:guild.id,personaId});
+    if(state.guild?.id===guild.id){state.turnMessage='Local model turn saved and signed to Guild mesh.';await refreshTurns()}
+  }catch(error){if(state.guild?.id===guild.id)state.turnError=clean(String(error?.message||error),500)}
+  finally{state.turnsRunning=false;if(state.guild?.id===guild.id)render()}
+}
 export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.0.0',open,close,refresh});
 if(typeof globalThis!=='undefined')globalThis.CivweaveStarlingLoungeV1=CivweaveStarlingLoungeV1;
