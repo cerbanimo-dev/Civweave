@@ -57,7 +57,7 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
   }
   async function status(guildId){
     const guild=clean(guildId,180),genesis=await founding(guild),p=await policy(guild,genesis.origin.nodeId);
-    return Object.freeze({schema:STARLING_WORKER_POLICY,guildId:guild,enabled:p?.enabled===true,intervalMinutes:p?.intervalMinutes??60,dailyLimit:p?.dailyLimit??4,revision:p?.revision??0,goal:p?.goal||'',siloMode:p?.siloMode===true,active:!stopped&&activeGuild===guild,busy});
+    return Object.freeze({schema:STARLING_WORKER_POLICY,guildId:guild,enabled:p?.enabled===true,intervalMinutes:p?.intervalMinutes??60,dailyLimit:p?.dailyLimit??4,revision:p?.revision??0,goal:p?.goal||'',goalId:p?.goalId||null,siloMode:p?.siloMode===true,active:!stopped&&activeGuild===guild,busy});
   }
   async function storePolicy(guild,enabled,{confirmConsent,intervalMinutes,dailyLimit,goal,siloMode}={}){
     const genesis=await requireFounder(guild);
@@ -68,7 +68,9 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const selectedGoal=goal===undefined?current?.goal||'':typeof goal==='string'?goal.trim():'';
     if(selectedGoal&&(selectedGoal.length<12||selectedGoal.length>4000))throw new Error('A Guild main goal must contain 12–4000 characters.');
     if(goal!==undefined&&!selectedGoal)throw new Error('A valid Guild goal is required to start autonomous project generation.');
-    const p={schema:STARLING_WORKER_POLICY,guildId:guild,enabled,intervalMinutes:interval,dailyLimit:daily,goal:selectedGoal,siloMode:siloMode===undefined?current?.siloMode===true:siloMode===true,localOnly:true,updatedAt:new Date(now()).toISOString()};
+    const nextSilo=siloMode===undefined?current?.siloMode===true:siloMode===true;
+    const goalId=selectedGoal&&current?.goal===selectedGoal&&current?.siloMode===nextSilo&&current?.goalId?current.goalId:selectedGoal?'goal-'+clean(String(randomId()),80):null;
+    const p={schema:STARLING_WORKER_POLICY,guildId:guild,enabled,intervalMinutes:interval,dailyLimit:daily,goal:selectedGoal,goalId,siloMode:nextSilo,localOnly:true,updatedAt:new Date(now()).toISOString()};
     await mesh.createObject({id:'starling-worker-policy:'+guild,revision:(current?.revision||0)+1,kind:STARLING_WORKER_POLICY,purpose:'Guildkeeper-controlled local Collective scheduler consent.',consent:'private',audience:[],publish:false,payload:p});
     return status(guild);
   }
@@ -103,14 +105,14 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
       if(![STARLING_PROJECT_KIND,STARLING_TASK_OUTPUT_KIND].includes(row?.kind)
          ||row.consent!=='group'||!row.audience?.includes('guild:'+guild)
          ||row.origin?.nodeId!==genesis.origin.nodeId||v?.guildId!==guild
-         ||v?.policyRevision!==p?.revision||(await mesh.validateObject(row))?.ok!==true)continue;
+         ||v?.goalId!==p?.goalId||(await mesh.validateObject(row))?.ok!==true)continue;
       if(row.kind===STARLING_PROJECT_KIND&&v?.schema===STARLING_PROJECT_KIND&&Array.isArray(v.tasks))
         projects.push({...v,id:row.id});
       if(row.kind===STARLING_TASK_OUTPUT_KIND&&v?.schema===STARLING_TASK_OUTPUT_KIND&&v.reviewRequired===true)
         outputs.push({...v,id:row.id});
     }
     projects.sort((a,b)=>Date.parse(a.createdAt)-Date.parse(b.createdAt));
-    return Object.freeze({projects,outputs,policyRevision:p?.revision||0});
+    return Object.freeze({projects,outputs,goalId:p?.goalId||null});
   }
   async function autonomousTick({guild,p,signer,personaId}){
     const board=await readProjects(guild),pending=findNextAutonomousTask(board.projects,board.outputs);
@@ -136,7 +138,7 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
         });
         const text=clean(response?.payload?.text,3500);
         if(!text)throw new Error('The local model returned no usable AI task draft.');
-        const payload={schema:STARLING_TASK_OUTPUT_KIND,guildId:guild,policyRevision:p.revision,projectId:project.id,taskId:task.id,personaId,
+        const payload={schema:STARLING_TASK_OUTPUT_KIND,guildId:guild,goalId:p.goalId,policyRevision:p.revision,projectId:project.id,taskId:task.id,personaId,
           text,sourceTurnId:response.id,at:new Date(now()).toISOString(),reviewRequired:true,status:'draft-awaiting-human-review',
           canonicalProof:false,completed:false};
         await mesh.createObject({id:'starling-task-output:'+guild+':'+runId,revision:1,kind:STARLING_TASK_OUTPUT_KIND,
@@ -157,7 +159,7 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
       const proposed=parseAutonomousProject(request?.payload?.text);
       const project=validateAutonomousProject(proposed,{guildId:guild,goal:p.goal,siloMode:p.siloMode,verifiedHumanSkills:policy.humanSkills});
       const projectId='starling-auto-project:'+guild+':'+runId;
-      const payload={...project,policyRevision:p.revision,createdAt:new Date(now()).toISOString(),originTurnId:request.id};
+      const payload={...project,goalId:p.goalId,policyRevision:p.revision,createdAt:new Date(now()).toISOString(),originTurnId:request.id};
       await mesh.createObject({id:projectId,revision:1,kind:STARLING_PROJECT_KIND,
         purpose:'Autonomously proposed Guild AI project: reviewable drafts only, no human assignments or canonical Quest completion.',
         consent:'group',audience:['guild:'+guild],publish:true,payload});
