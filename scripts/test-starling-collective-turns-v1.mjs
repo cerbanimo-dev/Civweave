@@ -118,13 +118,11 @@ test('a failed round retains signed previous turns and releases the scheduler lo
 test('round rejects duplicate personas and cannot be overlapped by another turn',async()=>{
  const {service,model}=makeHarness();
  await assert.rejects(()=>service.runRound({guildId:'garden',personas:['kami','kami']}),/distinct/);
- let release;
- model.generate=()=>new Promise(resolve=>{release=()=>resolve({status:'success',outputText:'Propose next step',actual:{provider:'ollama'}})});
+ let release,count=0;
+ model.generate=()=>{count++;if(count>1)return Promise.resolve({status:'success',outputText:'Propose next step',actual:{provider:'ollama'}});return new Promise(resolve=>{release=()=>resolve({status:'success',outputText:'Propose next step',actual:{provider:'ollama'}})})};
  const round=service.runRound({guildId:'garden',personas:['kami','jae']});
  await new Promise(resolve=>setImmediate(resolve));
  await assert.rejects(()=>service.runOneTurn({guildId:'garden',personaId:'rosa'}),/already running/);
- release();
- await new Promise(resolve=>setImmediate(resolve));
  release();
  await round;
 });
