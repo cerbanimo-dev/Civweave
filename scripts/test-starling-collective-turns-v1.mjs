@@ -96,3 +96,35 @@ test('local client refuses to store a turn without source-bound Guild sign-off',
  mesh.validateObject=async()=>({ok:false});
  await assert.rejects(()=>service.runOneTurn({guildId:'garden',personaId:'kami'}),/founding record/);
 });
+
+test('a bounded Collective round executes three independent personas serially',async()=>{
+ const {service,calls,rows}=makeHarness();
+ const observed=[];
+ const result=await service.runRound({guildId:'garden',personas:['kami','farah','rosa'],taskPrompt:'Design a seed-sharing event.',onTurn:row=>observed.push(row.payload.personaId)});
+ assert.deepEqual(observed,['kami','farah','rosa']);
+ assert.equal(result.completed,3);
+ assert.equal(rows.length,3);assert.equal(calls.length,3);
+ assert.equal(calls[1].messages.some(x=>x.content.includes('kami:')),true);
+ assert.equal(service.isBusy(),false);
+});
+test('a failed round retains signed previous turns and releases the scheduler lock',async()=>{
+ const {service,model,rows}=makeHarness();
+ let count=0;
+ model.generate=async()=>{count++;return count===2?{status:'provider-error',error:{message:'worker failed'}}:{status:'success',outputText:'Concrete next step',actual:{provider:'ollama'}}};
+ await assert.rejects(()=>service.runRound({guildId:'garden',personas:['kami','sana','kit']}),/worker failed/);
+ assert.equal(rows.length,1);
+ assert.equal(service.isBusy(),false);
+});
+test('round rejects duplicate personas and cannot be overlapped by another turn',async()=>{
+ const {service,model}=makeHarness();
+ await assert.rejects(()=>service.runRound({guildId:'garden',personas:['kami','kami']}),/distinct/);
+ let release;
+ model.generate=()=>new Promise(resolve=>{release=()=>resolve({status:'success',outputText:'Propose next step',actual:{provider:'ollama'}})});
+ const round=service.runRound({guildId:'garden',personas:['kami','jae']});
+ await new Promise(resolve=>setImmediate(resolve));
+ await assert.rejects(()=>service.runOneTurn({guildId:'garden',personaId:'rosa'}),/already running/);
+ release();
+ await new Promise(resolve=>setImmediate(resolve));
+ release();
+ await round;
+});
