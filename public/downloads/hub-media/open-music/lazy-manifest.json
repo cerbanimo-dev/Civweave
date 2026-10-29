@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-10-29T10:27:47Z",
+  "built_at": "2026-10-29T10:30:57Z",
   "entry_count": 31,
   "entries": [
     {
@@ -1138,12 +1138,8 @@
       ],
       "explicit": null,
       "curation": "metadata-discovered",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "freedom"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "freedom"
@@ -1151,6 +1147,10 @@
         {
           "playlist_id": "civweave",
           "matched_query": "people"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
         },
         {
           "playlist_id": "fellowfare",
@@ -1422,15 +1422,15 @@
       ],
       "explicit": null,
       "curation": "metadata-discovered",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "living-school",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "power"
-        },
         {
           "playlist_id": "living-school",
           "matched_query": "change"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "power"
         }
       ],
       "provider": "ccmixter"
@@ -1495,14 +1495,14 @@
       ],
       "explicit": null,
       "curation": "metadata-discovered",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
+          "playlist_id": "civweave",
           "matched_query": "freedom"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "anarchadia",
           "matched_query": "freedom"
         }
       ],

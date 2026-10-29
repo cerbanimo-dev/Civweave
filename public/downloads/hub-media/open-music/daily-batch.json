@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-daily-batch.v1",
-  "built_at": "2026-10-29T10:27:47Z",
+  "built_at": "2026-10-29T10:30:57Z",
   "candidate_count": 48,
   "candidates": [
     {
@@ -299,7 +299,7 @@
     },
     {
       "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "title": "Language of My Reality",
       "artist": "Colin Mutchler",
       "album": "",
@@ -349,16 +349,16 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
-          "matched_query": "freedom"
-        },
-        {
           "playlist_id": "civweave",
           "matched_query": "freedom"
         },
         {
           "playlist_id": "civweave",
           "matched_query": "people"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
         },
         {
           "playlist_id": "fellowfare",
@@ -516,7 +516,7 @@
     },
     {
       "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "title": "A Story of Striking the Root: Striking Down Public Unions",
       "artist": "Papa_Zulu",
       "album": "",
@@ -582,11 +582,11 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
+          "playlist_id": "civweave",
           "matched_query": "freedom"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "anarchadia",
           "matched_query": "freedom"
         }
       ]
@@ -1172,7 +1172,7 @@
     },
     {
       "candidate_id": "openmusic:7cc6cadff15789af28c53c1e",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "living-school",
       "title": "100 Paper Washingtons",
       "artist": "ScOmBer",
       "album": "",
@@ -1226,12 +1226,12 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "cerbanimo",
-          "matched_query": "power"
-        },
-        {
           "playlist_id": "living-school",
           "matched_query": "change"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "power"
         }
       ]
     },
@@ -1791,7 +1791,7 @@
     },
     {
       "candidate_id": "openmusic:7cc6cadff15789af28c53c1e",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "living-school",
       "title": "100 Paper Washingtons",
       "artist": "ScOmBer",
       "album": "",
@@ -1845,12 +1845,12 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "cerbanimo",
-          "matched_query": "power"
-        },
-        {
           "playlist_id": "living-school",
           "matched_query": "change"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "power"
         }
       ]
     },
@@ -2314,7 +2314,7 @@
     },
     {
       "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "title": "Language of My Reality",
       "artist": "Colin Mutchler",
       "album": "",
@@ -2364,16 +2364,16 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
-          "matched_query": "freedom"
-        },
-        {
           "playlist_id": "civweave",
           "matched_query": "freedom"
         },
         {
           "playlist_id": "civweave",
           "matched_query": "people"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
         },
         {
           "playlist_id": "fellowfare",
@@ -2983,7 +2983,7 @@
     },
     {
       "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "title": "Language of My Reality",
       "artist": "Colin Mutchler",
       "album": "",
@@ -3033,16 +3033,16 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
-          "matched_query": "freedom"
-        },
-        {
           "playlist_id": "civweave",
           "matched_query": "freedom"
         },
         {
           "playlist_id": "civweave",
           "matched_query": "people"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "freedom"
         },
         {
           "playlist_id": "fellowfare",
@@ -3052,7 +3052,7 @@
     },
     {
       "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "title": "A Story of Striking the Root: Striking Down Public Unions",
       "artist": "Papa_Zulu",
       "album": "",
@@ -3118,11 +3118,11 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
+          "playlist_id": "civweave",
           "matched_query": "freedom"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "anarchadia",
           "matched_query": "freedom"
         }
       ]
