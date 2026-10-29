@@ -49,7 +49,7 @@ const PACK_CATALOGUE=Object.freeze([
 ]);
 
 const CATALOGUE=Object.freeze([
-  {id:'qwen35-4b-litert-web',label:'Qwen 3.5 4B · LiteRT · phone-first test',tier:'PHONE FIRST',repo:'litert-community/Qwen3.5-4B',estimatedBytes:2754070624,license:'Apache-2.0',contextWindowTokens:262144,workingContextTokens:4096,nativeImport:true,artifact:'Qwen3.5-4B_mixed_int4.litertlm'},
+  {id:'qwen35-4b-litert-web',label:'Qwen 3.5 4B · LiteRT · legacy browser loader',tier:'LEGACY · WEB STREAMING METADATA UNSUPPORTED',repo:'litert-community/Qwen3.5-4B',estimatedBytes:2754070624,license:'Apache-2.0',contextWindowTokens:262144,workingContextTokens:4096,nativeImport:true,artifact:'Qwen3.5-4B_mixed_int4.litertlm'},
   {id:'qwen35-9b-litert-web',label:'Qwen 3.5 9B · LiteRT · optional separate selection',tier:'PHONE MAX · EXPERIMENTAL',repo:'litert-community/Qwen3.5-9B-LiteRT',estimatedBytes:9520000000,license:'Apache-2.0',contextWindowTokens:262144,workingContextTokens:3072,nativeImport:false},
   {id:'llama32-3b-instruct-q4f16',label:'Llama 3.2 3B Instruct · Two-Pass JSON Trial',tier:'PHONE TEST · Llama 3.2 3B',repo:'onnx-community/Llama-3.2-3B-Instruct-ONNX',estimatedBytes:2425000000,license:'llama3.2',contextWindowTokens:131072,workingContextTokens:2048,preferBackground:true},
   {id:'smollm2-135m-instruct-q8-wasm',label:'SmolLM2 135M Instruct',tier:'Phone Tiny',repo:'onnx-community/SmolLM2-135M-Instruct-ONNX',estimatedBytes:140453620,license:'Apache-2.0',contextWindowTokens:8192,workingContextTokens:768,preferBackground:false},
