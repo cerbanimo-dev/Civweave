@@ -51,7 +51,7 @@ test('three sequential public roles record actual model provenance and leave a p
 test('local reservations hard-cap concurrent creation at three before any inference',async()=>{
   let resolve;const gate=new Promise(r=>resolve=r);const f=fixture({runtime:async(_r,n)=>{if(n<=3)await gate;return{status:'success',outputJson:structuredClone(brief),actual:{provider:'ollama',model:'qwen3.5:4b'}}}});
   try{
-    const runs=[0,1,2,3].map(n=>f.api.runLine({intention:intention+n}).then(()=>null,e=>e));await flush();await flush();
+    const runs=[0,1,2,3].map(n=>f.api.runLine({intention:intention+n,creationMode:'autonomous'}).then(()=>null,e=>e));await flush();await flush();
     assert.equal(f.api.read().lines.length,3);assert.equal(f.calls.length,1);resolve();const results=await Promise.all(runs);
     assert.match(results[3].message,/three|3 active/i);assert.equal(f.api.read().lines.length,3);
   }finally{f.close()}
@@ -59,16 +59,16 @@ test('local reservations hard-cap concurrent creation at three before any infere
 
 test('abandoning releases a slot but never refunds the six-per-rolling-day creation allowance',async()=>{
   const f=fixture();try{
-    for(let n=0;n<6;n++){const line=await f.api.runLine({intention:intention+n});await f.api.abandon(line.id)}
+    for(let n=0;n<6;n++){const line=await f.api.runLine({intention:intention+n,creationMode:'autonomous'});await f.api.abandon(line.id)}
     assert.equal(f.api.read().limits.active,0);assert.equal(f.api.read().limits.createdInWindow,6);
-    await assert.rejects(f.api.runLine({intention}),/rolling|24 hours/i);assert.equal(f.calls.length,18);
+    await assert.rejects(f.api.runLine({intention,creationMode:'autonomous'}),/rolling|24 hours/i);assert.equal(f.calls.length,18);
   }finally{f.close()}
 });
 
 test('old creation timestamps expire by rolling age; active slots do not expire',async()=>{
   const f=fixture();try{
     const expired=new Date(Date.now()-25*60*60*1000).toISOString();
-    f.w.localStorage.setItem(key,JSON.stringify({schema:'civweave.starling-collective.v1',revision:1,lines:[{id:'old',intention,state:'failed',createdAt:expired,events:[]}],creations:[{id:'old',at:expired}]}));
+    f.w.localStorage.setItem(key,JSON.stringify({schema:'civweave.starling-collective.v1',revision:1,lines:[{id:'old',intention,state:'failed',createdAt:expired,creationMode:'autonomous',events:[]}],creations:[{id:'old',at:expired,creationMode:'autonomous'}]}));
     assert.equal(f.api.read().limits.active,1);assert.equal(f.api.read().limits.createdInWindow,0);
   }finally{f.close()}
 });
@@ -76,11 +76,11 @@ test('old creation timestamps expire by rolling age; active slots do not expire'
 test('failure and cancellation remain visible and require abandonment before releasing slots',async()=>{
   const f=fixture({runtime:async()=>({status:'provider-error',error:{message:'Fixture offline'},actual:{provider:'ollama',model:'qwen3.5:4b'}})});try{
     await assert.rejects(f.api.runLine({intention}),/Fixture offline/);const line=f.api.read().lines[0];
-    assert.equal(line.state,'failed');assert.equal(f.api.read().limits.active,1);assert.match(line.error,/Fixture offline/);
+    assert.equal(line.state,'failed');assert.equal(f.api.read().limits.active,0);assert.match(line.error,/Fixture offline/);
     await f.api.abandon(line.id);assert.equal(f.api.read().limits.active,0);
   }finally{f.close()}
   const c=fixture({runtime:r=>new Promise((_resolve,reject)=>r.signal.addEventListener('abort',()=>reject(new DOMException('Stopped','AbortError')),{once:true}))});try{
-    const running=c.api.runLine({intention});await flush();c.api.cancel();await assert.rejects(running,/Stopped|cancel/i);assert.equal(c.api.read().lines[0].state,'cancelled');assert.equal(c.api.read().limits.active,1);
+    const running=c.api.runLine({intention});await flush();c.api.cancel();await assert.rejects(running,/Stopped|cancel/i);assert.equal(c.api.read().lines[0].state,'cancelled');assert.equal(c.api.read().limits.active,0);
   }finally{c.close()}
 });
 
@@ -126,7 +126,7 @@ test('reviewed import delegates to canonical Quest owners and never activates or
     f.w.CivweaveWeavelingPlanMaterializationV265={materialize:()=>seen.push(['materialize'])};
     const imported=await f.api.importQuest(line.id,{reviewed:true});assert.equal(imported.questId,'canonical-fixture');assert.equal(imported.state,'active');assert.equal(saved[0].state,'review');assert.equal(seen.filter(x=>x[0]==='persist').length,1);
     await f.api.importQuest(line.id,{reviewed:true});assert.equal(seen.filter(x=>x[0]==='persist').length,1);
-    assert.equal(f.api.read().limits.active,1);
+    assert.equal(f.api.read().limits.active,0);
   }finally{f.close()}
 });
 
@@ -166,7 +166,7 @@ test('local completion releases a slot only after corroborated native proof for 
   f.w.CivweaveIntentionPlanner={persist:plan=>{const item={id:plan.id,kind:'weave-plan',state:'review',plan};f.w.localStorage.setItem('civweave.intentions.v127',JSON.stringify([item]));return item}};
   f.w.CivweaveProofProgressV158={planCompletion:id=>({planId:id,complete})};await f.api.importQuest(line.id,{reviewed:true});
   const rows=JSON.parse(f.w.localStorage.getItem('civweave.intentions.v127'));rows[0].state=rows[0].plan.state='completed';for(const p of rows[0].plan.paths)p.status='completed';f.w.localStorage.setItem('civweave.intentions.v127',JSON.stringify(rows));
-  await f.api.syncCompletion();assert.equal(f.api.read().limits.active,1);complete=true;await f.api.syncCompletion();assert.equal(f.api.read().limits.active,0);assert.equal(f.api.read().lines[0].state,'completed');
+  await f.api.syncCompletion();assert.equal(f.api.read().limits.active,0);complete=true;await f.api.syncCompletion();assert.equal(f.api.read().limits.active,0);assert.equal(f.api.read().lines[0].state,'completed');
  }finally{f.close()}
 });
 
@@ -243,5 +243,15 @@ test('responsive local inference receives a longer planning deadline with unchan
   assert.equal(f.calls.length,3);
   assert.ok(f.calls.every(request=>request.config.timeoutMs>=900000));
   assert.ok(f.calls.every(request=>request.config.model==='qwen35-4b-native'));
+ }finally{f.close()}
+});
+
+test('unlimited manual planning is independent of autonomous active slots and rolling allowance',async()=>{
+ const f=fixture();try{
+  for(let n=0;n<8;n++){const line=await f.api.runLine({intention:intention+' manually requested '+n});assert.equal(line.creationMode,'manual')}
+  assert.equal(f.calls.length,24);
+  assert.equal(f.api.read().limits.active,0);
+  assert.equal(f.api.read().limits.createdInWindow,0);
+  assert.equal(f.api.read().limits.manualUnlimited,true);
  }finally{f.close()}
 });

@@ -1,4 +1,5 @@
 import {guildQuestBeatSnapshot,discoverGuildOpportunities,STARLING_PERSONAS} from './starling-collective-v1.mjs';
+import {STARLING_PROJECT_KIND,STARLING_TASK_OUTPUT_KIND,autonomousTaskPolicy,parseAutonomousProject,validateAutonomousProject,findNextAutonomousTask} from './starling-autonomous-projects-v1.mjs';
 
 /**
  * Starling Collective cooperative worker.
@@ -22,7 +23,7 @@ const INTENTION_PERSONAS=Object.freeze(['kami','rosa','sana','farah','kit','jae'
 const MIN_INTERVAL=15;
 const MAX_DAILY=12;
 
-export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date.now(),randomId=()=>crypto.randomUUID(),setAlarm=(cb,ms)=>setTimeout(cb,ms),clearAlarm=handle=>clearTimeout(handle),withExclusiveLock,readTaskOpportunities}={}){
+export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date.now(),randomId=()=>crypto.randomUUID(),setAlarm=(cb,ms)=>setTimeout(cb,ms),clearAlarm=handle=>clearTimeout(handle),withExclusiveLock,readTaskOpportunities,readVerifiedHumanSkills}={}){
   if(!mesh?.getObject||!mesh?.createObject||!mesh?.listObjects||!mesh?.validateObject||!mesh?.deviceId||!turnService?.runOneTurn||typeof founder!=='function')throw new TypeError('Canonical mesh, turn service, and founding-device owner are required.');
   let busy=false,timer=null,stopped=true,activeGuild=null,generation=0;
 
@@ -50,19 +51,26 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const p=row.payload;
     if(typeof p.enabled!=='boolean'||!Number.isInteger(p.intervalMinutes)||p.intervalMinutes<MIN_INTERVAL||p.intervalMinutes>1440
       ||!Number.isInteger(p.dailyLimit)||p.dailyLimit<1||p.dailyLimit>MAX_DAILY)return null;
+    if(p.goal!==undefined&&(typeof p.goal!=='string'||p.goal.length>4000))return null;
+    if(p.siloMode!==undefined&&typeof p.siloMode!=='boolean')return null;
     return Object.freeze({...p,revision:row.revision});
   }
   async function status(guildId){
     const guild=clean(guildId,180),genesis=await founding(guild),p=await policy(guild,genesis.origin.nodeId);
-    return Object.freeze({schema:STARLING_WORKER_POLICY,guildId:guild,enabled:p?.enabled===true,intervalMinutes:p?.intervalMinutes??60,dailyLimit:p?.dailyLimit??4,revision:p?.revision??0,active:!stopped&&activeGuild===guild,busy});
+    return Object.freeze({schema:STARLING_WORKER_POLICY,guildId:guild,enabled:p?.enabled===true,intervalMinutes:p?.intervalMinutes??60,dailyLimit:p?.dailyLimit??4,revision:p?.revision??0,goal:p?.goal||'',goalId:p?.goalId||null,siloMode:p?.siloMode===true,active:!stopped&&activeGuild===guild,busy});
   }
-  async function storePolicy(guild,enabled,{confirmConsent,intervalMinutes,dailyLimit}={}){
+  async function storePolicy(guild,enabled,{confirmConsent,intervalMinutes,dailyLimit,goal,siloMode}={}){
     const genesis=await requireFounder(guild);
     if(enabled&&(!confirmConsent||confirmConsent({guildId:guild,mode:'local-only',share:'guild-members'})!==true))throw new Error('Explicit Guildkeeper consent is required to enable the local Collective worker.');
     const current=await policy(guild,genesis.origin.nodeId);
     const interval=Math.max(MIN_INTERVAL,Math.min(1440,Number.isInteger(intervalMinutes)?intervalMinutes:current?.intervalMinutes??60));
     const daily=Math.max(1,Math.min(MAX_DAILY,Number.isInteger(dailyLimit)?dailyLimit:current?.dailyLimit??4));
-    const p={schema:STARLING_WORKER_POLICY,guildId:guild,enabled,intervalMinutes:interval,dailyLimit:daily,localOnly:true,updatedAt:new Date(now()).toISOString()};
+    const selectedGoal=goal===undefined?current?.goal||'':typeof goal==='string'?goal.trim():'';
+    if(selectedGoal&&(selectedGoal.length<12||selectedGoal.length>4000))throw new Error('A Guild main goal must contain 12–4000 characters.');
+    if(goal!==undefined&&!selectedGoal)throw new Error('A valid Guild goal is required to start autonomous project generation.');
+    const nextSilo=siloMode===undefined?current?.siloMode===true:siloMode===true;
+    const goalId=selectedGoal&&current?.goal===selectedGoal&&current?.siloMode===nextSilo&&current?.goalId?current.goalId:selectedGoal?'goal-'+clean(String(randomId()),80):null;
+    const p={schema:STARLING_WORKER_POLICY,guildId:guild,enabled,intervalMinutes:interval,dailyLimit:daily,goal:selectedGoal,goalId,siloMode:nextSilo,localOnly:true,updatedAt:new Date(now()).toISOString()};
     await mesh.createObject({id:'starling-worker-policy:'+guild,revision:(current?.revision||0)+1,kind:STARLING_WORKER_POLICY,purpose:'Guildkeeper-controlled local Collective scheduler consent.',consent:'private',audience:[],publish:false,payload:p});
     return status(guild);
   }
@@ -86,6 +94,82 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const payload={schema:RECEIPT_SCHEMA,guildId:guild,policyRevision:revision,runId,status,at:new Date(now()).toISOString(),...extra};
     return mesh.createObject({id:'starling-work-receipt:'+guild+':'+runId+':'+status,revision:1,kind:STARLING_WORK_RECEIPT,purpose:'Auditable local Starling worker attempt; model output is a self-report until independently reviewed.',consent:'group',audience:['guild:'+guild],publish:true,priority:35,payload});
   }
+  /** Signed autonomous project backlog. A project is never an activated
+   * Cerbanimo Quest; AI-produced task drafts are reviewed independently. */
+  async function readProjects(guildId){
+    const guild=clean(guildId,180),genesis=await requireFounder(guild);
+    const p=await policy(guild,genesis.origin.nodeId),rows=await mesh.listObjects();
+    const projects=[],outputs=[];
+    for(const row of Array.isArray(rows)?rows:[]){
+      const v=row?.payload;
+      if(![STARLING_PROJECT_KIND,STARLING_TASK_OUTPUT_KIND].includes(row?.kind)
+         ||row.consent!=='group'||!row.audience?.includes('guild:'+guild)
+         ||row.origin?.nodeId!==genesis.origin.nodeId||v?.guildId!==guild
+         ||v?.goalId!==p?.goalId||(await mesh.validateObject(row))?.ok!==true)continue;
+      if(row.kind===STARLING_PROJECT_KIND&&v?.schema===STARLING_PROJECT_KIND&&Array.isArray(v.tasks))
+        projects.push({...v,id:row.id});
+      if(row.kind===STARLING_TASK_OUTPUT_KIND&&v?.schema===STARLING_TASK_OUTPUT_KIND&&v.reviewRequired===true)
+        outputs.push({...v,id:row.id});
+    }
+    projects.sort((a,b)=>Date.parse(a.createdAt)-Date.parse(b.createdAt));
+    return Object.freeze({projects,outputs,goalId:p?.goalId||null});
+  }
+  async function autonomousTick({guild,p,signer,personaId}){
+    const board=await readProjects(guild),pending=findNextAutonomousTask(board.projects,board.outputs);
+    const windowStart=now()-86400000;
+    const created=board.projects.filter(x=>Date.parse(x.createdAt)>windowStart);
+    // A project counts as active only while it has AI drafting work pending.
+    // Human tasks remain unassigned proposals, not work orders.
+    const active=board.projects.filter(project=>findNextAutonomousTask([project],board.outputs)).length;
+    if(!pending&&(created.length>=6||active>=3))return {status:'autonomous-project-limit',executed:0,createdInWindow:created.length,activeProjects:active};
+    const runId=clean(String(randomId()),80);
+    if(!/^[A-Za-z0-9_-]{1,80}$/.test(runId))throw new TypeError('Worker run ID must be a safe opaque identifier.');
+    const action=pending?'draft-task':'create-project';
+    await record(guild,p.revision,runId,'started',{personaId,action,projectId:pending?.project.id||null,taskId:pending?.task.id||null});
+    try{
+      if(pending){
+        const {project,task}=pending;
+        const response=await turnService.runOneTurn({
+          guildId:guild,personaId,workMode:'task-draft',
+          taskPrompt:'Work on one assigned AI drafting task. Guild main goal: '+clean(p.goal,1700)+
+          '. Project: '+clean(project.title,180)+'. Your task: '+clean(task.title,220)+
+          '. Required TEXT deliverable: '+clean(task.deliverable,800)+
+          '. Produce the actual draft output now, not a plan to produce it later. No physical action, publishing, external research claims, purchase, human assignment or false verification.'
+        });
+        const text=clean(response?.payload?.text,3500);
+        if(!text)throw new Error('The local model returned no usable AI task draft.');
+        const payload={schema:STARLING_TASK_OUTPUT_KIND,guildId:guild,goalId:p.goalId,policyRevision:p.revision,projectId:project.id,taskId:task.id,personaId,
+          text,sourceTurnId:response.id,at:new Date(now()).toISOString(),reviewRequired:true,status:'draft-awaiting-human-review',
+          canonicalProof:false,completed:false};
+        await mesh.createObject({id:'starling-task-output:'+guild+':'+runId,revision:1,kind:STARLING_TASK_OUTPUT_KIND,
+          purpose:'Unverified AI text deliverable for a self-proposed Guild project.',consent:'group',audience:['guild:'+guild],publish:true,payload});
+        await record(guild,p.revision,runId,'completed',{personaId,action,projectId:project.id,taskId:task.id,turnId:response.id});
+        return {status:'task-drafted',executed:1,personaId,projectId:project.id,taskId:task.id};
+      }
+      const policy=autonomousTaskPolicy({siloMode:p.siloMode,verifiedHumanSkills:typeof readVerifiedHumanSkills==='function'?await readVerifiedHumanSkills(guild):[]});
+      const request=await turnService.runOneTurn({
+        guildId:guild,personaId,workMode:'project',
+        taskPrompt:'Create ONE NEW concrete, independently useful project based on the ongoing Guild main goal: '+clean(p.goal,2100)+
+          '. Existing projects: '+board.projects.slice(-10).map(x=>x.title).join(' | ')+
+          '. Reply ONLY valid compact JSON: {"title":"...","outcome":"tangible text deliverable","tasks":[{"assignee":"ai","kind":"writing","title":"...","deliverable":"Draft article text"}]}. '+
+          'Propose 1–4 specific AI-capable creative, analysis, drafting, coding-draft, review, education or advocacy-content tasks.'+
+          (policy.aiOnly?' HUMAN SKILLS UNKNOWN OR SILO ENABLED: all tasks MUST be assigned to "ai"; propose NO human, street, animal-care, construction or other physical work.':' Human tasks may appear only as UNASSIGNED proposals requiring one of these VERIFIED available skills: '+policy.humanSkills.join(', ')+'.')+
+          ' This project is a reviewable internal proposal, not a completed Quest. Do not propose buying, posting or physically performing actions.'
+      });
+      const proposed=parseAutonomousProject(request?.payload?.text);
+      const project=validateAutonomousProject(proposed,{guildId:guild,goal:p.goal,siloMode:p.siloMode,verifiedHumanSkills:policy.humanSkills});
+      const projectId='starling-auto-project:'+guild+':'+runId;
+      const payload={...project,goalId:p.goalId,policyRevision:p.revision,createdAt:new Date(now()).toISOString(),originTurnId:request.id};
+      await mesh.createObject({id:projectId,revision:1,kind:STARLING_PROJECT_KIND,
+        purpose:'Autonomously proposed Guild AI project: reviewable drafts only, no human assignments or canonical Quest completion.',
+        consent:'group',audience:['guild:'+guild],publish:true,payload});
+      await record(guild,p.revision,runId,'completed',{personaId,action,projectId,turnId:request.id});
+      return {status:'project-created',executed:1,personaId,projectId,aiTasks:project.tasks.filter(x=>x.assignee==='ai').length};
+    }catch(error){
+      await record(guild,p.revision,runId,'failed',{personaId,action,error:clean(String(error?.message||error),280)});
+      throw error;
+    }
+  }
   async function oneTick(guild){
     const genesis=await requireFounder(guild),p=await policy(guild,genesis.origin.nodeId);
     if(!p?.enabled)return {status:'disabled',executed:0};
@@ -103,6 +187,7 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const latest=events.filter(x=>x.status==='completed').sort((a,b)=>Date.parse(b.at)-Date.parse(a.at))[0];
     if(latest&&now()-Date.parse(latest.at)<p.intervalMinutes*60000)return {status:'cooldown',executed:0};
     const personaId=INTENTION_PERSONAS[attempts.length%INTENTION_PERSONAS.length];
+    if(p.goal)return autonomousTick({guild,p,signer:genesis.origin.nodeId,personaId,runIdSeed:attempts.length});
     // Only a verified member-authenticated board adapter may return candidate
     // human projects. A model's own claims of task permission are ignored.
     let opportunity=null;
@@ -177,5 +262,5 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const snapshot=guildQuestBeatSnapshot({guildId:selected,publications:all});
     return discoverGuildOpportunities({snapshot,capabilities,verifyHumanPublisher});
   }
-  return Object.freeze({status,enable,disable,tick,start,stop,discover});
+  return Object.freeze({status,enable,disable,tick,start,stop,discover,readProjects});
 }

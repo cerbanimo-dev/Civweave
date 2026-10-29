@@ -146,3 +146,15 @@ test('unreviewed, foreign-Guild or incomplete host results cannot create signed 
  }
  assert.equal(rows.length,0);
 });
+
+test('project mode uses a bounded JSON schema; task-draft mode requests a real deliverable',async()=>{
+ const {service,calls}=makeHarness();
+ await service.runOneTurn({guildId:'garden',personaId:'rosa',workMode:'project',taskPrompt:'Make a one-project content plan.'});
+ await service.runOneTurn({guildId:'garden',personaId:'sana',workMode:'task-draft',taskPrompt:'Draft the requested article text now.'});
+ assert.equal(calls[0].responseFormat,'json');
+ assert.equal(calls[0].schema.required.includes('tasks'),true);
+ assert.equal(calls[0].maxTokens,900);
+ assert.match(calls[0].messages[0].content,/valid JSON object/i);
+ assert.equal(calls[1].maxTokens,1100);
+ assert.match(calls[1].messages[0].content,/Actually produce/);
+});

@@ -19,7 +19,7 @@ const bob = { nodeId: 'fictional-node-b', guildId: 'fictional-guild', userId: 'f
 const start = Date.parse('2026-10-28T12:00:00Z');
 const quest = (id = 'weave:fictional-checklist') => ({ kind: 'weave-plan', id, state: 'review', conversation: 'PRIVATE CHAT', plan: { schema: 'civweave.intention-weave.v1', id, title: 'Fictional checklist', outcome: 'Three saved checks', wish: 'PRIVATE WISH', paths: [{ id: 'path:make', realm: 'cerbanimo', title: 'Create', steps: ['Write three checks'], evidence: 'PRIVATE EVIDENCE' }] } });
 const call = (storage, actor, action, input = {}, options = {}) => executeGuildStarlingAction(storage, actor, action, input, { now: start, ...options });
-const reserve = (storage, id, actor = alice, options = {}) => call(storage, actor, 'reserve', { idempotencyKey: `fictional-${id}`, title: `Fictional line ${id}` }, options);
+const reserve = (storage, id, actor = alice, options = {}) => call(storage, actor, 'reserve', { idempotencyKey: `fictional-${id}`, title: `Fictional line ${id}`,mode:'autonomous' }, options);
 
 test('three concurrent active lines are a Guild-wide limit, not a per-user or starter-node limit', async () => {
   const store = new MemoryStorage();
@@ -186,4 +186,31 @@ test('unknown states, stale revisions, terminal resurrection and malformed ident
   await assert.rejects(call(store, alice, 'propose', { id: row.id, expectedRevision: abandoned.line.revision, quest: quest() }), { status: 409 });
   await assert.rejects(call(store, alice, 'reserve', { idempotencyKey: '../escape', title: 'Bad' }), { status: 400 });
   await assert.rejects(call(store, alice, 'delete', { id: row.id }), { status: 405 });
+});
+
+test('manual shared Guild plans are unlimited and cannot consume autonomous creation slots',async()=>{
+ const store=new MemoryStorage();
+ for(let i=0;i<9;i++){
+  const created=await call(store,alice,'reserve',{idempotencyKey:'manual:'+i,title:'Manual project '+i,mode:'manual'});
+  assert.equal(created.line.creationMode,'manual');
+ }
+ const status=await call(store,alice,'status');
+ assert.equal(status.activeCount,0);assert.equal(status.createdInWindow,0);
+ const first=await reserve(store,'auto-1');
+ assert.equal(first.line.creationMode,'autonomous');
+ assert.equal((await call(store,alice,'status')).activeCount,1);
+});
+
+test('pre-mode legacy manually reserved Guild history survives without consuming autonomy quota',async()=>{
+ const store=new MemoryStorage();
+ const oldId='starling-line:legacy-migration';
+ const prior={schema:'civweave.guild-starling-line.v1',id:oldId,...alice,title:'Old manual work',state:'reserved',revision:1,origin:'ai-generated',createdAt:new Date(start).toISOString(),updatedAt:new Date(start).toISOString()};
+ await store.put('guild-starling:'+alice.guildId+':line:'+oldId,prior);
+ await store.put('guild-starling:'+alice.guildId+':state',{
+  version:1,activeIds:[oldId],recentIds:[oldId],creationEvents:[start],retainedLines:1,passportUsers:[],intentionUsers:[],intentionEvents:[]
+ });
+ const status=await call(store,alice,'status');
+ assert.equal(status.activeCount,0);assert.equal(status.createdInWindow,0);
+ assert.ok(status.lines.some(line=>line.id===oldId));
+ assert.equal((await store.get('guild-starling:'+alice.guildId+':state')).quotaModeVersion,2);
 });
