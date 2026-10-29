@@ -138,6 +138,86 @@
         "trip_hop",
         "pop",
         "funk"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "28202",
+          "title": "Our Creative Community",
+          "artist": "Mana Junkie",
+          "themes": [
+            "sharing",
+            "creative community",
+            "open culture"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/28202",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "59709",
+          "title": "Unify",
+          "artist": "Madam Snowflake",
+          "themes": [
+            "unity",
+            "respect",
+            "collective action"
+          ],
+          "source_url": "https://ccmixter.org/files/snowflake/59709",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "38248",
+          "title": "Free Hearts Connections",
+          "artist": "CSoul",
+          "themes": [
+            "sharing",
+            "creative freedom",
+            "connectedness"
+          ],
+          "source_url": "https://ccmixter.org/files/CSoul/38248",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "38385",
+          "title": "Free Hearts",
+          "artist": "Mana Junkie",
+          "themes": [
+            "community",
+            "free expression",
+            "cooperation"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/38385",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "57886",
+          "title": "Hope Is A Dangerous Thing (Vo1k1 Mix)",
+          "artist": "vo1k1",
+          "themes": [
+            "hope",
+            "resilience",
+            "creative voice"
+          ],
+          "source_url": "https://ccmixter.org/files/vo1k1/57886",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "28114",
+          "title": "The Remixin' Blues",
+          "artist": "unreal_dm",
+          "themes": [
+            "sharing",
+            "creative commons",
+            "independence"
+          ],
+          "source_url": "https://ccmixter.org/files/unreal_dm/28114",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     },
     {
@@ -235,6 +315,112 @@
         "world",
         "pop",
         "blues"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "26427",
+          "title": "Suzy And Johnny Save The Planet",
+          "artist": "dwb",
+          "themes": [
+            "recycling",
+            "ecology",
+            "sustainability"
+          ],
+          "source_url": "https://ccmixter.org/files/dwb/26427",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "65367",
+          "title": "A Better Way",
+          "artist": "Rataxes",
+          "themes": [
+            "peace",
+            "change",
+            "cooperation"
+          ],
+          "source_url": "https://ccmixter.org/files/Rataxes/65367",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "45875",
+          "title": "Words of Gratitude (Summer Rain Mix) feat. SackJo",
+          "artist": "Mana Junkie",
+          "themes": [
+            "gratitude",
+            "connection",
+            "reflection"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/45875",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "40099",
+          "title": "Words of Gratitude",
+          "artist": "Mana Junkie",
+          "themes": [
+            "gratitude",
+            "connection",
+            "reflection"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/40099",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "55816",
+          "title": "Falling",
+          "artist": "Donnie Drost",
+          "themes": [
+            "introspection",
+            "care",
+            "emotion"
+          ],
+          "source_url": "https://ccmixter.org/files/donniedrost/55816",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "55608",
+          "title": "Falling",
+          "artist": "Bluemillenium",
+          "themes": [
+            "reflection",
+            "empathy",
+            "music exploration"
+          ],
+          "source_url": "https://ccmixter.org/files/Bluemillenium/55608",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33726",
+          "title": "In Peace",
+          "artist": "phasenwandler",
+          "themes": [
+            "peace",
+            "environment",
+            "restoration"
+          ],
+          "source_url": "https://ccmixter.org/files/phasenwandler/33726",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "40534",
+          "title": "The Same Light Shines",
+          "artist": "SackJo22",
+          "themes": [
+            "interdependence",
+            "care",
+            "hope"
+          ],
+          "source_url": "https://ccmixter.org/files/SackJo22/40534",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     },
     {
@@ -332,6 +518,99 @@
         "techno",
         "alternative",
         "indie"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "71219",
+          "title": "Age of AI Revisited",
+          "artist": "MikeTheBee",
+          "themes": [
+            "AI",
+            "automation",
+            "future"
+          ],
+          "source_url": "https://ccmixter.org/files/mikethebee/71219",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "59104",
+          "title": "The Revised Singularity",
+          "artist": "Apoxode",
+          "themes": [
+            "technology",
+            "future",
+            "humanity"
+          ],
+          "source_url": "https://ccmixter.org/files/Apoxode/59104",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "43036",
+          "title": "Turning Into Normal (What Once Felt Strange)",
+          "artist": "SackJo22",
+          "themes": [
+            "transition",
+            "change",
+            "experimentation"
+          ],
+          "source_url": "https://ccmixter.org/files/SackJo22/43036",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "31024",
+          "title": "Bustin Out",
+          "artist": "Benjamin Orth",
+          "themes": [
+            "creative energy",
+            "making",
+            "emergence"
+          ],
+          "source_url": "https://ccmixter.org/files/Benjamin_Orth/31024",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "56419",
+          "title": "Mother Truckers",
+          "artist": "Stefan Kartenberg",
+          "themes": [
+            "climate",
+            "action",
+            "change"
+          ],
+          "source_url": "https://ccmixter.org/files/JeffSpeed68/56419",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "68897",
+          "title": "Ghosts In The Machine (Robbero Remix) / For Science!",
+          "artist": "coruscate",
+          "themes": [
+            "science",
+            "technology",
+            "speculation"
+          ],
+          "source_url": "https://ccmixter.org/files/Coruscate/68897",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "67822",
+          "title": "PEACE WAVE",
+          "artist": "Bocrew",
+          "themes": [
+            "electronic creativity",
+            "peace",
+            "collaboration"
+          ],
+          "source_url": "https://ccmixter.org/files/BOCrew/67822",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     },
     {
@@ -429,6 +708,86 @@
         "acoustic",
         "chill",
         "blues"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "59991",
+          "title": "Focus on Love - Kara Square - Nickillus remix 2019",
+          "artist": "Nickillus",
+          "themes": [
+            "care",
+            "love",
+            "connection"
+          ],
+          "source_url": "https://ccmixter.org/files/Nickillus/59991",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "60107",
+          "title": "Good Night",
+          "artist": "Siobhan Dakay",
+          "themes": [
+            "care",
+            "reflection",
+            "companionship"
+          ],
+          "source_url": "https://ccmixter.org/files/SiobhanD/60107",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "59564",
+          "title": "Come Inside",
+          "artist": "Madam Snowflake",
+          "themes": [
+            "belonging",
+            "welcome",
+            "companionship"
+          ],
+          "source_url": "https://ccmixter.org/files/snowflake/59564",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "65367",
+          "title": "A Better Way",
+          "artist": "Rataxes",
+          "themes": [
+            "cooperation",
+            "shared future",
+            "peace"
+          ],
+          "source_url": "https://ccmixter.org/files/Rataxes/65367",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "38385",
+          "title": "Free Hearts",
+          "artist": "Mana Junkie",
+          "themes": [
+            "sharing",
+            "collective care",
+            "cooperation"
+          ],
+          "source_url": "https://ccmixter.org/files/mana_junkie/38385",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "40534",
+          "title": "The Same Light Shines",
+          "artist": "SackJo22",
+          "themes": [
+            "care",
+            "community",
+            "connection"
+          ],
+          "source_url": "https://ccmixter.org/files/SackJo22/40534",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     },
     {
@@ -526,6 +885,99 @@
         "experimental",
         "alternative",
         "electronic"
+      ],
+      "review_candidates_ccmixter": [
+        {
+          "id": "60893",
+          "title": "American Layer Cake (No War With Iran/Bernie 2020)",
+          "artist": "coruscate",
+          "themes": [
+            "anti-war",
+            "class politics",
+            "solidarity"
+          ],
+          "source_url": "https://ccmixter.org/files/Coruscate/60893",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "68853",
+          "title": "The Homeless Man",
+          "artist": "coruscate",
+          "themes": [
+            "homelessness",
+            "class",
+            "social justice"
+          ],
+          "source_url": "https://ccmixter.org/files/Coruscate/68853",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33634",
+          "title": "Spinning",
+          "artist": "Kara Square",
+          "themes": [
+            "climate",
+            "corporate accountability",
+            "peace"
+          ],
+          "source_url": "https://ccmixter.org/files/mindmapthat/33634",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33751",
+          "title": "In Peace",
+          "artist": "unreal_dm",
+          "themes": [
+            "peace",
+            "restoration",
+            "solidarity"
+          ],
+          "source_url": "https://ccmixter.org/files/unreal_dm/33751",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "34273",
+          "title": "In Peace (reprise)",
+          "artist": "Lasswell",
+          "themes": [
+            "peace",
+            "renewal",
+            "hope"
+          ],
+          "source_url": "https://ccmixter.org/files/lazztunes07/34273",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "59709",
+          "title": "Unify",
+          "artist": "Madam Snowflake",
+          "themes": [
+            "solidarity",
+            "respect",
+            "unity"
+          ],
+          "source_url": "https://ccmixter.org/files/snowflake/59709",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "68869",
+          "title": "Romantic Apathy",
+          "artist": "coruscate",
+          "themes": [
+            "personal autonomy",
+            "self-respect",
+            "relationships"
+          ],
+          "source_url": "https://ccmixter.org/files/Coruscate/68869",
+          "source_license_seen": "CC-BY",
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        }
       ]
     }
   ],
@@ -550,5 +1002,13 @@
     "broad_pages_per_tag": 12,
     "broad_playlist_id": "civweave",
     "broad_note": "Broad vocal search supplies additional songs for manual review; musical fit is inferred only from recorded tags and not assumed as an ideological match."
+  },
+  "review_candidate_policy": {
+    "enabled": true,
+    "source": "exact ccMixter upload pages; licensing and metadata independently confirmed by harvest API",
+    "mode": "stream-only, lyric content not audited",
+    "require_api_license_confirmation": true,
+    "exclude_from_safe_mode": true,
+    "note": "Web-source license review is not a listen-through. Do not infer explicit:false or human lyric audit from source-page metadata."
   }
 }
