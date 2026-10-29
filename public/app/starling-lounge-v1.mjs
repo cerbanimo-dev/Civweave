@@ -259,7 +259,7 @@ async function ensureWorker(){
     mesh:state.turnMesh,
     turnService:service,
     founder:mobile.mobileGuildStatus,
-    withExclusiveLock:(name,action)=>navigator.locks.request(name,{mode:'exclusive',ifAvailable:true},lock=>lock?action():{status:'another-tab-active',executed:0}),
+    withExclusiveLock:(name,action)=>navigator.locks.request('civweave:starling-collective:planning',{mode:'exclusive',ifAvailable:true},inferenceLock=>inferenceLock?navigator.locks.request(name,{mode:'exclusive',ifAvailable:true},guildLock=>guildLock?action():{status:'another-tab-active',executed:0}):{status:'another-starling-inference-active',executed:0}),
     readTaskOpportunities:async guildId=>{
       const guild=state.guild,client=globalThis.CivweaveGuildQuestsV1;
       if(!guild||guild.id!==guildId||!client?.sessionForGuild?.(guild))return[];
