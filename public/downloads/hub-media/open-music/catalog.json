@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-10-29T10:38:22Z",
+  "built_at": "2026-10-29T10:40:57Z",
   "record_count": 55,
   "failure_count": 0,
   "failures": [],
@@ -2549,7 +2549,7 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "33343",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "matched_query": "genre:chill",
       "title": "Twilight of the Cinema",
       "artist": "septahelix",
@@ -2598,11 +2598,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {
@@ -2828,7 +2828,7 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "16099",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "matched_query": "genre:pop",
       "title": "Blessed are the Greedy",
       "artist": "Scott Altham",
@@ -2876,11 +2876,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:pop"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:pop"
         },
         {
@@ -3572,7 +3572,7 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "579",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "matched_query": "genre:chill",
       "title": "Wreckless (U53-Mix)",
       "artist": "Djaii (as \"Kyro\")",
@@ -3620,11 +3620,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {

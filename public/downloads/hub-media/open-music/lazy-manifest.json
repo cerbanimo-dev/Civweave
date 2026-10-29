@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-10-29T10:38:22Z",
+  "built_at": "2026-10-29T10:40:57Z",
   "entry_count": 55,
   "entries": [
     {
@@ -2279,14 +2279,14 @@
       ],
       "explicit": null,
       "curation": "genre-discovered",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {
@@ -2525,14 +2525,14 @@
       ],
       "explicit": null,
       "curation": "genre-discovered",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:pop"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:pop"
         },
         {
@@ -3173,14 +3173,14 @@
       ],
       "explicit": null,
       "curation": "genre-discovered",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {

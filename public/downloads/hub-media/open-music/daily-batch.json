@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-daily-batch.v1",
-  "built_at": "2026-10-29T10:38:22Z",
+  "built_at": "2026-10-29T10:40:57Z",
   "candidate_count": 87,
   "candidates": [
     {
@@ -823,7 +823,7 @@
     },
     {
       "candidate_id": "openmusic:4ef39c8e26d3577ef48f3949",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "title": "Twilight of the Cinema",
       "artist": "septahelix",
       "album": "",
@@ -872,11 +872,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {
@@ -887,7 +887,7 @@
     },
     {
       "candidate_id": "openmusic:bb35bfe9dc00cc05134ea191",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "title": "Blessed are the Greedy",
       "artist": "Scott Altham",
       "album": "",
@@ -935,11 +935,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:pop"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:pop"
         },
         {
@@ -1237,7 +1237,7 @@
     },
     {
       "candidate_id": "openmusic:c639883ea73364db8ebc4217",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "title": "Wreckless (U53-Mix)",
       "artist": "Djaii (as \"Kyro\")",
       "album": "",
@@ -1285,11 +1285,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {
@@ -1925,7 +1925,7 @@
     },
     {
       "candidate_id": "openmusic:4ef39c8e26d3577ef48f3949",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "title": "Twilight of the Cinema",
       "artist": "septahelix",
       "album": "",
@@ -1974,11 +1974,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {
@@ -2074,7 +2074,7 @@
     },
     {
       "candidate_id": "openmusic:bb35bfe9dc00cc05134ea191",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "title": "Blessed are the Greedy",
       "artist": "Scott Altham",
       "album": "",
@@ -2122,11 +2122,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:pop"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:pop"
         },
         {
@@ -2365,7 +2365,7 @@
     },
     {
       "candidate_id": "openmusic:c639883ea73364db8ebc4217",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "title": "Wreckless (U53-Mix)",
       "artist": "Djaii (as \"Kyro\")",
       "album": "",
@@ -2413,11 +2413,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {
@@ -4028,7 +4028,7 @@
     },
     {
       "candidate_id": "openmusic:4ef39c8e26d3577ef48f3949",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "title": "Twilight of the Cinema",
       "artist": "septahelix",
       "album": "",
@@ -4077,11 +4077,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {
@@ -4092,7 +4092,7 @@
     },
     {
       "candidate_id": "openmusic:bb35bfe9dc00cc05134ea191",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "title": "Blessed are the Greedy",
       "artist": "Scott Altham",
       "album": "",
@@ -4140,11 +4140,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:pop"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:pop"
         },
         {
@@ -4395,7 +4395,7 @@
     },
     {
       "candidate_id": "openmusic:c639883ea73364db8ebc4217",
-      "playlist_id": "living-school",
+      "playlist_id": "civweave",
       "title": "Wreckless (U53-Mix)",
       "artist": "Djaii (as \"Kyro\")",
       "album": "",
@@ -4443,11 +4443,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "living-school",
+          "playlist_id": "civweave",
           "matched_query": "genre:chill"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         },
         {

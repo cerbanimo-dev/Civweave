@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-vocal-pool-scan.v1",
-  "at": "2026-10-29T10:37:57Z",
+  "at": "2026-10-29T10:40:32Z",
   "diagnostics": [
     {
       "tag": "female_vocals",
@@ -74,4 +74,4 @@
     }
   ],
   "note": "Source API result totals are pre-license and pre-quality filtering; these are candidate counts, not approved tracks."
-}\n
+}
