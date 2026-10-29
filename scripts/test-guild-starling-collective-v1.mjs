@@ -19,7 +19,7 @@ const bob = { nodeId: 'fictional-node-b', guildId: 'fictional-guild', userId: 'f
 const start = Date.parse('2026-10-28T12:00:00Z');
 const quest = (id = 'weave:fictional-checklist') => ({ kind: 'weave-plan', id, state: 'review', conversation: 'PRIVATE CHAT', plan: { schema: 'civweave.intention-weave.v1', id, title: 'Fictional checklist', outcome: 'Three saved checks', wish: 'PRIVATE WISH', paths: [{ id: 'path:make', realm: 'cerbanimo', title: 'Create', steps: ['Write three checks'], evidence: 'PRIVATE EVIDENCE' }] } });
 const call = (storage, actor, action, input = {}, options = {}) => executeGuildStarlingAction(storage, actor, action, input, { now: start, ...options });
-const reserve = (storage, id, actor = alice, options = {}) => call(storage, actor, 'reserve', { idempotencyKey: `fictional-${id}`, title: `Fictional line ${id}` }, options);
+const reserve = (storage, id, actor = alice, options = {}) => call(storage, actor, 'reserve', { idempotencyKey: `fictional-${id}`, title: `Fictional line ${id}`,mode:'autonomous' }, options);
 
 test('three concurrent active lines are a Guild-wide limit, not a per-user or starter-node limit', async () => {
   const store = new MemoryStorage();
