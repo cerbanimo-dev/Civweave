@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.139-settings-v324-ios-webgpu-qwen35';
+const VERSION='1.0.140-settings-v324-ios-webgpu-bundled-wasm';
 const COMPAT_VERSION='1.0.135-settings-gateway-v317-compat';
 const SELECTOR='[data-open-unified-ai-settings]';
 const LAYER_ID='cw-settings-v320';
 const STYLE_ID='cw-settings-v320-style';
 const INPUT_SLOT='__civweaveSettingsV320Capture';
 const SETTINGS_UI='/app/server-ai-settings-v301.js?v=1.0.117-v305-community-dividend';
-const MODEL_PROVIDER_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.18-ios-webgpu-qwen35';
+const MODEL_PROVIDER_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.19-ios-webgpu-bundled-wasm';
 const SETTINGS_LOCAL_ROUTE='/app/settings-local-route-v325.js?v=1.1.4-ios-webgpu-qwen-downloads';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const SETTINGS_KEY='civweave.universal-ai.v127';
@@ -314,7 +314,7 @@ function bind(layer){
     if(!event.target?.open)return;
     const target=form.querySelector('[data-ios-webgpu-setup]');
     if(!target||target.dataset.iosWebgpuMounted==='1')return;
-    void import('/app/local-ai/ios-webgpu-qwen-v1.js?v=1.0.0-ios-safari-qwen35-onnx-browser')
+    void import('/app/local-ai/ios-webgpu-qwen-v1.js?v=1.0.1-ios-safari-qwen35-bundled-wasm')
       .then(api=>{
         if(typeof api.mount!=='function')throw new Error('Browser WebGPU model module could not initialize.');
         api.mount(target,{activate:({model,localApiFlavor,endpoint,stream})=>{
