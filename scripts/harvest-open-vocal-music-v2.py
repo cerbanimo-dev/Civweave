@@ -267,24 +267,28 @@ def harvest_genre_discovery(playlist: dict, policy: dict, settings: dict) -> tup
     classes = [value for value in (settings.get("license_classes") or ["by", "sa"]) if value in ("by", "sa", "pd")]
     for genre in (playlist.get("genre_tags") or []):
         for requested in classes:
+            inspected = 0
             for offset in range(0, per_page * pages, per_page):
                 try:
                     rows = ccmixter_rows({
-                        "f": "json", "dataview": "info", "limit": per_page,
+                        "f": "json", "dataview": "default", "limit": per_page,
                         "offset": offset, "tags": genre, "type": "any", "lic": requested,
                         "sort": "num_scores", "ord": "desc",
                     })
                     if not rows:
                         break
                     for item in rows:
+                        if inspected >= 10:
+                            break
+                        inspected += 1
                         record = record_from_item(
-                            playlist, item, requested, f"genre:{genre}",
+                            playlist, detailed_upload(item), requested, f"genre:{genre}",
                             curated=None, preferred_terms=preferred,
                             minimum_teeth=minimum, genre_tag=genre,
                         )
                         if record:
                             records.append(record)
-                    if len(rows) < per_page:
+                    if len(rows) < per_page or inspected >= 10:
                         break
                 except Exception as exc:
                     failures.append({
