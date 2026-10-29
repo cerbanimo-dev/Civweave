@@ -12,7 +12,7 @@ try{
   }
 }catch{}
 
-const VERSION='1.0.198-universal-artifact-rail';
+const VERSION='1.0.200-interwoven-quest-map';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -332,11 +332,29 @@ function syncArtifactGate(article,row){
   }
   for(const button of previous.values())button.remove();
 }
+function syncQuestPathwayMap(article,row){
+  const presenter=globalThis.CivweaveQuestPathwayMapV1;
+  let host=article.querySelector('.cw350-quest-map-host');
+  const id=row?.approvalGate?.kind==='intention-activation'?row.approvalGate.planId:row?.planSnapshot?.id;
+  if(!presenter?.render||!row||row.role==='user'||row.pending||!id){host?.remove();return}
+  const item=savedArtifactItems('civweave.intentions.v127').find(value=>value?.id===id||value?.plan?.id===id);
+  if(!item?.plan){host?.remove();return}
+  const plan={...item.plan,state:item.state||item.plan.state||'review'},signature=JSON.stringify([plan,activeSystem]);
+  if(!host){host=document.createElement('section');host.className='cw350-quest-map-host';article.querySelector('.cw350-bubble')?.parentElement?.append(host)}
+  if(host.dataset.signature===signature)return;
+  host.dataset.signature=signature;
+  host.innerHTML=presenter.render(plan,{theme:activeSystem,actions:['inspect','edit','open-native','submit-guild'],scope:'Saved Quest · private on this device'});
+  presenter.bind(host,(detail,event)=>{
+    const owner=globalThis.CivweaveSharedReviewSurfaceV234;
+    if(owner?.handleMapAction)return owner.handleMapAction(detail,{source:event.target});
+    let notice=host.querySelector('[data-quest-map-notice]');if(!notice){notice=document.createElement('p');notice.dataset.questMapNotice='';notice.setAttribute('role','status');host.append(notice)}notice.textContent='Quest controls are unavailable. Reopen the app to load shared review.';
+  });
+}
 function syncArtifactGates(){
   if(!root)return;
   const log=root.querySelector('[data-log]');if(!log)return;
   const messages=readThread(activeSystem).messages||[],rows=new Map(messages.map((row,index)=>[String(row.id||`history-${activeSystem}-${index}`),row]));
-  for(const article of log.children)syncArtifactGate(article,rows.get(article.dataset.messageId));
+  for(const article of log.children){const row=rows.get(article.dataset.messageId);syncArtifactGate(article,row);syncQuestPathwayMap(article,row)}
 }
 function clippedQuestCandidate(row,messages,index){
   if(activeSystem!=='civweave'||!row||row.role!=='assistant'||row.pending||row.planSnapshot?.paths?.length||row.approvalGate?.kind==='intention-activation')return null;
@@ -424,6 +442,7 @@ function render(){
     if(!user&&meta){if(!metadata){metadata=document.createElement('div');metadata.className='cw350-meta';bubble.parentElement.append(metadata);}if(metadata.textContent!==meta)metadata.textContent=meta;}
     else metadata?.remove();
     syncArtifactGate(article,row);
+    syncQuestPathwayMap(article,row);
     syncClippedQuestCapture(article,row,messages,index);
     if(article!==cursor)log.insertBefore(article,cursor);else cursor=cursor.nextElementSibling;
   });

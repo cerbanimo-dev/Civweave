@@ -20,7 +20,7 @@ for(const path of [
 ])syntax(path);
 
 const campus=file('public/app/working-campus-v156.part5.txt');
-includes(campus,"WEAVELING_ORCHESTRATOR_VERSION='1.2.12-weaveling-plan-json-v190-saved-quest-revision'",'Working Campus');
+includes(campus,"WEAVELING_ORCHESTRATOR_VERSION='1.2.13-weaveling-plan-json-v190-explicit-dependency-order'",'Working Campus');
 includes(campus,"WEAVELING_ORCHESTRATOR_SRC='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.12-saved-quest-revision'",'Working Campus');
 includes(campus,'function aiQuestResult(result)', 'Working Campus');
 includes(campus,"result?.questAuthoring?.aiGenerated===true",'Working Campus');

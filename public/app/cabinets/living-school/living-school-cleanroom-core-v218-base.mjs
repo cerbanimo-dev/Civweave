@@ -212,7 +212,10 @@ export function availablePaths(){
   const map=new Map(),intake=readJson(INTAKE_KEY,[]);
   for(const item of Array.isArray(intake)?intake:[]){const id=clean(item?.sourcePlanId||item?.intentionId||item?.id,180);if(!id)continue;map.set(id,{id,title:clean(item.title||item.capability||'Learning path',180),capability:clean(item.purpose||item.capability||item.title,1200),proof:clean(item.completionCriteria||item.proof||'A fresh demonstration and reviewable evidence.',2000),state:clean(item.status||item.state||'ready',80)})}
   const intentions=readJson(INTENTION_KEY,[]);
-  for(const item of Array.isArray(intentions)?intentions:[]){const plan=item.plan&&typeof item.plan==='object'?item.plan:item,candidates=Array.isArray(plan.paths)?plan.paths:Object.values(plan.paths||{}),route=candidates.find(candidate=>candidate?.realm==='living-school'),id=clean(plan.id||item.id,180);if(!route||!id)continue;map.set(id,{id,...weavePathIdentity({weaveId:id,pathId:route.id}),title:clean(route.title||plan.title||'Learning path',180),capability:clean(route.purpose||plan.outcome||plan.wish||route.title,1200),proof:clean(route.completionCriteria||plan.completionCriteria||'A fresh demonstration and reviewable evidence.',2000),state:clean(plan.state||item.state||'review',80)})}
+  for(const item of Array.isArray(intentions)?intentions:[]){
+    const plan=item.plan&&typeof item.plan==='object'?item.plan:item,candidates=(Array.isArray(plan.paths)?plan.paths:Object.values(plan.paths||{})).filter(candidate=>candidate?.realm==='living-school'),weaveId=clean(plan.id||item.id,180);if(!weaveId)continue;
+    candidates.forEach((route,index)=>{const id=index===0?weaveId:`${weaveId}:${clean(route.id,180)}`;map.set(id,{id,...weavePathIdentity({weaveId,pathId:route.id}),title:clean(route.title||plan.title||'Learning path',180),capability:clean(route.purpose||plan.outcome||plan.wish||route.title,1200),proof:clean(route.completionCriteria||plan.completionCriteria||'A fresh demonstration and reviewable evidence.',2000),state:clean(plan.state||item.state||'review',80)})});
+  }
   if(currentState.pathContext?.id&&!map.has(currentState.pathContext.id))map.set(currentState.pathContext.id,currentState.pathContext);
   return[...map.values()];
 }
@@ -225,6 +228,13 @@ export function weavePathIdentity(candidate={}){
   if(!plan||!['active','completed'].includes(clean(plan.state||item?.state,80)))return{};
   const paths=Array.isArray(plan.paths)?plan.paths:Object.values(plan.paths||{});
   return paths.some(path=>clean(path?.id,180)===pathId&&path?.realm==='living-school')?{weaveId,pathId}:{};
+}
+export function selectRoutedQuestPath(candidate={}){
+  const identity=weavePathIdentity(candidate);if(!identity.weaveId)return false;
+  const path=availablePaths().find(row=>row.weaveId===identity.weaveId&&row.pathId===identity.pathId);if(!path)return false;
+  if(currentState.activePathId===path.id&&currentState.pathContext?.weaveId===identity.weaveId&&currentState.pathContext?.pathId===identity.pathId)return true;
+  currentState.activePathId=path.id;currentState.pathContext=path;currentState.settings={...currentState.settings,selectedJourneyPlanId:''};
+  persist('learning-path-selected',{pathId:path.id,weaveId:identity.weaveId,questPathId:identity.pathId,source:'quest-pathway-map'});return true;
 }
 export function curriculumWeaveIdentity(input={}){
   if(input.weaveId||input.pathId)return weavePathIdentity(input);

@@ -18,7 +18,7 @@ globalThis.CivweaveIntentionPlanner={persist:()=>{throw Error('unrequested persi
 globalThis.CivweaveWeavelingPlanMaterializationV265={materialize:()=>{throw Error('No additional materialization in mocked routing test')}};
 globalThis.CivweaveUnifiedChatSystemV1={version:'1.2.18-unified-chat-system-v1-explicit-learning-goal',handleNativeLivingSchoolRequest:async()=>{throw Error('Moss stole the Quest')}};
 globalThis.CivweaveWeavelingPlanJsonV190={
-  version:'1.2.12-weaveling-plan-json-v190-saved-quest-revision',
+  version:'1.2.13-weaveling-plan-json-v190-explicit-dependency-order',
   planIntent:text=>/quest|plan|commune|community garden/i.test(text),
   explicitProjectIntent:text=>/create|build|project|quest/i.test(text),
   supportsClippedDraftV1:true,

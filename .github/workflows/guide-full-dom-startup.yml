@@ -30,7 +30,10 @@ on:
       - 'scripts/test-working-campus-proof-projection-v1.mjs'
       - 'scripts/test-working-campus-current-selection-v1.mjs'
       - 'scripts/test-private-quest-map-v1.mjs'
-      - 'scripts/test-private-quest-map-compact-v1.mjs'
+      - 'scripts/test-quest-pathway-pipeline-v1.mjs'
+      - 'scripts/test-quest-pathway-map-v1.mjs'
+      - 'scripts/test-quest-interwoven-map-v1.mjs'
+      - 'scripts/test-native-quest-map-selection-v1.mjs'
       - 'scripts/test-weaveling-review-outcomes-v1.mjs'
       - 'scripts/test-living-school-journey-map-v1.mjs'
       - 'scripts/test-fellowfare-visual-workflow-v1.mjs'
@@ -69,7 +72,10 @@ on:
       - 'scripts/test-working-campus-proof-projection-v1.mjs'
       - 'scripts/test-working-campus-current-selection-v1.mjs'
       - 'scripts/test-private-quest-map-v1.mjs'
-      - 'scripts/test-private-quest-map-compact-v1.mjs'
+      - 'scripts/test-quest-pathway-pipeline-v1.mjs'
+      - 'scripts/test-quest-pathway-map-v1.mjs'
+      - 'scripts/test-quest-interwoven-map-v1.mjs'
+      - 'scripts/test-native-quest-map-selection-v1.mjs'
       - 'scripts/test-weaveling-review-outcomes-v1.mjs'
       - 'scripts/test-living-school-journey-map-v1.mjs'
       - 'scripts/test-fellowfare-visual-workflow-v1.mjs'
@@ -103,4 +109,4 @@ jobs:
       - name: Verify accepted work updates and revokes Quest progress
         run: node --test scripts/test-private-quest-map-v1.mjs scripts/test-weave-native-proof-progress-v1.mjs scripts/test-working-campus-proof-projection-v1.mjs scripts/test-working-campus-current-selection-v1.mjs
       - name: Verify subsystem maps, scoped review decisions and inert quick controls
-        run: node --test scripts/test-private-quest-map-compact-v1.mjs scripts/test-weaveling-review-outcomes-v1.mjs scripts/test-living-school-journey-map-v1.mjs scripts/test-fellowfare-visual-workflow-v1.mjs scripts/test-anarchadia-visual-workflow-v1.mjs scripts/test-civic-map-progressive-disclosure-v1.mjs
+        run: node --test scripts/test-quest-interwoven-map-v1.mjs scripts/test-quest-pathway-map-v1.mjs scripts/test-native-quest-map-selection-v1.mjs scripts/test-quest-pathway-pipeline-v1.mjs scripts/test-weaveling-review-outcomes-v1.mjs scripts/test-living-school-journey-map-v1.mjs scripts/test-fellowfare-visual-workflow-v1.mjs scripts/test-anarchadia-visual-workflow-v1.mjs scripts/test-civic-map-progressive-disclosure-v1.mjs

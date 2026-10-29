@@ -50,6 +50,14 @@ test('Quest lineage survives the persistent shell first-frame and runtime routes
   }
 });
 
+test('Guild Quest submission remains in the persistent shell through a fixed bounded native destination',()=>{
+  const context={URL,URLSearchParams,location:{origin:'https://civweave-staging.pages.dev'},document:{readyState:'loading',addEventListener(){}},addEventListener(){}};vm.runInNewContext(runtime,context);const owner=context.CivweavePersistentSystemShellV1;
+  const options={nativePage:'guild-quests',submitQuest:'qa-quest:42'},h=harness({system:'civweave',query:'&'+new URLSearchParams(options)}),target=new URL(h.frame.src);
+  assert.equal(target.pathname,'/app/civweave-guild-quest-v1.html');assert.equal(target.searchParams.get('submitQuest'),'qa-quest:42');assert.equal(h.frame.src,owner.contentUrl('civweave',options).href);assert.equal(owner.shellUrl('civweave',options).searchParams.get('submitQuest'),'qa-quest:42');h.frame.handlers.load();assert.equal(h.context.CivweaveShellRescueV1.validDocument(),true);
+  for(const submitQuest of ['https://evil.test/','<script>','x'.repeat(181)]){const invalid=harness({system:'civweave',query:'&'+new URLSearchParams({nativePage:'guild-quests',submitQuest})});assert.equal(new URL(invalid.frame.src).searchParams.has('submitQuest'),false);assert.equal(new URL(invalid.frame.src).pathname,'/app/civweave-guild-quest-v1.html');}
+  assert.equal(owner.contentUrl('anarchadia',options).pathname,'/app/anarchadia-console-v139.html');
+});
+
 test('healthy embedded HTML hides startup overlay without shared runtime',()=>{
   const h=harness();h.frame.handlers.load();
   assert.equal(h.loading.hidden,true);

@@ -6,7 +6,7 @@ const MODEL_RUNTIME='/app/shared/civweave-model-runtime.js?v=1.0.18-native-quest
 const MOSS_PLANNER='/app/unified-chat-system-v1.js?v=1.2.20-moss-multi-plan-library';
 const INTENTION_PLANNER='/app/intention-planner-v141.js?v=1.1.1-collective-line-identity';
 const QUEST_MATERIALIZER='/app/weaveling-plan-materialization-v265.js?v=1.1.3-current-selection';
-const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.13-universal-quest-rail';
+const QUEST_PLANNER='/extensions/civweave-weaveling-plan-json-v190.js?v=1.2.13-explicit-dependency-order';
 let modelsPromise=null,plannerPromise=null,questPromise=null;
 const clean=(text,max=1000)=>String(text??'').trim().slice(0,max);
 const GUIDE=Object.freeze({
@@ -89,7 +89,7 @@ async function ensureQuestPlanner(){
     await loadScript(QUEST_MATERIALIZER,()=>typeof globalThis.CivweaveWeavelingPlanMaterializationV265?.materialize==='function','Canonical Quest review materialization');
     await loadScript(QUEST_PLANNER,()=>typeof globalThis.CivweaveWeavelingPlanJsonV190?.createModelPlan==='function'&&
       typeof globalThis.CivweaveWeavelingPlanJsonV190?.planIntent==='function'&&
-      globalThis.CivweaveWeavelingPlanJsonV190?.version==='1.2.12-weaveling-plan-json-v190-saved-quest-revision','Canonical Weaveling Quest planner');
+      globalThis.CivweaveWeavelingPlanJsonV190?.version==='1.2.13-weaveling-plan-json-v190-explicit-dependency-order','Canonical Weaveling Quest planner');
     return globalThis.CivweaveWeavelingPlanJsonV190;
   })().catch(error=>{questPromise=null;throw error});
   return questPromise;

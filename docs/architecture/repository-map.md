@@ -139,6 +139,8 @@ Current route table:
 
 This table is a **route snapshot**, not an architecture contract. If the dispatcher changes, update this table in the same change. Do not infer shared-system ownership from these filenames.
 
+Civweave's fixed `nativePage=guild-quests` displays the existing Guild Quest tracker within the persistent shell; `submitQuest` accepts only a bounded saved Quest identifier and opens its preview without publishing.
+
 Anarchadia's Governance and Workbench are native content destinations within the same persistent shell. `persistent-system-shell-v1.js` accepts only the fixed `nativePage=governance` and `nativePage=workbench` routes for Anarchadia, with allowlisted Workbench views and bounded proposal/Quest identifiers. The first-frame bootstrap uses the same fixed destinations, and the shell validates the expected content origin, path, and launch parameters. Native entry and return controls delegate to the parent's existing `CivweavePersistentSystemShellV1.navigate` owner; standalone returns preserve the installed/embedding context without creating another shell or navigation owner.
 
 FellowFare's active entry renders its marketplace in the same document. `fellowfare-cabinet-v144.js` delegates commands and reviewed imports directly to the existing `services/fellowfare/cabinet-bridge.js` API. `services/fellowfare/marketplace-v2.js` owns marketplace state, order persistence, rendering, and current-tab state; `marketplace-v2-capabilities.js` delegates order mutations to it. The retained iframe boundary uses `postMessage` only with matching origin and parent sender checks. The native host does not emulate an iframe's `contentWindow` or `contentDocument`.
@@ -162,6 +164,7 @@ The canonical ownership list lives in `docs/architecture/systems-of-practice.md`
 | Starling Collective | `public/app/starling-collective-v1.js`; `starling-integration-v1.js` exposes the shared rail action. Guild limits and confirmed proposals use `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`. |
 | Guild Quest publication | `cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs`; `public/app/guild-quest-client-v1.js` calls it through existing member sessions |
 | Radio | `public/app/system-radio-agent-v233.js` |
+| Quest pathway presentation | `public/app/shared/quest-pathway-map-v1.js` and CSS; chat, shared review and Guild tracker delegate to canonical actions |
 | Review surface | `public/app/shared-review-surface-v234.js`; receipt presentation helper `public/app/shared/guide-outcome-scene-v1.js` and matching CSS |
 
 These are navigation landmarks only. Always re-check the ownership registry and active callers before changing them because filenames and owners can move.

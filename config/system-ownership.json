@@ -308,6 +308,19 @@
         "Canonical reward append events animate only a new persisted eligible grant for the current account; bootstrap, duplicates, migrations, and failed writes remain silent.",
         "An installed child delegates reward presentation only to its exact same-origin persistent parent; no duplicate child toast.",
         "Finite motion, reduced-motion support, Lud text presentation, and stable same-receipt DOM survive redraws."
+      ],
+      "questMapPresentationHelper": "public/app/shared/quest-pathway-map-v1.js",
+      "questMapPresentationStyles": "public/app/shared/quest-pathway-map-v1.css",
+      "questMapPresentationApi": "globalThis.CivweaveQuestPathwayMapV1",
+      "allowedQuestMapCallers": [
+        "public/app/guide-chat-surface-v350.js",
+        "public/app/shared-review-surface-v234.js",
+        "public/app/cerbanimo-intention-landscape-v1.js"
+      ],
+      "questMapRules": [
+        "The map renderer owns no Quest store, inference, activation, proof or Guild posting.",
+        "The shared review owner validates saved Quest and path identifiers before map actions; Guild submission opens the existing named preview and final confirmation.",
+        "All four subsystem lanes remain visible; unknown and ambiguous dependencies never become inferred proof or unlocked work."
       ]
     },
     "survival-assessment": {

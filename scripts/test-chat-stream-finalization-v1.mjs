@@ -71,7 +71,7 @@ function harness() {
     activeSystem: 'civweave', openState: true, GUIDE: { civweave: guide }, guide: () => guide,
     document: { createElement: tag => new Element(tag) },
     readThread: () => ({ messages: rows }), syncChrome() {}, markSeen() {}, syncSwitcher() {},
-    requestAnimationFrame: callback => callback(), esc: value => String(value),
+    requestAnimationFrame: callback => callback(), esc: value => String(value), clean: (value,max=12000) => String(value??'').trim().slice(0,max),
     globalThis: { CivweaveGuideContractsV141: { get: id => actions.get(id) }, CivweaveIntentionUI: { items: () => [...intentions.values()] } },
   };
   const start = source.indexOf('function savedArtifactItems(');

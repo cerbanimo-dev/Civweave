@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.4.0-member-quest-publication';
+const VERSION='1.5.0-shared-quest-pathway-map';
 const ROOT_ID='cerbanimo-intention-landscape';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const DISCOVERY_KEY='civweave.hub-discovery.v1';
@@ -42,7 +42,7 @@ const arr=v=>Array.isArray(v)?v:[];
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const hash=v=>{let out=2166136261;for(const c of String(v??'')){out^=c.charCodeAt(0);out=Math.imul(out,16777619)}return out>>>0};
 const isComplete=v=>COMPLETE.has(clean(v,60).toLowerCase());
-const state={screen:1,guildIndex:0,questIndex:0,guilds:[],votes:[],touchStart:null,wheelLock:false,observer:null,rendering:false,shell:null,directoryLoading:false,directoryState:'idle',boards:new Map(),composer:null,publicationBusy:false,publicationNotice:'',withdrawReview:''};
+const state={screen:1,guildIndex:0,questIndex:0,guilds:[],votes:[],touchStart:null,wheelLock:false,observer:null,rendering:false,shell:null,directoryLoading:false,directoryState:'idle',boards:new Map(),composer:null,publicationBusy:false,publicationNotice:'',withdrawReview:'',requestedSubmission:'',mapSelection:null};
 
 function query(){return new URLSearchParams(location.search)}
 function isCivweave(){const data=document.documentElement?.dataset||{},route=globalThis.CivweaveSystemRoutesV227?.identify?.(location.pathname)||'';return route==='civweave'||query().get('system')==='civweave'||data.civweaveSystemRoute==='civweave'||data.civweaveSystem==='civweave'||data.system==='civweave'}
@@ -155,7 +155,7 @@ async function refreshQuestBoard(guild=activeGuild(),{force=false,append=false}=
     board.quests=append?[...board.quests,...rows].filter((row,index,all)=>all.findIndex(other=>other.id===row.id)===index):rows;
     board.guildId=guildId;board.nextCursor=packet.nextCursor||null;board.status='live';
   }catch(error){board.status='error';board.error=clean(error?.message||error,1200)}
-  renderSurface();
+  renderSurface();resumeRequestedSubmission();
 }
 function availableDrafts(){return localIntentions().flatMap(raw=>{try{return[{id:raw.id||raw.plan?.id,snapshot:questClient().preview(raw)}]}catch{return[]}})}
 async function prepareSubmission(guild,draft){
@@ -164,6 +164,18 @@ async function prepareSubmission(guild,draft){
 }
 function selectDraft(id){const guild=activeGuild();if(state.composer&&guild)void prepareSubmission(guild,availableDrafts().find(row=>row.id===id))}
 function composeQuest(){const guild=activeGuild();if(guild&&membership(guild))void prepareSubmission(guild,availableDrafts()[0])}
+function openSubmission(id){
+  id=String(id||'');if(!/^[A-Za-z0-9:_-]{1,180}$/.test(id))return false;const draft=availableDrafts().find(row=>row.id===id);if(!draft)return false;
+  state.requestedSubmission=id;state.screen=2;state.publicationNotice='';resumeRequestedSubmission();return true;
+}
+function resumeRequestedSubmission(){
+  const id=state.requestedSubmission,guild=activeGuild();if(!id)return;
+  const draft=availableDrafts().find(row=>row.id===id);if(!draft){state.requestedSubmission='';return}
+  if(!guild){state.screen=1;renderSurface();return}
+  if(!membership(guild)){renderSurface();return}
+  const board=boardFor(guild);if(board?.status==='live'){state.requestedSubmission='';void prepareSubmission(guild,draft);return}
+  if(!board)void refreshQuestBoard(guild,{force:true});else renderSurface();
+}
 async function publishQuest(){
   const guild=activeGuild(),composer=state.composer,client=questClient();if(state.publicationBusy||!guild||composer?.guildId!==guild.id||!composer.snapshot||!client||composer.preparing||composer.expectedRevision==null)return;
   state.publicationBusy=true;state.publicationNotice='';renderSurface();
@@ -230,11 +242,11 @@ function pathLabel(path){return[clean(path?.title,240),clean(path?.realm||path?.
 function taskList(path){
   const source=arr(path?.tasks).length?arr(path.tasks):arr(path?.steps),progress=new Set(arr(path?.progress).map(Number)),pathDone=isComplete(path?.status);
   return source.map((task,i)=>{
-    if(typeof task==='string')return{id:`${realmForPath(path)}-${i}`,title:clean(task,220),status:pathDone||progress.has(i)?'completed':'ready',complete:pathDone||progress.has(i),raw:{}};
+    if(typeof task==='string')return{index:i,id:`${realmForPath(path)}-${i}`,title:clean(task,220),status:pathDone||progress.has(i)?'completed':'ready',complete:pathDone||progress.has(i),raw:{}};
     const title=clean(task?.title||task?.name||task?.label||task?.deliverable||task?.description,220);
     if(!title)return null;
     const status=clean(task?.status||((pathDone||progress.has(i))?'completed':'ready'),40);
-    return{id:clean(task?.id||task?.taskId||`${realmForPath(path)}-${i}`,160),title,status,complete:isComplete(status)||pathDone||progress.has(i),raw:task||{}};
+    return{index:i,id:clean(task?.id||task?.taskId||`${realmForPath(path)}-${i}`,160),title,status,complete:isComplete(status)||pathDone||progress.has(i),raw:task||{}};
   }).filter(Boolean);
 }
 function mapFor(quest){const lanes=Object.fromEntries(Object.keys(PATHS).map(realm=>[realm,[]]));for(const path of arr(quest?.plan?.paths||quest?.raw?.paths||quest?.plan?.tracks)){const realm=realmForPath(path);if(!lanes[realm])lanes[realm]=[];lanes[realm].push(...taskList(path).map(task=>({...task,pathLabel:pathLabel(path)})))}return lanes}
@@ -328,13 +340,28 @@ function emptyQuestMessage(){if(!questClient())return'Connected Guild Quest view
 function emptyGuildCard(){const source=state.directoryState==='unavailable'?'The live Guild directory is unavailable and this device has no saved Guild data.':'No Guild records are available from the live directory or this device yet.';return`<article class="cil-dropcard cil-empty"><div class="cil-card-handle"></div><small>GUILD DIRECTORY</small><h2>No Guild data available</h2><p>${esc(source)}</p></article>`}
 function questCard(quest){if(!quest)return`<article class="cil-dropcard cil-empty"><div class="cil-card-handle"></div><small>QUEST BOARD</small><h2>Guild Quest board</h2><p>${esc(emptyQuestMessage())}</p></article>`;const needs=quest.needs,progress=questProgress(quest);return`<article class="cil-dropcard cil-needs-card"><div class="cil-card-handle"></div><small>QUEST · ${quest.publication?'SHARED BY A MEMBER':esc(quest.state||'shared')}</small><div class="cil-card-heading"><div><h2>${esc(quest.title)}</h2>${quest.description?`<p>${esc(quest.description)}</p>`:''}</div><div class="cil-progress-orb" style="--quest-progress:${progress.percent}"><b>${progress.percent}%</b><small>${quest.publication?'reported':'mapped'}</small></div></div><div class="cil-section-kicker">Open needs</div><div class="cil-needs">${needs.length?needs.map(n=>`<div class="cil-need"><span>${esc(PATHS[n.realm]?.label||'Guild need')}</span><b>${esc(n.title)}</b></div>`).join(''):'<p class="cil-muted">No open needs are published right now. You can still inspect the Quest Map.</p>'}</div><button type="button" class="cil-primary" data-advance="quest">View Quest Map <span>↓</span></button>${withdrawalControls(quest)}</article>`}
 function voteBadges(task){const votes=votesForTask(task);if(!votes.length)return'';return`<span class="cil-votes" aria-label="${votes.length} related Anarchadia vote${votes.length===1?'':'s'}">${votes.slice(0,4).map(v=>`<span class="cil-vote" style="--vote:${voteColor(v)}" title="${esc(v.label)}">${voteNumber(v)}</span>`).join('')}</span>`}
-function lane(realm,tasks,reported=false){const spec=PATHS[realm]||UNASSIGNED_PATH,done=tasks.filter(t=>t.complete).length;return`<section class="cil-lane" data-lane="${realm}" style="--lane:${spec.solid};--lane-soft:${spec.soft}"><header><span class="cil-lane-glyph"></span><b>${esc(spec.label)}</b><small>${esc(spec.strap)} · ${done}/${tasks.length}</small></header><div class="cil-track">${tasks.length?tasks.map((task,i)=>`<article class="cil-task ${task.complete?'is-complete':''}" data-task-id="${esc(task.id)}"><span class="cil-node">${task.complete?'✓':i+1}</span><b>${esc(task.title)}</b>${task.pathLabel?`<small>${esc(task.pathLabel)}</small>`:''}<small>${task.complete?(reported?'Reported complete':'Complete'):reported?'Reported: '+esc(task.status||'Ready'):esc(task.status||'Ready')}</small>${voteBadges(task)}</article>`).join(''):`<div class="cil-lane-empty"><span class="cil-node">·</span><small>No active ${esc(spec.label)} steps.</small></div>`}</div></section>`}
+function selectedMapDetails(quest){
+  const selected=state.mapSelection;if(selected?.questId!==quest?.plan?.id)return'';
+  const path=arr(quest.plan.paths)[selected.pathIndex];if(!path)return'';
+  const tasks=taskList(path),steps=Number.isInteger(selected.stepIndex)?tasks.filter(task=>task.index===selected.stepIndex):tasks;
+  return`<section class="cil-dropcard" data-quest-map-selection tabindex="-1"><h3>${esc(path.title||'Path details')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}<ol>${steps.map(task=>`<li>${esc(task.title)} · ${quest.publication?'member-reported ':''}${esc(task.status)}${voteBadges(task)}</li>`).join('')}</ol>${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`;
+}
 function mapPanel(quest){
   if(!quest)return'';
-  const lanes=mapFor(quest),progress=questProgress(quest),reported=Boolean(quest.publication);
-  return`<section class="cil-map"><header class="cil-map-head"><div><small>QUEST MAP · ${progress.done}/${progress.total} ${reported?'STEPS REPORTED COMPLETE':'STEPS COMPLETE'}</small><h2>${esc(quest.title)}</h2><p>Learning, building, resources, and agreements can advance together.</p></div><button type="button" class="cil-up" data-screen="2" aria-label="Back to Quest level">↑ Quests</button></header>
-    <div class="cil-map-grid" style="--lane-count:${Object.keys(lanes).length}">${Object.entries(lanes).map(([realm,tasks])=>lane(realm,tasks,reported)).join('')}</div>
-    <footer><span>${reported?'This map is a member-reported snapshot. Proof is not included in this publication.':"Every step weaves impact. Completed steps come from the Quest's stored path progress and proof state."}</span><span class="cil-vote-legend"><i class="cil-vote-demo"></i>Numbered bubbles are linked Anarchadia votes; one vote keeps the same color everywhere.</span></footer></section>`;
+  const local=localIntentions().some(row=>row?.kind==='weave-plan'&&(row.id===quest.plan.id||row.plan?.id===quest.plan.id)),actions=['inspect',...(local?['edit','submit-guild']:[])],reported=Boolean(quest.publication);
+  return`<section class="cil-map"><header class="cil-map-head"><div><small>GUILD QUEST MAP</small><h2>${esc(quest.title)}</h2><p>Learning, building, resources, and agreements can advance together.</p></div><button type="button" class="cil-up" data-screen="2" aria-label="Back to Quest level">↑ Quests</button></header>${globalThis.CivweaveQuestPathwayMapV1?.render?.({...quest.plan,state:quest.state},{actions,reported,scope:reported?'Shared Guild Quest snapshot':'Saved Guild Quest'})||'<p>The map is unavailable in this package. Reopen the app to load it.</p>'}${selectedMapDetails(quest)}<footer><span>${reported?'This map is a member-reported snapshot. Proof is not included in this publication.':"Progress reflects this saved Quest."}</span></footer></section>`;
+}
+function mapAction(detail,event){
+  const quest=activeQuests()[state.questIndex]||activeQuests()[0];if(!quest||quest.plan?.id!==detail.questId)return;
+  if(detail.action==='inspect'){
+    const path=arr(quest.plan.paths)[detail.pathIndex];if(!path||String(path.id||'')!==detail.pathId)return;
+    state.mapSelection={questId:detail.questId,pathIndex:detail.pathIndex,stepIndex:detail.stepIndex};renderSurface();const node=document.querySelector('[data-quest-map-selection]');node?.focus({preventScroll:true});node?.scrollIntoView?.({block:'nearest'});return;
+  }
+  if(detail.action==='submit-guild')return openSubmission(detail.questId);
+  if(detail.action==='edit'){
+    let owner=globalThis.CivweaveSharedReviewSurfaceV234;try{if(!owner&&parent!==globalThis&&parent.location.origin===location.origin&&parent.document.getElementById('cw-persistent-system-stage')?.contentWindow===globalThis)owner=parent.CivweaveSharedReviewSurfaceV234}catch{}
+    return owner?.handleMapAction?.(detail,{source:event.target});
+  }
 }
 function screenControls(){const labels=[['1','Guilds'],['2','Quests'],['3','Quest Map']];return`<nav class="cil-level-indicator" aria-label="Guild Quest hierarchy">${labels.map(([num,label],i)=>{const screen=i+1,disabled=screen===2?!activeGuild():screen===3?!activeQuests().length:false;return`${i?'<span aria-hidden="true">›</span>':''}<button type="button" data-screen="${screen}" class="${state.screen===screen?'is-active':''}" ${disabled?'disabled':''}><i>${num}</i>${label}</button>`}).join('')}</nav>`}
 function surfaceHtml(){
@@ -345,7 +372,7 @@ function surfaceHtml(){
 
 function hideLegacy(shell,hidden){for(const sel of ['.rc-hero','.rc-active','.rc-dashboard','.rc-room-nav','.rc-workspace'])for(const node of shell.querySelectorAll(sel))node.hidden=hidden}
 function addReturnLink(){const shell=document.querySelector('#rc-app .rc-shell');if(!shell||!isCivweave())return;let link=shell.querySelector('[data-cil-return]');if(shouldOwnSurface()){link?.remove();return}if(link)return;const top=shell.querySelector('.rc-top');if(!top)return;link=document.createElement('a');link.href='/app/civweave-guild-quest-v1.html';link.className='cil-return-link';link.dataset.cilReturn='1';link.textContent='Guild Quest Tracker';top.append(link)}
-function renderSurface(){if(state.rendering)return;state.rendering=true;try{const shell=document.querySelector('#rc-app .rc-shell');if(!shell)return;state.shell=shell;addReturnLink();const existing=document.getElementById(ROOT_ID);if(!shouldOwnSurface()){existing?.remove();hideLegacy(shell,false);return}hideLegacy(shell,true);if(!state.guilds.length)state.guilds=discoveredGuilds();const markup=surfaceHtml();if(existing)existing.outerHTML=markup;else shell.querySelector('.rc-top')?.insertAdjacentHTML('afterend',markup)}finally{state.rendering=false}}
+function renderSurface(){if(state.rendering)return;state.rendering=true;try{const shell=document.querySelector('#rc-app .rc-shell');if(!shell)return;state.shell=shell;addReturnLink();const existing=document.getElementById(ROOT_ID);if(!shouldOwnSurface()){existing?.remove();hideLegacy(shell,false);return}hideLegacy(shell,true);if(!state.guilds.length)state.guilds=discoveredGuilds();const markup=surfaceHtml();if(existing)existing.outerHTML=markup;else shell.querySelector('.rc-top')?.insertAdjacentHTML('afterend',markup);globalThis.CivweaveQuestPathwayMapV1?.bind?.(document.getElementById(ROOT_ID),mapAction)}finally{state.rendering=false}}
 function activeGuild(){return state.guilds[state.guildIndex]||state.guilds[0]||null}
 function activeQuests(){return questsFor(activeGuild())}
 function rotate(kind,direction){if(kind==='guild'){const count=state.guilds.length;if(!count)return;setIndex('guild',(state.guildIndex+direction+count)%count)}else{const quests=activeQuests(),count=quests.length;if(!count)return;state.questIndex=(state.questIndex+direction+count)%count;renderSurface()}}
@@ -371,7 +398,7 @@ function onKey(event){const node=event.target.closest?.('[data-carousel]');if(!n
 function onWheel(event){const node=event.target.closest?.('[data-carousel]');if(!node||state.wheelLock||Math.abs(event.deltaX)+Math.abs(event.deltaY)<8)return;event.preventDefault();state.wheelLock=true;rotate(node.dataset.carousel,(event.deltaX||event.deltaY)>0?1:-1);setTimeout(()=>{state.wheelLock=false},180)}
 function onTouchStart(event){const node=event.target.closest?.('[data-carousel]');if(!node||!event.touches?.length)return;state.touchStart={kind:node.dataset.carousel,x:event.touches[0].clientX,y:event.touches[0].clientY}}
 function onTouchEnd(event){if(!state.touchStart||!event.changedTouches?.length)return;const touch=event.changedTouches[0],dx=touch.clientX-state.touchStart.x,dy=touch.clientY-state.touchStart.y,kind=state.touchStart.kind;state.touchStart=null;if(Math.abs(dx)<36||Math.abs(dx)<Math.abs(dy))return;rotate(kind,dx<0?1:-1)}
-function refreshFromStorage(){state.guilds=discoveredGuilds();state.guildIndex=clamp(state.guildIndex,0,Math.max(0,state.guilds.length-1));state.questIndex=0;state.votes=localVotes();renderSurface();refreshQuestBoard()}
+function refreshFromStorage(){state.guilds=discoveredGuilds();state.guildIndex=clamp(state.guildIndex,0,Math.max(0,state.guilds.length-1));state.questIndex=0;state.votes=localVotes();renderSurface();refreshQuestBoard();resumeRequestedSubmission()}
 function onStorage(event){if([INTENTIONS_KEY,DISCOVERY_KEY,MESH_KEY,DIRECTORY_CACHE_KEY,HOST_SELECTION_KEY,HOUSE_KEY,HOUSE_VOTE_KEY,VOTE_INDEX_KEY].includes(event.key))refreshFromStorage()}
 function onProgressChanged(){state.guilds=discoveredGuilds();renderSurface()}
 function onDirectoryChanged(){state.guilds=discoveredGuilds();renderSurface()}
@@ -384,7 +411,8 @@ function boot(){
   addEventListener('online',()=>refreshQuestBoard(activeGuild(),{force:true}));
   renderSurface();refreshVotes();refreshDirectory();refreshQuestBoard();
   Promise.resolve(questClient()?.restoreSelected()).then(()=>refreshQuestBoard()).catch(()=>{});
-  const api=Object.freeze({version:VERSION,houses:HOUSES,paths:PATHS,tierColors:TIER_COLORS,refresh(){refreshFromStorage();refreshVotes();refreshDirectory()},houseForGuild:g=>houseFor(g),houseForHub:g=>houseFor(g),requestHouseVote,openGuilds(){state.screen=1;renderSurface()},openQuests(){if(activeGuild()){state.screen=2;renderSurface()}},openQuestMap(){if(activeQuests().length){state.screen=3;renderSurface()}}});
+  const api=Object.freeze({version:VERSION,houses:HOUSES,paths:PATHS,tierColors:TIER_COLORS,refresh(){refreshFromStorage();refreshVotes();refreshDirectory()},houseForGuild:g=>houseFor(g),houseForHub:g=>houseFor(g),requestHouseVote,openSubmission,openGuilds(){state.screen=1;renderSurface()},openQuests(){if(activeGuild()){state.screen=2;renderSurface()}},openQuestMap(){if(activeQuests().length){state.screen=3;renderSurface()}}});
+  const requested=String(query().get('submitQuest')||'');if(requested)openSubmission(requested);
   globalThis.CivweaveCerbanimoIntentionLandscapeV1=api;globalThis.CivweaveGuildQuestTrackerV1=api;
   try{dispatchEvent(new CustomEvent('civweave:guild-quest-tracker-ready',{detail:{version:VERSION,hierarchy:['guild','quest','quest-map'],houses:HOUSES.map(x=>x.id),paths:Object.keys(PATHS),directoryEndpoint:DIRECTORY_ENDPOINT}}))}catch{}
 }

@@ -71,7 +71,7 @@ importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-c
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.167-local-ai-code-v322-ai-quest-source-authority');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v289-lifecycle-deferred');
 importScripts('/service-worker-core-v208.js?v=1.0.163-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1');
-importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v32-starling-collective');
+importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v33-interwoven-quest-map');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v295-entry-integrity');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
@@ -177,7 +177,7 @@ console.log(JSON.stringify({
   persistentActions:'guilds-map-all-systems-v2-chat-icon',
   iframeShell:true,
   iframeShellRetirement:'v1-purge-and-redirect',
-  shellAssets:'shell-assets-v1-repair-v32-starling-collective',
+  shellAssets:'shell-assets-v1-repair-v33-interwoven-quest-map',
   navigationSafety:'direct-system-pages-v2',
   localAICodeCoherence:'v322-ai-quest-source-authority',
   codeCoherence:'v289-lifecycle-deferred',

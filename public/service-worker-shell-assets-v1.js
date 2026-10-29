@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v32-starling-collective';
-const OPTIONAL=['/app/installer-repair-only-v2.js','/app/starling-collective-v1.js','/app/starling-collective-v1.css','/app/starling-integration-v1.js','/app/guild-starling-client-v1.js','/app/assets/ai/lari-review-sprites-v1.png','/app/assets/ai/kamiya-review-sprites-v1.png','/app/shared/guide-outcome-scene-v1.js','/app/shared/guide-outcome-scene-v1.css'];
+const REVISION='shell-assets-v1-repair-v33-interwoven-quest-map';
+const OPTIONAL=['/app/shared/quest-pathway-map-v1.js','/app/shared/quest-pathway-map-v1.css','/app/assets/ai/weaveling-review-sprites-v1.png','/app/assets/ai/moss-review-sprites-v1.png','/app/assets/ai/rook-review-sprites-v1.png','/app/assets/ai/merlin-review-sprites-v1.png','/app/installer-repair-only-v2.js','/app/starling-collective-v1.js','/app/starling-collective-v1.css','/app/starling-integration-v1.js','/app/guild-starling-client-v1.js','/app/assets/ai/lari-review-sprites-v1.png','/app/assets/ai/kamiya-review-sprites-v1.png','/app/shared/guide-outcome-scene-v1.js','/app/shared/guide-outcome-scene-v1.css'];
 const REQUIRED_FAMILY_NAV=[
   '/app/persistent-system-shell-v1.html',
   '/app/persistent-system-shell-v1.js',

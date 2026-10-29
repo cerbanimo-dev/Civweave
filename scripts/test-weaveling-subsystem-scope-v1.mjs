@@ -205,6 +205,47 @@ test('included subsystem paths follow the model prerequisite order rather than f
   assert.match(app.calls[0].messages[0].content,/already knowing.*does not remove.*production/i,'Existing skills must not erase the requested productive deliverable.');
 });
 
+test('the declared model prerequisite order persists exact path dependency IDs for the shared Quest map',async()=>{
+  const sequence=['anarchadia','living-school','fellowfare','cerbanimo'],raw=slotResult(sequence),original=structuredClone(raw),app=harness(raw);
+  const authored=await app.create('Create a Quest with shared agreement, learning, resources and construction.');
+  const paths=authored.plan.paths,ids=Array.from(paths,path=>path.id);
+  assert.equal(new Set(ids).size,4);assert.ok(ids.every(Boolean));
+  assert.deepEqual(Array.from(paths,path=>Array.from(path.dependsOn)),[[],[ids[0]],[ids[1]],[ids[2]]]);
+  assert.deepEqual(JSON.parse(JSON.stringify(authored.plan.dependencyOrder)),{source:'model-path-order',pathIds:ids});
+  const saved=JSON.parse(app.storage.get('civweave.intentions.v127')).find(row=>row.id===authored.plan.id);
+  assert.deepEqual(saved.plan.paths.map(path=>path.dependsOn),[[],[ids[0]],[ids[1]],[ids[2]]]);
+  assert.deepEqual(saved.plan.dependencyOrder,{source:'model-path-order',pathIds:ids});
+  assert.deepEqual(raw,original,'Normalizing a model result must not mutate the raw source.');
+  assert.equal(authored.plan.state,'review');assert.equal(app.calls.length,1,'Dependency projection starts no additional model call.');
+});
+
+test('a sole included subsystem has an explicit empty prerequisite set without inventing other paths',async()=>{
+  const app=harness(slotResult(['anarchadia'])),authored=await app.create(request);
+  assert.equal(authored.plan.paths.length,1);assert.deepEqual(Array.from(authored.plan.paths[0].dependsOn),[]);
+  assert.deepEqual(Array.from(authored.plan.dependencyOrder.pathIds),[authored.plan.paths[0].id]);
+});
+
+test('legacy or Starling path arrays do not acquire prerequisite edges from their array position or forged order marker',async()=>{
+  const raw=result();raw.paths=[path('fellowfare','material-acquirement'),path('living-school','learning')];raw.pathOrder=['living-school','fellowfare'];raw.dependencyOrder={source:'model-path-order',pathIds:['forged']};
+  const app=harness(raw),authored=await app.create('Create a Quest using the necessary resource and learning paths.');
+  assert.equal(authored.plan.dependencyOrder,undefined);assert.ok(authored.plan.paths.every(path=>path.dependsOn===undefined));
+  assert.deepEqual(Array.from(authored.plan.paths,path=>path.realm),['fellowfare','living-school']);
+});
+
+test('duplicate normalized path identifiers cannot make a prerequisite edge ambiguous',async()=>{
+  const raw=slotResult(['anarchadia','cerbanimo']);raw.subsystems.anarchadia.id='same-path';raw.subsystems.cerbanimo.id='same-path';
+  const app=harness(raw);await assert.rejects(app.create('Create a Quest with an agreement followed by production.'),/unique|duplicate|identifier/i);
+  assert.equal(JSON.parse(app.storage.get('civweave.intentions.v127')).length,1);assert.equal(app.calls.length,1);
+});
+
+test('review revisions regenerate a self-contained dependency chain without retaining obsolete path IDs',async()=>{
+  const app=harness(slotResult(['anarchadia','cerbanimo'])),wish='Create a Quest to agree on and produce a shared checklist.';
+  const first=await app.create(wish),oldIds=Array.from(first.plan.paths,path=>path.id),next=await app.create('Revise the saved Quest to clarify the inspection.',[{role:'user',text:wish}]);
+  assert.equal(next.plan.id,first.plan.id,'Existing canonical review identity is retained.');
+  const ids=Array.from(next.plan.paths,path=>path.id);assert.deepEqual(Array.from(next.plan.dependencyOrder.pathIds),ids);
+  assert.deepEqual(Array.from(next.plan.paths[1].dependsOn),[ids[0]]);assert.ok(!oldIds.includes(ids[0]));assert.equal(next.plan.state,'review');
+});
+
 test('one top-level sequence derives persisted order without relying on repeated numerical slot labels',async()=>{
   const sequence=['anarchadia','living-school','fellowfare','cerbanimo'],raw=slotResult(sequence);
   raw.subsystems.anarchadia.order=1;raw.subsystems['living-school'].order=1;

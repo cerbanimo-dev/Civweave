@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.20-quest-lineage-routes';
+const VERSION='1.1.21-guild-quest-map-route';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -9,6 +9,7 @@ const ROUTES=Object.freeze({
   fellowfare:['/app/fellowfare-cabinet-v144.html',{cabinet:'1'}],
   anarchadia:['/app/anarchadia-console-v139.html',{cabinet:'1'}]
 });
+const CIVWEAVE_NATIVE_PAGES=Object.freeze({'guild-quests':'/app/civweave-guild-quest-v1.html'});
 const ANARCHADIA_NATIVE_PAGES=Object.freeze({governance:'/app/anarchadia-governance-v145.html',workbench:'/app/services/anarchadia/workbench.html'});
 const ANARCHADIA_GOVERNANCE_ROUTES=new Set(['overview','identity','changes','ballots','federation','execution']);
 const ANARCHADIA_WORKBENCH_ROUTES=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);
@@ -22,7 +23,7 @@ const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.138-generation-timeout';
 const SETTINGS_LOCAL_ROUTE_VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
 const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
-const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.198-universal-artifact-rail';
+const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.200-interwoven-quest-map';
 const UPDATE_COLORS=Object.freeze({
   civweave:'#fff8ff',
   'living-school':'#9cff73',
@@ -47,19 +48,20 @@ let backlightTimers=[];
 function cleanSystem(value){const id=String(value||'').toLowerCase();return SYSTEMS.has(id)?id:'civweave'}
 function parse(value,fallback={}){try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}}
 function nativeOptions(system,options={}){
+  if(system==='civweave'&&options.nativePage==='guild-quests'){const id=String(options.submitQuest||'');return{nativePage:'guild-quests',...(/^[A-Za-z0-9:_-]{1,180}$/.test(id)?{submitQuest:id}:{})}}
   const nativePage=system==='anarchadia'&&Object.prototype.hasOwnProperty.call(ANARCHADIA_NATIVE_PAGES,options.nativePage)?options.nativePage:'';
   if(!nativePage)return{};
   const id=value=>String(value||'').slice(0,240);
   return nativePage==='governance'?{nativePage,nativeRoute:ANARCHADIA_GOVERNANCE_ROUTES.has(options.nativeRoute)?options.nativeRoute:'overview',proposal:id(options.proposal)}:{nativePage,nativeRoute:ANARCHADIA_WORKBENCH_ROUTES.has(options.nativeRoute)?options.nativeRoute:'workbench',weave:id(options.weave),path:id(options.path)};
 }
-function requestedOptions(query){return Object.fromEntries(['feature','nativePage','nativeRoute','proposal','weave','path'].map(key=>[key,query.get(key)||'']))}
+function requestedOptions(query){return Object.fromEntries(['feature','nativePage','nativeRoute','proposal','weave','path','submitQuest'].map(key=>[key,query.get(key)||'']))}
 function lineageOptions(options={}){return Object.fromEntries(['weave','path'].map(key=>[key,String(options[key]||'').slice(0,240)]).filter(([,value])=>value))}
 function contentUrl(system,options={}){
-  system=cleanSystem(system);const {feature=''}=options,native={...lineageOptions(options),...nativeOptions(system,options)},[path,params]=ROUTES[system];const url=new URL(ANARCHADIA_NATIVE_PAGES[native.nativePage]||path,location.origin);
+  system=cleanSystem(system);const {feature=''}=options,native={...lineageOptions(options),...nativeOptions(system,options)},[path,params]=ROUTES[system];const url=new URL((system==='civweave'?CIVWEAVE_NATIVE_PAGES:ANARCHADIA_NATIVE_PAGES)[native.nativePage]||path,location.origin);
   for(const [key,value] of Object.entries(params))url.searchParams.set(key,value);
   url.searchParams.set('installed','1');url.searchParams.set('embed','1');url.searchParams.set('persistentShell','1');
   if(feature)url.searchParams.set('feature',String(feature));
-  for(const key of ['proposal','weave','path'])if(native[key])url.searchParams.set(key,native[key]);
+  for(const key of ['proposal','weave','path','submitQuest'])if(native[key])url.searchParams.set(key,native[key]);
   if(native.nativeRoute)url.hash=native.nativeRoute;
   return url;
 }
@@ -289,7 +291,7 @@ function boot(){
 }
 
 globalThis.CivweavePersistentSystemShellV1=Object.freeze({
-  version:VERSION,navigate,contentUrl,shellUrl,current:()=>current,systems:[...SYSTEMS],anarchadiaNativePages:Object.freeze(Object.keys(ANARCHADIA_NATIVE_PAGES)),persistentNavbar:true,stage:'iframe-content-only',
+  version:VERSION,navigate,contentUrl,shellUrl,current:()=>current,systems:[...SYSTEMS],anarchadiaNativePages:Object.freeze(Object.keys(ANARCHADIA_NATIVE_PAGES)),civweaveNativePages:Object.freeze(Object.keys(CIVWEAVE_NATIVE_PAGES)),persistentNavbar:true,stage:'iframe-content-only',
   chromeOwner:true,sharedQuickFeatures:Object.freeze(['settings','chat']),updateSignal:'platform-backlight-v2',childChatLauncherPolicy:'parent-only',
   openSettings,openGuide,syncBacklights,suppressChildChrome
 });

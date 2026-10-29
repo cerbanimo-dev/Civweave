@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 
 const source=readFileSync(new URL('../public/app/shared-review-surface-v234.js',import.meta.url),'utf8'),presenter=readFileSync(new URL('../public/app/shared/guide-outcome-scene-v1.js',import.meta.url),'utf8');
+const mapSource=readFileSync(new URL('../public/app/shared/quest-pathway-map-v1.js',import.meta.url),'utf8');
 const KEYS={intentions:'civweave.intentions.v127',working:'civweave.working-campus.v1',inbox:'civweave.realm-inbox.v1'};
 function record(){return{id:'quest-review-1',kind:'weave-plan',state:'review',plan:{id:'quest-review-1',title:'Fictional repair plan',state:'review',paths:[{id:'learn',realm:'living-school',title:'Learn the joint',steps:['Inspect a fictional joint'],progress:[]},{id:'make',realm:'cerbanimo',title:'Build the joint',steps:['Check the repair'],progress:[]}]}}}
 async function browser(t,{item=record(),working={unrelated:'preserved'},lud=false}={}){
@@ -14,14 +15,14 @@ async function browser(t,{item=record(),working={unrelated:'preserved'},lud=fals
   const save=win.Storage.prototype.setItem;win.Storage.prototype.setItem=function(key,value){if(key===failKey)throw new Error('Fixture disk full');writes.push(key);return save.call(this,key,value)};
   win.fetch=async()=>{fetches++;throw new Error('Unexpected inference or publication')};
   for(const name of ['civweave:intentions-changed','civweave:review-plan-activated','civweave:review-plan-revision-requested'])win.addEventListener(name,event=>events.push({name,detail:event.detail}));
-  win.eval(presenter);win.eval(source);if(win.document.readyState==='loading')win.dispatchEvent(new win.Event('DOMContentLoaded'));
+  win.eval(presenter);win.eval(mapSource);win.eval(source);if(win.document.readyState==='loading')win.dispatchEvent(new win.Event('DOMContentLoaded'));
   win.CivweaveSharedReviewSurfaceV234.openPlan(item.id);await new Promise(resolve=>setImmediate(resolve));
   return{win,writes,events,api:win.CivweaveSharedReviewSurfaceV234,get fetches(){return fetches},fail:key=>{failKey=key},saved:()=>JSON.parse(win.localStorage.getItem(KEYS.intentions))[0],getWorking:()=>JSON.parse(win.localStorage.getItem(KEYS.working)),scene:()=>win.document.querySelector('[data-guide-outcome]'),button:name=>win.document.querySelector(`[data-review-command="${name}"]`)};
 }
 
 test('opening or mapping a newly generated review draft creates no review decision, scene, inference or writes',async t=>{
   const h=await browser(t);assert.equal(h.scene(),null);assert.equal(h.saved().plan.reviewDecision,undefined);assert.equal(h.writes.length,0);
-  h.win.document.querySelector('[data-map-path]').click();assert.equal(h.writes.length,0);assert.equal(h.fetches,0);assert.equal(h.saved().state,'review');
+  h.win.document.querySelector('[data-quest-map-action="inspect"]').click();assert.equal(h.writes.length,0);assert.equal(h.fetches,0);assert.equal(h.saved().state,'review');
   assert.ok(h.win.document.querySelector('[data-review-revision-form]'),'review needs a required-note request changes control');
 });
 

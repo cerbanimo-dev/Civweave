@@ -5,8 +5,7 @@ on:
     paths:
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-quest-engine-v144.css'
-      - 'public/app/assets/ai/lari-review-sprites-v1.png'
-      - 'public/app/assets/ai/kamiya-review-sprites-v1.png'
+      - 'public/app/assets/ai/*-review-sprites-v1.png'
       - 'scripts/test-cerbanimo-visual-feedback-v1.mjs'
       - 'public/app/shared/guide-outcome-scene-v1.js'
       - 'public/app/shared/guide-outcome-scene-v1.css'
@@ -24,8 +23,7 @@ on:
     paths:
       - 'public/app/cerbanimo-quest-engine-v144.js'
       - 'public/app/cerbanimo-quest-engine-v144.css'
-      - 'public/app/assets/ai/lari-review-sprites-v1.png'
-      - 'public/app/assets/ai/kamiya-review-sprites-v1.png'
+      - 'public/app/assets/ai/*-review-sprites-v1.png'
       - 'scripts/test-cerbanimo-visual-feedback-v1.mjs'
       - 'public/app/shared/guide-outcome-scene-v1.js'
       - 'public/app/shared/guide-outcome-scene-v1.css'

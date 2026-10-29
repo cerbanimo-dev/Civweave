@@ -1,4 +1,4 @@
-import{copy,state,replaceState,persist,readJson,STATE_KEY,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
+import{copy,state,replaceState,persist,readJson,STATE_KEY,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,selectRoutedQuestPath,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
 import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY,learningJourneyPlanById,recoverableChatPlans}from'./living-school-journey-index-v1.mjs?v=multi-plan-library-v2';
 import{render,currentLearningOutcome}from'./living-school-cleanroom-render-v218.mjs?v=quiz-journey-receipts-v2';
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=source-recovery-details-v269-selected-deadline';
@@ -413,6 +413,8 @@ async function generateCurriculumFromChat(input={},options={}){
   }
 }
 
+const questMapQuery=new URLSearchParams(location.search);
+if(questMapQuery.get('weave')&&questMapQuery.get('path'))selectRoutedQuestPath({weaveId:questMapQuery.get('weave'),pathId:questMapQuery.get('path')});
 sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
 renderEnhanced();

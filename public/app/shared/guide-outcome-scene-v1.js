@@ -1,13 +1,14 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveGuideOutcomeSceneV1)return;
-const VERSION='1.1.0';
+const VERSION='1.2.0-new-guide-atlases';
+const SIX_POSE_ATLAS=Object.freeze({grid:'300% 200%',ratio:'1',neutral:'0% 0%',brace:'50% 0%',cast:'100% 0%',dash:'0% 100%',success:'50% 100%',revision:'100% 100%'});
 const GUIDES=Object.freeze({
-  civweave:{name:'Weaveling',sheet:'/Civweave-weaveling-sprites.png',accent:'#8af5d2'},
-  'living-school':{name:'Moss',sheet:'/Living-School-moss-sprites.png',accent:'#aeea57'},
-  cerbanimo:{name:'Kamiya',sheet:'/app/assets/ai/kamiya-review-sprites-v1.png',accent:'#e85dff',grid:'300% 200%',ratio:'1',neutral:'0% 0%',brace:'50% 0%',cast:'100% 0%',dash:'0% 100%',success:'50% 100%',revision:'100% 100%'},
-  fellowfare:{name:'Rook',sheet:'/FellowFare-rook-sprites.png',accent:'#efb452'},
-  anarchadia:{name:'Merlin',sheet:'/Anarchadia-merlin-sprites.png',accent:'#ff3d96'}
+  civweave:{name:'Weaveling',sheet:'/app/assets/ai/weaveling-review-sprites-v1.png',accent:'#8af5d2'},
+  'living-school':{name:'Moss',sheet:'/app/assets/ai/moss-review-sprites-v1.png',accent:'#aeea57'},
+  cerbanimo:{name:'Kamiya',sheet:'/app/assets/ai/kamiya-review-sprites-v1.png',accent:'#e85dff'},
+  fellowfare:{name:'Rook',sheet:'/app/assets/ai/rook-review-sprites-v1.png',accent:'#efb452'},
+  anarchadia:{name:'Merlin',sheet:'/app/assets/ai/merlin-review-sprites-v1.png',accent:'#ff3d96'}
 });
 const LARI='/app/assets/ai/lari-review-sprites-v1.png';
 const fresh=new Set(),bound=new WeakSet();
@@ -16,7 +17,7 @@ const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;
 const reducedMotion=()=>globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
 const ludEnabled=()=>globalThis.CivweaveLudModeV1?.isEnabled?.()===true||document.documentElement?.dataset.civweaveOperatingMode==='lud';
 function markFresh(id){id=clean(id,240);if(!id)return;fresh.add(id);while(fresh.size>64)fresh.delete(fresh.values().next().value)}
-function guideFor(id){if(typeof id!=='string'||!Object.hasOwn(GUIDES,id))return null;return{grid:'500% 400%',ratio:'1.2',neutral:'0% 0%',brace:'50% 66.6667%',cast:'50% 66.6667%',dash:'25% 100%',success:'25% 100%',revision:'50% 66.6667%',...GUIDES[id]}}
+function guideFor(id){if(typeof id!=='string'||!Object.hasOwn(GUIDES,id))return null;return{...SIX_POSE_ATLAS,...GUIDES[id]}}
 function particles(outcome){return`<span class="cw-scene-particles" data-scene-particles="${outcome}" aria-hidden="true">${Array.from({length:12},(_,index)=>{const angle=index*Math.PI/6;return`<i style="--particle-x:${Math.round(Math.cos(angle)*72)}px;--particle-y:${Math.round(Math.sin(angle)*52)}px;--particle-delay:${(index%3)*.045}s;--particle-rotation:${index*37}deg"></i>`}).join('')}</span>`}
 function render(spec={}){
   const guide=guideFor(spec.guide),receiptId=clean(spec.receiptId,240),outcome=spec.outcome;

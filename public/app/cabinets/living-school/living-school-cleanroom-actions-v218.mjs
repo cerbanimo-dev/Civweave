@@ -64,7 +64,7 @@ function applyProjectReceipt(s,raw){
 
 export const actions={
   'apply-path':async target=>{
-    const id=clean(field('pathId',formFor(target)),180),path=availablePaths().find(item=>item.id===id);
+    const id=clean(field('pathId',formFor(target)),400),path=availablePaths().find(item=>item.id===id);
     if(!path)throw new Error('That path is unavailable.');
     const s=state();s.activePathId=id;s.pathContext=path;persist('learning-path-selected',{pathId:id});toast(`Using ${path.title}`);
   },

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.2-anarchadia-quest-path-v266-native-return';
+const VERSION='1.0.3-exact-quest-selection';
 if(globalThis.AnarchadiaQuestPathV266?.version===VERSION)return;
 
 const KEYS={
@@ -40,15 +40,15 @@ function planFromLedger(id){
 }
 function resolveContext(){
   const params=query(),handoff=read(KEYS.activeHandoff,{}),campus=read(KEYS.campus,{});
-  const weaveId=clean(params.get('weave')||handoff?.weaveId||campus?.plan?.id,240);
-  const pathId=clean(params.get('path')||handoff?.pathId,240);
-  let plan=null;
-  if(weaveId)plan=planFromLedger(weaveId);
-  if(!plan&&handoff?.plan?.id)plan=handoff.plan;
-  if(!plan&&campus?.plan?.id)plan=campus.plan;
-  if(!plan||plan.state==='review')return null;
+  const requestedWeave=clean(params.get('weave'),240),requestedPath=clean(params.get('path'),240);
+  const weaveId=requestedWeave||clean(campus?.plan?.id||handoff?.weaveId,240),pathId=requestedPath||(String(handoff?.weaveId||'')===weaveId?clean(handoff?.pathId,240):'');
+  let plan=weaveId?planFromLedger(weaveId):null;
+  if(!plan&&String(campus?.plan?.id||'')===weaveId)plan=campus.plan;
+  if(!plan&&String(handoff?.plan?.id||'')===weaveId)plan=handoff.plan;
+  if(!plan||!['active','completed'].includes(plan.state))return null;
   const paths=list(plan.paths).filter(path=>String(path?.realm||'').toLowerCase()==='anarchadia');
-  let path=paths.find(item=>String(item.id)===pathId)||paths[0]||null;
+  let path=pathId?paths.find(item=>String(item.id)===pathId)||null:paths[0]||null;
+  if(pathId&&!path)return null;
   let synthetic=false;
   if(!path&&plan.governance){
     synthetic=true;

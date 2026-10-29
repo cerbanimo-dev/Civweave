@@ -7,6 +7,14 @@ const clean = (value, max = 180) => typeof value === 'string' ? value.trim().sli
 const list = value => Array.isArray(value) ? value : [];
 const fail = (message, status = 400) => { throw Object.assign(new Error(message), { status }); };
 const identifier = value => { const id = clean(value); if (!id || !/^[A-Za-z0-9:_-]+$/.test(id)) fail('A valid Quest identifier is required.'); return id; };
+function nodeIdentifier(value) { if (value == null || value === '') return ''; if (typeof value !== 'string' || !/^[A-Za-z0-9:_-]{1,180}$/.test(value.trim())) fail('Shared Quest node identifiers must be valid and bounded.'); return value.trim(); }
+function dependencyFields(node) {
+  const key = node && typeof node === 'object' && ['dependsOn', 'dependencies', 'dependencyIds'].find(key => Object.hasOwn(node, key)); if (!key) return {};
+  const raw = node[key], refs = typeof raw === 'string' ? [raw] : raw; if (!Array.isArray(refs) || refs.length > 16) fail('Shared Quest dependencies must contain at most 16 identifiers.');
+  const ids = refs.map(ref => { const id = nodeIdentifier(typeof ref === 'string' ? ref : ref?.id || ref?.taskId); if (!id) fail('A valid dependency identifier is required.'); return id; });
+  if (new Set(ids).size !== ids.length) fail('Shared Quest dependency identifiers must be unique.'); return { dependsOn: ids };
+}
+function uniqueNodes(paths) { const ids = new Set(); for (const path of paths) for (const node of [path, ...path.steps.filter(step => typeof step === 'object')]) if (node.id) { if (ids.has(node.id)) fail('Shared Quest node identifiers must be unique.'); ids.add(node.id); } }
 export const GUILD_QUEST_CORS = Object.freeze({ 'cache-control': 'no-store', 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'authorization, content-type, x-civweave-node-id', 'access-control-max-age': '86400' });
 export const guildQuestJson = (value, status = 200) => Response.json(value, { status, headers: GUILD_QUEST_CORS });
 export const guildQuestError = error => guildQuestJson({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 500);
@@ -23,11 +31,12 @@ export function projectGuildQuest(raw) {
     const sourceSteps = list(path?.steps || path?.tasks);
     if (sourceSteps.length > 64) fail('A shared Quest path may contain at most 64 steps.');
     const indexedSteps = sourceSteps.map((step, index) => ({ index, step: typeof step === 'string' ? clean(step, 2000) : {
-      id: clean(step?.id || step?.taskId), title: clean(step?.title || step?.name || step?.label || step?.description, 2000), description: clean(step?.description, 2000), status: clean(step?.status, 40),
+      id: nodeIdentifier(step?.id || step?.taskId), title: clean(step?.title || step?.name || step?.label || step?.description, 2000), description: clean(step?.description, 2000), status: clean(step?.status, 40), ...dependencyFields(step),
     } })).filter(({ step }) => typeof step === 'string' ? Boolean(step) : Boolean(step.title));
     const steps = indexedSteps.map(({ step }) => step), progressIndices = new Map(indexedSteps.map(({ index }, projectedIndex) => [index, projectedIndex]));
-    return { id: clean(path?.id), type: clean(path?.type, 80), realm: clean(path?.realm || path?.system, 80), title: clean(path?.title, 240), purpose: clean(path?.purpose, 2000), status: clean(path?.status, 40), completionCriteria: clean(path?.completionCriteria, 2000), steps, progress: [...new Set(list(path?.progress).filter(index => Number.isSafeInteger(index) && progressIndices.has(index)).map(index => progressIndices.get(index)))] };
+    return { id: nodeIdentifier(path?.id), type: clean(path?.type, 80), realm: clean(path?.realm || path?.system, 80), title: clean(path?.title, 240), purpose: clean(path?.purpose, 2000), status: clean(path?.status, 40), completionCriteria: clean(path?.completionCriteria, 2000), steps, progress: [...new Set(list(path?.progress).filter(index => Number.isSafeInteger(index) && progressIndices.has(index)).map(index => progressIndices.get(index)))], ...dependencyFields(path) };
   });
+  uniqueNodes(projectedPaths);
   const needs = list(raw.needs || source.needs);
   if (needs.length > 32) fail('A shared Quest may contain at most 32 open needs.');
   return {

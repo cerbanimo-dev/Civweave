@@ -3,6 +3,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { JSDOM } from 'jsdom';
 
+const mapSource=await readFile(new URL('../public/app/shared/quest-pathway-map-v1.js',import.meta.url),'utf8');
 const source = await readFile(new URL('../public/app/shared-review-surface-v234.js', import.meta.url), 'utf8');
 const key = 'civweave.intentions.v127';
 function fixture() {
@@ -23,11 +24,11 @@ async function browser(item = fixture()) {
   win.fetch = async () => { fetches++; throw new Error('Private map must work without a hosted service.'); };
   const set = win.Storage.prototype.setItem;
   win.Storage.prototype.setItem = function (...args) { writes++; return set.apply(this, args); };
-  win.eval(source);
+  win.eval(mapSource);win.eval(source);
   if (win.document.readyState === 'loading') win.dispatchEvent(new win.Event('DOMContentLoaded'));
   win.document.querySelector('[data-gate]').click();
   await new Promise(resolve => setImmediate(resolve));
-  const map = () => win.document.querySelector('[data-private-quest-map]');
+  const map = () => win.document.querySelector('[data-quest-pathway-map]');
   return { win, map, before, get fetches() { return fetches; }, get writes() { return writes; }, close: () => win.close() };
 }
 
@@ -36,10 +37,10 @@ test('the canonical personal review renders a private four-subsystem map without
   try {
     assert.ok(b.map(), 'the active shared review owner must render the personal Quest map');
     for (const [realm, title] of [['living-school', 'Inspect the joint'], ['cerbanimo', 'Assemble the joint'], ['fellowfare', 'Borrow a clamp'], ['anarchadia', 'Review the workshop agreement'], ['unassigned', 'Check the fictional orbit']]) {
-      assert.match(b.map().querySelector(`[data-map-lane="${realm}"]`).textContent, new RegExp(title));
+      assert.match(b.map().querySelector(`[data-quest-map-lane="${realm}"]`).textContent, new RegExp(title));
     }
-    assert.match(b.map().querySelector('[data-map-lane="unassigned"]').textContent, /orbital-systems/);
-    assert.doesNotMatch(b.map().querySelector('[data-map-lane="cerbanimo"]').textContent, /agreement|orbit/);
+    assert.match(b.map().querySelector('[data-quest-map-lane="unassigned"]').textContent, /orbital-systems/);
+    assert.doesNotMatch(b.map().querySelector('[data-quest-map-lane="cerbanimo"]').textContent, /agreement|orbit/);
     assert.equal(b.fetches, 0);
     assert.equal(b.writes, 0);
     assert.equal(b.win.localStorage.getItem(key), b.before);
@@ -49,7 +50,7 @@ test('the canonical personal review renders a private four-subsystem map without
 test('map nodes focus the existing path details without activating, publishing, or editing the plan', async () => {
   const b = await browser();
   try {
-    const node = b.map()?.querySelector('[data-map-step="assemble"]');
+    const node = b.map()?.querySelector('[data-quest-map-step="assemble"] button');
     assert.ok(node, 'map task nodes must be semantic buttons');
     assert.equal(node.tagName, 'BUTTON');
     node.click();
@@ -66,12 +67,12 @@ test('dependency links use only declared references and plan order is labelled w
   const b = await browser(item);
   try {
     assert.ok(b.map());
-    const edge = b.map().querySelector('[data-map-edge-from="inspect"][data-map-edge-to="assemble"]');
+    const edge = b.map().querySelector('[data-quest-map-dependency="inspect"]');
     assert.ok(edge);
     assert.match(edge.textContent, /Inspect the joint/);
     assert.match(b.map().textContent, /Unresolved dependency: missing-source/);
-    assert.equal(b.map().querySelectorAll('[data-map-edge-from]').length, 1, 'adjacent plan items must not be invented as dependency edges');
-    assert.match(b.map().querySelector('[data-map-lane="fellowfare"]').textContent, /Plan order/);
+    assert.equal(b.map().querySelectorAll('[data-dependency-state="complete"]').length, 1, 'adjacent plan items must not be invented as dependency edges');
+    assert.match(b.map().textContent, /Plan order/);
   } finally { b.close(); }
 });
 
@@ -79,10 +80,10 @@ test('saved review and accepted step statuses remain visibly distinct', async ()
   const b = await browser();
   try {
     assert.ok(b.map());
-    assert.match(b.map().querySelector('[data-map-step="inspect"]').textContent, /Accepted/);
-    assert.match(b.map().querySelector('[data-map-step="assemble"]').textContent, /Under review/);
-    assert.equal(b.map().querySelector('[data-map-step="inspect"]').dataset.mapStatus, 'accepted');
-    assert.equal(b.map().querySelector('[data-map-step="assemble"]').dataset.mapStatus, 'review');
+    assert.match(b.map().querySelector('[data-quest-map-step="inspect"]').textContent, /accepted/i);
+    assert.match(b.map().querySelector('[data-quest-map-step="assemble"]').textContent, /Under review/);
+    assert.equal(b.map().querySelector('[data-quest-map-step="inspect"]').dataset.stepStatus, 'accepted');
+    assert.equal(b.map().querySelector('[data-quest-map-step="assemble"]').dataset.stepStatus, 'review');
     assert.doesNotMatch(b.map().textContent, /verified|proof accepted|100%/i);
   } finally { b.close(); }
 });
@@ -93,8 +94,8 @@ test('large and hostile local plans produce a bounded inert map', async () => {
   const b = await browser(item);
   try {
     assert.ok(b.map());
-    assert.ok(b.map().querySelectorAll('[data-map-step]').length <= 96);
-    assert.ok(b.map().querySelectorAll('[data-map-path]').length <= 12);
+    assert.ok(b.map().querySelectorAll('[data-quest-map-step]').length <= 96);
+    assert.ok(b.map().querySelectorAll('[data-quest-map-path]').length <= 12);
     assert.match(b.map().textContent, /Map preview.*12 of 20 paths/i);
     assert.equal(b.map().querySelector('img,script'), null);
     assert.equal(b.win.mapXss, undefined);
@@ -106,11 +107,11 @@ test('the existing explicit activation still owns state changes after map inspec
   const b = await browser();
   try {
     assert.ok(b.map());
-    b.map().querySelector('[data-map-step="assemble"]').click();
+    b.map().querySelector('[data-quest-map-step="assemble"] button').click();
     assert.equal(b.writes, 0);
     b.win.document.querySelector('[data-review-command="activate-plan"]').click();
     assert.equal(JSON.parse(b.win.localStorage.getItem(key))[0].state, 'active');
-    assert.ok(b.win.document.querySelector('[data-private-quest-map]'), 'the active Quest stays visible with its recorded plan decision');
+    assert.ok(b.win.document.querySelector('[data-quest-pathway-map]'), 'the active Quest stays visible with its recorded plan decision');
     assert.equal(JSON.parse(b.win.localStorage.getItem(key))[0].plan.reviewDecision.decision, 'accepted');
     assert.match(b.win.document.querySelector('#cw-shared-review-surface-v234').textContent, /Quest plan activated/);
     assert.equal(b.win.document.querySelector('[data-review-command="activate-plan"]'), null, 'the recorded active plan cannot be activated again from review');
@@ -123,7 +124,7 @@ test('the existing separate Anarchadia governance layer is mapped and focuses it
   item.plan.governance = { title: 'Workshop agreement', purpose: 'Agree on the fictional workshop use', agreements: ['Ask before using shared equipment'], reviewQuestion: 'Who must consent?' };
   const b = await browser(item);
   try {
-    const lane = b.map()?.querySelector('[data-map-lane="anarchadia"]');
+    const lane = b.map()?.querySelector('[data-quest-map-lane="anarchadia"]');
     assert.match(lane?.textContent || '', /Workshop agreement/);
     lane.querySelector('button').click();
     assert.equal(b.win.document.activeElement, b.win.document.querySelector('[data-review-governance]'));
