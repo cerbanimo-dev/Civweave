@@ -1,0 +1,63 @@
+name: Build Civweave Starling staging APK
+
+on:
+  pull_request:
+    branches: [staging]
+    paths:
+      - "native/android/civweave-staging-shell-v1/**"
+      - "native/android/civweave-starling-v1/**"
+      - ".github/workflows/build-starling-staging-apk.yml"
+  push:
+    branches: [staging]
+    paths:
+      - "native/android/civweave-staging-shell-v1/**"
+      - "native/android/civweave-starling-v1/**"
+      - ".github/workflows/build-starling-staging-apk.yml"
+  workflow_dispatch:
+
+jobs:
+  build-debug-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: native/android/civweave-staging-shell-v1
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android 35 SDK
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
+      - name: Set up Gradle 8.10.2
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Build debug APK (separate test package)
+        run: gradle --no-daemon :app:assembleDebug --stacktrace
+      - name: Verify test package, dex and APK signing
+        run: |
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          test -s "$APK"
+          unzip -l "$APK" | grep -q classes.dex
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          sha256sum "$APK" | tee starling-apk-sha256.txt
+          cp "$APK" civweave-starling-staging-debug.apk
+      - name: Upload installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: civweave-starling-staging-debug-apk
+          path: |
+            native/android/civweave-staging-shell-v1/civweave-starling-staging-debug.apk
+            native/android/civweave-staging-shell-v1/starling-apk-sha256.txt
+          if-no-files-found: error
+          retention-days: 30
