@@ -141,6 +141,8 @@ jobs:
         run: node scripts/test-creator-provenance-tribunal-v1.mjs
       - name: Verify device-endorsed Guild tribunal and signed review receipt
         run: node scripts/test-cloudflare-creator-provenance-human-endorsement-v1.mjs
+      - name: Verify document naming and persistence
+        run: node --test scripts/test-creator-document-naming-v1.mjs
       - name: Verify Creator audit client privacy
         run: node scripts/test-creator-audit-client-v1.mjs
       - name: Verify public Creator provenance CORS/auth bridge

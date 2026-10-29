@@ -1,0 +1,24 @@
+name: Starling Collective contract
+on:
+  pull_request:
+    paths: ['public/app/**', 'public/extensions/civweave-proof-progress-v158.js', 'cloudflare/mobile-guild-edge/src/**', 'cloudflare/node-cloud/src/**', 'scripts/test-starling-*.mjs', 'scripts/test-guild-starling-*.mjs', '.github/workflows/verify-starling-collective-v1.yml']
+  push:
+    branches: [staging, main]
+    paths: ['public/app/**', 'public/extensions/civweave-proof-progress-v158.js', 'cloudflare/mobile-guild-edge/src/**', 'cloudflare/node-cloud/src/**', 'scripts/test-starling-*.mjs', 'scripts/test-guild-starling-*.mjs', '.github/workflows/verify-starling-collective-v1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  starling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node --test --test-concurrency=2 scripts/test-starling-*.mjs scripts/test-guild-starling-*.mjs
+      - run: node --test scripts/test-guild-quest-publications-v1.mjs scripts/test-guild-quest-publication-ui-v1.mjs scripts/test-weave-native-proof-progress-v1.mjs
+      - run: node scripts/build-service-worker-v211.mjs --check

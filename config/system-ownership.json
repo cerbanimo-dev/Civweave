@@ -333,32 +333,41 @@
       ]
     },
     "starling-collective": {
-      "capability": "Optional Guild-scoped Starling persona collective, deliberation and AI task-offer policy",
-      "owner": "public/app/shared/starling-collective-v1.mjs",
-      "schema": "civweave.starling-collective.v1",
-      "contract": "docs/contracts/starling-collective-guild-service-v1.md",
-      "stage": "manual-and-browser-scheduled-local-inference-no-headless-worker-or-canonical-task-claim",
+      "capability": "Bounded visible Collective planning and explicitly confirmed Guild proposals",
+      "owner": "public/app/starling-collective-v1.js",
+      "canonicalApi": "globalThis.CivweaveStarlingCollectiveV1",
+      "integrationOwner": "public/app/starling-integration-v1.js",
+      "guildAuthority": "cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs",
+      "guildTransport": "cloudflare/mobile-guild-edge/src/guild-starling-transport-v1.mjs",
+      "browserTransport": "public/app/guild-starling-client-v1.js",
+      "route": "/api/node/starling",
+      "modelOwner": "public/app/shared/civweave-model-runtime.js",
+      "questOwner": "public/app/intention-planner-v141.js",
+      "completionOwner": "public/extensions/civweave-proof-progress-v158.js",
+      "allowedCallers": [
+        "public/app/persistent-shell-actions-v1.js",
+        "public/app/starling-integration-v1.js"
+      ],
       "rules": [
-        "No parallel Guild, Quest, task, learning, governance, reward, fulfillment or inference ledger; always use existing canonical owners.",
-        "Guildkeeper founding Intention remains provisional until superseded by validated human-member Guild ratification; agents never count as Guild voting members.",
-        "Only explicitly permissioned human-authored Guild tasks may be offered or considered for authorized AI auto-claim; this owner does not perform claims.",
-        "Local use does not spend hosted credits; hosted Collective generation has daily tier limits inside the existing node AI neuron budget.",
-        "Browser scheduler may draft Guild Quest assistance offers only; native task claims and Cerbanimo completions require a future authenticated transactional API.",
-        "The Guildkeeper must explicitly opt in and may disable; all local automatic inference is bounded and leaves signed interruption receipts."
+        "One user-started sequential planning batch with visible public role contributions and no always-on inference.",
+        "At most three reserved, proposed, blocked or published AI Quest lines per device and shared Guild.",
+        "At most six new lines per rolling 24 hours; failure, cancellation and abandonment do not refund history.",
+        "Model dialogue never completes work, votes, grants roles, activates a Quest or posts to a Guild.",
+        "Shared posting requires the exact saved proposal revision, hash and explicit human confirmation.",
+        "Passport claims require consent and distinguish declared skills, authenticated residents and verified capability.",
+        "Mesh discovery and billing seats never grant Guildmaster authority.",
+        "Shared completion requires trusted canonical proof; local model claims cannot attest it.",
+        "Guild local worker opt-in permits bounded signed persona turns and assistance offers, not claims, completed Quest beats, Guild votes or hosted spending.",
+        "The worker and the existing Collective planning workbench share the browser Starling inference lock."
       ],
-      "nodeAdapter": "lib/starling-collective-v1.mjs",
+      "localPersonaCatalog": "public/app/shared/starling-collective-v1.mjs",
+      "cooperativeWorker": "public/app/shared/starling-collective-worker-v1.mjs",
+      "signedTurnService": "public/app/shared/starling-collective-turns-v1.mjs",
+      "loungePresenter": "public/app/starling-lounge-v1.mjs",
+      "foundingIntentionCapture": "public/app/mobile-guild-create-v1.mjs",
       "toolPolicy": "public/app/shared/starling-collective-tools-v1.mjs",
-      "localToolAdapters": [
-        "tools/starling/aider-adapter-v1.mjs"
-      ],
-      "lounge": "public/app/starling-lounge-v1.mjs",
-      "maturity": "staging-opt-in-local-autopilot-signed-quest-offers-unclaimed",
-      "turnExecutionOwner": "public/app/shared/starling-collective-turns-v1.mjs",
-      "turnStorageOwner": "public/app/local-object-mesh-v146.js",
-      "inferenceOwner": "public/app/shared/civweave-model-runtime.js",
-      "testWorkflow": ".github/workflows/starling-native-contract.yml",
-      "workerOwner": "public/app/shared/starling-collective-worker-v1.mjs",
-      "executionPolicy": "guildkeeper-explicit-local-autopilot-while-lounge-open-signed-receipts"
+      "aiderAdapter": "tools/starling/aider-adapter-v1.mjs",
+      "cooperativeWorkerContract": "docs/contracts/starling-collective-guild-service-v1.md"
     }
   }
 }

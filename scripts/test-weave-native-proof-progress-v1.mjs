@@ -108,3 +108,14 @@ test('existing exact realm linkage continues to admit recorded learning, resourc
   for(const path of app.read(keys.campus).plan.paths.filter(path=>path.realm!=='cerbanimo')){assert.deepEqual(path.progress,[0]);assert.equal(path.status,'completed');}
   assert.equal(app.read(keys.campus).plan.state,'active','The incomplete native work path still gates the whole Quest.');
 });
+
+test('native path resolution prefers the current selected Quest over an old handoff and respects explicit exact IDs',()=>{
+  const app=fixture(),selected=app.read(keys.campus).plan,old={...structuredClone(selected),id:'old-quest',state:'active'};
+  app.storage.set('civweave.active-handoff.v1',JSON.stringify({weaveId:old.id,plan:old}));
+  const owner=app.context.CivweaveCerbanimoQuestPathV266;
+  assert.equal(owner.resolveContext().plan.id,selected.id,'An old active handoff cannot silently replace the selected Quest.');
+  app.context.location.search='?weave=missing-quest';assert.equal(owner.resolveContext(),null);
+  app.context.location.search=`?weave=${selected.id}&path=missing-path`;assert.equal(owner.resolveContext(),null,'An explicit invalid path cannot fall back to another path.');
+  app.context.location.search=`?weave=${selected.id}&path=${selected.paths[0].id}`;assert.equal(owner.resolveContext().path.id,selected.paths[0].id);
+  selected.state='abandoned';app.storage.set(keys.campus,JSON.stringify({stage:'active',plan:selected}));app.context.location.search='';assert.equal(owner.resolveContext(),null,'A stopped Quest cannot spawn new native work.');
+});

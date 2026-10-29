@@ -143,8 +143,6 @@ Anarchadia's Governance and Workbench are native content destinations within the
 
 FellowFare's active entry renders its marketplace in the same document. `fellowfare-cabinet-v144.js` delegates commands and reviewed imports directly to the existing `services/fellowfare/cabinet-bridge.js` API. `services/fellowfare/marketplace-v2.js` owns marketplace state, order persistence, rendering, and current-tab state; `marketplace-v2-capabilities.js` delegates order mutations to it. The retained iframe boundary uses `postMessage` only with matching origin and parent sender checks. The native host does not emulate an iframe's `contentWindow` or `contentDocument`.
 
-The optional Starling Guild Collective policy is owned by `public/app/shared/starling-collective-v1.mjs` (re-exported to Node by `lib/starling-collective-v1.mjs`) under `docs/contracts/starling-collective-guild-service-v1.md`. Mobile Guild founding records its provisional Intention in `public/app/mobile-guild-create-v1.mjs`; the read-only Guild Lounge is `public/app/starling-lounge-v1.mjs`; shared tool policy is `public/app/shared/starling-collective-tools-v1.mjs`, with a non-registered local Aider adapter in `tools/starling/`. This is not a replacement for Guild/Quest/governance owners; the Collective runtime is not yet activated.
-
 ## Shared capability landmarks
 
 The canonical ownership list lives in `docs/architecture/systems-of-practice.md` and `config/system-ownership.json`. Current high-value landmarks include:
@@ -161,6 +159,7 @@ The canonical ownership list lives in `docs/architecture/systems-of-practice.md`
 | Local AI bootstrap | `public/app/local-ai/bootstrap-v266.js` |
 | Private messaging | `public/app/civweave-private-messaging-v1.js` |
 | Offline object mesh | `public/app/local-object-mesh-v146.js` |
+| Starling Collective | `public/app/starling-collective-v1.js`; `starling-integration-v1.js` exposes the shared rail action. Guild limits and confirmed proposals use `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`; optional Guild-local worker, signed turns, and Lounge are subordinate capabilities at `public/app/shared/starling-collective-worker-v1.mjs`, `public/app/shared/starling-collective-turns-v1.mjs`, and `public/app/starling-lounge-v1.mjs`. |
 | Guild Quest publication | `cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs`; `public/app/guild-quest-client-v1.js` calls it through existing member sessions |
 | Radio | `public/app/system-radio-agent-v233.js` |
 | Review surface | `public/app/shared-review-surface-v234.js`; receipt presentation helper `public/app/shared/guide-outcome-scene-v1.js` and matching CSS |

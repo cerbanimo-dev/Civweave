@@ -112,10 +112,6 @@ Realm code may call the canonical API or host a presentation surface. It may not
 
 The v1 P-256 ECDH + HKDF + AES-GCM envelope is a baseline transport-privacy layer. Do not describe it as a mature Signal-equivalent protocol until forward secrecy, multi-device fanout, key transparency, prekeys/rotation, and verification UX are implemented and reviewed.
 
-## Optional Starling Guild Collective (migration foundation)
-
-`public/app/shared/starling-collective-v1.mjs` (also re-exported through `lib/starling-collective-v1.mjs`) holds the ported Starling persona registry and pure policies for Guildkeeper founding Intention fallback, human-member-only ratification eligibility, task-offer compatibility, and hosted generation preflight. `public/app/shared/starling-collective-tools-v1.mjs` is the optional tool manifest and task-scoped authorization preflight. `public/app/starling-lounge-v1.mjs` is a Guild-scoped view that reads existing Quest publication data, not a new chat or task owner. Its contract is `docs/contracts/starling-collective-guild-service-v1.md`. This is not a second Guild, Quest, governance, membership, wallet, or inference owner. It does not currently start agents, create/claim tasks, execute spending, or publish Guild updates. Future adapters must delegate execution and persistence to existing capability owners.
-
 ## Guild Quest publication
 
 `cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs` owns the portable publication contract. The node-cloud Guild Durable Object and the standalone mobile Guild capacity Durable Object use that same contract with their existing authenticated member authorities and storage. The standalone template keeps this source inside its deploy directory; node-cloud imports it directly.
@@ -159,3 +155,13 @@ Canonical assessment and reference policy: public/app/survival/survival-mode.mjs
 
 
 Living School places module quiz receipt scenes next to the active assessment, using its saved attempt ID, score, pass target and criterion feedback. A full Learning Journey completion receipt requires the current unique module set, passed assessments, matching accepted practicum, matching final pass and issued credential. Partial, fallback, demo, foreign and inconsistent records cannot produce that completed-journey receipt. The controller corroborates action-specific receipts against saved state before marking them fresh; storage failure restores the saved state and displays the failure.
+
+## Starling Collective
+
+The optional Collective capability belongs to `public/app/starling-collective-v1.js`, exposed through the shared rail by `starling-integration-v1.js`. It uses the existing selected model runtime for a user-started, sequential public planning session. Its activity journal shows actual role contributions, errors and model provenance; it is not a second guide chat or a background inference loop. Quests import through the canonical intention planner for review, and proof progress remains authoritative.
+
+The portable Guild authority is `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`, with authenticated browser transport `guild-starling-client-v1.js`. Slot reservation and rolling creation limits are transactional. Publication delegates to the existing Guild Quest owner only after exact preview confirmation. Passport sharing is optional and explicitly distinguishes device-declared skills from verified member identity; missing roster coverage stays unknown. Founder authority and human-only Intention voting are not inferred from billing seats or AI consensus.
+
+### Guild local worker extension
+
+The canonical Starling planner remains `public/app/starling-collective-v1.js` and its authenticated Guild authority remains `cloudflare/mobile-guild-edge/src/guild-starling-collective-v1.mjs`. The optional Guildkeeper-controlled cooperative worker at `public/app/shared/starling-collective-worker-v1.mjs` is an extension using the existing signed mesh and model runtime. It shares Starling's inference Web Lock and creates signed, reviewable local persona turns and Guild Quest assistance offers. `public/app/starling-lounge-v1.mjs` presents those reports, not a second chat data owner. No Quest task claims, work completion, Guild member votes or hosted spending are authorized by this extension. Details: `docs/contracts/starling-collective-guild-service-v1.md`.

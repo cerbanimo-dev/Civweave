@@ -60,7 +60,7 @@ importScripts('/service-worker-settings-v325-override.js?v=settings-v325-direct-
 // Staging takeover for the current Gemma phone stack. It runs before historical local-AI coherence so retired Q4 presentation scripts cannot reclaim Settings after a successful LiteRT import.
 importScripts('/service-worker-gemma4-current-phone-v1.js?v=gemma4-current-phone-worker-v5-qwen-internal');
 importScripts('/service-worker-release-generation-v1.js?v=release-generation-boundary-v9-navigation-response-stream');
-importScripts('/app/system-routes-v227.js?v=1.0.167-five-system-route-contract-v230-shared-navbar-owner');
+importScripts('/app/system-routes-v227.js?v=1.0.168-five-system-route-contract-v230-shared-navbar-owner');
 importScripts('/service-worker-canonical-navbar-v1.js?v=canonical-navbar-cache-first-v11-current-rail');
 importScripts('/service-worker-legacy-home-redirect-v1.js?v=legacy-home-redirect-v1-v156-to-v440');
 importScripts('/service-worker-canonical-home-v1.js?v=canonical-home-v1-persistent-shell-r2');
@@ -71,7 +71,7 @@ importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-c
 importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.167-local-ai-code-v322-ai-quest-source-authority');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v289-lifecycle-deferred');
 importScripts('/service-worker-core-v208.js?v=1.0.163-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-guild-quest-browser-v430-install-only-pwa-v1');
-importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v31-visible-civic-map');
+importScripts('/service-worker-shell-assets-v1.js?v=shell-assets-v1-repair-v32-starling-collective');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v295-entry-integrity');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
@@ -177,7 +177,7 @@ console.log(JSON.stringify({
   persistentActions:'guilds-map-all-systems-v2-chat-icon',
   iframeShell:true,
   iframeShellRetirement:'v1-purge-and-redirect',
-  shellAssets:'shell-assets-v1-repair-v31-visible-civic-map',
+  shellAssets:'shell-assets-v1-repair-v32-starling-collective',
   navigationSafety:'direct-system-pages-v2',
   localAICodeCoherence:'v322-ai-quest-source-authority',
   codeCoherence:'v289-lifecycle-deferred',

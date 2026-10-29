@@ -3,7 +3,7 @@
 const VERSION='1.0.10-anarchadia-runtime-stability-v159-governance-tabs';
 if(globalThis.AnarchadiaRuntimeStabilityV159?.version===VERSION)return;
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
-const LOADER_SRC='/app/family-ai-loader-v105.js?v=headless-canonical-r1';
+const LOADER_SRC='/app/family-ai-loader-v105.js?v=1.0.157-explicit-value-review';
 const QUEST_KEYS={campus:'civweave.working-campus.v1',intentions:'civweave.intentions.v127',inbox:'civweave.realm-inbox.v1',handoff:'civweave.active-handoff.v1'};
 const GOVERNANCE_VIEWS=new Set(['overview','identity','changes','ballots','federation','execution']);
 let loaderPromise=null;

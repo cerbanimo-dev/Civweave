@@ -39,7 +39,7 @@ function harness() {
     CivweaveResponseRouterV347: { classify: async () => ({ networkRequired: false }) },
     CivweaveBasicValueV1: {}, CivweaveEconomicPolicyV1: {},
     CivweaveBasicValueModelV1: {}, CivweaveBasicValueReviewV1: {},
-    CivweaveBasicValueSystemsV1: { eventDriven: true },
+    CivweaveBasicValueSystemsV1: { eventDriven: true, explicitSubjectDemand: true },
     CivweaveIntentionUI: {}, CivweaveLocalMeshV146: {},
     CivweaveCoreLoopV152: {}, CivweaveValidationCloudOptInV1: {},
     CivweaveWeavelingMemoryV191: {
