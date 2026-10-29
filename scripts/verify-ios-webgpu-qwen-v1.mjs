@@ -6,6 +6,8 @@ const source=readFileSync('public/app/local-ai/ios-webgpu-qwen-v1.js','utf8');
 const settings=readFileSync('public/app/settings-gateway-v317.js','utf8');
 const runtime=readFileSync('public/app/shared/civweave-model-runtime.js','utf8');
 const campus=readFileSync('public/app/working-campus-v440.html','utf8');
+const standalone=readFileSync('public/app/ios-webgpu-qwen-test-v1.html','utf8');
+const downloads=readFileSync('public/app/settings-local-models-direct-v325.js','utf8');
 new Function(settings);new Function(runtime);
 for(const id of ['qwen35-08b-onnx-webgpu','qwen35-2b-onnx-webgpu','qwen35-4b-onnx-webgpu'])
   assert.ok(source.includes(id),'missing iOS WebGPU model choice: '+id);
@@ -23,6 +25,11 @@ assert.match(runtime,/return\{text:run\.text,model:run\.model,streamed:run\.stre
 assert.match(runtime,/networkInference:false/);
 assert.match(runtime,/config\.localApiFlavor\?\{localApiFlavor:config\.localApiFlavor,stream:config\.stream\}/);
 assert.match(campus,/settings-gateway-v317\.js\?v=1\.0\.139-ios-webgpu-qwen35/);
+assert.match(standalone,/Qwen 3\.5 0\.8B/);
+assert.match(standalone,/from '\/app\/local-ai\/ios-webgpu-qwen-v1\.js\?v=/);
+assert.match(standalone,/Test streamed tokens/);
+assert.match(downloads,/data-direct-open-ios-webgpu/);
+assert.match(downloads,/safariWebGPUMarkup/);
 const actualImport='import(TRANSFORMERS)';
 assert.equal(source.split(actualImport).length,3,'mock exactly two SDK imports for an isolated regression');
 const instrumented=source.replaceAll(actualImport,'Promise.resolve(globalThis.__civweaveMockHF)');
