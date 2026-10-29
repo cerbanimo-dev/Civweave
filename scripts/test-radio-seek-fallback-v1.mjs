@@ -16,7 +16,7 @@ async function fixture({networkSeekable=false,gated=false,corrupt=false,oversize
   w.URL.createObjectURL=blob=>{const url=`blob:qa-track-${created.length+1}`;created.push({url,blob});return url};w.URL.revokeObjectURL=url=>revoked.push(url);
   w.caches={open:async()=>({match:async()=>null,put:async()=>{writes++},delete:async()=>true})};
   w.fetch=async(url,options={})=>{
-    if(String(url).includes('catalog.json'))return Response.json({records:[track('one'),track('two')]});
+    if(String(url).includes('lazy-manifest.json'))return Response.json({schema:'civweave.open-music-lazy-manifest.v1',entries:[]});if(String(url).includes('catalog.json'))return Response.json({records:[track('one'),track('two')]});
     fetched.push({url:String(url),options});await gate;
     return new Response(oversize?new Uint8Array([73,68,51,4,5]):corrupt?new Uint8Array([73,68,51,5]):bytes,{headers:{'content-type':'audio/mpeg'}});
   };
