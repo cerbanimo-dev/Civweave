@@ -334,8 +334,9 @@ async function toggleWorker(){
 }
 
 const hostPreference=guildId=>'civweave.starling.execution-host.v1:'+guildId;
-function selectedFoundingIntention(){
-  const guild=state.guild,founder=globalThis.CivweaveMobileGuildCreateV1?.mobileGuildStatus?.();
+async function selectedFoundingIntention(){
+  const mobile=await import('./mobile-guild-create-v1.mjs');
+  const guild=state.guild,founder=mobile.mobileGuildStatus();
   // Use the existing Guild authoring record, not a model-written authority
   // or an invented Guildkeeper vote.
   if(founder?.guildId!==guild?.id||!founder?.foundingIntention?.text)
@@ -385,7 +386,7 @@ async function submitHostDraft(){
   if(state.hostBusy||!state.hostTransport||!state.guild)return;
   state.hostBusy=true;render();
   try{
-    const intention=selectedFoundingIntention(),guildId=state.guild.id,model='qwen35-4b-native';
+    const intention=await selectedFoundingIntention(),guildId=state.guild.id,model='qwen35-4b-native';
     const job=await state.hostTransport.submit({
       jobId:crypto.randomUUID().replaceAll('-',''),guildId,personaId:state.speaker,
       model,intention,brief:clean($('#cw-sl-message')?.value,1200),maxTokens:440
@@ -402,7 +403,7 @@ async function setHostAutopilot(enabled){
   const guildId=state.guild.id,kind=state.hostKind;
   try{
     if(enabled){
-      const intention=selectedFoundingIntention();
+      const intention=await selectedFoundingIntention();
       // Disable the old in-browser scheduler before moving this Guild to an
       // independent execution host, preventing two local inference loops.
       const worker=await ensureWorker();
