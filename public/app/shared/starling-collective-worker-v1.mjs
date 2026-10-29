@@ -130,7 +130,7 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
       if(pending){
         const {project,task}=pending;
         const response=await turnService.runOneTurn({
-          guildId:guild,personaId,
+          guildId:guild,personaId,workMode:'task-draft',
           taskPrompt:'Work on one assigned AI drafting task. Guild main goal: '+clean(p.goal,1700)+
           '. Project: '+clean(project.title,180)+'. Your task: '+clean(task.title,220)+
           '. Required TEXT deliverable: '+clean(task.deliverable,800)+
@@ -148,7 +148,7 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
       }
       const policy=autonomousTaskPolicy({siloMode:p.siloMode,verifiedHumanSkills:typeof readVerifiedHumanSkills==='function'?await readVerifiedHumanSkills(guild):[]});
       const request=await turnService.runOneTurn({
-        guildId:guild,personaId,
+        guildId:guild,personaId,workMode:'project',
         taskPrompt:'Create ONE NEW concrete, independently useful project based on the ongoing Guild main goal: '+clean(p.goal,2100)+
           '. Existing projects: '+board.projects.slice(-10).map(x=>x.title).join(' | ')+
           '. Reply ONLY valid compact JSON: {"title":"...","outcome":"tangible text deliverable","tasks":[{"assignee":"ai","kind":"writing","title":"...","deliverable":"Draft article text"}]}. '+
