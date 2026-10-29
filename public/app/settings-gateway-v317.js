@@ -310,7 +310,7 @@ function bind(layer){
     if(!event.target?.open)return;
     const target=form.querySelector('[data-ios-ai-local-setup]');
     if(!target||target.dataset.iosAiLocalMounted==='1')return;
-    void import('/app/local-ai/ios-ai-local-server-setup-v1.js?v=1.0.0-ios-ai-local-openai-sse')
+    void import('/app/local-ai/ios-ai-local-server-setup-v1.js?v=1.0.1-ios-ai-local-openai-sse-stream-timeout')
       .then(()=>{
         const api=globalThis.CivweaveIOSAiLocalSetupV1;
         if(!api?.mount)throw new Error('iOS ai.local setup module did not initialize.');
