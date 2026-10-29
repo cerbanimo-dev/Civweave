@@ -29,7 +29,7 @@ function normalizeTurn(payload,object){
     model:clean(payload.model,200),questId:id(payload.questId)||null,
     signatureHash:clean(object.revisionHash,200),
     signerId:id(object.origin?.nodeId),
-    provenance:'founding-device-signed-self-report',
+    provenance:payload.source==='local-host'?'founding-device-signed-host-draft':'founding-device-signed-self-report',hostBackend:clean(payload.hostBackend,30)||null,
     completionVerified:false
   });
 }
@@ -121,5 +121,45 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
       return Object.freeze({schema:'civweave.starling-collective-round.v1',guildId,completed,total:personas.length,status:'recorded',completionVerified:false});
     }finally{roundBusy=false}
   }
-  return Object.freeze({readTurns,runOneTurn,runRound,isBusy:()=>busy||roundBusy});
+  /**
+   * On explicit Guildkeeper review/import, attach an external local host draft
+   * to the existing signed object-mesh transcript. Host output is NEVER
+   * independent execution evidence or a canonical Quest task result.
+   */
+  async function importHostDraft({guildId,job}={}){
+    const guild=ensureGuildId(guildId),founding=await genesis(guild),owner=founder();
+    if(owner?.guildId!==guild||owner.deviceId!==founding.origin.nodeId||await mesh.deviceId()!==founding.origin.nodeId)
+      throw new Error('Only the Guild founding device may sign an imported local host draft.');
+    const valid=job?.schema==='civweave.starling-host-job.v1'
+      &&job?.guildId===guild
+      &&/^[0-9a-f]{32}$/.test(job.jobId||'')
+      &&STARLING_PERSONAS[job.personaId]
+      &&job.state==='completed'
+      &&['termux','android'].includes(job.backend)
+      &&job.reviewRequired===true&&job.claimVerified===false
+      &&typeof job.text==='string'&&job.text.trim().length>0&&job.text.length<=6000;
+    if(!valid)throw new TypeError('A completed, review-only local host draft for this Guild is required.');
+    const objectId='starling-turn:'+guild+':'+job.jobId;
+    const existing=await mesh.getObject(objectId);
+    if(existing){
+      if(existing.kind!==STARLING_TURN_KIND||existing.payload?.guildId!==guild||existing.payload?.personaId!==job.personaId)
+        throw new Error('Host draft ID collides with a different Guild mesh object.');
+      if((await mesh.validateObject(existing))?.ok!==true)throw new Error('Existing signed host draft could not be verified.');
+      return existing;
+    }
+    const at=new Date().toISOString();
+    return mesh.createObject({
+      id:objectId,revision:1,kind:STARLING_TURN_KIND,
+      purpose:'Guildkeeper-reviewed imported local host draft; no completion or tool authority.',
+      consent:'group',audience:['guild:'+guild],publish:true,priority:40,
+      payload:{
+        schema:STARLING_TURN_SCHEMA,turnId:objectId,guildId:guild,
+        personaId:job.personaId,text:job.text.trim().slice(0,3500),brief:'',
+        at,model:'local-host:'+job.backend,questId:null,hostBackend:job.backend,
+        source:'local-host',completionVerified:false,claimVerified:false,
+        hostJobId:job.jobId
+      }
+    });
+  }
+  return Object.freeze({readTurns,runOneTurn,runRound,importHostDraft,isBusy:()=>busy||roundBusy});
 }
