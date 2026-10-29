@@ -139,7 +139,7 @@ async function unloadEngine(reason='model-switch',{afterGeneration=false}={}){
 // ReadableStream. Hybrid Qwen 3.5's native .litertlm contains an executor
 // metadata section that this Web streaming loader does not support.
 function unsupportedExecutorMetadata(error){
-  return /Streaming\\s+LlmExecutorMetadata\\s+section\\s+is\\s+not\\s+supported\\s+yet/i.test(clean(error?.message||error,1000));
+  return /Streaming\s+LlmExecutorMetadata\s+section\s+is\s+not\s+supported\s+yet/i.test(clean(error?.message||error,1000));
 }
 function executorMetadataFailure(profile,error){
   return Object.assign(new Error(
