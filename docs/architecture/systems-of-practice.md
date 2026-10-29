@@ -19,6 +19,15 @@ For every cross-cutting change, an agent must perform this sequence before editi
 7. Update the ownership verifier whenever the capability boundary changes.
 8. A PR is incomplete until the ownership verifier proves the active route graph still has one owner.
 
+## Action Board — personal capture and Quest next actions
+
+- Functional and UI owner: `public/app/action-board-v1.mjs`.
+- Deterministic projection model: `public/app/shared/action-board-core-v1.mjs`.
+- Device-local manual action state and Focus choices: `civweave.action-board.v1`.
+- Existing Weaveling Quest ledger (`civweave.intentions.v127`) and current-campus fallback are read-only inputs; the canonical Quest owner retains activation, progress, proof, and review authority.
+- The Ready Now button is merely a presentation caller in the active Working Campus, not a second task engine or chat owner.
+- See `docs/contracts/action-board-v1.md` and `scripts/test-action-board-v1.mjs`.
+
 ## Jurisdiction-sensitive financial behavior
 
 Before changing goods checkout, seller payment methods, marketplace fees, tax collection, seller reporting or withholding, cross-border goods behavior, service/learning/tutoring tax behavior, membership/compute/digital-service tax behavior, or a jurisdiction gate, read all three canonical artifacts:
