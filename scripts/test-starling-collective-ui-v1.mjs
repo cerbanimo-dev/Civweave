@@ -245,3 +245,13 @@ test('responsive local inference receives a longer planning deadline with unchan
   assert.ok(f.calls.every(request=>request.config.model==='qwen35-4b-native'));
  }finally{f.close()}
 });
+
+test('unlimited manual planning is independent of autonomous active slots and rolling allowance',async()=>{
+ const f=fixture();try{
+  for(let n=0;n<8;n++){const line=await f.api.runLine({intention:intention+' manually requested '+n});assert.equal(line.creationMode,'manual')}
+  assert.equal(f.calls.length,24);
+  assert.equal(f.api.read().limits.active,0);
+  assert.equal(f.api.read().limits.createdInWindow,0);
+  assert.equal(f.api.read().limits.manualUnlimited,true);
+ }finally{f.close()}
+});
