@@ -315,6 +315,8 @@ async function toggleWorker(){
       state.workerEnabled=false;
       state.workerMessage='Disabled and signed on the founding Guild device. No further automatic turns will start.';
     }else{
+      const selected=localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id);
+      if(selected==='termux'||selected==='android')throw new Error('Disable the '+selected+' host scheduler before enabling browser-local autopilot.');
       // This callback runs only in response to the Guildkeeper pressing the
       // visible opt-in control. It does not grant Quest/task/tool authority.
       await worker.enable(guild.id,{confirmConsent:()=>true,intervalMinutes:60,dailyLimit:4});
