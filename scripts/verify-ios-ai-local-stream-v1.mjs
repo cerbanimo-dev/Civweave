@@ -108,4 +108,53 @@ assert.match(campusHtml,/settings-gateway-v317\.js\?v=1\.0\.138-ios-offline-webv
 assert.match(shellJs,/settings-gateway-v317\.js\?v=1\.0\.138-ios-offline-webview/);
 console.log('PASS: ai.local frontend URL, isolated offline WKWebView probe and staged cache-busted Settings entry.');
 
+
+const rootHtml=readFileSync('public/index.html','utf8');
+const installerHtml=readFileSync('public/app/index.html','utf8');
+const browserBoundary=readFileSync('public/app/install-boundary-v146.js','utf8');
+const legacyCampus=readFileSync('public/app/working-campus-v156.html','utf8');
+const localRuntime=readFileSync('public/app/local-ai/runtime-v266.js','utf8');
+const localWorker=readFileSync('public/app/local-ai/worker-v266.js','utf8');
+const localChat=readFileSync('public/app/local-chat-runtime-v295.js','utf8');
+const rootInline=rootHtml.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+const installerInline=installerHtml.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+assert.ok(rootInline&&installerInline,'iOS entry scripts must be inline for pre-install navigation');
+const entryEnv=(ua,search='')=>{
+  let sent='';
+  const location={origin:'https://civweave-staging.pages.dev',hostname:'civweave-staging.pages.dev',
+    search,pathname:'/',href:'https://civweave-staging.pages.dev/'+search,
+    replace(url){sent=String(url)}};
+  const env={URL,URLSearchParams,location,navigator:{userAgent:ua,standalone:false,maxTouchPoints:0},
+    matchMedia:()=>({matches:false}),document:{querySelector:()=>({textContent:''})}};
+  env.globalThis=env;
+  return {env,get sent(){return sent}};
+};
+const iphone='Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit Safari';
+const desktop='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit Chrome';
+for(const source of [rootInline,installerInline]){
+  const ios=entryEnv(iphone);
+  vm.runInNewContext(source,ios.env);
+  assert.match(ios.sent,/\/app\/working-campus-v440\.html\?iosLocal=1/,'iOS browser must enter directly');
+  const explicit=entryEnv(iphone,'?install=required');
+  vm.runInNewContext(source,explicit.env);
+  assert.ok(!explicit.sent.includes('iosLocal=1'),'explicit iOS install must retain installer');
+}
+const browserEnv=entryEnv(desktop);
+vm.runInNewContext(installerInline,browserEnv.env);
+assert.equal(browserEnv.sent,'','non-iOS installer behavior unchanged');
+
+assert.match(browserBoundary,/const IOS_BROWSER_SESSION_KEY='civweave\.ios\.browser-access\.v1'/);
+assert.match(browserBoundary,/function allowed\(\)\{return installedDisplay\(\)\|\|launchSession\(\)\|\|developer\(\)\|\|iosBrowserSession\(\)\}/);
+assert.match(browserBoundary,/iosBrowserAccessPolicy:'ios-only-separate-session-not-installed'/);
+assert.match(browserBoundary,/installedQueryIsAuthorization:false/);
+assert.match(legacyCampus,/install-boundary-v146\.js\?v=browser-install-boundary-v228-ios-webview-session-v1/);
+assert.match(localRuntime,/if\(selected\.runtime==='litert-lm-web'\)/);
+assert.match(localRuntime,/authority\.ensure\(\{onProgress,reason:'exact-litert-runtime-request'\}\)/);
+assert.match(localRuntime,/return lite\.runFast\(/);
+assert.match(localWorker,/LOCAL_LITERT_WRONG_EXECUTOR/);
+assert.match(localWorker,/LOCAL_TRANSFORMERS_MODULE_API_MISMATCH/);
+assert.match(localChat,/runtime-v266\.js\?v=1\.0\.125-v327-litert-executor-dispatch/);
+assert.match(campusHtml,/local-chat-runtime-v295\.js\?v=1\.0\.133-litert-executor-dispatch/);
+console.log('PASS: automatic noninstalled iOS browser entry, explicit install remains available, LiteRT bypasses Transformers hf.env.');
+
 console.log('PASS: ai.local URL safety, explicit model discovery, true split-SSE token streaming, no premature activation, and Civweave /v1 runtime routing.');
