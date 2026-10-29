@@ -126,3 +126,23 @@ test('round rejects duplicate personas and cannot be overlapped by another turn'
  release();
  await round;
 });
+
+test('explicit host draft import is signed into the existing Guild mesh exactly once',async()=>{
+ const {service,rows}=makeHarness();
+ const draft={schema:'civweave.starling-host-job.v1',jobId:'a'.repeat(32),guildId:'garden',personaId:'kami',backend:'termux',state:'completed',text:'Review a seed library design.',reviewRequired:true,claimVerified:false};
+ const first=await service.importHostDraft({guildId:'garden',job:draft});
+ const again=await service.importHostDraft({guildId:'garden',job:draft});
+ assert.equal(first.id,again.id);assert.equal(rows.length,1);
+ const transcript=await service.readTurns({guildId:'garden',verifyReader:()=>true});
+ assert.equal(transcript[0].hostBackend,'termux');
+ assert.equal(transcript[0].completionVerified,false);
+ assert.equal(transcript[0].provenance,'founding-device-signed-host-draft');
+});
+test('unreviewed, foreign-Guild or incomplete host results cannot create signed turns',async()=>{
+ const {service,rows}=makeHarness();
+ const draft={schema:'civweave.starling-host-job.v1',jobId:'a'.repeat(32),guildId:'garden',personaId:'kami',backend:'android',state:'completed',text:'Draft',reviewRequired:true,claimVerified:false};
+ for(const invalid of [{...draft,state:'running'}, {...draft,guildId:'other'}, {...draft,claimVerified:true}, {...draft,backend:'cloud'}, {...draft,reviewRequired:false}]){
+   await assert.rejects(()=>service.importHostDraft({guildId:'garden',job:invalid}));
+ }
+ assert.equal(rows.length,0);
+});
