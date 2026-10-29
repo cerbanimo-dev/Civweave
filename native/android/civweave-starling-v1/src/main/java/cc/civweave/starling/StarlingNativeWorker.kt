@@ -221,8 +221,17 @@ class LoopbackLlamaEngine : StarlingLocalEngine {
                 .put("max_tokens", job.optInt("maxTokens", 440)).put("temperature", 0.2)
             connection.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
             require(connection.responseCode == 200) { "Local llama.cpp endpoint unavailable (HTTP " + connection.responseCode + ")." }
-            val bytes = connection.inputStream.use { it.readNBytes(120000) }
-            require(bytes.size < 120000) { "Local response exceeded 120 KB." }
+            val bytes = connection.inputStream.use { stream ->
+                val output = java.io.ByteArrayOutputStream()
+                val chunk = ByteArray(8192)
+                while (true) {
+                    val read = stream.read(chunk)
+                    if (read < 0) break
+                    require(output.size() + read <= 120000) { "Local response exceeded 120 KB." }
+                    output.write(chunk, 0, read)
+                }
+                output.toByteArray()
+            }
             val result = JSONObject(String(bytes, Charsets.UTF_8))
             val choice = result.getJSONArray("choices").getJSONObject(0)
             require(choice.optString("finish_reason") != "length") { "The local draft stopped early at max_tokens." }
