@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-daily-batch.v1",
-  "built_at": "2026-10-29T10:33:41Z",
-  "candidate_count": 83,
+  "built_at": "2026-10-29T10:35:14Z",
+  "candidate_count": 89,
   "candidates": [
     {
       "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
@@ -367,6 +367,70 @@
       ]
     },
     {
+      "candidate_id": "openmusic:b2a6a9c15a5ce35a31cfb23b",
+      "playlist_id": "civweave",
+      "title": "My Life",
+      "artist": "Colin Mutchler",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "166",
+      "source_url": "https://ccmixter.org/files/commonsplice/166",
+      "matched_query": "vocal-pool:male_vocals",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_My_Life.mp3",
+          "mime": "",
+          "bytes": 3282078,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Colin Mutchler",
+        "source_title": "My Life",
+        "source_url": "https://ccmixter.org/files/commonsplice/166",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 74,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "commons",
+        "genre:vocal-pool:male_vocals"
+      ],
+      "explicit": null,
+      "curation": "vocal-pool-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:male_vocals"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:spoken_word"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:experimental"
+        }
+      ]
+    },
+    {
       "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
       "playlist_id": "civweave",
       "title": "A Story of Striking the Root: Striking Down Public Unions",
@@ -444,6 +508,62 @@
       ]
     },
     {
+      "candidate_id": "openmusic:f9b5063c3c8d0cf781bbcf3d",
+      "playlist_id": "civweave",
+      "title": "Corruption (sample set for Strike the Root)",
+      "artist": "Octif",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "31395",
+      "source_url": "https://ccmixter.org/files/octif/31395",
+      "matched_query": "vocal-pool:male_vocals",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/octif/octif_-_Corruption_(sample_set_for_Strike_the_Root).mp3",
+          "mime": "",
+          "bytes": 1764837,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Octif",
+        "source_title": "Corruption (sample set for Strike the Root)",
+        "source_url": "https://ccmixter.org/files/octif/31395",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:vocal-pool:male_vocals"
+      ],
+      "explicit": null,
+      "curation": "vocal-pool-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:male_vocals"
+        }
+      ]
+    },
+    {
       "candidate_id": "openmusic:64440c7e11114879d9855b8c",
       "playlist_id": "civweave",
       "title": "How it is",
@@ -510,8 +630,64 @@
       ]
     },
     {
+      "candidate_id": "openmusic:7d9342f7ec2bebf23ccbe0aa",
+      "playlist_id": "civweave",
+      "title": "I Feel Like Dancing",
+      "artist": "Steven M Bryant",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "35149",
+      "source_url": "https://ccmixter.org/files/stevieb357/35149",
+      "matched_query": "vocal-pool:vocals",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/stevieb357/stevieb357_-_I_Feel_Like_Dancing.mp3",
+          "mime": "",
+          "bytes": 5563082,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Steven M Bryant",
+        "source_title": "I Feel Like Dancing",
+        "source_url": "https://ccmixter.org/files/stevieb357/35149",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "quality_score": 73,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:vocal-pool:vocals"
+      ],
+      "explicit": null,
+      "curation": "vocal-pool-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:vocals"
+        }
+      ]
+    },
+    {
       "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "civweave",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -577,12 +753,12 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "cerbanimo",
-          "matched_query": "labor"
-        },
-        {
           "playlist_id": "civweave",
           "matched_query": "collaboration"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
         }
       ]
     },
@@ -829,6 +1005,116 @@
       ]
     },
     {
+      "candidate_id": "openmusic:9403f838ff017c05d8cb621a",
+      "playlist_id": "civweave",
+      "title": "Brake Dance",
+      "artist": "Andres Franco",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "33929",
+      "source_url": "https://ccmixter.org/files/andrewfranco/33929",
+      "matched_query": "vocal-pool:rap",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/andrewfranco/andrewfranco_-_Brake_Dance.mp3",
+          "mime": "",
+          "bytes": 6406523,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Andres Franco",
+        "source_title": "Brake Dance",
+        "source_url": "https://ccmixter.org/files/andrewfranco/33929",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:vocal-pool:rap"
+      ],
+      "explicit": null,
+      "curation": "vocal-pool-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:rap"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:44d7ba4b962d2af7890a97ca",
+      "playlist_id": "civweave",
+      "title": "Creep Deep",
+      "artist": "Philozophi",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "815",
+      "source_url": "https://ccmixter.org/files/philozophi/815",
+      "matched_query": "vocal-pool:vocals",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/philozophi/philozophi_-_Creep_Deep.mp3",
+          "mime": "",
+          "bytes": 1220736,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Philozophi",
+        "source_title": "Creep Deep",
+        "source_url": "https://ccmixter.org/files/philozophi/815",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:vocal-pool:vocals"
+      ],
+      "explicit": null,
+      "curation": "vocal-pool-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:vocals"
+        }
+      ]
+    },
+    {
       "candidate_id": "openmusic:a07122b593c5a6ea3cd0ee58",
       "playlist_id": "civweave",
       "title": "Making Me Nervous (Cyberpest Mix 3.9)",
@@ -884,6 +1170,61 @@
         {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:indie"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:021aa2b95bec07485270b288",
+      "playlist_id": "civweave",
+      "title": "Making Me Nervous (Vocals)",
+      "artist": "brad sucks",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "66",
+      "source_url": "https://ccmixter.org/files/bradsucks/66",
+      "matched_query": "vocal-pool:female_vocals",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/bradsucks/bradsucks_-_Making_Me_Nervous_(Vocals).mp3",
+          "mime": "",
+          "bytes": 2327113,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "brad sucks",
+        "source_title": "Making Me Nervous (Vocals)",
+        "source_url": "https://ccmixter.org/files/bradsucks/66",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "genre:vocal-pool:female_vocals"
+      ],
+      "explicit": null,
+      "curation": "vocal-pool-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:female_vocals"
         }
       ]
     },
@@ -2650,7 +2991,7 @@
     },
     {
       "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "civweave",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -2716,12 +3057,12 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "cerbanimo",
-          "matched_query": "labor"
-        },
-        {
           "playlist_id": "civweave",
           "matched_query": "collaboration"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
         }
       ]
     },
@@ -4673,7 +5014,7 @@
     },
     {
       "candidate_id": "openmusic:b2a6a9c15a5ce35a31cfb23b",
-      "playlist_id": "anarchadia",
+      "playlist_id": "civweave",
       "title": "My Life",
       "artist": "Colin Mutchler",
       "album": "",
@@ -4716,11 +5057,19 @@
       "teeth_score": 1,
       "themes": [
         "commons",
-        "genre:experimental"
+        "genre:vocal-pool:male_vocals"
       ],
       "explicit": null,
-      "curation": "genre-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:male_vocals"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:spoken_word"
+        },
         {
           "playlist_id": "anarchadia",
           "matched_query": "genre:experimental"
