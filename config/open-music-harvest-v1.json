@@ -42,7 +42,7 @@
       "people",
       "power"
     ],
-    "discovery_note": "Full-song vocal signal from source metadata; genre-tag selection is a station-style match, not proof of lyrical content or an explicit-language audit. Unreviewed recordings are excluded from S.A.F.E. mode."
+    "discovery_note": "The 200-track discovery expansion uses exact community playlist source pages first; thematic and genre queries are supplementary to reduce API load. Source metadata is not a human listening or lyric review."
   },
   "playlists": [
     {
@@ -54,11 +54,7 @@
         "community",
         "commons",
         "collaboration",
-        "together",
-        "sharing",
-        "people",
-        "hope",
-        "peace"
+        "together"
       ],
       "scan_queries": [
         "freedom share vocals",
@@ -132,12 +128,7 @@
       "genre_tags": [
         "chill",
         "indie",
-        "electronic",
-        "soul",
-        "downtempo",
-        "trip_hop",
-        "pop",
-        "funk"
+        "electronic"
       ],
       "review_candidates_ccmixter": [
         {
@@ -264,11 +255,7 @@
         "nature",
         "ecology",
         "education",
-        "truth",
-        "imagine",
-        "grow",
-        "climate",
-        "change"
+        "truth"
       ],
       "scan_queries": [
         "truth choice vocals",
@@ -344,12 +331,7 @@
       "genre_tags": [
         "folk",
         "acoustic",
-        "jazz",
-        "chill",
-        "ambient",
-        "world",
-        "pop",
-        "blues"
+        "jazz"
       ],
       "review_candidates_ccmixter": [
         {
@@ -479,11 +461,7 @@
         "technology",
         "create",
         "automation",
-        "energy",
-        "power",
-        "future",
-        "build",
-        "rise"
+        "energy"
       ],
       "scan_queries": [
         "labor freedom vocals",
@@ -559,12 +537,7 @@
       "genre_tags": [
         "electronic",
         "rock",
-        "funk",
-        "dance",
-        "hip_hop",
-        "techno",
-        "alternative",
-        "indie"
+        "funk"
       ],
       "review_candidates_ccmixter": [
         {
@@ -669,11 +642,7 @@
         "share",
         "sustainability",
         "dignity",
-        "friendship",
-        "cooperative",
-        "caring",
-        "together",
-        "love"
+        "friendship"
       ],
       "scan_queries": [
         "mutual aid vocals",
@@ -749,12 +718,7 @@
       "genre_tags": [
         "funk",
         "soul",
-        "reggae",
-        "jazz",
-        "pop",
-        "acoustic",
-        "chill",
-        "blues"
+        "reggae"
       ],
       "review_candidates_ccmixter": [
         {
@@ -846,11 +810,7 @@
         "liberty",
         "protest",
         "freedom",
-        "oppression",
-        "solidarity",
-        "organize",
-        "liberation",
-        "peace"
+        "oppression"
       ],
       "scan_queries": [
         "justice resistance vocals",
@@ -926,12 +886,7 @@
       "genre_tags": [
         "rock",
         "punk",
-        "hip_hop",
-        "reggae",
-        "dub",
-        "experimental",
-        "alternative",
-        "electronic"
+        "hip_hop"
       ],
       "review_candidates_ccmixter": [
         {
@@ -1077,7 +1032,7 @@
   "max_library_tracks": 300,
   "genre_discovery": {
     "enabled": true,
-    "pages_per_tag": 3,
+    "pages_per_tag": 2,
     "results_per_page": 35,
     "license_classes": [
       "by",
@@ -1085,13 +1040,11 @@
     ],
     "note": "Discover vocal full songs by source genre/mood tags; do not treat genre as proof of activist lyrics.",
     "broad_vocal_tags": [
-      "female_vocals",
-      "male_vocals",
       "vocals",
-      "spoken_word",
-      "rap"
+      "rap",
+      "spoken_word"
     ],
-    "broad_pages_per_tag": 12,
+    "broad_pages_per_tag": 4,
     "broad_playlist_id": "civweave",
     "broad_note": "Broad vocal search supplies additional songs for manual review; musical fit is inferred only from recorded tags and not assumed as an ideological match."
   },
