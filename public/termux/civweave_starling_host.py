@@ -313,7 +313,7 @@ def make_handler(host):
             return authority in ("127.0.0.1:8767", "localhost:8767") and (not origin or origin in ORIGINS)
 
         def reply(self, code, data):
-            raw = json.dumps(data, separators=(",", ":")).encode()
+            raw = b"" if code == 204 else json.dumps(data, separators=(",", ":")).encode()
             self.send_response(code)
             self.send_header("Content-Type", "application/json")
             self.send_header("Cache-Control", "no-store")
