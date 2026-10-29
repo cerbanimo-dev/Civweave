@@ -26,6 +26,7 @@ const params=new URLSearchParams(location.search);
 const localDevelopment=['localhost','127.0.0.1','::1'].includes(location.hostname);
 const cloudflarePreview=location.hostname.endsWith('.pages.dev')&&location.hostname.split('.').length>3;
 const standalone=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+const iosBrowser=()=>/iPhone|iPad|iPod/i.test(String(navigator.userAgent||''))||(/Macintosh/i.test(String(navigator.userAgent||''))&&Number(navigator.maxTouchPoints||0)>1);
 function copyParams(target,blocked=new Set()){for(const [key,value] of params)if(!blocked.has(key))target.searchParams.append(key,value);return target}
 function stableInstaller(){
   let origin=location.origin;
@@ -48,6 +49,13 @@ function workingCampus(){
 }
 try{
   if(params.get('install')==='required'||params.has('installrequired')){location.replace(stableInstaller().href);return}
+  // An ordinary iOS browser (including ai.local WKWebView) must not be
+  // trapped at the PWA install gate. Installation remains an explicit choice.
+  if(iosBrowser()&&!standalone()){
+    const target=new URL('/app/working-campus-v440.html',location.origin);
+    target.searchParams.set('iosLocal','1');target.searchParams.set('source','ios-browser-entry');
+    location.replace(target.href);return;
+  }
   if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||location.origin===PREVIOUS_CANONICAL_ORIGIN||location.origin===LEGACY_CANONICAL_ORIGIN||cloudflarePreview)){location.replace(stableInstaller().href);return}
   // Existing installed copies may still have / as their baked start_url. Never
   // register, unregister, update, or activate a worker from this root during a

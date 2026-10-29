@@ -4,7 +4,7 @@ const VERSION='1.0.115-local-ai-runtime-v302-session-handoff';
 const LEGACY_VERSION='1.0.87-local-ai-runtime-v287-gemma4-mobile';
 const REVISION='1.0.88-local-ai-runtime-v283-small-model-fast-path';
 const LEGACY_WORKER='/app/local-ai/worker-v266.js?v=1.0.86-v286';
-const WORKER='/app/local-ai/worker-v266.js?v=1.0.125-v314-smooth-fit';
+const WORKER='/app/local-ai/worker-v266.js?v=1.0.126-v320-litert-executor-guard';
 const QUARANTINE_KEY='civweave.local-ai.webgpu-quarantine.v299';
 const LLAMA32='llama32-3b-instruct-q4f16';
 const LLAMA32_ACTIVE='civweave.llama32.gpu-active.v1';
@@ -79,6 +79,19 @@ function reportLocalPerformance(result,selected,elapsedMs){
 async function generate({messages=[],maxNewTokens=1024,promptTokenBudget,temperature,thinking=false,benchmark=false,timeoutMs=180000,stream=false,onProgress,onToken,executionProfile='interactive',expectedModelId='',strictModel=false,structuredOutputSchema=null}={}){
   const generation=generationEpoch,selected=activeSpec();if(!selected)throw Object.assign(new Error('No downloaded local model is active.'),{code:'LOCAL_MODEL_NOT_SELECTED'});
   if(expectedModelId&&selected.id!==expectedModelId)throw Object.assign(new Error('The local model selection changed during generation. The request was stopped before initializing another model.'),{code:'LOCAL_MODEL_SELECTION_MISMATCH',expectedModelId,executionModel:selected.id});
+  // LiteRT bundles are not Transformers.js modules. Never send them to
+  // worker-v266.js, which configures hf.env and would crash with
+  // "undefined is not an object (evaluating 'hf.env.allowLocalModels=true')".
+  // Delegate to the exact selected LiteRT engine; do not start an ONNX model.
+  if(selected.runtime==='litert-lm-web'){
+    if(structuredOutputSchema)throw Object.assign(new Error('LiteRT Web does not provide the strict Llama ONNX token-masked JSON compiler; use the LiteRT structured-output pipeline.'),{code:'STRUCTURED_COMPILER_MODEL_MISMATCH',executionModel:selected.id});
+    const authority=globalThis.CivweaveGemma4LiteRTRequestAuthorityV1;
+    if(typeof authority?.ensure==='function')await authority.ensure({onProgress,reason:'exact-litert-runtime-request'});
+    const lite=globalThis.CivweaveLiteRTGemma4FastRuntimeV1;
+    if(typeof lite?.runFast!=='function')throw Object.assign(new Error('The selected LiteRT model must run through the LiteRT-LM Web engine, not Transformers.js. The LiteRT executor is not ready; open Settings to load the local LiteRT runtime. Downloaded model weights were not changed.'),{code:'LOCAL_LITERT_EXECUTOR_NOT_READY',executionModel:selected.id,retryable:false});
+    if(downloads()?.selection?.()?.id!==selected.id)throw Object.assign(new Error('Local model selection changed during LiteRT initialization. Nothing else was started.'),{code:'LOCAL_MODEL_SELECTION_MISMATCH',executionModel:selected.id});
+    return lite.runFast({messages,maxNewTokens,promptTokenBudget,temperature,thinking,benchmark,timeoutMs,stream,onProgress,onToken,executionProfile,expectedModelId:selected.id,strictModel:true},selected.id);
+  }
   if(structuredOutputSchema&&selected.id!==LLAMA32)throw Object.assign(new Error('The strict token-masked JSON compiler is available only for the selected Llama 3.2 3B trial.'),{code:'STRUCTURED_COMPILER_MODEL_MISMATCH'});
   assertLlama32AndroidReady(selected.id);
   clearResidency();if(!await ready(selected.id,{repair:true,onProgress}))throw Object.assign(new Error(`${selected.label} is selected but is not fully downloaded on this device.`),{code:'LOCAL_MODEL_NOT_DOWNLOADED'});ensureGeneration(generation);

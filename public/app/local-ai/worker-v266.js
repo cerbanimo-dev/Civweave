@@ -50,6 +50,9 @@ function friendlyError(error,spec,stage='inference'){
   return raw;
 }
 async function importRuntime(spec){
+  if(spec?.runtime==='litert-lm-web')throw Object.assign(new Error(
+    'LiteRT model '+String(spec?.id||'')+' was sent to the Transformers.js worker. This model requires the LiteRT-LM executor and cannot initialize hf.env. The model cache was preserved; select the LiteRT route or an explicit local GGUF/ai.local server.'
+  ),{code:'LOCAL_LITERT_WRONG_EXECUTOR',model:spec?.id||'',retryable:false});
   const asset=runtimeAsset(spec);
   if(runtimeModules.has(asset))return runtimeModules.get(asset);
   const promise=import(asset).catch(error=>{runtimeModules.delete(asset);throw error});
@@ -136,6 +139,8 @@ async function configuredWasmChunks(spec){
   return{...spec,wasmChunks:chunks,wasmRuntimeBytes:Number(manifest.asyncifyWasmBytes||0)};
 }
 async function configureRuntime(hf,cache,spec){
+  if(!hf?.env||typeof hf.env!=='object'||typeof hf.AutoTokenizer?.from_pretrained!=='function')
+    throw Object.assign(new Error('The downloaded-local worker loaded a module without the Transformers.js env and tokenizer APIs. Check the model runtime registration; do not retry by changing or deleting downloaded model weights.'),{code:'LOCAL_TRANSFORMERS_MODULE_API_MISMATCH',model:spec?.id||'',runtimeAsset:runtimeAsset(spec),retryable:false});
   hf.env.allowLocalModels=true;
   hf.env.allowRemoteModels=false;
   hf.env.useBrowserCache=false;
