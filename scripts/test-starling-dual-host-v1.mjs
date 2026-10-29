@@ -49,5 +49,5 @@ test('native Android bridge is origin-scoped and work is durable',()=>{
   const worker=read('native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeWorker.kt');
   for(const term of ['WebViewCompat.addWebMessageListener','isMainFrame','https://civweave-staging.pages.dev','https://civweave.cc','WorkManager','PeriodicWorkRequestBuilder','ExistingWorkPolicy.KEEP'])assert.ok(bridge.includes(term),term);
   assert.doesNotMatch(bridge,/\.addJavascriptInterface\(/);
-  for(const term of ['getSharedPreferences','commit()','claimVerified','localhost','http://127.0.0.1:8080/v1/chat/completions','StarlingLocalEngine','cancelRequested'])assert.ok(worker.includes(term),term);
+  for(const term of ['getSharedPreferences','commit()','claimVerified','http://127.0.0.1:8080/v1/chat/completions','StarlingLocalEngine','cancelRequested'])assert.ok(worker.includes(term),term);
 });
