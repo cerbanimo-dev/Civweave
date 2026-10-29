@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-curated-playlists.v1",
-  "built_at": "2026-10-29T17:26:39Z",
+  "built_at": "2026-10-29T17:34:32Z",
   "vocal_required": true,
   "instrumental_only_rejected": true,
   "playlists": [
@@ -1969,6 +1969,179 @@
           "curation": "vocal-pool-unreviewed"
         },
         {
+          "candidate_id": "openmusic:c5f1c8e5b8dd81a252eab50a",
+          "title": "Like A Rapper",
+          "artist": "Donnie Ozone",
+          "provider": "ccmixter",
+          "provider_id": "36041",
+          "source_url": "https://ccmixter.org/files/donnieozone/36041",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/donnieozone/donnieozone_-_Like_A_Rapper.mp3",
+              "mime": "",
+              "bytes": 7412551,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Donnie Ozone",
+            "source_title": "Like A Rapper",
+            "source_url": "https://ccmixter.org/files/donnieozone/36041",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "genre:vocal-pool:rap"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:e60583e6feb04fe7091e32be",
+          "title": "Longing - spacious choir remix",
+          "artist": "Zep Hurme",
+          "provider": "ccmixter",
+          "provider_id": "33335",
+          "source_url": "https://ccmixter.org/files/zep_hurme/33335",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/zep_hurme/zep_hurme_-_Longing_-_spacious_choir_remix.mp3",
+              "mime": "",
+              "bytes": 3195884,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Zep Hurme",
+            "source_title": "Longing - spacious choir remix",
+            "source_url": "https://ccmixter.org/files/zep_hurme/33335",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "creative commons",
+            "collaborative music",
+            "sharing",
+            "genre:community-playlist:11087"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:ad23b08d76ca2949a732730a",
+          "title": "Longing for Tumbleweeds",
+          "artist": "Admiral Bob",
+          "provider": "ccmixter",
+          "provider_id": "33347",
+          "source_url": "https://ccmixter.org/files/admiralbob77/33347",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_Longing_for_Tumbleweeds.mp3",
+              "mime": "",
+              "bytes": 2756120,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Admiral Bob",
+            "source_title": "Longing for Tumbleweeds",
+            "source_url": "https://ccmixter.org/files/admiralbob77/33347",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "creative commons",
+            "collaborative music",
+            "sharing",
+            "genre:community-playlist:11087"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:4d26528f76438920cdc55d62",
+          "title": "Orc March",
+          "artist": "basematic",
+          "provider": "ccmixter",
+          "provider_id": "33579",
+          "source_url": "https://ccmixter.org/files/basematic/33579",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/basematic/basematic_-_Orc_March.mp3",
+              "mime": "",
+              "bytes": 4755166,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "basematic",
+            "source_title": "Orc March",
+            "source_url": "https://ccmixter.org/files/basematic/33579",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "creative commons",
+            "collaborative music",
+            "sharing",
+            "genre:community-playlist:11087"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:0284a7078fa2894918b9a54b",
           "title": "America Mad & Naked",
           "artist": "Stefan Kartenberg",
@@ -2017,51 +2190,6 @@
           "curation": "genre-discovered"
         },
         {
-          "candidate_id": "openmusic:29a3747e9b48a3d2c306100f",
-          "title": "Lamadio Tiado",
-          "artist": "Admiral Bob",
-          "provider": "ccmixter",
-          "provider_id": "33497",
-          "source_url": "https://ccmixter.org/files/admiralbob77/33497",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_Lamadio_Tiado.mp3",
-              "mime": "",
-              "bytes": 4174621,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Admiral Bob",
-            "source_title": "Lamadio Tiado",
-            "source_url": "https://ccmixter.org/files/admiralbob77/33497",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "creative commons",
-            "collaborative music",
-            "sharing",
-            "share",
-            "genre:community-playlist:11087"
-          ],
-          "explicit": null,
-          "curation": "community-playlist-unreviewed"
-        },
-        {
           "candidate_id": "openmusic:a867d261c1261699a060058d",
           "title": "Norleans Lovas",
           "artist": "Jeris",
@@ -2090,51 +2218,6 @@
             "creator": "Jeris",
             "source_title": "Norleans Lovas",
             "source_url": "https://ccmixter.org/files/VJ_Memes/33400",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "creative commons",
-            "collaborative music",
-            "sharing",
-            "share",
-            "genre:community-playlist:11087"
-          ],
-          "explicit": null,
-          "curation": "community-playlist-unreviewed"
-        },
-        {
-          "candidate_id": "openmusic:4ef39c8e26d3577ef48f3949",
-          "title": "Twilight of the Cinema",
-          "artist": "septahelix",
-          "provider": "ccmixter",
-          "provider_id": "33343",
-          "source_url": "https://ccmixter.org/files/septahelix/33343",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/septahelix/septahelix_-_Twilight_of_the_Cinema.mp3",
-              "mime": "",
-              "bytes": 7555851,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "septahelix",
-            "source_title": "Twilight of the Cinema",
-            "source_url": "https://ccmixter.org/files/septahelix/33343",
             "license": "Attribution Share-Alike (3.0)",
             "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
           },
@@ -3329,6 +3412,92 @@
           "curation": "community-playlist-unreviewed"
         },
         {
+          "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
+          "title": "Freedom in my voice",
+          "artist": "Carosone",
+          "provider": "ccmixter",
+          "provider_id": "28236",
+          "source_url": "https://ccmixter.org/files/Carosone/28236",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Carosone/Carosone_-_Freedom_in_my_voice.mp3",
+              "mime": "",
+              "bytes": 3704835,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Carosone",
+            "source_title": "Freedom in my voice",
+            "source_url": "https://ccmixter.org/files/Carosone/28236",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "creative freedom",
+            "reuse",
+            "open source"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:0d45f18990f07b6604f736f5",
+          "title": "Freedom in our Voices",
+          "artist": "ditto ditto",
+          "provider": "ccmixter",
+          "provider_id": "28039",
+          "source_url": "https://ccmixter.org/files/ditto/28039",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/ditto/ditto_-_Freedom_in_our_Voices.mp3",
+              "mime": "",
+              "bytes": 9534738,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "ditto ditto",
+            "source_title": "Freedom in our Voices",
+            "source_url": "https://ccmixter.org/files/ditto/28039",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "creative freedom",
+            "community",
+            "sharing"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
           "candidate_id": "openmusic:a0bdb4376631d15e442a2ab9",
           "title": "Mind Map This",
           "artist": "texasradiofish",
@@ -3414,6 +3583,150 @@
           ],
           "explicit": true,
           "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:ca91cc3d4d368906cbe40cd1",
+          "title": "Our Creative Community",
+          "artist": "Mana Junkie",
+          "provider": "ccmixter",
+          "provider_id": "28202",
+          "source_url": "https://ccmixter.org/files/mana_junkie/28202",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/mana_junkie/mana_junkie_-_Our_Creative_Community.mp3",
+              "mime": "",
+              "bytes": 5573321,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Mana Junkie",
+            "source_title": "Our Creative Community",
+            "source_url": "https://ccmixter.org/files/mana_junkie/28202",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 4,
+          "themes": [
+            "sharing",
+            "creative community",
+            "open culture",
+            "freedom",
+            "share",
+            "commons",
+            "community"
+          ],
+          "explicit": null,
+          "curation": "web-source-candidate"
+        },
+        {
+          "candidate_id": "openmusic:7c9ea2e21d6ba18fd1fbfd04",
+          "title": "Freedom To Share",
+          "artist": "Mana Junkie",
+          "provider": "ccmixter",
+          "provider_id": "28096",
+          "source_url": "https://ccmixter.org/files/mana_junkie/28096",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/mana_junkie/mana_junkie_-_Freedom_To_Share.mp3",
+              "mime": "",
+              "bytes": 6353860,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Mana Junkie",
+            "source_title": "Freedom To Share",
+            "source_url": "https://ccmixter.org/files/mana_junkie/28096",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "sharing",
+            "creative commons",
+            "freedom",
+            "share",
+            "commons"
+          ],
+          "explicit": null,
+          "curation": "web-source-candidate"
+        },
+        {
+          "candidate_id": "openmusic:2a20d2ebc9c09fc5ec2ce989",
+          "title": "The Remixin' Blues",
+          "artist": "unreal_dm",
+          "provider": "ccmixter",
+          "provider_id": "28114",
+          "source_url": "https://ccmixter.org/files/unreal_dm/28114",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/unreal_dm/unreal_dm_-_The_Remixin_Blues.mp3",
+              "mime": "",
+              "bytes": 7263058,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/unreal_dm/unreal_dm_-_The_Remixin_Blues.flac",
+              "mime": "",
+              "bytes": 24476219,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "unreal_dm",
+            "source_title": "The Remixin' Blues",
+            "source_url": "https://ccmixter.org/files/unreal_dm/28114",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "sharing",
+            "creative commons",
+            "independence",
+            "freedom",
+            "share",
+            "commons"
+          ],
+          "explicit": null,
+          "curation": "web-source-candidate"
         },
         {
           "candidate_id": "openmusic:16113b4f19ba21a7d0631de2",
@@ -6051,54 +6364,6 @@
       "id": "cerbanimo",
       "name": "Cerbanimo",
       "entries": [
-        {
-          "candidate_id": "openmusic:67428b002bc563392fea3623",
-          "title": "Funk It: How It Is",
-          "artist": "Aussens@iter",
-          "provider": "ccmixter",
-          "provider_id": "56698",
-          "source_url": "https://ccmixter.org/files/tobias_weber/56698",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.mp3",
-              "mime": "",
-              "bytes": 6393774,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.flac",
-              "mime": "",
-              "bytes": 29779249,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Aussens@iter",
-            "source_title": "Funk It: How It Is",
-            "source_url": "https://ccmixter.org/files/tobias_weber/56698",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:funk"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
         {
           "candidate_id": "openmusic:1a18c603676f255edc2886b3",
           "title": "Je ne peux pas le retenir",
@@ -9235,6 +9500,149 @@
           "curation": "community-playlist-unreviewed"
         },
         {
+          "candidate_id": "openmusic:70c01ad3a2d479485b7fe223",
+          "title": "Freedom in my Voice (the cover)",
+          "artist": "ditto ditto",
+          "provider": "ccmixter",
+          "provider_id": "28057",
+          "source_url": "https://ccmixter.org/files/ditto/28057",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/ditto/ditto_-_Freedom_in_my_Voice_(the_cover).mp3",
+              "mime": "",
+              "bytes": 8060387,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "ditto ditto",
+            "source_title": "Freedom in my Voice (the cover)",
+            "source_url": "https://ccmixter.org/files/ditto/28057",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 5,
+          "themes": [
+            "sharing",
+            "creative rights",
+            "community"
+          ],
+          "explicit": false,
+          "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:27801c9086d750f118d7005c",
+          "title": "Mine + Yours = Ours",
+          "artist": "George_Ellinas",
+          "provider": "ccmixter",
+          "provider_id": "28107",
+          "source_url": "https://ccmixter.org/files/George_Ellinas/28107",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/George_Ellinas/George_Ellinas_-_Mine_Yours_Ours.mp3",
+              "mime": "",
+              "bytes": 8938102,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "George_Ellinas",
+            "source_title": "Mine + Yours = Ours",
+            "source_url": "https://ccmixter.org/files/George_Ellinas/28107",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "community",
+            "music",
+            "connection",
+            "freedom",
+            "share",
+            "commons",
+            "genre:community-playlist:43545"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:d27fd279977a8f111bfe6d88",
+          "title": "The Remixin' Latino Blues",
+          "artist": "wellman",
+          "provider": "ccmixter",
+          "provider_id": "28135",
+          "source_url": "https://ccmixter.org/files/wellman/28135",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/wellman/wellman_-_The_Remixin_Latino_Blues.mp3",
+              "mime": "",
+              "bytes": 3246572,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/wellman/wellman_-_The_Remixin_Latino_Blues_1.mp3",
+              "mime": "",
+              "bytes": 3357557,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "wellman",
+            "source_title": "The Remixin' Latino Blues",
+            "source_url": "https://ccmixter.org/files/wellman/28135",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "community",
+            "music",
+            "connection",
+            "freedom",
+            "share",
+            "commons",
+            "genre:community-playlist:43545"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:7ec8f974c2a7c48d9092f8f2",
           "title": "We Are Free",
           "artist": "Zep Hurme",
@@ -9564,102 +9972,6 @@
           "curation": "genre-discovered"
         },
         {
-          "candidate_id": "openmusic:db7211a775298f8e3e72e788",
-          "title": "100 Paper Washingtons by Scomber",
-          "artist": "BeatMachine",
-          "provider": "ccmixter",
-          "provider_id": "62141",
-          "source_url": "https://ccmixter.org/files/BeatMachine/62141",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/BeatMachine/BeatMachine_-_100_Paper_Washingtons_by_Scomber.mp3",
-              "mime": "",
-              "bytes": 3698982,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/BeatMachine/BeatMachine_-_100_Paper_Washingtons_by_Scomber_1.mp3",
-              "mime": "",
-              "bytes": 3698982,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "BeatMachine",
-            "source_title": "100 Paper Washingtons by Scomber",
-            "source_url": "https://ccmixter.org/files/BeatMachine/62141",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:rock"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:80a750778c06f1157a34a7aa",
-          "title": "Can't Hold It Back",
-          "artist": "Stefan Kartenberg",
-          "provider": "ccmixter",
-          "provider_id": "52953",
-          "source_url": "https://ccmixter.org/files/JeffSpeed68/52953",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Can_t_Hold_It_Back.mp3",
-              "mime": "",
-              "bytes": 14073024,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Can_t_Hold_It_Back.flac",
-              "mime": "",
-              "bytes": 41815312,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Stefan Kartenberg",
-            "source_title": "Can't Hold It Back",
-            "source_url": "https://ccmixter.org/files/JeffSpeed68/52953",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:rock"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
           "candidate_id": "openmusic:50d2be30400a36d307ecad5c",
           "title": "Power To Strike",
           "artist": "Aussens@iter",
@@ -9932,48 +10244,6 @@
           "themes": [
             "share",
             "genre:rock"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:d2d4f3ec6faee9ee73cd0339",
-          "title": "I Won The Bet (Time To Collect)",
-          "artist": "coruscate",
-          "provider": "ccmixter",
-          "provider_id": "60772",
-          "source_url": "https://ccmixter.org/files/Coruscate/60772",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/Coruscate/Coruscate_-_I_Won_The_Bet_(Time_To_Collect)_1.mp3",
-              "mime": "",
-              "bytes": 5228714,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "coruscate",
-            "source_title": "I Won The Bet (Time To Collect)",
-            "source_url": "https://ccmixter.org/files/Coruscate/60772",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:hip_hop"
           ],
           "explicit": null,
           "curation": "genre-discovered"
@@ -10375,6 +10645,102 @@
           "curation": "metadata-discovered"
         },
         {
+          "candidate_id": "openmusic:25ad6eb8757ef5f30e31dad5",
+          "title": "Copyright?",
+          "artist": "Mana Junkie",
+          "provider": "ccmixter",
+          "provider_id": "28246",
+          "source_url": "https://ccmixter.org/files/mana_junkie/28246",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/mana_junkie/mana_junkie_-_Copyright_.mp3",
+              "mime": "",
+              "bytes": 4470536,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Mana Junkie",
+            "source_title": "Copyright?",
+            "source_url": "https://ccmixter.org/files/mana_junkie/28246",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "creative freedom",
+            "copyright autonomy",
+            "collaboration",
+            "sharing",
+            "freedom",
+            "share",
+            "commons",
+            "genre:community-playlist:8300"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:9364a5f2e2b3eee079f7ede5",
+          "title": "HOPE IS LIKE A RIVER",
+          "artist": "mykleanthony",
+          "provider": "ccmixter",
+          "provider_id": "28238",
+          "source_url": "https://ccmixter.org/files/mykleanthony/28238",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/mykleanthony/mykleanthony_-_HOPE_IS_LIKE_A_RIVER.mp3",
+              "mime": "",
+              "bytes": 10352893,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "mykleanthony",
+            "source_title": "HOPE IS LIKE A RIVER",
+            "source_url": "https://ccmixter.org/files/mykleanthony/28238",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "creative freedom",
+            "copyright autonomy",
+            "collaboration",
+            "sharing",
+            "freedom",
+            "share",
+            "commons",
+            "genre:community-playlist:8300"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
           "title": "Language of My Reality",
           "artist": "Colin Mutchler",
@@ -10473,6 +10839,54 @@
           ],
           "explicit": null,
           "curation": "web-source-candidate"
+        },
+        {
+          "candidate_id": "openmusic:b1f9e381550c6af8cdd7cff7",
+          "title": "Will You Share With Me",
+          "artist": "Donnie Drost",
+          "provider": "ccmixter",
+          "provider_id": "28147",
+          "source_url": "https://ccmixter.org/files/donniedrost/28147",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution",
+            "url": "http://creativecommons.org/licenses/by/2.5/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/donniedrost/donniedrost_-_Will_You_Share_With_Me.mp3",
+              "mime": "",
+              "bytes": 4562304,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Donnie Drost",
+            "source_title": "Will You Share With Me",
+            "source_url": "https://ccmixter.org/files/donniedrost/28147",
+            "license": "Attribution",
+            "license_url": "http://creativecommons.org/licenses/by/2.5/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "creative freedom",
+            "copyright autonomy",
+            "collaboration",
+            "sharing",
+            "freedom",
+            "share",
+            "commons",
+            "genre:community-playlist:8300"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
         },
         {
           "candidate_id": "openmusic:50d2be30400a36d307ecad5c",

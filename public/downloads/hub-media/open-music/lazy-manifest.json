@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-10-29T17:26:39Z",
-  "entry_count": 181,
+  "built_at": "2026-10-29T17:34:32Z",
+  "entry_count": 184,
   "entries": [
     {
       "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
@@ -114,6 +114,10 @@
         {
           "playlist_id": "civweave",
           "matched_query": "curated:28236"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -167,6 +171,10 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "curated:28057"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -220,6 +228,10 @@
         {
           "playlist_id": "civweave",
           "matched_query": "curated:28039"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -278,6 +290,10 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "curated:28143"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -573,6 +589,10 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "curated:28239"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -1040,6 +1060,10 @@
         {
           "playlist_id": "civweave",
           "matched_query": "source-page:28202"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -1094,6 +1118,64 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "oppression"
+        }
+      ],
+      "provider": "ccmixter"
+    },
+    {
+      "candidate_id": "openmusic:25ad6eb8757ef5f30e31dad5",
+      "title": "Copyright?",
+      "artist": "Mana Junkie",
+      "source_url": "https://ccmixter.org/files/mana_junkie/28246",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "Mana Junkie",
+        "source_title": "Copyright?",
+        "source_url": "https://ccmixter.org/files/mana_junkie/28246",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mana_junkie/mana_junkie_-_Copyright_.mp3",
+          "mime": "",
+          "bytes": 4470536,
+          "role": "source-download"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "creative freedom",
+        "copyright autonomy",
+        "collaboration",
+        "sharing",
+        "freedom",
+        "share",
+        "commons",
+        "genre:community-playlist:8300"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_id": "anarchadia",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -1204,6 +1286,68 @@
         {
           "playlist_id": "civweave",
           "matched_query": "source-page:28096"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
+        }
+      ],
+      "provider": "ccmixter"
+    },
+    {
+      "candidate_id": "openmusic:9364a5f2e2b3eee079f7ede5",
+      "title": "HOPE IS LIKE A RIVER",
+      "artist": "mykleanthony",
+      "source_url": "https://ccmixter.org/files/mykleanthony/28238",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "mykleanthony",
+        "source_title": "HOPE IS LIKE A RIVER",
+        "source_url": "https://ccmixter.org/files/mykleanthony/28238",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mykleanthony/mykleanthony_-_HOPE_IS_LIKE_A_RIVER.mp3",
+          "mime": "",
+          "bytes": 10352893,
+          "role": "source-download"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "creative freedom",
+        "copyright autonomy",
+        "collaboration",
+        "sharing",
+        "freedom",
+        "share",
+        "commons",
+        "genre:community-playlist:8300"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_id": "anarchadia",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -1322,6 +1466,10 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "community-playlist:43545"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -1384,6 +1532,10 @@
         {
           "playlist_id": "civweave",
           "matched_query": "source-page:28114"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -1514,6 +1666,68 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "community-playlist:43545"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
+        }
+      ],
+      "provider": "ccmixter"
+    },
+    {
+      "candidate_id": "openmusic:b1f9e381550c6af8cdd7cff7",
+      "title": "Will You Share With Me",
+      "artist": "Donnie Drost",
+      "source_url": "https://ccmixter.org/files/donniedrost/28147",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "Donnie Drost",
+        "source_title": "Will You Share With Me",
+        "source_url": "https://ccmixter.org/files/donniedrost/28147",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/donniedrost/donniedrost_-_Will_You_Share_With_Me.mp3",
+          "mime": "",
+          "bytes": 4562304,
+          "role": "source-download"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "creative freedom",
+        "copyright autonomy",
+        "collaboration",
+        "sharing",
+        "freedom",
+        "share",
+        "commons",
+        "genre:community-playlist:8300"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_id": "anarchadia",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "provider": "ccmixter"
@@ -2602,10 +2816,6 @@
         {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:blues"
         }
       ],
       "provider": "ccmixter"
@@ -2786,11 +2996,11 @@
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "vocal-pool:spoken_word"
+          "matched_query": "freedom"
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "freedom"
+          "matched_query": "vocal-pool:spoken_word"
         }
       ],
       "provider": "ccmixter"
@@ -2973,10 +3183,6 @@
         {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:ambient"
         }
       ],
       "provider": "ccmixter"
@@ -3085,10 +3291,6 @@
         },
         {
           "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
           "matched_query": "genre:funk"
         }
       ],
@@ -3208,10 +3410,6 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
-          "matched_query": "genre:funk"
         }
       ],
       "provider": "ccmixter"
@@ -3282,10 +3480,6 @@
         },
         {
           "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
           "matched_query": "genre:funk"
         }
       ],
@@ -3444,10 +3638,6 @@
         },
         {
           "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
           "matched_query": "genre:funk"
         }
       ],
@@ -3627,10 +3817,6 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "genre:hip_hop"
-        },
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "genre:hip_hop"
         }
       ],
       "provider": "ccmixter"
@@ -3769,6 +3955,10 @@
         },
         {
           "playlist_id": "civweave",
+          "matched_query": "collaboration"
+        },
+        {
+          "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
         },
         {
@@ -3778,10 +3968,6 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
-          "matched_query": "collaboration"
         }
       ],
       "provider": "ccmixter"
@@ -3844,10 +4030,6 @@
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "genre:chill"
-        },
-        {
-          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         }
       ],
@@ -4541,10 +4723,6 @@
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "genre:chill"
-        },
-        {
-          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         }
       ],

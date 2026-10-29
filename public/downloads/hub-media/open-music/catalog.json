@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-10-29T17:26:39Z",
-  "record_count": 181,
+  "built_at": "2026-10-29T17:34:32Z",
+  "record_count": 184,
   "failure_count": 23,
   "failures": [
     {
@@ -182,7 +182,7 @@
     }
   ],
   "provider_counts": {
-    "ccmixter": 181
+    "ccmixter": 184
   },
   "records": [
     {
@@ -311,6 +311,10 @@
         {
           "playlist_id": "civweave",
           "matched_query": "curated:28236"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
@@ -372,6 +376,10 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "curated:28057"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:70c01ad3a2d479485b7fe223",
@@ -433,6 +441,10 @@
         {
           "playlist_id": "civweave",
           "matched_query": "curated:28039"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:0d45f18990f07b6604f736f5",
@@ -499,6 +511,10 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "curated:28143"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:a0bdb4376631d15e442a2ab9",
@@ -834,6 +850,10 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "curated:28239"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:f07b5096cec10f2b089e33e0",
@@ -1365,6 +1385,10 @@
         {
           "playlist_id": "civweave",
           "matched_query": "source-page:28202"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:ca91cc3d4d368906cbe40cd1",
@@ -1431,6 +1455,72 @@
       ],
       "candidate_id": "openmusic:af4188aab800fe008b2099c3",
       "quality_score": 86
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "28246",
+      "playlist_id": "anarchadia",
+      "matched_query": "community-playlist:8300",
+      "title": "Copyright?",
+      "artist": "Mana Junkie",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/mana_junkie/28246",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mana_junkie/mana_junkie_-_Copyright_.mp3",
+          "mime": "",
+          "bytes": 4470536,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Mana Junkie",
+        "source_title": "Copyright?",
+        "source_url": "https://ccmixter.org/files/mana_junkie/28246",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "creative freedom",
+        "copyright autonomy",
+        "collaboration",
+        "sharing",
+        "freedom",
+        "share",
+        "commons",
+        "genre:community-playlist:8300"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
+        }
+      ],
+      "candidate_id": "openmusic:25ad6eb8757ef5f30e31dad5",
+      "quality_score": 82
     },
     {
       "schema": "civweave.open-music-track.v1",
@@ -1553,9 +1643,79 @@
         {
           "playlist_id": "civweave",
           "matched_query": "source-page:28096"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:7c9ea2e21d6ba18fd1fbfd04",
+      "quality_score": 82
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "28238",
+      "playlist_id": "anarchadia",
+      "matched_query": "community-playlist:8300",
+      "title": "HOPE IS LIKE A RIVER",
+      "artist": "mykleanthony",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/mykleanthony/28238",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/mykleanthony/mykleanthony_-_HOPE_IS_LIKE_A_RIVER.mp3",
+          "mime": "",
+          "bytes": 10352893,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "mykleanthony",
+        "source_title": "HOPE IS LIKE A RIVER",
+        "source_url": "https://ccmixter.org/files/mykleanthony/28238",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "creative freedom",
+        "copyright autonomy",
+        "collaboration",
+        "sharing",
+        "freedom",
+        "share",
+        "commons",
+        "genre:community-playlist:8300"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
+        }
+      ],
+      "candidate_id": "openmusic:9364a5f2e2b3eee079f7ede5",
       "quality_score": 82
     },
     {
@@ -1687,6 +1847,10 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "community-playlist:43545"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:27801c9086d750f118d7005c",
@@ -1757,6 +1921,10 @@
         {
           "playlist_id": "civweave",
           "matched_query": "source-page:28114"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:2a20d2ebc9c09fc5ec2ce989",
@@ -1903,9 +2071,79 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "community-playlist:43545"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
         }
       ],
       "candidate_id": "openmusic:d27fd279977a8f111bfe6d88",
+      "quality_score": 82
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "28147",
+      "playlist_id": "anarchadia",
+      "matched_query": "community-playlist:8300",
+      "title": "Will You Share With Me",
+      "artist": "Donnie Drost",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/donniedrost/28147",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/donniedrost/donniedrost_-_Will_You_Share_With_Me.mp3",
+          "mime": "",
+          "bytes": 4562304,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Donnie Drost",
+        "source_title": "Will You Share With Me",
+        "source_url": "https://ccmixter.org/files/donniedrost/28147",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 3,
+      "themes": [
+        "creative freedom",
+        "copyright autonomy",
+        "collaboration",
+        "sharing",
+        "freedom",
+        "share",
+        "commons",
+        "genre:community-playlist:8300"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "community-playlist:8300"
+        }
+      ],
+      "candidate_id": "openmusic:b1f9e381550c6af8cdd7cff7",
       "quality_score": 82
     },
     {
@@ -3135,10 +3373,6 @@
         {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:blues"
         }
       ],
       "candidate_id": "openmusic:db7211a775298f8e3e72e788",
@@ -3343,11 +3577,11 @@
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "vocal-pool:spoken_word"
+          "matched_query": "freedom"
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "freedom"
+          "matched_query": "vocal-pool:spoken_word"
         }
       ],
       "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
@@ -3554,10 +3788,6 @@
         {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:ambient"
         }
       ],
       "candidate_id": "openmusic:80a750778c06f1157a34a7aa",
@@ -3674,10 +3904,6 @@
         },
         {
           "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
           "matched_query": "genre:funk"
         }
       ],
@@ -3813,10 +4039,6 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
-          "matched_query": "genre:funk"
         }
       ],
       "candidate_id": "openmusic:67428b002bc563392fea3623",
@@ -3895,10 +4117,6 @@
         },
         {
           "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
           "matched_query": "genre:funk"
         }
       ],
@@ -4073,10 +4291,6 @@
         },
         {
           "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
           "matched_query": "genre:funk"
         }
       ],
@@ -4280,10 +4494,6 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "genre:hip_hop"
-        },
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "genre:hip_hop"
         }
       ],
       "candidate_id": "openmusic:d2d4f3ec6faee9ee73cd0339",
@@ -4438,6 +4648,10 @@
         },
         {
           "playlist_id": "civweave",
+          "matched_query": "collaboration"
+        },
+        {
+          "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
         },
         {
@@ -4447,10 +4661,6 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
-          "matched_query": "collaboration"
         }
       ],
       "candidate_id": "openmusic:1a18c603676f255edc2886b3",
@@ -4521,10 +4731,6 @@
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "genre:chill"
-        },
-        {
-          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         }
       ],
@@ -5314,10 +5520,6 @@
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "genre:chill"
-        },
-        {
-          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         }
       ],
