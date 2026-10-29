@@ -108,6 +108,7 @@ def record_from_item(
     curated: dict | None = None,
     preferred_terms: list[str],
     minimum_teeth: int,
+    genre_tag: str | None = None,
 ) -> dict | None:
     lic = base.ccmixter_license(item, requested_license)
     files = base.ccmixter_files(item)
@@ -123,11 +124,16 @@ def record_from_item(
     if curated is None:
         if not has_vocal_signal(item):
             return None
-        score, themes = teeth_score(item, preferred_terms)
-        if score < minimum_teeth:
+        name = normalized_text(item.get("upload_name") or item.get("name") or item.get("title"))
+        if any(part in name for part in ("vocal stem", "instrumental stem", "acappella stem", "sample pack", "stems only", "loop pack", "demo snippet")):
             return None
+        score, themes = teeth_score(item, preferred_terms)
+        if genre_tag is None and score < minimum_teeth:
+            return None
+        if genre_tag is not None:
+            themes.append("genre:" + genre_tag)
         explicit = None  # Lyrical language unreviewed; never imply family-safe.
-        curation = "metadata-discovered"
+        curation = "genre-discovered" if genre_tag is not None else "metadata-discovered"
         vocal_evidence = "ccMixter source metadata contains an affirmative vocal/voice/lyric marker"
     else:
         score = max(minimum_teeth, min(5, int(curated.get("teeth_score") or minimum_teeth)))
@@ -222,6 +228,49 @@ def harvest_discovery(playlist: dict, policy: dict) -> tuple[list[dict], list[di
     return records, failures
 
 
+def harvest_genre_discovery(playlist: dict, policy: dict, settings: dict) -> tuple[list[dict], list[dict]]:
+    """Find additional genuinely licensed vocal recordings by source genre tags.
+
+    Genre can support a station's musical character, not its lyrical ideology.
+    No lyrics are presumed safe without a separate lyric audit.
+    """
+    records, failures = [], []
+    preferred = list(policy.get("preferred_terms") or [])
+    minimum = max(1, min(5, int(policy.get("minimum_teeth_score") or 2)))
+    per_page = max(5, min(40, int(settings.get("results_per_page") or 35)))
+    pages = max(1, min(5, int(settings.get("pages_per_tag") or 3)))
+    classes = [value for value in (settings.get("license_classes") or ["by", "sa"]) if value in ("by", "sa", "pd")]
+    for genre in (playlist.get("genre_tags") or []):
+        for requested in classes:
+            for offset in range(0, per_page * pages, per_page):
+                try:
+                    rows = ccmixter_rows({
+                        "f": "json", "dataview": "info", "limit": per_page,
+                        "offset": offset, "tags": genre, "type": "any", "lic": requested,
+                        "sort": "num_scores", "ord": "desc",
+                    })
+                    if not rows:
+                        break
+                    for item in rows:
+                        record = record_from_item(
+                            playlist, item, requested, f"genre:{genre}",
+                            curated=None, preferred_terms=preferred,
+                            minimum_teeth=minimum, genre_tag=genre,
+                        )
+                        if record:
+                            records.append(record)
+                    if len(rows) < per_page:
+                        break
+                except Exception as exc:
+                    failures.append({
+                        "provider": "ccmixter", "playlist_id": playlist["id"],
+                        "query": f"genre:{genre}", "license_class": requested,
+                        "offset": offset, "error": base.clean(exc, 900),
+                    })
+                    break
+    return records, failures
+
+
 def enrich_outputs(config: dict) -> None:
     catalog_path = OUTPUT_DIR / "catalog.json"
     daily_path = OUTPUT_DIR / "daily-batch.json"
@@ -291,19 +340,21 @@ def main() -> None:
 
     records, failures = [], []
     playlists = config.get("playlists") or []
+    genre_settings = config.get("genre_discovery") or {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        futures = {
-            executor.submit(harvest_discovery, playlist, policy): playlist
-            for playlist in playlists
-        }
+        futures = {}
+        for playlist in playlists:
+            futures[executor.submit(harvest_discovery, playlist, policy)] = ("themed", playlist)
+            if genre_settings.get("enabled") is True:
+                futures[executor.submit(harvest_genre_discovery, playlist, policy, genre_settings)] = ("genre", playlist)
         for playlist in playlists:
             curated, curated_failures = harvest_curated(playlist, policy)
             records.extend(curated)
             failures.extend(curated_failures)
         for future in concurrent.futures.as_completed(futures):
-            playlist = futures[future]
+            lane, playlist = futures[future]
             discovered, discovery_failures = future.result()
-            print(f"{playlist['id']:15} discovered={len(discovered):3}")
+            print(f"{playlist['id']:15} {lane} discovered={len(discovered):3}")
             records.extend(discovered)
             failures.extend(discovery_failures)
 
