@@ -234,7 +234,7 @@ def enrich_outputs(config: dict) -> None:
     policy = json.loads(policy_path.read_text(encoding="utf-8"))
 
     by_id = {row.get("candidate_id"): row for row in catalog.get("records") or []}
-    fields = ("vocal_verified", "vocal_evidence", "instrumental_only", "teeth_score", "themes", "explicit", "curation")
+    fields = ("vocal_verified", "vocal_evidence", "instrumental_only", "teeth_score", "themes", "explicit", "curation", "playlist_id", "playlist_matches", "provider")
     for collection in (daily.get("candidates") or [], manifest.get("entries") or []):
         for row in collection:
             source = by_id.get(row.get("candidate_id")) or {}
