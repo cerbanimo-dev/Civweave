@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111316"><title>Creative & Business Tools · Civweave</title>
+  <link rel="manifest" href="/creator-suite/manifest.webmanifest">
+  <link rel="stylesheet" href="/creator-suite/creator-suite-v1.css">
+  <style>
+    .craft-wrap{max-width:1120px;margin:0 auto;padding:1rem 1rem 4rem}
+    .craft-intro{max-width:75ch;color:#c4ccd4;line-height:1.55}
+    .craft-filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.25rem 0}
+    .craft-filters button{background:#1b2228;color:#ecf0f4;border:1px solid #45515b;border-radius:.7rem;padding:.65rem .85rem;cursor:pointer}
+    .craft-filters button[aria-pressed=true]{background:#ecf0f4;color:#111316}
+    .craft-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:.75rem}
+    .craft-card{border:1px solid #34414b;background:#171c21;border-radius:1rem;padding:1rem;display:grid;align-content:start;gap:.55rem}
+    .craft-card h2{margin:0;font-size:1.15rem}.craft-card p{margin:0;color:#c4ccd4;line-height:1.45}
+    .craft-card .craft-status{font-size:.85rem;color:#f2ce7e}
+    .craft-card small{color:#a9b5c0}
+    .craft-card a{margin-top:.25rem;color:#b7dfff;text-underline-offset:3px}
+
+    .bridge-panel{margin:1rem 0 1.5rem;padding:1rem;border:1px solid #34414b;background:#171c21;border-radius:1rem;display:grid;gap:.8rem}
+    .bridge-fields{display:flex;flex-wrap:wrap;align-items:end;gap:.65rem}
+    .bridge-fields label{display:grid;gap:.35rem;flex:1 1 170px}
+    .bridge-fields input,.bridge-fields select{min-width:0;width:100%;padding:.65rem;border:1px solid #475664;border-radius:.5rem;background:#0b1014;color:#fff}
+    .bridge-fields button{padding:.7rem 1rem;background:#eaf2f8;border:0;border-radius:.5rem;font-weight:700;cursor:pointer}
+    .bridge-panel pre{white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:22rem;background:#0b1014;padding:.75rem;border-radius:.5rem}
+    .bridge-panel p{margin:.25rem 0;color:#bfcbd3}
+    .bridge-panel:focus{outline:2px solid #aecfe9;outline-offset:3px}
+  </style>
+</head>
+<body>
+  <header class="cs-header"><div><p class="cs-kicker">Civweave Creator Suite</p><h1>Creative & Business Tools</h1><p class="cs-subtitle">Open-source editing engines and optional business document services.</p></div><div class="cs-header-actions"><a class="cs-button cs-secondary" href="/creator-suite/">Back to Creator Suite</a><a class="cs-button cs-secondary" href="/creator-suite/setup.html">Install local tools</a></div></header>
+  <main class="craft-wrap">
+    <p class="craft-intro">This is a discovery and integration catalog, not an editor launcher. None of the upstream tools below can operate on Civweave files or receive AI instructions until its adapter is installed, granted the necessary permission and tested. The hosted ArtCraft AI service is deliberately excluded.</p>
+    <nav class="craft-filters" aria-label="Tool categories">
+      <button type="button" data-craft-filter="all" aria-pressed="true">All</button>
+      <button type="button" data-craft-filter="creative" aria-pressed="false">Creative</button>
+      <button type="button" data-craft-filter="cad" aria-pressed="false">CAD</button>
+      <button type="button" data-craft-filter="office" aria-pressed="false">Office</button>
+      <button type="button" data-craft-filter="services" aria-pressed="false">Document services</button>
+    </nav>
+    <section class="bridge-panel" id="wordcraft-panel" tabindex="-1" aria-label="Local WordCraft bridge">
+      <h2>WordCraft · local document tools</h2>
+      <p>Inspect DOCX files, extract text or export a PDF with a separately installed WordCraft CLI. The source file stays on your computer. This connector is not hosted by Civweave and is unavailable until you launch the companion process and authorize it.</p>
+      <p><a href="/creator-suite/setup.html">Setup instructions for Windows, macOS and Linux</a></p>
+      <div class="bridge-fields">
+        <label>One-session bridge token<input id="wordcraft-token" type="password" autocomplete="off" spellcheck="false" placeholder="Paste bridge token"></label>
+        <button id="wordcraft-connect" type="button">Connect local WordCraft</button>
+      </div>
+      <div class="bridge-fields">
+        <label>Your document<input id="wordcraft-file" type="file" accept=".docx,.odt,.rtf,.md,.txt"></label>
+        <label>Action<select id="wordcraft-action"><option value="inspect">Inspect structure</option><option value="text">Extract text</option><option value="pdf">Export separate PDF</option></select></label>
+        <button id="wordcraft-run" type="button">Run on selected file</button>
+      </div>
+      <p id="wordcraft-status" role="status" aria-live="polite">Start the loopback bridge on the same computer to enable this panel. No data is uploaded to Civweave servers.</p>
+      <pre id="wordcraft-output" aria-label="WordCraft result preview"></pre>
+    </section>
+    <section class="bridge-panel" id="cadcraft-panel" tabindex="-1" aria-label="Local CADCraft bridge">
+      <h2>CADCraft · local drawing tools</h2>
+      <p>Use the same bridge token from the WordCraft section above. CADCraft supports drawing inspection and separate SVG exports using a locally installed cadcraft-cli executable. Input DXF/DWG files are never overwritten.</p>
+      <div class="bridge-fields">
+        <label>Drawing<input id="cadcraft-file" type="file" accept=".dxf,.dwg"></label>
+        <label>Action<select id="cadcraft-action"><option value="info">Inspect drawing</option><option value="svg">Export separate SVG</option></select></label>
+        <button id="cadcraft-run" type="button">Run on drawing</button>
+      </div>
+      <p id="cadcraft-status" role="status" aria-live="polite">Install CADCraft CLI, start the local bridge and connect above.</p>
+      <pre id="cadcraft-output" aria-label="CADCraft drawing details"></pre>
+    </section>
+    <section class="bridge-panel" id="pdfcraft-panel" tabindex="-1" aria-label="Local PdfCraft bridge">
+      <h2>PdfCraft · PDF workflow tools</h2>
+      <p>Choose one PDF to inspect or extract text. Select exactly two PDFs to combine them into a new file. Originals remain unchanged; the total input limit is 8 MiB. Connect to the same local bridge above.</p>
+      <div class="bridge-fields">
+        <label>PDF file(s)<input id="pdfcraft-files" type="file" accept=".pdf,application/pdf" multiple></label>
+        <label>Action<select id="pdfcraft-action"><option value="info">Inspect PDF</option><option value="text">Extract text</option><option value="combine">Combine two PDFs</option></select></label>
+        <button id="pdfcraft-run" type="button">Run PDF action</button>
+      </div>
+      <p id="pdfcraft-status" role="status" aria-live="polite">Install PdfCraft CLI, start the local bridge and connect above.</p>
+      <pre id="pdfcraft-output" aria-label="PdfCraft PDF details or extracted text"></pre>
+    </section>
+    <p id="craft-count" aria-live="polite">Loading tool catalog…</p>
+    <section class="craft-grid" id="craft-list" aria-label="Upstream applications"></section>
+  </main>
+  <script src="/creator-suite/shared/craft-catalog-v1.js"></script>
+  <script src="/creator-suite/shared/ai-tools-v1.js"></script>
+  <script src="/creator-suite/craft-tools-v1.js"></script>
+  <script src="/creator-suite/wordcraft-connector-v1.js"></script>
+</body></html>
