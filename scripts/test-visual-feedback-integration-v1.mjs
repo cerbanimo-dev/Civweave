@@ -40,13 +40,13 @@ test('active capability pins select the implemented visual-workflow revisions',(
   const expected={
     'public/app/anarchadia-console-v139.html':['anarchadia-console-v158.js?v=1.0.10-civic-work-map','anarchadia-change-review-v165.js?v=1.0.6-receipt-outcome','anarchadia-runtime-stability-v159.js?v=1.0.10-governance-tabs','anarchadia-console-v139.css?v=interior-r6-civic-work-map'],
     'public/app/anarchadia-governance-v145.html':['anarchadia-governance-v145.js?v=native-tabs-r2'],
-    'public/app/persistent-system-shell-v1.html':['persistent-system-shell-v1.js?v=1.1.21-guild-quest-map-route','shared-review-surface-v234.js?v=1.0.6-map-first-review'],
-    'public/app/working-campus-v440.html':['shared-review-surface-v234.js?v=1.0.6-map-first-review'],
+    'public/app/persistent-system-shell-v1.html':['persistent-system-shell-v1.js?v=1.1.21-guild-quest-map-route','shared-review-surface-v234.js?v=1.0.7-map-focus-review'],
+    'public/app/working-campus-v440.html':['shared-review-surface-v234.js?v=1.0.7-map-focus-review'],
     'public/app/realm-console-v140.html':['cerbanimo-quest-engine-v144.js?v=quest-engine-r37-shared-outcome-scene','cerbanimo-quest-engine-v144.css?v=quest-engine-r37-shared-outcome-scene','cw-reward-ledger-v2.js?v=2.1.1-persisted-grants'],
     'public/app/cabinets/living-school/index.html':['living-school-cleanroom-v218.mjs?v=structured-single-v221-exact-quest-map-selection','living-school-cleanroom-v218.css?v=journey-receipts-v2','cw-reward-ledger-v2.js?v=2.1.1-persisted-grants'],
     'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs':['living-school-cleanroom-render-v218.mjs?v=quiz-journey-receipts-v2'],
     'public/app/fellowfare-cabinet-v144.html':['marketplace-v2.js?v=2.1.0-visual-workflow','marketplace-v2-capabilities.js?v=1.0.2-stable-order-target-visual-workflow','marketplace-v2.css?v=visual-workflow-v1','cw-reward-ledger-v2.js?v=2.1.1-persisted-grants'],
-    'public/app/install-boundary-v146.js':["'/app/shared-review-surface-v234.js':'1.0.6-map-first-review'","[CANONICAL_REWARD_LEDGER]:'2.1.1-persisted-grants'"]
+    'public/app/install-boundary-v146.js':["'/app/shared-review-surface-v234.js':'1.0.7-map-focus-review'","[CANONICAL_REWARD_LEDGER]:'2.1.1-persisted-grants'"]
   };
   for(const [file,pins] of Object.entries(expected)){const source=read(file);for(const pin of pins)assert.ok(source.includes(pin),`${file} must load ${pin}`)}
   for(const file of ['cerbanimo-chat-quest-capability-v2.js','cerbanimo-chat-quest-capability-v3.js','lud-human-tools-v1.js'])assert.ok(read(`public/app/${file}`).includes('quest-engine-r37-shared-outcome-scene'));

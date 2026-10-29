@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.6-map-first-review';
+const VERSION='1.0.7-map-focus-review';
 const REVISION='shared-review-surface-v234';
 const STYLE_ID='cw-shared-review-style-v234';
 const SURFACE_ID='cw-shared-review-surface-v234';
@@ -131,7 +131,7 @@ function handleMapAction(detail={},options={}){
   return false;
 }
 function openPersistentChat(system){
-  try{return globalThis.CivweavePersistentGuideChatV215?.open?.({guide:realm(system)})||null}catch{return null}
+  try{return globalThis.CivweavePersistentGuideChatV215?.open?.({guide:realm(system),focus:false})||null}catch{return null}
 }
 function chooseHost(source=null){
   const persistent=document.getElementById('cw-persistent-guide-chat-v215');

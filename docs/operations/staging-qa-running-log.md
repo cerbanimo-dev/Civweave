@@ -556,3 +556,6 @@ User explicitly diverted active focus from AI testing to the visual Quest map. N
 
 
 **Final local integration gate:** all executable commands from GuideFullDOMStartup, GuideArtifactLifecycle and GuildQuestPublications were run against the finalsource. Forty-six ordinarycontractfiles pass418/418; the threefullsource-graphworkerfiles runseparately toavoidCPUcontention pass7/7. Total425/425, shellintegrity52/52 andregisteredworkerbuildercheckpass. Thisincludesmainmapplacement,actualloaderrecovery,proofscope,streamfinalization,dependencycycle/performance,privacyprojection,allfour nativeroutes andretainedStarlingLoungecontracts. The fullpage scenarios use syntheticHTTPresponses; none is a newrealQwencompletion. Screenshot`qa-interwoven-quest-map-2026-10-29.jpg` inworkspaceparent shows the clearlylabelled unsaved specimen.
+
+
+**VIS-QUEST-04:** actualmapclick revealed canonicalchatopen queued composerfocus afterpathinspection, overridingkeyboardfocus. Newmicrotask-aware regression reproducedtheactualtextarea focussteal, thenpasseswhenreviewopen suppressescomposerfocus. Focusedmap/mainview/reviewregression22/22passafterthissmallrepair. No timing/retrylooporbusinessstatechangeadded.

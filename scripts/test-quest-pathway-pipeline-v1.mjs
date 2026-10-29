@@ -25,6 +25,7 @@ test('the saved generated response exposes its actual Quest trail immediately wi
 
 test('node inspection and editing enter canonical review, and Guild submission only enters the named preview route',async t=>{
   const b=await browser(t),map=b.chat.querySelector('[data-quest-pathway-map]');assert.ok(map);const before=b.win.localStorage.getItem(key);map.querySelector('[data-quest-map-action="inspect"][data-step-id="write-step"]').click();assert.equal(b.win.document.activeElement,b.win.document.querySelector('[data-review-path="0"]'));assert.equal(b.win.localStorage.getItem(key),before);
+  await Promise.resolve();assert.equal(b.win.document.activeElement,b.win.document.querySelector('[data-review-path="0"]'),'Opening the chat host must not steal keyboard focus back from the inspected path.');
   b.win.CivweaveSharedReviewSurfaceV234.close();map.querySelector('[data-quest-map-action="edit"]').click();assert.equal(b.win.document.activeElement,b.win.document.querySelector('[name="revisionNote"]'));assert.equal(b.win.localStorage.getItem(key),before);
   b.win.CivweaveSharedReviewSurfaceV234.close();map.querySelector('[data-quest-map-action="submit-guild"]').click();assert.deepEqual(JSON.parse(JSON.stringify(b.navigations)),[{system:'civweave',options:{nativePage:'guild-quests',submitQuest:'pipeline-quest',source:'quest-pathway-map'}}]);assert.equal(b.win.localStorage.getItem(key),before);
 });
