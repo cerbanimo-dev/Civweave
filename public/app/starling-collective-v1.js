@@ -32,7 +32,7 @@ function stored(){
   if(state?.schema!==SCHEMA||!Array.isArray(state.lines)||!Array.isArray(state.creations)||!state.lines.every(l=>l?.id&&l.createdAt&&l.state&&Array.isArray(l.events))||!state.creations.every(c=>c?.id&&Number.isFinite(Date.parse(c.at))))throw new Error('Starling storage has an invalid quota history. No new AI work can start.');
   return state;
 }
-function limits(state){const cutoff=Date.now()-DAY;return{active:state.lines.filter(l=>!TERMINAL.has(l.state)).length,maxActive:MAX_ACTIVE,createdInWindow:state.creations.filter(c=>Date.parse(c.at)>cutoff).length,maxCreatedInWindow:MAX_DAILY,windowHours:24}}
+function limits(state){const cutoff=Date.now()-DAY;return{active:state.lines.filter(l=>l.creationMode==='autonomous'&&!TERMINAL.has(l.state)).length,maxActive:MAX_ACTIVE,createdInWindow:state.creations.filter(c=>c.creationMode==='autonomous'&&Date.parse(c.at)>cutoff).length,maxCreatedInWindow:MAX_DAILY,windowHours:24,manualUnlimited:true}}
 function read(){const state=stored();return copy({...state,limits:limits(state),running:[...running.keys()]})}
 function save(state){
   state.revision=(Number(state.revision)||0)+1;state.updatedAt=now();
@@ -132,23 +132,23 @@ function attestation(result,config){
   if(!['server-auto','hosted'].includes(requested)&&actual.provider!==requested)throw new Error('The selected AI provider was substituted. Starling did not accept that response.');
   return actual;
 }
-async function reserve({intention,scope,shareIntention}){
+async function reserve({intention,scope,shareIntention,creationMode='manual'}){
   if(scope==='guild'&&(!guildStatus||!transport?.reserve))throw new Error('Connect the selected Guild before reserving a shared Quest line.');
   if(scope==='guild'&&shareIntention!==true)throw new Error('Explicit intention-sharing consent is required before Guild planning.');
-  const line=await mutate(state=>{const quota=limits(state);if(quota.active>=MAX_ACTIVE)throw new Error('Starling already has 3 active Quest lines. Complete or explicitly abandon a line to open a slot.');if(quota.createdInWindow>=MAX_DAILY)throw new Error('Starling has created 6 lines in the rolling last 24 hours. Abandonment does not reset this allowance.');const at=now(),next={id:uid(),intention,scope,state:'reserved',createdAt:at,updatedAt:at,events:[],context:planningContext(scope)};state.lines.unshift(next);state.creations.push({id:next.id,at});return next});
+  const line=await mutate(state=>{const quota=limits(state);if(creationMode==='autonomous'&&quota.active>=MAX_ACTIVE)throw new Error('Starling already has 3 active autonomous projects. Complete or abandon one to open a slot.');if(creationMode==='autonomous'&&quota.createdInWindow>=MAX_DAILY)throw new Error('Starling has created 6 autonomous projects in the rolling last 24 hours. Manual plans remain unlimited.');const at=now(),next={id:uid(),intention,scope,creationMode,state:'reserved',createdAt:at,updatedAt:at,events:[],context:planningContext(scope)};state.lines.unshift(next);state.creations.push({id:next.id,at,creationMode});return next});
   render();return line;
 }
-async function runLine({intention='',scope='local',shareIntention=false,signal}={}){
-  intention=clean(intention,4000);if(intention.length<12)throw new Error('Describe a concrete Guild Intention of at least 12 characters.');if(!['local','guild'].includes(scope))throw new Error('Choose local or Guild planning.');
+async function runLine({intention='',scope='local',shareIntention=false,creationMode='manual',signal}={}){
+  intention=clean(intention,4000);if(intention.length<12)throw new Error('Describe a concrete Guild Intention of at least 12 characters.');if(!['local','guild'].includes(scope))throw new Error('Choose local or Guild planning.');if(!['manual','autonomous'].includes(creationMode))throw new Error('Invalid plan creation mode.');
   // Select and probe the model before reserving a local creation slot.
   // The actual Guild reservation still precedes every AI inference call.
   const prepared=await preparePlannerRuntime();
-  const reserved=await reserve({intention,scope,shareIntention}),id=reserved.id,controller=new AbortController();
+  const reserved=await reserve({intention,scope,shareIntention,creationMode}),id=reserved.id,controller=new AbortController();
   running.set(id,controller);const {runtime,config,local}=prepared;
   const forwardAbort=()=>controller.abort(signal?.reason||new Error('Starling planning cancelled.'));if(signal?.aborted)forwardAbort();else signal?.addEventListener?.('abort',forwardAbort,{once:true});
   const active=()=>{if(controller.signal.aborted)throw controller.signal.reason||new Error('Starling planning cancelled.')};
   try{return await navigator.locks.request(INFERENCE_LOCK,{mode:'exclusive',signal:controller.signal},async()=>{
-    active();if(scope==='guild'){const reservation=await transport.reserve({lineId:id,title:intention.slice(0,150),intention});if(!reservation?.line?.id&&!reservation?.id)throw new Error('The Guild did not confirm a Quest-line reservation.');await update(id,line=>{line.reservation=copy(reservation);event(line,{kind:'authority',text:'The Guild reserved a shared slot. Your intention was shared with your explicit consent.'})})}
+    active();if(scope==='guild'){const reservation=await transport.reserve({lineId:id,title:intention.slice(0,150),intention,creationMode});if(!reservation?.line?.id&&!reservation?.id)throw new Error('The Guild did not confirm a Quest-line reservation.');await update(id,line=>{line.reservation=copy(reservation);event(line,{kind:'authority',text:'The Guild reserved a shared slot. Your intention was shared with your explicit consent.'})})}
     active();await update(id,line=>{line.state='planning';line.requested={provider:config.provider,model:clean(config.model,240)};event(line,{kind:'started',text:'Three bounded public planning turns started. Models can propose work; they cannot activate, publish or complete a Quest.'+(local?' Local models can take several minutes per turn; keep this planning window open.':'')})});
     const outputs=[];
     for(const role of ROLES){
@@ -229,7 +229,7 @@ function outputText(value){if(!value)return'';if(value.paths)return `${value.tit
 function render(){
   if(!root?.isConnected)return;const error=root.querySelector('[data-starling-error]');if(error){error.textContent=lastError;error.hidden=!lastError}
   let state;try{state=read()}catch(e){if(error){error.textContent=e.message;error.hidden=false}return}
-  const c=context(),quota=root.querySelector('[data-starling-quota]');if(quota)quota.textContent=`${state.limits.active} / 3 active lines · ${state.limits.createdInWindow} / 6 created in the rolling last 24 hours`;
+  const c=context(),quota=root.querySelector('[data-starling-quota]');if(quota)quota.textContent=`Manual plans: unlimited · Autonomous: ${state.limits.active} / 3 active projects · ${state.limits.createdInWindow} / 6 created in the rolling last 24 hours`;
   const capacity=root.querySelector('[data-starling-capacity]');if(capacity)capacity.innerHTML=`<dl><div><dt>Your Passport</dt><dd>${esc(c.passport.passportId||'Unavailable')}</dd></div><div><dt>Guild Hero count</dt><dd>${c.guild.heroCount===null?'Not verified':esc(c.guild.heroCount)}</dd></div><div><dt>Reported Passport Heroes</dt><dd>${c.guild.reportedPassportHeroes==null?'Unknown':esc(c.guild.reportedPassportHeroes)} · opt-in member claims</dd></div><div><dt>Known Guild member accounts</dt><dd>${c.guild.knownMemberCount==null?'Unknown':esc(c.guild.knownMemberCount)} · accounts can include multiple devices</dd></div><div><dt>Guild context</dt><dd>${esc(c.guild.status)}</dd></div><div><dt>Skill coverage</dt><dd>${esc(c.guild.skillsCoverage||'unknown')}${c.guild.observedAt?' · read '+esc(new Date(c.guild.observedAt).toLocaleString()):''}</dd></div><div><dt>Your recorded skills</dt><dd>${c.passport.skills===null?'Ledger unavailable':c.passport.skills.length?c.passport.skills.map(s=>`${esc(s.name)} (${esc(s.xp)} XP)`).join(' · '):'No Skill XP receipts; skills unknown'}</dd></div><div><dt>Guild shared skill claims</dt><dd>${c.guild.skills===null?'Unknown — no shared roster received':c.guild.skills.length?c.guild.skills.map(s=>`${esc(s.name)}${s.reportedHeroes?' · '+esc(s.reportedHeroes)+' reported Heroes':''}`).join('; '):'No shared skill claims; skills remain unknown'}</dd></div></dl>${c.guild.profiles?.length?`<details><summary>Inspect shared Passport profiles</summary>${c.guild.profiles.map(p=>`<p><strong>${esc(p.passportId)}</strong> · member-reported, unverified<br>${p.skillsKnown&&p.skills.length?p.skills.map(s=>`${esc(s.name)} (${esc(s.xp)} XP)`).join(' · '):'Skills unknown'}<br><small>${p.updatedAt?esc(new Date(p.updatedAt).toLocaleString()):'Update time unavailable'}</small></p>`).join('')}</details>`:''}${c.guild.intentionProposals?.length?`<details><summary>Human Intention proposals · not an adopted vote</summary>${c.guild.intentionProposals.map(i=>`<p>${esc(i.text)}</p>`).join('')}</details>`:''}<small>Only your current account’s canonical Skill XP is read locally. Shared profiles are consenting member claims. Skill receipts do not guarantee availability or qualification.</small>`;
   const connected=root.querySelector('[data-starling-connected]');if(connected){connected.textContent=guildStatus?`Connected to ${c.guild.guildId||'selected Guild'} · ${c.guild.source}`:'Local planning. Guild data is read only after Connect.'}
   root.querySelectorAll('[data-starling-needs-guild]').forEach(el=>el.disabled=!guildStatus);
