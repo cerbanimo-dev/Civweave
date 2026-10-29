@@ -217,6 +217,41 @@
           "source_url": "https://ccmixter.org/files/unreal_dm/28114",
           "source_license_seen": "CC-BY",
           "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "58199",
+          "title": "Turn Up the Peace",
+          "artist": "Mr_Yesterday",
+          "themes": [
+            "peace",
+            "hope",
+            "cooperation"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "61846",
+          "title": "We are Them",
+          "artist": "Mr_Yesterday",
+          "themes": [
+            "solidarity",
+            "community",
+            "action"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "28096",
+          "title": "Freedom To Share",
+          "artist": "Mana Junkie",
+          "themes": [
+            "sharing",
+            "creative commons"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
         }
       ]
     },
@@ -420,6 +455,18 @@
           "source_url": "https://ccmixter.org/files/SackJo22/40534",
           "source_license_seen": "CC-BY",
           "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33699",
+          "title": "The Right Voice",
+          "artist": "SackJo22",
+          "themes": [
+            "learning",
+            "choices",
+            "self-reflection"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
         }
       ]
     },
@@ -977,6 +1024,51 @@
           "source_url": "https://ccmixter.org/files/Coruscate/68869",
           "source_license_seen": "CC-BY",
           "review_status": "web-source-license-and-description-only; full audio and lyric review pending"
+        },
+        {
+          "id": "33646",
+          "title": "Rooted In Peace",
+          "artist": "Admiral Bob",
+          "themes": [
+            "peace",
+            "ecology",
+            "mutual care"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "64910",
+          "title": "Bodies In The Street",
+          "artist": "Radioontheshelf",
+          "themes": [
+            "solidarity",
+            "justice"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "56027",
+          "title": "J'ai un rêve (mixage de sensation)",
+          "artist": "Bluemillenium",
+          "themes": [
+            "freedom",
+            "justice"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
+        },
+        {
+          "id": "27917",
+          "title": "The Remixin' Blues",
+          "artist": "Admiral Bob",
+          "themes": [
+            "creative freedom",
+            "sharing"
+          ],
+          "review_status": "web-source-license-and-description-only; full audio and lyric review pending",
+          "source_license_seen": "CC-BY"
         }
       ]
     }
@@ -1010,5 +1102,58 @@
     "require_api_license_confirmation": true,
     "exclude_from_safe_mode": true,
     "note": "Web-source license review is not a listen-through. Do not infer explicit:false or human lyric audit from source-page metadata."
+  },
+  "community_playlist_discovery": {
+    "enabled": true,
+    "max_uploads_per_playlist": 85,
+    "source_playlists": [
+      {
+        "id": "11087",
+        "name": "Tubed BY You CC BY",
+        "system": "civweave",
+        "themes": [
+          "creative commons",
+          "collaborative music",
+          "sharing"
+        ],
+        "evidence": "ccMixter community playlist compiled for CC BY music for film and video; uploader licenses separately verified"
+      },
+      {
+        "id": "9158",
+        "name": "By and By: Remixes",
+        "system": "living-school",
+        "themes": [
+          "transformation",
+          "resilience",
+          "hope",
+          "creative commons"
+        ],
+        "evidence": "ccMixter community remix project requiring CC BY contributions; actual upload license independently verified"
+      },
+      {
+        "id": "43545",
+        "name": "Community music playlist",
+        "system": "fellowfare",
+        "themes": [
+          "community",
+          "music",
+          "connection"
+        ],
+        "evidence": "ccMixter playlist of independently licensed tracks; every source upload is re-checked"
+      },
+      {
+        "id": "10742",
+        "name": "Tubed BY You-Mixes",
+        "system": "cerbanimo",
+        "themes": [
+          "making",
+          "collaboration",
+          "creative technology"
+        ],
+        "evidence": "ccMixter project playlist; not every track is CC BY, so non-allowlisted entries are rejected"
+      }
+    ],
+    "require_vocal_source_metadata": true,
+    "selection_note": "Community playlist membership supports the style fit only. Each full recording must have its own allowlisted CC BY/CC BY-SA license, MP3, voice signal, and no known explicit flag. Listening and lyric review remain pending."
   }
 }
