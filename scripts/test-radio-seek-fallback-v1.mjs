@@ -31,7 +31,7 @@ async function fixture({networkSeekable=false,gated=false,corrupt=false,oversize
   prototype.play=function(){plays++;state(this).paused=false;this.dispatchEvent(new w.Event('play'));return Promise.resolve()};
   prototype.pause=function(){state(this).paused=true;this.dispatchEvent(new w.Event('pause'))};
   Object.defineProperty(w.document,'readyState',{value:'complete'});w.eval(source);const api=w.CivweaveRadioStationSurfaceV1;
-  const settle=()=>new Promise(resolve=>setTimeout(resolve,20));api.open();await settle();await api.playTrack('one');await settle();
+  const settle=()=>new Promise(resolve=>setTimeout(resolve,60));api.open();await settle();await api.playTrack('one');await settle();
   const audio=w.document.querySelector('audio'),seek=w.document.querySelector('[data-radio-seek]');
   const chooseTime=value=>{seek.value=String(value);seek.dispatchEvent(new w.Event('input',{bubbles:true}));seek.dispatchEvent(new w.Event('change',{bubbles:true}))};
   return{dom,w,api,audio,seek,fetched,created,revoked,timeSets,chooseTime,release,releaseMetadata:()=>pendingMetadata.splice(0).forEach(finish=>finish()),settle,get plays(){return plays},get writes(){return writes}};
