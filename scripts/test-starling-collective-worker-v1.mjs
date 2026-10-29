@@ -176,3 +176,18 @@ test('malformed autonomous project does not mint a project and is recorded as fa
  assert.equal((await h.worker.readProjects('garden')).projects.length,0);
  assert.equal(h.signed.at(-1).payload.status,'failed');
 });
+
+test('signed main goal and project backlog survive disabling and resuming autonomous work',async()=>{
+ const h=harness();
+ h.model.runOneTurn=async()=>({id:'turn:project',payload:{text:generatedPlan}});
+ const goal='Create a neighborhood litter education and outreach program.';
+ await h.worker.enable('garden',{confirmConsent:()=>true,goal,siloMode:true});
+ await h.worker.tick('garden');
+ const first=await h.worker.readProjects('garden');
+ assert.equal(first.projects.length,1);
+ await h.worker.disable('garden');
+ await h.worker.enable('garden',{confirmConsent:()=>true,goal,siloMode:true});
+ const second=await h.worker.readProjects('garden');
+ assert.equal(second.projects.length,1);
+ assert.equal(first.goalId,second.goalId);
+});
