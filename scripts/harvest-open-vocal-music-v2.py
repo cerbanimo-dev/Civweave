@@ -274,6 +274,7 @@ def harvest_genre_discovery(playlist: dict, policy: dict, settings: dict) -> tup
 def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[list[dict], list[dict]]:
     """Long-tail source-tag discovery for review, not automatic lyric approval."""
     records, failures = [], []
+    diagnostics = []
     per_page = max(5, min(40, int(settings.get("results_per_page") or 35)))
     pages = max(1, min(20, int(settings.get("broad_pages_per_tag") or 12)))
     preferred = list(policy.get("preferred_terms") or [])
@@ -282,6 +283,7 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
         for requested in settings.get("license_classes") or ["by", "sa"]:
             if requested not in ("by", "sa", "pd"):
                 continue
+            scanned, accepted, pages_seen = 0, 0, 0
             for offset in range(0, per_page * pages, per_page):
                 try:
                     rows = ccmixter_rows({
@@ -291,6 +293,8 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
                     })
                     if not rows:
                         break
+                    scanned += len(rows)
+                    pages_seen += 1
                     for item in rows:
                         record = record_from_item(
                             playlist, item, requested, f"vocal-pool:{tag}",
@@ -300,6 +304,7 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
                         if record:
                             record["curation"] = "vocal-pool-unreviewed"
                             records.append(record)
+                            accepted += 1
                     if len(rows) < per_page:
                         break
                 except Exception as exc:
@@ -309,6 +314,13 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
                         "offset": offset, "error": base.clean(exc, 900),
                     })
                     break
+            diagnostics.append({"tag": tag, "license_class": requested, "pages_seen": pages_seen, "scanned": scanned, "accepted": accepted})
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    (OUTPUT_DIR / "vocal-pool-scan.json").write_text(json.dumps({
+        "schema": "civweave.open-music-vocal-pool-scan.v1",
+        "at": base.now_iso(), "diagnostics": diagnostics,
+        "note": "Source API result totals are pre-license and pre-quality filtering; these are candidate counts, not approved tracks.",
+    }, indent=2) + "\\n", encoding="utf-8")
     return records, failures
 
 
