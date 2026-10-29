@@ -65,7 +65,7 @@ async function request(guild,action,input=null){
     return packet;
   }catch(error){if(error.name==='AbortError')throw new Error('The Guild Collective did not respond. Retry when it is available.');throw error;}finally{clearTimeout(timer);}
 }
-async function reserve(guild,value={}){const title=clean(value.title,240);if(!title)throw new TypeError('A Collective Quest line title is required.');return request(guild,'reserve',{title,idempotencyKey:requiredId(value.idempotencyKey,'idempotency key')});}
+async function reserve(guild,value={}){const title=clean(value.title,240);if(!title)throw new TypeError('A Collective Quest line title is required.');return request(guild,'reserve',{title,idempotencyKey:requiredId(value.idempotencyKey,'idempotency key'),mode:value.mode==='autonomous'?'autonomous':'manual'});}
 async function propose(guild,value={}){return request(guild,'propose',{id:requiredLine(value.id),expectedRevision:revision(value.expectedRevision),quest:owner()?.preview(value.quest),provider:clean(value.provider,80)||'unknown',model:clean(value.model,180)||'unknown'});}
 async function confirm(guild,value={}){const confirmation=confirmed(value.confirmed);if(!hash(value.proposalHash))throw new TypeError('The reviewed proposal hash is required.');return request(guild,'confirm',{id:requiredLine(value.id),expectedRevision:revision(value.expectedRevision),proposalHash:value.proposalHash,confirmed:confirmation});}
 async function abandon(guild,value={}){return request(guild,'abandon',{id:requiredLine(value.id),expectedRevision:revision(value.expectedRevision),reason:clean(value.reason,1000)});}
