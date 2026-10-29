@@ -320,7 +320,7 @@ def harvest_broad_vocals(playlist: dict, policy: dict, settings: dict) -> tuple[
         "schema": "civweave.open-music-vocal-pool-scan.v1",
         "at": base.now_iso(), "diagnostics": diagnostics,
         "note": "Source API result totals are pre-license and pre-quality filtering; these are candidate counts, not approved tracks.",
-    }, indent=2) + "\\n", encoding="utf-8")
+    }, indent=2) + "\n", encoding="utf-8")
     return records, failures
 
 
