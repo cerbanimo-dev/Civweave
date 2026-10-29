@@ -122,11 +122,11 @@ def ccmixter_license(item: dict, requested: str) -> dict | None:
     lowered = f"{label} {url}".lower()
     if any(token in lowered for token in ("noncommercial", "no derivatives", "by-nc", "by-nd", "bync")):
         return None
-    if "creativecommons.org/publicdomain" in lowered or requested == "pd":
+    if "creativecommons.org/publicdomain" in lowered:
         return license_record("PUBLIC-DOMAIN", label or "Public Domain", url, evidence)
-    if "creativecommons.org/licenses/by-sa/" in lowered or requested == "sa":
+    if "creativecommons.org/licenses/by-sa/" in lowered:
         return license_record("CC-BY-SA", label or "CC BY-SA", url, evidence, True)
-    if "creativecommons.org/licenses/by/" in lowered or requested == "by":
+    if "creativecommons.org/licenses/by/" in lowered:
         return license_record("CC-BY", label or "CC BY", url, evidence)
     return None
 
