@@ -1,0 +1,7 @@
+{
+  "name": "seedling",
+  "title": "Living Library: Seedling",
+  "description": "Browse and download public-domain books over Wi-Fi. Passport/Moss chat runs in the secure Civweave companion.",
+  "version": "0.3.0",
+  "mount": "settings"
+}
