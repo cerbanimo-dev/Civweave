@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-daily-batch.v1",
-  "built_at": "2026-10-29T10:35:14Z",
-  "candidate_count": 89,
+  "built_at": "2026-10-29T10:37:30Z",
+  "candidate_count": 87,
   "candidates": [
     {
       "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
@@ -504,62 +504,6 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "freedom"
-        }
-      ]
-    },
-    {
-      "candidate_id": "openmusic:f9b5063c3c8d0cf781bbcf3d",
-      "playlist_id": "civweave",
-      "title": "Corruption (sample set for Strike the Root)",
-      "artist": "Octif",
-      "album": "",
-      "provider": "ccmixter",
-      "provider_id": "31395",
-      "source_url": "https://ccmixter.org/files/octif/31395",
-      "matched_query": "vocal-pool:male_vocals",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/octif/octif_-_Corruption_(sample_set_for_Strike_the_Root).mp3",
-          "mime": "",
-          "bytes": 1764837,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Octif",
-        "source_title": "Corruption (sample set for Strike the Root)",
-        "source_url": "https://ccmixter.org/files/octif/31395",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "quality_score": 73,
-      "governance_state": "anarchadia-nomination-candidate",
-      "spotify_required": false,
-      "rights_gate": "passed-explicit-redistribution",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share",
-        "genre:vocal-pool:male_vocals"
-      ],
-      "explicit": null,
-      "curation": "vocal-pool-unreviewed",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "vocal-pool:male_vocals"
         }
       ]
     },
@@ -5527,61 +5471,6 @@
         {
           "playlist_id": "anarchadia",
           "matched_query": "genre:reggae"
-        }
-      ]
-    },
-    {
-      "candidate_id": "openmusic:f072b117a6fab18f7c7e6d8b",
-      "playlist_id": "anarchadia",
-      "title": "The Most Beautiful Girl I've Ever Seen (Acapella)",
-      "artist": "Moe Train",
-      "album": "",
-      "provider": "ccmixter",
-      "provider_id": "7961",
-      "source_url": "https://ccmixter.org/files/moetrain/7961",
-      "matched_query": "genre:punk",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/moetrain/moetrain_-_The_Most_Beautiful_Girl_I_ve_Ever_Seen_(Acapella)_1.mp3",
-          "mime": "",
-          "bytes": 2831718,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Moe Train",
-        "source_title": "The Most Beautiful Girl I've Ever Seen (Acapella)",
-        "source_url": "https://ccmixter.org/files/moetrain/7961",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "quality_score": 70,
-      "governance_state": "anarchadia-nomination-candidate",
-      "spotify_required": false,
-      "rights_gate": "passed-explicit-redistribution",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 0,
-      "themes": [
-        "genre:punk"
-      ],
-      "explicit": null,
-      "curation": "genre-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "genre:punk"
         }
       ]
     }

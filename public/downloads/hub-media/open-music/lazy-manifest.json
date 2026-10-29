@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-10-29T10:35:14Z",
-  "entry_count": 57,
+  "built_at": "2026-10-29T10:37:30Z",
+  "entry_count": 55,
   "entries": [
     {
       "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
@@ -1596,58 +1596,6 @@
       "provider": "ccmixter"
     },
     {
-      "candidate_id": "openmusic:f9b5063c3c8d0cf781bbcf3d",
-      "title": "Corruption (sample set for Strike the Root)",
-      "artist": "Octif",
-      "source_url": "https://ccmixter.org/files/octif/31395",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "attribution": {
-        "creator": "Octif",
-        "source_title": "Corruption (sample set for Strike the Root)",
-        "source_url": "https://ccmixter.org/files/octif/31395",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/octif/octif_-_Corruption_(sample_set_for_Strike_the_Root).mp3",
-          "mime": "",
-          "bytes": 1764837,
-          "role": "source-download"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share",
-        "genre:vocal-pool:male_vocals"
-      ],
-      "explicit": null,
-      "curation": "vocal-pool-unreviewed",
-      "playlist_id": "civweave",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "vocal-pool:male_vocals"
-        }
-      ],
-      "provider": "ccmixter"
-    },
-    {
       "candidate_id": "openmusic:729b3951f4837a0078354778",
       "title": "Dirty Money Money Money Ft. Scomber & Duckett",
       "artist": "coruscate",
@@ -3124,57 +3072,6 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
-        }
-      ],
-      "provider": "ccmixter"
-    },
-    {
-      "candidate_id": "openmusic:f072b117a6fab18f7c7e6d8b",
-      "title": "The Most Beautiful Girl I've Ever Seen (Acapella)",
-      "artist": "Moe Train",
-      "source_url": "https://ccmixter.org/files/moetrain/7961",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "attribution": {
-        "creator": "Moe Train",
-        "source_title": "The Most Beautiful Girl I've Ever Seen (Acapella)",
-        "source_url": "https://ccmixter.org/files/moetrain/7961",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/moetrain/moetrain_-_The_Most_Beautiful_Girl_I_ve_Ever_Seen_(Acapella)_1.mp3",
-          "mime": "",
-          "bytes": 2831718,
-          "role": "source-download"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 0,
-      "themes": [
-        "genre:punk"
-      ],
-      "explicit": null,
-      "curation": "genre-discovered",
-      "playlist_id": "anarchadia",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "genre:punk"
         }
       ],
       "provider": "ccmixter"

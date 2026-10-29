@@ -1,11 +1,11 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-10-29T10:35:14Z",
-  "record_count": 57,
+  "built_at": "2026-10-29T10:37:30Z",
+  "record_count": 55,
   "failure_count": 0,
   "failures": [],
   "provider_counts": {
-    "ccmixter": 57
+    "ccmixter": 55
   },
   "records": [
     {
@@ -1819,66 +1819,6 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
-      "provider_id": "31395",
-      "playlist_id": "civweave",
-      "matched_query": "vocal-pool:male_vocals",
-      "title": "Corruption (sample set for Strike the Root)",
-      "artist": "Octif",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/octif/31395",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/octif/octif_-_Corruption_(sample_set_for_Strike_the_Root).mp3",
-          "mime": "",
-          "bytes": 1764837,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Octif",
-        "source_title": "Corruption (sample set for Strike the Root)",
-        "source_url": "https://ccmixter.org/files/octif/31395",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share",
-        "genre:vocal-pool:male_vocals"
-      ],
-      "explicit": null,
-      "curation": "vocal-pool-unreviewed",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "vocal-pool:male_vocals"
-        }
-      ],
-      "candidate_id": "openmusic:f9b5063c3c8d0cf781bbcf3d",
-      "quality_score": 73
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
       "provider_id": "35441",
       "playlist_id": "cerbanimo",
       "matched_query": "genre:hip_hop",
@@ -3563,65 +3503,6 @@
         }
       ],
       "candidate_id": "openmusic:c3457eeaf446ecb7314fff83",
-      "quality_score": 70
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "7961",
-      "playlist_id": "anarchadia",
-      "matched_query": "genre:punk",
-      "title": "The Most Beautiful Girl I've Ever Seen (Acapella)",
-      "artist": "Moe Train",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/moetrain/7961",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/moetrain/moetrain_-_The_Most_Beautiful_Girl_I_ve_Ever_Seen_(Acapella)_1.mp3",
-          "mime": "",
-          "bytes": 2831718,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Moe Train",
-        "source_title": "The Most Beautiful Girl I've Ever Seen (Acapella)",
-        "source_url": "https://ccmixter.org/files/moetrain/7961",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker",
-      "instrumental_only": false,
-      "teeth_score": 0,
-      "themes": [
-        "genre:punk"
-      ],
-      "explicit": null,
-      "curation": "genre-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "genre:punk"
-        }
-      ],
-      "candidate_id": "openmusic:f072b117a6fab18f7c7e6d8b",
       "quality_score": 70
     },
     {
