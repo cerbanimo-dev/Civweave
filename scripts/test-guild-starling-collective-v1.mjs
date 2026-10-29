@@ -187,3 +187,16 @@ test('unknown states, stale revisions, terminal resurrection and malformed ident
   await assert.rejects(call(store, alice, 'reserve', { idempotencyKey: '../escape', title: 'Bad' }), { status: 400 });
   await assert.rejects(call(store, alice, 'delete', { id: row.id }), { status: 405 });
 });
+
+test('manual shared Guild plans are unlimited and cannot consume autonomous creation slots',async()=>{
+ const store=new MemoryStorage();
+ for(let i=0;i<9;i++){
+  const created=await call(store,alice,'reserve',{idempotencyKey:'manual:'+i,title:'Manual project '+i,mode:'manual'});
+  assert.equal(created.line.creationMode,'manual');
+ }
+ const status=await call(store,alice,'status');
+ assert.equal(status.activeCount,0);assert.equal(status.createdInWindow,0);
+ const first=await reserve(store,'auto-1');
+ assert.equal(first.line.creationMode,'autonomous');
+ assert.equal((await call(store,alice,'status')).activeCount,1);
+});
