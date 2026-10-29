@@ -43,7 +43,7 @@ assert(shellAssets.includes("policy:'code-critical-shell-avatar-media-on-demand-
 assert(shellRepair.includes("event.data?.type!=='REPAIR_DEVICE_PACKAGE'"),'v293 must own explicit repair messaging.');
 assert(repairOnly.includes('cacheDistinctPath:true'),'Current repair bridge must declare its stale-cache escape.');
 assert(boundary.includes("const LAUNCH_SESSION_KEY='civweave.pwa.launch-session.v1'"),'Shared boundary must use the session-scoped PWA launch key.');
-assert(boundary.includes('function allowed(){return installedDisplay()||launchSession()||developer()}'),'Shared boundary must accept installed display or PWA launch session, never embedded browser state.');
+assert(boundary.includes('function allowed(){return installedDisplay()||launchSession()||developer()||iosBrowserSession()}'),'Shared boundary must allow explicit iOS browser access separately from installed PWA launch authorization.');
 assert(boundary.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session'"),'Shared boundary must declare launch-session installed policy.');
 assert(boundary.includes('installedQueryIsAuthorization:false'),'Query parameters alone must never authorize the campus.');
 assert(!boundary.includes('civweave.pwa.installed-capability.v1'),'Shared boundary must not retain the unsafe durable runtime capability.');
