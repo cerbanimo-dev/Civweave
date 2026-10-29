@@ -12,7 +12,8 @@ test('Lounge imports the one native Collective owner and existing Guild read cli
  assert.match(src,/starling-collective-tools-v1\.mjs/);
  assert.match(src,/CivweaveGuildQuestsV1/);
  assert.match(src,/reportedOnly|member-reported|member-published|member-reported/i);
- assert.doesNotMatch(src,/localStorage\.setItem|indexedDB\.open|api\/node\/quests\/publish/);
+ assert.doesNotMatch(src,/indexedDB\.open|api\/node\/quests\/publish/);
+ assert.match(src,/localStorage\.setItem\(hostPreference/);
 });
 test('Lounge uses Civweave chat only; no invented personal messaging or auto claims',()=>{
  const src=read('public/app/starling-lounge-v1.mjs');
