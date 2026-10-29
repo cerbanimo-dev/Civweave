@@ -125,7 +125,7 @@ def record_from_item(
         if not has_vocal_signal(item):
             return None
         name = normalized_text(item.get("upload_name") or item.get("name") or item.get("title"))
-        if any(part in name for part in ("vocal stem", "instrumental stem", "acappella stem", "sample pack", "stems only", "loop pack", "demo snippet")):
+        if any(part in name for part in ("vocal stem", "instrumental stem", "acappella stem", "acapella", "sample pack", "sample set", "stems only", "loop pack", "demo snippet", "vocal only", "instrumental only")):
             return None
         score, themes = teeth_score(item, preferred_terms)
         if genre_tag is None and score < minimum_teeth:
@@ -337,7 +337,7 @@ def enrich_outputs(config: dict) -> None:
         "vocal_required": True,
         "instrumental_only_rejected": True,
         "minimum_teeth_score": max(1, min(5, int(vocal_policy.get("minimum_teeth_score") or 2))),
-        "selection_rule": "Every published candidate has verified vocals and lyrical substance; instrumental-only candidates are rejected.",
+        "selection_rule": "Source license and vocal metadata are checked before discovery. Genre and vocal tags are signals, not listening or lyric audits. Only hand-seeded recordings were manually reviewed; other recordings remain unreviewed candidates and are excluded from S.A.F.E. playback.",
         "discovery_provider_scope": list(config.get("providers") or ["ccmixter"]),
     })
 
