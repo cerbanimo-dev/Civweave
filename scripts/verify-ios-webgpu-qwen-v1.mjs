@@ -24,7 +24,7 @@ assert.match(runtime,/config\.localApiFlavor==='ios-webgpu'/);
 assert.match(runtime,/return\{text:run\.text,model:run\.model,streamed:run\.streamed,backend:run\.backend/);
 assert.match(runtime,/networkInference:false/);
 assert.match(runtime,/config\.localApiFlavor\?\{localApiFlavor:config\.localApiFlavor,stream:config\.stream\}/);
-assert.match(campus,/settings-gateway-v317\.js\?v=1\.0\.139-ios-webgpu-qwen35/);
+assert.match(campus,/settings-gateway-v317\.js\?v=1\.0\.140-ios-webgpu-bundled-wasm/);
 assert.match(standalone,/Qwen 3\.5 0\.8B/);
 assert.match(standalone,/from '\/app\/local-ai\/ios-webgpu-qwen-v1\.js\?v=/);
 assert.match(standalone,/Test streamed tokens/);
