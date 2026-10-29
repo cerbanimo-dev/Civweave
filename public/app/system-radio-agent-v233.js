@@ -317,8 +317,8 @@ function loadSeekSource(source,signal){
 }
 async function seekTrack(value){
   if(!audio||!currentTrack||!Number.isFinite(audio.duration))return false;
-  if(currentTrack.streamOnly){try{for(let i=0;i<audio.seekable.length;i++)if(target>=audio.seekable.start(i)&&target<=audio.seekable.end(i)){audio.currentTime=target;updatePlaybackUi();return true}}catch{}status('Seeking is unavailable on this source stream.');return false}
   const target=Math.min(audio.duration,Math.max(0,Number(value)||0));
+  if(currentTrack.streamOnly){try{for(let i=0;i<audio.seekable.length;i++)if(target>=audio.seekable.start(i)&&target<=audio.seekable.end(i)){audio.currentTime=target;updatePlaybackUi();return true}}catch{}status('Seeking is unavailable on this source stream.');return false}
   if(pendingSeek&&pendingSeek.token===playbackToken&&pendingSeek.track.id===currentTrack.id){pendingSeek.target=target;updatePlaybackUi();return pendingSeek.promise}
   if(canSeekTo(target)){audio.currentTime=target;updatePlaybackUi();return true}
   const request={token:++playbackToken,track:currentTrack,target,wasPlaying:isPlaying,controller:new AbortController(),promise:null};
