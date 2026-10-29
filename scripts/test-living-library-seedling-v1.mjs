@@ -133,7 +133,7 @@ test('X4 Pro Wi-Fi plugin is public-only, points to a real public catalog and ne
  assert.equal(d.browse.items,'items');
  assert.equal(d.browse.fields.title,'title');
  assert.equal(d.download.dest_dir,'/Books/Seedling/Updates');
- assert.ok(/^https:\/\/raw\.githubusercontent\.com\//.test(d.browse.url));
+ assert.equal(d.browse.url,'https://civweave-staging.pages.dev/seedling/library-v1.json');
  assert.ok(c.items.every(b=>/^https:\/\/www\.gutenberg\.org\/ebooks\/\d+\.epub\.noimages$/.test(b.url)));
  assert.doesNotMatch(JSON.stringify(d)+JSON.stringify(m),/"(?:authorization|access_token|refresh_token|password|credential|secret)"\\s*:/i);
 });
