@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {REVIEW_PLAN_KEY,EVIDENCE_PREFIX,STAGED_KEY,stageManualDraft,stageBundleForReview,evidenceForPlan,validateSubmission} from '../public/app/living-library-seedling-bridge-v1.mjs';
 import {exportSeedlingEpub} from '../public/app/living-library-seedling-epub-v1.mjs';
+import {sessionStatus,getMossThread,sendToMoss,transcript} from '../public/app/living-library-seedling-connect-core-v1.mjs';
+import fs from 'node:fs';
 import {newDraft,livingSchoolPlan,guildBundle,validateDraft,normaliseSource,normaliseMedia,videoEmbed,externalUrl} from '../public/app/living-library-seedling-core-v1.mjs';
 
 const fixture=()=>{const d=newDraft();d.title='Read and memorize tarot';d.capability='Independently recognize and explain Major Arcana symbols';d.proof='Name a random card, identify three symbols, and explain the interpretation without looking';d.modules.forEach((m,i)=>Object.assign(m,{title:'Module '+(i+1),focus:'Learn topic '+(i+1),outcome:'Identify and explain topic '+(i+1)}));d.sources=[normaliseSource({title:'Historical article',url:'https://example.org/tarot-history',type:'article'})];d.media=[normaliseMedia({kind:'video',url:'https://www.youtube.com/watch?v=dQw4w9WgXcQ',title:'Demonstration'})];return d};
@@ -98,4 +100,46 @@ test('EPUB optional images enforce actual file signatures',()=>{
  d.media[0].kind='image';
  const fake=new Uint8Array([0,1,2,3,4]);
  assert.throws(()=>exportSeedlingEpub(d,{images:[{mediaId,name:'fake.png',bytes:fake}]}),/valid PNG or JPEG/);
+});
+
+test('Moss companion only uses canonical logged-in chat and never handles Passport tokens',async()=>{
+ const calls=[];
+ const frame={
+  CivweaveHubPassportAccountV1:{identity:()=>({userId:'member-1',credential:'sensitive-secret'}),current:()=>({accountName:'Guild member'})},
+  CivweaveGuideChatSurfaceV350:{open:x=>calls.push(['open',x]),submitText:async(...args)=>{calls.push(['submit',...args]);return true}},
+  CivweaveSettingsV320:{readState:()=>({provider:'server-auto',model:'account-selected'})},
+  CivweaveRealmSessionIntegrityV237:{readThread:system=>({messages:[{id:'1',role:'assistant',text:'Moss response',at:'2026-10-29'}]})}
+ };
+ assert.equal(sessionStatus(frame).session,true);
+ assert.equal(sessionStatus(frame).provider,'server-auto');
+ const result=await sendToMoss(frame,'Help me build a garden Learning Journey');
+ assert.equal(result.ok,true);
+ assert.equal(calls[0][0],'open');
+ assert.equal(calls[0][1].guide,'living-school');
+ assert.deepEqual(calls[1],['submit','Help me build a garden Learning Journey','living-school',{skipAddress:true}]);
+ assert.equal(getMossThread(frame)[0].text,'Moss response');
+ assert.match(transcript(result.thread),/Moss response/);
+ assert.doesNotMatch(JSON.stringify(result),'sensitive-secret');
+ await assert.rejects(()=>sendToMoss({},'Hello'),/Sign in/);
+});
+test('X4 Pro Wi-Fi plugin is public-only, points to a real public catalog and never carries credentials',()=>{
+ const p='public/seedling/crosspoint-plugin/seedling/';
+ const m=JSON.parse(fs.readFileSync(p+'manifest.json','utf8'));
+ const d=JSON.parse(fs.readFileSync(p+'device.json','utf8'));
+ const c=JSON.parse(fs.readFileSync('public/seedling/library-v1.json','utf8'));
+ assert.equal(m.name,'seedling');
+ assert.equal(c.schema,'civweave.seedling.public-library.v1');
+ assert.equal(c.items.length,14);
+ assert.equal(d.browse.items,'items');
+ assert.equal(d.browse.fields.title,'title');
+ assert.equal(d.download.dest_dir,'/Books/Seedling/Updates');
+ assert.ok(/^https:\/\/raw\.githubusercontent\.com\//.test(d.browse.url));
+ assert.ok(c.items.every(b=>/^https:\/\/www\.gutenberg\.org\/ebooks\/\d+\.epub\.noimages$/.test(b.url)));
+ assert.doesNotMatch(JSON.stringify(d)+JSON.stringify(m),/Bearer|password|token|Passport|credential|secret/i);
+});
+test('Moss companion links to the canonical chat surface and does not mint its own model endpoint',()=>{
+ const html=fs.readFileSync('public/app/living-library-seedling-connect-v1.html','utf8');
+ assert.match(html,/working-campus-v440\.html/);
+ assert.match(html,/sendToMoss\(w,prompt\)/);
+ assert.doesNotMatch(html,/\/api\/ai\/|apiKey|Authorization.*Bearer/);
 });
