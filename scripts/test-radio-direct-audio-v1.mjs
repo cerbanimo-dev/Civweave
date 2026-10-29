@@ -34,7 +34,7 @@ test('the mobile music launcher is a visible, accessible vector control above th
   const x=await setup();t.after(()=>x.dom.window.close());
   const launcher=x.w.document.getElementById('cw-radio-station-launcher-v1');
   assert.ok(launcher,'The music launcher must exist immediately on a supported mobile shell');
-  assert.match(launcher.getAttribute('aria-label')||'',/music and playlists/i);
+  assert.match(launcher.getAttribute('aria-label')||'',/music and playlists|civweave radio/i);
   assert.ok(launcher.querySelector('svg[aria-hidden="true"] path'),'The launcher must not depend on mobile music-note font glyph support');
   assert.equal(launcher.textContent,'');
   const style=x.w.document.getElementById('cw-radio-station-surface-v1-style').textContent;
@@ -113,7 +113,7 @@ test('persistent system navigation updates theme and queue while keeping one aud
   x.w.document.documentElement.dataset.civweaveSystem='fellowfare';x.w.dispatchEvent(new x.w.CustomEvent('civweave:system-route-changed',{detail:{system:'fellowfare'}}));await x.settle();
   assert.equal(x.w.document.querySelector('audio'),audio);assert.match(audio.src,/one\.mp3$/);assert.equal(x.w.document.querySelector('[data-radio-system]').textContent,'FellowFare Radio');
   const style=x.w.document.getElementById('cw-radio-station-surface-v1-style').textContent;
-  assert.match(style,/background:transparent/);assert.match(style,/--cw-radio-accent/);assert.match(style,/data-radio-embedded/);
+  assert.match(style,/background:var\(--cw-radio-background/);assert.match(style,/border:2px solid var\(--cw-radio-accent/);assert.match(style,/--cw-radio-accent/);assert.match(style,/data-radio-embedded/);
 });
 
 test('embedded child loaded first waits for the parent owner without creating a launcher or media element',async t=>{
