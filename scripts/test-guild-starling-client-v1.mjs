@@ -37,7 +37,7 @@ test('client loads without requests, delegates canonical session lookup, and pin
   const packet = await h.api.read(h.guild); assert.equal(packet.context.heroCount, null); assert.equal(packet.policy.maxActiveLines, 3);
   const line = await h.api.reserve(h.guild, { title: 'Fictional line', idempotencyKey: 'fictional-1', guildmaster: true, userId: 'forged', guildId: 'forged', options: { knownMemberCount: 200 } });
   assert.equal(line.line.userId, h.session.userId);
-  assert.deepEqual(h.calls.at(-1).body, { title: 'Fictional line', idempotencyKey: 'fictional-1' });
+  assert.deepEqual(h.calls.at(-1).body, { title: 'Fictional line', idempotencyKey: 'fictional-1', mode:'manual' });
   assert.equal(new URL(h.calls.at(-1).url).pathname, '/api/node/starling/reserve');
   assert.equal(new URL(h.calls.at(-1).url).searchParams.get('nodeId'), h.session.nodeId);
   assert.equal(h.calls.at(-1).init.headers.authorization, `Bearer ${h.session.token}`);
