@@ -337,7 +337,7 @@
       "owner": "public/app/shared/starling-collective-v1.mjs",
       "schema": "civweave.starling-collective.v1",
       "contract": "docs/contracts/starling-collective-guild-service-v1.md",
-      "stage": "native-foundation-no-autonomous-execution",
+      "stage": "explicit-founder-local-signed-rounds-no-background-or-hosted-execution",
       "rules": [
         "No parallel Guild, Quest, task, learning, governance, reward, fulfillment or inference ledger; always use existing canonical owners.",
         "Guildkeeper founding Intention remains provisional until superseded by validated human-member Guild ratification; agents never count as Guild voting members.",
@@ -350,7 +350,11 @@
         "tools/starling/aider-adapter-v1.mjs"
       ],
       "lounge": "public/app/starling-lounge-v1.mjs",
-      "maturity": "migration-foundation-plus-guildkeeper-intention-and-read-only-lounge"
+      "maturity": "manual-local-turns-and-bounded-persona-rounds-replayable-in-guild-lounge",
+      "turnExecutionOwner": "public/app/shared/starling-collective-turns-v1.mjs",
+      "turnStorageOwner": "public/app/local-object-mesh-v146.js",
+      "inferenceOwner": "public/app/shared/civweave-model-runtime.js",
+      "testWorkflow": ".github/workflows/starling-native-contract.yml"
     }
   }
 }
