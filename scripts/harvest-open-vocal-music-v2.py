@@ -10,6 +10,7 @@ must prove vocals from source metadata and score against the configured themes.
 from __future__ import annotations
 
 import importlib.util
+import concurrent.futures
 import json
 import urllib.parse
 from pathlib import Path
@@ -125,7 +126,7 @@ def record_from_item(
         score, themes = teeth_score(item, preferred_terms)
         if score < minimum_teeth:
             return None
-        explicit = False
+        explicit = None  # Lyrical language unreviewed; never imply family-safe.
         curation = "metadata-discovered"
         vocal_evidence = "ccMixter source metadata contains an affirmative vocal/voice/lyric marker"
     else:
@@ -289,14 +290,22 @@ def main() -> None:
         raise SystemExit("Vocal harvester requires require_vocals=true and reject_instrumental_only=true.")
 
     records, failures = [], []
-    for playlist in config.get("playlists") or []:
-        curated, curated_failures = harvest_curated(playlist, policy)
-        discovered, discovery_failures = harvest_discovery(playlist, policy)
-        print(f"{playlist['id']:15} curated={len(curated):2} discovered={len(discovered):3}")
-        records.extend(curated)
-        records.extend(discovered)
-        failures.extend(curated_failures)
-        failures.extend(discovery_failures)
+    playlists = config.get("playlists") or []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {
+            executor.submit(harvest_discovery, playlist, policy): playlist
+            for playlist in playlists
+        }
+        for playlist in playlists:
+            curated, curated_failures = harvest_curated(playlist, policy)
+            records.extend(curated)
+            failures.extend(curated_failures)
+        for future in concurrent.futures.as_completed(futures):
+            playlist = futures[future]
+            discovered, discovery_failures = future.result()
+            print(f"{playlist['id']:15} discovered={len(discovered):3}")
+            records.extend(discovered)
+            failures.extend(discovery_failures)
 
     summary = base.build_outputs(records, failures, config)
     enrich_outputs(config)
