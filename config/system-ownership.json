@@ -337,12 +337,14 @@
       "owner": "public/app/shared/starling-collective-v1.mjs",
       "schema": "civweave.starling-collective.v1",
       "contract": "docs/contracts/starling-collective-guild-service-v1.md",
-      "stage": "explicit-founder-local-signed-rounds-no-background-or-hosted-execution",
+      "stage": "manual-and-browser-scheduled-local-inference-no-headless-worker-or-canonical-task-claim",
       "rules": [
         "No parallel Guild, Quest, task, learning, governance, reward, fulfillment or inference ledger; always use existing canonical owners.",
         "Guildkeeper founding Intention remains provisional until superseded by validated human-member Guild ratification; agents never count as Guild voting members.",
         "Only explicitly permissioned human-authored Guild tasks may be offered or considered for authorized AI auto-claim; this owner does not perform claims.",
-        "Local use does not spend hosted credits; hosted Collective generation has daily tier limits inside the existing node AI neuron budget."
+        "Local use does not spend hosted credits; hosted Collective generation has daily tier limits inside the existing node AI neuron budget.",
+        "Browser scheduler may draft Guild Quest assistance offers only; native task claims and Cerbanimo completions require a future authenticated transactional API.",
+        "The Guildkeeper must explicitly opt in and may disable; all local automatic inference is bounded and leaves signed interruption receipts."
       ],
       "nodeAdapter": "lib/starling-collective-v1.mjs",
       "toolPolicy": "public/app/shared/starling-collective-tools-v1.mjs",
@@ -350,11 +352,13 @@
         "tools/starling/aider-adapter-v1.mjs"
       ],
       "lounge": "public/app/starling-lounge-v1.mjs",
-      "maturity": "manual-local-turns-and-bounded-persona-rounds-replayable-in-guild-lounge",
+      "maturity": "staging-opt-in-local-autopilot-signed-quest-offers-unclaimed",
       "turnExecutionOwner": "public/app/shared/starling-collective-turns-v1.mjs",
       "turnStorageOwner": "public/app/local-object-mesh-v146.js",
       "inferenceOwner": "public/app/shared/civweave-model-runtime.js",
-      "testWorkflow": ".github/workflows/starling-native-contract.yml"
+      "testWorkflow": ".github/workflows/starling-native-contract.yml",
+      "workerOwner": "public/app/shared/starling-collective-worker-v1.mjs",
+      "executionPolicy": "guildkeeper-explicit-local-autopilot-while-lounge-open-signed-receipts"
     }
   }
 }
