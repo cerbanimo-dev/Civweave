@@ -35,7 +35,8 @@ function normalizeTurn(payload,object){
 }
 export function createCollectiveTurnService({mesh,model,founder}={}){
   if(!mesh||!model||typeof founder!=='function')throw new TypeError('The native mesh, model runtime and Guild founder reader are required.');
-  let busy=false;
+  let busy=false,roundBusy=false;
+  const roundToken=Object.freeze({});
   async function genesis(guildId){
     const record=await mesh.getObject('guild-genesis:'+guildId);
     const valid=record&&record.kind==='civweave.guild-genesis.v1'
@@ -61,8 +62,8 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
     const max=Math.max(1,Math.min(200,Number.isInteger(limit)?limit:100));
     return Object.freeze(turns.slice(-max));
   }
-  async function runOneTurn({guildId,personaId,questId='',taskPrompt=''}={}){
-    if(busy)throw new Error('A Collective local model turn is already running.');
+  async function runOneTurn({guildId,personaId,questId='',taskPrompt=''}={},internalToken=null){
+    if(busy||(roundBusy&&internalToken!==roundToken))throw new Error('A Collective local model turn is already running.');
     busy=true;
     try{
       const guild=ensureGuildId(guildId),person=STARLING_PERSONAS[personaId];
@@ -100,5 +101,25 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
       });
     }finally{busy=false}
   }
-  return Object.freeze({readTurns,runOneTurn,isBusy:()=>busy});
+  /**
+   * A manually initiated bounded deliberation. All turns are persisted before
+   * the next actor starts; no simultaneous resident LLM instances are needed.
+   * One failed turn stops the round without rolling back previous signed turns.
+   */
+  async function runRound({guildId,personas=['kami','farah','rosa'],taskPrompt='',onTurn}={}){
+    if(busy||roundBusy)throw new Error('A Collective local model turn is already running.');
+    if(!Array.isArray(personas)||personas.length<2||personas.length>4||new Set(personas).size!==personas.length
+       ||personas.some(key=>!STARLING_PERSONAS[key]))throw new TypeError('Choose two to four distinct Starling personas.');
+    roundBusy=true;
+    let completed=0;
+    try{
+      for(const personaId of personas){
+        const record=await runOneTurn({guildId,personaId,taskPrompt},roundToken);
+        completed++;
+        if(typeof onTurn==='function'){try{onTurn(record,completed,personas.length)}catch{}}
+      }
+      return Object.freeze({schema:'civweave.starling-collective-round.v1',guildId,completed,total:personas.length,status:'recorded',completionVerified:false});
+    }finally{roundBusy=false}
+  }
+  return Object.freeze({readTurns,runOneTurn,runRound,isBusy:()=>busy||roundBusy});
 }
