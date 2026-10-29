@@ -134,6 +134,7 @@ def record_from_item(
     preferred_terms: list[str],
     minimum_teeth: int,
     genre_tag: str | None = None,
+    review_seed: dict | None = None,
 ) -> dict | None:
     lic = base.ccmixter_license(item, requested_license)
     files = base.ccmixter_files(item)
@@ -153,13 +154,16 @@ def record_from_item(
         if any(part in name for part in ("vocal stem", "instrumental stem", "acappella stem", "acapella", "sample pack", "sample set", "stems only", "loop pack", "demo snippet", "vocal only", "instrumental only")):
             return None
         score, themes = teeth_score(item, preferred_terms)
-        if genre_tag is None and score < minimum_teeth:
+        if genre_tag is None and review_seed is None and score < minimum_teeth:
             return None
         if genre_tag is not None:
             themes.append("genre:" + genre_tag)
+        if review_seed is not None:
+            curated_themes = [base.clean(value, 80) for value in review_seed.get("themes") or [] if base.clean(value, 80)]
+            themes = list(dict.fromkeys(curated_themes + themes))
         explicit = None  # Lyrical language unreviewed; never imply family-safe.
-        curation = "genre-discovered" if genre_tag is not None else "metadata-discovered"
-        vocal_evidence = "ccMixter source metadata contains an affirmative vocal/voice/lyric marker"
+        curation = "web-source-candidate" if review_seed is not None else ("genre-discovered" if genre_tag is not None else "metadata-discovered")
+        vocal_evidence = "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited"
     else:
         score = max(minimum_teeth, min(5, int(curated.get("teeth_score") or minimum_teeth)))
         themes = [base.clean(value, 80) for value in curated.get("themes") or [] if base.clean(value, 80)]
@@ -226,6 +230,48 @@ def harvest_curated(playlist: dict, policy: dict) -> tuple[list[dict], list[dict
                 failures.append({"provider": "ccmixter", "playlist_id": playlist["id"], "query": f"curated:{upload_id}", "error": "exact curated upload did not return an allowlisted downloadable record"})
         except Exception as exc:
             failures.append({"provider": "ccmixter", "playlist_id": playlist["id"], "query": f"curated:{upload_id}", "error": base.clean(exc, 900)})
+    return records, failures
+
+
+def harvest_review_candidates(playlist: dict, policy: dict) -> tuple[list[dict], list[dict]]:
+    """Import exact source-page-discovered candidates without claiming a listening review.
+
+    Each upload must independently pass the upstream license check, contain a
+    qualifying direct audio file, and exhibit affirmative vocal source metadata.
+    A web-page attribution statement alone never bypasses these checks.
+    """
+    records, failures = [], []
+    preferred = list(policy.get("preferred_terms") or [])
+    minimum = max(1, min(5, int(policy.get("minimum_teeth_score") or 2)))
+    for seed in playlist.get("review_candidates_ccmixter") or []:
+        uid = base.clean(seed.get("id"), 120)
+        if not uid or not uid.isdigit():
+            continue
+        try:
+            rows = ccmixter_rows({"f": "json", "dataview": "info", "ids": uid, "limit": 1})
+            matched = None
+            for item in rows:
+                if base.clean(item.get("upload_id") or item.get("id"), 120) != uid:
+                    continue
+                candidate = record_from_item(
+                    playlist, item, "by", f"source-page:{uid}", review_seed=seed,
+                    preferred_terms=preferred, minimum_teeth=minimum,
+                )
+                if candidate and candidate["license"]["spdx"] == "CC-BY":
+                    matched = candidate
+                    break
+            if matched:
+                records.append(matched)
+            else:
+                failures.append({
+                    "provider": "ccmixter", "playlist_id": playlist["id"], "query": f"source-page:{uid}",
+                    "error": "No CC-BY-licensed, audio-bearing, source-metadata-confirmed vocal recording for exact source upload ID",
+                })
+        except Exception as exc:
+            failures.append({
+                "provider": "ccmixter", "playlist_id": playlist["id"], "query": f"source-page:{uid}",
+                "error": base.clean(exc, 900),
+            })
     return records, failures
 
 
@@ -438,6 +484,10 @@ def main() -> None:
             curated, curated_failures = harvest_curated(playlist, policy)
             records.extend(curated)
             failures.extend(curated_failures)
+            review_candidates, review_failures = harvest_review_candidates(playlist, policy)
+            print(f"{playlist['id']:15} web-sourced candidates={len(review_candidates):3}")
+            records.extend(review_candidates)
+            failures.extend(review_failures)
         for future in concurrent.futures.as_completed(futures):
             lane, playlist = futures[future]
             discovered, discovery_failures = future.result()
