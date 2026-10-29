@@ -117,3 +117,13 @@ test('automatic scan produces a reviewable offer linked to a verified published 
  assert.equal(h.signed.at(-1).payload.beatId,'beat-1');
  assert.equal(typeof worker.claimTask,'undefined');
 });
+
+test('a Quest beat already offered to is not repeatedly offered every automatic cycle',async()=>{
+ const h=harness();const beat={guildId:'garden',questId:'q1',beatId:'b1',beatTitle:'Write an accessibility guide',action:'suggest-offer-only',requiresCanonicalClaim:true};
+ const worker=createStarlingGuildWorker({mesh:h.mesh,turnService:h.model,founder:()=>({guildId:'garden',deviceId:'device:founder'}),now:()=>h.nowRef.value,randomId:()=>String(h.signed.length+1),readTaskOpportunities:async()=>[beat]});
+ await worker.enable('garden',{confirmConsent:()=>true,intervalMinutes:15,dailyLimit:3});
+ await worker.tick('garden');h.nowRef.value+=16*60000;
+ await worker.tick('garden');
+ assert.match(h.calls[0].taskPrompt,/accessibility guide/);
+ assert.doesNotMatch(h.calls[1].taskPrompt,/accessibility guide/);
+});
