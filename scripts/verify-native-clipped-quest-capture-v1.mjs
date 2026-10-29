@@ -7,8 +7,8 @@ const fast=readFileSync('public/app/local-ai/native-server-guide-fastpath-v1.js'
 const owner=readFileSync('public/extensions/civweave-weaveling-plan-json-v190.js','utf8');
 const campus=readFileSync('public/app/working-campus-v440.html','utf8');
 const shell=readFileSync('public/app/persistent-system-shell-v1.js','utf8');
-assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.197-clipped-quest-capture/);
-assert.match(shell,/guide-chat-surface-v350\.js\?v=1\.0\.197-clipped-quest-capture/);
+assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.200-interwoven-quest-map/);
+assert.match(shell,/guide-chat-surface-v350\.js\?v=1\.0\.200-interwoven-quest-map/);
 assert.match(fast,/function plausibleQuestRequest/);
 assert.match(fast,/commune\|community/);
 assert.match(fast,/export async function captureClippedQuest/);

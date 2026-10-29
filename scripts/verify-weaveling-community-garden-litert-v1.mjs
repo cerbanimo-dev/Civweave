@@ -102,7 +102,7 @@ for(const [a,b] of [
   ['civweave-weaveling-plan-json-v190.js','local-guide-control-bypass-v1.js'],
   ['local-guide-control-bypass-v1.js','guide-stream-thinking-v249.js']
 ])before(loader,a,b,'shared guide loader');
-includes(loader,'1.2.12-saved-quest-revision','shared guide loader');
+includes(loader,'1.2.13-explicit-dependency-order','shared guide loader');
 includes(loader,'1.4.1-ai-quest-lazy-route','shared guide loader');
 includes(loader,'aiQuestAuthoringRequired:true','shared guide loader');
 includes(loader,'structuredQuestOrchestratorSerialized:true','shared guide loader');

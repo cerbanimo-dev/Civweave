@@ -30,8 +30,8 @@ assert.match(quest,/questProgress\(args,'validated'/);
 assert.match(quest,/questProgress\(args,'saved'/);
 assert.match(quest,/questProgress\(args,'failed'/);
 assert.match(quest,/state:'review'/);
-assert.match(working,/guide-chat-surface-v350\.js\?v=1\.0\.198-universal-artifact-rail/);
-assert.match(shell,/guide-chat-surface-v350\.js\?v=1\.0\.198-universal-artifact-rail/);
+assert.match(working,/guide-chat-surface-v350\.js\?v=1\.0\.200-interwoven-quest-map/);
+assert.match(shell,/guide-chat-surface-v350\.js\?v=1\.0\.200-interwoven-quest-map/);
 assert.match(authority,/TRACKER_VERSION='1\.2\.23/);
 assert.match(moss,/1\.2\.13-universal-quest-rail/);
 
