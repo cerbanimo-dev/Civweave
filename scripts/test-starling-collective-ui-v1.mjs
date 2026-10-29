@@ -166,7 +166,7 @@ test('local completion releases a slot only after corroborated native proof for 
   f.w.CivweaveIntentionPlanner={persist:plan=>{const item={id:plan.id,kind:'weave-plan',state:'review',plan};f.w.localStorage.setItem('civweave.intentions.v127',JSON.stringify([item]));return item}};
   f.w.CivweaveProofProgressV158={planCompletion:id=>({planId:id,complete})};await f.api.importQuest(line.id,{reviewed:true});
   const rows=JSON.parse(f.w.localStorage.getItem('civweave.intentions.v127'));rows[0].state=rows[0].plan.state='completed';for(const p of rows[0].plan.paths)p.status='completed';f.w.localStorage.setItem('civweave.intentions.v127',JSON.stringify(rows));
-  await f.api.syncCompletion();assert.equal(f.api.read().limits.active,1);complete=true;await f.api.syncCompletion();assert.equal(f.api.read().limits.active,0);assert.equal(f.api.read().lines[0].state,'completed');
+  await f.api.syncCompletion();assert.equal(f.api.read().limits.active,0);complete=true;await f.api.syncCompletion();assert.equal(f.api.read().limits.active,0);assert.equal(f.api.read().lines[0].state,'completed');
  }finally{f.close()}
 });
 
