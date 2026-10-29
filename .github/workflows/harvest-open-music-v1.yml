@@ -15,7 +15,7 @@ on:
       - scripts/test-open-vocal-music-v2.py
       - .github/workflows/harvest-open-music-v1.yml
   schedule:
-    - cron: '37 5 * * *'
+    - cron: '37 5 * * 1'
   workflow_dispatch:
 
 permissions:
