@@ -2,7 +2,7 @@
 // download, provider switch or network request occurs when Settings opens.
 (()=>{
 'use strict';
-const VERSION='1.0.1-ios-ai-local-openai-sse-stream-timeout';
+const VERSION='1.0.2-ios-ai-local-webview-frontend-offline-probe';
 if(globalThis.CivweaveIOSAiLocalSetupV1?.version===VERSION)return;
 const DEFAULT_BASE='http://127.0.0.1:11434';
 const APP_URL='https://apps.apple.com/us/app/ai-local/id6741479958';
@@ -102,6 +102,10 @@ function mount(target,{activate}={}){
   target.dataset.iosAiLocalMounted='1';
   target.innerHTML='<p>Use <b>ai.local</b> as an on-device iPhone inference server, without an APK, IPA, or a Civweave native bridge. Run Civweave inside ai.local’s built-in web browser when possible to keep the server in the foreground.</p>'+
     '<p><a href="'+APP_URL+'" target="_blank" rel="noopener noreferrer">Get ai.local on the App Store</a> · <a href="'+DOCS_URL+'" target="_blank" rel="noopener noreferrer">Provider API documentation</a></p>'+
+    '<p><b>If ai.local says “Frontend required”:</b> enter this HTTPS Civweave URL into ai.local’s Frontend URL / built-in Web View URL field. The AI server URL below is not a webpage.</p>'+
+    '<label>Civweave frontend URL <input data-ai-local-frontend-url type="url" readonly></label>'+
+    '<div class="cw-clean-grid"><button type="button" data-ai-local-copy-frontend>Copy Civweave frontend URL</button><a href="/app/ios-local-webview/index.html" data-ai-local-webview-check>Test iOS offline WebView / PWA support</a></div>'+
+    '<p>First load the frontend while online. Inside ai.local’s own web view, install/download the offline campus, then verify a reload in Airplane Mode with Wi-Fi disabled. Offline data saved in Safari belongs to a different browser context.</p>'+
     '<p>In ai.local install a model (Qwen 3.5 4B, if available), then start the local server. The default port is 11434. Use the on-device loopback address first; if it is not reachable, try the exact LAN IP/Bonjour address displayed by ai.local.</p>'+
     '<label>ai.local HTTP base address <input data-ai-local-base type="url" inputmode="url" spellcheck="false" value="'+DEFAULT_BASE+'"></label>'+
     '<div class="cw-clean-grid"><button type="button" data-ai-local-discover>Discover installed models</button></div>'+
@@ -110,6 +114,13 @@ function mount(target,{activate}={}){
     '<output data-ai-local-status role="status" aria-live="polite">No requests sent. Current AI route is unchanged.</output>'+
     '<p>Use the OpenAI-compatible <code>/v1/chat/completions</code> route. ai.local’s Ollama <code>/api/chat</code> ignores streaming, so it cannot satisfy Civweave’s visible-token requirement. This test does not silently switch to another model.</p>'+
     '<p>iOS may suspend ai.local when another app is foregrounded. Built-in browser compatibility, CORS, and background service behavior must be verified on the actual iPhone. The server is unauthenticated: do not expose it to an untrusted Wi-Fi network.</p>';
+  const frontend=target.querySelector('[data-ai-local-frontend-url]');
+  frontend.value=new URL('/app/working-campus-v440.html?iosLocal=1',globalThis.location.href).href;
+  target.querySelector('[data-ai-local-copy-frontend]')?.addEventListener('click',async()=>{
+    const output=target.querySelector('[data-ai-local-status]');
+    try{await navigator.clipboard.writeText(frontend.value);output.textContent='Copied Civweave frontend URL. Paste it into ai.local’s Web View/Frontend URL setting.'}
+    catch{frontend.select();output.textContent='Copy the selected frontend URL and paste it into ai.local’s Web View/Frontend URL setting.'}
+  });
   const baseInput=target.querySelector('[data-ai-local-base]'),select=target.querySelector('[data-ai-local-model]'),status=target.querySelector('[data-ai-local-status]'),discoverButton=target.querySelector('[data-ai-local-discover]'),testButton=target.querySelector('[data-ai-local-test]'),activateButton=target.querySelector('[data-ai-local-activate]');
   let discoveredEndpoint='',tested=null,busy=false;
   function invalidate(){tested=null;activateButton.disabled=true;testButton.disabled=true;select.disabled=true;discoveredEndpoint='';}
