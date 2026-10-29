@@ -5,6 +5,12 @@
 // tested at runtime, not assumed from the iPhone model name.
 const ENGINE_VERSION='1.0.0-ios-safari-qwen35-onnx-browser';
 const TRANSFORMERS='/app/vendor/transformers-v4/transformers.min.js';
+const WASM_ROOT='/app/vendor/transformers-v4/wasm/';
+const WASM_CHUNKS=Object.freeze([
+  WASM_ROOT+'ort-wasm-simd-threaded.jsep.wasm.part0',
+  WASM_ROOT+'ort-wasm-simd-threaded.jsep.wasm.part1'
+]);
+let wasmBinary=null,wasmLoading=null;
 const MODEL_SPECS=Object.freeze([
   Object.freeze({id:'qwen35-08b-onnx-webgpu',repo:'onnx-community/Qwen3.5-0.8B-ONNX-OPT',label:'Qwen 3.5 0.8B · Safari WebGPU',hint:'Start here · lowest memory',trial:false}),
   Object.freeze({id:'qwen35-2b-onnx-webgpu',repo:'onnx-community/Qwen3.5-2B-ONNX-OPT',label:'Qwen 3.5 2B · Safari WebGPU',hint:'Bigger memory test',trial:true}),
@@ -51,6 +57,29 @@ function configure(hf){
   hf.env.allowRemoteModels=true; // Only touched after a user-initiated prepare/generate.
   return hf;
 }
+async function configureWasm(hf){
+  const wasm=hf.env.backends?.onnx?.wasm;
+  if(!wasm)return;
+  wasm.numThreads=1; // WKWebView/Safari need not be cross-origin isolated.
+  wasm.simd=true;wasm.wasmPaths=WASM_ROOT;
+  if(!wasmBinary){
+    if(!wasmLoading)wasmLoading=(async()=>{
+      const parts=[];let total=0;
+      for(const path of WASM_CHUNKS){
+        const response=await fetch(path,{cache:'force-cache'});
+        if(!response.ok)throw error('IOS_WEBGPU_WASM_MISSING','Bundled ONNX WebGPU runtime chunk missing: '+path+' (HTTP '+response.status+').');
+        const bytes=new Uint8Array(await response.arrayBuffer());
+        if(!bytes.length)throw error('IOS_WEBGPU_WASM_EMPTY','Bundled ONNX WebGPU runtime chunk is empty: '+path);
+        parts.push(bytes);total+=bytes.byteLength;
+      }
+      const full=new Uint8Array(total);let offset=0;
+      for(const part of parts){full.set(part,offset);offset+=part.length}
+      return full;
+    })().then(bytes=>{wasmBinary=bytes;return bytes}).finally(()=>{wasmLoading=null});
+    await wasmLoading;
+  }
+  wasm.wasmBinary=wasmBinary;
+}
 export async function prepare(id,{onPhase}={}){
   const spec=nameFor(id);if(!spec)throw error('IOS_WEBGPU_MODEL_UNKNOWN','Select a listed ONNX WebGPU Qwen model.');
   if(busy)return busy;
@@ -63,6 +92,7 @@ export async function prepare(id,{onPhase}={}){
     // download cannot be reused as these are different formats.
     notify('loading-runtime',{model:id});
     const hf=configure(await import(TRANSFORMERS));
+    await configureWasm(hf);
     if(active&&active!==id)release();
     notify('loading-processor',{model:id,repo:spec.repo});
     const nextProcessor=await hf.AutoProcessor.from_pretrained(spec.repo,{progress_callback:value=>notify('download',{model:id,component:'processor',...value})});
