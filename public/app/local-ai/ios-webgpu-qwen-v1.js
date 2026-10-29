@@ -3,7 +3,7 @@
 // Downloads start only from an explicit user action. No model is loaded
 // on module import or opening Settings. Safari/WKWebView GPU viability is
 // tested at runtime, not assumed from the iPhone model name.
-const ENGINE_VERSION='1.0.0-ios-safari-qwen35-onnx-browser';
+const ENGINE_VERSION='1.0.1-ios-safari-qwen35-bundled-wasm';
 const TRANSFORMERS='/app/vendor/transformers-v4/transformers.min.js';
 const WASM_ROOT='/app/vendor/transformers-v4/wasm/';
 const WASM_CHUNKS=Object.freeze([
