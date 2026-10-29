@@ -62,10 +62,11 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
     const max=Math.max(1,Math.min(200,Number.isInteger(limit)?limit:100));
     return Object.freeze(turns.slice(-max));
   }
-  async function runOneTurn({guildId,personaId,questId='',taskPrompt=''}={},internalToken=null){
+  async function runOneTurn({guildId,personaId,questId='',taskPrompt='',workMode='conversation'}={},internalToken=null){
     if(busy||(roundBusy&&internalToken!==roundToken))throw new Error('A Collective local model turn is already running.');
     busy=true;
     try{
+      if(!['conversation','project','task-draft'].includes(workMode))throw new TypeError('Unsupported Collective work mode.');
       const guild=ensureGuildId(guildId),person=STARLING_PERSONAS[personaId];
       if(!person)throw new TypeError('Choose a known Starling persona.');
       const founding=await genesis(guild),owner=founder();
@@ -82,17 +83,17 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
         'Working style: '+person.style+'. Reasoning approach: '+person.wiring+'.',
         'The Guildkeeper founding Intention is provisional and not a human-ratified decision: '+goal,
         'Work toward that Intention without claiming to represent human Guild members.',
-        'Propose one concrete, testable next action. State what information is missing and distinguish guesses from verified facts.',
+        workMode==='project'?'Create a concise, actionable new AI project and reply ONLY a valid JSON object with title, outcome and tasks. Each task must include assignee, kind, title and text deliverable. No markdown, preambles or imaginary human participation.':workMode==='task-draft'?'Actually produce the requested written or code-draft deliverable NOW, in useful concrete form. Do not just propose doing it later. This output is a draft for human review, never verified completion.':'Propose one concrete, testable next action. State what information is missing and distinguish guesses from verified facts.',
         'Do not claim tools were run, people agreed, sources were searched, or Quest beats were completed.',
         'Do not issue tool commands, spend resources or ask for privileged data.',
-        'Stay under 220 words.'
+        workMode==='project'?'Keep JSON compact, with 1–4 tasks and no extra explanation.':workMode==='task-draft'?'Deliver useful content within 450 words.':'Stay under 220 words.'
       ].join('\n');
-      const messages=[{role:'system',content:system},...prior.map(row=>({role:'assistant',content:row.personaId+': '+row.text.slice(0,1000)})),{role:'user',content:clean(taskPrompt,1200)||'Suggest one useful next action for the Guild, taking previous Collective turns into account.'}];
-      const result=await model.generate({purpose:'starling-collective-local-turn-v1',executionProfile:'interactive',config,messages,maxTokens:440,requireExternalConsent:true});
+      const messages=[{role:'system',content:system},...prior.map(row=>({role:'assistant',content:row.personaId+': '+row.text.slice(0,1000)})),{role:'user',content:clean(taskPrompt,2600)||'Suggest one useful next action for the Guild, taking previous Collective turns into account.'}];
+      const result=await model.generate({purpose:'starling-collective-local-turn-v1',executionProfile:'interactive',config,messages,maxTokens:workMode==='conversation'?440:workMode==='project'?900:1100,requireExternalConsent:true});
       const text=readableOutput(result);
       if(result?.actual?.provider&& !allowed.has(result.actual.provider))throw new Error('Unexpected nonlocal model completed the request. No Collective turn was saved.');
       const turnId='starling-turn:'+guild+':'+crypto.randomUUID(),at=new Date().toISOString();
-      const payload={schema:STARLING_TURN_SCHEMA,turnId,guildId:guild,personaId:person.id,text,brief:clean(taskPrompt,1200),at,model:clean(result.actual?.model||config.model,200),questId:id(questId)||null,source:'local-model',completionVerified:false};
+      const payload={schema:STARLING_TURN_SCHEMA,turnId,guildId:guild,personaId:person.id,text,workMode,brief:clean(taskPrompt,1200),at,model:clean(result.actual?.model||config.model,200),questId:id(questId)||null,source:'local-model',completionVerified:false};
       return await mesh.createObject({
         id:turnId,revision:1,kind:STARLING_TURN_KIND,
         purpose:'Signed Starling Collective local-model turn for Guild member review, not verified task completion.',
