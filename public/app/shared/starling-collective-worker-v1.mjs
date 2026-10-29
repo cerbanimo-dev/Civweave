@@ -108,7 +108,7 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     let opportunity=null;
     if(typeof readTaskOpportunities==='function'){
       try{const candidates=await readTaskOpportunities(guild);
-        if(Array.isArray(candidates))opportunity=candidates.find(candidate=>candidate?.guildId===guild&&candidate.action==='suggest-offer-only'&&candidate.requiresCanonicalClaim===true&&clean(candidate.beatTitle,500))||null;
+        if(Array.isArray(candidates)){const alreadyOffered=new Set(events.filter(x=>x.status==='completed'&&x.offerOnly===true&&clean(x.beatId,180)).map(x=>x.beatId));opportunity=candidates.find(candidate=>candidate?.guildId===guild&&candidate.action==='suggest-offer-only'&&candidate.requiresCanonicalClaim===true&&clean(candidate.beatId,180)&&!alreadyOffered.has(candidate.beatId)&&clean(candidate.beatTitle,500))||null;}
       }catch{} // An unavailable Guild board cannot block offline intention work.
     }
     const runId=clean(String(randomId()),80);
