@@ -94,7 +94,7 @@ public final class PocketService extends Service {
         checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT)==PackageManager.PERMISSION_GRANTED);}
     @SuppressLint("MissingPermission") private void scan(){
         if(!allowed()){updateNotice("Grant Nearby devices permission");return;}
-        BluetoothAdapter adapter=manager.getAdapter();if(adapter==null||!adapter.isEnabled){updateNotice("Enable Bluetooth");return;}
+        BluetoothAdapter adapter=manager.getAdapter();if(adapter==null||!adapter.isEnabled()){updateNotice("Enable Bluetooth");return;}
         scanner=adapter.getBluetoothLeScanner();if(scanner==null)return;
         ScanFilter filter=new ScanFilter.Builder().setServiceUuid(new ParcelUuid(SERVICE)).build();
         scanner.startScan(Collections.singletonList(filter),new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(),scanCallback);
