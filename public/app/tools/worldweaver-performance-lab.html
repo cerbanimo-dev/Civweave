@@ -67,6 +67,12 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 </section>
 <section>
 <h2>4 · Set-building and 3D stage</h2>
+<div class="controls"><button id="propose-set" type="button">AI propose stage redesign</button><button id="approve-set" type="button">Approve proposed set</button><button id="reject-set" type="button">Reject set</button></div>
+<p id="stage-review" class="compact">Only director-approved set revisions become stage geometry.</p>
+<label for="cast-character">Role to bind</label><select id="cast-character"></select>
+<label for="cast-avatar">Avatar / approved rig reference</label><input id="cast-avatar" value="starling:kami" maxlength="180">
+<label for="cast-pilot">Model pilot principal</label><input id="cast-pilot" value="pilot:starling:kami" maxlength="180">
+<div class="controls"><button id="assign-avatar" type="button">Approve role casting</button></div>
 <canvas id="stage-viewer" width="660" height="290" aria-label="Procedural 3D stage and character stand-ins"></canvas>
 <div id="stage-map" aria-label="Same-stage 2D footprints"></div>
 <p id="stage-note" class="compact">Review a screenplay scene to build its provisional stage set. These are geometry stand-ins, not rigged OpenSimulator avatars.</p>
