@@ -195,14 +195,14 @@ const QUEST_DRAFT_SECTIONS=Object.freeze([
 function questSectionSystem(index){
   const section=QUEST_DRAFT_SECTIONS[index];
   if(!section)throw new RangeError('Unknown Quest draft section');
-  return `You are Weaveling drafting one section of a reviewable Civweave Quest, NOT final JSON or private reasoning. Respect the CURRENT user request. Write ONLY this section, not the entire plan. Keep it under 105 words; use compact plain language, specific actions and evidence instead of boilerplate. The model is called separately for each section, so do not repeat other sections. End the response with the exact final line [END SECTION]. Do not omit or change that marker.\\n\\n${section}`;
+  return `You are Weaveling drafting one section of a reviewable Civweave Quest, NOT final JSON or private reasoning. Respect the CURRENT user request. Write ONLY this section, not the entire plan. Keep it under 105 words; use compact plain language, specific actions and evidence instead of boilerplate. The model is called separately for each section, so do not repeat other sections. End the response with the exact final line [END SECTION]. Do not omit or change that marker.\n\n${section}`;
 }
 function completedQuestSection(text,index){
   const source=stripThink(text);
-  if(!/\\[END SECTION\\]\\s*$/i.test(source)){
+  if(!/\[END SECTION\]\s*$/i.test(source)){
     throw Object.assign(new Error(`Quest draft section ${index+1} ended without its completion marker. The partial output was saved; JSON compilation has not started.`),{code:'CIVWEAVE_WEAVE_DRAFT_INCOMPLETE',stage:'draft',section:index+1,rejectedText:source});
   }
-  const result=source.replace(/\\s*\\[END SECTION\\]\\s*$/i,'').trim();
+  const result=source.replace(/\s*\[END SECTION\]\s*$/i,'').trim();
   if(result.length<25)throw Object.assign(new Error(`Quest draft section ${index+1} did not contain enough usable content.`),{code:'CIVWEAVE_WEAVE_DRAFT_INCOMPLETE',stage:'draft',section:index+1,rejectedText:source});
   return result;
 }
@@ -321,13 +321,13 @@ function compactQuestPayload(schema,draft,budget=2300){
   const cut=cap=>{
     const txt=String(draft||'');
     if(txt.length<=cap)return txt;
-    const sections=txt.split(/\\n\\n(?=SECTION \\d+:)/);
+    const sections=txt.split(/\n\n(?=SECTION \d+:)/);
     if(sections.length===3){
       // Preserve each section's core information in a narrow phone context.
       const allotment=Math.max(35,Math.floor((cap-12)/3));
-      return sections.map(section=>section.slice(0,allotment)).join('\\n\\n');
+      return sections.map(section=>section.slice(0,allotment)).join('\n\n');
     }
-    return txt.slice(0,Math.floor(cap*.65))+'\\n[...details omitted for device context...]\\n'+txt.slice(-Math.floor(cap*.35));
+    return txt.slice(0,Math.floor(cap*.65))+'\n[...details omitted for device context...]\n'+txt.slice(-Math.floor(cap*.35));
   };
   for(const schemaShape of [shape,minimumDeviceSchema('quest',schema)]){
     for(const cap of [1500,1100,800,500,300,140]){
@@ -413,7 +413,7 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
         const text=await runLocal({pipelineId,purpose,kind,phase:'draft',label:`Local Weave Draft ${section+1}/${QUEST_DRAFT_SECTIONS.length}`,systemPrompt:questSectionSystem(section),messages:draftMessages,maxNewTokens:DRAFT_TOKENS.quest});
         const completed=completedQuestSection(text,section);
         parts.push(completed);
-        draft=parts.map((part,index)=>`SECTION ${index+1}:\\n${part}`).join('\\n\\n');
+        draft=parts.map((part,index)=>`SECTION ${index+1}:\n${part}`).join('\n\n');
         saveArtifact({...lastArtifact,state:'drafting',draftParts:[...parts],draft});
         dispatch({pipelineId,purpose,kind,phase:'draft',state:'checkpoint',label:`Section ${section+1}/${QUEST_DRAFT_SECTIONS.length} saved`,section:section+1,sectionCount:QUEST_DRAFT_SECTIONS.length,text:draft});
       }
