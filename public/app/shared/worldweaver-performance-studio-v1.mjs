@@ -178,7 +178,7 @@ export function createPerformanceStudio({id,clock,authorize,initialState}={}){
     const scene=find(next.proposals,command.sceneId,'scene');
     if(scene.status!=='approved')throw new Error('Review and approve the screenplay first');
     if(next.rehearsals.some(r=>r.status==='running'))throw new Error('Another rehearsal is active');
-    const run={id:id(),sceneId:scene.id,status:'running',startedAt:at,events:[],finishedAt:null};
+    const run={id:id(),sceneId:scene.id,status:'running',startedAt:at,events:[],activeMomentId:null,finishedAt:null};
     next.rehearsals.push(run);receipt.rehearsal=run.id;
    }else if(type==='perform-cue'){
     only(command,['type','rehearsalId','lineIndex','outcome','notes'],'cue');
@@ -196,7 +196,26 @@ export function createPerformanceStudio({id,clock,authorize,initialState}={}){
     if(actor.kind!=='human')throw new Error('Human must close rehearsal');
     const run=find(next.rehearsals,command.rehearsalId,'rehearsal');
     if(run.status!=='running')throw new Error('Rehearsal not running');
-    run.status='finished';run.finishedAt=at;receipt.rehearsal=run.id;
+    run.status='finished';run.finishedAt=at;run.activeMomentId=null;receipt.rehearsal=run.id;
+   }else if(type==='open-audience-moment'){
+    only(command,['type','rehearsalId','momentId'],'audience gate');
+    if(!['human','runtime'].includes(actor.kind))throw new Error('Only a trusted stage controller can open an audience moment');
+    const run=find(next.rehearsals,command.rehearsalId,'rehearsal');
+    if(run.status!=='running')throw new Error('Rehearsal must be running to open audience moment');
+    if(run.activeMomentId)throw new Error('A participation moment is already active');
+    const scene=find(next.proposals,run.sceneId,'scene');
+    if(!scene.moments.some(x=>x.id===command.momentId))throw new RangeError('Unknown audience moment');
+    run.activeMomentId=command.momentId;
+    run.events.push({type:'audience-open',momentId:run.activeMomentId,at});
+    receipt.momentId=run.activeMomentId;
+   }else if(type==='close-audience-moment'){
+    only(command,['type','rehearsalId'],'audience gate close');
+    if(!['human','runtime'].includes(actor.kind))throw new Error('Only a trusted stage controller can close an audience moment');
+    const run=find(next.rehearsals,command.rehearsalId,'rehearsal');
+    if(run.status!=='running'||!run.activeMomentId)throw new Error('There is no open audience moment');
+    receipt.momentId=run.activeMomentId;
+    run.events.push({type:'audience-close',momentId:run.activeMomentId,at});
+    run.activeMomentId=null;
    }else if(type==='submit-audience'){
     only(command,['type','rehearsalId','momentId','kind','text','consent'],'audience response');
     if(actor.kind!=='audience')throw new Error('Audience entries require verified audience principals');
@@ -207,6 +226,7 @@ export function createPerformanceStudio({id,clock,authorize,initialState}={}){
     if(run.status!=='running')throw new Error('Audience may respond only during a live rehearsal');
     const scene=find(next.proposals,run.sceneId,'scene'),moment=scene.moments.find(m=>m.id===command.momentId);
     if(!moment)throw new RangeError('Unknown audience invitation moment');
+    if(run.activeMomentId!==moment.id)throw new Error('Participation moment is not currently open');
     if(!['text','transcript','reaction'].includes(command.kind))throw new TypeError('Unsupported response type');
     if(next.audience.length>=STAGE_LIMITS.feedback)throw new TypeError('Audience feedback limit');
     const response={id:id(),rehearsalId:run.id,sceneId:scene.id,momentId:moment.id,
