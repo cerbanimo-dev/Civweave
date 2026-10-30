@@ -1,8 +1,9 @@
 import {CivweaveCodeWorkspaceV1 as work,publishReviewed,adoptReviewed} from './shared/code-mesh-workspace-v1.mjs';
 import {resolveCodeInferenceRoute,runCodeInference} from './shared/code-inference-route-v1.mjs';
+import {currentCreatorLocalSelection,loadCreatorLocalRuntime,loadCreatorServerRuntime} from './shared/creator-inference-loaders-v1.mjs';
 
 const el=id=>document.getElementById('cw-'+id),out=(id,value)=>{el(id).textContent=typeof value==='string'?value:JSON.stringify(value,null,2);};
-let workspaceId='',previewId='',inspectedId='',running=false,stopRequested=false,localRuntimeFlight=null,serverRuntimeFlight=null,generationController=null;
+let workspaceId='',previewId='',inspectedId='',running=false,stopRequested=false,generationController=null;
 const clean=(v,n=5000)=>String(v??'').slice(0,n);
 function showError(error){out('checks',error.message||String(error));}
 function option(value,label){const e=document.createElement('option');e.value=value;e.textContent=label;return e;}
@@ -43,52 +44,16 @@ function registerTools(){
     }
   });
 }
-function currentSelection(){
-  try{const live=globalThis.CivweaveLocalModelDownloadV266?.selection?.();if(live?.active&&live.id)return live;}catch{}
-  try{const saved=JSON.parse(localStorage.getItem('civweave.local-ai.selection.v266')||'null');return saved?.active&&saved.id?saved:null;}catch{return null;}
-}
 function config(){
   const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate)throw new Error('Shared Civweave model runtime is unavailable. Reopen the Code Workshop from the installed app.');
   const value=runtime.readSharedConfig?.('agentic')||runtime.readSharedConfig?.('interactive');
   if(!value?.provider)throw new Error('No AI provider is configured in this app origin. Choose a model in Civweave Settings, then reopen Code Workshop.');
-  const selection=currentSelection(),route=resolveCodeInferenceRoute(value,selection);
+  const selection=currentCreatorLocalSelection(),route=resolveCodeInferenceRoute(value,selection);
   if(['manual','deterministic'].includes(route.provider))throw new Error('AI Settings currently selects '+route.provider+'. Select an inference model to use in the Code Workshop.');
   if(route.kind==='shared'&&['gemini','hosted'].includes(route.provider)&&!value.externalConsent)
     throw new Error('Cloud consent or credentials are unavailable in this Code Workshop tab. Reopen it from Civweave or explicitly configure a permitted provider for this session.');
   return{runtime,value,route,selection};
-}
-function loadLocalRuntime(){
-  if(globalThis.CivweaveLocalChatRuntimeV295?.generate)return Promise.resolve(globalThis.CivweaveLocalChatRuntimeV295);
-  if(localRuntimeFlight)return localRuntimeFlight;
-  localRuntimeFlight=new Promise((resolve,reject)=>{
-    const script=document.createElement('script');
-    script.src='/app/local-chat-runtime-v295.js?v=1.0.120-local-chat-runtime-v305-moss-core-readiness';
-    script.onload=()=>{const owner=globalThis.CivweaveLocalChatRuntimeV295;if(owner?.generate)resolve(owner);else reject(new Error('The installed local-chat inference owner did not initialize.'));};
-    script.onerror=()=>reject(new Error('Could not load Civweave local model inference. Check that the installed app package is up to date.'));
-    document.head.append(script);
-  }).catch(error=>{localRuntimeFlight=null;throw error});
-  return localRuntimeFlight;
-}
-function loadServerRuntime(){
-  if(globalThis.CivweaveServerAIRouterV301?.handle)return Promise.resolve(globalThis.CivweaveServerAIRouterV301);
-  if(serverRuntimeFlight)return serverRuntimeFlight;
-  const load=src=>new Promise((resolve,reject)=>{
-    const script=document.createElement('script');
-    script.src=src;script.onload=resolve;script.onerror=()=>reject(new Error('Unable to load canonical Guild/Cloudflare AI routing: '+src));
-    document.head.append(script);
-  });
-  serverRuntimeFlight=(async()=>{
-    // These modules are the existing Civweave host-session and mesh clients,
-    // not a second hosted inference or permission implementation.
-    if(!globalThis.CivweaveHostNodeSessionV1)await load('/app/host-node-session-v1.js');
-    if(!globalThis.CivweaveNodeAIMeshV1)await load('/app/node-ai-mesh-v1.js');
-    await load('/app/server-ai-router-v301.js');
-    const router=globalThis.CivweaveServerAIRouterV301;
-    if(!router?.handle)throw new Error('Guild/Cloudflare inference router is unavailable in this app context.');
-    return router;
-  })().catch(e=>{serverRuntimeFlight=null;throw e});
-  return serverRuntimeFlight;
 }
 function modelStatus(){
   const display=el('model-status');if(!display)return;
@@ -159,7 +124,7 @@ async function runAgent(){
         {role:'system',content:'You are a code editing tool planner. Reply with valid JSON only, not Markdown.'},
         {role:'user',content:prompt(goal,state,limit,profile,nativeTermux(value))}
       ],{
-        selection,loadLocal:loadLocalRuntime,loadServer:loadServerRuntime,sharedRuntime:runtime,context:{workspaceId:id,taskTier:profile},signal:controller.signal,
+        selection,loadLocal:loadCreatorLocalRuntime,loadServer:loadCreatorServerRuntime,sharedRuntime:runtime,context:{workspaceId:id,taskTier:profile},signal:controller.signal,
         maxTokens:profile==='small'?2048:4096,
         onProgress:progress=>{phase=clean(progress?.phase||progress?.stage||'working',100);out('agent-result','Code AI · '+route.model+' · call '+calls+'/'+total+' · '+phase+(visible?'\n'+visible.slice(-900):''));},
         onToken:token=>{const chunk=typeof token==='string'?token:clean(token?.text||token?.content||'',12000);visible+=chunk;if(visible.length>120000)visible=visible.slice(-120000);out('agent-result','Code AI · '+route.model+' · call '+calls+'/'+total+' · '+phase+'\n'+visible.slice(-1200));}
