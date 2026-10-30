@@ -38,6 +38,6 @@ export function starlingNpcCommand({personaId,instanceId,modelId,pilotPrincipalI
     personaRef:`starling:${p.id}`,
     appearanceRef:seed.referenceAsset,
     pilotPrompt:small(`You are ${p.name}, a fictional Starling collaborator. Role: ${p.role}. Character style: ${p.style}. Working goal: ${p.goal}. Act in this simulated world using only permitted tools. Do not claim to be a human Guild member. Leave payments, voting, publishing, and Quest proof to their actual authorities.`,2500),
-    capabilities:capabilities??['observe','inspect','speak','move','demonstrate','present']
+    capabilities:capabilities??['observe','inspect','speak','move','demonstrate','present','cast-screen','clear-screen']
   };
 }
