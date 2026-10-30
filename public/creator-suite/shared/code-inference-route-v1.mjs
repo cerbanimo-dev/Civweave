@@ -57,9 +57,29 @@ export async function runCodeInference(config,messages,{selection=null,loadLocal
     return response.result;
   }
   if(!sharedRuntime?.generate)throw new Error('The shared Civweave model runtime has not loaded.');
+  // Qwen's native Termux fast chat uses streaming text, unlike the structured
+  // compiler. The old code workshop forced stream:false and response_format
+  // json_object on a 2048-token call, producing a fetch timeout before any
+  // headers or visible tokens. Use bounded SSE and validate JSON in the code
+  // workbench AFTER a complete response; never commit partial text.
+  const nativeTermux=route.provider==='openai-compatible'
+    &&config.model==='qwen35-4b-native'
+    &&String(config.endpoint||'').replace(/\\/$/,'')==='http://127.0.0.1:8080/v1';
+  const requestConfig=nativeTermux
+    ?{...config,stream:true,maxTokens:Math.min(512,Math.max(128,Number(maxTokens)||512)),timeoutMs:Math.max(480000,Number(config.timeoutMs)||0),temperature:0.2}
+    :{...config,stream:false,maxTokens:Math.max(1024,Math.min(8192,Number(maxTokens)||2048))};
   return sharedRuntime.generate({
-    purpose:'creator-code-agent-v1',executionProfile:'agentic',taskTier:'complex',requiresTools:false,responseFormat:'json',maxRepairAttempts:1,signal,
-    messages,config:{...config,stream:false,maxTokens:Math.max(1024,Math.min(8192,Number(maxTokens)||2048))},
+    purpose:'creator-code-agent-v1',executionProfile:'agentic',taskTier:'complex',requiresTools:false,
+    responseFormat:nativeTermux?'text':'json',maxRepairAttempts:nativeTermux?0:1,signal,
+    messages,config:requestConfig,
+    onEvent:event=>{
+      if(event?.phase==='partial'){
+        const fragment=clean(event.text||'',12000);
+        if(fragment)onToken?.(fragment);
+      }else if(['connecting','generating','awaiting-first-token','repairing','failed'].includes(event?.phase)){
+        onProgress?.({phase:event.phase,backend:event.backend||'',detail:clean(event.detail||'',160)});
+      }
+    },
     context:{creatorSuite:true,mediaType:'code',...context}
   });
 }
