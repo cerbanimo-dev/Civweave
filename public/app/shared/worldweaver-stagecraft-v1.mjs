@@ -20,6 +20,8 @@ export function compileStageScene(state,sceneId,{regionId='stage:local',revision
  const scene=state.proposals.find(x=>x.id===sceneId);
  if(!scene)throw new RangeError('Unknown screenplay scene');
  if(scene.status!=='approved')throw new Error('Scene must be human-approved before staging');
+ const approvedSet=state.stagePlans?.filter(p=>p.sceneId===scene.id&&p.status==='approved').at(-1);
+ const set=approvedSet?.set??scene.set;
  const cast=[...new Set(scene.dialogue.map(l=>l.character))].map((character,i)=>{
   const binding=state.casts.find(c=>c.character===character);
   return {...entry(scene,character,binding),
@@ -28,15 +30,15 @@ export function compileStageScene(state,sceneId,{regionId='stage:local',revision
  });
  instanceId=instanceId??'stage:'+scene.id;
  const objects=[{
-  id:'set:'+scene.id,name:scene.set.location,kind:'stage',instanceId,
+  id:'set:'+scene.id,name:set.location,kind:'stage',instanceId,
   position:{x:128,y:128,z:0},rotation:q,parts:[
-   box('stage-floor','Stage floor','box',0,0,-.2,72,56,.4,scene.set.color),
+   box('stage-floor','Stage floor','box',0,0,-.2,72,56,.4,set.color),
    box('stage-backdrop','Set backdrop','box',0,26,9,72,1.5,18,'#32494b'),
    box('stage-left-wall','Left wing','box',-37,0,7,1.5,55,14,'#384a54'),
    box('stage-right-wall','Right wing','box',37,0,7,1.5,55,14,'#384a54')
   ]
  }];
- for(const prop of scene.set.props){
+ for(const prop of set.props){
   objects.push({
    id:'prop:'+scene.id+':'+prop.id,name:prop.name,kind:'prop',instanceId,
    position:{x:128+prop.x,y:128+prop.y,z:0},rotation:q,
@@ -55,6 +57,7 @@ export function compileStageScene(state,sceneId,{regionId='stage:local',revision
  const region={schema:OPENSIM_GEOMETRY_SCHEMA,regionId,size:{x:256,y:256},
   revision,source:'provisional-or-imported',objects};
  return {sceneId:scene.id,region,geometry:buildOpenSimGeometry(region),cast,
+  approvedStagePlanId:approvedSet?.id??null,
   draft:true,source:'screenplay stage mockup; not an OpenSimulator persistent region'};
 }
 export function compilePerformanceScore(state,sceneId,{maxSeconds=3600}={}){
