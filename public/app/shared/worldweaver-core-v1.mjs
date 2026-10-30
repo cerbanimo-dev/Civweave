@@ -144,6 +144,16 @@ export function createWorldweaver({authorize,id=()=>crypto.randomUUID(),clock=()
         receipt.screen=copy(screen);
         break;
       }
+      case 'cancel-cast':{
+        fields(command,['type','intentId']);
+        if(actor.kind!=='human')throw new Error('Human review required to cancel pending casts.');
+        const intent=state.intents.find(x=>x.id===command.intentId);
+        if(!intent||!['cast-screen','clear-screen'].includes(intent.tool))throw new RangeError('Unknown screen cast intent.');
+        if(!['queued','review-required'].includes(intent.status))throw new Error('Only pending screen casts can be cancelled.');
+        intent.status='cancelled';intent.reviewedBy=actor.principalId;intent.reviewedAt=eventTime;
+        receipt.intent=copy(intent);
+        break;
+      }
       case 'approve-cast':
       case 'reject-cast':{
         fields(command,command.type==='approve-cast'?['type','intentId']:['type','intentId','reason']);
