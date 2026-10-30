@@ -22,20 +22,16 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
-      - name: Prepare source archive
-        run: |
-          base64 -d native/android/civweave-pocket-v05/android-pocket-src.tar.xz.b64 | tar xJf -
-          test -f android-pocket/app/build.gradle
       - name: Install Android SDK
         run: |
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 3 -type f -name sdkmanager | head -n 1)"
           test -x "$SDKMANAGER"
           "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
       - name: Build debug APK
-        working-directory: android-pocket
+        working-directory: native/android/civweave-pocket-v05
         run: gradle --no-daemon :app:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: civweave-pocket-ble-v05-debug
-          path: android-pocket/app/build/outputs/apk/debug/app-debug.apk
+          path: native/android/civweave-pocket-v05/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
