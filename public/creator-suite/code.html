@@ -31,7 +31,7 @@
 <div class="actions"><button id="cw-inspect">Read file</button><button id="cw-edit">Save edit + Git checkpoint</button><button id="cw-validate">Validate locally</button></div>
 <pre id="cw-checks" aria-live="polite">Static checks detect invalid JSON, secret patterns, merge markers and unsafe publication paths. Other language syntax and tests require an approved validator; this tool never runs downloaded code.</pre>
 </section>
-<section><h2>3. Agentic code builder</h2><p>The model uses the Creator Suite provider and submits individual tool calls. Small models are limited to 3 edits/call; larger models to 64. Each successful call returns the new revision before the next call.</p>
+<section><h2>3. Agentic code builder</h2><p id="cw-model-status" aria-live="polite">Checking selected Civweave inference provider…</p><p>The model uses the Creator Suite provider and submits individual tool calls. Small models are limited to 3 edits/call; larger models to 64. Each successful call returns the new revision before the next call.</p>
 <label>Goal<textarea id="cw-goal" rows="3" placeholder="Build a small self-contained interactive quiz..."></textarea></label>
 <div class="actions"><label>Batch tier<select id="cw-tier"><option value="auto">Auto-detect</option><option value="small">Small (3)</option><option value="large">Large (64)</option></select></label><label>Max model calls<input type="number" min="1" max="40" value="12" id="cw-steps"></label><button id="cw-run">Generate / continue</button><button id="cw-stop">Stop</button></div>
 <pre id="cw-agent-result" aria-live="polite">No agent run started.</pre></section>
