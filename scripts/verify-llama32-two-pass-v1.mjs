@@ -288,7 +288,7 @@ assert.match(chatCore,/llama32StructuredTrialId/,'core registry predicate must d
       loads++;
       await Promise.resolve();
       sandbox.CivweaveGemma4WeaveDraftPipelineV1={
-        version:'1.3.9-weave-draft-pipeline-v1-runtime-family-gate',
+        version:'1.3.10-weave-draft-pipeline-v1-bounded-quest-sections',
         weaveTransport:async (purpose,args)=>{transportCalls++;return{purpose,args,text:'{}'}}
       };
       return true;
@@ -316,9 +316,9 @@ assert.match(chatCore,/llama32StructuredTrialId/,'core registry predicate must d
 }
 assert.match(read('public/app/local-ai/gemma4-structured-task-authority-v1.js'),/ensureWeaveLayers/,'ONNX learning-plan transport must initialize the existing canonical Weave layers on demand');
 const currentShell=read('public/app/persistent-system-shell-v1.html');
-assert.ok(currentShell.includes('gemma4-weave-draft-pipeline-v1.js?v=1.3.9-runtime-family-gate'),'persistent shell must retain shared Weave compiler');
+assert.ok(currentShell.includes('gemma4-weave-draft-pipeline-v1.js?v=1.3.10-bounded-quest-sections'),'persistent shell must retain shared Weave compiler');
 const actualCampus=read('public/app/working-campus-v440.html');
-assert.ok(actualCampus.includes('gemma4-weave-draft-pipeline-v1.js?v=1.3.9-runtime-family-gate'),
+assert.ok(actualCampus.includes('gemma4-weave-draft-pipeline-v1.js?v=1.3.10-bounded-quest-sections'),
  'Working Campus must load the Weave Draft pipeline even when LiteRT is not selected');
 
 console.log('PASS: Llama 3.2 3B installable trial, hard-token constrained compile wiring, and independent strict JSON validation.');

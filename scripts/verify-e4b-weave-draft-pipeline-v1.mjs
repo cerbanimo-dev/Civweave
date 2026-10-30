@@ -42,10 +42,17 @@ async function controlledFastRun(args,model,label,timeoutMs){
   assert.equal(model,'gemma4-e4b-it-litert-web');
   assert.equal(args.structuredTool,null,'E4B draft/compile/repair must use free text generation, never constrained tools');
   if(label==='Local GPU Smoke Test'){assert.equal(args.__civweaveProbe,true);assert.equal(args.__civweaveFirstTokenTimeoutMs,35000);assert.equal(timeoutMs,180000,'cold E4B engine initialization must not be mistaken for first-token inference failure');return{status:'success',outputText:'READY'};}
-  if(label==='Local Weave Draft'){
+  if(label==='Local Weave Draft'||/^Local Weave Draft [123]\/3$/.test(label)){
+    const questParts=[
+      'Create a community garden. Choose accessible land and a realistic timetable; start with site and water feasibility before any construction.\\n[END SECTION]',
+      'Gather bed materials, soil, tools and site access. A licensed electrician is only needed for permanent powered infrastructure. The group must vote on the shared site before construction.\\n[END SECTION]',
+      'Use FellowFare for garden materials, Cerbanimo for construction, and Anarchadia for the binding site vote. Evidence includes material receipts, vote receipt, build inspection and site photos.\\n[END SECTION]'
+    ];
+    const part=Number(label.match(/([123])\/3$/)?.[1]||0);
     const text=currentKind==='learning'
       ? 'Build tarot recall through card families, imagery anchors, spaced retrieval, comparison practice, and live interpretation. Resources include a tarot deck and a spaced-repetition system. No licensed specialist is required. No collective vote is required.'
-      : 'Create a community garden. Secure materials and site access. A licensed electrician is required only if permanent powered infrastructure is installed. The group must vote on the final shared site before construction; construction is blocked until that vote passes.';
+      : questParts[part-1];
+    assert.ok(text,`No fixture for ${label}`);
     args.onToken?.({text:text.slice(0,Math.ceil(text.length/2))});args.onToken?.({text:text.slice(Math.ceil(text.length/2))});
     return{status:'success',outputText:text};
   }
@@ -148,7 +155,7 @@ const civic=parsed.paths.find(path=>path.realm==='anarchadia'&&path.type==='civi
 assert.ok(civic,'vote-required gate must create an Anarchadia civic-governance path');
 assert.ok(civic.steps.some(step=>/Mandatory vote:/i.test(step)),'Anarchadia path must contain the mandatory vote beat');
 assert.ok(civic.steps.some(step=>/block/i.test(step)),'vote beat must identify blocked downstream work');
-assert.deepEqual(calls.map(call=>call.label),['Local Weave Draft','Local JSON Compile']);
+assert.deepEqual(calls.map(call=>call.label),['Local Weave Draft 1/3','Local Weave Draft 2/3','Local Weave Draft 3/3','Local JSON Compile']);
 assert.ok(calls.every(call=>call.model==='gemma4-e4b-it-litert-web'));
 assert.ok(calls.every(call=>call.structuredTool===null));
 
