@@ -129,3 +129,28 @@ assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.200-interwoven-quest-m
 assert.match(shell,/guide-chat-surface-v350\.js\?v=1\.0\.200-interwoven-quest-map/);
 assert.match(diagnostic,/Show last Civweave native-request stage/);
 console.log('PASS: direct native HTTP, Moss review planner fast entry, no second model, no heavy bootstrap, stage diagnostics and invalid route rejection');
+
+
+// A pasted, clipped plan is context for completion, not an instruction to
+// physically build anything or to launch a new Quest via historical keywords.
+selected.provider='openai-compatible';
+const pasted='Excellent progress on energy independence. Solar generation and storage can be scaled gradually. '+
+  ('Panel sizing and load inventory are important for a realistic build. ').repeat(25)+
+  '#### Battery Storage (The Buffer)\n* Recommendation: Lithium Iron Phosphate (Li';
+let pastedBody=null;
+const continued=await api.respondNative({
+ text:'Just finish your plan:\n'+pasted,system:'civweave',history:[],
+ fetcher:async(url,options)=>{
+   pastedBody=JSON.parse(options.body);
+   assert.equal(url,'http://127.0.0.1:8080/v1/chat/completions');
+   return{ok:true,status:200,json:async()=>({
+     choices:[{finish_reason:'stop',message:{role:'assistant',content:'Continue battery sizing with a daily energy budget and qualified installation review.'}}]
+   })};
+ }
+});
+assert.match(continued.response.answer,/Continue battery sizing/);
+assert.equal(pastedBody.messages.length,2,'Pasted continuation must bypass a new Quest and old chat history');
+assert.ok(pastedBody.messages[1].content.length<1600,'Long model output must be reduced to a bounded context tail');
+assert.match(pastedBody.messages[1].content,/request for INFORMATION/);
+assert.match(pastedBody.messages[1].content,/Lithium Iron Phosphate/);
+console.log('PASS: pasted partial plan continuation uses bounded native chat, not a duplicate Quest or a physical-task disclaimer');
