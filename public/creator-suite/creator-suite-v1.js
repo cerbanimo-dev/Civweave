@@ -12,6 +12,7 @@ function select(kind){activeKind=kind;document.querySelectorAll('[data-suite-tab
 function download(name,type,content){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 async function verify(){const value=session();if(!value)return setStatus('Start a creation session first.','cs-warn');const result=await provenance().verifySession(value);setStatus(result.valid?`History verified: ${result.eventCount} events, chain intact.`:`History failed verification: ${result.reason}.`,result.valid?'cs-good':'cs-bad');return result}
 async function finalize(){
+  if(activeKind==='text')await globalThis.CivweaveCreatorTextV1?.flush?.();
   const value=session();if(!value){setStatus('Start a creation session first.','cs-warn');return null}
   if(value.finalizedAt){setStatus('This creation session is already finalized. Start a new project to continue editing.','cs-warn');return{receipt:lastReceipt,ledgerObject:lastLedgerObject,vaultRecord:lastVaultRecord,guildShare:lastGuildShare}}
   const result=await provenance().finalizeSession(value,{id:`creator-artifact:${crypto.randomUUID()}`,kind:activeKind,metadata:{}}),packet=await provenance().makePacket(result.session),warnings=[];
