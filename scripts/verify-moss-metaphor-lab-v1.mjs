@@ -22,7 +22,7 @@ vm.createContext(sandbox);
 vm.runInContext(source.replace(/^import[^\n]+\n/m,'').replace(/^export /gm,'')+'\nglobalThis.__specTools={validateMetaphor,detail,schema,scopeFingerprint};',sandbox,{filename});
 const {validateMetaphor,detail,schema,scopeFingerprint}=sandbox.__specTools;
 const good={
- title:'The <Aqueduct>',world:'A water tower sends water through pipes.',analogy:'Flow represents a constrained resource.',theme:'river',
+ title:'The <Aqueduct>',world:'A water tower <img src=x onerror=alert(1)> sends water through pipes.',analogy:'Flow represents a constrained resource.',theme:'river',
  mapping:[{image:'Tower',concept:'Reserve capacity',relation:'Water storage represents headroom.'},{image:'Valve',concept:'Control',relation:'Opening the valve changes throughput.'}],
  steps:[
   {kind:'dial',scene:'The water is flowing.',question:'How should you set the valve?',dial:{label:'Valve setting',levels:[
@@ -48,7 +48,8 @@ assert.match(shown,/mml-dial-output/);
 assert.match(shown,/Where this metaphor breaks down/);
 const revealed=detail({lab:{spec:validated,step:1,answers:[{choice:1,correct:true}],provider:'Qwen'}});
 assert.match(revealed,/Choose a response/);
-assert.doesNotMatch(shown,/<script>|<Aqueduct>/);
+assert.match(shown,/&lt;img/);
+assert.doesNotMatch(shown,/<script>|<Aqueduct>|<img/);
 assert.notEqual(scopeFingerprint({title:'First',objective:'Objective'}),scopeFingerprint({title:'Second',objective:'Objective'}));
 assert.throws(()=>validateMetaphor({...good,steps:[good.steps[0]]}),/scenes/);
 assert.throws(()=>validateMetaphor({...good,steps:[{...good.steps[0],dial:{...good.steps[0].dial,levels:[
