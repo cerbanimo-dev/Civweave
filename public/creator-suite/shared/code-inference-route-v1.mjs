@@ -1,3 +1,4 @@
+import {requireNativeIdle,isCreatorNativeTermux} from './native-server-control-v1.mjs';
 // Creator Suite code inference adapter. Routes to existing shared/runtime owners;
  // never implements, replaces or silently downgrades an inference engine.
 const DEVICE_ROUTES=new Set(['downloaded-local','generative-local','smollm2','smollm3','qwen']);
@@ -19,7 +20,7 @@ export function normalizeCodeInferenceResult(value={},model=''){
   if(!outputText&&!value?.outputJson)throw new Error('Downloaded local model returned no text or JSON.');
   return{status:'success',outputText,outputJson:value?.outputJson??null,actual:{provider:'downloaded-local',model},usage:value?.usage||{},fallback:value?.fallback||{used:false}};
 }
-export async function runCodeInference(config,messages,{selection=null,loadLocal,loadServer,sharedRuntime,onProgress,onToken,context={},maxTokens=2048,signal,purpose='creator-code-agent-v1',mediaType='code',taskTier='complex',requiresTools=false}={}){
+export async function runCodeInference(config,messages,{selection=null,loadLocal,loadServer,sharedRuntime,onProgress,onToken,context={},maxTokens=2048,signal,purpose='creator-code-agent-v1',mediaType='code',taskTier='complex',requiresTools=false,checkNativeSlots=requireNativeIdle}={}){
   const route=resolveCodeInferenceRoute(config,selection);
   if(route.kind==='downloaded-local'){
     if(typeof loadLocal!=='function')throw new Error('Canonical downloaded-local runtime loader is missing.');
@@ -62,9 +63,12 @@ export async function runCodeInference(config,messages,{selection=null,loadLocal
   // json_object on a 2048-token call, producing a fetch timeout before any
   // headers or visible tokens. Use bounded SSE and validate JSON in the code
   // workbench AFTER a complete response; never commit partial text.
-  const nativeTermux=route.provider==='openai-compatible'
-    &&config.model==='qwen35-4b-native'
-    &&String(config.endpoint||'').replace(/\/$/,'')==='http://127.0.0.1:8080/v1';
+  const nativeTermux=isCreatorNativeTermux(config);
+  if(nativeTermux){
+    onProgress?.({phase:'checking-server-slots'});
+    const slots=await checkNativeSlots({signal});
+    onProgress?.({phase:slots?.state==='idle'?'server-idle':'slot-status-unavailable',detail:slots?.detail||''});
+  }
   const requestConfig=nativeTermux
     ?{...config,stream:true,maxTokens:Math.min(512,Math.max(128,Number(maxTokens)||512)),timeoutMs:Math.max(480000,Number(config.timeoutMs)||0),temperature:0.2}
     :{...config,stream:false,maxTokens:Math.max(1024,Math.min(8192,Number(maxTokens)||2048))};
