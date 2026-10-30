@@ -63,6 +63,10 @@ test('validate provider payload: bounds, mesh injection and group IDs',()=>{
  assert.throws(()=>validateOpenSimRegion(bad),/color/);
  const dup=simple();dup.objects.push(structuredClone(dup.objects[0]));
  assert.throws(()=>validateOpenSimRegion(dup),/Duplicate/);
+ const repeatedPart=simple();
+ const second=structuredClone(repeatedPart.objects[0]);second.id='object:other';
+ repeatedPart.objects.push(second);
+ assert.throws(()=>validateOpenSimRegion(repeatedPart),/Duplicate prim ID/);
  const noShape=simple({shape:'https://example.org/glb'});
  assert.throws(()=>validateOpenSimRegion(noShape),/Unsupported prim type/);
  const huge=simple();huge.objects[0].parts[0].scale.x=300;
