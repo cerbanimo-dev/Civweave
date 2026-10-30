@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Worldweaver · Performance Studio</title>
+<style>
+:root{font:15px system-ui,sans-serif;color-scheme:dark;background:#10151e;color:#f3eefa}
+*{box-sizing:border-box}body{max-width:1320px;margin:auto;padding:16px}
+h1{font-size:clamp(1.6rem,4vw,2.1rem)}h2{font-size:1.16rem;margin:.2rem 0 .8rem}h3{font-size:1rem}
+p{line-height:1.48;color:#c9cbda}small{color:#aabac9}header{margin-bottom:1rem}
+section{border:1px solid #455367;background:#1b2432;border-radius:13px;padding:15px;min-width:0}
+.layout{display:grid;grid-template-columns:minmax(280px,1fr) minmax(330px,1.2fr);gap:14px}
+label{display:block;font-weight:600;margin:12px 0 5px}
+textarea,input,select,button{font:inherit;color:inherit}
+textarea,input,select{width:100%;border:1px solid #738093;border-radius:8px;background:#0d1826;padding:9px}
+textarea{min-height:85px;resize:vertical}
+button{border:1px solid #abb9ce;background:#38536e;padding:8px 12px;min-height:42px;border-radius:9px;cursor:pointer}
+button:disabled{opacity:.5}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #eecbb0;outline-offset:2px}
+.controls{display:flex;flex-wrap:wrap;gap:9px;margin:11px 0}.controls>button{flex:1}
+.compact{font-size:.9rem;color:#adbccf}
+#stage-viewer{width:100%;height:290px;display:block;touch-action:none;background:#162a38;border-radius:9px}
+#stage-map{height:285px;border-radius:9px;overflow:hidden}
+#stage-map .cw-world-map-2d{height:100%}
+#script-lines{max-height:230px;overflow:auto}
+#script-lines p{padding:8px;border-left:3px solid #688eaa;margin:6px 0;background:#172c3f}
+pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;overflow-wrap:anywhere;max-height:280px}
+#status{min-height:50px;padding:10px;background:#2b3d50;border-radius:9px}
+[hidden]{display:none!important}
+.project{padding:12px;border:1px solid #60768b;border-radius:8px;margin:10px 0}
+.check{display:flex;gap:9px;align-items:flex-start;font-weight:500}.check input{width:auto;margin-top:4px}
+#models{color:#b1dfcc}
+@media(max-width:760px){.layout{grid-template-columns:1fr}#stage-viewer{height:245px}#stage-map{height:245px}}
+</style></head><body>
+<header><small>CIVWEAVE · WORLDWEAVER · PRIVATE DEVELOPMENT LAB</small>
+<h1>Performance Studio</h1>
+<p>Book → reviewed screenplay → staged characters, scenery and cues → rehearsal → voluntary audience participation → film-editing and Qwen training packages. This is a local workflow prototype, not a rendered film or a live OpenSimulator theater.</p>
+<nav><a href="./worldweaver-geometry-lab.html">3D/2D Geometry Lab</a> · <a href="/creator-suite/index.html?tool=video">Creator Suite video editor</a></nav>
+</header>
+<div class="layout">
+<section>
+<h2>1 · Start a rights-cleared adaptation</h2>
+<label for="production-title">Production title</label><input id="production-title" value="Untitled animated stage production" maxlength="180">
+<label for="book-title">Source book</label><input id="book-title" placeholder="Title of your manuscript" maxlength="180">
+<label for="rights">Manuscript adaptation rights</label>
+<select id="rights"><option value="">Select confirmed rights</option><option value="owned">I own the adaptation/training rights</option><option value="licensed">I have the appropriate license</option><option value="public-domain">Public domain</option></select>
+<label for="art-brief">Original visual direction</label>
+<textarea id="art-brief">Emotionally expressive character silhouettes, intricate practical-fantasy scenery, friendly wonder edged with uncanny mystery, and dreamlike landscapes that express inner conflict. Original artwork and visual identity; avoid replicating existing films or artists' distinctive designs.</textarea>
+<button id="create-project" type="button">Create private production</button>
+<div id="production-state" class="compact"></div>
+<hr>
+<h2>2 · Bring in the manuscript</h2>
+<label for="chapter-title">Chapter / excerpt name</label><input id="chapter-title" value="Act I · Chapter 1">
+<label for="source-text">Manuscript excerpt (up to 12,000 characters)</label><textarea id="source-text" maxlength="12000" rows="6" placeholder="Paste text from your rights-cleared manuscript. The lab keeps it in memory; nothing is published."></textarea>
+<div class="controls"><button id="add-source" type="button">Add excerpt</button><button id="export-state" type="button">Export private project JSON</button></div>
+<p id="sources-status" class="compact">No source imported.</p>
+<hr>
+<h2>3 · Script adaptation</h2>
+<label for="scene-title">Scene title</label><input id="scene-title" value="First scene" maxlength="140">
+<label for="scene-synopsis">Scene synopsis</label><textarea id="scene-synopsis" rows="3" placeholder="What physically happens in this scene?"></textarea>
+<label for="dialogue">Character dialogue (one line per actor)</label>
+<textarea id="dialogue" rows="5" placeholder="HERO: I think the door is breathing.&#10;FRIEND: Then perhaps we should knock."></textarea>
+<label for="location">Set location</label><input id="location" value="A surreal workshop" maxlength="100">
+<label for="audience-prompt">Optional audience participation moment</label>
+<textarea id="audience-prompt" rows="2" placeholder="What would you ask the character right now?"></textarea>
+<label class="check"><input id="cloud-consent" type="checkbox"> For this model request only: allow my manuscript or staged script excerpts to leave this device if the selected provider is remote</label>
+<div class="controls"><button id="draft-scene" type="button">Draft scene manually</button><button id="generate-scene" type="button">Propose with selected AI</button></div>
+<p id="models" class="compact">AI uses the existing Civweave inference selection and may incur configured cloud cost. It proposes for review; it cannot approve or stage unreviewed content.</p>
+<label for="scene-select">Screenplay scenes</label><select id="scene-select"></select>
+<label for="review-notes">Director's review notes</label><input id="review-notes" value="Approved for private staging; retain character intentions.">
+<div class="controls"><button id="approve-scene" type="button">Approve screenplay</button><button id="reject-scene" type="button">Reject draft</button></div>
+</section>
+<section>
+<h2>4 · Set-building and 3D stage</h2>
+<div class="controls"><button id="propose-set" type="button">AI propose stage redesign</button><button id="approve-set" type="button">Approve proposed set</button><button id="reject-set" type="button">Reject set</button></div>
+<p id="stage-review" class="compact">Only director-approved set revisions become stage geometry.</p>
+<label for="cast-character">Role to bind</label><select id="cast-character"></select>
+<label for="cast-avatar">Avatar / approved rig reference</label><input id="cast-avatar" value="starling:kami" maxlength="180">
+<label for="cast-pilot">Model pilot principal</label><input id="cast-pilot" value="pilot:starling:kami" maxlength="180">
+<div class="controls"><button id="assign-avatar" type="button">Approve role casting</button></div>
+<canvas id="stage-viewer" width="660" height="290" aria-label="Procedural 3D stage and character stand-ins"></canvas>
+<div id="stage-map" aria-label="Same-stage 2D footprints"></div>
+<p id="stage-note" class="compact">Review a screenplay scene to build its provisional stage set. These are geometry stand-ins, not rigged OpenSimulator avatars.</p>
+<h2>5 · Cue and performance</h2>
+<div id="script-lines"></div>
+<div class="controls"><button id="rehearse" type="button">Start rehearsal</button><button id="next-cue" type="button">Play next cue</button><button id="finish" type="button">Finish rehearsal</button></div>
+<label class="check"><input id="speak-lines" type="checkbox"> Speak written dialogue using this device's available text-to-speech voice</label>
+<p id="cue-status" class="compact">No rehearsal active.</p>
+<hr>
+<h2>6 · Audience interaction and reflection</h2>
+<p class="compact">Participation is optional. Do not use biometric emotion recognition or covert recordings. Browser voice transcription may use an online service; check the device/browser provider before inviting audience members.</p>
+<label class="check"><input id="audience-consent" type="checkbox"> I voluntarily consent to submit this response for this rehearsal</label>
+<label class="check"><input id="training-consent" type="checkbox"> Separately consent to use this response in an optional future training export</label>
+<label class="check"><input id="speech-provider-consent" type="checkbox"> If I turn on speech transcription, I understand my browser may send audio to its speech provider</label>
+<label for="feedback-text">Audience comment, transcript or reflection</label><textarea id="feedback-text" rows="3" placeholder="What stood out, or what would you ask next?"></textarea>
+<div class="controls"><button id="transcribe" type="button">Start opt-in speech transcription</button><button id="stop-transcription" type="button">Stop transcription</button><button id="submit-feedback" type="button">Submit response</button></div>
+<div class="controls"><button id="withdraw-feedback" type="button">Withdraw my last response</button></div>
+<p id="audience-status" class="compact">No microphone requested, and no audience data collected.</p>
+<hr>
+<h2>7 · Render/export handoff</h2>
+<label class="check"><input id="training-authorized" type="checkbox"> I authorize training on the owned or appropriately licensed, human-reviewed screenplay material</label>
+<label class="check"><input id="include-audience" type="checkbox"> Include only responses with separate participant training consent</label>
+<div class="controls">
+<button id="filmcraft" type="button">Export FilmCraft edit plan</button>
+<button id="lora" type="button">Export Qwen 4B JSONL</button>
+</div>
+<p class="compact">Film export contains an edit timeline and captions, not fabricated rendered clips. LoRA export contains supervised examples, not model weights; actual training is a separate, controlled run.</p>
+<pre id="exports" aria-label="Export summary"></pre>
+</section>
+</div>
+<p id="status" role="status" aria-live="polite">Ready to create a private production.</p>
+<script src="/app/shared/civweave-model-runtime.js"></script>
+<script type="module" src="./worldweaver-performance-lab-v1.mjs"></script>
+</body></html>

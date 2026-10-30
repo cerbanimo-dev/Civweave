@@ -30,7 +30,9 @@ const exact=(value,keys,label)=>{
 };
 
 function validateSnapshot(snapshot){
-  exact(snapshot,['schema','revision','instances','stations','links','npcs','intents','debateTurns','journal'],'manifest fields');
+  for(const key of ['avatarProposals','screens','screenHistory'])if(snapshot?.[key]===undefined)snapshot[key]=[];
+  exact(snapshot,['schema','revision','instances','stations','links','npcs','avatarProposals','screens','screenHistory','intents','debateTurns','journal'],'manifest fields');
+  for(const key of ['avatarProposals','screens','screenHistory'])if(!Array.isArray(snapshot[key])||snapshot[key].length)invalid('connected avatar or screen records');
   if(snapshot.schema!==WORLDWEAVER_SCHEMA||!Number.isSafeInteger(snapshot.revision)||snapshot.revision<0)invalid('schema or revision');
   for(const key of ['instances','stations','links','npcs','intents','debateTurns','journal'])if(!Array.isArray(snapshot[key]))invalid(key);
   if(snapshot.instances.length>LIMITS.instances||snapshot.intents.length||snapshot.journal.length>1000)invalid('record limits or runtime intents');
@@ -136,7 +138,7 @@ export function createWorkspace({storage=availableStorage(),id,clock}={}){
     if(!identifier(instanceId)||!manifest.instances.some(row=>row.id===instanceId))throw new RangeError('Select an existing space to export.');
     const exported={schema:WORLDWEAVER_SCHEMA,revision:manifest.revision};
     exported.instances=manifest.instances.filter(row=>row.id===instanceId);
-    for(const key of ['stations','links','npcs','intents','debateTurns','journal'])exported[key]=manifest[key].filter(row=>row.instanceId===instanceId);
+    for(const key of ['stations','links','npcs','avatarProposals','screens','screenHistory','intents','debateTurns','journal'])exported[key]=manifest[key].filter(row=>row.instanceId===instanceId);
     return copy(exported);
   }
   reload();

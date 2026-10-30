@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Worldweaver 2D — Living Map Lab</title>
+<style>
+:root{color-scheme:dark;background:#0c121b;color:#f2f3f7;font:15px system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:auto;max-width:1100px;padding:16px}
+main{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);gap:14px}
+section{border:1px solid #52637a;background:#152230;padding:14px;border-radius:14px;min-width:0}
+h1{font-size:clamp(1.5rem,4vw,2rem)}h2{font-size:1.1rem}
+a{color:#d3cdff}p{line-height:1.5;color:#c5d2e1}
+button,select{font:inherit;color:#fff;background:#29445c;border:1px solid #8293a6;border-radius:9px;padding:9px;min-height:44px}
+button:focus-visible,select:focus-visible{outline:3px solid #e1bcff;outline-offset:2px}
+.controls{display:flex;flex-wrap:wrap;gap:9px}.controls>button{flex:1}
+label{display:block;font-weight:600;margin:12px 0 6px}
+select{width:100%}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 ui-monospace,monospace;color:#dbe1e9;max-height:300px;overflow:auto}
+#world-map{height:440px}#inset{height:290px}.compact{font-size:.9rem;color:#a9bbcd}
+#status{padding:8px;background:#23354a;border-radius:9px;min-height:44px}
+@media(max-width:750px){main{grid-template-columns:1fr}#world-map{height:350px}}
+</style></head><body>
+<header><small>WORLDWEAVER · LIGHTWEIGHT TWO-DIMENSIONAL WORLD</small>
+<h1>One world, two ways of seeing it</h1>
+<p>The map follows the same world snapshot used by the screen and NPC lab. Tap a building, inspect an inhabitant, or display Civweave on a screen. The screen shows this 2D version—not an infinitely nested app.</p>
+<p class="compact">The four spaces in this lab are an illustrative schematic, not a recovered map from the archived visual platform. No remote multiplayer sync or 3D engine runs here.</p>
+<nav><a href="./worldweaver-avatar-lab.html">Avatar Lab</a> · <a href="./worldweaver-screen-lab.html">Screen Lab</a> · <a href="./worldweaver-geometry-lab.html">3D/2D Geometry Lab</a></nav>
+</header>
+<main>
+<section>
+<h2>Live 2D World Map</h2>
+<div id="world-map" aria-label="2D commune map"></div>
+<label for="space">Active building / role</label><select id="space"></select>
+<div class="controls">
+<button id="cast-app" type="button">Cast Civweave to room screen</button>
+<button id="model-cast" type="button">Simulate NPC casting Civweave</button>
+<button id="clear" type="button">Clear room screen</button>
+</div>
+<p id="status" role="status">Ready.</p>
+</section>
+<section>
+<h2>Room screen: Civweave inside Civweave</h2>
+<div id="inset"></div>
+<h2>Agent-accessible observation</h2>
+<pre id="observation" aria-label="Compact machine-readable map observation"></pre>
+<p class="compact">Map buttons emit inspect or navigation requests. A real host must check permissions and execute any resulting action through its canonical owners.</p>
+</section>
+</main>
+<script type="module" src="./worldweaver-map-lab-v1.mjs"></script>
+</body></html>

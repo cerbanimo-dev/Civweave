@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.3.9-weave-draft-pipeline-v1-runtime-family-gate';
+const VERSION='1.3.10-weave-draft-pipeline-v1-bounded-quest-sections';
 const modelFor=(config={})=>globalThis.CivweaveLocalGenerationModelPolicyV1?.resolve?.('deep',{config})||globalThis.CivweaveGemma4LiteRTRequestAuthorityV1?.deepRoleModel?.()||config?.model||globalThis.CivweaveLocalModelDownloadV266?.selection?.()?.id||'';
 const modelName=id=>globalThis.CivweaveLocalGenerationModelPolicyV1?.display?.(id)||id||'Local model';
 const LEARNING_PURPOSE='living-school-learning-plan-review-v2';
@@ -9,7 +9,7 @@ const QUEST_PURPOSE='civweave-weaveling-intention-json-v190';
 const PURPOSES=new Set([LEARNING_PURPOSE,QUEST_PURPOSE]);
 const LOCAL_PROVIDERS=new Set(['downloaded-local','generative-local','local-ai','browser','smollm2','smollm3','qwen']);
 const ARTIFACT_PREFIX='civweave.weave-draft-pipeline.v1';
-const DRAFT_TOKENS=Object.freeze({learning:700,quest:1150});
+const DRAFT_TOKENS=Object.freeze({learning:700,quest:420});
 const COMPILE_TOKENS=Object.freeze({learning:900,quest:1300});
 const REPAIR_TOKENS=Object.freeze({learning:800,quest:1150});
 const MAX_STAGE_TEXT=16000;
@@ -187,6 +187,25 @@ function draftSystem(kind){
   const subject=kind==='learning'?'high-level Learning Journey':'reviewable Quest';
   return `You are the local planning model working in Civweave Weave Draft mode. Create the strongest useful ${subject} you can from the supplied request and context. This is a planning artifact, not JSON, not a tool call, and not private chain-of-thought. Give conclusions, structure, dependencies, and useful planning detail without narrating hidden reasoning.\n\nYou may organize the draft however you think is clearest. Content requirements:\n- State the intended outcome or observable capability.\n- Lay out the stages/modules/Quest beats and important dependencies.\n- Include a complete resource manifest: information, references, tools, materials, software, places, people, services, money/access, or other resources genuinely needed. If a category is unnecessary, say so rather than inventing a need.\n- Identify any specialist, licensed, regulated, certified, or otherwise professionally restricted work. State why it is required and what it blocks. If none is required, say none.\n- Identify decision gates. For collective/civic decisions, state the decision, useful options, prerequisites, what later beat is blocked, and that the vote must occur in Anarchadia before the blocked beat proceeds. If no collective vote is required, say none.\n- Distinguish user-supplied facts from assumptions; do not invent missing facts.\n- State completion/evidence criteria.\n${kind==='learning'?'- Keep this at high-level learning-plan depth. Do not write full lessons, quizzes, readings, or teaching content yet.':'- Use Living School only for learning, Cerbanimo for skilled work, FellowFare for resources/exchange, and Anarchadia for governance/consent/voting when actually needed.'}`;
 }
+const QUEST_DRAFT_SECTIONS=Object.freeze([
+  'PART 1/3 — Describe the actual current state, the desired long-term outcome, and a safe prioritized execution sequence. Begin with the first achievable milestone; respect the stated user priority and carry other dependent goals forward. For example, start with energy only when the request prioritizes energy. Do not assume ownership, electrical loads, site permissions, or installed infrastructure.',
+  'PART 2/3 — Identify the resource manifest (including information, tools, access and budget), any genuinely needed professional or regulated specialist work, and any genuinely required community decision gates. Name the work they block. Do not invent vote or specialist requirements.',
+  'PART 3/3 — Name the relevant Civweave subsystem work paths and dependencies, completion evidence for each milestone, and user facts versus open decisions or assumptions. Keep the plan reviewable and do not activate, purchase or commission anything.'
+]);
+function questSectionSystem(index){
+  const section=QUEST_DRAFT_SECTIONS[index];
+  if(!section)throw new RangeError('Unknown Quest draft section');
+  return `You are Weaveling drafting one section of a reviewable Civweave Quest, NOT final JSON or private reasoning. Respect the CURRENT user request. Write ONLY this section, not the entire plan. Keep it under 105 words; use compact plain language, specific actions and evidence instead of boilerplate. The model is called separately for each section, so do not repeat other sections. End the response with the exact final line [END SECTION]. Do not omit or change that marker.\n\n${section}`;
+}
+function completedQuestSection(text,index){
+  const source=stripThink(text);
+  if(!/\[END SECTION\]\s*$/i.test(source)){
+    throw Object.assign(new Error(`Quest draft section ${index+1} ended without its completion marker. The partial output was saved; JSON compilation has not started.`),{code:'CIVWEAVE_WEAVE_DRAFT_INCOMPLETE',stage:'draft',section:index+1,rejectedText:source});
+  }
+  const result=source.replace(/\s*\[END SECTION\]\s*$/i,'').trim();
+  if(result.length<25)throw Object.assign(new Error(`Quest draft section ${index+1} did not contain enough usable content.`),{code:'CIVWEAVE_WEAVE_DRAFT_INCOMPLETE',stage:'draft',section:index+1,rejectedText:source});
+  return result;
+}
 function compilerSystem(kind){
   if(kind==='learning')return 'You are Moss converting a short Learning Journey draft to ONE valid JSON object matching TARGET_SCHEMA. Include title, capability, level, mode, proof, assumptions, and 3–5 modules with title, focus, outcome. Also include resourceManifest, specialistWork, decisionGates as arrays; use empty arrays for genuinely unnecessary special requirements. No markdown, prose, private reasoning, lessons, or invented learner facts.';
   return `You are the local planning model working as Civweave's compiler. Convert a completed Weave Draft into exactly one valid JSON object matching TARGET_SCHEMA. Do not output markdown, prose, a tool call, or code fences. Preserve the substance of the draft rather than redesigning it. Fill required fields that are clearly implied; leave genuinely unknown details as assumptions rather than inventing user facts.\n\nIn addition to TARGET_SCHEMA fields, ALWAYS include these companion arrays at the top level (additional properties are allowed):\n- resourceManifest: resources from the draft, each as an object with a useful name/category plus why/when needed when known. Empty array only when the draft genuinely requires no additional resources.\n- specialistWork: specialist/licensed/regulated work, each as an object with role/work, why required, licensedOrRegulated when known, and blockingBeat when known.\n- decisionGates: decisions, each as an object with decision, why, options, prerequisites, blockingBeat, voteRequired.\n\n${kind==='quest'?'For every decisionGates item where voteRequired is true, the target Quest paths MUST also contain an Anarchadia path with type "civic-governance". Its steps must contain the mandatory vote as a blocking Quest beat before the dependent work proceeds. Preserve or create governance review material consistent with those gates.':'For a Learning Journey, keep modules at review-plan depth and do not compile lesson content.'}`;
@@ -301,7 +320,14 @@ function compactQuestPayload(schema,draft,budget=2300){
   const target=Math.min(2300,budget),shape=compactSchema(schema&&typeof schema==='object'?schema:{type:'object'});
   const cut=cap=>{
     const txt=String(draft||'');
-    return txt.length<=cap?txt:txt.slice(0,Math.floor(cap*.65))+'\n[...details omitted for device context...]\n'+txt.slice(-Math.floor(cap*.35));
+    if(txt.length<=cap)return txt;
+    const sections=txt.split(/\n\n(?=SECTION \d+:)/);
+    if(sections.length===3){
+      // Preserve each section's core information in a narrow phone context.
+      const allotment=Math.max(35,Math.floor((cap-12)/3));
+      return sections.map(section=>section.slice(0,allotment)).join('\n\n');
+    }
+    return txt.slice(0,Math.floor(cap*.65))+'\n[...details omitted for device context...]\n'+txt.slice(-Math.floor(cap*.35));
   };
   for(const schemaShape of [shape,minimumDeviceSchema('quest',schema)]){
     for(const cap of [1500,1100,800,500,300,140]){
@@ -378,7 +404,26 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
     try{runtimeEmit?.('connecting',{provider:'downloaded-local',model:modelFor(),mode:'weave-draft-pass'})}catch{}
     await preflightLocalLearningGpu({pipelineId,purpose,kind,signal});
     const draftMessages=kind==='learning'?[{role:'user',content:focusedLearningDraftMessage(messages,stageInputBudget(draftSystem(kind),DRAFT_TOKENS[kind]))}]:modelMessages(messages);
-    const draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:draftMessages,maxNewTokens:DRAFT_TOKENS[kind]});
+    let draft='';
+    if(kind==='quest'){
+      const parts=[];
+      for(let section=0;section<QUEST_DRAFT_SECTIONS.length;section++){
+        if(signal?.aborted)throw Object.assign(new Error('Generation stopped.'),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true});
+        paint(`Drafting Quest section ${section+1} of ${QUEST_DRAFT_SECTIONS.length}…`);
+        const text=await runLocal({pipelineId,purpose,kind,phase:'draft',label:`Local Weave Draft ${section+1}/${QUEST_DRAFT_SECTIONS.length}`,systemPrompt:questSectionSystem(section),messages:draftMessages,maxNewTokens:DRAFT_TOKENS.quest});
+        let completed;
+        try{completed=completedQuestSection(text,section)}catch(error){
+          dispatch({pipelineId,purpose,kind,phase:'draft',state:'failed',label:`Quest section ${section+1} incomplete`,section:section+1,text,code:error.code,message:error.message});
+          throw error;
+        }
+        parts.push(completed);
+        draft=parts.map((part,index)=>`SECTION ${index+1}:\n${part}`).join('\n\n');
+        saveArtifact({...lastArtifact,state:'drafting',draftParts:[...parts],draft});
+        dispatch({pipelineId,purpose,kind,phase:'draft',state:'streaming',checkpoint:true,label:`Section ${section+1}/${QUEST_DRAFT_SECTIONS.length} saved`,section:section+1,sectionCount:QUEST_DRAFT_SECTIONS.length,text:draft});
+      }
+    }else{
+      draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:draftMessages,maxNewTokens:DRAFT_TOKENS.learning});
+    }
     if(!draft)throw Object.assign(new Error('Local Weave Draft returned no planning content.'),{code:'CIVWEAVE_E4B_WEAVE_DRAFT_EMPTY'});
     saveArtifact({...lastArtifact,state:'drafted',draft});
 
@@ -457,6 +502,7 @@ globalThis.CivweaveGemma4WeaveDraftPipelineV1=Object.freeze({
   targeted,kindFor,firstBalancedJson,parseJsonLoose,companions,canonicalize,validateSchema,validateCompiled,draftSystem,compilerSystem,repairSystem,weaveTransport,prepareRequest,installRuntime,install,schedule,readArtifact,lastArtifact:()=>lastArtifact,
   architecture:'Local intake -> Local free Weave Draft -> Local JSON compile -> deterministic validation -> one Local targeted repair if needed',
   constrainedToolRequired:false,
+  boundedQuestDraftSections:QUEST_DRAFT_SECTIONS.length,
   privateChainOfThoughtExposed:false,
   resourceManifestRequired:true,
   specialistWorkRequired:true,
