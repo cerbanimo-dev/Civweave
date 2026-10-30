@@ -59,6 +59,7 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <label for="location">Set location</label><input id="location" value="A surreal workshop" maxlength="100">
 <label for="audience-prompt">Optional audience participation moment</label>
 <textarea id="audience-prompt" rows="2" placeholder="What would you ask the character right now?"></textarea>
+<label class="check"><input id="cloud-consent" type="checkbox"> For this model request only: allow my manuscript or staged script excerpts to leave this device if the selected provider is remote</label>
 <div class="controls"><button id="draft-scene" type="button">Draft scene manually</button><button id="generate-scene" type="button">Propose with selected AI</button></div>
 <p id="models" class="compact">AI uses the existing Civweave inference selection and may incur configured cloud cost. It proposes for review; it cannot approve or stage unreviewed content.</p>
 <label for="scene-select">Screenplay scenes</label><select id="scene-select"></select>
@@ -86,6 +87,7 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <p class="compact">Participation is optional. Do not use biometric emotion recognition or covert recordings. Browser voice transcription may use an online service; check the device/browser provider before inviting audience members.</p>
 <label class="check"><input id="audience-consent" type="checkbox"> I voluntarily consent to submit this response for this rehearsal</label>
 <label class="check"><input id="training-consent" type="checkbox"> Separately consent to use this response in an optional future training export</label>
+<label class="check"><input id="speech-provider-consent" type="checkbox"> If I turn on speech transcription, I understand my browser may send audio to its speech provider</label>
 <label for="feedback-text">Audience comment, transcript or reflection</label><textarea id="feedback-text" rows="3" placeholder="What stood out, or what would you ask next?"></textarea>
 <div class="controls"><button id="transcribe" type="button">Start opt-in speech transcription</button><button id="stop-transcription" type="button">Stop transcription</button><button id="submit-feedback" type="button">Submit response</button></div>
 <div class="controls"><button id="withdraw-feedback" type="button">Withdraw my last response</button></div>
