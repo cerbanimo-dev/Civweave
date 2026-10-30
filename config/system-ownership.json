@@ -181,8 +181,13 @@
         "Living School uses the family-shell Settings control and has no realm-local Settings button.",
         "Browser prototypes, DOM prototypes, and Settings API methods may not be monkey-patched to repair Settings behavior.",
         "Credential helpers may expose explicit compatibility methods but may not intercept Settings input, patch Settings open(), or mutate credential state at module load.",
-        "Realm stability/recovery layers may call the canonical Settings API programmatically but may not intercept Settings controls or carry dormant fallback listeners."
-      ]
+        "Realm stability/recovery layers may call the canonical Settings API programmatically but may not intercept Settings controls or carry dormant fallback listeners.",
+        "The shared AI Fleet owns purpose-based model catalog and device/format/memory visibility in the existing Settings Local models tab. It is a presentation and role-preference service, not another Settings input owner or inference runtime.",
+        "Model choices delegate activation to the canonical Settings and local inference runtimes; no AI starts, downloads, probes hardware or silently changes provider merely from opening the fleet."
+      ],
+      "aiFleetCatalog": "public/app/shared/civweave-ai-fleet-v1.js",
+      "aiFleetRoleSelectionStore": "civweave.ai.fleet.choices.v1",
+      "aiFleetMemoryOverrideStore": "civweave.ai.fleet.memory-gb.v1"
     },
     "family-navigation": {
       "capability": "Five-system navigation and expressive realm-status chrome",
