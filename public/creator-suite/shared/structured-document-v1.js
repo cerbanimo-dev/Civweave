@@ -112,12 +112,23 @@ function apply(source,edits,{expectedRevision,requestId='',maxEdits=64}={}){
 }
 function fromHuman(source,text){
   check(source);
-  const doc=clone(source);
-  doc.blocks=string(text)?[{id:crypto.randomUUID(),type:'paragraph',text:string(text)}]:[];
-  if(render(doc).length>MAX_CHARS)throw new Error('Document exceeds maximum length.');
-  doc.revision++;
-  doc.updatedAt=new Date().toISOString();
-  doc.lastChange='Human text edit saved';
+  const doc=clone(source),content=string(text);
+  if(content.length>MAX_CHARS)throw new Error('Document exceeds maximum length.');
+  const pieces=content?content.split(/\n\s*\n/u):[];
+  doc.blocks=pieces.filter(Boolean).map((piece,index)=>{
+    let type='paragraph',value=piece,level;
+    const heading=piece.match(/^(#{1,6}) (.+)$/s);
+    if(heading){type='heading';level=heading[1].length;value=heading[2];}
+    else if(piece==='---'){type='divider';value='';}
+    else if(piece.startsWith('- ')){type='bullet';value=piece.slice(2);}
+    else if(/^1\. /u.test(piece)){type='numbered';value=piece.slice(3);}
+    else if(piece.startsWith('> ')){type='quote';value=piece.slice(2);}
+    else if(piece.startsWith('~~~\n')&&piece.endsWith('\n~~~')){type='code';value=piece.slice(4,-4);}
+    const block={id:source.blocks[index]?.type===type?source.blocks[index].id:crypto.randomUUID(),type,text:value};
+    if(level)block.level=level;
+    return block;
+  });
+  doc.revision++;doc.updatedAt=new Date().toISOString();doc.lastChange='Human text edit saved';
   return doc;
 }
 globalThis.CivweaveStructuredDocumentV1=Object.freeze({schema:SCHEMA,fresh,check,render,outline,status,apply,fromHuman});
