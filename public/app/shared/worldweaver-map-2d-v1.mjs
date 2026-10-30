@@ -141,7 +141,11 @@ export function renderWorldMap2D(projected,{documentRef=globalThis.document,onAc
     el.setAttribute('stroke-width','.2');el.setAttribute('opacity',opacity);
     el.setAttribute('data-geometry-id',poly.id);svg.append(el);
    };
-   for(const face of projected.facePolygons||[])draw(face,face.color||'#508c7c','none','.12');
+   // Low-end 2D renderers should not materialize thousands of SVG nodes.
+   // All projected face IDs remain in the projection data for inspection,
+   // but the visible map uses conservative prim footprints at high density.
+   if((projected.facePolygons||[]).length<=1000)
+    for(const face of projected.facePolygons||[])draw(face,face.color||'#508c7c','none','.12');
    for(const prim of projected.polygons)draw(prim,'#8acaba','#ddffe7','.38');
    for(const object of projected.buildingPolygons||[]){
     draw(object,'none',object.id===selectedObjectId?'#ffef9e':'#e4ffb0','.9');
