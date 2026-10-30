@@ -20,7 +20,7 @@ const GUIDE_ROOT_ID='cw-persistent-guide-chat-v215';
 const UPDATE_STYLE_ID='cw-persistent-platform-update-backlights-v1';
 const SUBSYSTEM_STATE_KEY='civweave.subsystem-avatar-state.v347';
 const GUIDE_THREAD_PREFIX='civweave.guide-thread.v350.';
-const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.138-ios-offline-webview';
+const SETTINGS_GATEWAY='/app/settings-gateway-v317.js?v=1.0.140-ios-webgpu-bundled-wasm';
 const SETTINGS_LOCAL_ROUTE_VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
 const SETTINGS_LOCAL_ROUTE=`/app/settings-local-route-v325.js?v=${SETTINGS_LOCAL_ROUTE_VERSION}`;
 const GUIDE_CHAT_SURFACE='/app/guide-chat-surface-v350.js?v=1.0.200-interwoven-quest-map';

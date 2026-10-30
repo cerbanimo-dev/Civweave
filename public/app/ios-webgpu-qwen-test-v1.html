@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c1e1a">
+<title>Civweave · iPhone WebGPU Qwen test</title>
+<style>
+:root{color-scheme:dark;font:16px/1.5 system-ui,-apple-system,sans-serif;background:#0c1e1a;color:#e8f2ed}
+*{box-sizing:border-box}main{max-width:700px;margin:0 auto;padding:22px 16px 64px}
+a{color:#a5d7be}.panel{background:#162c24;border:1px solid #426356;padding:17px;border-radius:15px;margin:15px 0}
+h1{font-size:1.55rem;margin:0}h2{font-size:1.05rem;margin:0 0 7px}
+button,select{font:inherit;border-radius:9px;padding:10px;border:1px solid #aadbbf}
+button{background:#b9e2c9;color:#0b2919;cursor:pointer;font-weight:650}
+button:disabled{opacity:.55;cursor:not-allowed}
+select{color:#e9f5ed;background:#163428;max-width:100%;width:100%}
+.row{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}
+output{white-space:pre-wrap;overflow-wrap:anywhere;display:block;min-height:2em}
+small{color:#c0d4ca}
+</style>
+</head>
+<body>
+<main>
+<h1>On-device Qwen 3.5 · iPhone WebGPU</h1>
+<p>This is an isolated browser test. It requires no app installation, HTTP model server, LiteRT, ai.local or native bridge. You can run it in Safari or ai.local’s built-in web view. Models are downloaded only when you choose to load one.</p>
+<section class="panel">
+<h2>1 · Detect Apple/WebKit GPU</h2>
+<div class="row"><button id="gpu" type="button">Check GPU</button></div>
+<output id="gpu-result" role="status">Not checked.</output>
+</section>
+<section class="panel">
+<h2>2 · Choose and load an ONNX model</h2>
+<select id="model" aria-label="Select local Qwen model"><option value="qwen35-08b-onnx-webgpu">Qwen 3.5 0.8B · first test</option><option value="qwen35-2b-onnx-webgpu">Qwen 3.5 2B · higher memory</option><option value="qwen35-4b-onnx-webgpu">Qwen 3.5 4B · experimental</option></select>
+<div class="row"><button id="load" type="button">Download and load locally</button><button id="test" type="button" disabled>Test streamed tokens</button></div>
+<output id="model-result" role="status">No download started.</output>
+</section>
+<section class="panel">
+<h2>3 · Offline verification</h2>
+<p>After a successful run, enable Airplane Mode and disable Wi-Fi; then reload this same page and load the model again. If the test works, the model and runtime are available in this browser’s offline caches. Safari and ai.local have different stores.</p>
+<div class="row"><a href="/app/working-campus-v440.html?iosLocal=1">Open Civweave campus</a><a href="/app/ios-local-webview/index.html">Check service-worker/offline support</a></div>
+<small>Actual local inference and offline behavior need to be confirmed per device. iPhone memory/GPU budgets can prevent the 2B or 4B models from loading.</small>
+</section>
+</main>
+<script type="module">
+import{probeGPU,prepare,generate}from '/app/local-ai/ios-webgpu-qwen-v1.js?v=1.0.1-ios-safari-qwen35-bundled-wasm';
+const by=id=>document.getElementById(id);
+let loaded='',busy=false;
+function setStatus(id,value){by(id).textContent=String(value||'').slice(0,850)}
+async function action(type){
+  if(busy)return;busy=true;
+  for(const id of ['gpu','load','test'])by(id).disabled=true;
+  try{
+    if(type==='gpu'){
+      const status=await probeGPU();
+      setStatus('gpu-result','WebGPU available. Maximum storage binding: '+Math.floor(status.maxStorageBufferBindingSize/1048576)+' MiB. This does not mean a large model will fit.');
+    }else if(type==='load'){
+      const id=by('model').value;
+      if(id==='qwen35-4b-onnx-webgpu'&&!confirm('4B is experimental and may exhaust Safari memory. Continue?'))return;
+      loaded='';
+      setStatus('model-result','Starting local browser model download…');
+      await prepare(id,{onPhase:(phase,detail)=>setStatus('model-result',phase+' · '+String(detail.file||detail.model||id)+' · '+String(detail.progress??''))});
+      loaded=id;setStatus('model-result','Model loaded on WebGPU. Test live tokens.');
+    }else if(type==='test'){
+      if(loaded!==by('model').value)throw Error('Load the selected model first.');
+      setStatus('model-result','Generating…');
+      const result=await generate({modelId:loaded,messages:[{role:'user',content:'Reply with exactly READY.'}],maxTokens:32,
+        onToken:(_,acc)=>setStatus('model-result','Live tokens: '+acc)});
+      setStatus('model-result','Local stream completed: '+result.text+' · '+result.chunks+' text chunks.');
+    }
+  }catch(e){loaded='';setStatus(type==='gpu'?'gpu-result':'model-result',(e.code?e.code+': ':'')+String(e.message||e))}
+  finally{busy=false;by('gpu').disabled=by('load').disabled=false;by('test').disabled=loaded!==by('model').value}
+}
+by('model').addEventListener('change',()=>{loaded='';by('test').disabled=true;setStatus('model-result','Model changed. Load before testing.')});
+for(const type of ['gpu','load','test'])by(type).addEventListener('click',()=>void action(type));
+</script>
+</body></html>

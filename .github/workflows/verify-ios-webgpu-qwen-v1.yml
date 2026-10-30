@@ -1,0 +1,35 @@
+name: Verify iOS WebGPU Qwen browser inference
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/local-ai/ios-webgpu-qwen-v1.js'
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/settings-local-models-direct-v325.js'
+      - 'public/app/settings-local-route-v325.js'
+      - 'public/app/ios-webgpu-qwen-test-v1.html'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-ios-webgpu-qwen-v1.mjs'
+      - '.github/workflows/verify-ios-webgpu-qwen-v1.yml'
+  pull_request:
+    paths:
+      - 'public/app/local-ai/ios-webgpu-qwen-v1.js'
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/settings-local-models-direct-v325.js'
+      - 'public/app/settings-local-route-v325.js'
+      - 'public/app/ios-webgpu-qwen-test-v1.html'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/verify-ios-webgpu-qwen-v1.mjs'
+      - '.github/workflows/verify-ios-webgpu-qwen-v1.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/verify-ios-webgpu-qwen-v1.mjs
