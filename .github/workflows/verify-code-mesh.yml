@@ -8,6 +8,8 @@ on:
       - 'public/creator-suite/shared/code-mesh-workspace-v1.mjs'
       - 'public/creator-suite/shared/code-workspace-core-v1.mjs'
       - 'public/creator-suite/shared/code-inference-route-v1.mjs'
+      - 'public/creator-suite/shared/native-server-control-v1.mjs'
+      - 'scripts/test-creator-native-server-control-v1.mjs'
       - 'public/creator-suite/document-agent-v1.js'
       - 'public/creator-suite/shared/creator-inference-loaders-v1.mjs'
       - 'public/app/shared/civweave-model-runtime.js'
@@ -22,6 +24,8 @@ on:
       - 'public/creator-suite/shared/code-mesh-workspace-v1.mjs'
       - 'public/creator-suite/shared/code-workspace-core-v1.mjs'
       - 'public/creator-suite/shared/code-inference-route-v1.mjs'
+      - 'public/creator-suite/shared/native-server-control-v1.mjs'
+      - 'scripts/test-creator-native-server-control-v1.mjs'
       - 'public/creator-suite/document-agent-v1.js'
       - 'public/creator-suite/shared/creator-inference-loaders-v1.mjs'
       - 'public/app/shared/civweave-model-runtime.js'
@@ -45,5 +49,6 @@ jobs:
       - run: node --check public/creator-suite/shared/code-inference-route-v1.mjs
       - run: node --check public/creator-suite/shared/creator-inference-loaders-v1.mjs
       - run: node --check public/creator-suite/document-agent-v1.js
+      - run: node --check public/creator-suite/shared/native-server-control-v1.mjs
       - run: node scripts/verify-creator-agentic-inference-config-v1.mjs
-      - run: node --test scripts/test-code-mesh-workspace-v1.mjs scripts/test-code-workshop-model-route-v1.mjs
+      - run: node --test scripts/test-code-mesh-workspace-v1.mjs scripts/test-code-workshop-model-route-v1.mjs scripts/test-creator-native-server-control-v1.mjs
