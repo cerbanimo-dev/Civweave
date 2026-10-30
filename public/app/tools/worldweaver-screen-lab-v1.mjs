@@ -1,5 +1,6 @@
 import {createWorldweaver} from '../shared/worldweaver-core-v1.mjs';
 import {normalizeScreenContent,renderWorldScreen} from '../shared/worldweaver-screen-v1.mjs';
+import {projectWorld2D,observeWorld2D,renderWorldMap2D} from '../shared/worldweaver-map-2d-v1.mjs';
 import {createLabMediaLeases,validateLabMediaFile,probeBrowserImage,probeBrowserVideo,stopLabMedia} from '../shared/worldweaver-lab-media-v1.mjs';
 
 const $=id=>document.getElementById(id);
@@ -18,6 +19,7 @@ const world=createWorldweaver({
 });
 const space=world.dispatch({type:'create',guide:'moss',title:'Local display workshop'},human).instance;
 const screen=world.dispatch({type:'create-screen',instanceId:space.id,title:'Shared presentation screen',aspectRatio:'16:9'},human).screen;
+world.dispatch({type:'add-station',instanceId:space.id,stationType:'practice',title:'Hands-on exercise',instructions:'Use this workshop to demonstrate one skill.'},human);
 const npc=world.dispatch({type:'rig-npc',instanceId:space.id,modelId:model.modelId,pilotPrompt:'Explain learning artifacts and visual demonstrations',name:'Sample agent',capabilities:['observe','speak','cast-screen','clear-screen']},model).npc;
 const terminal=new Set(['succeeded','failed','rejected','cancelled']);
 function log(value){
@@ -30,9 +32,21 @@ function say(value){$('status').textContent=value;log(value);}
 function updateInputs(){
  const kind=$('kind').value;
  $('upload').accept=kind==='video'?'video/mp4,video/webm':'image/png,image/jpeg,image/webp';
- $('file-options').hidden=kind==='website';
+ $('file-options').hidden=kind==='website'||kind==='civweave';
+ $('url-label').hidden=kind==='civweave';$('url-help').hidden=kind==='civweave';
+ $('source-url').hidden=kind==='civweave';
  $('generate').hidden=kind!=='image';
- $('upload').disabled=kind==='website';
+ $('upload').disabled=kind==='website'||kind==='civweave';
+}
+function inspectMap(action){
+ say(action.recursivePortal?
+  'Civweave inside Civweave opens the same 2D map. Infinite home screens are politely declined.':
+  'Map inspected '+action.objectType+' '+action.objectId+'. Real interactions must go through their canonical owners.');
+}
+function updateMap(){
+ const snapshot=world.snapshot(),map=projectWorld2D(snapshot,{worldRef:space.id});
+ $('mini-map').replaceChildren(renderWorldMap2D(map,{documentRef:document,onActivate:inspectMap}));
+ $('model-observation').textContent=JSON.stringify(observeWorld2D(snapshot,{worldRef:space.id}),null,2);
 }
 function activeIntent(){
  return world.snapshot().intents.find(i=>i.id===pendingId)||null;
@@ -56,6 +70,7 @@ function updateQueue(){
  $('apply').disabled=!pending||pending.status!=='queued';
  $('cancel').disabled=!pending||!['queued','review-required'].includes(pending.status);
  $('queue-model').disabled=Boolean(pending);
+ updateMap();
 }
 function prune(){
  const keep=new Set();
@@ -69,7 +84,8 @@ function prune(){
 }
 function unloadScreen(){stopLabMedia($('screen'));$('screen').replaceChildren()}
 function render(){
- const selected=world.snapshot().screens.find(x=>x.id===screen.id);
+ const state=world.snapshot();
+ const selected=state.screens.find(x=>x.id===screen.id);
  const host=$('screen');
  unloadScreen();
  if(!selected?.current){
@@ -77,7 +93,9 @@ function render(){
  }else{
   try{host.append(renderWorldScreen(selected.current,{
    documentRef:document,
-   resolveAsset:(id,kind)=>leases.resolve(id,kind)
+   resolveAsset:(id,kind)=>leases.resolve(id,kind),
+   worldState:state,
+   onActivate:inspectMap
   }))}
   catch(error){const p=document.createElement('p');p.textContent='Display unavailable: '+String(error.message||error);host.append(p);}
  }
@@ -112,7 +130,7 @@ $('kind').addEventListener('change',()=>{
  uploadEpoch++;
  currentAsset=null;$('source-url').value='';
  updateInputs();prune();
- $('upload').disabled=$('kind').value==='website';
+ $('upload').disabled=$('kind').value==='website'||$('kind').value==='civweave';
  $('generate').disabled=false;
 });
 $('generate').addEventListener('click',async()=>{
@@ -136,6 +154,7 @@ $('generate').addEventListener('click',async()=>{
 function content(){
  const kind=$('kind').value,url=$('source-url').value.trim();
  const title=$('title').value.trim()||'Untitled display';
+ if(kind==='civweave')return normalizeScreenContent({kind,source:{worldRef:space.id},title:'Civweave ↳ 2D World'});
  const source=url?{url}:currentAsset?.kind===kind?{assetId:currentAsset.assetId}:null;
  if(!source)throw new TypeError('Choose a supported media file, generated slide, or HTTPS link.');
  return normalizeScreenContent({kind,source,title,alt:title});

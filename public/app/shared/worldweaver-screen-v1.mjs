@@ -1,9 +1,11 @@
+import {projectWorld2D,renderWorldMap2D} from './worldweaver-map-2d-v1.mjs';
+
 /**
  * Portable, non-executable Worldweaver screen media grammar and DOM presenter.
  * Asset IDs are opaque: the canonical creator/library owner verifies and resolves
  * them in the trusted renderer. Remote URLs are not fetched by a server.
  */
-export const WORLD_SCREEN_KINDS=Object.freeze(['image','video','website']);
+export const WORLD_SCREEN_KINDS=Object.freeze(['image','video','website','civweave']);
 const id=/^[A-Za-z0-9][A-Za-z0-9:._/-]{0,179}$/;
 const own=(object,fields,label)=>{
   if(!object||typeof object!=='object'||Array.isArray(object))throw new TypeError(label+' must be an object.');
@@ -40,7 +42,15 @@ function assetSource(value){
 export function normalizeScreenContent(value){
   own(value,['kind','source','title','alt'],'screen content');
   if(!WORLD_SCREEN_KINDS.includes(value.kind))throw new TypeError('Unknown screen media kind.');
-  own(value.source,['assetId','url'],'screen source');
+  own(value.source,value.kind==='civweave'?['worldRef']:['assetId','url'],'screen source');
+  if(value.kind==='civweave'){
+    if(Object.keys(value.source).length!==1||typeof value.source.worldRef!=='string'||
+      !id.test(value.source.worldRef)||value.source.worldRef.includes('..'))
+      throw new TypeError('Civweave screen requires exactly one bounded world reference.');
+    const title=text(value.title,160,'Screen title');
+    const alt=value.alt===undefined?'':text(value.alt,500,'Alt text');
+    return {kind:'civweave',source:{worldRef:value.source.worldRef},title,...(alt?{alt}:{})};
+  }
   const hasAsset=Object.hasOwn(value.source,'assetId');
   const hasUrl=Object.hasOwn(value.source,'url');
   if(hasAsset===hasUrl)throw new TypeError('Screen source requires exactly one asset ID or URL.');
@@ -55,7 +65,14 @@ export function normalizeScreenContent(value){
  * trusted adapter for user-selected/locally generated assets on this device.
  */
 export function resolveScreenSource(content,resolveAsset){
-  const item=normalizeScreenContent(content);
+  // Canonical Worldweaver screen history attaches presenter/shownAt metadata.
+  // Strip ONLY these owner-produced envelope fields when rendering a stored
+  // presentation; incoming casts still pass strict normalizeScreenContent.
+  const raw=content&&typeof content==='object'?{...content}:content;
+  if(raw&&typeof raw==='object'){delete raw.presenter;delete raw.shownAt;}
+  const item=normalizeScreenContent(raw);
+  if(item.kind==='civweave')return {kind:'civweave',worldRef:item.source.worldRef,title:item.title,
+    alt:item.alt||item.title,origin:'internal'};
   if(item.source.url)return {kind:item.kind,url:item.source.url,title:item.title,alt:item.alt||item.title,origin:'external'};
   if(typeof resolveAsset!=='function')throw new TypeError('A trusted screen asset resolver is required.');
   const record=resolveAsset(item.source.assetId,item.kind);
@@ -73,14 +90,30 @@ export function resolveScreenSource(content,resolveAsset){
  * no camera/microphone/geolocation/presentation, and a useful external link.
  * Third-party CSP/X-Frame-Options can still prevent embedded display.
  */
-export function renderWorldScreen(content,{documentRef=globalThis.document,resolveAsset}={}){
+export function renderWorldScreen(content,{documentRef=globalThis.document,resolveAsset,worldState,onActivate}={}){
   const source=resolveScreenSource(content,resolveAsset);
-  const meta={...source,...(source.kind==='website'?{sandbox:'allow-scripts allow-forms'}:{})};
+  const map=source.kind==='civweave'?
+    (worldState?projectWorld2D(worldState,{worldRef:source.worldRef}):null):null;
+  const meta={...source,...(source.kind==='website'?{sandbox:'allow-scripts allow-forms'}:{}),
+    ...(map?{mapSchema:map.schema,mapRevision:map.revision}:{} )};
   if(!documentRef?.createElement)return meta;
   const root=documentRef.createElement('section');
   root.className='cw-worldweaver-screen';root.setAttribute('aria-label',source.title);
   const header=documentRef.createElement('h3');header.textContent=source.title;root.append(header);
   let media;
+  if(source.kind==='civweave'){
+    if(!map){
+      const placeholder=documentRef.createElement('p');
+      placeholder.textContent='Civweave 2D world needs an authorized live Worldweaver state provider.';
+      root.append(placeholder);
+    }else{
+      const portal=renderWorldMap2D(map,{documentRef,onActivate,embedded:true});
+      // The embedded map *never* displays another full app iframe or nested
+      // projector. In-map Weave screens become labeled one-depth portals.
+      root.append(portal);
+    }
+    return root;
+  }
   if(source.kind==='image'){
     media=documentRef.createElement('img');
     media.src=source.url;media.alt=source.alt;media.loading='lazy';

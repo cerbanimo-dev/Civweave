@@ -131,7 +131,10 @@ export function createWorldweaver({authorize,id=()=>crypto.randomUUID(),clock=()
         if(actor.kind!=='human')throw new Error('Model pilots must queue screen casts as tool intents.');
         const screen=screenById(command.screenId);
         if(findInstance(screen.instanceId).status==='archived')throw new Error('Archived instance screen.');
-        updateScreen(screen,normalizeScreenContent(command.content),actor,eventTime);
+        const content=normalizeScreenContent(command.content);
+        if(content.kind==='civweave'&&content.source.worldRef!==screen.instanceId)
+          throw new Error('Civweave screens can only project their own authorized world instance.');
+        updateScreen(screen,content,actor,eventTime);
         receipt.screen=copy(screen);
         break;
       }
@@ -305,6 +308,8 @@ export function createWorldweaver({authorize,id=()=>crypto.randomUUID(),clock=()
             expectedScreenRevision=screen.revision;
             if(action.tool==='cast-screen'){
               const content=normalizeScreenContent(args.content);
+              if(content.kind==='civweave'&&content.source.worldRef!==npc.instanceId)
+                throw new Error('Model cannot display a different world through Civweave projection.');
               needsReview=Boolean(content.source.url);
               args={screenId:screen.id,content};
             }else args={screenId:screen.id};
