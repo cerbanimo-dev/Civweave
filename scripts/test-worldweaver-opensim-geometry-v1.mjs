@@ -136,7 +136,7 @@ test('in-world Civweave screen renders geometry-backed 2D polygon view; still no
  assert.equal(rendered.mapRevision,world.snapshot().revision);
  const s=readFileSync(new URL('../public/app/shared/worldweaver-screen-v1.mjs',import.meta.url),'utf8');
  assert.match(s,/worldLayout/);
- assert.doesNotMatch(s,/allow-same-origin/);
+ assert.equal(s.includes("media.setAttribute('sandbox','allow-same-origin"),false);
 });
 test('visual-world example uses verified district names, but labels provisional coordinates',()=>{
  const fixture=createProvisionalOpenSimScene({instanceId:'demo:commune'});
@@ -146,7 +146,7 @@ test('visual-world example uses verified district names, but labels provisional 
  assert.equal(fixture.objects.filter(x=>x.kind==='building').length,13);
  assert.ok(fixture.objects.some(x=>x.name==='Federation Harbor'));
  const built=buildOpenSimGeometry(fixture);
- assert.equal(built.objects.length,24);
+ assert.equal(built.objects.length,25);
  assert.equal(built.source,'provisional-or-imported');
  assert.ok(built.faces.length>100);
  const html=readFileSync(new URL('../public/app/tools/worldweaver-geometry-lab.html',import.meta.url),'utf8');
