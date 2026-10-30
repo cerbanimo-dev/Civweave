@@ -59,7 +59,7 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     if(input.enableOnboarding===true&&!this.meta('guildOnboardingV1')){
       this.putMeta('guildOnboardingV1',{schema:'civweave.guild-node-onboarding.v1',guildId:result.guildId,stage:0,startedAt:new Date().toISOString(),milestones:[]});
     }
-    return {...result,onboarding:this.onboardingStatus()};
+    return this.status();
   }
   onboardingState(){return this.meta('guildOnboardingV1')}
   onboardingStatus(){
