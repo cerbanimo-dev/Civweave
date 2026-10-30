@@ -1,0 +1,30 @@
+name: Verify Creator Story Protocols
+on:
+  pull_request:
+    paths:
+      - 'public/creator-suite/world-protocols/**'
+      - 'public/creator-suite/document-agent-v1.js'
+      - 'public/creator-suite/index.html'
+      - 'scripts/test-world-protocols-v1.mjs'
+      - '.github/workflows/verify-story-protocols.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/creator-suite/world-protocols/**'
+      - 'public/creator-suite/document-agent-v1.js'
+      - 'public/creator-suite/index.html'
+      - 'scripts/test-world-protocols-v1.mjs'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check public/creator-suite/world-protocols/catalog.mjs
+          node --check public/creator-suite/world-protocols/core.mjs
+          node --check public/creator-suite/world-protocols/panel.mjs
+          node --check public/creator-suite/document-agent-v1.js
+          node --test scripts/test-world-protocols-v1.mjs
