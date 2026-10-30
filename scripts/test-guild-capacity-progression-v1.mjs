@@ -40,6 +40,6 @@ test('owner management is reachable from the installed Guild navigation',()=>{
   const client=source('public/app/guild-owner-management-v1.js');
   assert.match(nav,/data-cw-guild-manage/);
   assert.match(campus,/guild-owner-management-v1\.js/);
-  assert.match(client,/aria-label="Guild management"/);
+  assert.match(client,/setAttribute\('aria-label','Guild management'\)/);
   assert.match(client,/data-guild-reward-slot/);
 });
