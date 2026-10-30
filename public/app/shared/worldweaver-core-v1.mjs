@@ -1,4 +1,5 @@
 import {validateAvatarPlan} from './worldweaver-avatar-v1.mjs';
+import {normalizeScreenContent} from './worldweaver-screen-v1.mjs';
 
 /**
  * Worldweaver microspace manifest and NPC-pilot proposal owner.
@@ -26,7 +27,7 @@ const STATIONS=Object.freeze({
   'creator-shop':['display','demonstration'],
   'convention':['debate','ballot','display']
 });
-export const NPC_TOOLS=Object.freeze(['observe','inspect','speak','move','demonstrate','build','present','facilitate']);
+export const NPC_TOOLS=Object.freeze(['observe','inspect','speak','move','demonstrate','build','present','facilitate','cast-screen','clear-screen']);
 const BOUND_ID=/^[A-Za-z0-9][A-Za-z0-9:_./-]{0,179}$/;
 const clean=(v,max=240)=>typeof v==='string'?v.trim().slice(0,max):'';
 const copy=v=>JSON.parse(JSON.stringify(v));
@@ -50,7 +51,7 @@ const appearanceRef=(value)=>{
   if(/^\/app\/assets\/[a-z0-9_-]+(?:\/[a-z0-9_-]+)*\.(?:svg|png|jpg|webp)$/.test(x))return x;
   return ref(x,'Appearance');
 };
-const empty=()=>({schema:WORLDWEAVER_SCHEMA,revision:0,instances:[],stations:[],links:[],npcs:[],avatarProposals:[],intents:[],debateTurns:[],journal:[]});
+const empty=()=>({schema:WORLDWEAVER_SCHEMA,revision:0,instances:[],stations:[],links:[],npcs:[],avatarProposals:[],screens:[],screenHistory:[],intents:[],debateTurns:[],journal:[]});
 
 /**
  * All dispatches are manifest transitions, not external actions.
@@ -66,11 +67,29 @@ export function createWorldweaver({authorize,id=()=>crypto.randomUUID(),clock=()
   // Older v1 snapshots lacked avatar proposals. Preserve those instances.
   if(state.avatarProposals===undefined)state.avatarProposals=[];
   if(!Array.isArray(state.avatarProposals))throw new TypeError('Invalid avatar proposal history.');
+  if(state.screens===undefined)state.screens=[];
+  if(state.screenHistory===undefined)state.screenHistory=[];
+  if(!Array.isArray(state.screens)||!Array.isArray(state.screenHistory))
+    throw new TypeError('Invalid screen history or manifests.');
   const nextId=()=>ref(String(id()),'Generated ID');
   const findInstance=key=>{
     const row=state.instances.find(x=>x.id===key);
     if(!row)throw new RangeError('Unknown instance.');
     return row;
+  };
+  const screenById=key=>{
+    const screen=state.screens.find(x=>x.id===key);
+    if(!screen)throw new RangeError('Unknown screen.');
+    return screen;
+  };
+  function updateScreen(screen,content,actor,at){
+    screen.current=content?{...content,presenter:{kind:actor.kind,principalId:actor.principalId},shownAt:at}:null;
+    screen.status=content?'presenting':'blank';
+    screen.revision+=1;
+    screen.updatedAt=at;
+    state.screenHistory.push({id:nextId(),screenId:screen.id,instanceId:screen.instanceId,
+      revision:screen.revision,kind:content?.kind||'clear',presenterKind:actor.kind,at});
+    if(state.screenHistory.length>200)state.screenHistory.shift();
   };
   function dispatch(command,actor){
     if(!command||typeof command.type!=='string')throw new TypeError('Command type required.');
@@ -92,6 +111,56 @@ export function createWorldweaver({authorize,id=()=>crypto.randomUUID(),clock=()
           scope,guildId,status:'draft',createdBy:actor.principalId,createdAt:eventTime,world:null};
         state.instances.push(row);
         receipt.instance=copy(row);
+        break;
+      }
+      case 'create-screen':{
+        fields(command,['type','instanceId','title','aspectRatio']);
+        if(instance.status==='archived')throw new Error('Archived worlds cannot create screens.');
+        if(!['16:9','4:3','portrait','square'].includes(command.aspectRatio||'16:9'))
+          throw new TypeError('Unsupported screen aspect ratio.');
+        if(state.screens.filter(x=>x.instanceId===instance.id).length>=12)
+          throw new Error('This instance has reached its screen limit.');
+        const screen={id:nextId(),instanceId:instance.id,title:required(command.title,'Screen title',100),
+          aspectRatio:command.aspectRatio||'16:9',createdBy:actor.principalId,
+          status:'blank',revision:0,current:null,createdAt:eventTime,updatedAt:eventTime};
+        state.screens.push(screen);receipt.screen=copy(screen);
+        break;
+      }
+      case 'cast-screen':{
+        fields(command,['type','screenId','content']);
+        if(actor.kind!=='human')throw new Error('Model pilots must queue screen casts as tool intents.');
+        const screen=screenById(command.screenId);
+        if(findInstance(screen.instanceId).status==='archived')throw new Error('Archived instance screen.');
+        updateScreen(screen,normalizeScreenContent(command.content),actor,eventTime);
+        receipt.screen=copy(screen);
+        break;
+      }
+      case 'clear-screen':{
+        fields(command,['type','screenId']);
+        if(actor.kind!=='human')throw new Error('Model pilots must queue screen clears as tool intents.');
+        const screen=screenById(command.screenId);
+        if(findInstance(screen.instanceId).status==='archived')throw new Error('Archived instance screen.');
+        updateScreen(screen,null,actor,eventTime);
+        receipt.screen=copy(screen);
+        break;
+      }
+      case 'approve-cast':
+      case 'reject-cast':{
+        fields(command,command.type==='approve-cast'?['type','intentId']:['type','intentId','reason']);
+        if(actor.kind!=='human')throw new Error('External media review requires a human.');
+        const intent=state.intents.find(x=>x.id===command.intentId);
+        if(!intent||intent.tool!=='cast-screen')throw new RangeError('Unknown screen cast request.');
+        if(intent.status!=='review-required')throw new Error('This cast does not require review.');
+        if(command.type==='approve-cast'){
+          const screen=screenById(intent.args.screenId);
+          if(screen.revision!==intent.expectedScreenRevision)throw new Error('Stale screen cast revision.');
+          intent.status='queued';intent.reviewedBy=actor.principalId;intent.reviewedAt=eventTime;
+        }else{
+          const reason=required(command.reason,'Review reason',500);
+          intent.status='rejected';intent.reviewReason=reason;
+          intent.reviewedBy=actor.principalId;intent.reviewedAt=eventTime;
+        }
+        receipt.intent=copy(intent);
         break;
       }
       case 'add-station':{
@@ -215,11 +284,23 @@ export function createWorldweaver({authorize,id=()=>crypto.randomUUID(),clock=()
         const intents=command.actions.map(action=>{
           fields(action,['tool','args']);
           if(!npc.capabilities.includes(action.tool))throw new Error('NPC tool is not allowed: '+String(action.tool));
-          const args=action.args??{};
+          let args=action.args??{};
           if(!args||typeof args!=='object'||Array.isArray(args)||JSON.stringify(args).length>2000)
             throw new TypeError('NPC action arguments must be bounded structured data.');
+          let expectedScreenRevision=null,needsReview=false;
+          if(action.tool==='cast-screen'||action.tool==='clear-screen'){
+            fields(args,action.tool==='cast-screen'?['screenId','content']:['screenId']);
+            const screen=screenById(args.screenId);
+            if(screen.instanceId!==npc.instanceId)throw new Error('NPC cannot cast into another world instance.');
+            expectedScreenRevision=screen.revision;
+            if(action.tool==='cast-screen'){
+              const content=normalizeScreenContent(args.content);
+              needsReview=Boolean(content.source.url);
+              args={screenId:screen.id,content};
+            }else args={screenId:screen.id};
+          }
           return {id:nextId(),npcId:npc.id,instanceId:npc.instanceId,tool:action.tool,
-            args:copy(args),status:'queued',createdAt:eventTime};
+            args:copy(args),expectedScreenRevision,status:needsReview?'review-required':'queued',createdAt:eventTime};
         });
         state.intents.push(...intents);
         receipt.intents=copy(intents);
@@ -230,8 +311,21 @@ export function createWorldweaver({authorize,id=()=>crypto.randomUUID(),clock=()
         if(actor.kind!=='runtime')throw new Error('Only a trusted runtime can report action execution.');
         const intent=state.intents.find(x=>x.id===command.intentId);
         if(!intent)throw new RangeError('Unknown action intent.');
-        if(intent.status!=='queued')throw new Error('Action already resolved.');
+        if(intent.status!=='queued')throw new Error('Action not queued or already resolved.');
         if(!['succeeded','failed'].includes(command.outcome))throw new TypeError('Invalid action outcome.');
+        let targetScreen=null;
+        if(intent.tool==='cast-screen'||intent.tool==='clear-screen'){
+          targetScreen=screenById(intent.args.screenId);
+          if(targetScreen.revision!==intent.expectedScreenRevision)
+            throw new Error('Stale screen revision; this cast cannot overwrite newer content.');
+        }
+        if(command.outcome==='succeeded'&&targetScreen){
+          const npc=state.npcs.find(x=>x.id===intent.npcId);
+          if(!npc)throw new RangeError('NPC pilot no longer exists.');
+          const pilot={kind:'model',principalId:npc.pilotPrincipalId};
+          updateScreen(targetScreen,intent.tool==='cast-screen'?intent.args.content:null,pilot,eventTime);
+          receipt.screen=copy(targetScreen);
+        }
         intent.status=command.outcome;intent.resolvedAt=eventTime;
         intent.summary=clean(command.summary,500);
         receipt.intent=copy(intent);
