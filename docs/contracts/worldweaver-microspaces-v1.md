@@ -70,3 +70,16 @@ Provider adapters (OpenSimulator, local 2D/WebGL, future Genie or Overte) may re
 6. Test multiplayer authorization, griefing/impersonation resistance, rate and resource budgets, long-running NPC behavior, and recovery after reconnect.
 
 The feature branch is not a production deployment. Test all host changes on staging before a production merge.
+
+## Visual self-design and Starling avatar pilots (feature-branch increment)
+
+The authoritative Starling team remains `public/app/shared/starling-collective-v1.mjs`: it defines Aphra, Jae, Anthony, Rosa, Sana, Kit, Farah and Kami. `worldweaver-starling-bridge-v1.mjs` **reads** that existing registry and maps each persona to its packaged `/app/assets/starling/<id>.svg` portrait. No second Starling character catalog is created; the optional `personaRef` binds an NPC to the authenticated Starling pilot identity. These existing SVG assets are reference art, not directly machine-understood images.
+
+`rasterizeTrustedAvatar` in `worldweaver-avatar-v1.mjs` converts the verified, packaged SVG portrait to a bounded PNG data URI in the user's browser *on demand*. This step is never automatic at boot and never downloads remote artwork. `avatarVisualRequest` produces provider-neutral image/text input for an actually vision-capable selected model; otherwise it explicitly offers a text-description fallback rather than pretending a model saw an image.
+
+`proposeAvatarViaModel` in `worldweaver-avatar-pilot-v1.mjs` hands that request to the existing selected-model invoker **supplied by the caller**, checks exact model/persona binding, requires image bytes when vision is claimed, validates returned structured JSON, and dispatches a pending `propose-avatar` record to the one canonical Worldweaver core. It does not own inference scheduling or silently spend cloud neurons. Failed inference cannot overwrite the active avatar. Model-tool and guide integration remains pending.
+
+The initial body plan is procedural **2D**, not a claim that an OpenSimulator skeleton or 3D mesh was generated. It supports up to 24 primitive body parts in a noncyclic hierarchy, 12 bounded rotation poses (including idle), and 16 event-triggered `pose`/`say` behaviors. The pure `renderAvatarSvg` and `avatarEventSteps` preview and interpret this declarative plan without executing scripts. Each model may propose only for an NPC bound to its verified principal/model/persona. Human review is required before a trusted world renderer can report `apply-avatar`; the previously applied avatar stays active during edits and rejected changes. More general 3D skeletal binding and approved LSL adapters require a later capability implementation and independent security checks.
+
+The approved actor identity, authorizer and renderer are trusted external dependencies, **not booleans supplied by a model**. Avatar image input must be consented before using hosted vision inference. Neither a model-generated appearance nor an in-world script grants commerce, publication, voting, or network permissions.
+
