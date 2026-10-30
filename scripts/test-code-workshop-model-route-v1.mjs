@@ -79,6 +79,7 @@ test('native Termux code chunks use streaming text, 512 token ceiling and an ext
    {provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1',stream:false,timeoutMs:90000},
    [{role:'user',content:'Create a small JS function as JSON'}],{
      maxTokens:2048,
+     checkNativeSlots:async()=>({state:'idle',detail:'All slots idle'}),
      sharedRuntime:{generate:async req=>{
        assert.equal(req.responseFormat,'text','Do not force llama.cpp blocking JSON grammar');
        assert.equal(req.config.stream,true,'Termux request must stream deltas');
@@ -106,4 +107,15 @@ test('native behavior is restricted to exact loopback Termux model and port',asy
   assert.equal(req.responseFormat,'json');assert.equal(req.config.stream,false);
   return{status:'success',outputJson:{type:'done'}};
  }}});
+});
+
+test('busy native slot rejects a code request without sending a second model POST',async()=>{
+ let generated=false;
+ await assert.rejects(runCodeInference(
+  {provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1'},
+  [{role:'user',content:'Build a feature'}],{
+   checkNativeSlots:async()=>{const error=new Error('Termux busy: no new generation submitted.');error.code='NATIVE_SERVER_BUSY';throw error;},
+   sharedRuntime:{generate:async()=>{generated=true;}}
+  }),/busy/i);
+ assert.equal(generated,false,'Must not queue behind a ghost generation');
 });
