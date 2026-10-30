@@ -417,7 +417,8 @@
       "allowedCallers": [
         "scripts/test-worldweaver-core-v1.mjs",
         "scripts/test-worldweaver-avatar-rigs-v1.mjs",
-        "scripts/test-worldweaver-screens-v1.mjs"
+        "scripts/test-worldweaver-screens-v1.mjs",
+        "scripts/test-worldweaver-labs-hardening-v1.mjs"
       ],
       "activeRoute": "none; manifest-only foundation pending authenticated capability integration",
       "delegatedAuthorities": {
@@ -440,18 +441,24 @@
         "NPC avatar body plans and behavior are declarative, reviewed and acknowledged by a trusted renderer before activation.",
         "Screens are logical world objects with validated image, video or HTTPS website source references and one canonical cast state owner.",
         "Model presenters queue cast-screen/clear-screen intents; only trusted runtimes acknowledge changes; external URLs require human review.",
-        "Websites render in sandboxed cross-origin iframes without same-origin permission and may refuse embedding; no arbitrary model HTML or JavaScript."
+        "Websites render in sandboxed cross-origin iframes without same-origin permission and may refuse embedding; no arbitrary model HTML or JavaScript.",
+        "Local labs verify media type magic bytes, image dimensions and video duration before retaining user-selected files.",
+        "Local avatar drafts persist only validated plans, support persona-scoped import/export and remain revertible.",
+        "Screen lab releases unused object URLs, closes video playback, and allows the human owner to cancel queued model casts."
       ],
       "helpers": [
         "public/app/shared/worldweaver-avatar-v1.mjs",
         "public/app/shared/worldweaver-starling-bridge-v1.mjs",
         "public/app/shared/worldweaver-avatar-pilot-v1.mjs",
-        "public/app/shared/worldweaver-screen-v1.mjs"
+        "public/app/shared/worldweaver-screen-v1.mjs",
+        "public/app/shared/worldweaver-lab-draft-v1.mjs",
+        "public/app/shared/worldweaver-lab-media-v1.mjs"
       ],
       "executableVerifiers": [
         "scripts/test-worldweaver-core-v1.mjs",
         "scripts/test-worldweaver-avatar-rigs-v1.mjs",
-        "scripts/test-worldweaver-screens-v1.mjs"
+        "scripts/test-worldweaver-screens-v1.mjs",
+        "scripts/test-worldweaver-labs-hardening-v1.mjs"
       ],
       "presentationDemos": [
         "public/app/tools/worldweaver-avatar-lab.html",

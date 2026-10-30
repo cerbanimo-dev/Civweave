@@ -17,6 +17,10 @@ textarea{min-height:270px;resize:vertical;font:12px/1.6 ui-monospace,monospace}
 button{background:#303e54;padding:.65rem .85rem;cursor:pointer}
 button:hover{background:#405473}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #c6a6ff;outline-offset:2px}
 .buttons{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.75rem}
+.file-label{margin:0;display:inline-flex;gap:.5rem;align-items:center;background:#303e54;border:1px solid #646a7e;border-radius:9px;padding:.5rem}
+.file-label input{max-width:180px;font-size:.8rem}
+button,.file-label{min-height:42px}
+#draft-status{font-size:.9rem}
 .reference{width:min(100%,280px);height:270px;object-fit:contain;border-radius:12px;background:#10141e}
 .preview{height:300px;display:grid;place-items:center;border:1px dashed #4d5369;border-radius:12px;background:#111622}
 .preview svg{width:90%;height:90%}
@@ -60,7 +64,16 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#d1cde2;font:12px/1.5 ui-m
 <label for="plan">Avatar body and event scripts (structured JSON)</label>
 <textarea id="plan" spellcheck="false" aria-describedby="plan-help"></textarea>
 <small id="plan-help">Edit and preview a body plan. Arbitrary JavaScript, LSL, network actions and direct voting or purchasing commands are not accepted.</small>
-<div class="buttons"><button id="preview" type="button">Validate and preview</button><button id="reset" type="button">Reset to starter body</button></div>
+<div class="buttons">
+<button id="preview" type="button">Validate and preview</button>
+<button id="revert" type="button">Undo last valid edit</button>
+<button id="reset" type="button">Reset to starter body</button>
+</div>
+<div class="buttons">
+<button id="export" type="button">Export validated rig JSON</button>
+<label for="import" class="file-label">Import JSON rig <input id="import" type="file" accept=".json,application/json"></label>
+</div>
+<p id="draft-status" class="note" role="status">Drafts are stored locally only when valid.</p>
 <p id="status" role="status"></p>
 </section>
 </div>

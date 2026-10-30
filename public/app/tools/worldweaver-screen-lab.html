@@ -22,6 +22,10 @@ button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visi
 .cw-worldweaver-screen p{font-size:.78rem;margin:.4rem}.cw-worldweaver-screen a{display:inline-block;color:#eac8ff;padding:.35rem;font-size:.86rem}
 .muted{color:#a8aabb;font-size:.9rem}.status{background:#252c3e;padding:.65rem;border-radius:10px;min-height:2.5rem}
 .card{margin:.7rem 0;padding:.7rem;border:1px solid #464d60;border-radius:10px}
+#queue{padding-left:1.1rem;max-height:180px;overflow:auto}
+#queue li{margin:.3rem 0;overflow-wrap:anywhere}
+button{min-height:42px}
+
 #blank{color:#d2d0de;text-align:center}#log{font:12px/1.6 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:140px;overflow:auto}
 a{color:#d9c1ff}
 @media(max-width:750px){main{grid-template-columns:1fr}.screen-wrap{border-width:7px}.cw-worldweaver-screen iframe{min-height:150px}}
@@ -43,7 +47,7 @@ a{color:#d9c1ff}
 <div id="file-options">
 <label for="upload">Manually created / uploaded image or video</label>
 <input id="upload" type="file" accept="image/png,image/jpeg,image/webp">
-<p class="muted">Selected media is held only in this browser session, without uploading to a server.</p>
+<p class="muted">Only PNG/JPEG/WebP under 12 MB (maximum 8192 px edge, 32 megapixels) or MP4/WebM under 50 MB and five minutes. Actual file signatures and decoded metadata are checked. Media remains in this browser session.</p>
 <button type="button" id="generate">Generate a local demo slide image</button>
 </div>
 <label for="source-url">Optional HTTPS media or website URL</label>
@@ -56,10 +60,10 @@ a{color:#d9c1ff}
 <div class="card">
 <h2>Model review and execution demo</h2>
 <p class="muted">No inference runs here. The model command and renderer acknowledgement are demonstrated with clearly labeled test identities only.</p>
-<div id="pending" aria-live="polite">No model cast pending.</div>
+<div id="pending" aria-live="polite">No model cast pending.</div><ol id="queue" class="muted" aria-label="Recent presentation requests"></ol>
 <div class="buttons">
 <button type="button" id="approve">Approve URL</button>
-<button type="button" id="reject">Reject</button>
+<button type="button" id="reject">Reject</button><button type="button" id="cancel">Cancel pending</button>
 <button type="button" id="apply">Simulate trusted display</button>
 </div>
 </div>
@@ -67,7 +71,7 @@ a{color:#d9c1ff}
 <section aria-labelledby="display-title">
 <h2 id="display-title">Workshop wall screen</h2>
 <div class="screen-wrap" id="screen" aria-live="polite"><p id="blank">Nothing is showing yet.</p></div>
-<div class="buttons"><button type="button" id="clear">Clear screen</button></div>
+<div class="buttons"><button type="button" id="clear">Clear screen</button></div><p class="muted">An embedded website may refuse to load. In that case use its visible external link; it will never be bypassed.</p>
 <p id="status" class="status" role="status">A local Worldweaver screen is ready.</p>
 <h2>Presentation log</h2>
 <pre id="log" aria-label="Presentation activity"></pre>
