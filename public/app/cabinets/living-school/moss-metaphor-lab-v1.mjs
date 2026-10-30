@@ -26,9 +26,11 @@ export function validateMetaphor(candidate){
   for(const row of mapping)if(!validString(row?.image,140)||!validString(row?.concept,220)||!validString(row?.relation,350))throw Error('A metaphor-to-concept mapping is incomplete.');
   for(const step of steps){
     if(!validString(step?.scene,900)||!validString(step?.question,450))throw Error('A metaphor scene or decision is incomplete.');
-    if(list(step.choices).length<2||step.choices.length>4)throw Error('A scene needs between two and four options.');
-    if(step.choices.filter(choice=>choice?.correct===true).length!==1)throw Error('Each scene needs exactly one supported answer.');
-    for(const choice of step.choices)if(!validString(choice?.label,240)||!validString(choice?.feedback,480)||typeof choice.correct!=='boolean')throw Error('A scene decision is missing label, explanation, or correctness.');
+    const dial=step.kind==='dial',values=dial?list(step.dial?.levels):list(step.choices);
+    if(values.length<(dial?3:2)||values.length>(dial?5:4))throw Error('A scene needs 2–4 decisions or 3–5 dial settings.');
+    if(values.filter(choice=>choice?.correct===true).length!==1)throw Error('Each scene needs exactly one supported answer.');
+    if(dial&&!validString(step.dial?.label,180))throw Error('The interactive dial must have a meaningful label.');
+    for(const choice of values)if(!validString(choice?.label,240)||!validString(choice?.feedback,480)||typeof choice.correct!=='boolean'||(dial&&!validString(choice?.worldState,450)))throw Error('A scene option needs a meaningful label, feedback, and consequence.');
   }
   if(candidate.theme!=null&&!THEMES.has(candidate.theme))throw Error('The scene theme is not supported.');
   // Copy only approved, bounded text and booleans. Ignore all markup, URLs, scripts, styles, and extra fields.
@@ -36,7 +38,10 @@ export function validateMetaphor(candidate){
     title:text(candidate.title,120),world:text(candidate.world,700),analogy:text(candidate.analogy,950),
     theme:THEMES.has(candidate.theme)?candidate.theme:'garden',
     mapping:mapping.map(row=>({image:text(row.image,140),concept:text(row.concept,220),relation:text(row.relation,350)})),
-    steps:steps.map(step=>({scene:text(step.scene,900),question:text(step.question,450),choices:step.choices.map(choice=>({label:text(choice.label,240),feedback:text(choice.feedback,480),correct:choice.correct}))})),
+    steps:steps.map(step=>({
+      scene:text(step.scene,900),question:text(step.question,450),kind:step.kind==='dial'?'dial':'choice',
+      ...(step.kind==='dial'?{dial:{label:text(step.dial.label,180),levels:step.dial.levels.map(level=>({label:text(level.label,240),worldState:text(level.worldState,450),feedback:text(level.feedback,480),correct:level.correct}))}}:{choices:step.choices.map(choice=>({label:text(choice.label,240),feedback:text(choice.feedback,480),correct:choice.correct}))})
+    })),
     transferPrompt:text(candidate.transferPrompt,500),limitation:text(candidate.limitation,500)
   };
 }
@@ -50,11 +55,11 @@ function responseJson(result){
 }
 
 function schema(){
-  const string={type:'string'},choice={type:'object',required:['label','feedback','correct'],properties:{label:string,feedback:string,correct:{type:'boolean'}}};
+  const string={type:'string'},choice={type:'object',required:['label','feedback','correct'],properties:{label:string,feedback:string,correct:{type:'boolean'}}},level={type:'object',required:['label','worldState','feedback','correct'],properties:{label:string,worldState:string,feedback:string,correct:{type:'boolean'}}};
   return {type:'object',required:['title','world','analogy','mapping','steps','transferPrompt','limitation'],properties:{
     title:string,world:string,analogy:string,theme:{type:'string',enum:[...THEMES]},
     mapping:{type:'array',minItems:2,maxItems:6,items:{type:'object',required:['image','concept','relation'],properties:{image:string,concept:string,relation:string}}},
-    steps:{type:'array',minItems:2,maxItems:4,items:{type:'object',required:['scene','question','choices'],properties:{scene:string,question:string,choices:{type:'array',minItems:2,maxItems:4,items:choice}}}},
+    steps:{type:'array',minItems:2,maxItems:4,items:{type:'object',required:['scene','question'],properties:{scene:string,question:string,kind:{type:'string',enum:['choice','dial']},choices:{type:'array',minItems:2,maxItems:4,items:choice},dial:{type:'object',required:['label','levels'],properties:{label:string,levels:{type:'array',minItems:3,maxItems:5,items:level}}}}}},
     transferPrompt:string,limitation:string
   }};
 }
@@ -95,7 +100,7 @@ async function generate(){
       },schema:schema(),maxRepairAttempts:1,context,
       ...(String(config.provider||config.route||'').toLowerCase()==='ollama'?{think:false}:{}),
       messages:[
-        {role:'system',content:'You are Moss, a creative and accurate tutor. Invent ONE novel metaphor-driven, browser-playable activity for the provided lesson. Output ONLY strict JSON matching the schema. No code, HTML, CSS, markdown, URLs, external references, APIs, or tools. Build a coherent imaginary world; map concrete imagery to the REAL lesson concepts and explicitly name where the analogy stops working. Include 2–4 sequential scenes. In each scene the learner chooses an action, receives specific causal feedback, and discovers the actual principle. Exactly one answer per scene is supported by the lesson, and all alternative choices explain a useful misconception. End with a transfer-to-real-life question. Avoid trivia or obvious options; make the learner experiment mentally. Never claim that an analogy is an evidence source.'},
+        {role:'system',content:'You are Moss, a creative and accurate tutor. Invent ONE novel metaphor-driven, browser-playable activity for the provided lesson. Output ONLY strict JSON matching the schema. No code, HTML, CSS, markdown, URLs, external references, APIs, or tools. Build a coherent imaginary world; map concrete imagery to the REAL lesson concepts and explicitly name where the analogy stops working. Include 2–4 sequential scenes with a variety of mechanics: kind choice with 2–4 choices, OR kind dial with dial.label and 3–5 levels, each a label, worldState, feedback and correct boolean. A dial changes an imaginary condition so learners can experiment with its consequences. Use at least one dial if the subject allows meaningful variation. Every scene has exactly one supported answer, and other settings reveal useful misconceptions; feedback must explain causality, not just whether an answer is right. End with a transfer-to-real-life question. Avoid trivia or obvious options; make the learner experiment mentally. Never claim that an analogy is an evidence source.'},
         {role:'user',content:'Create a fresh interactive metaphor for this module, in a way that matches the learner level. Use only the following lesson facts, and distinguish creative analogy from source-backed claims:\n'+JSON.stringify(context)}
       ]
     });
@@ -135,6 +140,9 @@ function style(){
     '#'+ROOT_ID+' .mml-mapping{background:#1c352a;border:1px solid #456b51;border-radius:11px;padding:10px}',
     '#'+ROOT_ID+' .mml-mapping b{display:block;color:#bfe9c5} #'+ROOT_ID+' .mml-mapping small{display:block;color:#c5d9c8;line-height:1.5}',
     '#'+ROOT_ID+' .mml-choices{display:grid;gap:8px;margin:12px 0}',
+    '#'+ROOT_ID+' .mml-dial{display:grid;gap:10px;padding:12px;background:#1a3b30;border-radius:12px;margin:12px 0}',
+    '#'+ROOT_ID+' .mml-dial input[type="range"]{width:100%;accent-color:#c9e8a5;min-height:42px}',
+    '#'+ROOT_ID+' .mml-dial-output{padding:10px;border:1px solid #73977e;border-radius:10px;min-height:60px}',
     '#'+ROOT_ID+' button{appearance:none;padding:10px 12px;background:#2b5940;border:1px solid #76ae87;border-radius:10px;color:#f6fff7;font:inherit;text-align:left;cursor:pointer;min-height:44px}',
     '#'+ROOT_ID+' button:hover:not(:disabled){background:#3b7353} #'+ROOT_ID+' button:focus-visible{outline:3px solid #f5d678;outline-offset:2px}',
     '#'+ROOT_ID+' button:disabled{opacity:.55;cursor:not-allowed} #'+ROOT_ID+' .mml-choice[aria-pressed="true"]{border-color:#f4d77e;background:#35573d}',
@@ -154,8 +162,12 @@ function detail(ctx){
   let body='<div class="mml-world"><b>The imaginary world</b><p>'+escapeText(spec.world,700)+'</p><p>'+escapeText(spec.analogy,950)+'</p></div><div class="mml-mappings" aria-label="Metaphor concept map">'+maps+'</div>';
   if(stage){
     body+='<div class="mml-world"><span class="mml-kicker">Scene '+(stepIndex+1)+' of '+spec.steps.length+'</span><p>'+escapeText(stage.scene,900)+'</p><h4>'+escapeText(stage.question,450)+'</h4></div>';
-    body+='<div class="mml-choices" role="group" aria-label="Choose a response">'+stage.choices.map((choice,i)=>button('choose',choice.label,'class="mml-choice" data-choice-index="'+i+'" aria-pressed="'+(answer?.choice===i)+'"')).join('')+'</div>';
-    if(answer)body+='<div class="mml-note" role="status"><b>'+(answer.correct?'That fits the lesson.':'Try another approach.')+'</b><p>'+escapeText(stage.choices[answer.choice]?.feedback||'',480)+'</p></div>';
+    const options=stage.kind==='dial'?stage.dial.levels:stage.choices;
+    if(stage.kind==='dial'){
+      const selected=Number.isInteger(answer?.choice)?answer.choice:0,level=options[selected];
+      body+='<div class="mml-dial"><label for="mml-dial-range">'+escapeText(stage.dial.label,180)+'</label><input id="mml-dial-range" type="range" min="0" max="'+(options.length-1)+'" step="1" value="'+selected+'" aria-describedby="mml-dial-output"><div id="mml-dial-output" class="mml-dial-output" role="status"><b>'+escapeText(level.label,240)+'</b><p>'+escapeText(level.worldState,450)+'</p></div>'+button('set-dial','Apply this setting')+'</div>';
+    }else body+='<div class="mml-choices" role="group" aria-label="Choose a response">'+stage.choices.map((choice,i)=>button('choose',choice.label,'class="mml-choice" data-choice-index="'+i+'" aria-pressed="'+(answer?.choice===i)+'"')).join('')+'</div>';
+    if(answer)body+='<div class="mml-note" role="status"><b>'+(answer.correct?'That fits the lesson.':'Try another approach.')+'</b><p>'+escapeText(options[answer.choice]?.feedback||'',480)+'</p></div>';
     if(answer?.correct)body+='<div class="mml-actions">'+button('next',stepIndex===spec.steps.length-1?'Reflect on the lesson':'Continue the story')+'</div>';
   }else if(done){
     body+='<div class="mml-note"><b>Metaphor explored</b><p>Now transfer the insight out of the imaginary world. This activity is practice, not the module assessment.</p></div>';
@@ -194,8 +206,11 @@ function handleAction(event){
   const action=target.getAttribute(ACTION);
   if(action==='generate'){generate();return}
   const ctx=labContext(),lab=ctx?.lab;if(!lab||generating)return;
-  if(action==='choose'){
-    const choiceIndex=Number(target.dataset.choiceIndex),step=Number(lab.step)||0,choices=lab.spec.steps[step]?.choices||[];
+  if(action==='choose'||action==='set-dial'){
+    const step=Number(lab.step)||0,stage=lab.spec.steps[step];
+    if(!stage||(action==='set-dial')!==(stage.kind==='dial'))return;
+    const choices=stage.kind==='dial'?stage.dial.levels:stage.choices;
+    const choiceIndex=action==='set-dial'?Number(document.getElementById('mml-dial-range')?.value):Number(target.dataset.choiceIndex);
     if(!Number.isInteger(choiceIndex)||choiceIndex<0||choiceIndex>=choices.length)return;
     const answers=[...list(lab.answers).slice(0,step),{choice:choiceIndex,correct:choices[choiceIndex].correct,at:time()}];
     withUpdatedLab(ctx,{answers},'moss-metaphor-choice');return;
@@ -213,9 +228,22 @@ function handleAction(event){
     errorMessage='';withUpdatedLab(ctx,{reflection,completed:true},'moss-metaphor-reflection-saved');
   }
 }
+function handleDialInput(event){
+  const input=event.target;
+  if(input?.id!=='mml-dial-range'||!document.getElementById(ROOT_ID)?.contains(input))return;
+  const stage=labContext()?.lab?.spec?.steps?.[labContext()?.lab?.step||0];
+  if(stage?.kind!=='dial')return;
+  const index=Number(input.value),level=stage.dial.levels[index],output=document.getElementById('mml-dial-output');
+  if(!level||!output)return;
+  output.replaceChildren();
+  const title=document.createElement('b');title.textContent=level.label;
+  const description=document.createElement('p');description.textContent=level.worldState;
+  output.append(title,description);
+}
 export function install(){
   if(initialized)return;
   initialized=true;
   document.addEventListener('click',handleAction,true);
+  document.addEventListener('input',handleDialInput,true);
   mount();
 }
