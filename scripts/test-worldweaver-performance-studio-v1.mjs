@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createPerformanceStudio,performanceObservation,PERFORMANCE_SCHEMA} from '../public/app/shared/worldweaver-performance-studio-v1.mjs';
 import {compileStageScene,compilePerformanceScore} from '../public/app/shared/worldweaver-stagecraft-v1.mjs';
-import {productionPrompt,proposeScreenplayViaModel} from '../public/app/shared/worldweaver-adaptation-model-v1.mjs';
+import {productionPrompt,proposeScreenplayViaModel,proposeStageViaModel} from '../public/app/shared/worldweaver-adaptation-model-v1.mjs';
 import {screenplayToVTT,exportFilmCraftInterchange,exportQwenLoRADataset} from '../public/app/shared/worldweaver-filmcraft-interchange-v1.mjs';
 import {projectOpenSimPolygons3Dto2D} from '../public/app/shared/worldweaver-opensim-geometry-v1.mjs';
 import {createWorldweaver} from '../public/app/shared/worldweaver-core-v1.mjs';
@@ -211,4 +211,40 @@ test('production lab explicitly labels stage as provisional and voices/audience 
  assert.match(source,/SpeechRecognition/);
  assert.match(source,/runCodeInference/);
  assert.doesNotMatch(source,/getUserMedia\(/);
+});
+
+test('model-proposed set rebuilds are inert until human approval; rejected changes preserve existing geometry',async()=>{
+ const s=setup(),id=propose(s);approve(s,id);
+ const original=compileStageScene(s.studio.snapshot(),id);
+ const newSet=structuredClone(s.scene.set);
+ newSet.props[0].x=30;newSet.location='Floating laboratory';
+ const proposal=await proposeStageViaModel({studio:s.studio,actor:model,sceneId:id,
+  invokeModel:async()=>({outputJson:{set:newSet,note:'Give the actors more distance from the doorway'}})});
+ assert.equal(s.studio.snapshot().stagePlans[0].status,'review-required');
+ assert.equal(s.studio.snapshot().stagePlans[0].id,proposal.stagePlan);
+ assert.deepEqual(compileStageScene(s.studio.snapshot(),id).geometry,original.geometry);
+ assert.throws(()=>s.studio.dispatch({type:'review-stage',stagePlanId:proposal.stagePlan,
+  decision:'approved',notes:'yes'},model),/authorized/);
+ s.studio.dispatch({type:'review-stage',stagePlanId:proposal.stagePlan,decision:'approved',
+  notes:'Block actors farther from prop'},human);
+ const updated=compileStageScene(s.studio.snapshot(),id);
+ assert.equal(updated.approvedStagePlanId,proposal.stagePlan);
+ assert.notDeepEqual(updated.geometry.objects.find(x=>x.kind==='prop').position,
+  original.geometry.objects.find(x=>x.kind==='prop').position);
+ const other={...newSet,location:'A changed location'};
+ const second=s.studio.dispatch({type:'propose-stage',sceneId:id,set:other,note:'Another option'},model).stagePlan;
+ s.studio.dispatch({type:'review-stage',stagePlanId:second,decision:'rejected',notes:'Keep current'},human);
+ assert.equal(compileStageScene(s.studio.snapshot(),id).approvedStagePlanId,proposal.stagePlan);
+});
+test('stale set inference never overwrites approved stage and pending stage blocks duplicate proposals',async()=>{
+ const s=setup(),id=propose(s);approve(s,id);
+ const first=s.studio.dispatch({type:'propose-stage',sceneId:id,set:s.scene.set,note:'Original proposal'},model).stagePlan;
+ assert.throws(()=>s.studio.dispatch({type:'propose-stage',sceneId:id,set:s.scene.set,note:'repeat'},model),/pending stage/);
+ const before=s.studio.snapshot().revision;
+ await assert.rejects(proposeStageViaModel({studio:s.studio,actor:model,sceneId:id,invokeModel:async()=>{
+  s.studio.dispatch({type:'review-stage',stagePlanId:first,decision:'rejected',notes:'No'},human);
+  return {outputJson:{set:s.scene.set,note:'too late'}};
+ }}),/Project changed/);
+ assert.equal(s.studio.snapshot().revision,before+1);
+ assert.equal(s.studio.snapshot().stagePlans.length,1);
 });
