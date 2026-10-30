@@ -22,6 +22,13 @@ const SUITES=Object.freeze({
   item('quill','qwen35-2b-onnx-webgpu','Qwen 3.5 2B',4,'ios-webgpu',{experimental:true}),
   item('atlas','qwen35-4b-onnx-webgpu','Qwen 3.5 4B',7,'ios-webgpu',{experimental:true,notes:'Small-model reasoning, not 70B-equivalent performance.'})
  ]),
+ iosApi:Object.freeze([
+  item('swift','qwen3.5:0.8b','Qwen 3.5 0.8B · ai.local',2,'ai-local',{notes:'Requires the installed ai.local app and a verified local endpoint.'}),
+  item('archive','qwen3.5:2b','Qwen 3.5 2B · ai.local',4,'ai-local'),
+  item('forge','qwen3.5:4b','Qwen 3.5 4B · ai.local',7,'ai-local'),
+  item('quill','qwen3.5:4b','Qwen 3.5 4B · ai.local',7,'ai-local'),
+  item('atlas','qwen3.5:4b','Qwen 3.5 4B · ai.local',7,'ai-local',{notes:'Compact reasoning rather than 70B-class reasoning.'})
+ ]),
  android:Object.freeze([
   item('swift','qwen35-2b-gguf','Qwen 3.5 2B · Q4_K_M',4,'browser-gguf',{preset:'2b'}),
   item('archive','qwen35-4b-gguf','Qwen 3.5 4B · IQ2_M',6,'browser-gguf',{preset:'4b'}),
@@ -57,9 +64,10 @@ function detectDevice(){
  // Never infer the physical RAM of an iPhone from its user agent.
  const reported=budgetValue(globalThis.navigator?.deviceMemory);
  const override=budgetValue(read(MEMORY_KEY,null));
+ const webgpuApi=Boolean(globalThis.navigator?.gpu&&typeof globalThis.navigator.gpu.requestAdapter==='function');
  const defaultBudget=ios?8:android?8:reported||8;
  const budgetGB=override||defaultBudget;
- return Object.freeze({platform,reportedGB:reported,budgetGB,manual:override!==null,
+ return Object.freeze({platform,reportedGB:reported,budgetGB,webgpuApi,manual:override!==null,
   source:override!==null?'user set':reported!==null&&!ios?'browser estimate (may be capped)':'conservative default',
   note:ios?'iOS does not expose physical RAM to web pages. The 4B WebGPU model remains experimental.':
     'Browser memory reports are approximate and may be capped. Set the usable model-memory budget for accurate filtering.'});
@@ -70,9 +78,9 @@ function setMemoryBudget(value){
 }
 function catalogue(){
  const device=detectDevice();
- const families=device.platform==='desktop'?['desktop',...(device.budgetGB>=24?['node']:[])]:[device.platform];
+ const families=device.platform==='desktop'?['desktop',...(device.budgetGB>=24?['node']:[])]:[device.platform==='ios'&&!device.webgpuApi?'iosApi':device.platform];
  return Object.freeze(families.flatMap(platform=>SUITES[platform].filter(model=>model.ramGB<=device.budgetGB).map(model=>Object.freeze({
-  ...model,platform,group:platform==='ios'?'iPhone · PWA WebGPU':platform==='android'?'Android · browser GGUF':platform==='node'?'Guild node · Ollama':'Desktop / cyberdeck · Ollama',
+  ...model,platform:platform==='iosApi'?'ios':platform,group:platform==='ios'?'iPhone · PWA WebGPU':platform==='iosApi'?'iPhone · ai.local (native)':platform==='android'?'Android · browser GGUF':platform==='node'?'Guild node · Ollama':'Desktop / cyberdeck · Ollama',
   name:ROLES[model.role].label,purpose:ROLES[model.role].purpose,description:ROLES[model.role].description
  }))));
 }
@@ -96,6 +104,10 @@ function openSetup(row,layer){
   if(!details)throw Error('iPhone WebGPU configuration is not installed.');
   details.open=true;
   details.scrollIntoView?.({block:'nearest'});
+ }else if(row.runtime==='ai-local'){
+  const details=form.querySelector('[data-ios-ai-local-server]');
+  if(!details)throw Error('iPhone ai.local setup is unavailable.');
+  details.open=true;details.scrollIntoView?.({block:'nearest'});
  }else if(row.runtime==='browser-gguf'){
   const panel=form.querySelector('[data-mobile-gguf-panel]');
   const preset=form.elements?.namedItem?.('embeddedGGUFPreset');
@@ -144,7 +156,7 @@ function render(layer){
  }).join('');
  panel.innerHTML='<div><h3>AI Fleet</h3><p>Choose what the AI does first. Each role uses an actual model format supported by this device. Shared model weights are reused across roles where practical.</p></div>'+
   '<label>Usable model-memory budget <select data-ai-fleet-memory aria-label="Usable model memory">'+options+'</select></label>'+
-  '<p class="cw-fleet-meta">Device: '+esc(device.platform)+' · '+esc(device.source)+' · '+esc(device.note)+'</p>'+
+  '<p class="cw-fleet-meta">Device: '+esc(device.platform)+' · '+(device.platform==='ios'?(device.webgpuApi?'WebGPU API present':'WebGPU unavailable; ai.local adapter')+' · ':'')+esc(device.source)+' · '+esc(device.note)+'</p>'+
   '<p class="cw-fleet-meta">These are working RAM estimates, not download sizes or measured peaks. Opening this view never downloads, starts or tests an AI. Hidden roles need more memory or a different runtime.</p>'+
   (groupHtml||'<p>No model in this fleet fits the configured memory budget.</p>')+
   '<output data-ai-fleet-message role="status" aria-live="polite">Select a role to open the compatible existing setup and activate it after verification.</output>';
