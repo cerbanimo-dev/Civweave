@@ -78,11 +78,11 @@ async function perform(action,button){
     if(action==='remove-member')extra.userId=button.dataset.memberId;
     const names={pair:'pair-node',revoke:'revoke-node','remove-member':'remove-member','verify-location':'verify-location',finalize:'finalize'};
     const result=await request('POST',names[action],extra);
+    await refresh();
     if(action==='pair'){
       const help=root?.querySelector('[data-gm-pair-help]');
       if(help){help.textContent='Pairing code (expires in 10 minutes): '+result.pairingCode+'. On the physical server, set CIVWEAVE_GUILD_ORIGIN and CIVWEAVE_NODE_PAIRING_CODE, then run node scripts/guild-physical-node-agent-v1.mjs. This code is not a Guild owner key.'}
     }
-    await refresh();
     feedback(action==='pair'?'Pairing code issued. Complete pairing on the physical server.':'Guild action completed.');
   }catch(error){feedback('Unable to complete Guild action: '+clean(error?.message||error,400))}
   finally{busy=false}
