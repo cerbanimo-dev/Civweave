@@ -52,3 +52,23 @@ test('server auto delegates to canonical Guild/Cloudflare router without falling
  });
  assert.equal(server,1);assert.equal(local,0);assert.equal(shared,0);assert.equal(result.actual.provider,'cloudflare-workers-ai');
 });
+
+test('server auto prefers selected on-device model and skips cloud when it succeeds',async()=>{
+ let local=0,server=0;
+ const result=await runCodeInference({provider:'server-auto',model:'civweave-server-auto-v1'},[{role:'user',content:'Write code'}],{
+   selection:{active:true,id:'selected-qwen'},
+   loadLocal:async()=>({generate:async()=>{local++;return{status:'success',outputText:'{"type":"done"}'};}}),
+   loadServer:async()=>{server++;throw Error('Network must not run after local success');}
+ });
+ assert.equal(local,1);assert.equal(server,0);
+ assert.equal(result.actual.provider,'downloaded-local');
+});
+test('explicit server-auto falls through to Guild after unavailable selected device model',async()=>{
+ let local=0,server=0;
+ const result=await runCodeInference({provider:'server-auto',model:'civweave-server-auto-v1'},[{role:'user',content:'Write code'}],{
+   selection:{active:true,id:'selected-qwen'},
+   loadLocal:async()=>({generate:async()=>{local++;throw Error('Device model failed');}}),
+   loadServer:async()=>({handle:async()=>{server++;return{handled:true,result:{status:'success',outputText:'{"type":"done"}',actual:{provider:'server-local'}}};}})
+ });
+ assert.equal(local,1);assert.equal(server,1);assert.equal(result.actual.provider,'server-local');
+});
