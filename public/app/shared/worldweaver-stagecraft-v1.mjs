@@ -15,7 +15,7 @@ const entry=(scene,x,cast)=>({character:x,avatarRef:cast?.avatarRef??null,
  pilotPrincipalId:cast?.pilotPrincipalId??null,voiceRef:cast?.voiceRef??null,
  stageType:cast?'avatar-cue-target':'unassigned'});
 const colors=['#b780aa','#66a5a0','#ddaf62','#8b9eb8','#c77d76','#9ba978'];
-export function compileStageScene(state,sceneId,{regionId='stage:local',revision=1}={}){
+export function compileStageScene(state,sceneId,{regionId='stage:local',revision=1,instanceId}={}){
  if(state?.schema!==PERFORMANCE_SCHEMA)throw new TypeError('Production state required');
  const scene=state.proposals.find(x=>x.id===sceneId);
  if(!scene)throw new RangeError('Unknown screenplay scene');
@@ -26,7 +26,7 @@ export function compileStageScene(state,sceneId,{regionId='stage:local',revision
    x:115+i*bound(12/Math.max(1,Math.min(10,scene.dialogue.length)),1,6),
    y:122+i%2*7,z:1.6,mark:colors[i%colors.length]};
  });
- const instanceId='stage:'+scene.id;
+ instanceId=instanceId??'stage:'+scene.id;
  const objects=[{
   id:'set:'+scene.id,name:scene.set.location,kind:'stage',instanceId,
   position:{x:128,y:128,z:0},rotation:q,parts:[
