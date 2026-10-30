@@ -117,7 +117,7 @@ test('cue score has timed dialogue and audience invitation without running audio
 test('rehearsal events are revisioned, cues bounded, and human finalization required',()=>{
  const s=setup(),id=propose(s);approve(s,id);
  const rid=s.studio.dispatch({type:'start-rehearsal',sceneId:id},human).rehearsal;
- assert.throws(()=>s.studio.dispatch({type:'start-rehearsal',sceneId:id},human),/already active/);
+ assert.throws(()=>s.studio.dispatch({type:'start-rehearsal',sceneId:id},human),/rehearsal is active/);
  assert.throws(()=>s.studio.dispatch({type:'perform-cue',rehearsalId:rid,lineIndex:3,outcome:'played'},human),/line index/);
  s.studio.dispatch({type:'perform-cue',rehearsalId:rid,lineIndex:0,outcome:'played'},human);
  assert.equal(s.studio.snapshot().rehearsals[0].events[0].outcome,'played');
