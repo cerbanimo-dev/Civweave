@@ -18,6 +18,7 @@ const studio=createPerformanceStudio({
   if(['create-project','add-source','review-scene','assign-cast','start-rehearsal','finish-rehearsal'].includes(command.type))return actor.kind==='human';
   if(command.type==='propose-scenes')return ['human','model'].includes(actor.kind);
   if(command.type==='perform-cue')return ['human','model','runtime'].includes(actor.kind);
+  if(['open-audience-moment','close-audience-moment'].includes(command.type))return actor.kind==='human';
   if(command.type==='submit-audience')return actor.kind==='audience';
   if(command.type==='withdraw-audience')return ['human','audience'].includes(actor.kind);
   return false;
@@ -237,6 +238,8 @@ $('rehearse').addEventListener('click',()=>{
 $('next-cue').addEventListener('click',()=>{
  if(!rehearsalId||!score)return;
  const event=score.events[eventIndex++];
+ const existing=studio.snapshot().rehearsals.find(x=>x.id===rehearsalId)?.activeMomentId;
+ if(existing)studio.dispatch({type:'close-audience-moment',rehearsalId},human);
  if(!event){report('Cue score complete. Finish the rehearsal to close it.');return;}
  if(event.type==='dialogue'){
   const index=getScene().dialogue.findIndex((l,i)=>i===score.events.slice(0,eventIndex).filter(e=>e.type==='dialogue').length-1);
@@ -249,8 +252,10 @@ $('next-cue').addEventListener('click',()=>{
   }
   report('Actor '+event.character+' · '+event.text);
  }else{
+  try{studio.dispatch({type:'open-audience-moment',rehearsalId,momentId:event.momentId},human)}
+  catch(error){report('Audience invitation could not open: '+text(error.message));return;}
   activeMoment=event.momentId;
-  report('Audience invitation: '+event.prompt+' (optional, separately consented).');
+  report('Audience invitation OPEN: '+event.prompt+' (optional, separately consented).');
  }
 });
 $('finish').addEventListener('click',()=>{
