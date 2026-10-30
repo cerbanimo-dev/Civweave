@@ -68,6 +68,13 @@ Subscribers may react to `civweave:model-settings-opened` after the canonical su
 
 Living School is not a special case. It uses the same family-shell Settings control, the same Settings gateway, the same controller, and the same downloaded-model management lane as Cerbanimo, FellowFare, and Anarchadia. Living School may not ship a realm-local Settings button or load Settings repair code to create one.
 
+### AI Fleet catalog
+- Catalog and device filter owner: `public/app/shared/civweave-ai-fleet-v1.js`. The five role names Swift, Archive, Forge, Quill and Atlas are shared across all systems.
+- The Local models / AI fleet tab is the only role-based model selection screen. Legacy pack lists are superseded; the existing GGUF, iOS WebGPU and Ollama settings remain format-specific activation adapters, not separate model-selection authorities.
+- iOS, Android and desktop are filtered by platform and runtime format. Desktop node-host packages are visible only when the configured usable memory budget is sufficient.
+- Browser RAM information is approximate and unavailable on iOS. The user may override the usable memory budget. A model role preference is not an assertion that weights are installed, compatible or running.
+- Opening the catalog reads saved preferences only: never download, execute, probe, warm, change provider, or switch to hosted inference.
+
 ## Family navigation
 
 - Shared chrome owner: `public/app/family-shell-v104.js`
