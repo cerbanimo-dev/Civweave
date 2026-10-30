@@ -4,10 +4,10 @@ import vm from 'node:vm';
 import {test} from 'node:test';
 
 const source=fs.readFileSync(new URL('../public/app/shared/civweave-ai-fleet-v1.js',import.meta.url),'utf8');
-function boot(userAgent,deviceMemory=undefined){
+function boot(userAgent,deviceMemory=undefined,webgpu=/iPhone|iPad/.test(userAgent)){
  const data=new Map();
  const storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,String(v))};
- const context={globalThis:null,navigator:{userAgent,deviceMemory},localStorage:storage};
+ const context={globalThis:null,navigator:{userAgent,deviceMemory,...(webgpu?{gpu:{requestAdapter(){throw Error('GPU probed on display')}}}:{})},localStorage:storage};
  context.globalThis=context;
  vm.runInNewContext(source,context,{filename:'civweave-ai-fleet-v1.js'});
  return{fleet:context.CivweaveAIFleetV1,data};
@@ -20,6 +20,13 @@ test('iPhone shows browser-compatible ONNX fleet, never GGUF, LiteRT or server-o
  assert.ok(rows.some(x=>x.modelId==='qwen35-08b-onnx-webgpu'));
  assert.ok(rows.every(x=>x.ramGB<=fleet.detectDevice().budgetGB));
  assert.ok(!rows.some(x=>/litert|gguf|ollama/i.test(x.runtime)));
+});
+test('iPhone without WebGPU only offers the native ai.local adapter',()=>{
+ const {fleet}=boot('Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X)',undefined,false);
+ const rows=fleet.catalogue();
+ assert.ok(rows.length);
+ assert.ok(rows.every(x=>x.platform==='ios'&&x.runtime==='ai-local'));
+ assert.ok(rows.every(x=>!x.modelId.includes('onnx-webgpu')));
 });
 test('Android phone hides iPhone-only model format and large desktop models',()=>{
  const {fleet}=boot('Mozilla/5.0 (Linux; Android 16; A069P) AppleWebKit/537.36',8);
