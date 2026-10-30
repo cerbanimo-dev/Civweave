@@ -72,7 +72,7 @@ test('dependency links use only declared references and plan order is labelled w
     assert.match(edge.textContent, /Inspect the joint/);
     assert.match(b.map().textContent, /Unresolved dependency: missing-source/);
     assert.equal(b.map().querySelectorAll('[data-dependency-state="complete"]').length, 1, 'adjacent plan items must not be invented as dependency edges');
-    assert.match(b.map().textContent, /Plan order/);
+    assert.match(b.map().textContent, /Beat order · not a lock/);
   } finally { b.close(); }
 });
 
@@ -97,7 +97,9 @@ test('large and hostile local plans produce a bounded inert map', async () => {
     assert.ok(b.map().querySelectorAll('[data-quest-map-step]').length <= 96);
     assert.ok(b.map().querySelectorAll('[data-quest-map-path]').length <= 12);
     assert.match(b.map().textContent, /Map preview.*12 of 20 paths/i);
-    assert.equal(b.map().querySelector('img,script'), null);
+    assert.equal(b.map().querySelector('script,img[onerror]'), null);
+    assert.equal(b.map().querySelectorAll('img').length,4);
+    assert.equal(b.map().querySelectorAll('.cw-qmap-lane-labels img').length,4);
     assert.equal(b.win.mapXss, undefined);
     assert.equal(b.writes, 0);
   } finally { b.close(); }
