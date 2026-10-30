@@ -1,0 +1,43 @@
+name: Guild owner and physical node onboarding
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/mobile-guild-edge/src/**'
+      - 'public/app/guild-owner-management-v1.js'
+      - 'public/app/guild-symbol-v1.js'
+      - 'public/app/mobile-guild-create-v1.mjs'
+      - 'public/app/working-campus-v440.html'
+      - 'public/app/working-campus-v156.html'
+      - 'scripts/guild-physical-node-agent-v1.mjs'
+      - 'scripts/test-guild-capacity-progression-v1.mjs'
+      - 'package.json'
+      - '.github/workflows/verify-guild-node-rewards-v1.yml'
+  push:
+    branches: [staging, main]
+    paths:
+      - 'cloudflare/mobile-guild-edge/src/**'
+      - 'public/app/guild-owner-management-v1.js'
+      - 'public/app/guild-symbol-v1.js'
+      - 'public/app/mobile-guild-create-v1.mjs'
+      - 'scripts/guild-physical-node-agent-v1.mjs'
+      - 'scripts/test-guild-capacity-progression-v1.mjs'
+      - '.github/workflows/verify-guild-node-rewards-v1.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check cloudflare/mobile-guild-edge/src/index.mjs
+          node --check cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs
+          node --check cloudflare/mobile-guild-edge/src/guild-capacity-progression-v1.mjs
+          node --check public/app/guild-owner-management-v1.js
+          node --check public/app/mobile-guild-create-v1.mjs
+          node --check scripts/guild-physical-node-agent-v1.mjs
+      - name: Guild capacity progression and onboarding contract
+        run: node --test scripts/test-guild-capacity-progression-v1.mjs
