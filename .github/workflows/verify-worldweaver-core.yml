@@ -4,6 +4,10 @@ on:
     paths:
       - 'public/app/shared/worldweaver-core-v1.mjs'
       - 'public/app/shared/worldweaver-screen-v1.mjs'
+      - 'public/app/shared/worldweaver-map-2d-v1.mjs'
+      - 'scripts/test-worldweaver-map-2d-v1.mjs'
+      - 'public/app/tools/worldweaver-map-lab.html'
+      - 'public/app/tools/worldweaver-map-lab-v1.mjs'
       - 'public/app/shared/worldweaver-lab-draft-v1.mjs'
       - 'public/app/shared/worldweaver-lab-media-v1.mjs'
       - 'scripts/test-worldweaver-labs-hardening-v1.mjs'
@@ -38,5 +42,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --check public/app/shared/worldweaver-core-v1.mjs && node --check public/app/shared/worldweaver-screen-v1.mjs && node --check public/app/tools/worldweaver-screen-lab-v1.mjs && node --check public/app/tools/worldweaver-avatar-lab-v1.mjs
+      - run: node --check public/app/shared/worldweaver-core-v1.mjs && node --check public/app/shared/worldweaver-map-2d-v1.mjs && node --check public/app/tools/worldweaver-map-lab-v1.mjs && node --check public/app/shared/worldweaver-screen-v1.mjs && node --check public/app/tools/worldweaver-screen-lab-v1.mjs && node --check public/app/tools/worldweaver-avatar-lab-v1.mjs
       - run: npm run test:worldweaver
