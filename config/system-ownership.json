@@ -415,7 +415,8 @@
       "contract": "docs/contracts/worldweaver-microspaces-v1.md",
       "executableVerifier": "scripts/test-worldweaver-core-v1.mjs",
       "allowedCallers": [
-        "scripts/test-worldweaver-core-v1.mjs"
+        "scripts/test-worldweaver-core-v1.mjs",
+        "scripts/test-worldweaver-avatar-rigs-v1.mjs"
       ],
       "activeRoute": "none; manifest-only foundation pending authenticated capability integration",
       "delegatedAuthorities": {
@@ -432,7 +433,19 @@
         "Model NPCs may create pilot personas with custom role prompts under platform/tool permissions and externally verified model identities.",
         "NPC proposals are bounded to one to three tools; only trusted world runtimes attest tool outcomes.",
         "No direct code execution, payments, ballot casting, Quest completion, publishing or role-grant authority.",
-        "External permission adapter, signed persistent store, world renderers and bridge integrations are mandatory before public release."
+        "External permission adapter, signed persistent store, world renderers and bridge integrations are mandatory before public release.",
+        "Starling personas and existing SVG portraits are read from canonical Starling sources; no duplicate persona registry.",
+        "Models receive real bounded rasterized images only when explicitly supported; fallback cannot claim visual perception.",
+        "NPC avatar body plans and behavior are declarative, reviewed and acknowledged by a trusted renderer before activation."
+      ],
+      "helpers": [
+        "public/app/shared/worldweaver-avatar-v1.mjs",
+        "public/app/shared/worldweaver-starling-bridge-v1.mjs",
+        "public/app/shared/worldweaver-avatar-pilot-v1.mjs"
+      ],
+      "executableVerifiers": [
+        "scripts/test-worldweaver-core-v1.mjs",
+        "scripts/test-worldweaver-avatar-rigs-v1.mjs"
       ]
     }
   }
