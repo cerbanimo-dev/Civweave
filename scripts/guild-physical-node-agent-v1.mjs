@@ -2,6 +2,7 @@
 // Civweave Guild physical-node companion (Node 22+). Run on the owner's actual server.
 // Credentials are kept on that server and never printed to stdout.
 import {mkdir,readFile,writeFile,chmod} from 'node:fs/promises';
+import {createHash,createHmac} from 'node:crypto';
 import {join,dirname} from 'node:path';
 import {homedir,hostname} from 'node:os';
 
@@ -10,6 +11,14 @@ const origin=String(process.env.CIVWEAVE_GUILD_ORIGIN||'').trim().replace(/\/$/,
 const pairingCode=String(process.env.CIVWEAVE_NODE_PAIRING_CODE||'').trim();
 const syncKey=String(process.env.CIVWEAVE_GUILD_SYNC_KEY||'').trim();
 const stableNodeId=String(process.env.CIVWEAVE_NODE_ID||hostname()).toLowerCase().replace(/[^a-z0-9-]/g,'-').slice(0,120);
+function localProofCode(nodeToken,minute=Math.floor(Date.now()/60000)){
+  const raw=createHmac('sha256',nodeToken).update('civweave.community-physical-code.v1\\n'+minute).digest();
+  const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let buffer=0,bits=0,code='';
+  for(const byte of raw){buffer=(buffer<<8)|byte;bits+=8;while(bits>=5&&code.length<8){bits-=5;code+=alphabet[(buffer>>bits)&31]}if(code.length===8)break}
+  return code;
+}
+function communityProofHash(code){return createHash('sha256').update('civweave.community-node-code.v1\\n'+code).digest('hex')}
 if(!origin||!/^https:\/\//.test(origin)||!stableNodeId||stableNodeId.length<8){
   console.error('Set CIVWEAVE_GUILD_ORIGIN to the HTTPS Guild Worker URL and CIVWEAVE_NODE_ID to a stable identifier (at least 8 characters).');
   process.exitCode=1;
@@ -43,10 +52,11 @@ if(!origin||!/^https:\/\//.test(origin)||!stableNodeId||stableNodeId.length<8){
       let meshSyncOk=false;
       if(syncKey){await request('/api/envelopes?limit=1',{token:syncKey});meshSyncOk=true}
       const recoveryOk=health.claimed===true&&manifest.guildId===health.guildId&&consecutiveSuccesses>=1;
-      const result=await request('/api/guild/physical/heartbeat',{token:linked.nodeToken,body:{challengeEcho:linked.challenge,meshSyncOk,recoveryOk}});
+      const checkCode=localProofCode(linked.nodeToken);
+      const result=await request('/api/guild/physical/heartbeat',{token:linked.nodeToken,body:{challengeEcho:linked.challenge,meshSyncOk,recoveryOk,communityProofHash:communityProofHash(checkCode)}});
       linked.challenge=result.challenge;linked.lastSeenAt=new Date().toISOString();await save(linked);
       consecutiveSuccesses++;
-      console.log('Cloud heartbeat accepted; verified stage '+(result.onboarding?.stage||0)+'/5; '+(result.onboarding?.unlockedSlots||5)+'/10 Guild slots.');
+      console.log('Cloud heartbeat accepted; verified stage '+(result.onboarding?.stage||0)+'/5; '+(result.onboarding?.unlockedSlots||5)+'/10 Guild slots. Community check code: '+checkCode+' (rotates every minute; visible locally on this server only).');
     }catch(error){consecutiveSuccesses=0;console.error('Guild Cloud check failed: '+error.message+'; rechecking shortly.')}
     if(stopped)break;
     await new Promise(resolve=>setTimeout(resolve,30000));
