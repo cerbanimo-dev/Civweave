@@ -87,3 +87,34 @@ The approved actor identity, authorizer and renderer are trusted external depend
 ## Standalone avatar preview (no production integration)
 
 `public/app/tools/worldweaver-avatar-lab.html` and `worldweaver-avatar-lab-v1.mjs` expose an optional, directly loadable browser prototype. They read the canonical Starling personas and demonstrate local portrait display, image rasterization, declarative body previews, event-driven pose changes, and textual dialogue. The editable plan is explicitly a **preview** and does not impersonate a model, send hosted requests, persist authoritative rig state, render 3D, or provision a world. Its developer/browser route has no automatic navigation registration and does not create a new shared interaction owner. The actual runtime can use `proposeAvatarViaModel` only after it supplies a trusted authenticated model adapter.\n
+## World screens and presentations
+
+Canonical screen media grammar and renderer: `public/app/shared/worldweaver-screen-v1.mjs`. The shared Worldweaver owner alone manages screen manifests and presentation revision history. This is a *logical screen* object suitable for the workshop, task training, shop, convention or Starling room; rendering in a live 3D scene requires a provider adapter.
+
+### Screen lifecycle
+- `create-screen` takes a space ID, title and 16:9, 4:3, square or portrait layout. A space has at most 12 screen manifests.
+- `cast-screen` and `clear-screen` are direct **authenticated human** actions, never commands an LLM can execute outside its own authorized tool queue.
+- A bound NPC must receive `cast-screen` and/or `clear-screen` in its `capabilities`, then `queue-actions` with a 1–3 action batch. Cast intent arguments include `screenId` and normalized `content`; cross-instance casts are rejected.
+- A trusted renderer confirms or fails the action with `report-action`. Only a *successful* acknowledgement changes `screen.current`; stale screen revisions prevent out-of-order model casts from replacing newer human content.
+- An NPC-suggested external HTTPS image, video or website source enters `review-required` and must receive `approve-cast` from an authenticated human before execution. `reject-cast` preserves previous content. Future trusted content galleries may opt into a separately authenticated allowed-media list.
+- Screen history is bounded; screen content captures its presenter type and principal, and is not falsely recorded as human-created when a model presents.
+
+### Content
+Each presentation contains:
+```json
+{"kind":"image","source":{"assetId":"creator:generated-or-uploaded-id"},"title":"Design showcase","alt":"Illustration preview"}
+```
+```json
+{"kind":"video","source":{"assetId":"library:reviewed-video-id"},"title":"Process demonstration"}
+```
+```json
+{"kind":"website","source":{"url":"https://example.org/guide"},"title":"Research source"}
+```
+An `assetId` is an opaque reference. The actual bytes must be looked up by a trusted permission-checking resolver belonging to the existing Creator Suite or library. Worldweaver does not store blobs or generate media. HTTPS URLs reject credentials, local/private address literals, nonstandard ports, fragments and dangerous schemes. URLs are never server-fetched by Worldweaver. External images/videos can still contact their provider from the *viewer's browser* and must be treated as third-party media.
+
+### Presentation
+`renderWorldScreen` uses native `img`, user-controlled `video`, and sandboxed `iframe`. Websites have `sandbox="allow-scripts allow-forms"`, **not** `allow-same-origin`, with no granted device capabilities and `referrerPolicy="no-referrer"`. No user/model HTML or JavaScript is inserted in the world. Some sites cannot be framed because of CSP/X-Frame-Options; the screen provides an explicit **Open website** link rather than bypassing those protections. Browser autoplay is not assumed.
+
+The isolated `/app/tools/worldweaver-screen-lab.html` can load a user-selected PNG/JPEG/WebP, an MP4/WebM video (max 50 MB each), generate a local demonstration PNG slide, accept an HTTPS link, and preview the cast. Its local object URLs are session-scoped. Its model actor and trusted renderer are **simulations** demonstrating permissions, not authenticated Guild participants or live LLMs. No actual model inference, provider deployment, shared Guild sync, live 3D screen or creator-asset storage integration is claimed.
+
+The new screen cases run under `npm run test:worldweaver` and `scripts/test-worldweaver-screens-v1.mjs`. A real installation must use signed mesh state, authenticated identity and proper asset checks before enabling remote model-driven casting.
