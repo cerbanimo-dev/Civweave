@@ -64,7 +64,7 @@ export async function runCodeInference(config,messages,{selection=null,loadLocal
   // workbench AFTER a complete response; never commit partial text.
   const nativeTermux=route.provider==='openai-compatible'
     &&config.model==='qwen35-4b-native'
-    &&String(config.endpoint||'').replace(/\\/$/,'')==='http://127.0.0.1:8080/v1';
+    &&String(config.endpoint||'').replace(/\/$/,'')==='http://127.0.0.1:8080/v1';
   const requestConfig=nativeTermux
     ?{...config,stream:true,maxTokens:Math.min(512,Math.max(128,Number(maxTokens)||512)),timeoutMs:Math.max(480000,Number(config.timeoutMs)||0),temperature:0.2}
     :{...config,stream:false,maxTokens:Math.max(1024,Math.min(8192,Number(maxTokens)||2048))};
