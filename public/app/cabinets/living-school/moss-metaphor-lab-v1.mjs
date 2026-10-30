@@ -58,6 +58,9 @@ function schema(){
     transferPrompt:string,limitation:string
   }};
 }
+function scopeFingerprint(module){
+  return [module?.title,module?.objective,...list(module?.lessonBlocks).slice(0,2).map(block=>block?.content)].map(value=>text(value,400)).join('|').slice(0,1300);
+}
 function exactModule(schoolId,moduleId){
   const s=state();
   return s.school?.id===schoolId&&s.school.modules?.find(item=>item.id===moduleId);
@@ -98,7 +101,7 @@ async function generate(){
     });
     if(result?.status!=='success')throw Error(text(result?.error?.message||result?.error||'Metaphor generation did not succeed.',1000));
     const spec=validateMetaphor(responseJson(result));
-    const lab={schema:'civweave.moss-metaphor-lab.v1',spec,at:time(),step:0,answers:[],reflection:'',completed:false,provider:text(result?.actual?.provider||config.provider||config.route,80),model:text(result?.actual?.model||config.model,120)};
+    const lab={schema:'civweave.moss-metaphor-lab.v1',schoolId,moduleId,scopeFingerprint:scopeFingerprint(module),spec,at:time(),step:0,answers:[],reflection:'',completed:false,provider:text(result?.actual?.provider||config.provider||config.route,80),model:text(result?.actual?.model||config.model,120)};
     if(!setLab(schoolId,moduleId,lab,'moss-metaphor-created'))throw Error('The learning module changed during generation; the detached activity was not saved.');
   }catch(err){errorMessage=text(err?.message||err,1200);}
   finally{generating=false;mount();}
@@ -108,7 +111,9 @@ function labContext(){
   const module=activeModule(),s=state(),schoolId=s.school?.id,moduleId=module?.id;
   if(!schoolId||!moduleId)return null;
   const lab=progressFor(moduleId).metaphorLab;
-  return {schoolId,moduleId,lab:lab?.schema==='civweave.moss-metaphor-lab.v1'&&lab.spec?lab:null};
+  if(lab?.schema!=='civweave.moss-metaphor-lab.v1'||lab.schoolId!==schoolId||lab.moduleId!==moduleId||lab.scopeFingerprint!==scopeFingerprint(module))return {schoolId,moduleId,lab:null};
+  try{return {schoolId,moduleId,lab:{...lab,spec:validateMetaphor(lab.spec)}}}catch{return {schoolId,moduleId,lab:null}}
+
 }
 function withUpdatedLab(ctx,change,event){
   if(!ctx?.lab)return;
