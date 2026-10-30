@@ -65,7 +65,12 @@ export function normalizeScreenContent(value){
  * trusted adapter for user-selected/locally generated assets on this device.
  */
 export function resolveScreenSource(content,resolveAsset){
-  const item=normalizeScreenContent(content);
+  // Canonical Worldweaver screen history attaches presenter/shownAt metadata.
+  // Strip ONLY these owner-produced envelope fields when rendering a stored
+  // presentation; incoming casts still pass strict normalizeScreenContent.
+  const raw=content&&typeof content==='object'?{...content}:content;
+  if(raw&&typeof raw==='object'){delete raw.presenter;delete raw.shownAt;}
+  const item=normalizeScreenContent(raw);
   if(item.kind==='civweave')return {kind:'civweave',worldRef:item.source.worldRef,title:item.title,
     alt:item.alt||item.title,origin:'internal'};
   if(item.source.url)return {kind:item.kind,url:item.source.url,title:item.title,alt:item.alt||item.title,origin:'external'};
