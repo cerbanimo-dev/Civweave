@@ -148,6 +148,8 @@ $('generate-scene').addEventListener('click',async()=>{
  try{
   const state=studio.snapshot(),runtime=globalThis.CivweaveModelRuntime;
   const cfg=runtime?.readSharedConfig?.('agentic')||runtime?.readSharedConfig?.('interactive');
+  if(runtime?.endpointLeavesDevice?.(cfg)&&!$('cloud-consent').checked)
+   throw new Error('Explicit permission required to send source material to a remote model');
   if(!cfg?.provider||['manual','deterministic'].includes(cfg.provider))
    throw new Error('Choose a local or consented cloud model in Civweave AI settings.');
   if(!state.sources.length)throw new Error('Import a manuscript excerpt first.');
@@ -171,7 +173,7 @@ $('generate-scene').addEventListener('click',async()=>{
    }});
   updateScenes();showStage();status('Model screenplay proposal saved as review-required. You retain approval control.');
  }catch(error){status('Model proposal unavailable: '+text(error.message,300));}
- finally{modelBusy=false;$('generate-scene').disabled=false;}
+ finally{modelBusy=false;$('cloud-consent').checked=false;$('generate-scene').disabled=false;}
 });
 $('propose-set').addEventListener('click',async()=>{
  if(modelBusy)return;
@@ -180,6 +182,8 @@ $('propose-set').addEventListener('click',async()=>{
   const state=studio.snapshot(),scene=getScene(),runtime=globalThis.CivweaveModelRuntime;
   const cfg=runtime?.readSharedConfig?.('agentic')||runtime?.readSharedConfig?.('interactive');
   if(!scene||scene.status!=='approved')throw new Error('Approve a screenplay scene first');
+  if(runtime?.endpointLeavesDevice?.(cfg)&&!$('cloud-consent').checked)
+   throw new Error('Explicit permission required to send source material to a remote model');
   if(!cfg?.provider||['manual','deterministic'].includes(cfg.provider))
    throw new Error('Select a real local or consented cloud model in Civweave settings');
   const {runCodeInference}=await import('/creator-suite/shared/code-inference-route-v1.mjs');
@@ -197,7 +201,7 @@ $('propose-set').addEventListener('click',async()=>{
    }});
   updateScenes();status('Model set redesign is pending human approval. Existing stage remains unchanged.');
  }catch(error){status('Stage redesign not applied: '+text(error.message,300));}
- finally{modelBusy=false;updateScenes();}
+ finally{modelBusy=false;$('cloud-consent').checked=false;updateScenes();}
 });
 for(const [button,decision] of [['approve-set','approved'],['reject-set','rejected']]){
  $(button).addEventListener('click',()=>{
@@ -241,7 +245,7 @@ $('next-cue').addEventListener('click',()=>{
  const event=score.events[eventIndex++];
  const existing=studio.snapshot().rehearsals.find(x=>x.id===rehearsalId)?.activeMomentId;
  if(existing)studio.dispatch({type:'close-audience-moment',rehearsalId},human);
- if(!event){report('Cue score complete. Finish the rehearsal to close it.');return;}
+ if(!event){activeMoment=null;report('Cue score complete. Finish the rehearsal to close it.');return;}
  if(event.type==='dialogue'){
   const index=getScene().dialogue.findIndex((l,i)=>i===score.events.slice(0,eventIndex).filter(e=>e.type==='dialogue').length-1);
   try{studio.dispatch({type:'perform-cue',rehearsalId,lineIndex:index,outcome:'played',notes:'Browser-local table read'},human)}
@@ -272,6 +276,7 @@ $('transcribe').addEventListener('click',()=>{
   $('audience-status').textContent='Give participation consent and reach a live invitation moment first.';return;
  }
  const Recognition=globalThis.SpeechRecognition||globalThis.webkitSpeechRecognition;
+ if(!$('speech-provider-consent').checked){$('audience-status').textContent='Confirm browser speech-provider consent, or type instead.';return;}
  if(!Recognition){$('audience-status').textContent='Speech recognition unsupported here. Type your response instead.';return;}
  if(recognizer){$('audience-status').textContent='Transcription is already active.';return;}
  const rec=new Recognition();recognizer=rec;rec.lang='en-US';rec.continuous=false;rec.interimResults=false;
