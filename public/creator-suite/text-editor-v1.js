@@ -72,7 +72,7 @@ function sealSession(next){
 async function commit(next,nextDoc,content,expected){
   const contentDigest='sha256:'+await digest(content);changed(expected);
   await store().commitDocumentChange({session:next,document:nextDoc,content,contentDigest});changed(expected);
-  session=next;doc=nextDoc;lastText=content;editor().innerText=content;notify();
+  session=next;doc=nextDoc;lastText=content;if(editor()?.innerText!==content)editor().innerText=content;notify();
 }
 async function snapshot(type,expected){
   const text=editor()?.innerText||'';
