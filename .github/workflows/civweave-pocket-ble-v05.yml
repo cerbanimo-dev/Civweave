@@ -1,0 +1,40 @@
+name: Civweave Pocket BLE v0.5 Android debug APK
+on:
+  push:
+    branches: [feature/pocket-ble-v05]
+    paths:
+      - native/android/civweave-pocket-v05/**
+      - .github/workflows/civweave-pocket-ble-v05.yml
+  pull_request:
+    branches: [staging]
+  workflow_dispatch:
+concurrency:
+  group: pocket-ble-v05-build
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Install Android SDK
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 3 -type f -name sdkmanager | head -n 1)"
+          test -x "$SDKMANAGER"
+          "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Build debug APK
+        working-directory: native/android/civweave-pocket-v05
+        run: gradle --no-daemon :app:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: civweave-pocket-ble-v05-debug
+          path: native/android/civweave-pocket-v05/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
