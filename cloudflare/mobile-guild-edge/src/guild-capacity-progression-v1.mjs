@@ -3,7 +3,7 @@ export const INITIAL_GUILD_SLOTS=5;
 export const MAX_GUILD_SLOTS=10;
 export const GUILD_MILESTONES=Object.freeze([
   'Physical server connected to Guild Cloud',
-  'Nearby physical location confirmed by owner',
+  'Nearby server confirmed through a resident community check-in',
   'Server identity and secure heartbeat verified',
   'Mesh synchronization and recovery verified',
   'Final server health and configuration verified'
