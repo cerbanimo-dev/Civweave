@@ -1,7 +1,8 @@
 import {CivweaveCodeWorkspaceV1 as work,publishReviewed,adoptReviewed} from './shared/code-mesh-workspace-v1.mjs';
+import {resolveCodeInferenceRoute,runCodeInference} from './shared/code-inference-route-v1.mjs';
 
 const el=id=>document.getElementById('cw-'+id),out=(id,value)=>{el(id).textContent=typeof value==='string'?value:JSON.stringify(value,null,2);};
-let workspaceId='',previewId='',inspectedId='',running=false,stopRequested=false;
+let workspaceId='',previewId='',inspectedId='',running=false,stopRequested=false,localRuntimeFlight=null;
 const clean=(v,n=5000)=>String(v??'').slice(0,n);
 function showError(error){out('checks',error.message||String(error));}
 function option(value,label){const e=document.createElement('option');e.value=value;e.textContent=label;return e;}
@@ -42,12 +43,39 @@ function registerTools(){
     }
   });
 }
+function currentSelection(){
+  try{const live=globalThis.CivweaveLocalModelDownloadV266?.selection?.();if(live?.active&&live.id)return live;}catch{}
+  try{const saved=JSON.parse(localStorage.getItem('civweave.local-ai.selection.v266')||'null');return saved?.active&&saved.id?saved:null;}catch{return null;}
+}
 function config(){
   const runtime=globalThis.CivweaveModelRuntime;
-  if(!runtime?.generate)throw new Error('Configure a Civweave local or consented cloud model in AI settings.');
+  if(!runtime?.generate)throw new Error('Shared Civweave model runtime is unavailable. Reopen the Code Workshop from the installed app.');
   const value=runtime.readSharedConfig?.('agentic')||runtime.readSharedConfig?.('interactive');
-  if(!value?.provider||['manual','deterministic'].includes(value.provider))throw new Error('Select an inference provider first.');
-  return{runtime,value};
+  if(!value?.provider)throw new Error('No AI provider is configured in this app origin. Choose a model in Civweave Settings, then reopen Code Workshop.');
+  const selection=currentSelection(),route=resolveCodeInferenceRoute(value,selection);
+  if(['manual','deterministic'].includes(route.provider))throw new Error('AI Settings currently selects '+route.provider+'. Select an inference model to use in the Code Workshop.');
+  if(route.kind==='shared'&&['gemini','hosted'].includes(route.provider)&&!value.externalConsent)
+    throw new Error('Cloud consent or credentials are unavailable in this Code Workshop tab. Reopen it from Civweave or explicitly configure a permitted provider for this session.');
+  return{runtime,value,route,selection};
+}
+function loadLocalRuntime(){
+  if(globalThis.CivweaveLocalChatRuntimeV295?.generate)return Promise.resolve(globalThis.CivweaveLocalChatRuntimeV295);
+  if(localRuntimeFlight)return localRuntimeFlight;
+  localRuntimeFlight=new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='/app/local-chat-runtime-v295.js?v=1.0.120-local-chat-runtime-v305-moss-core-readiness';
+    script.onload=()=>{const owner=globalThis.CivweaveLocalChatRuntimeV295;if(owner?.generate)resolve(owner);else reject(new Error('The installed local-chat inference owner did not initialize.'));};
+    script.onerror=()=>reject(new Error('Could not load Civweave local model inference. Check that the installed app package is up to date.'));
+    document.head.append(script);
+  }).catch(error=>{localRuntimeFlight=null;throw error});
+  return localRuntimeFlight;
+}
+function modelStatus(){
+  const display=el('model-status');if(!display)return;
+  try{const {value,route}=config();display.textContent=route.kind==='downloaded-local'
+    ?'Selected device model: '+route.model+' · on-device inference'
+    :'Selected provider: '+route.provider+' · '+(value.model||'default');}
+  catch(error){display.textContent='Model unavailable: '+error.message;}
 }
 function smallModel(name){return /(?:^|[^0-9])(?:0\.\d+|1(?:\.5)?|2|3|4|5|6|7)b(?:[^a-z]|$)/i.test(clean(name,240))||/\be[24]b\b/i.test(clean(name,240));}
 function decode(output){
@@ -58,7 +86,7 @@ function decode(output){
   if(start>=0&&end>start)return JSON.parse(raw.slice(start,end+1));
   throw new Error('Model did not return a valid JSON tool instruction; no edit applied.');
 }
-function prompt(goal,state,limit){
+function prompt(goal,state,limit,profile='large'){
   return [
     'You are a code-authoring agent operating an offline saved workspace through tools.',
     'Return ONLY one JSON object for exactly one operation per response.',
@@ -73,15 +101,16 @@ function prompt(goal,state,limit){
     'Never publish, install, execute or adopt code; only the user can approve those actions.',
     'Read file content before changing unfamiliar files. Avoid duplicate edits. When complete, return done.',
     'Goal: '+goal,
-    'Saved workspace and latest tool result: '+clean(JSON.stringify(state),18000)
+    'Saved workspace and latest tool result: '+clean(JSON.stringify(state),profile==='small'?2400:9000)
   ].join('\n');
 }
 async function runAgent(){
   if(running)throw new Error('Code agent already running.');
   const goal=el('goal').value.trim();if(!goal)throw new Error('Enter a code-building objective.');
-  const id=selected(),{runtime,value}=config();
+  const id=selected(),{runtime,value,route,selection}=config();
   const requested=el('tier').value,profile=requested==='auto'?(smallModel(value.model)?'small':'large'):requested,limit=profile==='small'?3:64;
   const total=Math.max(1,Math.min(40,Number(el('steps').value)||12)),tools=globalThis.CivweaveCreatorToolsV1;
+  out('agent-result','Using '+route.provider+' · '+route.model+' · '+total+' model calls maximum.');
   running=true;stopRequested=false;el('run').disabled=true;
   let state={status:await work.status(id)},calls=0,completed=false;
   try{
@@ -90,13 +119,17 @@ async function runAgent(){
       calls=i+1;
       out('agent-result','Code AI · call '+calls+'/'+total+' · max '+limit+' edits/call');
       const readRevision=(await work.status(id)).revision;
-      const response=await runtime.generate({
-        purpose:'creator-code-agent-v1',executionProfile:'agentic',taskTier:'complex',requiresTools:true,
-        messages:[{role:'system',content:'You are a code editing tool planner. Reply with valid JSON only, not Markdown.'},{role:'user',content:prompt(goal,state,limit)}],
-        config:{...value,stream:false,maxTokens:Math.max(1400,Math.min(Number(value.maxTokens)||8192,32768))},
-        context:{creatorSuite:true,mediaType:'code',workspaceId:id,taskTier:profile}
+      let visible='',phase='starting';
+      const response=await runCodeInference(value,[
+        {role:'system',content:'You are a code editing tool planner. Reply with valid JSON only, not Markdown.'},
+        {role:'user',content:prompt(goal,state,limit,profile)}
+      ],{
+        selection,loadLocal:loadLocalRuntime,sharedRuntime:runtime,context:{workspaceId:id,taskTier:profile},
+        maxTokens:profile==='small'?2048:4096,
+        onProgress:progress=>{phase=clean(progress?.phase||progress?.stage||'working',100);out('agent-result','Code AI · '+route.model+' · call '+calls+'/'+total+' · '+phase+(visible?'\n'+visible.slice(-900):''));},
+        onToken:token=>{const chunk=typeof token==='string'?token:clean(token?.text||token?.content||'',12000);visible+=chunk;if(visible.length>120000)visible=visible.slice(-120000);out('agent-result','Code AI · '+route.model+' · call '+calls+'/'+total+' · '+phase+'\n'+visible.slice(-1200));}
       });
-      if(response?.status!=='success'||(response?.fallback?.used&&response.fallback.provider==='deterministic'))throw new Error('Inference failed: '+clean(response?.error?.message||response?.status||'unknown',300));
+      if(response?.status!=='success'||response?.fallback?.used)throw new Error('Inference failed ('+clean(response?.error?.code||response?.status||'unknown',100)+'): '+clean(response?.error?.message||response?.status||'unknown',500));
       if(stopRequested)break;
       if(workspaceId!==id)throw new Error('Project changed while AI was thinking.');
       const instruction=decode(response);
@@ -144,6 +177,9 @@ async function adopt(event){
 function bind(id,handler){el(id)?.addEventListener('click',event=>Promise.resolve().then(()=>handler(event)).catch(error=>{out(['preview','publish'].includes(id)?'preview-result':id==='adopt'||id==='discover'||id==='inspect-public'?'discovery-result':id==='run'?'agent-result':'checks',error.message||String(error));}));}
 function init(){
   registerTools();
+  modelStatus();
+  addEventListener('storage',modelStatus);
+  addEventListener('civweave:model-config-changed',modelStatus);
   bind('create',async()=>{const created=await work.createWorkspace({title:el('new-title').value});await choose(created.id);});
   bind('refresh',()=>choose());
   el('workspaces').addEventListener('change',()=>{workspaceId=el('workspaces').value;previewId='';el('publish').disabled=true;choose(workspaceId).catch(showError);});
