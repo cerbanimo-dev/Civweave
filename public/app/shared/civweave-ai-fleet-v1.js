@@ -99,7 +99,7 @@ function openSetup(row,layer){
  }else if(row.runtime==='browser-gguf'){
   const panel=form.querySelector('[data-mobile-gguf-panel]');
   const preset=form.elements?.namedItem?.('embeddedGGUFPreset');
-  if(preset)preset.value=row.preset||'4b';
+  if(preset){preset.value=row.preset||'4b';preset.dispatchEvent(new Event('change',{bubbles:true}));}
   if(!panel)throw Error('Browser GGUF setup is unavailable.');
   panel.scrollIntoView?.({block:'nearest'});
  }else if(row.runtime==='ollama'){
