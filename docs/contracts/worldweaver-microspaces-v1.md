@@ -83,3 +83,7 @@ The initial body plan is procedural **2D**, not a claim that an OpenSimulator sk
 
 The approved actor identity, authorizer and renderer are trusted external dependencies, **not booleans supplied by a model**. Avatar image input must be consented before using hosted vision inference. Neither a model-generated appearance nor an in-world script grants commerce, publication, voting, or network permissions.
 
+
+## Standalone avatar preview (no production integration)
+
+`public/app/tools/worldweaver-avatar-lab.html` and `worldweaver-avatar-lab-v1.mjs` expose an optional, directly loadable browser prototype. They read the canonical Starling personas and demonstrate local portrait display, image rasterization, declarative body previews, event-driven pose changes, and textual dialogue. The editable plan is explicitly a **preview** and does not impersonate a model, send hosted requests, persist authoritative rig state, render 3D, or provision a world. Its developer/browser route has no automatic navigation registration and does not create a new shared interaction owner. The actual runtime can use `proposeAvatarViaModel` only after it supplies a trusted authenticated model adapter.\n
