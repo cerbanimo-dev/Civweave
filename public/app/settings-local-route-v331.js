@@ -278,7 +278,7 @@ function renderDock(){
 function localPanel(form){return form?.querySelector(`#${PANEL_ID}`)||null}
 
 
-const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.0.0-purpose-first-device-filtered';
+const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.0.1-device-aware-ios-fallback';
 function showUnifiedFleet(layer=document.getElementById('cw-settings-v320')){
   const target=layer?.querySelector?.('[data-settings-tab-panel="local-models"]');
   if(!target||!layer?.isConnected||layer.hidden)return false;
