@@ -67,7 +67,9 @@ function validateSnapshot(snapshot){
     links.add(key);
   }
   for(const row of snapshot.npcs){
-    exact(row,['id','instanceId','modelId','pilotPrincipalId','name','pilotPrompt','appearanceRef','capabilities','status','createdBy','createdAt'],'NPC fields');
+    for(const key of ['personaRef','avatarProposalId','avatarBackendRef'])if(row[key]===undefined)row[key]=null;
+    exact(row,['id','instanceId','modelId','pilotPrincipalId','name','pilotPrompt','appearanceRef','personaRef','avatarProposalId','avatarBackendRef','capabilities','status','createdBy','createdAt'],'NPC fields');
+    if(row.personaRef!==null||row.avatarProposalId!==null||row.avatarBackendRef!==null)invalid('authenticated avatar binding');
     if(!identifier(row.modelId)||row.pilotPrincipalId!==PILOT||!text(row.name,100)||!text(row.pilotPrompt,5000)||(row.appearanceRef!==null&&!identifier(row.appearanceRef))||!Array.isArray(row.capabilities)||!row.capabilities.length||row.capabilities.length>NPC_TOOLS.length||new Set(row.capabilities).size!==row.capabilities.length||row.capabilities.some(tool=>!NPC_TOOLS.includes(tool))||row.status!=='ready'||row.createdBy!==LOCAL_ACTOR.principalId||!time(row.createdAt))invalid('NPC draft configuration');
   }
   for(const row of snapshot.debateTurns){
