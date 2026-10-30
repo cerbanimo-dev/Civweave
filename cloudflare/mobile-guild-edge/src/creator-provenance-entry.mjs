@@ -122,6 +122,10 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
       throw Object.assign(new Error('Finish secure pairing, sync/recovery checks and a fresh server heartbeat before finalizing.'),{status:409});
     return {ok:true,onboarding:this.recordStage(5,{completedAt:new Date().toISOString()})};
   }
+  revokePhysicalNode(){
+    const row=this.onboardingState();if(!row)throw Object.assign(new Error('This Guild has no physical-node onboarding.'),{status:409});
+    return {ok:true,onboarding:this.recordStage(row.stage,{nodeTokenHash:null,lastSeenAt:null,challenge:null})};
+  }
   memberDirectory(){
     this.ensureResidentTables();
     return [...this.sql.exec('SELECT node_id,user_id,seat_class,created_at,last_seen_at FROM resident_members ORDER BY created_at LIMIT 100')].map(row=>({nodeId:row.node_id,userId:row.user_id,seatClass:row.seat_class,createdAt:row.created_at,lastSeenAt:row.last_seen_at}));
@@ -212,7 +216,42 @@ export default{
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:GUILD_QUEST_CORS});
       try{const route=guildQuestAction(request),body=request.method==='POST'?await readGuildQuestInput(request):{},result=await capacityStub(env).guildQuestAction({tokenHash:await sessionTokenHash(bearer(request)),requestedNodeId:requestedNodeId(request),action:route.action,input:{...body,...route.input}});return guildQuestJson(result,result.created?201:200)}catch(error){return guildQuestError(error)}
     }
-    const url=new URL(request.url);if(request.method==='OPTIONS'&&(isSessionPath(url.pathname)||isGeneratePath(url.pathname)))return new Response(null,{status:204,headers:sessionCors});
+    const url=new URL(request.url);
+
+    // Owner authority is independent of the synchronization key and resident sessions.
+    if(url.pathname==='/api/guild/manage'){
+      if(request.method==='OPTIONS')return new Response(null,{status:204,headers:sessionCors});
+      try{
+        const token=bearer(request);
+        if(!/^[A-Za-z0-9_-]{40,200}$/.test(token))throw Object.assign(new Error('Guild owner authentication required.'),{status:401});
+        const digest=await crypto.subtle.digest('SHA-256',enc.encode('civweave.guild-owner-credential.v1\\n'+token));
+        const authorized=await env.GUILD_STATE.get(env.GUILD_STATE.idFromName('guild')).authorizedOwner(b64url(digest));
+        if(!authorized)throw Object.assign(new Error('Only the founding Guild owner can manage this Guild.'),{status:403});
+        const guildState=await env.GUILD_STATE.get(env.GUILD_STATE.idFromName('guild')).status();
+        const stub=capacityStub(env);
+        if(request.method==='GET')return json({ok:true,guild:{guildId:guildState.guildId,displayName:guildState.displayName,location:guildState.location},capacity:await stub.status(),members:await stub.memberDirectory()});
+        if(request.method!=='POST')return json({ok:false,error:'Method not allowed'},405);
+        const body=await request.json().catch(()=>({})),action=clean(body.action,60);
+        let result;
+        if(action==='pair-node')result=await stub.issuePairing();
+        else if(action==='verify-location')result=await stub.advanceOnboarding('verify-location',{pin:guildState.location,position:body.position});
+        else if(action==='finalize')result=await stub.advanceOnboarding('finalize');
+        else if(action==='remove-member')result=await stub.removeResident(body.userId);
+        else if(action==='revoke-node')result=await stub.revokePhysicalNode();
+        else throw Object.assign(new Error('Unknown Guild management action.'),{status:400});
+        return json({...result,capacity:await stub.status(),members:await stub.memberDirectory()});
+      }catch(error){return errorResponse(error)}
+    }
+    if(url.pathname==='/api/guild/physical/connect'||url.pathname==='/api/guild/physical/heartbeat'){
+      if(request.method==='OPTIONS')return new Response(null,{status:204,headers:sessionCors});
+      if(request.method!=='POST')return json({ok:false,error:'Method not allowed'},405);
+      try{
+        const body=await request.json().catch(()=>({})),stub=capacityStub(env);
+        if(url.pathname.endsWith('/connect'))return json(await stub.connectPhysicalNode({pairingCode:body.pairingCode,nodeId:body.nodeId}),201);
+        return json(await stub.heartbeatPhysicalNode({nodeToken:bearer(request),challengeEcho:body.challengeEcho,meshSyncOk:body.meshSyncOk,recoveryOk:body.recoveryOk}));
+      }catch(error){return errorResponse(error)}
+    }
+    if(request.method==='OPTIONS'&&(isSessionPath(url.pathname)||isGeneratePath(url.pathname)))return new Response(null,{status:204,headers:sessionCors});
     if(isSessionPath(url.pathname))return handleSession(request,env);
     if(isGeneratePath(url.pathname)){const sessionResponse=await handleSessionGenerate(request.clone(),env);if(sessionResponse)return sessionResponse}
     let receipt=null;if(request.method==='POST'&&url.pathname==='/api/envelopes'){const input=await request.clone().json().catch(()=>null);if(input?.schema==='civweave.community-object-envelope.v1'&&input?.payload?.kind===RECEIPT_KIND)receipt=input.payload}
