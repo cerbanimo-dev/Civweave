@@ -16,7 +16,8 @@ const studio=createPerformanceStudio({
  authorize:({actor,command})=>{
   if(actor.verified!==true)return false;
   if(['create-project','add-source','review-scene','assign-cast','start-rehearsal','finish-rehearsal'].includes(command.type))return actor.kind==='human';
-  if(command.type==='propose-scenes')return ['human','model'].includes(actor.kind);
+  if(['propose-scenes','propose-stage'].includes(command.type))return ['human','model'].includes(actor.kind);
+  if(command.type==='review-stage')return actor.kind==='human';
   if(command.type==='perform-cue')return ['human','model','runtime'].includes(actor.kind);
   if(['open-audience-moment','close-audience-moment'].includes(command.type))return actor.kind==='human';
   if(command.type==='submit-audience')return actor.kind==='audience';
