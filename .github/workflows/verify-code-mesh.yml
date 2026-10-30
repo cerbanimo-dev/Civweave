@@ -7,7 +7,10 @@ on:
       - 'public/creator-suite/code-workbench-v1.mjs'
       - 'public/creator-suite/shared/code-mesh-workspace-v1.mjs'
       - 'public/creator-suite/shared/code-workspace-core-v1.mjs'
+      - 'public/creator-suite/shared/code-inference-route-v1.mjs'
+      - 'scripts/test-code-workshop-model-route-v1.mjs'
       - 'scripts/test-code-mesh-workspace-v1.mjs'
+      - 'scripts/test-code-workshop-model-route-v1.mjs'
       - '.github/workflows/verify-code-mesh.yml'
   pull_request:
     paths:
@@ -30,4 +33,5 @@ jobs:
       - run: node --check public/creator-suite/shared/code-workspace-core-v1.mjs
       - run: node --check public/creator-suite/shared/code-mesh-workspace-v1.mjs
       - run: node --check public/creator-suite/code-workbench-v1.mjs
-      - run: node --test scripts/test-code-mesh-workspace-v1.mjs
+      - run: node --check public/creator-suite/shared/code-inference-route-v1.mjs
+      - run: node --test scripts/test-code-mesh-workspace-v1.mjs scripts/test-code-workshop-model-route-v1.mjs
