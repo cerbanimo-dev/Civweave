@@ -3,6 +3,20 @@
   "policy": "extend-existing-owner-never-add-parallel-owner",
   "requiredForAgentWork": true,
   "systems": {
+    "action-board": {
+      "capability": "Offline-first capture and context-filtered next-action projection over saved Quests",
+      "owner": "public/app/action-board-v1.mjs",
+      "model": "public/app/shared/action-board-core-v1.mjs",
+      "canonicalApi": "globalThis.CivweaveActionBoardV1",
+      "storageKey": "civweave.action-board.v1",
+      "questLedgerReadOnly": "civweave.intentions.v127",
+      "rules": [
+        "Manual lightweight actions and Focus flags are local, never duplicate or mutate canonical saved Quests.",
+        "Saved Quest statuses, dependencies, activation, proofs and completion remain owned by their existing Quest workflow.",
+        "Unknown and ambiguous dependencies fail closed into Waiting; no sequential dependency is invented.",
+        "Action projection and filtering work without AI or network access."
+      ]
+    },
     "content-provenance": {
       "capability": "Immutable creation provenance for Civweave artifacts and additive human-validation history",
       "owner": "public/app/content-provenance-v1.js",
@@ -167,8 +181,13 @@
         "Living School uses the family-shell Settings control and has no realm-local Settings button.",
         "Browser prototypes, DOM prototypes, and Settings API methods may not be monkey-patched to repair Settings behavior.",
         "Credential helpers may expose explicit compatibility methods but may not intercept Settings input, patch Settings open(), or mutate credential state at module load.",
-        "Realm stability/recovery layers may call the canonical Settings API programmatically but may not intercept Settings controls or carry dormant fallback listeners."
-      ]
+        "Realm stability/recovery layers may call the canonical Settings API programmatically but may not intercept Settings controls or carry dormant fallback listeners.",
+        "The shared AI Fleet owns purpose-based model catalog and device/format/memory visibility in the existing Settings Local models tab. It is a presentation and role-preference service, not another Settings input owner or inference runtime.",
+        "Model choices delegate activation to the canonical Settings and local inference runtimes; no AI starts, downloads, probes hardware or silently changes provider merely from opening the fleet."
+      ],
+      "aiFleetCatalog": "public/app/shared/civweave-ai-fleet-v1.js",
+      "aiFleetRoleSelectionStore": "civweave.ai.fleet.choices.v1",
+      "aiFleetMemoryOverrideStore": "civweave.ai.fleet.memory-gb.v1"
     },
     "family-navigation": {
       "capability": "Five-system navigation and expressive realm-status chrome",
@@ -388,6 +407,92 @@
       "androidExecutionBridge": "native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeBridge.kt",
       "androidScheduledWorker": "native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeWorker.kt",
       "hostProtocolClient": "public/app/shared/starling-execution-transport-v1.mjs"
+    },
+    "worldweaver": {
+      "capability": "Shared portable world microspace manifests, world lifecycle intents and model-driven NPC tool proposals",
+      "owner": "public/app/shared/worldweaver-core-v1.mjs",
+      "canonicalApi": "ES module: createWorldweaver, WORLDWEAVER_SCHEMA, SPACE_GUIDES, NPC_TOOLS",
+      "contract": "docs/contracts/worldweaver-microspaces-v1.md",
+      "executableVerifier": "scripts/test-worldweaver-core-v1.mjs",
+      "allowedCallers": [
+        "scripts/test-worldweaver-core-v1.mjs",
+        "scripts/test-worldweaver-avatar-rigs-v1.mjs",
+        "scripts/test-worldweaver-screens-v1.mjs",
+        "scripts/test-worldweaver-labs-hardening-v1.mjs",
+        "scripts/test-worldweaver-map-2d-v1.mjs",
+        "scripts/test-worldweaver-opensim-geometry-v1.mjs",
+        "scripts/test-worldweaver-performance-studio-v1.mjs"
+      ],
+      "activeRoute": "none; manifest-only foundation pending authenticated capability integration",
+      "delegatedAuthorities": {
+        "learning": "Living School existing learning and credential owner",
+        "tasks": "Cerbanimo existing Quest/proof owner",
+        "marketplace": "public/app/services/fellowfare/marketplace-v2.js",
+        "governance": "public/app/anarchadia-governance-kernel-v145.js",
+        "mapping": "Existing Guild Map owner",
+        "inference": "Existing shared local AI/Starling runtime"
+      },
+      "rules": [
+        "One cross-system owner; guides are typed templates and never separate chat or world engines.",
+        "Instance creation records a draft, not a hosted server or published Guild Map marker.",
+        "Model NPCs may create pilot personas with custom role prompts under platform/tool permissions and externally verified model identities.",
+        "NPC proposals are bounded to one to three tools; only trusted world runtimes attest tool outcomes.",
+        "No direct code execution, payments, ballot casting, Quest completion, publishing or role-grant authority.",
+        "External permission adapter, signed persistent store, world renderers and bridge integrations are mandatory before public release.",
+        "Starling personas and existing SVG portraits are read from canonical Starling sources; no duplicate persona registry.",
+        "Models receive real bounded rasterized images only when explicitly supported; fallback cannot claim visual perception.",
+        "NPC avatar body plans and behavior are declarative, reviewed and acknowledged by a trusted renderer before activation.",
+        "Screens are logical world objects with validated image, video or HTTPS website source references and one canonical cast state owner.",
+        "Model presenters queue cast-screen/clear-screen intents; only trusted runtimes acknowledge changes; external URLs require human review.",
+        "Websites render in sandboxed cross-origin iframes without same-origin permission and may refuse embedding; no arbitrary model HTML or JavaScript.",
+        "Local labs verify media type magic bytes, image dimensions and video duration before retaining user-selected files.",
+        "Local avatar drafts persist only validated plans, support persona-scoped import/export and remain revertible.",
+        "Screen lab releases unused object URLs, closes video playback, and allows the human owner to cancel queued model casts.",
+        "Lightweight 2D map and 3D world must use the same authorized Worldweaver snapshot, not competing or replicated authority.",
+        "Casting native Civweave to a Weave screen renders a single-depth 2D world projection with map screen icons, never a self-recursive iframe.",
+        "Map coordinates without verified provider geometry are explicitly schematic; model observations omit internal pilot prompts and protected task details.",
+        "Real-time synchronized views require a trusted host state subscription; lab-only local updates cannot claim cross-device multiplayer synchronization.",
+        "An OpenSimulator region module, not the browser canvas, remains the authoritative source for persistent prim/mesh geometry and avatar positions.",
+        "Every 2D polygon in an OpenSimulator-backed map is projected from the same world-space transformed 3D prim vertices/triangles used in the 3D preview.",
+        "Region geometry must come from an authenticated, permission-filtered adapter; archived screenshots and demo district positions are never authoritative.",
+        "Browser 3D geometry preview is not a replacement for the OpenSimulator native multiplayer viewer.",
+        "Book-to-screenplay proposals, cast rig bindings, stage blocking, timed cues and rehearsal decisions remain distinct, attributed reviewable production records.",
+        "Models can propose 1-3 scenes at a time with a selected runtime; a verified human must approve scenes, cast bindings and rehearsal starts.",
+        "Audience transcription and reactions require voluntary opt-in and a separate opt-in for LoRA training; withdrawals clear active text and revoke the corresponding consent.",
+        "FilmCraft interchange and Qwen3.5 LoRA datasets are exports, not rendered footage or model weights; sources need confirmed rights."
+      ],
+      "helpers": [
+        "public/app/shared/worldweaver-avatar-v1.mjs",
+        "public/app/shared/worldweaver-starling-bridge-v1.mjs",
+        "public/app/shared/worldweaver-avatar-pilot-v1.mjs",
+        "public/app/shared/worldweaver-screen-v1.mjs",
+        "public/app/shared/worldweaver-lab-draft-v1.mjs",
+        "public/app/shared/worldweaver-lab-media-v1.mjs",
+        "public/app/shared/worldweaver-map-2d-v1.mjs",
+        "public/app/shared/worldweaver-opensim-geometry-v1.mjs",
+        "public/app/shared/worldweaver-3d-preview-v1.mjs",
+        "public/app/shared/worldweaver-visual-scene-v1.mjs",
+        "public/app/shared/worldweaver-performance-studio-v1.mjs",
+        "public/app/shared/worldweaver-stagecraft-v1.mjs",
+        "public/app/shared/worldweaver-adaptation-model-v1.mjs",
+        "public/app/shared/worldweaver-filmcraft-interchange-v1.mjs"
+      ],
+      "executableVerifiers": [
+        "scripts/test-worldweaver-core-v1.mjs",
+        "scripts/test-worldweaver-avatar-rigs-v1.mjs",
+        "scripts/test-worldweaver-screens-v1.mjs",
+        "scripts/test-worldweaver-labs-hardening-v1.mjs",
+        "scripts/test-worldweaver-map-2d-v1.mjs",
+        "scripts/test-worldweaver-opensim-geometry-v1.mjs",
+        "scripts/test-worldweaver-performance-studio-v1.mjs"
+      ],
+      "presentationDemos": [
+        "public/app/tools/worldweaver-avatar-lab.html",
+        "public/app/tools/worldweaver-screen-lab.html",
+        "public/app/tools/worldweaver-map-lab.html",
+        "public/app/tools/worldweaver-geometry-lab.html",
+        "public/app/tools/worldweaver-performance-lab.html"
+      ]
     }
   }
 }

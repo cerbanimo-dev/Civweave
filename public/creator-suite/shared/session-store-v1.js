@@ -12,7 +12,25 @@ function db(){
   return dbPromise;
 }
 async function run(store,mode,work){const database=await db();return new Promise((resolve,reject)=>{const tx=database.transaction(store,mode),os=tx.objectStore(store),result=work(os);tx.oncomplete=()=>resolve(result?.result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('IndexedDB transaction aborted.'))})}
+async function commitDocumentChange({session,document,content,contentDigest}={}){
+  if(!session?.id||document?.sessionId!==session.id||typeof content!=='string')
+    throw new Error('Document commit must contain matching session, document, and content.');
+  const database=await db();
+  const journal={id:'journal:'+session.id,schema:'civweave.creator-crash-journal.v1',
+    sessionId:session.id,kind:'text',updatedAt:new Date().toISOString(),
+    content,contentDigest:String(contentDigest||''),recoverable:true};
+  return new Promise((resolve,reject)=>{
+    const tx=database.transaction([SESSION_STORE,ARTIFACT_STORE],'readwrite');
+    tx.objectStore(SESSION_STORE).put(structuredClone(session));
+    tx.objectStore(ARTIFACT_STORE).put(structuredClone(document));
+    tx.objectStore(ARTIFACT_STORE).put(journal);
+    tx.oncomplete=()=>resolve({sessionId:session.id,revision:document.revision});
+    tx.onerror=()=>reject(tx.error||new Error('Document commit failed.'));
+    tx.onabort=()=>reject(tx.error||new Error('Document commit aborted.'));
+  });
+}
 const api=Object.freeze({
+  commitDocumentChange,
   putSession(session){return run(SESSION_STORE,'readwrite',os=>os.put(structuredClone(session)))},
   getSession(id){return run(SESSION_STORE,'readonly',os=>os.get(id))},
   deleteSession(id){return run(SESSION_STORE,'readwrite',os=>os.delete(id))},

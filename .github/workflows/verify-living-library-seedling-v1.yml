@@ -1,0 +1,26 @@
+name: Verify Living Library Seedling
+on:
+  pull_request:
+    paths:
+      - 'public/app/living-library-seedling-*'
+      - 'scripts/test-living-library-seedling-v1.mjs'
+      - 'docs/living-library-seedling-v1.md'
+      - '.github/workflows/verify-living-library-seedling-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/living-library-seedling-*'
+      - 'scripts/test-living-library-seedling-v1.mjs'
+      - '.github/workflows/verify-living-library-seedling-v1.yml'
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Seedling manual plans, review imports and Guild envelopes
+        run: node --test scripts/test-living-library-seedling-v1.mjs

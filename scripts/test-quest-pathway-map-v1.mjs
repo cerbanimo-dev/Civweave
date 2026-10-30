@@ -18,7 +18,7 @@ test('a newly generated Quest immediately shows all four subsystem trails and sa
     assert.equal(b.host.querySelectorAll('[data-quest-map-step]').length,4);
     assert.match(b.host.textContent,/Awaiting activation/);
     assert.equal(b.host.querySelector('[data-quest-map-lane="fellowfare"]').textContent.includes('No path requested'),true);
-    assert.match(b.host.textContent,/Plan order is not a dependency/);
+    assert.match(b.host.textContent,/Beat order · not a lock/);
     assert.equal(b.host.querySelector('[data-quest-map-step="proof-id"]').dataset.locked,'true');
     assert.equal(b.host.querySelector('[data-quest-map-step="fit-id"]').dataset.locked,'false');
   }finally{b.close()}
@@ -66,7 +66,8 @@ test('completed Quests keep native work viewable while stopped Quests have no av
 test('unrecognized paths stay visible and markup is escaped without leaking unrelated fields',()=>{
   const plan=fixture();plan.title='<img src=x onerror=alert(1)>';plan.wish='PRIVATE WISH';plan.profile={secret:'PRIVATE PROFILE'};plan.paths.push({id:'<unsafe>',realm:'unknown-system',title:'<script>unsafe</script>',evidence:['PRIVATE PROOF'],steps:['<b>not markup</b>']});
   const b=browser(plan);try{
-    assert.equal(b.host.querySelectorAll('[data-quest-map-lane]').length,5);assert.equal(b.host.querySelectorAll('img,script,b').length,0);
+    assert.equal(b.host.querySelectorAll('[data-quest-map-lane]').length,5);assert.equal(b.host.querySelectorAll('script,img[onerror]').length,0);
+    assert.equal(b.host.querySelectorAll('img').length,4);assert.equal(b.host.querySelectorAll('b').length,4);assert.equal(b.host.querySelectorAll('.cw-qmap-lane-labels img').length,4);
     assert.match(b.host.textContent,/Unassigned subsystem/);assert.match(b.host.textContent,/<script>unsafe<\/script>/);assert.doesNotMatch(b.host.textContent,/PRIVATE/);
     assert.equal(b.host.querySelector('[data-path-id="<unsafe>"]').dataset.pathId,'<unsafe>');
   }finally{b.close()}

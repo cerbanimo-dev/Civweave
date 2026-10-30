@@ -11,8 +11,8 @@ const FAST_RUNTIME_SRC='/app/local-ai/litert-gemma4-fast-runtime-v1.js?v=1.8.6-q
 const FAST_STRUCTURED_TOOL_ADAPTER_VERSION='1.0.0-litert-web-dual-tool-shape-json-fallback';
 const TRACKER_VERSION='1.2.23-guide-generation-tracker-v1-universal-artifact-rail';
 const TRACKER_SRC='/app/guide-generation-tracker-v1.js?v=1.2.23-universal-artifact-rail';
-const WEAVE_PIPELINE_VERSION='1.3.9-weave-draft-pipeline-v1-runtime-family-gate';
-const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.9-runtime-family-gate';
+const WEAVE_PIPELINE_VERSION='1.3.10-weave-draft-pipeline-v1-bounded-quest-sections';
+const WEAVE_PIPELINE_SRC='/app/local-ai/gemma4-weave-draft-pipeline-v1.js?v=1.3.10-bounded-quest-sections';
 const GEMMA_FAST_MODEL='gemma4-e2b-it-litert-web';
 const GEMMA_DEEP_MODEL='gemma4-e4b-it-litert-web';
 const QWEN_FAST_MODEL='qwen35-4b-litert-web';

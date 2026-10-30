@@ -30,6 +30,7 @@ on:
       - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
       - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
       - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
+      - 'scripts/test-quest-bounded-draft-v1.mjs'
       - 'scripts/verify-gemma4-first-request-intake-bridge-v1.mjs'
       - 'scripts/verify-gemma4-route-integrity-v1.mjs'
       - 'scripts/verify-gemma4-learning-plan-entry-authority-v1.mjs'
@@ -73,6 +74,7 @@ on:
       - 'scripts/verify-e4b-structured-task-authority-v1.mjs'
       - 'scripts/verify-litert-structured-tool-shape-v1.mjs'
       - 'scripts/verify-e4b-weave-draft-pipeline-v1.mjs'
+      - 'scripts/test-quest-bounded-draft-v1.mjs'
       - 'scripts/verify-gemma4-first-request-intake-bridge-v1.mjs'
       - 'scripts/verify-gemma4-route-integrity-v1.mjs'
       - 'scripts/verify-gemma4-learning-plan-entry-authority-v1.mjs'
@@ -142,6 +144,8 @@ jobs:
         run: node scripts/verify-e4b-structured-task-authority-v1.mjs
       - name: Verify E4B Weave Draft compiler pipeline
         run: node scripts/verify-e4b-weave-draft-pipeline-v1.mjs
+      - name: Verify bounded Quest sections and preserved partial drafts
+        run: node scripts/test-quest-bounded-draft-v1.mjs
       - name: Verify first-request intake bridge
         run: node scripts/verify-gemma4-first-request-intake-bridge-v1.mjs
       - name: Verify post-loader original-text routing

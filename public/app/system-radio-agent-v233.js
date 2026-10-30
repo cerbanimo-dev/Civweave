@@ -137,7 +137,7 @@ try{dispatchEvent(new CustomEvent('civweave:radio-agent-ready',{detail:{version:
 (()=>{
 'use strict';
 
-const VERSION='1.2.0-direct-open-radio-v1';
+const VERSION='1.2.1-mobile-music-launcher-v1';
 const LAUNCHER_ID='cw-radio-station-launcher-v1';
 const PANEL_ID='cw-radio-station-panel-v1';
 const STYLE_ID='cw-radio-station-surface-v1-style';
@@ -402,7 +402,9 @@ function installStyle(){
 /* One dock offset in the parent; an embedded standalone fallback already has a shortened viewport. */
 html[data-radio-embedded="true"]{--cw-radio-dock-space:0px}
 html:not([data-radio-embedded="true"]){--cw-radio-dock-space:calc(var(--cw-themed-nav-height,64px) + env(safe-area-inset-bottom))}
-#${LAUNCHER_ID}{bottom:calc(var(--cw-radio-dock-space) + 8px);width:44px;height:44px;background:transparent;border:0;border-radius:12px;color:var(--cw-radio-accent,#cfabed);box-shadow:none;font-size:28px;text-shadow:0 1px 3px #000b}
+#${LAUNCHER_ID}{bottom:calc(var(--cw-radio-dock-space) + 10px);width:50px;height:50px;min-width:50px;min-height:50px;padding:0!important;display:grid!important;place-items:center;visibility:visible!important;opacity:1!important;background:var(--cw-radio-background,#21152e);border:2px solid var(--cw-radio-accent,#cfabed);border-radius:15px;color:var(--cw-radio-accent,#cfabed);box-shadow:0 3px 14px #000a;isolation:isolate;touch-action:manipulation}
+#${LAUNCHER_ID} svg{display:block!important;width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+@media(max-width:640px){#${LAUNCHER_ID}{left:max(14px,env(safe-area-inset-left));bottom:calc(var(--cw-radio-dock-space) + 14px);width:54px;height:54px;min-width:54px;min-height:54px;border-radius:17px}}
 #${LAUNCHER_ID}[aria-expanded="true"],#${LAUNCHER_ID}[data-playing="true"]{box-shadow:none;color:var(--cw-radio-accent,#cfabed)}
 #${LAUNCHER_ID}:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 #${PANEL_ID}{bottom:calc(var(--cw-radio-dock-space) + 58px);max-height:calc(100dvh - var(--cw-radio-dock-space) - 78px);display:grid;grid-template-rows:auto auto auto minmax(0,1fr);min-height:0;overflow:hidden;background:var(--cw-radio-background,#21152e);border-color:color-mix(in srgb,var(--cw-radio-accent,#cfabed) 45%,transparent);box-shadow:0 12px 34px #0008;overscroll-behavior:contain}
@@ -473,7 +475,7 @@ function ensureSurface(){
   }
   if(!launcher?.isConnected){
     launcher=document.getElementById(LAUNCHER_ID)||document.createElement('button');
-    launcher.id=LAUNCHER_ID;launcher.type='button';launcher.textContent='♫';launcher.setAttribute('aria-haspopup','dialog');launcher.setAttribute('aria-expanded','false');
+    launcher.id=LAUNCHER_ID;launcher.type='button';launcher.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18V5l12-2v13"/><ellipse cx="6" cy="18" rx="3" ry="2.5"/><ellipse cx="18" cy="16" rx="3" ry="2.5"/></svg>';launcher.setAttribute('aria-label','Open music and playlists');launcher.setAttribute('title','Music and playlists');launcher.setAttribute('aria-haspopup','dialog');launcher.setAttribute('aria-expanded','false');
     launcher.addEventListener('click',toggle);
     if(!launcher.isConnected)document.body.append(launcher);
   }

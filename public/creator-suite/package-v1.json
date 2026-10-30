@@ -1,6 +1,6 @@
 {
   "schema": "civweave.creator-suite-package.v1",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "name": "Civweave Creator Suite",
   "scope": "/creator-suite/",
   "entry": "/creator-suite/index.html",
@@ -13,7 +13,8 @@
     "/app/host-node-session-v1.js",
     "/app/local-object-mesh-v146.js",
     "/app/pocket-guild-node-v1.mjs",
-    "/app/shared/guild-host-resilience-v1.mjs"
+    "/app/shared/guild-host-resilience-v1.mjs",
+    "/app/shared/civweave-model-runtime.js"
   ],
   "assets": [
     "/creator-suite/index.html",
@@ -41,7 +42,9 @@
     "/creator-suite/audit/review-endorsement-v1.mjs",
     "/creator-suite/audit/review-receipt-v1.mjs",
     "/creator-suite/audit/quest-beat-v1.js",
+    "/creator-suite/shared/structured-document-v1.js",
     "/creator-suite/text-editor-v1.js",
+    "/creator-suite/document-agent-v1.js",
     "/creator-suite/audio-editor-v1.js",
     "/creator-suite/video-editor-v1.js"
   ]

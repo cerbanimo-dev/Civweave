@@ -33,7 +33,7 @@ test('the static shell includes common feedback assets without making animation 
   const context={REQUIRED_SHELL_ASSETS:[],OPTIONAL_SHELL_ASSETS:[],SHELL_ASSETS:[],self:{}};vm.runInNewContext(read('public/service-worker-shell-assets-v1.js'),context);
   for(const extension of ['js','css']){const asset=`${common}.${extension}`;assert.ok(context.OPTIONAL_SHELL_ASSETS.includes(asset));assert.ok(context.SHELL_ASSETS.includes(asset));assert.equal(context.REQUIRED_SHELL_ASSETS.includes(asset),false)}
   assert.ok(context.OPTIONAL_SHELL_ASSETS.includes('/app/assets/ai/kamiya-review-sprites-v1.png'));
-  const revision=context.self.CivweaveShellAssetsV1.revision;assert.equal(revision,'shell-assets-v1-repair-v34-primary-quest-map');assert.ok(read('scripts/build-service-worker-v211.mjs').includes(`/service-worker-shell-assets-v1.js?v=${revision}`));
+  const revision=context.self.CivweaveShellAssetsV1.revision;assert.equal(revision,'shell-assets-v1-repair-v37-four-lane-game-board');assert.ok(read('scripts/build-service-worker-v211.mjs').includes(`/service-worker-shell-assets-v1.js?v=${revision}`));
 });
 
 test('active capability pins select the implemented visual-workflow revisions',()=>{

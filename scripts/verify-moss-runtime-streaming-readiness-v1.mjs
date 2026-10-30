@@ -14,7 +14,7 @@ new vm.Script(fast);
 assert.match(runtime,/nativeDirectTermuxStreamV2:\s*true/);
 assert.doesNotMatch(runtime,/compatibility\\n\s*nativeDirectTermuxStreamV2/,
   'Literal backslash-n inside a // comment hides the critical runtime export');
-assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.196-ai-lifecycle/);
+assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.200-interwoven-quest-map/);
 assert.match(loader,/shared\/civweave-model-runtime\.js\?v=1\.0\.16-ollama-request-thinking/);
 assert.match(runtime,/nativeMossVisibleStreamV3:\s*true/);
 

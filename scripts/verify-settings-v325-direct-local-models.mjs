@@ -1,162 +1,58 @@
 import assert from 'node:assert/strict';
-import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
 
-const directSource=await readFile(new URL('../public/app/settings-local-models-direct-v325.js',import.meta.url),'utf8');
-const workerSource=await readFile(new URL('../public/service-worker-settings-v325-override.js',import.meta.url),'utf8');
-const v203Source=await readFile(new URL('../public/service-worker-v203.js',import.meta.url),'utf8');
-const rootWorker=await readFile(new URL('../public/service-worker.js',import.meta.url),'utf8');
-
-assert.match(directSource,/CIVWEAVE SETTINGS · v325/);
-assert.match(directSource,/Settings v325 · renderer direct-local-v325(?:\.\d+)? · Qwen 4B phone-first performance/);
-assert.match(directSource,/hardLoadingGuardMs:900/);
-assert.match(directSource,/data-local-pack-finish/,'Premier Phone finalization must be owned directly by the card renderer.');
-assert.match(directSource,/actionsStayInPlace:true/,'Local model actions must remain in the direct renderer.');
-assert.match(directSource,/fullRendererSwapOnAction:false/,'Actions must never replace the Settings renderer.');
-assert.match(directSource,/premierPhoneFinalizer:true/,'Premier Phone must use the idempotent finalizer.');
-assert.doesNotMatch(directSource,/delegated\.click\(\)/,'Direct actions must never synthesize a second click.');
-assert.doesNotMatch(directSource,/route\.renderLocalModels\(layer\)/,'Direct actions must never swap to the full lifecycle renderer.');
-assert.doesNotMatch(directSource,/navigator\.serviceWorker/,'The direct display renderer must not touch the service worker.');
-assert.match(directSource,/async function importPhoneQwenDirect/,'The Qwen file import must require a user file-picker action.');
-assert.match(directSource,/importChunkedFile/,'The selected file must be saved in cache fragments.');
-
-let managerReads=0;
-let storageWrites=0;
-const store=new Map([
-  ['civweave.local-ai.selection.v266',JSON.stringify({active:true,id:'gemma4-e2b-it-q2f16-mobile'})],
-  ['civweave.local-ai.downloads.v266',JSON.stringify({'gemma4-e2b-it-q2f16-mobile':{status:'ready',percent:100}})],
-  ['civweave.local-ai.packs.v1',JSON.stringify({'premier-phone':{status:'ready',selectedModel:'gemma4-e2b-it-q2f16-mobile'}})],
-  ['civweave.local-ai.health.v286',JSON.stringify({'gemma4-e2b-it-q2f16-mobile':{ok:true}})]
+const read=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
+const [direct,full,compat,shared,gateway]=await Promise.all([
+ read('public/app/settings-local-models-direct-v325.js'),
+ read('public/app/settings-local-route-v331.js'),
+ read('public/app/settings-local-route-v327.js'),
+ read('public/app/shared/civweave-ai-fleet-v1.js'),
+ read('public/app/settings-gateway-v317.js')
 ]);
-const headerLabel={textContent:'CIVWEAVE SETTINGS · v324'};
-const localTarget={innerHTML:'<p>Reading saved local model choices…</p>',querySelector(){return null}};
-const form={dataset:{},querySelector(selector){
-  if(selector==='[data-settings-tab-panel="local-models"]')return localTarget;
-  if(selector==='[data-settings-tab="local-models"]')return{getAttribute(){return'true'}};
-  return null;
+for(const [name,source] of [['direct',direct],['full',full],['compat',compat]]){
+ assert.match(source,/showUnifiedFleet/,'Shared AI Fleet must own '+name+' selection display.');
+ assert.match(source,/civweave-ai-fleet-v1\.js/,'Fleet loader missing from '+name+'.');
+ assert.match(source,/return true/,'Fleet takeover must stop obsolete display path in '+name+'.');
+}
+assert.match(gateway,/data-settings-tab="local-models">AI fleet<\/button>/);
+assert.match(shared,/qwen35-08b-onnx-webgpu/);
+assert.match(shared,/qwen35-4b-onnx-webgpu/);
+assert.match(shared,/qwen35-4b-gguf/);
+assert.match(shared,/qwen2\.5-coder:7b/);
+assert.match(shared,/llama3\.3:70b/);
+
+// Shared Settings display must not read model cache, download, run inference,
+// change provider or touch the network simply by opening the AI Fleet tab.
+let writes=0,reads=0,renders=0;
+const target={innerHTML:'',querySelector(){return null}};
+const header={textContent:'CIVWEAVE SETTINGS · v324'};
+const form={querySelector(sel){
+ if(sel==='[data-settings-tab-panel="local-models"]')return target;
+ return null;
 }};
-const layer={isConnected:true,hidden:false,dataset:{},querySelector(selector){
-  if(selector==='[data-cw-settings-form]')return form;
-  if(selector==='header small')return headerLabel;
-  return null;
+const layer={isConnected:true,hidden:false,dataset:{},querySelector(sel){
+ if(sel==='[data-cw-settings-form]')return form;
+ if(sel==='[data-settings-tab-panel="local-models"]')return target;
+ if(sel==='header small')return header;
+ return null;
 }};
-function element(){return{id:'',dataset:{},style:{},classList:{toggle(){}},append(){},addEventListener(){},set textContent(value){this._text=value},get textContent(){return this._text||''}}}
-const directContext={
-  console,setTimeout,clearTimeout,URL,
-  localStorage:{getItem(key){return store.get(key)||null},setItem(key,value){storageWrites++;store.set(key,String(value))}},
-  document:{
-    head:{append(){}},
-    getElementById(id){return id==='cw-settings-v320'?layer:null},
-    createElement(){return element()},
-    addEventListener(){}
-  },
-  addEventListener(){},
-  queueMicrotask(){},
-  globalThis:null
+const context={
+ console,URL,setTimeout,clearTimeout,
+ document:{getElementById:id=>id==='cw-settings-v320'?layer:null,
+ createElement(){throw Error('AI Fleet should be loaded already.');},
+ addEventListener(){},head:{}},
+ localStorage:{getItem(){reads++;return null},setItem(){writes++}},
+ CivweaveAIFleetV1:{render(){renders++;target.innerHTML='<h3>AI Fleet</h3>';return true}},
+ addEventListener(){},queueMicrotask(){},globalThis:null
 };
-directContext.globalThis=directContext;
-Object.defineProperty(directContext,'CivweaveLocalModelDownloadV266',{configurable:true,get(){managerReads++;throw new Error('Display path touched the live model manager.')}});
-vm.createContext(directContext);
-vm.runInContext(directSource,directContext,{filename:'settings-local-models-direct-v325.js'});
-assert.ok(directContext.CivweaveSettingsLocalDirectV325?.render);
-assert.equal(directContext.CivweaveSettingsLocalDirectV325.render(layer),true);
-assert.equal(managerReads,0,'Rendering Local models must not touch the live model manager.');
-assert.equal(storageWrites,0,'Rendering Local models must not mutate saved state.');
-assert.equal(headerLabel.textContent,'CIVWEAVE SETTINGS · v325');
-assert.match(localTarget.innerHTML,/AI Downloads/);
-assert.match(localTarget.innerHTML,/Qwen 3\.5 4B · LiteRT/);
-assert.match(localTarget.innerHTML,/Qwen 3\.5 9B · LiteRT/);
-assert.match(localTarget.innerHTML,/Gemma Phone Compatibility Pack/);
-assert.match(localTarget.innerHTML,/Premium Phone Pack/);
-assert.match(localTarget.innerHTML,/Premium phone companions/);
-assert.match(localTarget.innerHTML,/Mac mini \/ cyberdeck local AI setups/);
-assert.match(localTarget.innerHTML,/Qwen3\.8-27B · MLX 4-bit/);
-assert.match(localTarget.innerHTML,/Qwen3-Coder-Next · MLX 4-bit/);
-assert.match(localTarget.innerHTML,/Local Dream · Stable Diffusion 1\.5/);
-assert.match(localTarget.innerHTML,/renderer direct-local-v325/);
-assert.doesNotMatch(localTarget.innerHTML,/Reading saved local model choices/);
-
-assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")>0,'v203 must import the Settings override.');
-assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")<v203Source.indexOf("service-worker-release-generation-v1.js"),'Settings override must register before other fetch handlers.');
-assert.ok(v203Source.indexOf("service-worker-settings-v325-override.js")<v203Source.indexOf("service-worker-core-v208.js"),'Settings override must register before cache-first core.');
-const bridgeRevision=rootWorker.match(/const CIVWEAVE_ROOT_WORKER_BRIDGE='([^']+)'/)?.[1];
-assert.ok(bridgeRevision,'Root worker must declare its staging generation.');
-assert.ok(rootWorker.includes(`importScripts('/service-worker-v203.js?v=${bridgeRevision}')`),'Root worker must import v203 through its declared staging generation boundary.');
-assert.match(workerSource,/stopImmediatePropagation\(\)/);
-assert.match(workerSource,/settings-gateway-v317\.js/);
-assert.match(workerSource,/settings-local-route-v331\.js/);
-assert.match(workerSource,/CW_SETTINGS_V325_ACTION_PARAM='cwAction'/);
-
-const listeners={};
-const cacheStore=new Map();
-const workerContext={
-  console,URL,Headers,Request,Response,
-  self:{
-    location:{origin:'https://example.test'},
-    addEventListener(type,listener){(listeners[type]??=[]).push(listener)}
-  },
-  caches:{
-    async open(){return{
-      async put(key,response){const url=typeof key==='string'?key:key.url;cacheStore.set(url,response.clone())},
-      async match(key){const url=typeof key==='string'?key:key.url;return cacheStore.get(url)?.clone()||null},
-      async keys(){return[]},
-      async delete(){return true}
-    }},
-    async match(request){return cacheStore.get(request.url)?.clone()||null},
-    async keys(){return[]}
-  },
-  fetch:async request=>{
-    const url=new URL(typeof request==='string'?request:request.url);
-    if(url.pathname==='/app/settings-gateway-v317.js')return new Response("const VERSION='1.0.133-settings-v324-direct-local-model-view';const x='CIVWEAVE SETTINGS · v324';const y='settings-v324';",{status:200,headers:{'content-type':'application/javascript'}});
-    if(url.pathname==='/app/settings-local-models-direct-v325.js')return new Response("globalThis.CivweaveSettingsLocalDirectV325={version:'test-patch'};",{status:200,headers:{'content-type':'application/javascript'}});
-    if(url.pathname==='/app/settings-local-route-v331.js')return new Response("globalThis.CivweaveSettingsLocalRouteV323={version:'action-route'};",{status:200,headers:{'content-type':'application/javascript'}});
-    return new Response('not found',{status:404});
-  }
-};
-workerContext.globalThis=workerContext;
-vm.createContext(workerContext);
-vm.runInContext(workerSource,workerContext,{filename:'service-worker-settings-v325-override.js'});
-assert.equal(listeners.fetch?.length,1,'Settings override must own one focused fetch listener.');
-const fetchListener=listeners.fetch[0];
-async function runFetch(url){
-  let stopped=false,promise=null;
-  const event={request:new Request(url),stopImmediatePropagation(){stopped=true},respondWith(value){promise=Promise.resolve(value)}};
-  fetchListener(event);
-  assert.equal(stopped,true,`Settings request was not isolated: ${url}`);
-  assert.ok(promise,`Settings request was not answered: ${url}`);
-  return promise;
-}
-const gatewayResponse=await runFetch('https://example.test/app/settings-gateway-v317.js?v=old');
-const gatewayText=await gatewayResponse.text();
-assert.match(gatewayText,/1\.0\.134-settings-v325-direct-local-model-view/);
-assert.match(gatewayText,/CIVWEAVE SETTINGS · v325/);
-assert.match(gatewayText,/CivweaveSettingsLocalDirectV325/,'Gateway response must contain the direct display renderer.');
-const shimResponse=await runFetch('https://example.test/app/settings-local-route-v325.js?v=old');
-const shimText=await shimResponse.text();
-assert.match(shimText,/settingsV325DisplayShim:true/);
-assert.doesNotMatch(shimText,/download-manager|runtime-v266|WebGPU/i,'Display shim must not load local-model lifecycle/runtime code.');
-const actionResponse=await runFetch('https://example.test/app/settings-local-route-v331.js?cwAction=1');
-assert.match(await actionResponse.text(),/action-route/,'Explicit fallback action routes must remain available for stale clients.');
-
-console.log(JSON.stringify({ok:true,revision:'settings-v325-direct-local-models',visibleVersion:'v325',managerReads,storageWrites,gatewayTransformed:true,displayShim:true,stableInPlaceActions:true,legacyActionRouteFallback:true,rootWorkerGeneration:'v25-settings-v337-direct-gateway'},null,2));
-
-// The visible settings renderer must expose the downloadable Llama model in
-// both current direct UI and older installed-PWA fallback UI.
-for(const path of ['public/app/settings-local-route-v327.js','public/app/settings-local-route-v323.js','public/app/settings-local-route-v331.js']){
-  const legacy=await readFile(new URL('../'+path,import.meta.url),'utf8');
-  assert.match(legacy, /llama32-3b-instruct-q4f16/,path+' lacks Llama trial');
-  assert.match(legacy, /<details open><summary><b>Individual models/,path+' hides downloads');
-  assert.match(legacy, /llama32-two-pass-test-v4.html/,path+' lacks test link');
-}
-assert.match(directSource,/llama32-3b-instruct-q4f16/,'current direct Settings lacks download');
-assert.match(directSource,/<details open><summary><b>Individual Civweave models/,'current direct Settings hides downloads');
-assert.match(directSource,/await m.start\(id,\{preferBackground:false,onProgress:/,'individual models must use observable foreground downloads and progressive bytes');
-assert.match(directSource,/llama32-two-pass-test-v4.html/,'current Settings lacks trial link');
-const bridge=await readFile(new URL('../public/app/settings-local-route-v325.js',import.meta.url),'utf8');
-assert.match(bridge,/DIRECT_VERSION='1\.2\.3-settings-v325-direct-local-models-qwen-import-owner'/);
-console.log('PASS: old v324 fallback and current v325 settings expose Llama 3.2 with downloads and constrained JSON trial.');
-
-for(const file of ['public/app/settings-local-route-v327.js','public/app/settings-local-route-v323.js','public/app/settings-local-route-v331.js']){
- const s=await readFile(new URL('../'+file,import.meta.url),'utf8');
- assert.match(s,/FOREGROUND_PHONE_MODELS=new Set\(\['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16','llama32-3b-instruct-q4f16'\]\)/,file+' still queues invisible background downloads');
-}
+context.globalThis=context;
+Object.defineProperty(context,'CivweaveLocalModelDownloadV266',{get(){throw Error('Model manager accessed on view')}});
+vm.runInNewContext(direct,context,{filename:'settings-local-models-direct-v325.js'});
+assert.equal(context.CivweaveSettingsLocalDirectV325.render(layer),true);
+assert.equal(renders,1);
+assert.equal(writes,0);
+assert.match(target.innerHTML,/AI Fleet/);
+assert.doesNotMatch(target.innerHTML,/LiteRT|Premier Phone Pack|Individual Civweave models/i);
+assert.equal(header.textContent,'CIVWEAVE SETTINGS · v325');
+console.log(JSON.stringify({ok:true,revision:'ai-fleet-shared-settings',renders,reads,writes}));

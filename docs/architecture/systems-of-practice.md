@@ -19,6 +19,15 @@ For every cross-cutting change, an agent must perform this sequence before editi
 7. Update the ownership verifier whenever the capability boundary changes.
 8. A PR is incomplete until the ownership verifier proves the active route graph still has one owner.
 
+## Action Board — personal capture and Quest next actions
+
+- Functional and UI owner: `public/app/action-board-v1.mjs`.
+- Deterministic projection model: `public/app/shared/action-board-core-v1.mjs`.
+- Device-local manual action state and Focus choices: `civweave.action-board.v1`.
+- Existing Weaveling Quest ledger (`civweave.intentions.v127`) and current-campus fallback are read-only inputs; the canonical Quest owner retains activation, progress, proof, and review authority.
+- The Ready Now button is merely a presentation caller in the active Working Campus, not a second task engine or chat owner.
+- See `docs/contracts/action-board-v1.md` and `scripts/test-action-board-v1.mjs`.
+
 ## Jurisdiction-sensitive financial behavior
 
 Before changing goods checkout, seller payment methods, marketplace fees, tax collection, seller reporting or withholding, cross-border goods behavior, service/learning/tutoring tax behavior, membership/compute/digital-service tax behavior, or a jurisdiction gate, read all three canonical artifacts:
@@ -58,6 +67,13 @@ Subscribers may react to `civweave:model-settings-opened` after the canonical su
 ### Living School
 
 Living School is not a special case. It uses the same family-shell Settings control, the same Settings gateway, the same controller, and the same downloaded-model management lane as Cerbanimo, FellowFare, and Anarchadia. Living School may not ship a realm-local Settings button or load Settings repair code to create one.
+
+### AI Fleet catalog
+- Catalog and device filter owner: `public/app/shared/civweave-ai-fleet-v1.js`. The five role names Swift, Archive, Forge, Quill and Atlas are shared across all systems.
+- The Local models / AI fleet tab is the only role-based model selection screen. Legacy pack lists are superseded; the existing GGUF, iOS WebGPU and Ollama settings remain format-specific activation adapters, not separate model-selection authorities.
+- iOS, Android and desktop are filtered by platform and runtime format. Desktop node-host packages are visible only when the configured usable memory budget is sufficient.
+- Browser RAM information is approximate and unavailable on iOS. The user may override the usable memory budget. A model role preference is not an assertion that weights are installed, compatible or running.
+- Opening the catalog reads saved preferences only: never download, execute, probe, warm, change provider, or switch to hosted inference.
 
 ## Family navigation
 
@@ -175,3 +191,19 @@ The Guild Collective can delegate bounded, non-authoritative local drafting jobs
 `public/app/shared/quest-pathway-map-v1.js` and its stylesheet are the shared bounded game-map presenter for the generated chat result, canonical review, and Guild Quest tracker. Its interwoven SVG diagram keeps all four canonical subsystem colors while host themes change the surrounding chart. Declared dependencies, cycle locks and plain semantic details share one bounded projection. It owns no state or inference. `CivweaveSharedReviewSurfaceV234.handleMapAction` validates the current saved Quest and path before inspection, revision requests, native navigation, or submission-preview navigation. The Guild tracker owns publication inspection and delegates existing explicit submission to its publication client. The removed private review map is not a second renderer.
 
 Civweave's fixed `nativePage=guild-quests` destination stays within the persistent shell. Its bounded `submitQuest` selects an exact local Quest for the existing named Guild preview; it never posts automatically. All four native tools retain their own work and proof owners. Living School selects exact activated `weave` / `path` IDs without generation; FellowFare and Anarchadia reject stale fallback identities and stopped Quests. Anarchadia paths open the existing Workbench. See `docs/contracts/quest-pathway-map-v1.md`.
+
+## Worldweaver shared microspace manifest owner
+
+The canonical Worldweaver v1 foundation is `public/app/shared/worldweaver-core-v1.mjs`. Moss, Kamiya, Rook, and Merlin select typed spaces within the **same** manifest owner; no separate chat, event owner, billing, ballot ledger, or model inference loop is created. It records workshop stations, canonical task/listing/ballot references, narrated debate turns, portable world lifecycle requests, and bounded NPC pilot/tool intents. All commands require an authenticated external authorizer. World-host creation and action outcomes must be acknowledged by a trusted adapter; the core cannot make them up. It has no installed route until an authenticated shared capability handler and renderer are integrated. Owner, allowed caller, contract and executable verifier are registered in `config/system-ownership.json`; see `docs/contracts/worldweaver-microspaces-v1.md` and `scripts/test-worldweaver-core-v1.mjs`. The old illustrated Living World files are not used as a new authority.\n
+## Creator Suite code workspaces and mesh code capsules
+
+- Canonical code worktree, encrypted checkpoint, publication review, and adoption owner: `public/creator-suite/shared/code-mesh-workspace-v1.mjs`.
+- Pure bounded-edit, static-snippet, and Git object identity contract: `public/creator-suite/shared/code-workspace-core-v1.mjs`.
+- Creator Suite presentation and agent tool caller: `public/creator-suite/code-workbench-v1.mjs` and `public/creator-suite/code.html`.
+- Shared local inference bridge: `public/creator-suite/shared/code-inference-route-v1.mjs` delegates downloaded-local generation to existing `public/app/local-chat-runtime-v295.js`, while all remote generation delegates to the selected `CivweaveModelRuntime` provider with its consent rules. It does not implement a second local model loader or engine.\n- Shared AI dispatch authority: existing `public/creator-suite/shared/ai-tools-v1.js`; only `code.status`, `code.read`, `code.edit`, and `code.validate` can be exposed as AI tools. Public posting and adoption require explicit trusted human interactions, not model-call arguments.
+- Signed peer transport owner: existing `public/app/local-object-mesh-v146.js`. Private repositories are not mesh objects. An explicitly reviewed, licensed selection becomes a `civweave.code-capsule.v1` public object.
+- Local Passport ID is provided by existing `CivweavePassportIdentityV1`. A nonextractable, device-stored AES-GCM key protects encrypted worktrees; the Passport ID is an associated-data binding, **not** a password or sufficient cryptographic secret for portable recovery.
+- The browser implementation stores Git-format SHA-1 blob/tree/commit identities and encrypted snapshots, but it does not expose a native `git` CLI or execute imported code. Git interoperability and external language/runtime tests require separate explicitly approved adapters.
+- Verification: `npm run test:code-mesh`.
+
+The Code Workshop `qwen35-4b-native` Termux OpenAI-compatible route uses bounded SSE text generation (up to 512 output tokens with a 480-second deadline), then parses and validates the complete JSON tool call locally before applying any code. This prevents the workshop's former nonstreaming JSON POST timeout without modifying the canonical local-server runtime. A human Stop aborts the active model request; already saved chunks remain intact. Other providers retain their existing structured JSON contract.

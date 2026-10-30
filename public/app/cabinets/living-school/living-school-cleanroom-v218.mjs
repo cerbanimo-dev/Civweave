@@ -1,6 +1,7 @@
 import{copy,state,replaceState,persist,readJson,STATE_KEY,VERSION,clean,progressFor,freshState,curriculumWeaveIdentity,selectRoutedQuestPath,escapeHtml as e,regenerateLivingSchoolResearch,regenerateLivingSchoolStructure,discardLivingSchoolFailedDrafts}from'./living-school-cleanroom-core-v218.mjs';
 import{learningJourneySnapshot,PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY,learningJourneyPlanById,recoverableChatPlans}from'./living-school-journey-index-v1.mjs?v=multi-plan-library-v2';
 import{render,currentLearningOutcome}from'./living-school-cleanroom-render-v218.mjs?v=quiz-journey-receipts-v2';
+import{mount as mountMossMetaphorLab,install as installMossMetaphorLab}from'./moss-metaphor-lab-v1.mjs';
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=source-recovery-details-v269-selected-deadline';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=first-call-module-material-v1';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=bounded-ai-assessments-v1';
@@ -114,7 +115,7 @@ function renderRecoveryPanel(){
   }
   document.documentElement.dataset.livingSchoolGenerationRecovery=report.status||'unknown';
 }
-function renderEnhanced(){render();renderRecoveryPanel();}
+function renderEnhanced(){render();renderRecoveryPanel();mountMossMetaphorLab();}
 
 async function applyVideoContract(reason='render'){
   const school=state().school;
@@ -417,6 +418,7 @@ const questMapQuery=new URLSearchParams(location.search);
 if(questMapQuery.get('weave')&&questMapQuery.get('path'))selectRoutedQuestPath({weaveId:questMapQuery.get('weave'),pathId:questMapQuery.get('path')});
 sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
+installMossMetaphorLab();
 renderEnhanced();
 for(const key of [PLAN_KEY,QUEUE_KEY,PLAN_LIBRARY_KEY]){
   // A pending plan may be approved in the parent persistent guide surface.

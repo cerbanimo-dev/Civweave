@@ -1,6 +1,6 @@
 {
   "version": "1.0.106",
-  "revision": "canonical-ledger-contract-v1-fulfillment-v1-background-campus-v241-systems-mesh-v251-standard-only",
+  "revision": "canonical-ledger-contract-v1-fulfillment-v1-background-campus-v241-systems-mesh-v251-standard-only-moss-metaphor-lab-v1",
   "payloadPolicy": "core-first-lazy-packs-v302-core-labor-v1",
   "description": "Compact Civweave offline core with canonical realm surfaces, deterministic local work, and lazy core O*NET/ESCO labor intelligence. Large media, full federation discovery, decorative visuals, and device-AI model payloads remain optional.",
   "seeds": [
@@ -71,6 +71,7 @@
     "/app/knowledge-library-upstream-v1.mjs",
     "/app/knowledge-library-launcher-v1.js",
     "/app/cabinets/living-school/living-library-panel-v1.js",
+    "/app/cabinets/living-school/moss-metaphor-lab-v1.mjs",
     "/app/cabinets/living-school/living-library-downloads-v1.css",
     "/app/cabinets/living-school/living-library-downloads-v1.js",
     "/app/knowledge-library-browser-v1.css",
@@ -293,11 +294,11 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 12474580,
+    "estimatedBytes": 12679727,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 79583444,
-    "candidateAssetCount": 857,
-    "estimatedAssetCount": 857,
+    "requiredFreeBytes": 79788591,
+    "candidateAssetCount": 875,
+    "estimatedAssetCount": 875,
     "conservativeUpperBound": true
   }
 }

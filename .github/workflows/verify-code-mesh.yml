@@ -1,0 +1,54 @@
+name: Verify Creator Code Mesh
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/creator-suite/code.html'
+      - 'public/creator-suite/code-workbench-v1.mjs'
+      - 'public/creator-suite/shared/code-mesh-workspace-v1.mjs'
+      - 'public/creator-suite/shared/code-workspace-core-v1.mjs'
+      - 'public/creator-suite/shared/code-inference-route-v1.mjs'
+      - 'public/creator-suite/shared/native-server-control-v1.mjs'
+      - 'scripts/test-creator-native-server-control-v1.mjs'
+      - 'public/creator-suite/document-agent-v1.js'
+      - 'public/creator-suite/shared/creator-inference-loaders-v1.mjs'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'scripts/verify-creator-agentic-inference-config-v1.mjs'
+      - 'scripts/test-code-workshop-model-route-v1.mjs'
+      - 'scripts/test-code-mesh-workspace-v1.mjs'
+      - '.github/workflows/verify-code-mesh.yml'
+  pull_request:
+    paths:
+      - 'public/creator-suite/code.html'
+      - 'public/creator-suite/code-workbench-v1.mjs'
+      - 'public/creator-suite/shared/code-mesh-workspace-v1.mjs'
+      - 'public/creator-suite/shared/code-workspace-core-v1.mjs'
+      - 'public/creator-suite/shared/code-inference-route-v1.mjs'
+      - 'public/creator-suite/shared/native-server-control-v1.mjs'
+      - 'scripts/test-creator-native-server-control-v1.mjs'
+      - 'public/creator-suite/document-agent-v1.js'
+      - 'public/creator-suite/shared/creator-inference-loaders-v1.mjs'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'scripts/verify-creator-agentic-inference-config-v1.mjs'
+      - 'scripts/test-code-mesh-workspace-v1.mjs'
+      - 'scripts/test-code-workshop-model-route-v1.mjs'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check public/creator-suite/shared/code-workspace-core-v1.mjs
+      - run: node --check public/creator-suite/shared/code-mesh-workspace-v1.mjs
+      - run: node --check public/creator-suite/code-workbench-v1.mjs
+      - run: node --check public/creator-suite/shared/code-inference-route-v1.mjs
+      - run: node --check public/creator-suite/shared/creator-inference-loaders-v1.mjs
+      - run: node --check public/creator-suite/document-agent-v1.js
+      - run: node --check public/creator-suite/shared/native-server-control-v1.mjs
+      - run: node scripts/verify-creator-agentic-inference-config-v1.mjs
+      - run: node --test scripts/test-code-mesh-workspace-v1.mjs scripts/test-code-workshop-model-route-v1.mjs scripts/test-creator-native-server-control-v1.mjs

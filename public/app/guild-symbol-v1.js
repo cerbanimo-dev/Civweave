@@ -39,7 +39,7 @@ function installStyle(doc=document){
 #${GUILD_CARD_ID} .cw-nearby-guilds-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px 12px;border-bottom:1px solid #8af5d22f;background:#081b27e8;color:#effffb}
 #${GUILD_CARD_ID} .cw-nearby-guilds-card-head strong{display:block;font:850 16px/1.15 system-ui,sans-serif}
 #${GUILD_CARD_ID} .cw-nearby-guilds-card-head small{display:block;margin-top:4px;color:#b7d8d1;font:500 12px/1.3 system-ui,sans-serif}
-#${GUILD_OVERLAY_ID} .cw-nearby-guilds-close{flex:0 0 42px;width:42px;height:42px;border:1px solid #ffffff38;border-radius:999px;background:#07131fee;color:#fff;font:800 24px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 22px #0008}
+#${GUILD_OVERLAY_ID} .cw-guild-manage{min-height:44px;padding:7px 12px;border-radius:11px;border:1px solid #87e4c3;background:#16473e;color:#f1fff9;font-weight:800;cursor:pointer}\n#${GUILD_OVERLAY_ID} .cw-nearby-guilds-close{flex:0 0 42px;width:42px;height:42px;border:1px solid #ffffff38;border-radius:999px;background:#07131fee;color:#fff;font:800 24px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 22px #0008}
 #${GUILD_MOUNT_ID}{position:relative;z-index:2;padding:12px}
 #${GUILD_MOUNT_ID} .cw-host-node-lobby{margin:0!important;max-width:none!important;position:relative!important;inset:auto!important;transform:none!important;z-index:auto!important}
 #${GUILD_MOUNT_ID} #cw-host-node-search{position:relative!important;inset:auto!important;transform:none!important;z-index:auto!important}
@@ -155,7 +155,7 @@ function ensureNearbyGuildsOverlay(){
   overlay.setAttribute('role','dialog');
   overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label','Find nearby Civweave Guilds');
-  overlay.innerHTML=`<div class="cw-nearby-guilds-shell"><section id="${GUILD_CARD_ID}" aria-label="Nearby Guild search"><header class="cw-nearby-guilds-card-head"><div><strong>Find nearby Guilds</strong><small>Guild search is separate from the Guild Map.</small></div><button class="cw-nearby-guilds-close" type="button" aria-label="Close nearby Guilds">×</button></header><div id="${GUILD_MOUNT_ID}"></div></section></div>`;
+  overlay.innerHTML=`<div class="cw-nearby-guilds-shell"><section id="${GUILD_CARD_ID}" aria-label="Nearby Guild search"><header class="cw-nearby-guilds-card-head"><div><strong>Find nearby Guilds</strong><small>Guild search is separate from the Guild Map.</small></div><button class="cw-guild-manage" type="button" data-cw-guild-manage hidden>Manage Guild</button><button class="cw-nearby-guilds-close" type="button" aria-label="Close nearby Guilds">×</button></header><div id="${GUILD_MOUNT_ID}"></div></section></div>`;
   overlay.querySelector('.cw-nearby-guilds-close')?.addEventListener('click',()=>closeNearbyGuilds('button'));
   overlay.addEventListener('click',event=>{if(event.target===overlay)closeNearbyGuilds('backdrop')});
   overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closeNearbyGuilds('escape')}});

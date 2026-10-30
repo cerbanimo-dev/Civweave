@@ -7,6 +7,7 @@ on:
       - staging
       - 'agent/canonical-playlist-hub-music-*'
       - 'feature/open-radio-streaming-library-*'
+      - 'feature/radio-200-library-mobile-launcher-*'
     paths:
       - config/open-music-harvest-v1.json
       - scripts/harvest-open-music-v1.py

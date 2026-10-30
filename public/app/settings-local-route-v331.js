@@ -277,7 +277,37 @@ function renderDock(){
 
 function localPanel(form){return form?.querySelector(`#${PANEL_ID}`)||null}
 
+
+const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.0.1-device-aware-ios-fallback';
+function showUnifiedFleet(layer=document.getElementById('cw-settings-v320')){
+  const target=layer?.querySelector?.('[data-settings-tab-panel="local-models"]');
+  if(!target||!layer?.isConnected||layer.hidden)return false;
+  const api=globalThis.CivweaveAIFleetV1;
+  if(api?.render){api.render(layer);return true;}
+  // One shared model-selection owner. Legacy pack/model card renderers are
+  // superseded; neither their download buttons nor their listeners are mounted.
+  target.innerHTML='<section class="cw-clean-panel"><h3>AI Fleet</h3><p>Loading compatible AI choices for this device…</p></section>';
+  if(!globalThis.__civweaveFleetLoadV1){
+    globalThis.__civweaveFleetLoadV1=new Promise((resolve,reject)=>{
+      const script=document.createElement('script');
+      script.src=UNIFIED_FLEET_SRC;script.async=false;
+      script.onload=()=>globalThis.CivweaveAIFleetV1?.render?resolve(true):reject(Error('AI Fleet catalog did not initialize.'));
+      script.onerror=()=>reject(Error('AI Fleet catalog failed to load.'));
+      document.head.append(script);
+    }).catch(error=>{
+      const live=document.querySelector('[data-settings-tab-panel="local-models"]');
+      if(live)live.innerHTML='<section class="cw-clean-panel"><h3>AI Fleet unavailable</h3><p>'+String(error?.message||error).replace(/[&<>]/g,'')+'</p></section>';
+      return false;
+    });
+  }
+  void globalThis.__civweaveFleetLoadV1.then(ok=>{if(ok&&layer?.isConnected&&!layer.hidden&&
+    layer.querySelector('[data-settings-tab="local-models"]')?.getAttribute('aria-selected')==='true')
+    globalThis.CivweaveAIFleetV1.render(layer)});
+  return true;
+}
+
 function renderLocalModels(layerOrForm=document.getElementById(SETTINGS_LAYER_ID)){
+  if(showUnifiedFleet())return document.querySelector('[data-settings-tab-panel="local-models"]');
   if(!writable())return null;
   installLocalStyle();
   hideDock();

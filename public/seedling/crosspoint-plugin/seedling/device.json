@@ -1,0 +1,23 @@
+{
+  "title": "Living Library: Seedling",
+  "description": "Wi-Fi public shelf updates — no Passport credentials",
+  "browse": {
+    "format": "json",
+    "url": "https://civweave-staging.pages.dev/seedling/library-v1.json",
+    "items": "items",
+    "fields": {
+      "title": "title",
+      "author": "author",
+      "id": "id",
+      "url": "url",
+      "description": "description",
+      "repository": "source"
+    },
+    "page_size": 16
+  },
+  "download": {
+    "url": "{url}",
+    "dest_dir": "/Books/Seedling/Updates",
+    "filename": "{title}.epub"
+  }
+}

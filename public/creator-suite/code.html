@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111316"><title>Civweave · Code Workshop</title>
+<link rel="manifest" href="/creator-suite/manifest.webmanifest"><link rel="stylesheet" href="/creator-suite/creator-suite-v1.css">
+<style>
+.cw-code{max-width:1120px;margin:auto;padding:1rem;display:grid;gap:1rem}
+.cw-code section{border:1px solid #4c575a;border-radius:12px;padding:1rem;background:#191e20}
+.cw-code h2{font-size:1.2rem;margin:0 0 .6rem}
+.cw-code label{display:flex;flex-direction:column;gap:.3rem;margin:.5rem 0}
+.cw-code input,.cw-code select,.cw-code textarea{width:100%;padding:.65rem;background:#101415;color:#fafafa;border:1px solid #7b8a8c;border-radius:8px}
+.cw-code textarea{min-height:8rem;font:14px/1.5 ui-monospace,monospace}
+.cw-code .actions{display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;margin:.5rem 0}
+.cw-code .actions>*{flex:0 1 auto}
+.cw-code .actions label{min-width:145px;flex:1}
+.cw-code pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow:auto;background:#101415;border-radius:8px;padding:.75rem}
+.cw-code button{padding:.65rem .9rem;border:1px solid #92adad;border-radius:8px;background:#2b4848;color:white}
+.cw-code button:disabled{opacity:.45}
+.cw-code p{color:#c5cece}
+.cw-code .warning{border-left:4px solid #f0c66c;padding-left:.75rem}
+</style></head><body>
+<header class="cs-header"><div><p class="cs-kicker">Civweave Creator Suite</p><h1>Code Workshop</h1><p class="cs-subtitle">Agentic edit chunks · encrypted local Git checkpoints · reviewed public mesh capsules</p></div><a class="cs-button cs-secondary" href="/creator-suite/">Back to Creator Suite</a></header>
+<main class="cw-code">
+<section><h2>1. Local workspaces</h2><p>Each workspace is encrypted using a non-exportable key stored on this device and associated with your local Passport. Nothing is sent to the mesh unless you publish selected files.</p>
+<div class="actions"><label>Project name<input id="cw-new-title" value="Untitled code project" maxlength="120"></label><button id="cw-create">Create encrypted workspace</button><button id="cw-refresh">Refresh</button></div>
+<label>Active project<select id="cw-workspaces" aria-label="Active code workspace"></select></label>
+<pre id="cw-status" aria-live="polite">Open or create a project.</pre></section>
+<section><h2>2. Edit and validate code snippets</h2>
+<div class="actions"><label>File path<input id="cw-path" placeholder="src/index.js"></label><label>Operation<select id="cw-operation"><option value="create">Create file</option><option value="replace">Replace file</option><option value="append">Append phrase</option><option value="replace_range">Replace line range</option><option value="delete">Delete file</option></select></label>
+<label>Start line<input id="cw-start" type="number" min="1" value="1"></label><label>End line<input id="cw-end" type="number" min="1" value="1"></label></div>
+<label>Snippet text<textarea id="cw-content" spellcheck="false" placeholder="Paste or generate code here"></textarea></label>
+<div class="actions"><button id="cw-inspect">Read file</button><button id="cw-edit">Save edit + Git checkpoint</button><button id="cw-validate">Validate locally</button></div>
+<pre id="cw-checks" aria-live="polite">Static checks detect invalid JSON, secret patterns, merge markers and unsafe publication paths. Other language syntax and tests require an approved validator; this tool never runs downloaded code.</pre>
+</section>
+<section><h2>3. Agentic code builder</h2><p id="cw-model-status" aria-live="polite">Checking selected Civweave inference provider…</p><p>The model uses the Creator Suite provider and submits individual tool calls. Small models are limited to 3 edits/call; larger models to 64. Each successful call returns the new revision before the next call.</p>
+<label>Goal<textarea id="cw-goal" rows="3" placeholder="Build a small self-contained interactive quiz..."></textarea></label>
+<div class="actions"><label>Batch tier<select id="cw-tier"><option value="auto">Auto-detect</option><option value="small">Small (3)</option><option value="large">Large (64)</option></select></label><label>Max model calls<input type="number" min="1" max="40" value="12" id="cw-steps"></label><button id="cw-run">Generate / continue</button><button id="cw-stop">Stop</button></div>
+<pre id="cw-agent-result" aria-live="polite">No agent run started.</pre><div class="actions"><button type="button" id="cw-server-check">Check Termux inference slots</button><button type="button" id="cw-server-restart">Restart stuck Termux server (paired Companion only)</button></div><pre id="cw-server-status" aria-live="polite">Termux slot status not checked. Stop cancels the browser request; check whether a server slot remains busy before retrying.</pre></section>
+<section><h2>4. Snippet review and public posting</h2>
+<p class="warning">Publishing is permanent in practice: other devices can retain copies. Only selected files are posted, never private Git history or unselected files. Review content, third-party rights, dependencies and secrets before publishing.</p>
+<div class="actions"><label>Title<input id="cw-public-title" maxlength="120"></label><label>License<select id="cw-license"><option value="">Choose a license…</option><option>MIT</option><option>Apache-2.0</option><option>BSD-3-Clause</option><option>GPL-3.0-or-later</option><option>MPL-2.0</option><option>CC0-1.0</option></select></label></div>
+<label>Selected file paths (one per line)<textarea id="cw-publish-paths" rows="3" placeholder="src/index.js"></textarea></label>
+<label>Public description<input id="cw-public-description" maxlength="2000"></label>
+<div class="actions"><button id="cw-preview">Prepare public review</button><button id="cw-publish" disabled>Publish reviewed files to mesh</button></div>
+<pre id="cw-preview-result" aria-live="polite">Private by default.</pre></section>
+<section><h2>5. Discover and optionally adopt</h2><div class="actions"><label>Search public code<input id="cw-search" placeholder="quiz, UI component…"></label><button id="cw-discover">Discover peer capsules</button></div>
+<label>Discovered capsule<select id="cw-capsules"></select></label><div class="actions"><button id="cw-inspect-public">Inspect source</button><button id="cw-adopt">Adopt into encrypted workspace</button></div>
+<pre id="cw-discovery-result" aria-live="polite">Peer code is untrusted. Inspection and adoption never execute it.</pre></section>
+</main>
+<script src="/app/shared/civweave-passport-identity-v1.js"></script>
+<script src="/app/local-object-mesh-v146.js"></script>
+<script src="/app/shared/civweave-model-runtime.js"></script>
+<script src="/creator-suite/shared/ai-tools-v1.js"></script>
+<script type="module" src="/creator-suite/code-workbench-v1.mjs"></script>
+</body></html>
