@@ -8,9 +8,11 @@ test('selected downloaded local provider uses canonical local runtime, not bare 
  assert.equal(route.model,'qwen35-4b-litert-web');
 });
 test('provider explicit routing does not silently replace remote or manual routes',()=>{
- for (const provider of ['gemini','ollama','openai-compatible','hosted','manual','deterministic','server-auto']){
+ for (const provider of ['gemini','ollama','openai-compatible','hosted','manual','deterministic']){
   assert.equal(resolveCodeInferenceRoute({provider,model:'saved'},{active:true,id:'qwen'}).kind,'shared');
  }
+ assert.equal(resolveCodeInferenceRoute({provider:'server-auto'},{active:true,id:'qwen'}).kind,'server-auto');
+ assert.equal(resolveCodeInferenceRoute({provider:'cloudflare-workers-ai'},{active:false}).kind,'server-auto');
  assert.equal(resolveCodeInferenceRoute({provider:'browser'},{active:false}).kind,'shared');
  assert.equal(resolveCodeInferenceRoute({provider:'browser'},{active:true,id:'qwen'}).kind,'downloaded-local');
 });
@@ -40,4 +42,13 @@ test('remote provider retains shared runtime and explicit failure',async()=>{
   sharedRuntime:{generate:async request=>{calls++;assert.equal(request.config.provider,'ollama');return {status:'provider-error',error:{code:'DISCONNECTED',message:'Unreachable'}};}}
  });
  assert.equal(calls,1);assert.equal(result.status,'provider-error');
+});
+
+test('server auto delegates to canonical Guild/Cloudflare router without falling through bare model runtime',async()=>{
+ let local=0,shared=0,server=0;
+ const result=await runCodeInference({provider:'server-auto',model:'civweave-server-auto-v1'},[{role:'user',content:'Write code'}],{
+   selection:null,loadLocal:async()=>{local++;},loadServer:async()=>({handle:async req=>{server++;assert.equal(req.config.provider,'server-auto');assert.equal(req.responseFormat,'json');return{handled:true,result:{status:'success',outputText:'{\"type\":\"done\"}',actual:{provider:'cloudflare-workers-ai',model:'test'}}};}}),
+   sharedRuntime:{generate:async()=>{shared++;}}
+ });
+ assert.equal(server,1);assert.equal(local,0);assert.equal(shared,0);assert.equal(result.actual.provider,'cloudflare-workers-ai');
 });
