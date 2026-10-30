@@ -418,7 +418,8 @@
         "scripts/test-worldweaver-core-v1.mjs",
         "scripts/test-worldweaver-avatar-rigs-v1.mjs",
         "scripts/test-worldweaver-screens-v1.mjs",
-        "scripts/test-worldweaver-labs-hardening-v1.mjs"
+        "scripts/test-worldweaver-labs-hardening-v1.mjs",
+        "scripts/test-worldweaver-map-2d-v1.mjs"
       ],
       "activeRoute": "none; manifest-only foundation pending authenticated capability integration",
       "delegatedAuthorities": {
@@ -444,7 +445,11 @@
         "Websites render in sandboxed cross-origin iframes without same-origin permission and may refuse embedding; no arbitrary model HTML or JavaScript.",
         "Local labs verify media type magic bytes, image dimensions and video duration before retaining user-selected files.",
         "Local avatar drafts persist only validated plans, support persona-scoped import/export and remain revertible.",
-        "Screen lab releases unused object URLs, closes video playback, and allows the human owner to cancel queued model casts."
+        "Screen lab releases unused object URLs, closes video playback, and allows the human owner to cancel queued model casts.",
+        "Lightweight 2D map and 3D world must use the same authorized Worldweaver snapshot, not competing or replicated authority.",
+        "Casting native Civweave to a Weave screen renders a single-depth 2D world projection with map screen icons, never a self-recursive iframe.",
+        "Map coordinates without verified provider geometry are explicitly schematic; model observations omit internal pilot prompts and protected task details.",
+        "Real-time synchronized views require a trusted host state subscription; lab-only local updates cannot claim cross-device multiplayer synchronization."
       ],
       "helpers": [
         "public/app/shared/worldweaver-avatar-v1.mjs",
@@ -452,17 +457,20 @@
         "public/app/shared/worldweaver-avatar-pilot-v1.mjs",
         "public/app/shared/worldweaver-screen-v1.mjs",
         "public/app/shared/worldweaver-lab-draft-v1.mjs",
-        "public/app/shared/worldweaver-lab-media-v1.mjs"
+        "public/app/shared/worldweaver-lab-media-v1.mjs",
+        "public/app/shared/worldweaver-map-2d-v1.mjs"
       ],
       "executableVerifiers": [
         "scripts/test-worldweaver-core-v1.mjs",
         "scripts/test-worldweaver-avatar-rigs-v1.mjs",
         "scripts/test-worldweaver-screens-v1.mjs",
-        "scripts/test-worldweaver-labs-hardening-v1.mjs"
+        "scripts/test-worldweaver-labs-hardening-v1.mjs",
+        "scripts/test-worldweaver-map-2d-v1.mjs"
       ],
       "presentationDemos": [
         "public/app/tools/worldweaver-avatar-lab.html",
-        "public/app/tools/worldweaver-screen-lab.html"
+        "public/app/tools/worldweaver-screen-lab.html",
+        "public/app/tools/worldweaver-map-lab.html"
       ]
     }
   }
