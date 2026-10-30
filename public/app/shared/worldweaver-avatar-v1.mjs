@@ -91,8 +91,8 @@ const dataImage=/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/]+={0,2})$/;
  * accepted by every model). Calling model adapters must check vision capability.
  */
 export function avatarVisualRequest(seed,{rasterImageDataUri,task='Propose a usable avatar body, animation rig, and bounded behavior plan.'}={}){
-  FIELD(seed,['personaId','name','role','description','referenceAsset','style','goal'],'avatar seed');
-  const text=`Use the avatar image reference when supplied. Character: ${string(seed.name,100,'Name')} (${string(seed.role,180,'Role')}). Visual/textual description: ${string(seed.description,1200,'Description')}. ${string(task,600,'Task')} Respond with an avatar plan in the Worldweaver schema. Do not emit runnable JavaScript, LSL, network calls or external actions.`;
+  FIELD(seed,['personaId','name','role','color','description','referenceAsset','style','goal'],'avatar seed');
+  const text=`Use the avatar image reference when supplied. Character: ${string(seed.name,100,'Name')} (${string(seed.role,180,'Role')}). Visual/textual description: ${string(seed.description,1200,'Description')}. ${string(task,600,'Task')} Respond with a strict JSON object using exactly {format,parts,poses,behaviors}. Set format to procedural-2d. Each part has {id,parent,shape,x,y,width,height,color}; the first part has parent null and others may refer only to earlier parts. Shapes: ellipse, circle, rectangle, capsule; sizes 1..160, offsets -160..160, six-digit hex colors. Each pose has {name,rotations}, including idle, with rotation angles -180..180 for named parts. Each behavior has {on,action,value}; on is one of visitor-arrived, visitor-left, spoken-to, task-started, task-completed, idle, and action is pose (name existing pose) or say (short dialogue). Keep the plan to a few parts and poses. Do not emit runnable JavaScript, LSL, network calls or external actions.`;
   const content=[{type:'text',text}];
   if(rasterImageDataUri!==undefined){
     if(typeof rasterImageDataUri!=='string'||rasterImageDataUri.length>2000000||!dataImage.test(rasterImageDataUri))
