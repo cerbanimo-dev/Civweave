@@ -3,6 +3,8 @@
  * Projects the SAME authorized Worldweaver snapshot that a 3D adapter consumes.
  * Never creates its own authority, polls a cloud server or runs agent inference.
  */
+import {projectOpenSimPolygons3Dto2D} from './worldweaver-opensim-geometry-v1.mjs';
+
 export const WORLD_MAP_2D_SCHEMA='civweave.worldweaver-map-2d.v1';
 const copy=x=>JSON.parse(JSON.stringify(x));
 const safeLabel=(x,n=100)=>typeof x==='string'?x.slice(0,n):'';
@@ -31,6 +33,7 @@ export function projectWorld2D(snapshot,{worldRef,layout={},includeDrafts=false}
  const visible=includeDrafts?scope:scope.filter(x=>x.id===focus.id||x.status==='live');
  const selected=bounded(visible,32);
  const geometry=layout.positions&&typeof layout.positions==='object'?layout.positions:{};
+ const worldGeometry=layout.sceneGeometry?projectOpenSimPolygons3Dto2D(layout.sceneGeometry):null;
  const nodes=[],edges=[];
  const emit=(node,fallback)=>{
   const pos=Object.hasOwn(geometry,node.id)?point(geometry[node.id],node.id):fallback;
@@ -65,10 +68,20 @@ export function projectWorld2D(snapshot,{worldRef,layout={},includeDrafts=false}
  }
  // Schematic connections are not navigable roads. Only provider-supplied paths
  // may later authorize actual travel/movement.
+ const visibleIds=new Set(selected.map(x=>x.id));
+ const canSee=p=>p.instanceId!=null&&visibleIds.has(p.instanceId);
+ const polygons=worldGeometry?worldGeometry.footprints.filter(canSee).map(p=>({
+  id:p.id,objectId:p.objectId,instanceId:p.instanceId,label:safeLabel(p.name),
+  type:'prim-footprint',quality:p.quality,points:p.points})): [];
+ const facePolygons=worldGeometry?worldGeometry.projectedFaces.filter(canSee):[];
+ const buildingPolygons=worldGeometry?worldGeometry.buildings.filter(canSee).map(p=>({
+  id:p.id,objectId:p.id,label:safeLabel(p.name),instanceId:p.instanceId,
+  quality:p.quality,points:p.points})): [];
  return copy({schema:WORLD_MAP_2D_SCHEMA,revision:snapshot.revision??0,worldRef:focus.id,
   focusedTitle:safeLabel(focus.title),coordinateSpace:'normalized-percent',
-  geometryStatus:Object.keys(geometry).length?'mixed-provider-and-schematic':'schematic-only',
-  nodes,edges,
+  geometryStatus:worldGeometry?'opensim-world-geometry':Object.keys(geometry).length?'mixed-provider-and-schematic':'schematic-only',
+  geometryRevision:worldGeometry?.revision??null,geometryRegionId:worldGeometry?.regionId??null,
+  nodes,edges,polygons,buildingPolygons,facePolygons,
   pendingIntents:snapshot.intents.filter(x=>x.instanceId===focus.id&&['queued','review-required'].includes(x.status)).length});
 }
 /** Model-friendly accessibility channel. Tool actions are *suggestions* and must
@@ -79,6 +92,8 @@ export function observeWorld2D(snapshot,options={}){
  const map=projectWorld2D(snapshot,options);
  return {schema:WORLD_MAP_2D_SCHEMA,worldRef:map.worldRef,revision:map.revision,
   geometryStatus:map.geometryStatus,
+  geometryRevision:map.geometryRevision,
+  polygons:(map.polygons||[]).map(p=>({id:p.id,objectId:p.objectId,quality:p.quality,points:p.points})),
   entities:map.nodes.map(n=>({id:n.id,type:n.type,label:n.label,x:n.x,y:n.y,
    ...(n.type==='screen'?{media:n.contentKind||'blank',recursivePortal:n.recursivePortal}:{}),
    ...(n.type==='npc'?{persona:n.personaRef}:{}),
@@ -104,6 +119,27 @@ export function renderWorldMap2D(projected,{documentRef=globalThis.document,onAc
  const area=documentRef.createElement('div');
  area.setAttribute('role','group');area.setAttribute('aria-label','World locations and active objects');
  area.style.cssText='position:relative;flex:1;min-height:150px;overflow:hidden;border:1px solid #40516c;border-radius:8px;background:#172c31';
+ if(projected.polygons?.length){
+  const svg=documentRef.createElementNS?.('http://www.w3.org/2000/svg','svg');
+  if(svg){
+   svg.setAttribute('viewBox','0 0 100 100');
+   svg.setAttribute('preserveAspectRatio','none');
+   svg.setAttribute('aria-label','Projected OpenSimulator polygons');
+   svg.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
+   const draw=(poly,fill,stroke,opacity)=>{
+    if(poly.points.length<3)return;
+    const el=documentRef.createElementNS('http://www.w3.org/2000/svg','polygon');
+    el.setAttribute('points',poly.points.map(p=>p.x+','+p.y).join(' '));
+    el.setAttribute('fill',fill);el.setAttribute('stroke',stroke);
+    el.setAttribute('stroke-width','.2');el.setAttribute('opacity',opacity);
+    el.setAttribute('data-geometry-id',poly.id);svg.append(el);
+   };
+   for(const face of projected.facePolygons||[])draw(face,face.color||'#508c7c','none','.12');
+   for(const prim of projected.polygons)draw(prim,'#8acaba','#ddffe7','.38');
+   for(const object of projected.buildingPolygons||[])draw(object,'none','#e4ffb0','.8');
+   area.append(svg);
+  }
+ }
  for(const n of projected.nodes){
   if(!kinds.has(n.type))continue;
   const button=documentRef.createElement('button');
@@ -133,12 +169,12 @@ export function renderWorldMap2D(projected,{documentRef=globalThis.document,onAc
  * call update manually after local actions; remote realtime requires a trusted
  * persistent sync stream, not a BroadcastChannel identity shortcut.
  */
-export function createWorldMap2DView({getSnapshot,worldRef,container,subscribe,onActivate,includeDrafts=false}={}){
+export function createWorldMap2DView({getSnapshot,getLayout,worldRef,container,subscribe,onActivate,includeDrafts=false}={}){
  if(typeof getSnapshot!=='function'||!container?.replaceChildren)throw new TypeError('Map requires a snapshot provider and DOM container.');
  let closed=false;
  const update=()=>{
   if(closed)return null;
-  const projection=projectWorld2D(getSnapshot(),{worldRef,includeDrafts});
+  const projection=projectWorld2D(getSnapshot(),{worldRef,includeDrafts,layout:typeof getLayout==='function'?getLayout():{}});
   const node=renderWorldMap2D(projection,{documentRef:container.ownerDocument||globalThis.document,onActivate});
   container.replaceChildren(node);
   return projection;
