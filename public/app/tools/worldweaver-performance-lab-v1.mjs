@@ -1,6 +1,6 @@
 import {createPerformanceStudio,performanceObservation} from '../shared/worldweaver-performance-studio-v1.mjs';
 import {compileStageScene,compilePerformanceScore} from '../shared/worldweaver-stagecraft-v1.mjs';
-import {proposeScreenplayViaModel} from '../shared/worldweaver-adaptation-model-v1.mjs';
+import {proposeScreenplayViaModel,proposeStageViaModel} from '../shared/worldweaver-adaptation-model-v1.mjs';
 import {exportFilmCraftInterchange,exportQwenLoRADataset} from '../shared/worldweaver-filmcraft-interchange-v1.mjs';
 import {createWorldweaver} from '../shared/worldweaver-core-v1.mjs';
 import {createOpenSim3DPreview} from '../shared/worldweaver-3d-preview-v1.mjs';
@@ -49,6 +49,23 @@ function updateScenes(){
  $('production-state').textContent='Project: '+(state.project?.title||'not created')+' · revision '+state.revision;
  $('sources-status').textContent=state.sources.length+' manuscript excerpts in this session.';
  const item=getScene();
+ const choices=[...new Set(item?.dialogue.map(x=>x.character)||[])];
+ const selectedRole=$('cast-character').value;
+ $('cast-character').replaceChildren();
+ for(const name of choices){
+  const opt=document.createElement('option');opt.value=name;opt.textContent=name;
+  $('cast-character').append(opt);
+ }
+ if(choices.includes(selectedRole))$('cast-character').value=selectedRole;
+ const stagePlans=state.stagePlans?.filter(x=>x.sceneId===item?.id)||[];
+ const pendingStage=stagePlans.find(x=>x.status==='review-required');
+ $('stage-review').textContent=pendingStage?
+  'Stage revision awaiting director review: '+pendingStage.note:
+  'Stage revisions: '+stagePlans.length+'. Only approved geometry changes are shown.';
+ $('approve-set').disabled=!pendingStage;
+ $('reject-set').disabled=!pendingStage;
+ $('propose-set').disabled=!item||item.status!=='approved'||Boolean(pendingStage);
+ $('assign-avatar').disabled=!item||item.status!=='approved';
  $('approve-scene').disabled=!item||item.status!=='review-required';
  $('reject-scene').disabled=!item||item.status!=='review-required';
  $('rehearse').disabled=!item||item.status!=='approved'||Boolean(studio.snapshot().rehearsals.some(r=>r.status==='running'));
@@ -153,6 +170,53 @@ $('generate-scene').addEventListener('click',async()=>{
   updateScenes();showStage();status('Model screenplay proposal saved as review-required. You retain approval control.');
  }catch(error){status('Model proposal unavailable: '+text(error.message,300));}
  finally{modelBusy=false;$('generate-scene').disabled=false;}
+});
+$('propose-set').addEventListener('click',async()=>{
+ if(modelBusy)return;
+ modelBusy=true;$('propose-set').disabled=true;
+ try{
+  const state=studio.snapshot(),scene=getScene(),runtime=globalThis.CivweaveModelRuntime;
+  const cfg=runtime?.readSharedConfig?.('agentic')||runtime?.readSharedConfig?.('interactive');
+  if(!scene||scene.status!=='approved')throw new Error('Approve a screenplay scene first');
+  if(!cfg?.provider||['manual','deterministic'].includes(cfg.provider))
+   throw new Error('Select a real local or consented cloud model in Civweave settings');
+  const {runCodeInference}=await import('/creator-suite/shared/code-inference-route-v1.mjs');
+  const loaders=await import('/creator-suite/shared/creator-inference-loaders-v1.mjs');
+  const actor={kind:'model',principalId:'lab:model:'+text(cfg.model,80).replace(/[^a-z0-9:._/-]/gi,'_'),modelId:cfg.model||'selected-model',verified:true};
+  status('Model is proposing an alternative stage set; no geometry changes before review.');
+  await proposeStageViaModel({studio,actor,sceneId:scene.id,
+   invokeModel:async({messages,purpose,signal})=>{
+    const response=await runCodeInference(cfg,messages,{selection:loaders.currentCreatorLocalSelection(),
+     loadLocal:loaders.loadCreatorLocalRuntime,loadServer:loaders.loadCreatorServerRuntime,
+     sharedRuntime:runtime,signal,purpose,mediaType:'text',taskTier:'complex',
+     requiresTools:true,maxTokens:Math.min(Math.max(1400,Number(cfg.maxTokens)||2700),8192)});
+    if(response?.status!=='success'||response?.fallback?.provider==='deterministic')throw new Error('Stage model did not complete');
+    return response;
+   }});
+  updateScenes();status('Model set redesign is pending human approval. Existing stage remains unchanged.');
+ }catch(error){status('Stage redesign not applied: '+text(error.message,300));}
+ finally{modelBusy=false;updateScenes();}
+});
+for(const [button,decision] of [['approve-set','approved'],['reject-set','rejected']]){
+ $(button).addEventListener('click',()=>{
+  try{
+   const proposal=studio.snapshot().stagePlans.find(p=>p.sceneId===selected&&p.status==='review-required');
+   if(!proposal)throw new Error('No pending set revision');
+   studio.dispatch({type:'review-stage',stagePlanId:proposal.id,decision,
+    notes:$('review-notes').value},human);
+   updateScenes();showStage();status('Set revision '+decision+'. 3D and 2D views updated only if approved.');
+  }catch(error){status('Set review failed: '+text(error.message));}
+ });
+}
+$('assign-avatar').addEventListener('click',()=>{
+ try{
+  const scene=getScene();
+  if(!scene||scene.status!=='approved')throw new Error('Approve a scene before casting');
+  studio.dispatch({type:'assign-cast',character:$('cast-character').value,
+   avatarRef:$('cast-avatar').value,pilotPrincipalId:$('cast-pilot').value},human);
+  updateScenes();showStage();
+  status('Cast/rig reference approved. Stage marker is assigned; actual native avatar rig deployment remains a separate trusted tool.');
+ }catch(error){status('Role binding rejected: '+text(error.message));}
 });
 $('scene-select').addEventListener('change',()=>{selected=$('scene-select').value;showStage();updateScenes()});
 for(const [button,decision] of [['approve-scene','approved'],['reject-scene','rejected']]){
