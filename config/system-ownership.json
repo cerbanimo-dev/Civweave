@@ -420,7 +420,8 @@
         "scripts/test-worldweaver-screens-v1.mjs",
         "scripts/test-worldweaver-labs-hardening-v1.mjs",
         "scripts/test-worldweaver-map-2d-v1.mjs",
-        "scripts/test-worldweaver-opensim-geometry-v1.mjs"
+        "scripts/test-worldweaver-opensim-geometry-v1.mjs",
+        "scripts/test-worldweaver-performance-studio-v1.mjs"
       ],
       "activeRoute": "none; manifest-only foundation pending authenticated capability integration",
       "delegatedAuthorities": {
@@ -454,7 +455,11 @@
         "An OpenSimulator region module, not the browser canvas, remains the authoritative source for persistent prim/mesh geometry and avatar positions.",
         "Every 2D polygon in an OpenSimulator-backed map is projected from the same world-space transformed 3D prim vertices/triangles used in the 3D preview.",
         "Region geometry must come from an authenticated, permission-filtered adapter; archived screenshots and demo district positions are never authoritative.",
-        "Browser 3D geometry preview is not a replacement for the OpenSimulator native multiplayer viewer."
+        "Browser 3D geometry preview is not a replacement for the OpenSimulator native multiplayer viewer.",
+        "Book-to-screenplay proposals, cast rig bindings, stage blocking, timed cues and rehearsal decisions remain distinct, attributed reviewable production records.",
+        "Models can propose 1-3 scenes at a time with a selected runtime; a verified human must approve scenes, cast bindings and rehearsal starts.",
+        "Audience transcription and reactions require voluntary opt-in and a separate opt-in for LoRA training; withdrawals clear active text and revoke the corresponding consent.",
+        "FilmCraft interchange and Qwen3.5 LoRA datasets are exports, not rendered footage or model weights; sources need confirmed rights."
       ],
       "helpers": [
         "public/app/shared/worldweaver-avatar-v1.mjs",
@@ -466,7 +471,11 @@
         "public/app/shared/worldweaver-map-2d-v1.mjs",
         "public/app/shared/worldweaver-opensim-geometry-v1.mjs",
         "public/app/shared/worldweaver-3d-preview-v1.mjs",
-        "public/app/shared/worldweaver-visual-scene-v1.mjs"
+        "public/app/shared/worldweaver-visual-scene-v1.mjs",
+        "public/app/shared/worldweaver-performance-studio-v1.mjs",
+        "public/app/shared/worldweaver-stagecraft-v1.mjs",
+        "public/app/shared/worldweaver-adaptation-model-v1.mjs",
+        "public/app/shared/worldweaver-filmcraft-interchange-v1.mjs"
       ],
       "executableVerifiers": [
         "scripts/test-worldweaver-core-v1.mjs",
@@ -474,13 +483,15 @@
         "scripts/test-worldweaver-screens-v1.mjs",
         "scripts/test-worldweaver-labs-hardening-v1.mjs",
         "scripts/test-worldweaver-map-2d-v1.mjs",
-        "scripts/test-worldweaver-opensim-geometry-v1.mjs"
+        "scripts/test-worldweaver-opensim-geometry-v1.mjs",
+        "scripts/test-worldweaver-performance-studio-v1.mjs"
       ],
       "presentationDemos": [
         "public/app/tools/worldweaver-avatar-lab.html",
         "public/app/tools/worldweaver-screen-lab.html",
         "public/app/tools/worldweaver-map-lab.html",
-        "public/app/tools/worldweaver-geometry-lab.html"
+        "public/app/tools/worldweaver-geometry-lab.html",
+        "public/app/tools/worldweaver-performance-lab.html"
       ]
     }
   }

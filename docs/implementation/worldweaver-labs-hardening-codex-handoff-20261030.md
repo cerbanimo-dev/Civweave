@@ -101,3 +101,28 @@ The October 30 bridge adds the canonical validated region-geometry translator at
 Codex: implement an authenticated read-only OpenSimulator IRegionModule, extracting SceneObjectGroups, individual SceneObjectParts, scale, rotation, linked transforms, mesh triangles, terrain height fields and changed-object events into the documented v1 schema. Keep region thread hooks nonblocking, auth and parcel rights external, and rate/object budgets enforced. Verify with real OAR and native viewer; don't claim the demonstration is a live OpenSimulator client. If geometry is absent, flag conservative envelopes as approximate.
 
 Only after viewer/2D position parity is verified should reviewed agent edits and rollback be connected to this bridge. 3D and 2D users must see identical object IDs, coordinates, action outcomes and revision numbers. No public RemoteAdmin or arbitrary model-supplied executable scripts.
+
+## 7. Screenplay-to-movie process for Codex 6.1 Sol
+
+A private Performance Studio pipeline has been staged with a human-reviewed source-to-screenplay state engine, bounded existing-model inference adapter, OpenSimulator-compatible 3D stage mockup, 2D polygon parity, reversible rehearsal cue records, optional audience transcription, consented response capture, and FilmCraft/Qwen3.5 4B data exports. No user manuscript was imported into this demo; no real OpenSimulator movie, character rig, voice synthesis asset, FilmCraft native project, or trained LoRA exists yet. There are several potentially relevant user manuscripts; do not silently select one.
+
+Sol's acceptance sequence:
+1. Confirm source book edition, adaptation/training rights and intent, chapter by chapter. Create a continuity bible and original design brief.
+2. Use the selected Civweave local/consented cloud AI with one to three scene proposals per call, preserving excerpt provenance, tool receipts and revisions. Human approve screenplay and cast decisions.
+3. Convert approved scenes to stage sets, storyboard/camera blocking, gesture and lighting cues. Replace provisional actor stand-ins with approved Starling/avatar rigs through the authorized OpenSimulator adapter. Match 3D and 2D object IDs and polygons.
+4. Practice scripted performances on a real hosted OpenSimulator region; acknowledge actual movements/animations/screens from the renderer. Invite voluntary audience contributions only at announced moments, offer text fallback, flag provider-hosted speech recognition, preserve consent withdrawal and avoid facial/emotional profiling.
+5. Queue individually renderable original shots, vocal performances and assets. Generate timecoded captions/transcript and a verified FilmCraft-compatible editable project import. Current output is a portable planning manifest, not a native FilmCraft project or video render.
+6. Only after collecting enough validated human edits, tool action success/failure records and reviewed clips, prepare training/validation splits for Qwen3.5 4B LoRA. Compare a baseline to a trained adapter on held-out scenes, record evaluation metrics and retain rollback. No fabricated hidden chain-of-thought or unconsented audience material.
+
+Original art direction: expressive characters and emotions, approachable yet unsettling fantasy puppetry/theatrical textures, and striking surreal landscapes that communicate the story's emotional architecture. Film references are mood references only: do not reproduce characters, set layouts or distinctive signature imagery of existing movies or artists.
+
+Remaining gaps: real OpenSimulator native region/physics/avatar adapter, full actor animation rigs, storyboards and shot camera automation, streaming audio/TTS with recording permissions, durable production storage and withdrawal propagation, FilmCraft native timeline import, render queue and full movie assembly. Keep everything staging-only until real end-to-end acceptance.
+
+### Stage reconfiguration and inference privacy hardening
+After approving a screenplay, an AI can propose a revised set plan via `propose-stage`, but the existing approved geometry remains in use until `review-stage` receives a verified human approval. `compileStageScene` uses only the most recently approved set revision. Every proposal is revision-scoped so stale model outputs cannot silently alter sets, and only one pending stage proposal exists for each scene.
+
+The browser studio asks for explicit per-request confirmation before sending manuscript or script excerpts to a remotely hosted selected inference endpoint. This uses the existing `CivweaveModelRuntime.endpointLeavesDevice` check; it does not create a second inference provider. Browser speech transcription also requires a separate provider-consent checkbox, because its implementation may send microphone audio to the browser's chosen speech service.
+
+Audience response capture now requires a **trusted controller to open a specific scripted audience moment** via `open-audience-moment`; the same controller can close it with `close-audience-moment`. Knowing a moment's ID or having a rehearsal in progress is not enough to submit early or late. The lab represents local synthetic actor identities only; production will require authenticated host audience and stage controller roles.
+
+A character-to-avatar binding records a reviewed role, `avatarRef`, model principal, and optional voice reference. The 3D browser set currently renders a character **stand-in**, not a native OpenSimulator rig; Sol must implement actual rig/animation approvals and model pilot execution before reporting a modeled character performance. Training exports are not proof that a Qwen LoRA has been fitted, and FilmCraft planning JSON is not yet a native FilmCraft project.
