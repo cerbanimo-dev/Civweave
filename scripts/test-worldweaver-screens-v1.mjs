@@ -117,7 +117,8 @@ test('screen DOM projection restricts websites to sandboxed iframes with fallbac
  const screenSource=readFileSync(new URL('../public/app/shared/worldweaver-screen-v1.mjs',import.meta.url),'utf8');
  assert.match(screenSource,/referrerpolicy|referrerPolicy/);
  assert.match(screenSource,/sandbox/);
- assert.doesNotMatch(screenSource,/allow-same-origin/);
+ assert.match(screenSource,/setAttribute\\('sandbox','allow-scripts allow-forms'\\)/);
+ assert.doesNotMatch(screenSource,/setAttribute\\('sandbox'[^)]*allow-same-origin/);
 });
 test('the standalone screen lab has accessible buttons and only shared Worldweaver owners',()=>{
  const html=readFileSync(new URL('../public/app/tools/worldweaver-screen-lab.html',import.meta.url),'utf8');
