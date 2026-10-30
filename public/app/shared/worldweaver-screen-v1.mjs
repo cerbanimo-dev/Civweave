@@ -90,10 +90,10 @@ export function resolveScreenSource(content,resolveAsset){
  * no camera/microphone/geolocation/presentation, and a useful external link.
  * Third-party CSP/X-Frame-Options can still prevent embedded display.
  */
-export function renderWorldScreen(content,{documentRef=globalThis.document,resolveAsset,worldState,onActivate}={}){
+export function renderWorldScreen(content,{documentRef=globalThis.document,resolveAsset,worldState,worldLayout,onActivate}={}){
   const source=resolveScreenSource(content,resolveAsset);
   const map=source.kind==='civweave'?
-    (worldState?projectWorld2D(worldState,{worldRef:source.worldRef}):null):null;
+    (worldState?projectWorld2D(worldState,{worldRef:source.worldRef,layout:worldLayout||{}}):null):null;
   const meta={...source,...(source.kind==='website'?{sandbox:'allow-scripts allow-forms'}:{}),
     ...(map?{mapSchema:map.schema,mapRevision:map.revision}:{} )};
   if(!documentRef?.createElement)return meta;
