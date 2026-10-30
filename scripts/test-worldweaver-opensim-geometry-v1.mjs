@@ -34,7 +34,7 @@ test('group quaternion rotates every prim face and changes the footprint accordi
  [[126,124],[130,124],[130,132],[126,132]]);
  assert.equal(geo.faces.length,12);
  const projected=projectOpenSimPolygons3Dto2D(geo);
- assert.equal(projected.footprints[0].points[0].x,round(126/256*100)); // approximate decimal resolution
+ assert.equal(projected.footprints[0].points[0].x,Number((126/256*100).toFixed(5)));
 });
 test('mesh triangles project with their original face IDs and no invented hidden polygons',()=>{
  const scene=simple();
