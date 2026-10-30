@@ -8,7 +8,7 @@ let active=null,pose='idle',currentPersona='kami',invalidDraft=false,editTimer=n
 let history=[];
 let store=createAvatarDraftStore(null);
 try{store=createAvatarDraftStore(window.localStorage)}catch{/* storage blocked: ephemeral editing still works */}
-const draftNotice=message=>$(draft-status').textContent=message;
+const draftNotice=message=>$('draft-status').textContent=message;
 function starterPlan(seed){
   const color=seed.color||'#8265ac';
   return {format:'procedural-2d',parts:[
