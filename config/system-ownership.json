@@ -407,6 +407,46 @@
       "androidExecutionBridge": "native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeBridge.kt",
       "androidScheduledWorker": "native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeWorker.kt",
       "hostProtocolClient": "public/app/shared/starling-execution-transport-v1.mjs"
+    },
+    "worldweaver": {
+      "capability": "Shared portable world microspace manifests, world lifecycle intents and model-driven NPC tool proposals",
+      "owner": "public/app/shared/worldweaver-core-v1.mjs",
+      "canonicalApi": "ES module: createWorldweaver, WORLDWEAVER_SCHEMA, SPACE_GUIDES, NPC_TOOLS",
+      "contract": "docs/contracts/worldweaver-microspaces-v1.md",
+      "executableVerifier": "scripts/test-worldweaver-core-v1.mjs",
+      "allowedCallers": [
+        "scripts/test-worldweaver-core-v1.mjs",
+        "scripts/test-worldweaver-avatar-rigs-v1.mjs"
+      ],
+      "activeRoute": "none; manifest-only foundation pending authenticated capability integration",
+      "delegatedAuthorities": {
+        "learning": "Living School existing learning and credential owner",
+        "tasks": "Cerbanimo existing Quest/proof owner",
+        "marketplace": "public/app/services/fellowfare/marketplace-v2.js",
+        "governance": "public/app/anarchadia-governance-kernel-v145.js",
+        "mapping": "Existing Guild Map owner",
+        "inference": "Existing shared local AI/Starling runtime"
+      },
+      "rules": [
+        "One cross-system owner; guides are typed templates and never separate chat or world engines.",
+        "Instance creation records a draft, not a hosted server or published Guild Map marker.",
+        "Model NPCs may create pilot personas with custom role prompts under platform/tool permissions and externally verified model identities.",
+        "NPC proposals are bounded to one to three tools; only trusted world runtimes attest tool outcomes.",
+        "No direct code execution, payments, ballot casting, Quest completion, publishing or role-grant authority.",
+        "External permission adapter, signed persistent store, world renderers and bridge integrations are mandatory before public release.",
+        "Starling personas and existing SVG portraits are read from canonical Starling sources; no duplicate persona registry.",
+        "Models receive real bounded rasterized images only when explicitly supported; fallback cannot claim visual perception.",
+        "NPC avatar body plans and behavior are declarative, reviewed and acknowledged by a trusted renderer before activation."
+      ],
+      "helpers": [
+        "public/app/shared/worldweaver-avatar-v1.mjs",
+        "public/app/shared/worldweaver-starling-bridge-v1.mjs",
+        "public/app/shared/worldweaver-avatar-pilot-v1.mjs"
+      ],
+      "executableVerifiers": [
+        "scripts/test-worldweaver-core-v1.mjs",
+        "scripts/test-worldweaver-avatar-rigs-v1.mjs"
+      ]
     }
   }
 }

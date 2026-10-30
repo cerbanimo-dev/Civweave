@@ -321,3 +321,9 @@ Do not turn this file into a historical changelog. Keep it describing the curren
 ## Survival Mode capability
 
 The canonical cross-realm survival-assessment owner is public/app/survival/survival-mode.mjs, presented at public/app/survival/index.html with temporary camera preview and source browsing in public/app/survival/app.mjs. The existing persistent-shell-actions-v1.js supplies its launcher, and offline-package-v208.json and optional service-worker assets seed the offline page. This is not a sixth realm or chat system. See docs/contracts/survival-mode-v1.md.
+
+## New shared capability: Worldweaver (manifest-only)
+
+`public/app/shared/worldweaver-core-v1.mjs` owns Worldweaver's typed learning, task-training, shop, and convention manifests and model-piloted NPC proposals. This does not change the active installed-family route graph. See `docs/contracts/worldweaver-microspaces-v1.md`, the `worldweaver` entry in `config/system-ownership.json`, and `scripts/test-worldweaver-core-v1.mjs`. World state is not yet connected to OpenSimulator, the mesh, or UI.\n
+Worldweaver's optional read-only Starling adapter is `public/app/shared/worldweaver-starling-bridge-v1.mjs`; its pure avatar grammar/renderer is `public/app/shared/worldweaver-avatar-v1.mjs` and model invocation handoff is `public/app/shared/worldweaver-avatar-pilot-v1.mjs`. These do not change Starling's canonical owner or installed route graph; validation is in `scripts/test-worldweaver-avatar-rigs-v1.mjs`.\n
+A standalone visual proof of the avatar grammar lives at `public/app/tools/worldweaver-avatar-lab.html`; it is a direct developer route, not a new installed-family route, chat system, or source of avatar authority.\n
