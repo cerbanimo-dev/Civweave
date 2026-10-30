@@ -1,7 +1,7 @@
 'use strict';
 
 const VERSION = '1.0.163';
-const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';
+const BUILD = 'lightweight-shell-v208-ai-fleet-device-catalog-v1';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
 const OFFLINE_CACHE = `civweave-offline-${VERSION}-${BUILD}`;
@@ -38,6 +38,7 @@ const OPTIONAL_SHELL_ASSETS = [
   '/app/survival/vision-policy.mjs',
   '/app/low-end-device-lab-v1.html',
   '/app/low-end-device-lab-v1.js',
+  '/app/shared/civweave-ai-fleet-v1.js',
   '/app/local-ai/model-registry-v266.js',
   '/app/local-ai/download-manager-v267.js',
   '/app/local-ai/runtime-v266.js',
