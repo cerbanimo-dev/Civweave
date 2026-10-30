@@ -73,7 +73,7 @@ const latest=()=>JSON.parse(records.get('civweave.weave-draft-pipeline.v1.latest
 assert.equal(latest().draftParts.length,3);
 assert(!latest().draft.includes('[END SECTION]'));
 assert(latest().draft.includes('winter needs'));
-assert(latest().draft.includes('Electrical'));
+assert(latest().draft.includes('electrician'));
 assert(latest().draft.includes('Meter log')===false);
 assert.equal(latest().state,'complete');
 
