@@ -1,16 +1,18 @@
-name: Verify Settings v325 Direct Local Models
+name: Verify Settings AI Fleet
 
 on:
   push:
     branches: [staging, main]
     paths:
       - public/app/settings-local-models-direct-v325.js
+      - public/app/shared/civweave-ai-fleet-v1.js
       - public/app/settings-local-route-v325.js
       - public/app/settings-local-route-v327.js
       - public/service-worker-settings-v325-override.js
       - public/service-worker-v203.js
       - public/service-worker.js
       - scripts/verify-settings-v325-direct-local-models.mjs
+      - scripts/test-ai-fleet-v1.mjs
       - scripts/verify-settings-v325-stale-worker-bridge.mjs
       - scripts/verify-settings-registered-worker-boundary-v338.mjs
       - .github/workflows/verify-settings-v325-direct-local-models.yml
@@ -18,12 +20,14 @@ on:
     branches: [staging, main]
     paths:
       - public/app/settings-local-models-direct-v325.js
+      - public/app/shared/civweave-ai-fleet-v1.js
       - public/app/settings-local-route-v325.js
       - public/app/settings-local-route-v327.js
       - public/service-worker-settings-v325-override.js
       - public/service-worker-v203.js
       - public/service-worker.js
       - scripts/verify-settings-v325-direct-local-models.mjs
+      - scripts/test-ai-fleet-v1.mjs
       - scripts/verify-settings-v325-stale-worker-bridge.mjs
       - scripts/verify-settings-registered-worker-boundary-v338.mjs
       - .github/workflows/verify-settings-v325-direct-local-models.yml
@@ -47,6 +51,7 @@ jobs:
           node-version: 22
       - name: Syntax check
         run: |
+          node --check public/app/shared/civweave-ai-fleet-v1.js
           node --check public/app/settings-local-models-direct-v325.js
           node --check public/app/settings-local-route-v325.js
           node --check public/app/settings-local-route-v327.js
@@ -56,8 +61,9 @@ jobs:
           node --check scripts/verify-settings-v325-direct-local-models.mjs
           node --check scripts/verify-settings-v325-stale-worker-bridge.mjs
           node --check scripts/verify-settings-registered-worker-boundary-v338.mjs
-      - name: Verify installed Settings v325 local-model path
+      - name: Verify device-filtered AI Fleet and legacy browser boundaries
         run: |
+          node --test scripts/test-ai-fleet-v1.mjs
           node scripts/verify-settings-v325-direct-local-models.mjs
           node scripts/verify-settings-v325-stale-worker-bridge.mjs
           node scripts/verify-settings-registered-worker-boundary-v338.mjs
