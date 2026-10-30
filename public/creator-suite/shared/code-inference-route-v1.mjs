@@ -31,6 +31,24 @@ export async function runCodeInference(config,messages,{selection=null,loadLocal
     return normalizeCodeInferenceResult(result,route.model);
   }
   if(route.kind==='server-auto'){
+    // Civweave server-auto tries the user's selected device model first, then
+    // delegates to paired Guild/Cloudflare only after local execution fails.
+    // Server-auto itself is the explicit network-routing selection; a regular
+    // downloaded-local selection NEVER falls through to a remote provider.
+    if(selection?.active===true&&selection.id&&typeof loadLocal==='function'){
+      try{
+        const local=await loadLocal();
+        if(typeof local?.generate==='function'){
+          const result=await local.generate({
+            systemPrompt:messages.filter(x=>x.role==='system').map(x=>x.content).join('\n\n'),
+            messages:messages.filter(x=>x.role!=='system'),
+            onProgress,onToken,maxNewTokens:Math.min(4096,Math.max(256,Number(maxTokens)||2048))
+          });
+          const normalized=normalizeCodeInferenceResult(result,selection.id);
+          if(normalized.status==='success'&&String(normalized.outputText||'').trim())return normalized;
+        }
+      }catch(error){onProgress?.({phase:'local-unavailable',detail:clean(error?.message,200)});}
+    }
     if(typeof loadServer!=='function')throw new Error('Canonical Guild/Cloudflare AI router is unavailable.');
     const server=await loadServer();
     if(!server?.handle)throw new Error('Civweave server AI routing owner did not initialize.');
