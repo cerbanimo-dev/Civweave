@@ -2,7 +2,7 @@ import {CivweaveCodeWorkspaceV1 as work,publishReviewed,adoptReviewed} from './s
 import {resolveCodeInferenceRoute,runCodeInference} from './shared/code-inference-route-v1.mjs';
 
 const el=id=>document.getElementById('cw-'+id),out=(id,value)=>{el(id).textContent=typeof value==='string'?value:JSON.stringify(value,null,2);};
-let workspaceId='',previewId='',inspectedId='',running=false,stopRequested=false,localRuntimeFlight=null;
+let workspaceId='',previewId='',inspectedId='',running=false,stopRequested=false,localRuntimeFlight=null,serverRuntimeFlight=null;
 const clean=(v,n=5000)=>String(v??'').slice(0,n);
 function showError(error){out('checks',error.message||String(error));}
 function option(value,label){const e=document.createElement('option');e.value=value;e.textContent=label;return e;}
@@ -70,6 +70,26 @@ function loadLocalRuntime(){
   }).catch(error=>{localRuntimeFlight=null;throw error});
   return localRuntimeFlight;
 }
+function loadServerRuntime(){
+  if(globalThis.CivweaveServerAIRouterV301?.handle)return Promise.resolve(globalThis.CivweaveServerAIRouterV301);
+  if(serverRuntimeFlight)return serverRuntimeFlight;
+  const load=src=>new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src=src;script.onload=resolve;script.onerror=()=>reject(new Error('Unable to load canonical Guild/Cloudflare AI routing: '+src));
+    document.head.append(script);
+  });
+  serverRuntimeFlight=(async()=>{
+    // These modules are the existing Civweave host-session and mesh clients,
+    // not a second hosted inference or permission implementation.
+    if(!globalThis.CivweaveHostNodeSessionV1)await load('/app/host-node-session-v1.js');
+    if(!globalThis.CivweaveNodeAIMeshV1)await load('/app/node-ai-mesh-v1.js');
+    await load('/app/server-ai-router-v301.js');
+    const router=globalThis.CivweaveServerAIRouterV301;
+    if(!router?.handle)throw new Error('Guild/Cloudflare inference router is unavailable in this app context.');
+    return router;
+  })().catch(e=>{serverRuntimeFlight=null;throw e});
+  return serverRuntimeFlight;
+}
 function modelStatus(){
   const display=el('model-status');if(!display)return;
   try{const {value,route}=config();display.textContent=route.kind==='downloaded-local'
@@ -124,7 +144,7 @@ async function runAgent(){
         {role:'system',content:'You are a code editing tool planner. Reply with valid JSON only, not Markdown.'},
         {role:'user',content:prompt(goal,state,limit,profile)}
       ],{
-        selection,loadLocal:loadLocalRuntime,sharedRuntime:runtime,context:{workspaceId:id,taskTier:profile},
+        selection,loadLocal:loadLocalRuntime,loadServer:loadServerRuntime,sharedRuntime:runtime,context:{workspaceId:id,taskTier:profile},
         maxTokens:profile==='small'?2048:4096,
         onProgress:progress=>{phase=clean(progress?.phase||progress?.stage||'working',100);out('agent-result','Code AI · '+route.model+' · call '+calls+'/'+total+' · '+phase+(visible?'\n'+visible.slice(-900):''));},
         onToken:token=>{const chunk=typeof token==='string'?token:clean(token?.text||token?.content||'',12000);visible+=chunk;if(visible.length>120000)visible=visible.slice(-120000);out('agent-result','Code AI · '+route.model+' · call '+calls+'/'+total+' · '+phase+'\n'+visible.slice(-1200));}
