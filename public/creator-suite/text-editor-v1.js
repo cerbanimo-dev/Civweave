@@ -47,6 +47,7 @@ function newSession(){
 }
 async function openSession(next){
   if(!next||next.mediaType!=='text')return false;
+  if(session&&!session.finalizedAt&&editor()?.innerText!==lastText)await flush();
   clearTimeout(saveTimer);const expected=++epoch;
   await pending;changed(expected);
   const [recovered,savedDoc]=await Promise.all([journal()?.restore(next.id),store()?.getArtifact('document:'+next.id)]);
@@ -163,7 +164,7 @@ function init(){
       await store().putSession(next);changed(expected);session=next;notify();
     }).catch(report);
   });
-  document.querySelector('[data-new-session="text"]')?.addEventListener('click',newSession);
+  document.querySelector('[data-new-session="text"]')?.addEventListener('click',()=>flush().then(newSession).catch(report));
   document.getElementById('cs-save-document-name')?.addEventListener('click',()=>renameDocument(document.getElementById('cs-document-name')?.value).catch(report));
   document.getElementById('cs-document-name')?.addEventListener('keydown',event=>{
     if(event.key==='Enter'){event.preventDefault();renameDocument(event.currentTarget.value).catch(report);}
