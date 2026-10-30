@@ -72,3 +72,38 @@ test('explicit server-auto falls through to Guild after unavailable selected dev
  });
  assert.equal(local,1);assert.equal(server,1);assert.equal(result.actual.provider,'server-local');
 });
+
+test('native Termux code chunks use streaming text, 512 token ceiling and an extended bounded deadline',async()=>{
+ let observed=0;
+ const response=await runCodeInference(
+   {provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'http://127.0.0.1:8080/v1',stream:false,timeoutMs:90000},
+   [{role:'user',content:'Create a small JS function as JSON'}],{
+     maxTokens:2048,
+     sharedRuntime:{generate:async req=>{
+       assert.equal(req.responseFormat,'text','Do not force llama.cpp blocking JSON grammar');
+       assert.equal(req.config.stream,true,'Termux request must stream deltas');
+       assert.ok(req.config.maxTokens<=512&&req.config.maxTokens>=128);
+       assert.ok(req.config.timeoutMs>=480000);
+       req.onEvent({phase:'partial',text:'{"type":"done"}'});
+       observed++;return{status:'success',outputText:'{"type":"done"}'};
+     }},
+     onToken:chunk=>assert.equal(chunk,'{"type":"done"}')
+   }
+ );
+ assert.equal(observed,1);assert.equal(response.status,'success');
+});
+test('normal Ollama/Gemini code requests still use schema-backed JSON and no forced native SSE',async()=>{
+ for(const config of [{provider:'ollama',model:'qwen3.5:4b'},{provider:'gemini',model:'gemini-3.1-flash-lite'}]){
+  await runCodeInference(config,[{role:'user',content:'Write code'}],{sharedRuntime:{generate:async req=>{
+   assert.equal(req.responseFormat,'json');assert.equal(req.config.stream,false);
+   assert.equal(req.maxRepairAttempts,1);return{status:'success',outputJson:{type:'done'}};
+  }}});
+ }
+});
+test('native behavior is restricted to exact loopback Termux model and port',async()=>{
+ const config={provider:'openai-compatible',model:'qwen35-4b-native',endpoint:'https://remote.example/v1'};
+ await runCodeInference(config,[{role:'user',content:'Write code'}],{sharedRuntime:{generate:async req=>{
+  assert.equal(req.responseFormat,'json');assert.equal(req.config.stream,false);
+  return{status:'success',outputJson:{type:'done'}};
+ }}});
+});
