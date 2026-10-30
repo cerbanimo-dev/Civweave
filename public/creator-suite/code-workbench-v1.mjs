@@ -2,7 +2,7 @@ import {CivweaveCodeWorkspaceV1 as work,publishReviewed,adoptReviewed} from './s
 import {resolveCodeInferenceRoute,runCodeInference} from './shared/code-inference-route-v1.mjs';
 
 const el=id=>document.getElementById('cw-'+id),out=(id,value)=>{el(id).textContent=typeof value==='string'?value:JSON.stringify(value,null,2);};
-let workspaceId='',previewId='',inspectedId='',running=false,stopRequested=false,localRuntimeFlight=null,serverRuntimeFlight=null;
+let workspaceId='',previewId='',inspectedId='',running=false,stopRequested=false,localRuntimeFlight=null,serverRuntimeFlight=null,generationController=null;
 const clean=(v,n=5000)=>String(v??'').slice(0,n);
 function showError(error){out('checks',error.message||String(error));}
 function option(value,label){const e=document.createElement('option');e.value=value;e.textContent=label;return e;}
@@ -94,9 +94,10 @@ function modelStatus(){
   const display=el('model-status');if(!display)return;
   try{const {value,route}=config();display.textContent=route.kind==='downloaded-local'
     ?'Selected device model: '+route.model+' · on-device inference'
-    :'Selected provider: '+route.provider+' · '+(value.model||'default');}
+    :'Selected provider: '+route.provider+' · '+(value.model||'default')+(nativeTermux(value)?' · Termux streaming code chunks':'');}
   catch(error){display.textContent='Model unavailable: '+error.message;}
 }
+function nativeTermux(config){return config?.provider==='openai-compatible'&&config.model==='qwen35-4b-native'&&String(config.endpoint||'').replace(/\/$/,'')==='http://127.0.0.1:8080/v1';}
 function smallModel(name){return /(?:^|[^0-9])(?:0\.\d+|1(?:\.5)?|2|3|4|5|6|7)b(?:[^a-z]|$)/i.test(clean(name,240))||/\be[24]b\b/i.test(clean(name,240));}
 function decode(output){
   if(output?.outputJson&&typeof output.outputJson==='object'&&!Array.isArray(output.outputJson))return output.outputJson;
@@ -106,7 +107,20 @@ function decode(output){
   if(start>=0&&end>start)return JSON.parse(raw.slice(start,end+1));
   throw new Error('Model did not return a valid JSON tool instruction; no edit applied.');
 }
-function prompt(goal,state,limit,profile='large'){
+function prompt(goal,state,limit,profile='large',native=false){
+  if(native)return [
+    'You are an AI code editing an encrypted workspace by short, saved tool calls.',
+    'Output only ONE complete JSON object. Do not show reasoning, markdown, or preambles.',
+    'To save code: {"type":"edit","edits":[{"op":"create","path":"src/app.js","content":"const x = 1;"}],"message":"add code"}.',
+    'Or {"type":"read","path":"src/app.js","startLine":1,"endLine":30}.',
+    'Or {"type":"validate"}. Or {"type":"done","note":"what is finished"}.',
+    'For edits use create, replace, append, replace_range, delete. For replace_range include startLine/endLine.',
+    'IMPORTANT: Return one small change under 15 lines and 300 output tokens, even for a large project.',
+    'Every valid edit is saved automatically; continue with the NEXT edit on your next call.',
+    'Use append for an existing file, not create. Do not output the entire project. Do not publish.',
+    'Goal: '+clean(goal,650),
+    'Current saved state: '+clean(JSON.stringify(state),1400)
+  ].join('\\n');
   return [
     'You are a code-authoring agent operating an offline saved workspace through tools.',
     'Return ONLY one JSON object for exactly one operation per response.',
@@ -132,6 +146,7 @@ async function runAgent(){
   const total=Math.max(1,Math.min(40,Number(el('steps').value)||12)),tools=globalThis.CivweaveCreatorToolsV1;
   out('agent-result','Using '+route.provider+' · '+route.model+' · '+total+' model calls maximum.');
   running=true;stopRequested=false;el('run').disabled=true;
+  const controller=new AbortController();generationController=controller;
   let state={status:await work.status(id)},calls=0,completed=false;
   try{
     for(let i=0;i<total&&!stopRequested;i++){
@@ -142,13 +157,14 @@ async function runAgent(){
       let visible='',phase='starting';
       const response=await runCodeInference(value,[
         {role:'system',content:'You are a code editing tool planner. Reply with valid JSON only, not Markdown.'},
-        {role:'user',content:prompt(goal,state,limit,profile)}
+        {role:'user',content:prompt(goal,state,limit,profile,nativeTermux(value))}
       ],{
-        selection,loadLocal:loadLocalRuntime,loadServer:loadServerRuntime,sharedRuntime:runtime,context:{workspaceId:id,taskTier:profile},
+        selection,loadLocal:loadLocalRuntime,loadServer:loadServerRuntime,sharedRuntime:runtime,context:{workspaceId:id,taskTier:profile},signal:controller.signal,
         maxTokens:profile==='small'?2048:4096,
         onProgress:progress=>{phase=clean(progress?.phase||progress?.stage||'working',100);out('agent-result','Code AI · '+route.model+' · call '+calls+'/'+total+' · '+phase+(visible?'\n'+visible.slice(-900):''));},
         onToken:token=>{const chunk=typeof token==='string'?token:clean(token?.text||token?.content||'',12000);visible+=chunk;if(visible.length>120000)visible=visible.slice(-120000);out('agent-result','Code AI · '+route.model+' · call '+calls+'/'+total+' · '+phase+'\n'+visible.slice(-1200));}
       });
+      if(stopRequested||controller.signal.aborted)break;
       if(response?.status!=='success'||response?.fallback?.used)throw new Error('Inference failed ('+clean(response?.error?.code||response?.status||'unknown',100)+'): '+clean(response?.error?.message||response?.status||'unknown',500));
       if(stopRequested)break;
       if(workspaceId!==id)throw new Error('Project changed while AI was thinking.');
@@ -166,7 +182,7 @@ async function runAgent(){
       await choose(id);
     }
     out('agent-result',{completed,stopped:stopRequested,calls,state:await work.status(id),note:'Static validation only; source has not been executed or published.'});
-  }finally{running=false;el('run').disabled=false;}
+  }finally{if(generationController===controller)generationController=null;running=false;el('run').disabled=false;}
 }
 function parsePaths(){return el('publish-paths').value.split(/[\n,]/).map(x=>x.trim()).filter(Boolean);}
 async function prepare(){
@@ -205,7 +221,7 @@ function init(){
   el('workspaces').addEventListener('change',()=>{workspaceId=el('workspaces').value;previewId='';el('publish').disabled=true;choose(workspaceId).catch(showError);});
   bind('inspect',async()=>{const r=await work.readFile(selected(),el('path').value.trim());el('content').value=r.content;out('checks',r);});
   bind('edit',editManual);bind('validate',async()=>out('checks',await work.validate(selected())));
-  bind('run',()=>runAgent());bind('stop',()=>{stopRequested=true;out('agent-result','Stop requested; saved chunks are preserved.');});
+  bind('run',()=>runAgent());bind('stop',()=>{stopRequested=true;generationController?.abort(new DOMException('Code generation stopped by user','AbortError'));out('agent-result','Stop requested; already saved code edits are preserved.');});
   bind('preview',prepare);bind('publish',publish);bind('discover',discover);bind('inspect-public',inspect);bind('adopt',adopt);
   choose().catch(showError);
 }
