@@ -1,4 +1,5 @@
-import {capacityForStage,progressForStage,nearPinnedLocation,GUILD_MILESTONES} from './guild-capacity-progression-v1.mjs';
+import {capacityForStage,progressForStage,GUILD_MILESTONES} from './guild-capacity-progression-v1.mjs';
+import {CHECK_POLICY,nodeLiveness,locationVerdict,rewardAllowed,proofFresh} from './guild-community-proof-v1.mjs';
 import {GUILD_STARLING_ROUTE,executeGuildStarlingAction} from './guild-starling-collective-v1.mjs';
 import {guildStarlingAction} from './guild-starling-transport-v1.mjs';
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
@@ -12,7 +13,7 @@ const DAILY_INCLUDED_NEURONS=900;
 const COMMUNITY_SEAT_LIMIT=6;
 const MAX_RESIDENTS=28;
 const PATRON_SEAT_LIMIT=MAX_RESIDENTS-COMMUNITY_SEAT_LIMIT;
-const NODE_HEARTBEAT_GRACE_MS=3*60*1000;
+const NODE_HEARTBEAT_GRACE_MS=CHECK_POLICY.heartbeatGraceMs;
 const PAIRING_TTL_MS=10*60*1000;
 const SESSION_TTL_MS=30*24*60*60*1000;
 const DEFAULT_AI_MODEL='@cf/zai-org/glm-4.7-flash';
@@ -65,8 +66,8 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
   onboardingStatus(){
     const row=this.onboardingState();
     if(!row)return null; // Legacy Guilds retain their previously established capacity.
-    const stage=Math.max(0,Math.min(5,Number(row.stage)||0)),online=Boolean(row.lastSeenAt&&Date.now()-Date.parse(row.lastSeenAt)<NODE_HEARTBEAT_GRACE_MS);
-    return {schema:row.schema,stage,progressPercent:progressForStage(stage),unlockedSlots:capacityForStage(stage),lockedSlots:10-capacityForStage(stage),maxSlots:10,milestones:GUILD_MILESTONES.map((label,i)=>({step:i+1,label,complete:stage>=i+1})),nodeId:row.nodeId||null,nodeOnline:online,lastSeenAt:row.lastSeenAt||null,locationVerification:row.locationVerification||null,completedAt:row.completedAt||null};
+    const stage=Math.max(0,Math.min(5,Number(row.stage)||0)),life=nodeLiveness(row),online=life.state==='online'||life.state==='flagged';
+    return {schema:row.schema,stage,progressPercent:progressForStage(stage),unlockedSlots:capacityForStage(stage),lockedSlots:10-capacityForStage(stage),maxSlots:10,milestones:GUILD_MILESTONES.map((label,i)=>({step:i+1,label,complete:stage>=i+1})),nodeId:life.state==='removed'?null:(row.nodeId||null),retiredNodeId:life.state==='removed'?(row.retiredNodeId||row.nodeId||null):null,nodeOnline:online,nodeState:life.state,downReason:life.reason,downSince:life.downSince,lastSeenAt:row.lastSeenAt||null,locationVerification:row.locationVerification||null,lastCommunityVerifiedAt:row.lastCommunityVerifiedAt||null,communityProofAvailable:proofFresh(row.communityProofAt),completedAt:row.completedAt||null};
   }
   recordStage(stage,extra={}){
     const current=this.onboardingState();if(!current)throw Object.assign(new Error('This Guild predates the physical-node reward program.'),{status:409});
@@ -88,43 +89,115 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     if(!normalized||normalized.length<8)throw Object.assign(new Error('Give the physical server a stable node identifier.'),{status:400});
     this.putMeta('physicalPairingV1',null); // One-time use.
     const nodeToken=randomToken(48),nodeTokenHash=await shaHex('civweave.physical-node-auth.v1\\n'+nodeToken),now=new Date().toISOString();
-    const onboarding=this.recordStage(1,{nodeId:normalized,nodeTokenHash,lastSeenAt:now,heartbeatCount:1,challenge:randomToken(24),locationVerification:null});
+    const onboarding=this.recordStage(1,{nodeId:normalized,nodeTokenHash,lastSeenAt:now,heartbeatCount:1,challenge:randomToken(24),locationVerification:null,nodeState:'online',downSince:null,downReason:null,disputes:[],nearReviews:[],communityProofHash:null,communityProofAt:null});
+    await this.schedulePhysicalAlarm();
     return {ok:true,nodeToken,challenge:this.onboardingState().challenge,onboarding};
   }
   async requireNodeToken(token){
     const row=this.onboardingState();
     if(!row?.nodeTokenHash||!/^[A-Za-z0-9_-]{40,300}$/.test(String(token||''))||row.nodeTokenHash!==await shaHex('civweave.physical-node-auth.v1\\n'+token))
       throw Object.assign(new Error('Physical node authorization rejected.'),{status:403});
+    if(nodeLiveness(row).state==='removed')throw Object.assign(new Error('This physical server was retired after a sustained outage; re-pair it to restore access.'),{status:410});
     return row;
   }
-  async heartbeatPhysicalNode({nodeToken,challengeEcho,meshSyncOk=false,recoveryOk=false}={}){
+  async heartbeatPhysicalNode({nodeToken,challengeEcho,meshSyncOk=false,recoveryOk=false,communityProofHash=null}={}){
     const row=await this.requireNodeToken(nodeToken);
+    if(communityProofHash!=null&&!/^[a-f0-9]{64}$/.test(String(communityProofHash)))throw Object.assign(new Error('Invalid rolling community proof digest.'),{status:400});
     const count=(Number(row.heartbeatCount)||0)+1;
     let stage=row.stage;
     if(stage>=2&&count>=2)stage=Math.max(stage,3);
     // An authenticated second round trip verifies the node can receive and echo server challenges.
     if(stage>=3&&challengeEcho&&challengeEcho===row.challenge&&meshSyncOk===true&&recoveryOk===true)stage=Math.max(stage,4);
-    const challenge=randomToken(24),onboarding=this.recordStage(stage,{lastSeenAt:new Date().toISOString(),heartbeatCount:count,challenge});
+    const challenge=randomToken(24),priorState=nodeLiveness(row);
+    const proof=communityProofHash?{communityProofHash,communityProofAt:Date.now(),previousCommunityProofHash:row.communityProofHash,previousCommunityProofAt:row.communityProofAt}:{communityProofHash:null,communityProofAt:null,previousCommunityProofHash:null,previousCommunityProofAt:null};
+    const recovery=(priorState.state==='down'&&priorState.reason==='heartbeat-stale')?{downSince:null,downReason:null,nodeState:'online'}:{};
+    const onboarding=this.recordStage(stage,{lastSeenAt:new Date().toISOString(),heartbeatCount:count,challenge,...proof,...recovery});
+    await this.schedulePhysicalAlarm();
     return {ok:true,challenge,onboarding};
   }
-  async verifyNodeLocation({pin,position}={}){
-    const row=this.onboardingState();
-    if(!row?.nodeTokenHash||!row.lastSeenAt||Date.now()-Date.parse(row.lastSeenAt)>NODE_HEARTBEAT_GRACE_MS)
-      throw Object.assign(new Error('A paired physical server must be online before verifying its location.'),{status:409});
-    const outcome=nearPinnedLocation(pin,position);
-    if(!outcome.ok)throw Object.assign(new Error('Current owner location could not be verified near the Guild Map pin: '+outcome.reason),{status:422});
-    // This is owner-attested proximity, not tamper-proof GPS or hardware attestation.
-    return {ok:true,onboarding:this.recordStage(2,{locationVerification:{kind:'owner-attested-geolocation',distanceMeters:outcome.distanceMeters,radiusMeters:outcome.radiusMeters,confirmedAt:new Date().toISOString()}})};
+  ensureCommunityProofTables(){
+    this.sql.exec('CREATE TABLE IF NOT EXISTS physical_ping_attempts (day TEXT NOT NULL,user_id TEXT NOT NULL,attempts INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(day,user_id))');
+    this.sql.exec('CREATE TABLE IF NOT EXISTS physical_ping_rewards (day TEXT NOT NULL,user_id TEXT NOT NULL,earned_at TEXT NOT NULL,PRIMARY KEY(day,user_id))');
+    this.sql.exec('CREATE TABLE IF NOT EXISTS physical_ping_wallets (user_id TEXT PRIMARY KEY,tokens INTEGER NOT NULL DEFAULT 0,updated_at TEXT NOT NULL)');
+  }
+  communityWallet(userId){
+    this.ensureCommunityProofTables();
+    return Number([...this.sql.exec('SELECT tokens FROM physical_ping_wallets WHERE user_id=?',userId)][0]?.tokens||0);
+  }
+  pingMemberStatus({tokenHash,requestedNodeId}={}){
+    const session=this.sessionForHash({tokenHash,requestedNodeId});
+    if(!session.ok)throw Object.assign(new Error(session.error),{status:session.status});
+    return {ok:true,account:{verificationTokens:this.communityWallet(session.userId),unit:'nontransferable-guild-verification-token'},onboarding:this.onboardingStatus()};
+  }
+  async recordCommunityProof({tokenHash,requestedNodeId,code,position,pin}={}){
+    const session=this.sessionForHash({tokenHash,requestedNodeId});
+    if(!session.ok)throw Object.assign(new Error(session.error),{status:session.status});
+    const initial=this.onboardingState(),life=nodeLiveness(initial);
+    if(['removed','unpaired'].includes(life.state))throw Object.assign(new Error('No paired physical Guild server is available to verify.'),{status:409});
+    const now=Date.now(),day=dayKey(now);
+    this.ensureCommunityProofTables();
+    const used=Number([...this.sql.exec('SELECT attempts FROM physical_ping_attempts WHERE day=? AND user_id=?',day,session.userId)][0]?.attempts||0);
+    if(used>=CHECK_POLICY.maxProofAttemptsPerUserPerDay)throw Object.assign(new Error('Daily verification attempt limit reached.'),{status:429});
+    this.sql.exec('INSERT INTO physical_ping_attempts (day,user_id,attempts) VALUES (?,?,1) ON CONFLICT(day,user_id) DO UPDATE SET attempts=attempts+1',day,session.userId);
+    const normalized=clean(code,20).toUpperCase();
+    if(!/^[A-Z2-7]{8}$/.test(normalized))throw Object.assign(new Error('Enter the eight-character code displayed by the physical server.'),{status:422});
+    const hashed=await shaHex('civweave.community-node-code.v1\\n'+normalized);
+    const validCurrent=initial.communityProofHash===hashed&&proofFresh(initial.communityProofAt,now);
+    const validPrevious=initial.previousCommunityProofHash===hashed&&proofFresh(initial.previousCommunityProofAt,now);
+    if(!validCurrent&&!validPrevious)throw Object.assign(new Error('This physical-server code is invalid or expired.'),{status:422});
+    const outcome=locationVerdict(pin,position,now);
+    if(outcome.kind==='unverifiable')throw Object.assign(new Error('A fresh, accurate enough location reading is required: '+outcome.reason),{status:422});
+    if(outcome.kind==='away'){
+      const disputes=(Array.isArray(initial.disputes)?initial.disputes:[]).filter(row=>now-Number(row.at)<CHECK_POLICY.locationEvidenceWindowMs&&row.userId!==session.userId);
+      disputes.push({userId:session.userId,at:now});
+      const next=this.recordStage(initial.stage,{disputes});
+      const dispute=nodeLiveness(this.onboardingState());
+      if(dispute.state==='down')this.recordStage(initial.stage,{downReason:dispute.reason,downSince:dispute.downSince,nodeState:'down'});
+      await this.schedulePhysicalAlarm();
+      return {ok:true,verification:'location-disputed',awardedTokens:0,onboarding:this.onboardingStatus(),message:'The authenticated server code was observed outside the claimed Guild location. The node has been flagged for review.'};
+    }
+    let nextStage=Math.max(initial.stage,2),disputes=initial.disputes||[],nearReviews=(Array.isArray(initial.nearReviews)?initial.nearReviews:[]).filter(row=>now-Number(row.at)<CHECK_POLICY.locationEvidenceWindowMs&&row.userId!==session.userId);
+    nearReviews.push({userId:session.userId,at:now});
+    const recovered=initial.downReason==='location-disputed'&&new Set(nearReviews.map(v=>v.userId)).size>=2&&now-Date.parse(initial.lastSeenAt||'')<CHECK_POLICY.heartbeatGraceMs;
+    const changed={nearReviews,lastCommunityVerifiedAt:new Date(now).toISOString(),locationVerification:{kind:'community-local-code-and-location',confirmedAt:new Date(now).toISOString()},...(recovered?{disputes:[],downReason:null,downSince:null,nodeState:'online'}:{})};
+    this.recordStage(nextStage,changed);
+    const memberClaims=Number([...this.sql.exec('SELECT COUNT(*) AS count FROM physical_ping_rewards WHERE day=? AND user_id=?',day,session.userId)][0]?.count||0);
+    const guildClaims=Number([...this.sql.exec('SELECT COUNT(*) AS count FROM physical_ping_rewards WHERE day=?',day)][0]?.count||0);
+    const award=rewardAllowed({memberClaimsToday:memberClaims,guildClaimsToday:guildClaims})?CHECK_POLICY.rewardTokens:0;
+    if(award){
+      this.sql.exec('INSERT OR IGNORE INTO physical_ping_rewards (day,user_id,earned_at) VALUES (?,?,?)',day,session.userId,new Date(now).toISOString());
+      this.sql.exec('INSERT INTO physical_ping_wallets (user_id,tokens,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET tokens=tokens+excluded.tokens,updated_at=excluded.updated_at',session.userId,award,new Date(now).toISOString());
+    }
+    this.sql.exec('DELETE FROM physical_ping_attempts WHERE day<?',dayKey(now-30*86400000));
+    this.sql.exec('DELETE FROM physical_ping_rewards WHERE day<?',dayKey(now-30*86400000));
+    await this.schedulePhysicalAlarm();
+    return {ok:true,verification:'nearby',awardedTokens:award,verificationTokens:this.communityWallet(session.userId),onboarding:this.onboardingStatus()};
+  }
+  async schedulePhysicalAlarm(){
+    const row=this.onboardingState();if(!row?.nodeTokenHash)return;
+    const live=nodeLiveness(row);
+    const alarmAt=live.state==='down'?Date.parse(live.downSince)+CHECK_POLICY.removeAfterMs:Date.parse(row.lastSeenAt)+CHECK_POLICY.heartbeatGraceMs+1000;
+    if(Number.isFinite(alarmAt)&&alarmAt>Date.now())await this.ctx.storage.setAlarm(alarmAt);
+    else if(live.state==='removed')await this.retireExpiredPhysicalNode();
+  }
+  async retireExpiredPhysicalNode(){
+    const row=this.onboardingState(),live=nodeLiveness(row);
+    if(live.state!=='removed'||row?.nodeState==='removed')return this.onboardingStatus();
+    return this.recordStage(row.stage,{nodeState:'removed',downReason:live.reason,downSince:live.downSince,removedAt:new Date().toISOString(),retiredNodeId:row.nodeId,nodeId:null,nodeTokenHash:null,communityProofHash:null,previousCommunityProofHash:null});
+  }
+  async alarm(){
+    await this.retireExpiredPhysicalNode();
+    await this.schedulePhysicalAlarm();
   }
   finalizeOnboarding(){
     const row=this.onboardingState();
-    if(!row||row.stage<4||!row.lastSeenAt||Date.now()-Date.parse(row.lastSeenAt)>NODE_HEARTBEAT_GRACE_MS)
+    if(!row||row.stage<4||nodeLiveness(row).state!=='online')
       throw Object.assign(new Error('Finish secure pairing, sync/recovery checks and a fresh server heartbeat before finalizing.'),{status:409});
     return {ok:true,onboarding:this.recordStage(5,{completedAt:new Date().toISOString()})};
   }
   revokePhysicalNode(){
     const row=this.onboardingState();if(!row)throw Object.assign(new Error('This Guild has no physical-node onboarding.'),{status:409});
-    return {ok:true,onboarding:this.recordStage(row.stage,{nodeTokenHash:null,lastSeenAt:null,challenge:null})};
+    return {ok:true,onboarding:this.recordStage(row.stage,{nodeTokenHash:null,lastSeenAt:null,challenge:null,communityProofHash:null,previousCommunityProofHash:null,nodeState:'unpaired',downReason:null,downSince:null})};
   }
   memberDirectory(){
     this.ensureResidentTables();
@@ -138,7 +211,6 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     return {ok:true,removed:before>0,capacity:this.status()};
   }
   advanceOnboarding(action,input={}){
-    if(action==='verify-location')return this.verifyNodeLocation(input);
     if(action==='finalize')return this.finalizeOnboarding();
     throw Object.assign(new Error('Unknown onboarding milestone action.'),{status:400});
   }
@@ -218,6 +290,23 @@ export default{
     }
     const url=new URL(request.url);
 
+    // A verified resident may submit a short-lived code seen locally at the physical node.
+    if(url.pathname==='/api/guild/physical/check-in'){
+      if(request.method==='OPTIONS')return new Response(null,{status:204,headers:sessionCors});
+      try{
+        const tokenHash=await sessionTokenHash(bearer(request)),stub=capacityStub(env);
+        if(request.method==='GET')return json(await stub.pingMemberStatus({tokenHash,requestedNodeId:requestedNodeId(request)}));
+        if(request.method!=='POST')return json({ok:false,error:'Method not allowed'},405);
+        const raw=await request.text();if(enc.encode(raw).byteLength>8192)throw Object.assign(new Error('Community verification request too large.'),{status:413});
+        let body;try{body=JSON.parse(raw)}catch{throw Object.assign(new Error('Invalid community verification JSON.'),{status:400})}
+        const guild=await env.GUILD_STATE.get(env.GUILD_STATE.idFromName('guild')).status();
+        if(!guild.location)throw Object.assign(new Error('Guild Map location is not configured.'),{status:409});
+        return json(await stub.recordCommunityProof({tokenHash,requestedNodeId:requestedNodeId(request),code:body?.code,position:body?.position,pin:guild.location}));
+      }catch(error){return errorResponse(error)}
+    }
+    if(request.method==='GET'&&url.pathname==='/api/guild/physical/status'){
+      try{const on=await capacityStub(env).onboardingStatus();return json({ok:true,onboarding:on?{stage:on.stage,nodeId:on.nodeId,nodeState:on.nodeState,downSince:on.downSince,downReason:on.downReason,lastCommunityVerifiedAt:on.lastCommunityVerifiedAt,communityProofAvailable:on.communityProofAvailable}:null})}catch(error){return errorResponse(error)}
+    }
     // Owner authority is independent of the synchronization key and resident sessions.
     if(url.pathname==='/api/guild/manage'){
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:sessionCors});
@@ -234,7 +323,6 @@ export default{
         const body=await request.json().catch(()=>({})),action=clean(body.action,60);
         let result;
         if(action==='pair-node')result=await stub.issuePairing();
-        else if(action==='verify-location')result=await stub.advanceOnboarding('verify-location',{pin:guildState.location,position:body.position});
         else if(action==='finalize')result=await stub.advanceOnboarding('finalize');
         else if(action==='remove-member')result=await stub.removeResident(body.userId);
         else if(action==='revoke-node')result=await stub.revokePhysicalNode();
@@ -248,7 +336,7 @@ export default{
       try{
         const body=await request.json().catch(()=>({})),stub=capacityStub(env);
         if(url.pathname.endsWith('/connect'))return json(await stub.connectPhysicalNode({pairingCode:body.pairingCode,nodeId:body.nodeId}),201);
-        return json(await stub.heartbeatPhysicalNode({nodeToken:bearer(request),challengeEcho:body.challengeEcho,meshSyncOk:body.meshSyncOk,recoveryOk:body.recoveryOk}));
+        return json(await stub.heartbeatPhysicalNode({nodeToken:bearer(request),challengeEcho:body.challengeEcho,meshSyncOk:body.meshSyncOk,recoveryOk:body.recoveryOk,communityProofHash:body.communityProofHash}));
       }catch(error){return errorResponse(error)}
     }
     if(request.method==='OPTIONS'&&(isSessionPath(url.pathname)||isGeneratePath(url.pathname)))return new Response(null,{status:204,headers:sessionCors});
