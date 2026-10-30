@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Worldweaver · OpenSimulator 3D/2D Geometry Lab</title>
+<style>
+:root{font:15px system-ui,sans-serif;color-scheme:dark;background:#0e1720;color:#f4f1e8}
+*{box-sizing:border-box}body{margin:0 auto;max-width:1280px;padding:16px}
+a{color:#cfe6ff}p{line-height:1.5;color:#c3d1d7}h1{font-size:clamp(1.5rem,4vw,2rem)}
+article{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+section{min-width:0;background:#182631;border:1px solid #486474;border-radius:12px;padding:12px}
+h2{font-size:1.1rem;margin:.25rem 0 .75rem}
+canvas{width:100%;height:395px;display:block;border-radius:8px;touch-action:none;background:#0c1a24}
+#map{height:395px;width:100%;border-radius:8px;overflow:hidden}
+.controls{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}
+button,select{font:inherit;border:1px solid #a1b3b6;background:#2b5263;color:#fff;border-radius:8px;min-height:44px;padding:7px 12px}
+button:focus-visible,select:focus-visible{outline:3px solid #ecd58d;outline-offset:2px}
+button:disabled{opacity:.4}
+label{display:block;margin:10px 0 6px;font-weight:600}
+select{width:100%}pre{font:12px/1.4 ui-monospace,monospace;white-space:pre-wrap;max-height:280px;overflow:auto;overflow-wrap:anywhere}
+#screen-panel{height:295px;overflow:hidden}#screen-panel .cw-worldweaver-screen{height:100%;display:flex;flex-direction:column}
+#screen-panel .cw-world-map-2d{min-height:240px}
+#screen-panel .cw-worldweaver-screen h3{margin:.2rem;font-size:14px}
+#status{min-height:2.5rem;padding:10px;border-radius:8px;background:#23404d}
+small{color:#b4c8cf}.layout-note{font-size:.85rem}
+@media(max-width:800px){article{grid-template-columns:1fr}canvas,#map{height:310px}}
+</style></head>
+<body>
+<header><small>WORLDWEAVER · OPENSIMULATOR GEOMETRY BRIDGE · EXPERIMENTAL</small>
+<h1>One OpenSimulator scene, two geometric views</h1>
+<p>The left pane projects 3D prim and mesh triangles into perspective. The right pane translates the very same vertices into top-down 2D polygons. Select a building in either view, rotate it, or move it: both views update from one geometry revision.</p>
+<p class="layout-note">This is a local browser geometry preview, not an OpenSimulator multiplayer protocol viewer. The district names come from Civweave's illustrated visual world; the current shapes and positions are provisional until imported from a real OpenSimulator region module or verified OAR geometry.</p>
+<nav><a href="./worldweaver-map-lab.html">2D Map Lab</a> · <a href="./worldweaver-screen-lab.html">Screen Lab</a></nav>
+</header>
+<article>
+<section>
+<h2>3D OpenSimulator-style geometry</h2>
+<canvas id="viewer" width="720" height="395" aria-label="3D polygon viewer, drag to orbit and scroll to zoom"></canvas>
+<p><small>Drag to orbit · wheel to zoom · tap a building to inspect. No native viewer or OpenSimulator server is connected.</small></p>
+<label for="object">Selected 3D building</label>
+<select id="object"></select>
+<div class="controls">
+<button id="turn" type="button">Rotate 15°</button>
+<button id="shift" type="button">Move east 4 m</button>
+<button id="reset" type="button">Reset geometry</button>
+</div>
+<p id="status" role="status">Loading the scene.</p>
+</section>
+<section>
+<h2>2D orthographic polygons · same source</h2>
+<div id="map" aria-label="Top-down building footprints projected from 3D meshes"></div>
+<p><small>Solid polygons show prim footprints; lighter boundaries mark grouped building outlines. The projection is at X/Y with north at the top.</small></p>
+<h2>3D → 2D geometry correspondence</h2>
+<pre id="details" aria-label="Selected object geometry and face counts"></pre>
+</section>
+<section>
+<h2>Weave screen: cast Civweave into the world</h2>
+<div class="controls"><button id="cast" type="button">Show Civweave → 2D world</button><button id="clear" type="button">Clear</button></div>
+<div id="screen-panel" aria-label="World screen preview"></div>
+</section>
+<section>
+<h2>Model-readable geometry</h2>
+<pre id="observation" aria-label="Bounded model geometry observation"></pre>
+<p><small>Presentations, movement and edits in a hosted region must use the authenticated OpenSimulator bridge, not this preview's local actor simulation.</small></p>
+</section>
+</article>
+<script type="module" src="./worldweaver-geometry-lab-v1.mjs"></script>
+</body></html>
