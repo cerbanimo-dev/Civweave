@@ -134,7 +134,7 @@ function execute(action,args={},actor){
     const maxEdits=small?3:64;
     const expectedRevision=action==='document.apply'?args.expectedRevision:doc.revision;
     const update=builder().apply(doc,edits,{
-      expectedRevision,requestId:args.batchId||actor?.requestId||'',maxEdits
+      expectedRevision,requestId:args.batchId||(action==='document.apply'?actor?.requestId:''),maxEdits
     });
     if(update.duplicate)return{sessionId:session.id,duplicate:true,applied:0,status:builder().status(doc)};
     const nextDoc=update.document,body=builder().render(nextDoc),hash=await digest(body);changed(expected);
