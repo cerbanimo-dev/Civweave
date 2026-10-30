@@ -84,8 +84,9 @@ export function createPerformanceStudio({id,clock,authorize,initialState}={}){
  if(typeof id!=='function'||typeof clock!=='function'||typeof authorize!=='function')
   throw new TypeError('Trusted id, clock and authorization adapters required');
  let state=initialState?clone(initialState):{
-  schema:PERFORMANCE_SCHEMA,revision:0,project:null,sources:[],proposals:[],casts:[],rehearsals:[],audience:[],journal:[]};
- if(state.schema!==PERFORMANCE_SCHEMA||!Array.isArray(state.proposals)||!Array.isArray(state.audience))
+  schema:PERFORMANCE_SCHEMA,revision:0,project:null,sources:[],proposals:[],stagePlans:[],casts:[],rehearsals:[],audience:[],journal:[]};
+ if(state.stagePlans===undefined)state.stagePlans=[];
+ if(state.schema!==PERFORMANCE_SCHEMA||!Array.isArray(state.proposals)||!Array.isArray(state.audience)||!Array.isArray(state.stagePlans))
   throw new TypeError('Invalid production state');
  const find=(coll,k,label)=>{const v=coll.find(x=>x.id===k);if(!v)throw new RangeError('Unknown '+label);return v;};
  function dispatch(command,actor){
@@ -140,6 +141,26 @@ export function createPerformanceStudio({id,clock,authorize,initialState}={}){
     scene.status=command.decision;scene.reviewedAt=at;scene.reviewedBy=actor.principalId;
     scene.reviewNotes=bounded(command.notes,700,'review notes');
     receipt.sceneId=scene.id;receipt.decision=scene.status;
+   }else if(type==='propose-stage'){
+    only(command,['type','sceneId','set','note'],'stage proposal');
+    const scene=find(next.proposals,command.sceneId,'scene');
+    if(scene.status!=='approved')throw new Error('Screenplay must be approved before set replanning');
+    if(next.stagePlans.length>=300)throw new TypeError('Stage revision history limit reached');
+    if(next.stagePlans.some(p=>p.sceneId===scene.id&&p.status==='review-required'))
+     throw new Error('Resolve pending stage review before proposing another');
+    const record={id:id(),sceneId:scene.id,set:validateSet(command.set),
+     note:bounded(command.note,700,'set revision rationale'),status:'review-required',
+     proposedBy:actor.principalId,actorKind:actor.kind,createdAt:at,reviewedAt:null};
+    next.stagePlans.push(record);receipt.stagePlan=record.id;
+   }else if(type==='review-stage'){
+    only(command,['type','stagePlanId','decision','notes'],'stage review');
+    if(actor.kind!=='human')throw new Error('Stage set approval is human only');
+    const record=find(next.stagePlans,command.stagePlanId,'stage plan');
+    if(record.status!=='review-required')throw new Error('Stage plan already reviewed');
+    if(!['approved','rejected'].includes(command.decision))throw new TypeError('Invalid stage decision');
+    record.status=command.decision;record.reviewedBy=actor.principalId;
+    record.reviewedAt=at;record.reviewNotes=bounded(command.notes,700,'set review notes');
+    receipt.stagePlan=record.id;receipt.decision=record.status;
    }else if(type==='assign-cast'){
     only(command,['type','character','avatarRef','pilotPrincipalId','voiceRef'],'cast');
     if(actor.kind!=='human')throw new Error('Cast bindings require human review');
@@ -223,6 +244,7 @@ export function performanceObservation(state){
   scenes:state.proposals.map(x=>({id:x.id,title:x.title,status:x.status,sourceIds:x.sourceIds,
    lines:x.dialogue.length,moments:x.moments.length})),
   cast:state.casts.map(x=>({character:x.character,avatarRef:x.avatarRef})),
+  stagePlans:state.stagePlans.map(p=>({id:p.id,sceneId:p.sceneId,status:p.status})),
   activeRehearsal:state.rehearsals.find(x=>x.status==='running')?.id||null,
   audienceCounts:{received:state.audience.filter(x=>x.status==='retained').length,
    trainingEligible:state.audience.filter(x=>x.status==='retained'&&x.consent.training).length}};
