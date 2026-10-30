@@ -46,7 +46,7 @@ function stepPrompt(objective,toolState,maxEdits,native=false){
     'Do not repeat existing content. Do not claim publication or execution.',
     'Document objective: '+text(objective,1000),
     'Current document status and previous tool result: '+text(JSON.stringify(toolState),1600)
-  ].join('\\n');
+  ].join('\n');
   return [
     'You edit a persistent document by calling a tool. DO NOT output the whole document.',
     'Return ONLY a JSON object using ONE shape:',
