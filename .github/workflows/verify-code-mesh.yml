@@ -1,0 +1,33 @@
+name: Verify Creator Code Mesh
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/creator-suite/code.html'
+      - 'public/creator-suite/code-workbench-v1.mjs'
+      - 'public/creator-suite/shared/code-mesh-workspace-v1.mjs'
+      - 'public/creator-suite/shared/code-workspace-core-v1.mjs'
+      - 'scripts/test-code-mesh-workspace-v1.mjs'
+      - '.github/workflows/verify-code-mesh.yml'
+  pull_request:
+    paths:
+      - 'public/creator-suite/code.html'
+      - 'public/creator-suite/code-workbench-v1.mjs'
+      - 'public/creator-suite/shared/code-mesh-workspace-v1.mjs'
+      - 'public/creator-suite/shared/code-workspace-core-v1.mjs'
+      - 'scripts/test-code-mesh-workspace-v1.mjs'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check public/creator-suite/shared/code-workspace-core-v1.mjs
+      - run: node --check public/creator-suite/shared/code-mesh-workspace-v1.mjs
+      - run: node --check public/creator-suite/code-workbench-v1.mjs
+      - run: node --test scripts/test-code-mesh-workspace-v1.mjs
