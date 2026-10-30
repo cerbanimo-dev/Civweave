@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createWorldweaver} from '../public/app/shared/worldweaver-core-v1.mjs';
 import {validateAvatarPlan, avatarEventSteps, avatarVisualRequest, renderAvatarSvg} from '../public/app/shared/worldweaver-avatar-v1.mjs';
+import {proposeAvatarViaModel} from '../public/app/shared/worldweaver-avatar-pilot-v1.mjs';
 import {STARLING_PERSONAS} from '../public/app/shared/starling-collective-v1.mjs';
 import {starlingAvatarSeed,starlingNpcCommand,starlingRoster} from '../public/app/shared/worldweaver-starling-bridge-v1.mjs';
 
@@ -109,4 +110,46 @@ test('preview SVG escapes untrusted fields and cannot embed scripts',()=>{
   assert.throws(()=>validateAvatarPlan(unsafe),/color/i);
   const svg=renderAvatarSvg(plan);
   assert.doesNotMatch(svg,/<script|onload=|foreignObject/);
+});
+
+test('a model can self-design from actual image pixels through the selected vision-capable inference adapter',async()=>{
+  const {world,npc}=setup();
+  const raster='data:image/png;base64,'+Buffer.from('local raster image').toString('base64');
+  let seen;
+  const proposal=await proposeAvatarViaModel({
+    world,npcId:npc.id,actor:model,seed:starlingAvatarSeed('kami'),
+    visionCapable:true,rasterImageDataUri:raster,
+    invokeModel:async request=>{
+      seen=request;
+      return {plan};
+    }
+  });
+  assert.equal(seen.modelId,model.modelId);
+  assert.equal(seen.messages[0].role,'user');
+  assert.equal(seen.messages[0].content[1].image_url.url,raster);
+  assert.equal(seen.responseFormat,'json');
+  assert.equal(proposal.status,'pending-review');
+  assert.equal(world.snapshot().avatarProposals.length,1);
+});
+test('non-vision models get honest text fallback, and failed generation preserves the last rig',async()=>{
+  const {world,npc}=setup();
+  let seen;
+  await proposeAvatarViaModel({world,npcId:npc.id,actor:model,seed:starlingAvatarSeed('kami'),visionCapable:false,
+    invokeModel:async request=>{seen=request;return JSON.stringify(plan)}});
+  assert.equal(seen.messages[0].content.length,1);
+  assert.equal(seen.vision,false);
+  assert.equal(world.snapshot().avatarProposals.length,1);
+  const before=JSON.stringify(world.snapshot());
+  await assert.rejects(proposeAvatarViaModel({world,npcId:npc.id,actor:model,seed:starlingAvatarSeed('kami'),visionCapable:true,
+    invokeModel:async()=>({plan})}),/raster image/i);
+  assert.equal(JSON.stringify(world.snapshot()),before);
+  await assert.rejects(proposeAvatarViaModel({world,npcId:npc.id,actor:model,seed:starlingAvatarSeed('kami'),visionCapable:false,
+    invokeModel:async()=>({plan:{...plan,behaviors:[{on:'idle',action:'http',value:'https://example.org'}]}})}),/action/i);
+  assert.equal(JSON.stringify(world.snapshot()),before);
+});
+test('a pilot cannot submit another persona\'s image as their own identity',async()=>{
+  const {world,npc}=setup();
+  await assert.rejects(proposeAvatarViaModel({world,npcId:npc.id,actor:model,seed:starlingAvatarSeed('aphra'),
+    visionCapable:false,invokeModel:async()=>({plan})}),/persona/i);
+  assert.equal(world.snapshot().avatarProposals.length,0);
 });
