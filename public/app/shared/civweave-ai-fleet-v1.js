@@ -2,7 +2,7 @@
 'use strict';
 // One presentation/catalogue owner. Existing inference, download, Settings,
 // privacy/consent and device-fit contracts remain the execution authorities.
-const VERSION='1.0.0-purpose-first-device-filtered';
+const VERSION='1.0.1-device-aware-ios-fallback';
 if(globalThis.CivweaveAIFleetV1?.version===VERSION)return;
 const MEMORY_KEY='civweave.ai.fleet.memory-gb.v1';
 const CHOICE_KEY='civweave.ai.fleet.choices.v1';
