@@ -78,6 +78,15 @@ test('nested Civweave screen is a one-depth functional 2D projection, not infini
  assert.match(screenSource,/renderWorldMap2D/);
  assert.doesNotMatch(screenSource,/iframe[^\n]*src[^\n]*Civweave/);
 });
+test('stored screen presentation envelopes render without allowing unvalidated cast fields',()=>{
+ const {world,one,screen}=setup();
+ world.dispatch({type:'cast-screen',screenId:screen.id,content:app(one.id)},human);
+ const saved=world.snapshot().screens.find(x=>x.id===screen.id).current;
+ assert.equal(saved.presenter.kind,'human');
+ assert.equal(renderWorldScreen(saved,{documentRef:null,worldState:world.snapshot()}).kind,'civweave');
+ assert.throws(()=>normalizeScreenContent(saved),/Unsupported field/);
+ assert.throws(()=>renderWorldScreen({...saved,html:'<script/>'},{documentRef:null,worldState:world.snapshot()}),/Unsupported field/);
+});
 test('map updates to the same snapshot revision after screen casts and clear',()=>{
  const {world,one,screen}=setup();
  const a=projectWorld2D(world.snapshot(),{worldRef:one.id});
