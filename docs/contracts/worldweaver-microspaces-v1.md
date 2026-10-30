@@ -118,3 +118,13 @@ An `assetId` is an opaque reference. The actual bytes must be looked up by a tru
 The isolated `/app/tools/worldweaver-screen-lab.html` can load a user-selected PNG/JPEG/WebP, an MP4/WebM video (max 50 MB each), generate a local demonstration PNG slide, accept an HTTPS link, and preview the cast. Its local object URLs are session-scoped. Its model actor and trusted renderer are **simulations** demonstrating permissions, not authenticated Guild participants or live LLMs. No actual model inference, provider deployment, shared Guild sync, live 3D screen or creator-asset storage integration is claimed.
 
 The new screen cases run under `npm run test:worldweaver` and `scripts/test-worldweaver-screens-v1.mjs`. A real installation must use signed mesh state, authenticated identity and proper asset checks before enabling remote model-driven casting.
+
+## October 30, 2026 lab-hardening pass
+
+The optional Avatar Lab now auto-saves only validated rigs under per-persona local browser storage keys. The portable import/export bundle is `civweave.worldweaver.avatar-lab.v1` and is restricted to 32 KB. Invalid text does not overwrite the last valid preview; the user can undo up to 12 earlier validated states, restore the canonical starter, or export a valid plan. Storage denial is explicitly reported and never treated as persistence success. The appearance image reference stays on-device unless a separate model call is explicitly initiated.
+
+The optional Screen Lab now checks media MIME against **magic bytes**, enforces decoded image dimensions (8192-pixel maximum edge and 32 megapixels) and a five-minute finite video duration, caps images at 12 MiB and videos at 50 MiB, and avoids SVG file uploads. It uses a reference-aware object URL registry that preserves files still displayed or queued, revokes unused URLs, and stops/unloads media on a screen change. User requests expose approval and cancellation controls. All lab identities remain simulated and cannot be transplanted into a real Worldweaver host as an authentication implementation.
+
+The canonical Worldweaver manifest now supports an authenticated-human `cancel-cast` transition on pending `cast-screen` / `clear-screen` intents. A canceled action cannot later be acknowledged by the trusted runtime. Original authorizer and external instance permission checks remain required.
+
+Regression tests: `scripts/test-worldweaver-labs-hardening-v1.mjs`, included in `npm run test:worldweaver`. These are deterministic module tests and CI syntax checks. They do **not** substitute for on-device mobile/browser testing, external website CSP behavior, actual multiplayer permissions, or a live OpenSimulator renderer.
