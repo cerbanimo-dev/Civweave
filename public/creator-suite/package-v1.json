@@ -46,6 +46,10 @@
     "/creator-suite/text-editor-v1.js",
     "/creator-suite/document-agent-v1.js",
     "/creator-suite/audio-editor-v1.js",
-    "/creator-suite/video-editor-v1.js"
+    "/creator-suite/video-editor-v1.js",
+    "/creator-suite/world-protocols/catalog.mjs",
+    "/creator-suite/world-protocols/core.mjs",
+    "/creator-suite/world-protocols/panel.mjs",
+    "/creator-suite/world-protocols/panel.css"
   ]
 }

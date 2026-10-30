@@ -1,0 +1,110 @@
+export const WORLD_PROTOCOLS=Object.freeze([
+  {
+    "id": "city-between-panels",
+    "title": "The City Between Panels",
+    "genres": "Superhero comics, noir",
+    "premise": "A city whose comic panels and gutters are physical space.",
+    "mechanics": "Skipped panel time still happened; public revelations may reshape scenery, never private consent.",
+    "conflict": "A bureau stages tragic origins to create heroes.",
+    "seed": "Prevent a prescribed tragedy.",
+    "art": "city",
+    "order": 1,
+    "tier": "public-reader-safe"
+  },
+  {
+    "id": "orchard-of-moving-castles",
+    "title": "The Orchard of Moving Castles",
+    "genres": "Fairy tale, portal fantasy",
+    "premise": "Walking homes and forests move along promises and memories.",
+    "mechanics": "Paths follow unresolved promises; protective mazes cannot own residents; objects remember imperfectly.",
+    "conflict": "A guardian's safety labyrinth has become a prison.",
+    "seed": "Help a village escape safely.",
+    "art": "castle",
+    "order": 2,
+    "tier": "public-reader-safe"
+  },
+  {
+    "id": "starship-commons",
+    "title": "The Starship Commons",
+    "genres": "Space opera, exploration",
+    "premise": "Living starships migrate together, each with distinct cultures and governments.",
+    "mechanics": "Ships are stakeholders; communication delay matters; predictions cannot confer political authority.",
+    "conflict": "A navigator hides destinations for everyone's safety.",
+    "seed": "Hold a route vote under uncertainty.",
+    "art": "ship",
+    "order": 3,
+    "tier": "public-reader-safe"
+  },
+  {
+    "id": "department-of-unfinished-lessons",
+    "title": "The Department of Unfinished Lessons",
+    "genres": "Cosmic bureaucracy, comedy",
+    "premise": "Cosmic service workers administer dreams and learning cycles.",
+    "mechanics": "Daemons are service roles, not inherent evil; every learning cycle needs objectives, appeals and an end.",
+    "conflict": "A conscientious administrator realizes a curriculum is imprisonment.",
+    "seed": "Appeal a centuries-old order.",
+    "art": "office",
+    "order": 4,
+    "tier": "public-reader-safe"
+  },
+  {
+    "id": "monsters-after-midnight",
+    "title": "Monsters After Midnight",
+    "genres": "Urban fantasy, mystery",
+    "premise": "A coastal town of humans and many kinds of monster neighbors.",
+    "mechanics": "Species does not establish morality; accommodations are negotiated; rumor is not evidence.",
+    "conflict": "An organization profits from mutual fear.",
+    "seed": "Solve an incident without scapegoating.",
+    "art": "town",
+    "order": 5,
+    "tier": "public-reader-safe"
+  },
+  {
+    "id": "neon-afterimage",
+    "title": "The Neon Afterimage",
+    "genres": "Cyberpunk, simulation ethics",
+    "premise": "Embodied and simulated people share overlapping cities.",
+    "mechanics": "Transfers have energy and capacity costs; simulated people may have rights; no liberation through mass deletion.",
+    "conflict": "Simulated citizens want to escape without destroying their hosts.",
+    "seed": "Negotiate a safe migration.",
+    "art": "neon",
+    "order": 6,
+    "tier": "public-reader-safe"
+  },
+  {
+    "id": "kingdom-of-side-quests",
+    "title": "The Kingdom of Side Quests",
+    "genres": "Tabletop fantasy, satire",
+    "premise": "Quests, levels and item drops are real civic institutions.",
+    "mechanics": "The reward ledger is auditable but biased; non-adventurers sustain the economy; rules can be changed.",
+    "conflict": "Essential workers are labeled nonessential.",
+    "seed": "Organize a workers' quest.",
+    "art": "quest",
+    "order": 7,
+    "tier": "public-reader-safe"
+  },
+  {
+    "id": "kaiju-garden",
+    "title": "The Kaiju Garden",
+    "genres": "Kaiju, mecha, ecological fantasy",
+    "premise": "Colossal creatures rewild a damaged industrial world.",
+    "mechanics": "Migration follows ecological signals; mecha need real energy and repair; mind links require consent.",
+    "conflict": "Restoration looks to survivors like invasion.",
+    "seed": "Turn a combat machine into a translator.",
+    "art": "kaiju",
+    "order": 8,
+    "tier": "public-reader-safe"
+  },
+  {
+    "id": "gentle-apocalypse",
+    "title": "The Gentle Apocalypse",
+    "genres": "Post-apocalyptic, solarpunk",
+    "premise": "Thriving villages face the return of industrial machines generations after collapse.",
+    "mechanics": "Abundance needs energy and materials; new industry must be repairable and governed; local knowledge counts.",
+    "conflict": "An ancient factory could restart extraction.",
+    "seed": "Restore useful technology without restoring exploitation.",
+    "art": "garden",
+    "order": 9,
+    "tier": "public-reader-safe"
+  }
+]);

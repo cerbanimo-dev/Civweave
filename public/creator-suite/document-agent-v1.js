@@ -75,6 +75,7 @@ async function run({objective='',steps=12,tier='auto'}={}){
   const selectedModel=loaders.currentCreatorLocalSelection();
   const route=resolveCodeInferenceRoute(value,selectedModel);
   const native=nativeTermux(value);
+  const storyProtocolContext=globalThis.CivweaveStoryProtocolsV1?.getContext?.()||'';
   if(!agent?.getDocumentStatus||!tools?.execute)throw new Error('Structured document editor is not ready.');
   const profile=tier==='auto'?(smallModel(value.model)?'small':'large'):tier;
   if(!['small','large'].includes(profile))throw new Error('Invalid model edit tier.');
@@ -94,7 +95,7 @@ async function run({objective='',steps=12,tier='auto'}={}){
       const readRevision=agent.getDocumentStatus().revision;
       calls=i+1;status('Document AI · '+(i+1)+'/'+total+' · '+profile+' model · up to '+limit+' edits/call');
       const response=await runCodeInference(value,[
-        {role:'system',content:'You are a document editing tool planner. Reply only with one complete JSON object.'},
+        {role:'system',content:'You are a document editing tool planner. Reply only with one complete JSON object.'+(storyProtocolContext?'\n\n'+storyProtocolContext:'')},
         {role:'user',content:stepPrompt(chosen,toolState,limit,native)}
       ],{
         selection:selectedModel,loadLocal:loaders.loadCreatorLocalRuntime,loadServer:loaders.loadCreatorServerRuntime,
