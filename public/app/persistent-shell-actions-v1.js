@@ -1,12 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-starling-collective';
+const VERSION='1.2.0-worldweaver-workspace';
 const NAV_ID='cw-themed-system-nav';
 const ACTIONS_ID='cw-persistent-shell-actions-v1';
 const STYLE_ID='cw-persistent-shell-actions-v1-style';
 const GUILD_SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
 const SURVIVAL_PATH='/app/survival/index.html';
+const WORLDWEAVER_PATH='/app/worldweaver/index.html';
 const CONTEXT_KEY='civweave.pending-system-context.v1';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const RETIRED_PATHS=Object.freeze({
@@ -23,11 +24,14 @@ function installStyle(){
   const style=document.createElement('style');
   style.id=STYLE_ID;
   style.textContent=`
-#${NAV_ID} #${ACTIONS_ID}{grid-column:1/span 3;grid-row:1;min-width:0;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:4px;pointer-events:auto}
+#${NAV_ID} .cw-nav-utilities{grid-template-columns:repeat(6,minmax(0,1fr))}
+#${NAV_ID} .cw-nav-tools{grid-column:6}
+#${NAV_ID} #${ACTIONS_ID}{grid-column:1/span 5;grid-row:1;min-width:0;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;gap:4px;pointer-events:auto}
 #${NAV_ID} #${ACTIONS_ID} button{all:unset;box-sizing:border-box;display:inline-flex!important;align-items:center;justify-content:center;gap:6px;min-width:0;min-height:36px;padding:4px 6px;border:1px solid #f2d88755;border-radius:8px;background:#ffffff0a;color:#fff4ce;font:700 12px/1.1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #${NAV_ID} #${ACTIONS_ID} button:hover,#${NAV_ID} #${ACTIONS_ID} button:focus-visible{border-color:#8af5d299;background:#8af5d217;outline:none}
 #${NAV_ID} #${ACTIONS_ID} img{display:block;width:18px;height:18px;object-fit:contain;flex:0 0 18px}
-@media(max-width:680px){#${NAV_ID} #${ACTIONS_ID} button{gap:4px;padding:4px;font-size:11px}#${NAV_ID} #${ACTIONS_ID} img{width:16px;height:16px;flex-basis:16px}}
+@media(max-width:680px){#${NAV_ID} #${ACTIONS_ID}{gap:2px}#${NAV_ID} #${ACTIONS_ID} button{gap:3px;padding:3px 2px;font-size:10px;min-height:44px}#${NAV_ID} #${ACTIONS_ID} img{width:14px;height:14px;flex-basis:14px}}
+@media(max-width:480px){#${NAV_ID} #${ACTIONS_ID} img{display:none}}
 `;
   (document.head||document.documentElement).append(style);
 }
@@ -67,6 +71,7 @@ async function openStarling(){
 }
 function openMap(){location.assign('/finder?view=map&source=persistent-shell');return true}
 function openSurvival(){location.assign(SURVIVAL_PATH);return true}
+function openWorldweaver(){location.assign(WORLDWEAVER_PATH);return true}
 
 const navObserver=new MutationObserver(()=>{
   if(!observedNav||!observedNav.isConnected){observedNav=null;ensureMounted();return}
@@ -80,11 +85,11 @@ function bindNavObserver(nav){
 }
 function ensureMounted(){
   installStyle();bindLegacyRoutes();const nav=document.getElementById(NAV_ID);if(!nav){bindNavObserver(null);return false}bindNavObserver(nav);const utilities=nav.querySelector('.cw-nav-utilities');if(!utilities)return false;let actions=document.getElementById(ACTIONS_ID);if(actions){if(actions.parentElement!==utilities)utilities.prepend(actions);return true}
-  document.getElementById('cw-civweave-primary-actions-v441')?.remove();actions=document.createElement('div');actions.id=ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Guild, map, and survival tools');actions.innerHTML=`<button type="button" data-cw-persistent-action="guilds" data-cw-civweave-nav="guilds" aria-label="Find nearby Guilds"><img src="${GUILD_SRC}" alt="" aria-hidden="true"><span>Guilds</span></button><button type="button" data-cw-persistent-action="map" data-cw-civweave-nav="map" aria-label="Open Guild Map"><img src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button><button type="button" data-cw-persistent-action="survival" aria-label="Open Survival Mode">Survival</button><button type="button" data-cw-persistent-action="starling" aria-label="Open Starling Collective">Collective</button>`;actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-persistent-action]')?.dataset.cwPersistentAction;if(action==='guilds'){event.preventDefault();void openGuilds()}else if(action==='map'){event.preventDefault();openMap()}else if(action==='survival'){event.preventDefault();openSurvival()}else if(action==='starling'){event.preventDefault();void openStarling()}});utilities.prepend(actions);nav.dataset.persistentActions='guilds-map-survival-all-systems-v1';return true
+  document.getElementById('cw-civweave-primary-actions-v441')?.remove();actions=document.createElement('div');actions.id=ACTIONS_ID;actions.setAttribute('role','group');actions.setAttribute('aria-label','Guild, map, survival, Collective, and Worldweaver tools');actions.innerHTML=`<button type="button" data-cw-persistent-action="guilds" data-cw-civweave-nav="guilds" aria-label="Find nearby Guilds"><img src="${GUILD_SRC}" alt="" aria-hidden="true"><span>Guilds</span></button><button type="button" data-cw-persistent-action="map" data-cw-civweave-nav="map" aria-label="Open Guild Map"><img src="${MAP_SRC}" alt="" aria-hidden="true"><span>Map</span></button><button type="button" data-cw-persistent-action="survival" aria-label="Open Survival Mode">Survival</button><button type="button" data-cw-persistent-action="starling" aria-label="Open Starling Collective">Collective</button><button type="button" data-cw-persistent-action="worldweaver" aria-label="Open Worldweaver worldbuilding workspace" title="Worldweaver">Worlds</button>`;actions.addEventListener('click',event=>{const action=event.target.closest?.('[data-cw-persistent-action]')?.dataset.cwPersistentAction;if(action==='guilds'){event.preventDefault();void openGuilds()}else if(action==='map'){event.preventDefault();openMap()}else if(action==='survival'){event.preventDefault();openSurvival()}else if(action==='starling'){event.preventDefault();void openStarling()}else if(action==='worldweaver'){event.preventDefault();openWorldweaver()}});utilities.prepend(actions);nav.dataset.persistentActions='guilds-map-survival-collective-worldweaver-v1';return true
 }
 const observer=new MutationObserver(records=>{if(records.some(record=>[...record.addedNodes,...record.removedNodes].some(node=>node?.nodeType===1&&(node.id===NAV_ID||node.querySelector?.(`#${NAV_ID}`)))))ensureMounted()});
 function boot(){bindLegacyRoutes();ensureMounted();const target=document.body||document.documentElement;observer.observe(target,{childList:true,subtree:false});for(const delay of [80,300,900,1800])setTimeout(ensureMounted,delay)}
 addEventListener('pageshow',ensureMounted);addEventListener('focus',ensureMounted);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap,openSurvival,openStarling,legacySystemFor,switchLegacyRoute,retiredRealmEntrypoints:false,canonicalRealmInterception:false,observerScope:'body-direct-children+navbar-childlist',utilityRow:'cw-nav-utilities'});
+globalThis.CivweavePersistentShellActionsV1=Object.freeze({version:VERSION,ensureMounted,openGuilds,openMap,openSurvival,openStarling,openWorldweaver,legacySystemFor,switchLegacyRoute,retiredRealmEntrypoints:false,canonicalRealmInterception:false,observerScope:'body-direct-children+navbar-childlist',utilityRow:'cw-nav-utilities'});
 })();

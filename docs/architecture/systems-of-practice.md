@@ -207,3 +207,10 @@ The canonical Worldweaver v1 foundation is `public/app/shared/worldweaver-core-v
 - Verification: `npm run test:code-mesh`.
 
 The Code Workshop `qwen35-4b-native` Termux OpenAI-compatible route uses bounded SSE text generation (up to 512 output tokens with a 480-second deadline), then parses and validates the complete JSON tool call locally before applying any code. This prevents the workshop's former nonstreaming JSON POST timeout without modifying the canonical local-server runtime. A human Stop aborts the active model request; already saved chunks remain intact. Other providers retain their existing structured JSON contract.
+
+## Worldweaver local planning workspace
+
+
+The canonical Worldweaver owner is `public/app/shared/worldweaver-core-v1.mjs`. Moss, Kamiya, Rook, and Merlin select typed spaces within the **same** manifest owner; no separate chat, billing, ballot ledger, or model inference loop is created. It records stations, task/listing/ballot references, debate turns, lifecycle requests, and bounded NPC tool intents. Connected world actions require an authenticated external authorizer, and only trusted adapters acknowledge world creation and outcomes.
+
+The local draft workspace at `/app/worldweaver/index.html` is presented by `public/app/worldweaver/workspace.mjs`. Its persistence adapter `public/app/shared/worldweaver-workspace-v1.mjs` delegates all manifest edits to the core and grants only local standalone draft commands with an explicit local principal and placeholder pilot. It cannot provision worlds, queue model actions, report runtime success, claim Guild authority, or grant permissions. The shared `persistent-shell-actions-v1.js` owner supplies the Worlds launcher; existing navigation and guide-feature routes retain their owners. The preview renders readable station plans and never claims a live OpenSimulator connection. Owner, callers, storage, and executable contracts are registered in `config/system-ownership.json`; see `docs/contracts/worldweaver-microspaces-v1.md` and `npm run test:worldweaver`. The old illustrated Living World files are not used as a new authority.

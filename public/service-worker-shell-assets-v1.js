@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v37-four-lane-game-board';
+const REVISION='shell-assets-v1-repair-v38-worldweaver-workspace';
 const OPTIONAL=['/app/action-board-v1.css','/app/action-board-v1.mjs','/app/shared/action-board-core-v1.mjs','/app/shared/quest-pathway-map-v1.js','/app/shared/quest-pathway-map-v1.css','/app/assets/ai/weaveling-review-sprites-v1.png','/app/assets/ai/moss-review-sprites-v1.png','/app/assets/ai/rook-review-sprites-v1.png','/app/assets/ai/merlin-review-sprites-v1.png','/app/installer-repair-only-v2.js','/app/starling-collective-v1.js','/app/starling-collective-v1.css','/app/starling-integration-v1.js','/app/guild-starling-client-v1.js','/app/assets/ai/lari-review-sprites-v1.png','/app/assets/ai/kamiya-review-sprites-v1.png','/app/shared/guide-outcome-scene-v1.js','/app/shared/guide-outcome-scene-v1.css'];
 const REQUIRED_FAMILY_NAV=[
   '/app/persistent-system-shell-v1.html',
@@ -51,6 +51,13 @@ const OPTIONAL_GUILD_QUEST=[
   '/app/cerbanimo-intention-landscape-v1.js',
   '/app/guild-quest-client-v1.js'
 ];
+const OPTIONAL_WORLDWEAVER=[
+  '/app/worldweaver/index.html',
+  '/app/worldweaver/workspace.mjs',
+  '/app/worldweaver/workspace.css',
+  '/app/shared/worldweaver-core-v1.mjs',
+  '/app/shared/worldweaver-workspace-v1.mjs'
+];
 const OPTIONAL_HUMAN_CHAT=[
   '/app/guild-membership-mesh-v1.js',
   '/app/ble-object-transport-v1.js',
@@ -65,7 +72,7 @@ for(const pathname of [...REQUIRED_FAMILY_NAV,...REQUIRED_NAV_MEDIA,...REQUIRED_
   if(!REQUIRED_SHELL_ASSETS.includes(pathname))REQUIRED_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
-for(const pathname of [...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
+for(const pathname of [...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_WORLDWEAVER,...OPTIONAL_HUMAN_CHAT]){
   const requiredIndex=REQUIRED_SHELL_ASSETS.indexOf(pathname);
   if(requiredIndex>=0)REQUIRED_SHELL_ASSETS.splice(requiredIndex,1);
   if(!OPTIONAL_SHELL_ASSETS.includes(pathname))OPTIONAL_SHELL_ASSETS.push(pathname);
@@ -77,7 +84,7 @@ self.CivweaveShellAssetsV1=Object.freeze({
   requiredNavigationMedia:[...REQUIRED_NAV_MEDIA],
   requiredCivweaveBoot:[...REQUIRED_CIVWEAVE_BOOT],
   requiredHumanChat:[...REQUIRED_HUMAN_CHAT],
-  optional:[...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
+  optional:[...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_WORLDWEAVER,...OPTIONAL_HUMAN_CHAT],
   humanChat:[...REQUIRED_HUMAN_CHAT,...OPTIONAL_HUMAN_CHAT],
   humanChatRoster:'signed-local-object-v1',
   humanChatBle:'object-transport-v1',

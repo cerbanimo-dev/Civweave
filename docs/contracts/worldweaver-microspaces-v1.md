@@ -5,7 +5,7 @@ Worldweaver is one shared, local-first **manifest and intent** capability. It is
 
 Canonical owner: `public/app/shared/worldweaver-core-v1.mjs` (`createWorldweaver`, `SPACE_GUIDES`, `NPC_TOOLS`).
 Executable contract: `scripts/test-worldweaver-core-v1.mjs`.
-Active UI routes modified by v1: **none**. This initial module is an integration-ready foundation and does not yet start an OpenSimulator server or install a browser viewer.
+The local planning utility is `/app/worldweaver/index.html`; its Worlds launcher belongs to the existing shared utility owner. The five installed system routes are unchanged. This initial module is an integration-ready foundation and does not yet start an OpenSimulator server or install a browser viewer.
 
 ## Four space templates
 
@@ -191,3 +191,15 @@ The browser studio asks for explicit per-request confirmation before sending man
 Audience response capture now requires a **trusted controller to open a specific scripted audience moment** via `open-audience-moment`; the same controller can close it with `close-audience-moment`. Knowing a moment's ID or having a rehearsal in progress is not enough to submit early or late. The lab represents local synthetic actor identities only; production will require authenticated host audience and stage controller roles.
 
 A character-to-avatar binding records a reviewed role, `avatarRef`, model principal, and optional voice reference. The 3D browser set currently renders a character **stand-in**, not a native OpenSimulator rig; Sol must implement actual rig/animation approvals and model pilot execution before reporting a modeled character performance. Training exports are not proof that a Qwen LoRA has been fitted, and FilmCraft planning JSON is not yet a native FilmCraft project.
+
+## Local workspace boundary
+
+`public/app/shared/worldweaver-workspace-v1.mjs` is the device draft persistence adapter for the existing core. `public/app/worldweaver/workspace.mjs` presents the four templates, a searchable space library, readable station plans, external record references, and NPC character drafts. Every manifest mutation delegates to `createWorldweaver`; there is no second world engine or chat. Opening the page reads saved drafts and starts no inference or network requests for world state.
+
+The adapter's fixed local human principal permits only `create`, `add-station`, `link`, `rig-npc`, and attributed local `debate-turn` notes on standalone drafts. This principal is a device draft label, not verified human identity. NPCs use the explicit `local-draft-pilot` placeholder. Character prompts and proposed tools do not bind or run an authenticated pilot. Provisioning, runtime outcomes, model action queues, and Guild scopes are rejected. The UI labels the OpenSimulator connection unavailable and never presents a draft as a live world.
+
+Storage key: `civweave.worldweaver.workspace.v1`. Opening never creates a draft or writes storage. Limits are 24 spaces, 48 stations, 16 references, 8 character drafts and 32 debate notes per space, with a bounded serialized envelope. Stored records are validated before use. Failed writes do not advance memory; corrupt data is preserved with a visible recovery message. Optimistic stale-tab checks require explicit reload before retrying; localStorage is not a transactional mesh or a cross-tab compare-and-swap service. This adapter neither imports untrusted manifests nor claims signed mesh persistence.
+
+Export is explicit and contains the exact selected space's manifest records, including its notes and character instructions; unrelated spaces are excluded. Export is not publishing, adapter approval, or provisioning. References remain unverified here. Existing feature links open Living School, Cerbanimo, FellowFare, or Anarchadia through the route owner; guide links open the existing guide without transferring private conversation or prompts.
+
+The workspace uses semantic forms, keyboard tabs, visible focus, reduced-motion styling, and readable station instructions independent of 3D placement. The offline package and optional service-worker asset set include the whole workspace module graph. Deterministic contracts: `scripts/test-worldweaver-workspace-v1.mjs`, `scripts/test-worldweaver-ui-v1.mjs`, and `scripts/test-worldweaver-launcher-v1.mjs`, run with the core by `npm run test:worldweaver`.

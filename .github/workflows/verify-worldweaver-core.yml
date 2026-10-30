@@ -3,6 +3,14 @@ on:
   pull_request:
     paths:
       - 'public/app/shared/worldweaver-core-v1.mjs'
+      - 'public/app/shared/worldweaver-workspace-v1.mjs'
+      - 'public/app/worldweaver/**'
+      - 'public/app/persistent-shell-actions-v1.js'
+      - 'public/app/offline-package-v208.json'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'scripts/test-worldweaver-workspace-v1.mjs'
+      - 'scripts/test-worldweaver-ui-v1.mjs'
+      - 'scripts/test-worldweaver-launcher-v1.mjs'
       - 'public/app/shared/worldweaver-screen-v1.mjs'
       - 'public/app/shared/worldweaver-map-2d-v1.mjs'
       - 'public/app/shared/worldweaver-opensim-geometry-v1.mjs'
@@ -41,6 +49,14 @@ on:
     branches: [staging]
     paths:
       - 'public/app/shared/worldweaver-core-v1.mjs'
+      - 'public/app/shared/worldweaver-workspace-v1.mjs'
+      - 'public/app/worldweaver/**'
+      - 'public/app/persistent-shell-actions-v1.js'
+      - 'public/app/offline-package-v208.json'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'scripts/test-worldweaver-workspace-v1.mjs'
+      - 'scripts/test-worldweaver-ui-v1.mjs'
+      - 'scripts/test-worldweaver-launcher-v1.mjs'
       - 'scripts/test-worldweaver-core-v1.mjs'
       - 'config/system-ownership.json'
       - 'docs/contracts/worldweaver-microspaces-v1.md'
