@@ -49,3 +49,35 @@ export async function proposeScreenplayViaModel({studio,actor,sourceIds,objectiv
  const parsed=decode(result);
  return studio.dispatch({type:'propose-scenes',scenes:parsed.scenes},actor);
 }
+
+/** A bounded set-change proposal. The result is reviewed by a human before a
+ * stage renderer or OpenSimulator adapter receives any geometry updates.
+ */
+export async function proposeStageViaModel({studio,actor,sceneId,invokeModel,signal}={}){
+ if(!studio?.snapshot||!studio?.dispatch||actor?.kind!=='model'||typeof invokeModel!=='function')
+  throw new TypeError('Model and authenticated production studio required');
+ const initial=studio.snapshot(),revision=initial.revision;
+ const scene=initial.proposals.find(x=>x.id===sceneId);
+ if(!scene||scene.status!=='approved')throw new Error('An approved screenplay is needed for stage redesign');
+ const approved=initial.stagePlans?.filter(x=>x.sceneId===sceneId&&x.status==='approved').at(-1);
+ const currentSet=approved?.set??scene.set;
+ const response=await invokeModel({purpose:'worldweaver-stage-replan',format:'json',
+  maxOutputTokens:1500,signal,revision,messages:[
+   {role:'system',content:'You are a film stage designer. Return ONLY JSON {"set":{...},"note":"reason"}, never executable OpenSimulator or browser code. This is a proposal for human approval, not a live stage edit.'},
+   {role:'user',content:'Design a simpler or more dramatic original physical stage arrangement from the approved screenplay. Preserve all dialogue and source intent. Existing set: '+JSON.stringify(currentSet)+
+    '\nScene synopsis: '+scene.synopsis+'\nVisual direction: '+scene.visualDirection+
+    '\nReturn a set with keys location,mood,color,props,light,ambience. Each prop has id,name,shape (box/cylinder),x,y,height,width,depth,color. Coordinates x/y -75..75, dimensions .1..35 meters and height .1..30, hex colors, up to 24 props. No unlicensed assets or third-party characters.'}
+  ]});
+ if(signal?.aborted)throw new Error('Stage redesign cancelled');
+ if(studio.snapshot().revision!==revision)throw new Error('Project changed while model designed the stage');
+ if(response?.status&&response.status!=='success')throw new Error('Stage inference failed');
+ let raw=response?.outputJson??response?.outputText??response?.text??response;
+ if(typeof raw==='string'){
+  if(raw.length>24000)throw new TypeError('Stage proposal output too long');
+  try{raw=JSON.parse(raw.trim())}catch{throw new TypeError('Model must return JSON for stage proposal')}
+ }
+ if(!raw||typeof raw!=='object'||Array.isArray(raw)||!raw.set||
+  Object.keys(raw).some(k=>!['set','note'].includes(k)))throw new TypeError('Expected stage set proposal JSON');
+ return studio.dispatch({type:'propose-stage',sceneId,set:raw.set,
+  note:String(raw.note||'Proposed stage geometry revision').slice(0,700)},actor);
+}
