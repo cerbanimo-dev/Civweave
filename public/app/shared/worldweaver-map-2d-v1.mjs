@@ -18,7 +18,7 @@ const cards=(row,index,total)=>({
  x:Math.min(92,13+(index%4)*25),
  y:Math.min(84,18+Math.floor(index/4)*29)
 });
-const kinds=new Set(['space','screen','npc','station']);
+const kinds=new Set(['space','screen','npc','station','building']);
 const bounded=(value,limit)=>Array.isArray(value)?value.slice(0,limit):[];
 export function projectWorld2D(snapshot,{worldRef,layout={},includeDrafts=false}={}){
  if(!snapshot||!Array.isArray(snapshot.instances)||!Array.isArray(snapshot.screens)||!Array.isArray(snapshot.npcs)||
@@ -76,7 +76,14 @@ export function projectWorld2D(snapshot,{worldRef,layout={},includeDrafts=false}
  const facePolygons=worldGeometry?worldGeometry.projectedFaces.filter(canSee):[];
  const buildingPolygons=worldGeometry?worldGeometry.buildings.filter(canSee).map(p=>({
   id:p.id,objectId:p.id,label:safeLabel(p.name),instanceId:p.instanceId,
-  quality:p.quality,points:p.points})): [];
+  kind:p.kind,quality:p.quality,points:p.points})): [];
+ for(const polygon of buildingPolygons){
+  if(polygon.kind==='path'||polygon.points.length<3)continue;
+  const centre={x:polygon.points.reduce((a,b)=>a+b.x,0)/polygon.points.length,
+   y:polygon.points.reduce((a,b)=>a+b.y,0)/polygon.points.length};
+  emit({id:polygon.id,type:'building',instanceId:polygon.instanceId,label:polygon.label,
+   kind:'building',status:'built',geometryObjectId:polygon.objectId},centre);
+ }
  return copy({schema:WORLD_MAP_2D_SCHEMA,revision:snapshot.revision??0,worldRef:focus.id,
   focusedTitle:safeLabel(focus.title),coordinateSpace:'normalized-percent',
   geometryStatus:worldGeometry?'opensim-world-geometry':Object.keys(geometry).length?'mixed-provider-and-schematic':'schematic-only',
@@ -103,7 +110,7 @@ export function observeWorld2D(snapshot,options={}){
 /** A browser DOM projection, no canvas/WebGL/GPU required.
  * Recursive in-world Civweave screens become a labeled single-depth portal.
  */
-export function renderWorldMap2D(projected,{documentRef=globalThis.document,onActivate,embedded=false}={}){
+export function renderWorldMap2D(projected,{documentRef=globalThis.document,onActivate,embedded=false,selectedObjectId=null}={}){
  if(!projected||projected.schema!==WORLD_MAP_2D_SCHEMA)throw new TypeError('Invalid map projection.');
  if(!documentRef?.createElement)return {schema:projected.schema,nodeCount:projected.nodes.length,
   nodes:copy(projected.nodes),recursivePortalCount:projected.nodes.filter(x=>x.recursivePortal).length};
@@ -136,7 +143,9 @@ export function renderWorldMap2D(projected,{documentRef=globalThis.document,onAc
    };
    for(const face of projected.facePolygons||[])draw(face,face.color||'#508c7c','none','.12');
    for(const prim of projected.polygons)draw(prim,'#8acaba','#ddffe7','.38');
-   for(const object of projected.buildingPolygons||[])draw(object,'none','#e4ffb0','.8');
+   for(const object of projected.buildingPolygons||[]){
+    draw(object,'none',object.id===selectedObjectId?'#ffef9e':'#e4ffb0','.9');
+   }
    area.append(svg);
   }
  }
@@ -149,6 +158,7 @@ export function renderWorldMap2D(projected,{documentRef=globalThis.document,onAc
   button.textContent=(n.type==='screen'?'▣ ':n.type==='npc'?'◉ ':n.type==='station'?'✦ ':'⌂ ')+
    (n.recursivePortal?'Civweave ↳ 2D (no infinite mirrors)':n.label);
   button.title=n.type+' · '+n.label;
+  if(n.id===selectedObjectId)button.style.outline='2px solid #fff0a8';
   button.setAttribute('aria-label',n.type+' '+n.label+
    (n.recursivePortal?' · returns to this two-dimensional world, recursion intentionally capped':''));
   button.addEventListener('click',()=>{
