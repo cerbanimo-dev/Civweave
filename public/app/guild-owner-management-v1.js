@@ -89,7 +89,7 @@ async function perform(action,button){
 }
 async function open(){
   if(!owner())return false;
-  ensure().hidden=false;feedback('Loading owner-only Guild configuration…');
+  globalThis.CivweaveGuildSymbolV1?.closeNearbyGuilds?.('owner-management');\n  ensure().hidden=false;feedback('Loading owner-only Guild configuration…');
   try{await refresh()}catch(error){feedback('Guild Management unavailable: '+clean(error?.message||error,400))}
   root.querySelector('[data-gm-close]')?.focus({preventScroll:true});return true;
 }
