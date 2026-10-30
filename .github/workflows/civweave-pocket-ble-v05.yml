@@ -5,6 +5,8 @@ on:
     paths:
       - native/android/civweave-pocket-v05/**
       - .github/workflows/civweave-pocket-ble-v05.yml
+  pull_request:
+    branches: [staging]
   workflow_dispatch:
 permissions:
   contents: read
