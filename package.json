@@ -72,7 +72,7 @@
     "test:starling-turns": "node --test scripts/test-starling-collective-turns-v1.mjs",
     "test:starling-worker": "node --test scripts/test-starling-collective-worker-v1.mjs",
     "test:ai-fleet": "node --test scripts/test-ai-fleet-v1.mjs",
-    "test:worldweaver": "node --test scripts/test-worldweaver-core-v1.mjs scripts/test-worldweaver-avatar-rigs-v1.mjs scripts/test-worldweaver-screens-v1.mjs scripts/test-worldweaver-labs-hardening-v1.mjs scripts/test-worldweaver-map-2d-v1.mjs scripts/test-worldweaver-opensim-geometry-v1.mjs",
+    "test:worldweaver": "node --test scripts/test-worldweaver-core-v1.mjs scripts/test-worldweaver-avatar-rigs-v1.mjs scripts/test-worldweaver-screens-v1.mjs scripts/test-worldweaver-labs-hardening-v1.mjs scripts/test-worldweaver-map-2d-v1.mjs scripts/test-worldweaver-opensim-geometry-v1.mjs scripts/test-worldweaver-performance-studio-v1.mjs",
     "test:code-mesh": "node --test scripts/test-code-mesh-workspace-v1.mjs scripts/test-code-workshop-model-route-v1.mjs"
   },
   "overrides": {
