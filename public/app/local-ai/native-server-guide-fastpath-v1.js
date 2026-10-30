@@ -270,13 +270,30 @@ export async function readNativeStream(response,{onToken,signal}={}){
     try{reader.releaseLock()}catch{}
   }
 }
+// Pasted, truncated assistant output is context, not a new request to
+// author a Quest or to perform physical work. Recover only its topic and tail
+// before the native prompt; long pasted text is otherwise echoed by the 4B model.
+export function pastedPlanContinuation(text){
+  const match=String(text||'').match(/^\s*(?:just\s+)?(?:finish|complete|continue)\s+(?:your|the|this)\s+plan\s*:\s*([\s\S]+)$/i);
+  if(!match||match[1].trim().length<100)return null;
+  const pasted=match[1].trim();
+  const topic=pasted.slice(0,260).replace(/\s+/g,' ');
+  const tail=pasted.slice(-850);
+  return {
+    topic,tail,
+    prompt:'Continue this partially written planning advice. This is a request for INFORMATION, not for you to construct or perform any real-world task. Give practical guidance. Begin where the draft stopped; do not restate, quote, or summarize the existing text. Do not apologize or say that you cannot perform physical tasks.\n'+
+      'Subject: '+topic+'\nExisting draft ends at:\n'+tail+
+      '\nContinue immediately with the next unfinished point, then subsequent actionable steps in concise prose. Do not repeat the opening.'
+  };
+}
 export async function respondNative({system='civweave',text='',history=[],fetcher=fetch,onToken=null,signal=null}={}){
   if(!nativeSelection())throw new Error('The selected native llama-server route changed. No inference was started.');
   const user=clean(text,5000);if(!user)throw new Error('There was no text to send to the selected server.');
   markNativeStage('native-fast-lane',system);
+  const pastedContinuation=pastedPlanContinuation(user);
   // Cross-realm Quests take precedence over single-realm learning, because
   // their full objective can contain both Moss and Cerbanimo prerequisites.
-  const quest=await maybeCreateOfficialQuest({system,user,history,signal,onToken});
+  const quest=pastedContinuation?null:await maybeCreateOfficialQuest({system,user,history,signal,onToken});
   if(quest)return quest;
   const learningIntent=learningRequest(user),learningControl=learningControlOutsideMoss(user);
   // Weaveling and the other guides must route explicit learning requests into
@@ -294,11 +311,11 @@ export async function respondNative({system='civweave',text='',history=[],fetche
     if(learningIntent||learningControl)throw new Error('Moss did not recognize this learning request. No generic chat response or learning content was substituted.');
   }
   const [name,role]=GUIDE[system]||GUIDE.civweave;
-  const continuation=continuationRequest(user);
+  const continuation=continuationRequest(user)||Boolean(pastedContinuation);
   // Continuations are a new completion task, not a replay of all earlier chat.
   // Give Qwen the final text anchor and require only the missing continuation.
   const prior=continuation?[]:previousTurns(history,user);
-  const finalRequest=continuation?continuationPrompt(history):user;
+  const finalRequest=pastedContinuation?.prompt||(continuation?continuationPrompt(history):user);
   const controller=new AbortController();
   const parentAbort=()=>controller.abort(signal?.reason||new DOMException('Generation cancelled','AbortError'));
   signal?.addEventListener?.('abort',parentAbort,{once:true});
@@ -325,6 +342,10 @@ export async function respondNative({system='civweave',text='',history=[],fetche
       try{onToken?.(delta,text)}catch{}
     }});
     const answer=streamed.answer,payload=streamed.payload,finishReason=streamed.finishReason;
+    if(pastedContinuation&&/\b(?:i cannot (?:continue|provide)|i (?:am|['’]m) an ai assistant and|cannot perform physical tasks)\b/i.test(answer)){
+      markNativeStage('native-pasted-continuation-refusal','generic inability-to-perform response blocked');
+      throw new Error('The local model returned a generic inability-to-act disclaimer instead of continuing the existing written plan. No finished answer was accepted. Try an explicit continuation request.');
+    }
     if(continuation&&repeatedContinuation(answer,history)){
       markNativeStage('native-continuation-echo-blocked','model repeated previous assistant text');
       throw new Error('The model repeated the previous answer instead of continuing; the duplicate was not saved. Try asking for the next specific step or section.');
