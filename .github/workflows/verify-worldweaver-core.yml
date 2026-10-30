@@ -1,0 +1,29 @@
+name: Verify Worldweaver Core
+on:
+  pull_request:
+    paths:
+      - 'public/app/shared/worldweaver-core-v1.mjs'
+      - 'scripts/test-worldweaver-core-v1.mjs'
+      - 'config/system-ownership.json'
+      - 'docs/contracts/worldweaver-microspaces-v1.md'
+      - '.github/workflows/verify-worldweaver-core.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/shared/worldweaver-core-v1.mjs'
+      - 'scripts/test-worldweaver-core-v1.mjs'
+      - 'config/system-ownership.json'
+      - 'docs/contracts/worldweaver-microspaces-v1.md'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check public/app/shared/worldweaver-core-v1.mjs
+      - run: npm run test:worldweaver
