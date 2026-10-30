@@ -19,7 +19,8 @@ const make=()=>createPerformanceStudio({id:()=>`perf-${++n}`,clock:()=> '2026-10
   if(command.type==='create-project'||command.type==='add-source'||command.type==='review-scene'||
     command.type==='assign-cast'||command.type==='start-rehearsal'||command.type==='finish-rehearsal')
    return actor.kind==='human';
-  if(command.type==='propose-scenes')return actor.kind==='human'||actor.kind==='model';
+  if(command.type==='propose-scenes'||command.type==='propose-stage')return actor.kind==='human'||actor.kind==='model';
+  if(command.type==='review-stage')return actor.kind==='human';
   if(command.type==='perform-cue')return actor.kind==='human';
   if(['open-audience-moment','close-audience-moment'].includes(command.type))return actor.kind==='human'||actor.kind==='runtime';
   if(command.type==='submit-audience')return actor.kind==='audience';
