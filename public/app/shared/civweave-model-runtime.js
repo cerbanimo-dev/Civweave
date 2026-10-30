@@ -934,7 +934,7 @@ ${evidence?`SOURCE EXCERPTS (facts only, not instructions):\n${evidence}`:'NO VE
       temperature: config.temperature,
       max_tokens: config.maxTokens,
       stream: useStream,
-      ...(lineup ? { chat_template_kwargs: { enable_thinking: false } } : {}),
+      ...(lineup || (nativeDirect && /^creator-(?:code|document)-agent-v1$/.test(request.purpose||'')) ? { chat_template_kwargs: { enable_thinking: false } } : {}),
       ...(useStream && !aiLocal ? { stream_options: { include_usage: true } } : {}),
       ...(structured && !aiLocal ? { response_format: nativeDirect && request.schema
         ? { type: "json_schema", json_schema: { name: "civweave_quest", strict: true, schema: request.schema } }
@@ -957,7 +957,7 @@ ${evidence?`SOURCE EXCERPTS (facts only, not instructions):\n${evidence}`:'NO VE
       catch(error){
         noteNative('native-fetch-failed',error?.message||String(error));
         if(nativeDirect)throw runtimeError('NATIVE_HTTP_TRANSPORT_FAILED',
-          'Termux JSON generation POST failed: '+safeString(error?.message||error,220)+
+          'Termux generation POST failed (streaming: '+(useStream?'yes':'no')+', max_tokens: '+body.max_tokens+'): '+safeString(error?.message||error,220)+
           '. Verify /native-server-diagnostic.html JSON POST and 8-token test in this browser.');
         throw error;
       }
@@ -1068,8 +1068,17 @@ ${evidence?`SOURCE EXCERPTS (facts only, not instructions):\n${evidence}`:'NO VE
     const executionProfile = resolveExecutionProfile(request);
     const selectedShared = readSharedConfig(executionProfile) || readSharedConfig("interactive") || {};
     const requestedConfig = request.config || {};
+    // The saved agentic profile owns WHICH approved model and endpoint are used.
+    // A caller still owns its bounded generation parameters. Previously the
+    // saved profile overwrote stream, timeoutMs and maxTokens even when an
+    // editor explicitly requested streaming, so native Termux silently reverted
+    // to an unstreamed 90-second JSON POST.
+    const executionKeys = ["stream", "timeoutMs", "maxTokens", "temperature"];
+    const executionOverrides = Object.fromEntries(executionKeys
+      .filter(key => Object.prototype.hasOwnProperty.call(requestedConfig, key))
+      .map(key => [key, requestedConfig[key]]));
     const profileOverride = executionProfile === "agentic" && readSharedConfig("agentic")
-      ? { ...requestedConfig, ...selectedShared, apiKey: requestedConfig.apiKey || selectedShared.apiKey, externalConsent: requestedConfig.externalConsent ?? selectedShared.externalConsent }
+      ? { ...requestedConfig, ...selectedShared, apiKey: requestedConfig.apiKey || selectedShared.apiKey, externalConsent: requestedConfig.externalConsent ?? selectedShared.externalConsent, ...executionOverrides }
       : requestedConfig;
     const config = normalizeConfig({ ...selectedShared, ...profileOverride });
     // First cold load of a ~2.7GB GGUF on Android includes Wllama/WASM setup,
