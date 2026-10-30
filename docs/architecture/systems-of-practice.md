@@ -195,3 +195,13 @@ Civweave's fixed `nativePage=guild-quests` destination stays within the persiste
 ## Worldweaver shared microspace manifest owner
 
 The canonical Worldweaver v1 foundation is `public/app/shared/worldweaver-core-v1.mjs`. Moss, Kamiya, Rook, and Merlin select typed spaces within the **same** manifest owner; no separate chat, event owner, billing, ballot ledger, or model inference loop is created. It records workshop stations, canonical task/listing/ballot references, narrated debate turns, portable world lifecycle requests, and bounded NPC pilot/tool intents. All commands require an authenticated external authorizer. World-host creation and action outcomes must be acknowledged by a trusted adapter; the core cannot make them up. It has no installed route until an authenticated shared capability handler and renderer are integrated. Owner, allowed caller, contract and executable verifier are registered in `config/system-ownership.json`; see `docs/contracts/worldweaver-microspaces-v1.md` and `scripts/test-worldweaver-core-v1.mjs`. The old illustrated Living World files are not used as a new authority.\n
+## Creator Suite code workspaces and mesh code capsules
+
+- Canonical code worktree, encrypted checkpoint, publication review, and adoption owner: `public/creator-suite/shared/code-mesh-workspace-v1.mjs`.
+- Pure bounded-edit, static-snippet, and Git object identity contract: `public/creator-suite/shared/code-workspace-core-v1.mjs`.
+- Creator Suite presentation and agent tool caller: `public/creator-suite/code-workbench-v1.mjs` and `public/creator-suite/code.html`.
+- Shared AI dispatch authority: existing `public/creator-suite/shared/ai-tools-v1.js`; only `code.status`, `code.read`, `code.edit`, and `code.validate` can be exposed as AI tools. Public posting and adoption require explicit trusted human interactions, not model-call arguments.
+- Signed peer transport owner: existing `public/app/local-object-mesh-v146.js`. Private repositories are not mesh objects. An explicitly reviewed, licensed selection becomes a `civweave.code-capsule.v1` public object.
+- Local Passport ID is provided by existing `CivweavePassportIdentityV1`. A nonextractable, device-stored AES-GCM key protects encrypted worktrees; the Passport ID is an associated-data binding, **not** a password or sufficient cryptographic secret for portable recovery.
+- The browser implementation stores Git-format SHA-1 blob/tree/commit identities and encrypted snapshots, but it does not expose a native `git` CLI or execute imported code. Git interoperability and external language/runtime tests require separate explicitly approved adapters.
+- Verification: `npm run test:code-mesh`.
