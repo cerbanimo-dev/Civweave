@@ -182,3 +182,12 @@ Use original emotional character design, uncanny but accessible practical-fantas
 6. Only after enough **verified** human edits, failed/successful actor attempts and approved production outcomes: prepare training/validation splits, run Qwen3.5 4B LoRA externally, evaluate held-out scenes and preserve rollbacks. Training is optional and distinct from editorial acceptance.
 
 Browser proof, tests and handoff cannot assert that a feature-length film or OpenSimulator native performance has already been produced.
+
+### Stage reconfiguration and inference privacy hardening
+After approving a screenplay, an AI can propose a revised set plan via `propose-stage`, but the existing approved geometry remains in use until `review-stage` receives a verified human approval. `compileStageScene` uses only the most recently approved set revision. Every proposal is revision-scoped so stale model outputs cannot silently alter sets, and only one pending stage proposal exists for each scene.
+
+The browser studio asks for explicit per-request confirmation before sending manuscript or script excerpts to a remotely hosted selected inference endpoint. This uses the existing `CivweaveModelRuntime.endpointLeavesDevice` check; it does not create a second inference provider. Browser speech transcription also requires a separate provider-consent checkbox, because its implementation may send microphone audio to the browser's chosen speech service.
+
+Audience response capture now requires a **trusted controller to open a specific scripted audience moment** via `open-audience-moment`; the same controller can close it with `close-audience-moment`. Knowing a moment's ID or having a rehearsal in progress is not enough to submit early or late. The lab represents local synthetic actor identities only; production will require authenticated host audience and stage controller roles.
+
+A character-to-avatar binding records a reviewed role, `avatarRef`, model principal, and optional voice reference. The 3D browser set currently renders a character **stand-in**, not a native OpenSimulator rig; Sol must implement actual rig/animation approvals and model pilot execution before reporting a modeled character performance. Training exports are not proof that a Qwen LoRA has been fitted, and FilmCraft planning JSON is not yet a native FilmCraft project.
