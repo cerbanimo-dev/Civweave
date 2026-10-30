@@ -120,7 +120,7 @@ function prompt(goal,state,limit,profile='large',native=false){
     'Use append for an existing file, not create. Do not output the entire project. Do not publish.',
     'Goal: '+clean(goal,650),
     'Current saved state: '+clean(JSON.stringify(state),1400)
-  ].join('\\n');
+  ].join('\n');
   return [
     'You are a code-authoring agent operating an offline saved workspace through tools.',
     'Return ONLY one JSON object for exactly one operation per response.',
