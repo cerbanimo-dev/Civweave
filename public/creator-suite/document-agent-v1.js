@@ -130,16 +130,43 @@ async function run({objective='',steps=12,tier='auto'}={}){
       completed?'Document complete · revision '+state.revision+' · '+state.wordCount+' words.':
         'Stopped at '+total+' model calls · revision '+state.revision+'. Continue to extend the draft.');
     return{completed,stopped:stopRequested,calls,status:state};
-  }catch(error){status(error.message||String(error),true);throw error;}
+  }catch(error){if(controller.signal.aborted){status('Browser generation cancelled. Saved document edits are preserved; confirm the Termux slot is idle before retrying.');return{stopped:true,calls};}status(error.message||String(error),true);throw error;}
   finally{if(activeController===controller)activeController=null;running=false;if(button)button.disabled=false;if(editor)editor.setAttribute('contenteditable',priorEditable??'true');}
 }
-function stop(){stopRequested=true;activeController?.abort(new DOMException('Document generation stopped by user','AbortError'));status('Stop requested. Saved document edits are preserved.');}
+async function inspectServer(){
+  const module=await import('/creator-suite/shared/native-server-control-v1.mjs');
+  const value=config().value;
+  const output=node('cs-agent-server-status');
+  if(!module.isCreatorNativeTermux(value)){if(output)output.textContent='Current model is not direct Termux Qwen.';return;}
+  if(output)output.textContent='Checking llama-server inference slots…';
+  const [slots,companion]=await Promise.all([module.inspectNativeSlots(),module.inspectCreatorCompanion()]);
+  if(output)output.textContent=slots.detail+'\\n'+companion.detail+
+    (slots.state==='busy'?'\\nDo not queue another request. Browser cancellation may not have stopped the old generation.':'');
+}
+async function restartServer(){
+  const module=await import('/creator-suite/shared/native-server-control-v1.mjs');
+  if(!module.isCreatorNativeTermux(config().value))throw new Error('Termux native model is not selected.');
+  const companion=await module.inspectCreatorCompanion();
+  const output=node('cs-agent-server-status');
+  if(companion.state!=='managed'){if(output)output.textContent='No restart sent. '+companion.detail;return;}
+  if(!window.confirm('Restart the Companion-managed Qwen server? This interrupts ALL active chat, document and code generations. Saved local edits remain.'))return;
+  const result=await module.restartCreatorNativeServer();
+  if(output)output.textContent=result.detail+'\\nJob '+result.jobId+'. Check slots again after model reload.';
+}
+function stop(){
+  stopRequested=true;
+  activeController?.abort(new DOMException('Document generation stopped by user','AbortError'));
+  status('Browser generation cancelled; saved edits preserved. Checking whether Termux is still processing…');
+  void inspectServer().catch(error=>{const output=node('cs-agent-server-status');if(output)output.textContent=String(error.message||error);});
+}
 function init(){
   node('cs-agent-run')?.addEventListener('click',()=>{
     run({objective:node('cs-agent-objective')?.value,steps:node('cs-agent-steps')?.value,
       tier:node('cs-agent-tier')?.value}).catch(error=>console.warn('Document AI:',error.message));
   });
   node('cs-agent-stop')?.addEventListener('click',stop);
+  node('cs-agent-server-check')?.addEventListener('click',()=>inspectServer().catch(error=>status(error.message,true)));
+  node('cs-agent-server-restart')?.addEventListener('click',()=>restartServer().catch(error=>status(error.message,true)));
 }
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 globalThis.CivweaveCreatorDocumentAgentV1=Object.freeze({run,stop,isRunning:()=>running,getLastResult:()=>lastResult,smallModel});
