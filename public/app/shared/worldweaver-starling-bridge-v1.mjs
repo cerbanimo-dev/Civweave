@@ -11,6 +11,7 @@ export function starlingAvatarSeed(personaId){
     personaId:p.id,
     name:p.name,
     role:p.role,
+    color:p.color,
     description:small(`${p.role}. ${p.style}. ${p.goal}`,1200),
     referenceAsset:`/app/assets/starling/${p.id}.svg`,
     style:p.style,
