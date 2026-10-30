@@ -72,7 +72,7 @@
     "test:starling-turns": "node --test scripts/test-starling-collective-turns-v1.mjs",
     "test:starling-worker": "node --test scripts/test-starling-collective-worker-v1.mjs",
     "test:ai-fleet": "node --test scripts/test-ai-fleet-v1.mjs",
-    "test:worldweaver": "node --test scripts/test-worldweaver-core-v1.mjs"
+    "test:worldweaver": "node --test scripts/test-worldweaver-core-v1.mjs scripts/test-worldweaver-avatar-rigs-v1.mjs"
   },
   "overrides": {
     "sharp": "0.35.3"
