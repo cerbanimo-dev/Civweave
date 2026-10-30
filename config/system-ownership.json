@@ -415,9 +415,20 @@
       "contract": "docs/contracts/worldweaver-microspaces-v1.md",
       "executableVerifier": "scripts/test-worldweaver-core-v1.mjs",
       "allowedCallers": [
-        "scripts/test-worldweaver-core-v1.mjs"
+        "scripts/test-worldweaver-core-v1.mjs",
+        "public/app/shared/worldweaver-workspace-v1.mjs",
+        "public/app/worldweaver/workspace.mjs"
       ],
-      "activeRoute": "none; manifest-only foundation pending authenticated capability integration",
+      "workspaceAdapter": "public/app/shared/worldweaver-workspace-v1.mjs",
+      "presentationCaller": "public/app/worldweaver/workspace.mjs",
+      "workspaceStorageKey": "civweave.worldweaver.workspace.v1",
+      "launcherOwner": "public/app/persistent-shell-actions-v1.js",
+      "workspaceExecutableContracts": [
+        "scripts/test-worldweaver-workspace-v1.mjs",
+        "scripts/test-worldweaver-ui-v1.mjs",
+        "scripts/test-worldweaver-launcher-v1.mjs"
+      ],
+      "activeRoute": "/app/worldweaver/index.html; shared local draft workspace, not a sixth system",
       "delegatedAuthorities": {
         "learning": "Living School existing learning and credential owner",
         "tasks": "Cerbanimo existing Quest/proof owner",
@@ -432,7 +443,9 @@
         "Model NPCs may create pilot personas with custom role prompts under platform/tool permissions and externally verified model identities.",
         "NPC proposals are bounded to one to three tools; only trusted world runtimes attest tool outcomes.",
         "No direct code execution, payments, ballot casting, Quest completion, publishing or role-grant authority.",
-        "External permission adapter, signed persistent store, world renderers and bridge integrations are mandatory before public release."
+        "The workspace adapter permits device-local standalone draft editing only; its fixed local principal is not authenticated identity or a live pilot binding.",
+        "The workspace never provisions a world, publishes a Guild Map marker, invokes a model, attests an action, or mutates an external capability.",
+        "External permission adapter, signed persistent store, world renderers and bridge integrations are mandatory before connected world release."
       ]
     }
   }

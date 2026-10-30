@@ -23,7 +23,8 @@
     "/app/realm-console-v140.html",
     "/app/fellowfare-cabinet-v144.html",
     "/app/anarchadia-console-v139.html",
-    "/app/survival/index.html"
+    "/app/survival/index.html",
+    "/app/worldweaver/index.html"
   ],
   "assets": [
     "/finder",
@@ -80,6 +81,10 @@
     "/app/survival/survival-mode.mjs",
     "/app/survival/vision-worker.mjs",
     "/app/survival/vision-policy.mjs",
+    "/app/worldweaver/workspace.mjs",
+    "/app/worldweaver/workspace.css",
+    "/app/shared/worldweaver-core-v1.mjs",
+    "/app/shared/worldweaver-workspace-v1.mjs",
     "/app/learning-pack-seeds-v1.js",
     "/app/shared/learning-pack-runtime-v1.mjs",
     "/app/shared/learning-pack-resolver-v1.mjs",
@@ -294,11 +299,12 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 12679727,
+    "estimatedBytes": 12909091,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 79788591,
-    "candidateAssetCount": 875,
-    "estimatedAssetCount": 875,
-    "conservativeUpperBound": true
+    "requiredFreeBytes": 81024255,
+    "candidateAssetCount": 881,
+    "estimatedAssetCount": 881,
+    "conservativeUpperBound": true,
+    "explicitCoreLaborBytes": 1006300
   }
 }

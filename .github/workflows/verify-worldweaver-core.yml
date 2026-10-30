@@ -3,6 +3,13 @@ on:
   pull_request:
     paths:
       - 'public/app/shared/worldweaver-core-v1.mjs'
+      - 'public/app/shared/worldweaver-workspace-v1.mjs'
+      - 'public/app/worldweaver/**'
+      - 'public/app/persistent-shell-actions-v1.js'
+      - 'public/app/offline-package-v208.json'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'scripts/test-worldweaver-*.mjs'
+      - 'package.json'
       - 'scripts/test-worldweaver-core-v1.mjs'
       - 'config/system-ownership.json'
       - 'docs/contracts/worldweaver-microspaces-v1.md'
@@ -11,6 +18,13 @@ on:
     branches: [staging]
     paths:
       - 'public/app/shared/worldweaver-core-v1.mjs'
+      - 'public/app/shared/worldweaver-workspace-v1.mjs'
+      - 'public/app/worldweaver/**'
+      - 'public/app/persistent-shell-actions-v1.js'
+      - 'public/app/offline-package-v208.json'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'scripts/test-worldweaver-*.mjs'
+      - 'package.json'
       - 'scripts/test-worldweaver-core-v1.mjs'
       - 'config/system-ownership.json'
       - 'docs/contracts/worldweaver-microspaces-v1.md'

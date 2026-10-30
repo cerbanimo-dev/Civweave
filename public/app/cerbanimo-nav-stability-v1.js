@@ -3,7 +3,7 @@
 const VERSION='1.0.6-embedded-persistent-shell-guard';
 const NAV_ID='cw-themed-system-nav';
 const NAV_SRC='/app/themed-system-nav-v178.js?v=1.0.165-viewport-bounds';
-const ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.0.5-direct-routes';
+const ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.2.0-worldweaver-workspace';
 const params=new URLSearchParams(location.search);
 const embedded=window.self!==window.top;
 const persistentEmbedded=embedded&&(params.get('embed')==='1'||params.get('persistentShell')==='1');
