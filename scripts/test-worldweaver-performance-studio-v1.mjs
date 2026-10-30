@@ -21,6 +21,7 @@ const make=()=>createPerformanceStudio({id:()=>`perf-${++n}`,clock:()=> '2026-10
    return actor.kind==='human';
   if(command.type==='propose-scenes')return actor.kind==='human'||actor.kind==='model';
   if(command.type==='perform-cue')return actor.kind==='human';
+  if(['open-audience-moment','close-audience-moment'].includes(command.type))return actor.kind==='human'||actor.kind==='runtime';
   if(command.type==='submit-audience')return actor.kind==='audience';
   if(command.type==='withdraw-audience')return actor.kind==='audience'||actor.kind==='human';
   return false;
@@ -128,6 +129,8 @@ test('rehearsal events are revisioned, cues bounded, and human finalization requ
 test('audience transcript submission is opt-in and restricted to valid open moments',()=>{
  const s=setup(),id=propose(s);approve(s,id);
  const rid=s.studio.dispatch({type:'start-rehearsal',sceneId:id},human).rehearsal;
+ assert.throws(()=>s.studio.dispatch({type:'submit-audience',rehearsalId:rid,momentId:'ask',kind:'text',text:'Too early',consent:{participation:true,training:false}},participant),/not currently open/);
+ s.studio.dispatch({type:'open-audience-moment',rehearsalId:rid,momentId:'ask'},human);
  const command={type:'submit-audience',rehearsalId:rid,momentId:'ask',kind:'transcript',
   text:'The doorway felt inviting.',consent:{participation:true,training:false}};
  assert.throws(()=>s.studio.dispatch({...command,consent:{participation:false,training:false}},participant),/consent/);
@@ -161,6 +164,7 @@ test('FilmCraft interchange is honest: no fake rendered clips or media URLs',()=
 test('LoRA exports require explicit owner consent; nonconsenting audience never included',()=>{
  const s=setup(),id=propose(s);approve(s,id);
  const rid=s.studio.dispatch({type:'start-rehearsal',sceneId:id},human).rehearsal;
+ s.studio.dispatch({type:'open-audience-moment',rehearsalId:rid,momentId:'ask'},human);
  s.studio.dispatch({type:'submit-audience',rehearsalId:rid,momentId:'ask',kind:'text',
   text:'I worry about the door.',consent:{participation:true,training:false}},participant);
  assert.throws(()=>exportQwenLoRADataset(s.studio.snapshot()),/training authorization/);
@@ -247,4 +251,15 @@ test('stale set inference never overwrites approved stage and pending stage bloc
  }}),/Project changed/);
  assert.equal(s.studio.snapshot().revision,before+1);
  assert.equal(s.studio.snapshot().stagePlans.length,1);
+});
+
+test('closed audience invitation rejects late submission even during a running rehearsal',()=>{
+ const s=setup(),id=propose(s);approve(s,id);
+ const rid=s.studio.dispatch({type:'start-rehearsal',sceneId:id},human).rehearsal;
+ s.studio.dispatch({type:'open-audience-moment',rehearsalId:rid,momentId:'ask'},human);
+ assert.throws(()=>s.studio.dispatch({type:'open-audience-moment',rehearsalId:rid,momentId:'ask'},human),/already active/);
+ s.studio.dispatch({type:'close-audience-moment',rehearsalId:rid},human);
+ assert.throws(()=>s.studio.dispatch({type:'submit-audience',rehearsalId:rid,momentId:'ask',kind:'text',
+  text:'This response is after the invitation',consent:{participation:true,training:false}},participant),/not currently open/);
+ assert.equal(s.studio.snapshot().audience.length,0);
 });
