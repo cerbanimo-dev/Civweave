@@ -90,6 +90,7 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     this.putMeta('physicalPairingV1',null); // One-time use.
     const nodeToken=randomToken(48),nodeTokenHash=await shaHex('civweave.physical-node-auth.v1\\n'+nodeToken),now=new Date().toISOString();
     const onboarding=this.recordStage(1,{nodeId:normalized,nodeTokenHash,lastSeenAt:now,heartbeatCount:1,challenge:randomToken(24),locationVerification:null,nodeState:'online',downSince:null,downReason:null,disputes:[],nearReviews:[],communityProofHash:null,communityProofAt:null});
+    await this.schedulePhysicalAlarm();
     return {ok:true,nodeToken,challenge:this.onboardingState().challenge,onboarding};
   }
   async requireNodeToken(token){
@@ -289,6 +290,23 @@ export default{
     }
     const url=new URL(request.url);
 
+    // A verified resident may submit a short-lived code seen locally at the physical node.
+    if(url.pathname==='/api/guild/physical/check-in'){
+      if(request.method==='OPTIONS')return new Response(null,{status:204,headers:sessionCors});
+      try{
+        const tokenHash=await sessionTokenHash(bearer(request)),stub=capacityStub(env);
+        if(request.method==='GET')return json(await stub.pingMemberStatus({tokenHash,requestedNodeId:requestedNodeId(request)}));
+        if(request.method!=='POST')return json({ok:false,error:'Method not allowed'},405);
+        const raw=await request.text();if(enc.encode(raw).byteLength>8192)throw Object.assign(new Error('Community verification request too large.'),{status:413});
+        let body;try{body=JSON.parse(raw)}catch{throw Object.assign(new Error('Invalid community verification JSON.'),{status:400})}
+        const guild=await env.GUILD_STATE.get(env.GUILD_STATE.idFromName('guild')).status();
+        if(!guild.location)throw Object.assign(new Error('Guild Map location is not configured.'),{status:409});
+        return json(await stub.recordCommunityProof({tokenHash,requestedNodeId:requestedNodeId(request),code:body?.code,position:body?.position,pin:guild.location}));
+      }catch(error){return errorResponse(error)}
+    }
+    if(request.method==='GET'&&url.pathname==='/api/guild/physical/status'){
+      try{const on=await capacityStub(env).onboardingStatus();return json({ok:true,onboarding:on?{stage:on.stage,nodeId:on.nodeId,nodeState:on.nodeState,downSince:on.downSince,downReason:on.downReason,lastCommunityVerifiedAt:on.lastCommunityVerifiedAt,communityProofAvailable:on.communityProofAvailable}:null})}catch(error){return errorResponse(error)}
+    }
     // Owner authority is independent of the synchronization key and resident sessions.
     if(url.pathname==='/api/guild/manage'){
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:sessionCors});
@@ -305,7 +323,6 @@ export default{
         const body=await request.json().catch(()=>({})),action=clean(body.action,60);
         let result;
         if(action==='pair-node')result=await stub.issuePairing();
-        else if(action==='verify-location')result=await stub.advanceOnboarding('verify-location',{pin:guildState.location,position:body.position});
         else if(action==='finalize')result=await stub.advanceOnboarding('finalize');
         else if(action==='remove-member')result=await stub.removeResident(body.userId);
         else if(action==='revoke-node')result=await stub.revokePhysicalNode();
@@ -319,7 +336,7 @@ export default{
       try{
         const body=await request.json().catch(()=>({})),stub=capacityStub(env);
         if(url.pathname.endsWith('/connect'))return json(await stub.connectPhysicalNode({pairingCode:body.pairingCode,nodeId:body.nodeId}),201);
-        return json(await stub.heartbeatPhysicalNode({nodeToken:bearer(request),challengeEcho:body.challengeEcho,meshSyncOk:body.meshSyncOk,recoveryOk:body.recoveryOk}));
+        return json(await stub.heartbeatPhysicalNode({nodeToken:bearer(request),challengeEcho:body.challengeEcho,meshSyncOk:body.meshSyncOk,recoveryOk:body.recoveryOk,communityProofHash:body.communityProofHash}));
       }catch(error){return errorResponse(error)}
     }
     if(request.method==='OPTIONS'&&(isSessionPath(url.pathname)||isGeneratePath(url.pathname)))return new Response(null,{status:204,headers:sessionCors});
