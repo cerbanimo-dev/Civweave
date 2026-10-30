@@ -67,6 +67,7 @@ async function run({objective='',steps=12,tier='auto'}={}){
     toolState={status:agent.getDocumentStatus()};
     for(let i=0;i<total&&!stopRequested;i++){
       if(agent.getSession()?.id!==activeSessionId)throw new Error('Active document changed; agent stopped before writing to another document.');
+      const readRevision=agent.getDocumentStatus().revision;
       calls=i+1;status('Document AI · '+(i+1)+'/'+total+' · '+profile+' model · up to '+limit+' edits/call');
       const response=await runtime.generate({
         purpose:'creator-document-agent-v1',executionProfile:'agentic',taskTier:'complex',requiresTools:true,
@@ -88,9 +89,8 @@ async function run({objective='',steps=12,tier='auto'}={}){
       }else if(kind==='edit'){
         if(!Array.isArray(instruction.edits)||!instruction.edits.length||instruction.edits.length>limit)
           throw new Error('Model proposed an invalid batch: expected 1 to '+limit+' edits.');
-        const current=agent.getDocumentStatus();
         toolState=await tools.execute({kind:'text',action:'document.apply',actorId:'creator-document-agent',
-          provider,model,requestId:crypto.randomUUID(),args:{expectedRevision:current.revision,edits:instruction.edits,
+          provider,model,requestId:crypto.randomUUID(),args:{expectedRevision:readRevision,edits:instruction.edits,
             taskTier:profile,batchId:crypto.randomUUID()}});
       }else throw new Error('Model must choose edit, inspect, or done.');
       lastResult={status:agent.getDocumentStatus(),done:false,note:text(instruction.note,400)};
