@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createWorldweaver} from '../public/app/shared/worldweaver-core-v1.mjs';
+import {starlingNpcCommand} from '../public/app/shared/worldweaver-starling-bridge-v1.mjs';
 import {normalizeScreenContent,renderWorldScreen,resolveScreenSource} from '../public/app/shared/worldweaver-screen-v1.mjs';
 
 let n=0;
@@ -128,4 +129,12 @@ test('the standalone screen lab has accessible buttons and only shared Worldweav
  assert.match(html,/Image/);assert.match(html,/Video/);assert.match(html,/Website/);
  assert.match(js,/createWorldweaver/);
  assert.match(js,/renderWorldScreen/);
+});
+
+test('Starling model pilots can request casting as an approved tool, without gaining commerce or governance authority',()=>{
+  const cmd=starlingNpcCommand({personaId:'kami',instanceId:'space-1',modelId:'qwen3.5:4b',pilotPrincipalId:'pilot-1'});
+  assert.ok(cmd.capabilities.includes('cast-screen'));
+  assert.ok(cmd.capabilities.includes('clear-screen'));
+  assert.equal(cmd.capabilities.includes('purchase'),false);
+  assert.equal(cmd.capabilities.includes('vote'),false);
 });
