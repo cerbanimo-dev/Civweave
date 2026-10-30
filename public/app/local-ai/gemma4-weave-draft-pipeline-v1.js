@@ -411,11 +411,15 @@ async function weaveTransport(purpose,{config={},messages=[],schema=null,signal,
         if(signal?.aborted)throw Object.assign(new Error('Generation stopped.'),{code:'CIVWEAVE_GENERATION_STOPPED',cancelled:true});
         paint(`Drafting Quest section ${section+1} of ${QUEST_DRAFT_SECTIONS.length}…`);
         const text=await runLocal({pipelineId,purpose,kind,phase:'draft',label:`Local Weave Draft ${section+1}/${QUEST_DRAFT_SECTIONS.length}`,systemPrompt:questSectionSystem(section),messages:draftMessages,maxNewTokens:DRAFT_TOKENS.quest});
-        const completed=completedQuestSection(text,section);
+        let completed;
+        try{completed=completedQuestSection(text,section)}catch(error){
+          dispatch({pipelineId,purpose,kind,phase:'draft',state:'failed',label:`Quest section ${section+1} incomplete`,section:section+1,text,code:error.code,message:error.message});
+          throw error;
+        }
         parts.push(completed);
         draft=parts.map((part,index)=>`SECTION ${index+1}:\n${part}`).join('\n\n');
         saveArtifact({...lastArtifact,state:'drafting',draftParts:[...parts],draft});
-        dispatch({pipelineId,purpose,kind,phase:'draft',state:'checkpoint',label:`Section ${section+1}/${QUEST_DRAFT_SECTIONS.length} saved`,section:section+1,sectionCount:QUEST_DRAFT_SECTIONS.length,text:draft});
+        dispatch({pipelineId,purpose,kind,phase:'draft',state:'streaming',checkpoint:true,label:`Section ${section+1}/${QUEST_DRAFT_SECTIONS.length} saved`,section:section+1,sectionCount:QUEST_DRAFT_SECTIONS.length,text:draft});
       }
     }else{
       draft=await runLocal({pipelineId,purpose,kind,phase:'draft',label:'Local Weave Draft',systemPrompt:draftSystem(kind),messages:draftMessages,maxNewTokens:DRAFT_TOKENS.learning});
