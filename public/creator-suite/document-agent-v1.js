@@ -60,22 +60,25 @@ async function run({objective='',steps=12,tier='auto'}={}){
   const button=node('cs-agent-run');if(button)button.disabled=true;
   const editor=node('cs-text-editor'),priorEditable=editor?.getAttribute('contenteditable');
   if(editor)editor.setAttribute('contenteditable','false');
+  const activeSessionId=agent.getSession()?.id;
   let toolState={status:agent.getDocumentStatus()},completed=false,calls=0;
   try{
     await agent.flush();
     toolState={status:agent.getDocumentStatus()};
     for(let i=0;i<total&&!stopRequested;i++){
+      if(agent.getSession()?.id!==activeSessionId)throw new Error('Active document changed; agent stopped before writing to another document.');
       calls=i+1;status('Document AI · '+(i+1)+'/'+total+' · '+profile+' model · up to '+limit+' edits/call');
       const response=await runtime.generate({
         purpose:'creator-document-agent-v1',executionProfile:'agentic',taskTier:'complex',requiresTools:true,
         messages:[{role:'system',content:'You are a document-editing tool planner. Reply ONLY with a JSON object. No markdown outside JSON.'},
           {role:'user',content:stepPrompt(chosen,toolState,limit)}],
-        config:{...value,stream:false,maxTokens:Math.max(900,Math.min(Number(value.maxTokens)||4000,8192))},
+        config:{...value,stream:false,maxTokens:Math.max(1400,Math.min(Number(value.maxTokens)||8192,32768))},
         context:{creatorSuite:true,mediaType:'text',taskTier:profile,documentSessionId:agent.getSession()?.id}
       });
-      if(!['success','fallback'].includes(response?.status))
+      if(response?.status!=='success'||(response?.fallback?.used&&response?.fallback?.provider==='deterministic'))
         throw new Error('Inference stopped: '+text(response?.error?.message||response?.status||'unknown error',500));
       if(stopRequested)break;
+      if(agent.getSession()?.id!==activeSessionId)throw new Error('Active document changed while the model was thinking; no edit was applied.');
       const instruction=parse(response),kind=text(instruction.type,50);
       if(kind==='done'){completed=true;lastResult={status:agent.getDocumentStatus(),done:true,note:text(instruction.note,400)};break;}
       const actual=response.actual||{},provider=text(actual.provider||value.provider,120),model=text(actual.model||value.model,240);
