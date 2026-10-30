@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {createWorldweaver} from '../public/app/shared/worldweaver-core-v1.mjs';
 import {validateAvatarPlan, avatarEventSteps, avatarVisualRequest, renderAvatarSvg} from '../public/app/shared/worldweaver-avatar-v1.mjs';
 import {proposeAvatarViaModel} from '../public/app/shared/worldweaver-avatar-pilot-v1.mjs';
@@ -152,4 +153,16 @@ test('a pilot cannot submit another persona\'s image as their own identity',asyn
   await assert.rejects(proposeAvatarViaModel({world,npcId:npc.id,actor:model,seed:starlingAvatarSeed('aphra'),
     visionCapable:false,invokeModel:async()=>({plan})}),/persona/i);
   assert.equal(world.snapshot().avatarProposals.length,0);
+});
+
+test('Avatar Lab is a direct, accessible local preview that imports shared owners',()=>{
+  const html=readFileSync(new URL('../public/app/tools/worldweaver-avatar-lab.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../public/app/tools/worldweaver-avatar-lab-v1.mjs',import.meta.url),'utf8');
+  assert.match(html,/Worldweaver · Avatar Lab/);
+  assert.match(html,/aria-live="polite"/);
+  assert.match(html,/data-event="visitor-arrived"/);
+  assert.match(js,/starlingRoster/);
+  assert.match(js,/validateAvatarPlan/);
+  assert.match(js,/rasterizeTrustedAvatar/);
+  assert.doesNotMatch(js,/\beval\s*\(|new Function\s*\(/);
 });
