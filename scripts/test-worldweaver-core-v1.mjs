@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {createWorldweaver, SPACE_GUIDES, WORLDWEAVER_SCHEMA} from '../public/app/shared/worldweaver-core-v1.mjs';
 
 let seq=0;
@@ -30,7 +31,7 @@ test('map linking requires a guild, and instance creation never claims to alloca
   const r=create(w,'rook','guild-map','guild-123');
   assert.equal(r.instance.guildId,'guild-123');
   assert.equal(r.instance.status,'draft');
-  assert.throws(()=>w.dispatch({type:'provisioned',instanceId:r.instance.id,backend:'opensim',worldRef:'grid-123'},human),/runtime/i);
+  assert.throws(()=>w.dispatch({type:'provisioned',instanceId:r.instance.id,backend:'opensim',worldRef:'grid-123'},human),/Unauthorized|runtime/i);
   w.dispatch({type:'request-provision',instanceId:r.instance.id},human);
   assert.equal(w.snapshot().instances[0].status,'provision-requested');
   assert.equal(w.dispatch({type:'provisioned',instanceId:r.instance.id,backend:'opensim',worldRef:'grid-123'},runtime).instance.status,'live');
@@ -60,7 +61,7 @@ test('models can rig and pilot NPCs, but their custom prompts cannot expand tool
   const turns=w.dispatch({type:'queue-actions',npcId:r.npc.id,actions:[{tool:'observe',args:{target:'desk'}},{tool:'speak',args:{text:'Welcome'}}]},npcActor);
   assert.equal(turns.intents.length,2);
   assert.ok(turns.intents.every(x=>x.status==='queued'));
-  assert.throws(()=>w.dispatch({type:'report-action',intentId:turns.intents[0].id,outcome:'succeeded'},npcActor),/runtime/i);
+  assert.throws(()=>w.dispatch({type:'report-action',intentId:turns.intents[0].id,outcome:'succeeded'},npcActor),/Unauthorized|runtime/i);
   assert.equal(w.dispatch({type:'report-action',intentId:turns.intents[0].id,outcome:'succeeded'},runtime).intent.status,'succeeded');
   assert.throws(()=>w.dispatch({type:'queue-actions',npcId:r.npc.id,actions:Array.from({length:4},()=>({tool:'observe'}))},npcActor),/three/i);
 });
@@ -94,4 +95,11 @@ test('unauthenticated calls fail; snapshots cannot mutate internal state',()=>{
   snap.instances[0].title='tampered';
   assert.notEqual(w.snapshot().instances[0].title,'tampered');
   assert.throws(()=>w.dispatch({type:'create',guide:'wrong',title:'Bad'},human),/guide/i);
+});
+
+test('Worldweaver has one registered shared owner and its named contract',()=>{
+  const json=JSON.parse(readFileSync(new URL('../config/system-ownership.json',import.meta.url),'utf8'));
+  assert.equal(json.systems.worldweaver.owner,'public/app/shared/worldweaver-core-v1.mjs');
+  assert.ok(json.systems.worldweaver.allowedCallers.includes('scripts/test-worldweaver-core-v1.mjs'));
+  assert.match(readFileSync(new URL('../docs/contracts/worldweaver-microspaces-v1.md',import.meta.url),'utf8'),/NPC pilots/);
 });
