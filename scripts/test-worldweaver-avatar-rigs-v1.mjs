@@ -6,7 +6,7 @@ import {STARLING_PERSONAS} from '../public/app/shared/starling-collective-v1.mjs
 import {starlingAvatarSeed,starlingNpcCommand,starlingRoster} from '../public/app/shared/worldweaver-starling-bridge-v1.mjs';
 
 let n=0;
-const model={kind:'model',principalId:'pilot:starling:kami',modelId:'qwen3.5:4b',verified:true};
+const model={kind:'model',principalId:'pilot:starling:kami',modelId:'qwen3.5:4b',personaRef:'starling:kami',verified:true};
 const human={kind:'human',principalId:'human-1',verified:true};
 const runtime={kind:'runtime',principalId:'trusted-renderer',verified:true};
 const make=()=>createWorldweaver({id:()=>`rig-${++n}`,clock:()=> '2026-10-30T04:00:00Z',
