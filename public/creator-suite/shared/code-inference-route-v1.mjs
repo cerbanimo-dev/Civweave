@@ -19,7 +19,7 @@ export function normalizeCodeInferenceResult(value={},model=''){
   if(!outputText&&!value?.outputJson)throw new Error('Downloaded local model returned no text or JSON.');
   return{status:'success',outputText,outputJson:value?.outputJson??null,actual:{provider:'downloaded-local',model},usage:value?.usage||{},fallback:value?.fallback||{used:false}};
 }
-export async function runCodeInference(config,messages,{selection=null,loadLocal,loadServer,sharedRuntime,onProgress,onToken,context={},maxTokens=2048,signal}={}){
+export async function runCodeInference(config,messages,{selection=null,loadLocal,loadServer,sharedRuntime,onProgress,onToken,context={},maxTokens=2048,signal,purpose='creator-code-agent-v1',mediaType='code',taskTier='complex',requiresTools=false}={}){
   const route=resolveCodeInferenceRoute(config,selection);
   if(route.kind==='downloaded-local'){
     if(typeof loadLocal!=='function')throw new Error('Canonical downloaded-local runtime loader is missing.');
@@ -52,7 +52,7 @@ export async function runCodeInference(config,messages,{selection=null,loadLocal
     if(typeof loadServer!=='function')throw new Error('Canonical Guild/Cloudflare AI router is unavailable.');
     const server=await loadServer();
     if(!server?.handle)throw new Error('Civweave server AI routing owner did not initialize.');
-    const response=await server.handle({purpose:'creator-code-agent-v1',executionProfile:'agentic',taskTier:'complex',messages,responseFormat:'json',config:{...config,maxTokens:Math.max(1024,Math.min(8192,Number(maxTokens)||2048))},context:{creatorSuite:true,mediaType:'code',...context}});
+    const response=await server.handle({purpose,executionProfile:'agentic',taskTier,messages,responseFormat:'json',config:{...config,maxTokens:Math.max(1024,Math.min(8192,Number(maxTokens)||2048))},context:{creatorSuite:true,mediaType,...context}});
     if(response?.handled!==true||!response.result)throw new Error('Configured Guild/Cloudflare inference route did not handle the request. Verify your selected node and active capacity session.');
     return response.result;
   }
@@ -69,7 +69,7 @@ export async function runCodeInference(config,messages,{selection=null,loadLocal
     ?{...config,stream:true,maxTokens:Math.min(512,Math.max(128,Number(maxTokens)||512)),timeoutMs:Math.max(480000,Number(config.timeoutMs)||0),temperature:0.2}
     :{...config,stream:false,maxTokens:Math.max(1024,Math.min(8192,Number(maxTokens)||2048))};
   return sharedRuntime.generate({
-    purpose:'creator-code-agent-v1',executionProfile:'agentic',taskTier:'complex',requiresTools:false,
+    purpose,executionProfile:'agentic',taskTier,requiresTools,
     responseFormat:nativeTermux?'text':'json',maxRepairAttempts:nativeTermux?0:1,signal,
     messages,config:requestConfig,
     onEvent:event=>{
@@ -80,6 +80,6 @@ export async function runCodeInference(config,messages,{selection=null,loadLocal
         onProgress?.({phase:event.phase,backend:event.backend||'',detail:clean(event.detail||'',160)});
       }
     },
-    context:{creatorSuite:true,mediaType:'code',...context}
+    context:{creatorSuite:true,mediaType,...context}
   });
 }
