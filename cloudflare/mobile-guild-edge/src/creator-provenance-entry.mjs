@@ -67,7 +67,7 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     const row=this.onboardingState();
     if(!row)return null; // Legacy Guilds retain their previously established capacity.
     const stage=Math.max(0,Math.min(5,Number(row.stage)||0)),life=nodeLiveness(row),online=life.state==='online'||life.state==='flagged';
-    return {schema:row.schema,stage,progressPercent:progressForStage(stage),unlockedSlots:capacityForStage(stage),lockedSlots:10-capacityForStage(stage),maxSlots:10,milestones:GUILD_MILESTONES.map((label,i)=>({step:i+1,label,complete:stage>=i+1})),nodeId:row.nodeId||null,nodeOnline:online,nodeState:life.state,downReason:life.reason,downSince:life.downSince,lastSeenAt:row.lastSeenAt||null,locationVerification:row.locationVerification||null,lastCommunityVerifiedAt:row.lastCommunityVerifiedAt||null,communityProofAvailable:proofFresh(row.communityProofAt),completedAt:row.completedAt||null};
+    return {schema:row.schema,stage,progressPercent:progressForStage(stage),unlockedSlots:capacityForStage(stage),lockedSlots:10-capacityForStage(stage),maxSlots:10,milestones:GUILD_MILESTONES.map((label,i)=>({step:i+1,label,complete:stage>=i+1})),nodeId:life.state==='removed'?null:(row.nodeId||null),retiredNodeId:life.state==='removed'?(row.retiredNodeId||row.nodeId||null):null,nodeOnline:online,nodeState:life.state,downReason:life.reason,downSince:life.downSince,lastSeenAt:row.lastSeenAt||null,locationVerification:row.locationVerification||null,lastCommunityVerifiedAt:row.lastCommunityVerifiedAt||null,communityProofAvailable:proofFresh(row.communityProofAt),completedAt:row.completedAt||null};
   }
   recordStage(stage,extra={}){
     const current=this.onboardingState();if(!current)throw Object.assign(new Error('This Guild predates the physical-node reward program.'),{status:409});
@@ -183,7 +183,7 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
   async retireExpiredPhysicalNode(){
     const row=this.onboardingState(),live=nodeLiveness(row);
     if(live.state!=='removed'||row?.nodeState==='removed')return this.onboardingStatus();
-    return this.recordStage(row.stage,{nodeState:'removed',downReason:live.reason,downSince:live.downSince,removedAt:new Date().toISOString(),nodeTokenHash:null,communityProofHash:null,previousCommunityProofHash:null});
+    return this.recordStage(row.stage,{nodeState:'removed',downReason:live.reason,downSince:live.downSince,removedAt:new Date().toISOString(),retiredNodeId:row.nodeId,nodeId:null,nodeTokenHash:null,communityProofHash:null,previousCommunityProofHash:null});
   }
   async alarm(){
     await this.retireExpiredPhysicalNode();
@@ -191,13 +191,13 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
   }
   finalizeOnboarding(){
     const row=this.onboardingState();
-    if(!row||row.stage<4||!row.lastSeenAt||Date.now()-Date.parse(row.lastSeenAt)>NODE_HEARTBEAT_GRACE_MS)
+    if(!row||row.stage<4||nodeLiveness(row).state!=='online')
       throw Object.assign(new Error('Finish secure pairing, sync/recovery checks and a fresh server heartbeat before finalizing.'),{status:409});
     return {ok:true,onboarding:this.recordStage(5,{completedAt:new Date().toISOString()})};
   }
   revokePhysicalNode(){
     const row=this.onboardingState();if(!row)throw Object.assign(new Error('This Guild has no physical-node onboarding.'),{status:409});
-    return {ok:true,onboarding:this.recordStage(row.stage,{nodeTokenHash:null,lastSeenAt:null,challenge:null})};
+    return {ok:true,onboarding:this.recordStage(row.stage,{nodeTokenHash:null,lastSeenAt:null,challenge:null,communityProofHash:null,previousCommunityProofHash:null,nodeState:'unpaired',downReason:null,downSince:null})};
   }
   memberDirectory(){
     this.ensureResidentTables();
