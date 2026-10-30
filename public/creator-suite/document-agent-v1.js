@@ -32,7 +32,7 @@ function config(){
 }
 function nativeTermux(config){
   return config.provider==='openai-compatible'&&config.model==='qwen35-4b-native'
-    &&String(config.endpoint||'').replace(/\\/$/,'')==='http://127.0.0.1:8080/v1';
+    &&String(config.endpoint||'').replace(/\/$/,'')==='http://127.0.0.1:8080/v1';
 }
 function stepPrompt(objective,toolState,maxEdits,native=false){
   if(native)return [
