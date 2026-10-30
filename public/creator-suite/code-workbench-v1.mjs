@@ -1,6 +1,7 @@
 import {CivweaveCodeWorkspaceV1 as work,publishReviewed,adoptReviewed} from './shared/code-mesh-workspace-v1.mjs';
 import {resolveCodeInferenceRoute,runCodeInference} from './shared/code-inference-route-v1.mjs';
 import {currentCreatorLocalSelection,loadCreatorLocalRuntime,loadCreatorServerRuntime} from './shared/creator-inference-loaders-v1.mjs';
+import {inspectNativeSlots,inspectCreatorCompanion,restartCreatorNativeServer,isCreatorNativeTermux} from './shared/native-server-control-v1.mjs';
 
 const el=id=>document.getElementById('cw-'+id),out=(id,value)=>{el(id).textContent=typeof value==='string'?value:JSON.stringify(value,null,2);};
 let workspaceId='',previewId='',inspectedId='',running=false,stopRequested=false,generationController=null;
@@ -62,7 +63,32 @@ function modelStatus(){
     :'Selected provider: '+route.provider+' · '+(value.model||'default')+(nativeTermux(value)?' · Termux streaming code chunks':'');}
   catch(error){display.textContent='Model unavailable: '+error.message;}
 }
-function nativeTermux(config){return config?.provider==='openai-compatible'&&config.model==='qwen35-4b-native'&&String(config.endpoint||'').replace(/\/$/,'')==='http://127.0.0.1:8080/v1';}
+function nativeTermux(config){return isCreatorNativeTermux(config);}
+function serverSummary(info){
+  const tasks=(info.slots||[]).filter(slot=>slot.busy).map(slot=>slot.taskId).filter(id=>id!==null);
+  return 'Termux slots: '+(info.detail||info.state||'unknown')+(tasks.length?' · running task IDs '+tasks.join(', '):'');
+}
+async function checkTermux(){
+  const {value}=config();
+  if(!nativeTermux(value)){out('server-status','Current provider is not the direct Termux model.');return;}
+  out('server-status','Checking Termux processing slots…');
+  const slots=await inspectNativeSlots();
+  const companion=await inspectCreatorCompanion();
+  out('server-status',serverSummary(slots)+'\\nCompanion: '+companion.detail+
+    (slots.state==='busy'?'\\nDo not submit another generation until the slot is idle. Browser Stop may not cancel server work.':''));
+}
+async function restartTermux(){
+  if(!nativeTermux(config().value))throw new Error('Choose the direct Termux model before restarting it.');
+  const companion=await inspectCreatorCompanion();
+  if(companion.state!=='managed'){
+    out('server-status','No restart sent. '+companion.detail);
+    return;
+  }
+  if(!window.confirm('Restart the Companion-managed Termux Qwen server? This will interrupt ALL chat, document and code generations using it. Local saved work is preserved.'))return;
+  out('server-status','Requesting Companion-owned server restart…');
+  const result=await restartCreatorNativeServer();
+  out('server-status',result.detail+'\\nRequest '+result.jobId+'. Use Check Termux inference slots after the model reloads.');
+}
 function smallModel(name){return /(?:^|[^0-9])(?:0\.\d+|1(?:\.5)?|2|3|4|5|6|7)b(?:[^a-z]|$)/i.test(clean(name,240))||/\be[24]b\b/i.test(clean(name,240));}
 function decode(output){
   if(output?.outputJson&&typeof output.outputJson==='object'&&!Array.isArray(output.outputJson))return output.outputJson;
@@ -113,6 +139,13 @@ async function runAgent(){
   running=true;stopRequested=false;el('run').disabled=true;
   const controller=new AbortController();generationController=controller;
   let state={status:await work.status(id)},calls=0,completed=false;
+  let slotPollBusy=false;
+  const monitor=nativeTermux(value)?setInterval(async()=>{
+    if(slotPollBusy||!running||stopRequested)return;
+    slotPollBusy=true;
+    try{const slots=await inspectNativeSlots();out('server-status',serverSummary(slots))}catch{}
+    finally{slotPollBusy=false;}
+  },12000):null;
   try{
     for(let i=0;i<total&&!stopRequested;i++){
       if(workspaceId!==id)throw new Error('Workspace selection changed during agent run.');
@@ -147,7 +180,7 @@ async function runAgent(){
       await choose(id);
     }
     out('agent-result',{completed,stopped:stopRequested,calls,state:await work.status(id),note:'Static validation only; source has not been executed or published.'});
-  }finally{if(generationController===controller)generationController=null;running=false;el('run').disabled=false;}
+  }finally{if(monitor!==null)clearInterval(monitor);if(generationController===controller)generationController=null;running=false;el('run').disabled=false;}
 }
 function parsePaths(){return el('publish-paths').value.split(/[\n,]/).map(x=>x.trim()).filter(Boolean);}
 async function prepare(){
@@ -186,7 +219,15 @@ function init(){
   el('workspaces').addEventListener('change',()=>{workspaceId=el('workspaces').value;previewId='';el('publish').disabled=true;choose(workspaceId).catch(showError);});
   bind('inspect',async()=>{const r=await work.readFile(selected(),el('path').value.trim());el('content').value=r.content;out('checks',r);});
   bind('edit',editManual);bind('validate',async()=>out('checks',await work.validate(selected())));
-  bind('run',()=>runAgent());bind('stop',()=>{stopRequested=true;generationController?.abort(new DOMException('Code generation stopped by user','AbortError'));out('agent-result','Stop requested; already saved code edits are preserved.');});
+  bind('run',()=>runAgent());bind('stop',async()=>{
+    stopRequested=true;generationController?.abort(new DOMException('Code generation stopped by user','AbortError'));
+    out('agent-result','Browser request cancelled. Saved edits are preserved; checking whether llama-server is still running the old task…');
+    if(nativeTermux(config().value)){
+      const slots=await inspectNativeSlots();
+      out('server-status',serverSummary(slots)+(slots.state==='busy'?'\\nThe server is STILL generating after browser Stop. Use the explicit Companion restart if you own this server; otherwise stop the llama-server process in Termux.':'\\nBrowser Stop does not by itself prove server cancellation.'));
+    }
+  });
+  bind('server-check',checkTermux);bind('server-restart',restartTermux);
   bind('preview',prepare);bind('publish',publish);bind('discover',discover);bind('inspect-public',inspect);bind('adopt',adopt);
   choose().catch(showError);
 }
