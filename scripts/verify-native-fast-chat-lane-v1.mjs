@@ -123,7 +123,7 @@ assert.match(moss,/handleNativeLivingSchoolRequest/);
 assert.match(chat,/await direct\.respondNative/);
 assert.match(chat,/guide:respondingSystem,responderSystem:respondingSystem/);
 assert.match(chat,/await verifyNativePhoneServerTransport/);
-assert.match(runtime,/const useStream = aiLocal \|\| Boolean\(config\.stream \|\| lineup\)/,\n  'Native direct requests must honor the passed streaming setting');
+assert.match(runtime,/const useStream = aiLocal \|\| Boolean\(config\.stream \|\| lineup\)/, 'Native direct requests must honor the passed streaming setting');
 assert.match(runtime,/nativeDirectTermuxNoStream: true/);
 assert.match(campus,/guide-chat-surface-v350\.js\?v=1\.0\.200-interwoven-quest-map/);
 assert.match(shell,/guide-chat-surface-v350\.js\?v=1\.0\.200-interwoven-quest-map/);
