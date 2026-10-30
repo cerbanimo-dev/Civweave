@@ -416,7 +416,8 @@
       "executableVerifier": "scripts/test-worldweaver-core-v1.mjs",
       "allowedCallers": [
         "scripts/test-worldweaver-core-v1.mjs",
-        "scripts/test-worldweaver-avatar-rigs-v1.mjs"
+        "scripts/test-worldweaver-avatar-rigs-v1.mjs",
+        "scripts/test-worldweaver-screens-v1.mjs"
       ],
       "activeRoute": "none; manifest-only foundation pending authenticated capability integration",
       "delegatedAuthorities": {
@@ -436,16 +437,25 @@
         "External permission adapter, signed persistent store, world renderers and bridge integrations are mandatory before public release.",
         "Starling personas and existing SVG portraits are read from canonical Starling sources; no duplicate persona registry.",
         "Models receive real bounded rasterized images only when explicitly supported; fallback cannot claim visual perception.",
-        "NPC avatar body plans and behavior are declarative, reviewed and acknowledged by a trusted renderer before activation."
+        "NPC avatar body plans and behavior are declarative, reviewed and acknowledged by a trusted renderer before activation.",
+        "Screens are logical world objects with validated image, video or HTTPS website source references and one canonical cast state owner.",
+        "Model presenters queue cast-screen/clear-screen intents; only trusted runtimes acknowledge changes; external URLs require human review.",
+        "Websites render in sandboxed cross-origin iframes without same-origin permission and may refuse embedding; no arbitrary model HTML or JavaScript."
       ],
       "helpers": [
         "public/app/shared/worldweaver-avatar-v1.mjs",
         "public/app/shared/worldweaver-starling-bridge-v1.mjs",
-        "public/app/shared/worldweaver-avatar-pilot-v1.mjs"
+        "public/app/shared/worldweaver-avatar-pilot-v1.mjs",
+        "public/app/shared/worldweaver-screen-v1.mjs"
       ],
       "executableVerifiers": [
         "scripts/test-worldweaver-core-v1.mjs",
-        "scripts/test-worldweaver-avatar-rigs-v1.mjs"
+        "scripts/test-worldweaver-avatar-rigs-v1.mjs",
+        "scripts/test-worldweaver-screens-v1.mjs"
+      ],
+      "presentationDemos": [
+        "public/app/tools/worldweaver-avatar-lab.html",
+        "public/app/tools/worldweaver-screen-lab.html"
       ]
     }
   }

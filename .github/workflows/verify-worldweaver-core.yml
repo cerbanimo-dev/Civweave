@@ -3,6 +3,10 @@ on:
   pull_request:
     paths:
       - 'public/app/shared/worldweaver-core-v1.mjs'
+      - 'public/app/shared/worldweaver-screen-v1.mjs'
+      - 'scripts/test-worldweaver-screens-v1.mjs'
+      - 'public/app/tools/worldweaver-screen-lab.html'
+      - 'public/app/tools/worldweaver-screen-lab-v1.mjs'
       - 'scripts/test-worldweaver-core-v1.mjs'
       - 'scripts/test-worldweaver-avatar-rigs-v1.mjs'
       - 'public/app/shared/worldweaver-avatar-v1.mjs'
@@ -31,5 +35,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --check public/app/shared/worldweaver-core-v1.mjs
+      - run: node --check public/app/shared/worldweaver-core-v1.mjs && node --check public/app/shared/worldweaver-screen-v1.mjs && node --check public/app/tools/worldweaver-screen-lab-v1.mjs
       - run: npm run test:worldweaver

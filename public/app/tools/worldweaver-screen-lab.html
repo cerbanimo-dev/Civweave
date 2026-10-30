@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Worldweaver Screen Lab</title>
+<style>
+:root{font-family:system-ui,sans-serif;color-scheme:dark;background:#10131d;color:#f6f5fa}
+*{box-sizing:border-box}body{max-width:1160px;margin:auto;padding:1.25rem}
+h1{font-size:clamp(1.6rem,4vw,2rem);margin:.3rem 0}h2{font-size:1.08rem}p{color:#c8c6d3;line-height:1.5}
+main{display:grid;grid-template-columns:minmax(260px,1fr) minmax(340px,1.7fr);gap:1rem}
+section{border:1px solid #485064;background:#1b202b;border-radius:16px;padding:1.05rem;min-width:0}
+label{display:block;margin:.8rem 0 .3rem;font-weight:600}input,select,button{font:inherit;color:inherit}
+input[type=text],input[type=url],input[type=file],select{background:#10131d;border:1px solid #777c91;border-radius:9px;padding:.65rem;width:100%;max-width:100%}
+button,.shortcut{border:1px solid #737d97;background:#30405a;color:#fdfdff;border-radius:10px;padding:.7rem .85rem;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #c8abff;outline-offset:2px}
+.buttons{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}.buttons>button{flex:1}
+.screen-wrap{aspect-ratio:16 / 9;border:12px solid #333748;background:#05070e;border-radius:18px;overflow:hidden;min-height:180px;display:grid;place-items:center}
+.screen-wrap:has(.cw-worldweaver-screen){display:block}.cw-worldweaver-screen{height:100%;display:flex;flex-direction:column;margin:0}
+.cw-worldweaver-screen h3{padding:.3rem .7rem;margin:0;font-size:.95rem}
+.cw-worldweaver-screen-media{width:100%;flex:1;object-fit:contain;min-height:0;border:0;background:#060912}
+.cw-worldweaver-screen iframe{min-height:210px;object-fit:fill}
+.cw-worldweaver-screen p{font-size:.78rem;margin:.4rem}.cw-worldweaver-screen a{display:inline-block;color:#eac8ff;padding:.35rem;font-size:.86rem}
+.muted{color:#a8aabb;font-size:.9rem}.status{background:#252c3e;padding:.65rem;border-radius:10px;min-height:2.5rem}
+.card{margin:.7rem 0;padding:.7rem;border:1px solid #464d60;border-radius:10px}
+#blank{color:#d2d0de;text-align:center}#log{font:12px/1.6 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:140px;overflow:auto}
+a{color:#d9c1ff}
+@media(max-width:750px){main{grid-template-columns:1fr}.screen-wrap{border-width:7px}.cw-worldweaver-screen iframe{min-height:150px}}
+</style>
+</head><body>
+<header>
+<small>WORLDWEAVER · LOCAL SCREEN EXPERIMENT</small>
+<h1>Worldweaver Screen Lab</h1>
+<p>Cast created images, uploaded videos, and HTTPS webpages to an in-world display. Model presentation follows a queued action and trusted-renderer acknowledgement; external URLs require human review. This is an isolated demo with simulated actors, not an active AI or shared Guild screen.</p>
+<a href="./worldweaver-avatar-lab.html">Avatar Lab</a>
+</header>
+<main>
+<section aria-labelledby="controls-title">
+<h2 id="controls-title">Choose what to display</h2>
+<label for="kind">Media type</label>
+<select id="kind"><option value="image">Image</option><option value="video">Video</option><option value="website">Website</option></select>
+<label for="title">Display title</label>
+<input id="title" type="text" maxlength="160" value="Workshop display">
+<div id="file-options">
+<label for="upload">Manually created / uploaded image or video</label>
+<input id="upload" type="file" accept="image/png,image/jpeg,image/webp">
+<p class="muted">Selected media is held only in this browser session, without uploading to a server.</p>
+<button type="button" id="generate">Generate a local demo slide image</button>
+</div>
+<label for="source-url">Optional HTTPS media or website URL</label>
+<input id="source-url" type="url" placeholder="https://example.org/" autocomplete="off" spellcheck="false">
+<p class="muted">External sites may disallow iframe embedding. Screens do not bypass website permissions or browser media policies.</p>
+<div class="buttons">
+<button type="button" id="cast-human">Cast manually</button>
+<button type="button" id="queue-model">Queue model cast</button>
+</div>
+<div class="card">
+<h2>Model review and execution demo</h2>
+<p class="muted">No inference runs here. The model command and renderer acknowledgement are demonstrated with clearly labeled test identities only.</p>
+<div id="pending" aria-live="polite">No model cast pending.</div>
+<div class="buttons">
+<button type="button" id="approve">Approve URL</button>
+<button type="button" id="reject">Reject</button>
+<button type="button" id="apply">Simulate trusted display</button>
+</div>
+</div>
+</section>
+<section aria-labelledby="display-title">
+<h2 id="display-title">Workshop wall screen</h2>
+<div class="screen-wrap" id="screen" aria-live="polite"><p id="blank">Nothing is showing yet.</p></div>
+<div class="buttons"><button type="button" id="clear">Clear screen</button></div>
+<p id="status" class="status" role="status">A local Worldweaver screen is ready.</p>
+<h2>Presentation log</h2>
+<pre id="log" aria-label="Presentation activity"></pre>
+</section>
+</main>
+<script type="module" src="./worldweaver-screen-lab-v1.mjs"></script>
+</body></html>
