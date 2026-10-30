@@ -151,6 +151,7 @@ const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.0.0-purpose-fir
 function showUnifiedFleet(layer=document.getElementById('cw-settings-v320')){
   const target=layer?.querySelector?.('[data-settings-tab-panel="local-models"]');
   if(!target||!layer?.isConnected||layer.hidden)return false;
+  updateHeader(layer);
   const api=globalThis.CivweaveAIFleetV1;
   if(api?.render){api.render(layer);return true;}
   // One shared model-selection owner. Legacy pack/model card renderers are
