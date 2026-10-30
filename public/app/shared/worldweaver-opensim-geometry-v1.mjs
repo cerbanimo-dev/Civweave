@@ -84,7 +84,7 @@ export function validateOpenSimRegion(raw){
  const size={x:scalar(raw.size.x,16,4096,'region width'),y:scalar(raw.size.y,16,4096,'region height')};
  const revision=scalar(raw.revision,0,Number.MAX_SAFE_INTEGER,'revision');
  if(!Array.isArray(raw.objects)||raw.objects.length>256)throw new TypeError('Too many region objects');
- const objectIds=new Set(),objects=[];let totalFaces=0;
+ const objectIds=new Set(),globalPartIds=new Set(),objects=[];let totalFaces=0;
  for(const rawObject of raw.objects){
   allowed(rawObject,['id','name','position','rotation','parts','kind','instanceId'],'object');
   const id=identifier(rawObject.id,'object ID');
@@ -98,8 +98,8 @@ export function validateOpenSimRegion(raw){
   for(const rawPart of rawObject.parts){
    allowed(rawPart,['id','name','type','offset','rotation','scale','vertices','triangles','color'],'prim');
    const partId=identifier(rawPart.id,'prim ID');
-   if(partIds.has(partId))throw new TypeError('Duplicate prim ID');
-   partIds.add(partId);
+   if(partIds.has(partId)||globalPartIds.has(partId))throw new TypeError('Duplicate prim ID');
+   partIds.add(partId);globalPartIds.add(partId);
    const type=rawPart.type;
    if(!['box','cylinder','mesh'].includes(type))throw new TypeError('Unsupported prim type');
    const offset=vector(rawPart.offset,'part offset');
