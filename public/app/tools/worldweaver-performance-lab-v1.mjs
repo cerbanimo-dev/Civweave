@@ -491,8 +491,13 @@ async function personaRun(phase){
     branchId:'what-if:'+crypto.randomUUID(),title:'Private rehearsal',
     scenario,stage,cast:participants});
    const prior=personaScene||{revision:0,turn:startingCampaign.turn};
+   const recentPublic=campaignPublicTimeline(startingCampaign)
+    .filter(e=>e.type==='rehearsal-preview').slice(-3)
+    .map(e=>('Player said/tried: '+text(e.playerCue,350)+'; '+e.characterId+' replied: '+text(e.speech,350)));
    personaScene=await prepareDirectedScene({pack:personaCast,stage,scenario,participants,
-    goals:['Respect canonical facts and personal knowledge; improvise without silently rewriting historical events.'],
+    goals:['Respect canonical facts and personal knowledge; improvise without silently rewriting historical events.',
+      'Adapt to any player deviation; these past rehearsal lines are UNVERIFIED dialogue, not authoritative facts.',
+      ...recentPublic],
     branchId:startingCampaign.branchId,
     previousScene:prior,invokeModel:runPersonaSelectedModel});
    personaCampaign=startingCampaign;
@@ -531,8 +536,16 @@ async function personaRun(phase){
     sceneRevision:personaScene.revision,proposedActions:result.proposedActions||[]});
    personaWillpower=personaCampaign.willpower;showPersonaWillpower();
    rebuildPersonaRecent();
+   const redirected=$('persona-force-redirect').checked||result.needsDirection===true;
    personaScene=advanceSceneTurn(personaScene,{expectedTurn:personaScene.turn});
+   if(redirected){
+    // This expires the scene brief only. Model output never changes canon or
+    // Worldweaver state. A new 4B direction is needed for the next cue.
+    personaScene.expireAfterTurn=personaScene.turn;
+    $('persona-force-redirect').checked=false;
+   }
    personaStatus(JSON.stringify({character:split?'landry-delia':id,speech:result.speech,emote:result.emote,
+     playerDeviationRequested:redirected,
      route:split?result.route:'individual',remainingWillpower:split?personaWillpower.points:undefined,
      directControlReceipt:split?result.directControlReceipt:undefined,
      proposedActions:result.proposedActions,worldChanged:false,actionsExecuted:false,
