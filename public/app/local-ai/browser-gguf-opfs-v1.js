@@ -79,9 +79,11 @@ export async function readGGUFShards(record){
   }
   return blobs;
 }
-export async function removeGGUFShards(importId,indexes){
-  let dir;try{dir=await directory()}catch{return}
+export async function removeGGUFShards(importId,indexes,{strict=false}={}){
+  let dir;
+  try{dir=await directory()}catch(error){if(strict)throw error;return}
   for(const index of indexes){
-    try{await dir.removeEntry(filename(importId,index))}catch{}
+    try{await dir.removeEntry(filename(importId,index))}
+    catch(error){if(strict&&error?.name!=='NotFoundError')throw error}
   }
 }
