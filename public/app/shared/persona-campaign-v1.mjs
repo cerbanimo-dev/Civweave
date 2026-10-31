@@ -59,7 +59,26 @@ function sanitizedActions(actions){
   return actions.map(a=>{
     if(!obj(a)||!['speak','move','observe','inspect'].includes(a.tool)||!obj(a.args))
       throw new TypeError('Unsupported proposed action.');
-    if(JSON.stringify(a.args).length>1000||Object.entries(a.args).some(([k,v])=>!validId(k)||typeof v!=='string'||v.length>400))
+    if(JSON.stringify(a.args).length>1000)
+      throw new TypeError('Proposed action arguments exceed their byte budget.');
+    // A trusted simulation may propose an exact 3D kinematic translation,
+    // which must not be mistaken for free-form JSON or arbitrary tool use.
+    const movementKeys=['from','to','expectedSceneRevision'];
+    const structuredMove=a.tool==='move'&&
+      movementKeys.every(k=>Object.hasOwn(a.args,k))&&Object.keys(a.args).length===3;
+    if(structuredMove){
+      const pt=p=>obj(p)&&Object.keys(p).length===3&&
+        ['x','y','z'].every(k=>Object.hasOwn(p,k)&&typeof p[k]==='number'&&
+          Number.isFinite(p[k])&&p[k]>=0&&p[k]<=64)&&p.z===0;
+      if(!pt(a.args.from)||!pt(a.args.to)||
+         !Number.isSafeInteger(a.args.expectedSceneRevision)||a.args.expectedSceneRevision<0||
+         Math.hypot(a.args.from.x-a.args.to.x,
+                    a.args.from.y-a.args.to.y)<.05||
+         Math.hypot(a.args.from.x-a.args.to.x,
+                    a.args.from.y-a.args.to.y)>2.5)
+        throw new TypeError('Invalid structured three-dimensional move proposal.');
+    }else if(Object.entries(a.args).some(([k,v])=>
+       !validId(k)||typeof v!=='string'||v.length>400))
       throw new TypeError('Invalid proposed action arguments.');
     return {tool:a.tool,args:clone(a.args)};
   });
