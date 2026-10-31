@@ -640,10 +640,10 @@ async function bindGuideActivity({read,subscribe}={}){
         next[row.id]={status:row.status,at:row.at};
       }
       state.guideActivity=next;
-      renderSpeaker();
+      if(state.root)renderSpeaker();
     }catch{
       if(epoch!==state.guideEpoch)return;
-      state.guideActivity=Object.create(null);renderSpeaker();
+      state.guideActivity=Object.create(null);if(state.root)renderSpeaker();
     }
   };
   if(typeof subscribe==='function'){
