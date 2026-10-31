@@ -17,6 +17,16 @@ The Guild identity remains local-first. Its original founder holds a separate ow
 
 Existing Guilds retain pre-existing capacity allocations. Earned seats and enrolled residents are retained even when a physical server is later removed, avoiding abrupt displacement.
 
+## Guildkeeper neuron-flow monitor
+
+The Guilds tab's existing **Manage Guild** action is available to the founding Guild owner (the currently supported Guildkeeper management credential). The owner-only management response now includes a read-only **Neuron flow** projection produced inside the Guild's canonical Capacity Durable Object from the existing `resident_usage` ledger; ordinary resident capacity sessions cannot read it.
+
+It displays today's settled Guild Cloud neurons charged, remaining included allowance, current registered residents' allowance ceiling, and the next **UTC midnight** reset; a seven-day daily bar history; contributions to used neurons by Cloudflare starter node; and current residents' individual usage/remaining included quota. Charges from former residents remain in the Guild total but are grouped anonymously, preserving account removal. The live figures update only on opening or explicit Refresh; no new polling, duplicate wallet ledger or inference listener is introduced.
+
+**Scope:** This is Guild Cloud Workers AI charge reporting, *not* a provider-wide Cloudflare account consumption meter, real-time token-by-token activity stream, device-local inference telemetry, external physical node usage, paid Gateway credit monitor or financial transaction view. Missing telemetry is shown as unavailable, not fabricated as zero. Historic data is daily aggregates, not per-request logs.
+
+Server authorization reuses the founding owner credential verification on `GET /api/guild/manage`, which is separate from resident sessions or physical-node pairing keys. Delegated Guildkeeper privileges are not currently active; this screen grants no role delegation or rights to ordinary residents. The UI is part of the existing `public/app/guild-owner-management-v1.js` management surface. See `cloudflare/mobile-guild-edge/src/guild-neuron-flow-v1.mjs` and `scripts/test-guildkeeper-neuron-flow-v1.mjs`.
+
 ## Resident check-in and Guild verification tokens
 
 In the installed Working Campus choose **Guilds**, select/join the relevant Guild and choose **Verify physical Guild server · earn tokens**. A logged-in resident must visit the publicly pinned location, read the rotating eight-character code displayed **locally by the physical server** and enter it. The browser requests an optional, one-time geolocation reading only on submission. A successful nearby verification is eligible for **1 nontransferable Guild verification token per resident per UTC day**, up to **20 tokens per Guild per UTC day**; up to six code attempts per resident per day. An accepted verification still counts as service evidence if a daily reward quota has been exhausted.

@@ -2,6 +2,7 @@ import {capacityForStage,progressForStage,GUILD_MILESTONES} from './guild-capaci
 import {CHECK_POLICY,nodeLiveness,locationVerdict,rewardAllowed,proofFresh} from './guild-community-proof-v1.mjs';
 import {GUILD_STARLING_ROUTE,executeGuildStarlingAction} from './guild-starling-collective-v1.mjs';
 import {guildStarlingAction} from './guild-starling-transport-v1.mjs';
+import {buildGuildNeuronFlow} from './guild-neuron-flow-v1.mjs';
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
 import {GUILD_QUEST_ROUTE,GUILD_QUEST_CORS,guildQuestAction,readGuildQuestInput,executeGuildQuestAction,guildQuestJson,guildQuestError} from './guild-quest-publications-v1.mjs';
 
@@ -199,6 +200,15 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     const row=this.onboardingState();if(!row)throw Object.assign(new Error('This Guild has no physical-node onboarding.'),{status:409});
     return {ok:true,onboarding:this.recordStage(row.stage,{nodeTokenHash:null,lastSeenAt:null,challenge:null,communityProofHash:null,previousCommunityProofHash:null,nodeState:'unpaired',downReason:null,downSince:null})};
   }
+  neuronFlow(){
+    // Canonical resident_usage is owned by this Guild's Capacity DO. This method
+    // is exposed only through the existing verified founder/Guildkeeper management
+    // route, not as a resident-facing aggregation endpoint.
+    this.ensureResidentTables();
+    const now=Date.now(),since=dayKey(now-6*86400000);
+    const usageRows=[...this.sql.exec('SELECT day,node_id,user_id,neurons FROM resident_usage WHERE day>=? ORDER BY day,node_id,user_id LIMIT 5000',since)];
+    return buildGuildNeuronFlow({now,capacity:this.status(),members:this.memberDirectory(),usageRows});
+  }
   memberDirectory(){
     this.ensureResidentTables();
     return [...this.sql.exec('SELECT node_id,user_id,seat_class,created_at,last_seen_at FROM resident_members ORDER BY created_at LIMIT 100')].map(row=>({nodeId:row.node_id,userId:row.user_id,seatClass:row.seat_class,createdAt:row.created_at,lastSeenAt:row.last_seen_at}));
@@ -318,7 +328,7 @@ export default{
         if(!authorized)throw Object.assign(new Error('Only the founding Guild owner can manage this Guild.'),{status:403});
         const guildState=await env.GUILD_STATE.get(env.GUILD_STATE.idFromName('guild')).status();
         const stub=capacityStub(env);
-        if(request.method==='GET')return json({ok:true,guild:{guildId:guildState.guildId,displayName:guildState.displayName,location:guildState.location},capacity:await stub.status(),members:await stub.memberDirectory()});
+        if(request.method==='GET')return json({ok:true,guild:{guildId:guildState.guildId,displayName:guildState.displayName,location:guildState.location},capacity:await stub.status(),members:await stub.memberDirectory(),neuronFlow:await stub.neuronFlow()});
         if(request.method!=='POST')return json({ok:false,error:'Method not allowed'},405);
         const body=await request.json().catch(()=>({})),action=clean(body.action,60);
         let result;
