@@ -1,0 +1,31 @@
+name: Verify branded heart launch v449
+on:
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/pwa-start-v436.html'
+      - 'public/app/logos/civweave-branded-heart-*'
+      - 'public/app/index.html'
+      - 'public/app/shell-integrity-v281.json'
+      - 'scripts/test-branded-launch-v449.mjs'
+      - '.github/workflows/verify-branded-launch-v449.yml'
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/pwa-start-v436.html'
+      - 'public/app/logos/civweave-branded-heart-*'
+      - 'public/app/index.html'
+      - 'public/app/shell-integrity-v281.json'
+      - 'scripts/test-branded-launch-v449.mjs'
+jobs:
+  branded-launch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify launch screen, icons and offline hashes
+        run: node --test scripts/test-branded-launch-v449.mjs
