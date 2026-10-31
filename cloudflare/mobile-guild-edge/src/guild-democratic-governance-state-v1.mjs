@@ -1,5 +1,5 @@
 import {GUILD_GOVERNANCE_SCHEMA,GUILD_CONTRIBUTION_WINDOW_MS,GUILD_BALLOT_WINDOW_MS,
-  qualifiedContributors,ballotSpec,ballotOutcome,safeReportReceipt,validGuildUser} from './guild-democratic-governance-v1.mjs';
+  qualifiedContributors,activeGuildVoters,ballotSpec,ballotOutcome,safeReportReceipt,validGuildUser} from './guild-democratic-governance-v1.mjs';
 
 const fail=(message,status=409)=>Object.assign(new Error(message),{status});
 const nowIso=()=>new Date().toISOString();
@@ -25,13 +25,15 @@ export function creditVerifiedContribution(sql,{id,userId,kind,at=nowIso()}){
     safe(id,220),userId,kind,at);
 }
 function rows(sql,query,...args){return [...sql.exec(query,...args)]}
-export function electorate(sql,{now=Date.now()}={}){
+function electorateSnapshot(sql,{now=Date.now()}={}){
   ensureGovernanceTables(sql);
-  const members=rows(sql,'SELECT user_id FROM resident_members');
+  const members=rows(sql,'SELECT user_id,last_seen_at FROM resident_members');
   const receipts=rows(sql,'SELECT user_id,kind,at FROM guild_governance_contributions WHERE at>=?',
     new Date(now-GUILD_CONTRIBUTION_WINDOW_MS).toISOString()).map(row=>({userId:row.user_id,kind:row.kind,at:row.at}));
-  return qualifiedContributors(members,receipts,{now});
+  return {voters:activeGuildVoters(members,receipts,{now}),
+    contributors:qualifiedContributors(members,receipts,{now})};
 }
+export function electorate(sql,{now=Date.now()}={}){return electorateSnapshot(sql,{now}).voters}
 export function delegatedRole(sql,userId){
   ensureGovernanceTables(sql);
   const row=rows(sql,'SELECT role FROM guild_governance_roles WHERE user_id=? LIMIT 1',userId)[0];
@@ -114,8 +116,8 @@ export function proposeGovernance(sql,{guildId,origin,actorId,action,targetUserI
   if(action==='lift-ban'){
     if(!isBanned(sql,targetUserId,{now}))throw fail('A lift-ban vote needs an existing active Guild ban.',409);
   }else if(!members.some(row=>row.user_id===targetUserId))throw fail('Target member must be currently enrolled.',404);
-  const eligible=electorate(sql,{now});
-  const spec=ballotSpec({action,targetUserId,initiatorUserId:actorId,eligible,reasonCode,role,statement,now});
+  const {voters:eligible,contributors}=electorateSnapshot(sql,{now});
+  const spec=ballotSpec({action,targetUserId,initiatorUserId:actorId,eligible,contributors,reasonCode,role,statement,now});
   if(action==='report'){
     const recentlyApproved=rows(sql,"SELECT id FROM guild_governance_ballots WHERE target_user_id=? AND action='report' AND status='approved' AND resolved_at>=? LIMIT 1",
       targetUserId,new Date(now-30*86400000).toISOString())[0];
@@ -139,7 +141,7 @@ export function castGovernanceVote(sql,{guildId,origin,actorId,ballotId,choice,n
   ensureGovernanceTables(sql);
   const row=ballotRow(sql,ballotId),spec=viewBallot(row);
   if(spec.status!=='open')throw fail('Vote has already closed.');
-  if(!spec.eligible.includes(actorId))throw fail('Only eligible active contributors at proposal time may vote.',403);
+  if(!spec.eligible.includes(actorId))throw fail('Only members in the active Guild electorate at proposal time may vote.',403);
   if(!['yes','no'].includes(choice))throw fail('Vote choice must be yes or no.',400);
   if(Date.parse(spec.expiresAt)<=now)return settle(sql,ballotId,{guildId,origin,now});
   sql.exec("INSERT INTO guild_governance_votes(ballot_id,user_id,choice,voted_at) VALUES(?,?,?,?) ON CONFLICT(ballot_id,user_id) DO UPDATE SET choice=excluded.choice,voted_at=excluded.voted_at",
@@ -149,7 +151,7 @@ export function castGovernanceVote(sql,{guildId,origin,actorId,ballotId,choice,n
 }
 export function governanceStatus(sql,{actorId='',now=Date.now()}={}){
   ensureGovernanceTables(sql);
-  const eligible=electorate(sql,{now}),ballots=rows(sql,
+  const {voters:eligible,contributors}=electorateSnapshot(sql,{now}),ballots=rows(sql,
     'SELECT * FROM guild_governance_ballots ORDER BY created_at DESC LIMIT 40').map(row=>{
       const votes=rows(sql,'SELECT user_id,choice FROM guild_governance_votes WHERE ballot_id=?',row.id);
       const outcome=ballotOutcome({...viewBallot(row),status:'open'},votes.map(v=>({userId:v.user_id,choice:v.choice})),{now});
@@ -162,7 +164,7 @@ export function governanceStatus(sql,{actorId='',now=Date.now()}={}){
   const outboundReports=rows(sql,'SELECT ballot_id,delivery_state,recipient_count,attempts,delivered_at FROM guild_governance_reports ORDER BY rowid DESC LIMIT 20')
     .map(row=>({ballotId:row.ballot_id,state:row.delivery_state,recipients:Number(row.recipient_count),attempts:Number(row.attempts),deliveredAt:row.delivered_at}));
   return {schema:GUILD_GOVERNANCE_SCHEMA,eligible,activeCount:eligible.length,majority:Math.floor(eligible.length/2)+1,
-    actorEligible:eligible.includes(actorId),actorRole:actorId?delegatedRole(sql,actorId):'member',ballots,
+    actorEligible:contributors.includes(actorId)&&eligible.includes(actorId),actorCanVote:eligible.includes(actorId),actorRole:actorId?delegatedRole(sql,actorId):'member',ballots,
     bans,outboundReports,reportQueuedCount:outboundReports.filter(row=>row.state!=='delivered').length};
 }
 export function reportQueue(sql){
