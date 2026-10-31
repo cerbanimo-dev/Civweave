@@ -77,3 +77,21 @@ Currently tested with an explicitly selected Ollama or OpenAI-compatible provide
 ### Optional split-mind rehearsal control
 
 When Landry and Delia are both selected, the same panel exposes a checked split-mind mode, an installed 2B internal model ID and a visible willpower pool. Each actor receives a separate 2B call; absent a deliberate author-simulated override, their private responses are given to a 0.8B presentation moderator. Selecting a named voice for a *single explicit rehearsal cue* simulates a 1-point direct-control spend. This browser-local test is not authenticated in-world willpower authority; a production multiplayer game must obtain the intervention from its trusted world authority instead. Separate model weights are selected but never automatically installed.\n
+## Campaign continuity and private save/load (feature-branch increment)
+
+`public/app/shared/persona-campaign-v1.mjs` is a pure event-ledger/snapshot helper **within** the Persona Library capability, not a second game server, chat owner or multiplayer transport.
+
+- `createPersonaCampaign` binds a cast, initial stage, rights-controlled source pack identity and immutable `what-if:` branch name to an owner. It never writes back to manuscript canon.
+- `applyCampaignEvent` requires an externally authenticated actor and an explicit caller-owned authorizer on **every** transition; optimistic `expectedRevision` rejects stale player updates. The local lab uses a local-only author-simulation adapter; it is not a Guild credential.
+- Player seats and NPC model principal bindings are explicit. NPC speech/actions remain `pending` until the **trusted runtime**, not a model or other player, sends a receipt. The event history is append-only: resolutions do not rewrite original proposals.
+- A rehearsal preview records its player cue, character response and proposed actions with `status: 'unexecuted'`. It cannot imply world success or authorize NPC tools.
+- Willpower is deterministic and linked to accepted turn counters. It is spent by an explicitly authorized author/runtime event rather than by instructions inside model text.
+- `exportCampaignSnapshot` and `importCampaignSnapshot` support small, explicit JSON private saves. Imports require the same `packId` and pack version; they are **always untrusted** until validated by an authenticated session authority. Never merge a local import into a multiplayer world on the basis of these checks alone. A production multiplayer implementation needs signed/revisioned mesh objects, actor provenance and trusted world outcomes.
+- The Performance Studio page adds a Start new / Export / Restore control, a read-only recent-turn history and per-session revision indicators. It does not silently write personal dialogue or unpublished prose to localStorage, public GitHub, mesh, or cloud.
+- Reopening a save requires a new 4B director brief. Private prompts are deliberately excluded from the exported snapshot, reducing the risk of leaking a character's author-only knowledge in a shared session file.
+- These controls are exposed only in the existing optional Performance Studio rehearsal surface and do not duplicate Civweave's canonical chat input. Running the campaign **inside the unified guide-chat composer**, genuine multi-device syncing and model-weight installation remain separate integration gates.
+- Executable contracts: `scripts/test-persona-campaign-v1.mjs`, `scripts/test-persona-performance-lab-v1.mjs` and the existing Persona Library/Worldweaver tests.
+
+### Planned multiplayer authority boundary
+
+The future mesh/session owner must verify the player's Passport and seat assignment, enforce one revision per accepted change, authenticate each NPC pilot using the canonical model principal, and confirm action receipts through Worldweaver's runtime adapter. A browser file import is suitable for private rehearsal, **not** for shared authoritative state. Private character memories remain separately access controlled; a player-visible public timeline contains only dialog/actions already exposed in the scene.
