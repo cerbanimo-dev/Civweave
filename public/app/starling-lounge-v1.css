@@ -1029,3 +1029,14 @@
 #cw-starling-lounge .sl-focus-copy h3{
  overflow-wrap:normal;word-break:normal
 }
+
+/* Focused text entry can scroll above the Android on-screen keyboard. */
+#cw-starling-lounge{
+ scroll-padding-top:12px;scroll-padding-bottom:max(100px,env(safe-area-inset-bottom,0px));
+}
+@media(max-width:700px){
+ #cw-starling-lounge:has(.sl-compose textarea:focus){
+  padding-bottom:max(190px,31dvh,env(safe-area-inset-bottom,0px));
+ }
+ #cw-starling-lounge .sl-compose textarea{scroll-margin-bottom:80px}
+}
