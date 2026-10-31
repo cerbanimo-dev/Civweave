@@ -55,13 +55,14 @@ export function needsDirectorRefresh(scene,{turn,stage,worldChanged=false,trigge
  */
 export async function prepareDirectedScene({
   pack,stage,scenario,participants,goals=[],branchId='canon',
-  invokeModel,previousScene=null,expiresInTurns=4
+  invokeModel,previousScene=null,expiresInTurns=4,world=null
 }={}){
   const p=validatePersonaPack(pack);
   if(typeof invokeModel!=='function')throw new TypeError('The existing selected-model invoker is required.');
   if(!Number.isInteger(stage)||stage<0||!text(scenario,8000))throw new TypeError('Scene and numbered stage required.');
   if(!Array.isArray(participants)||!participants.length||participants.length>12||
     new Set(participants).size!==participants.length)throw new TypeError('Choose 1–12 distinct participants.');
+  const initialRevision=world?.snapshot?.()?.revision??null;
   const directives={characters:{}};
   for(const characterId of participants){
     const req=createPrivateDirectorRequest({pack:p,stage,scenario,characterId,participants,goals,branchId});
@@ -69,13 +70,15 @@ export async function prepareDirectedScene({
     const parsed=validateDirectorResponse({pack:p,stage,participants:[characterId],response:modelPayload(raw)});
     directives.characters[characterId]=parsed.characters[characterId];
   }
+  if(initialRevision!==null&&world.snapshot().revision!==initialRevision)
+    throw new Error('World changed during director inference; stale instructions discarded.');
   const turn=Number.isInteger(previousScene?.turn)?previousScene.turn:0;
   const duration=Math.max(1,Math.min(16,Number(expiresInTurns)||4));
   return {schema:'civweave.persona-scene.v1',packId:p.id,packVersion:p.version||1,
     scenario:text(scenario,8000),stage,branchId,
     participants:copy(participants),goals:arr(goals).map(x=>text(x,350)).slice(0,16),
     revision:(previousScene?.revision||0)+1,turn,expireAfterTurn:turn+duration,
-    directives,worldStateRevision:null};
+    directives,worldStateRevision:initialRevision};
 }
 function safeProposal(v){
   if(!plain(v)||!ACTOR_TOOLS.has(v.tool)||!plain(v.args))return null;
@@ -205,4 +208,18 @@ export async function runSplitMindTurn({
   return {...publicAnswer,route,internalVoices:answers,willpower:resource,
     directControlReceipt:receipt,worldChanged:false,directorRevision:scene.revision,
     sceneTurn:scene.turn};
+}
+
+/**
+ * Advance only when the caller has accepted a real simulation turn. This does
+ * not mutate Worldweaver, canon, or any persistent user history by itself.
+ */
+export function advanceSceneTurn(scene,{expectedTurn,worldChanged=false}={}){
+  if(!plain(scene)||!Number.isInteger(scene.turn)||!Number.isInteger(scene.expireAfterTurn))
+    throw new TypeError('A prepared scene is required.');
+  if(expectedTurn!==scene.turn)throw new Error('Stale or conflicting scene turn.');
+  const result=copy(scene);
+  result.turn+=1;
+  if(worldChanged===true)result.expireAfterTurn=result.turn;
+  return result;
 }
