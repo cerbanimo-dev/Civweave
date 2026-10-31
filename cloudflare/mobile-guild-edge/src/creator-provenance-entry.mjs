@@ -56,7 +56,7 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     // audit receipt, and the resulting member/role/ban/report mutation.
     // Failed execution rolls back the deciding vote too.
     if(input?.action==='propose')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:proposeGovernance(this.sql,{guildId,origin,
-      actorId:session.userId,action:input.kind,targetUserId:input.targetUserId,role:input.role,reasonCode:input.reasonCode})}));
+      actorId:session.userId,action:input.kind,targetUserId:input.targetUserId,role:input.role,reasonCode:input.reasonCode,statement:input.statement})}));
     if(input?.action==='vote')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:castGovernanceVote(this.sql,{guildId,origin,
       actorId:session.userId,ballotId:clean(input.ballotId,200),choice:input.choice})}));
     throw Object.assign(new Error('Unknown Guild vote action.'),{status:400});
