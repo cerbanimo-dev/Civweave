@@ -246,8 +246,8 @@ function currentGuild(){
   const api=globalThis.CivweaveHostNodeSessionV1;
   let selected={};try{selected=JSON.parse(localStorage.getItem('civweave.host-node.selection.v1')||'{}')||{}}catch{}
   const raw=selected.origin||api?.selectedOrigin?.();
-  try{const url=new URL(raw);if(url.protocol!=='https:'||url.username||url.password)return null;
-    return {origin:url.origin,nodeId:String(selected.nodeId||'').slice(0,180),displayName:String(selected.displayName||'').slice(0,160)}}catch{return null}
+  try{const url=new URL(raw);const sameOriginLocal=url.protocol==='http:'&&url.origin===location.origin&&/^(localhost|127\\.0\\.0\\.1|\\[::1\\]|10\\.\\d+\\.\\d+\\.\\d+|192\\.168\\.\\d+\\.\\d+|172\\.(1[6-9]|2\\d|3[01])\\.\\d+\\.\\d+)$/i.test(url.hostname);if((url.protocol!=='https:'&&!sameOriginLocal)||url.username||url.password)return null;
+    return {origin:url.origin,nodeId:String(selected.nodeId||'').slice(0,180),displayName:String(selected.displayName||'').slice(0,160),localFederated:sameOriginLocal}}catch{return null}
 }
 function currentGuildSession(guild){
   const api=globalThis.CivweaveHostNodeSessionV1;
@@ -278,8 +278,8 @@ function renderGuildTab(){
       const status=session&&activeGuildStatus?.origin===guild.origin?activeGuildStatus?.packet:null;
       const quota=status?.quota||null,capacity=status?.capacity||null;
       const label=guild.displayName||guild.origin.replace(/^https:\/\//,'');
-      const seat=session?(session.seatClass==='guildkeeper'?'Guildkeeper':session.seatClass||'Resident'):'Not signed in';
-      const health=status?.ok===true?'Connected · verified Guild session':activeGuildStatus?.error?'Session status unavailable: '+activeGuildStatus.error:session?'Signed in · status not refreshed':'Choose Join to request access';
+      const seat=session?(session.seatClass==='guildkeeper'?'Guildkeeper':session.seatClass||'Resident'):guild.localFederated?'Local Guild selected':'Not signed in';
+      const health=status?.ok===true?'Connected · verified Guild session':activeGuildStatus?.error?'Session status unavailable: '+activeGuildStatus.error:session?'Signed in · status not refreshed':guild.localFederated?'Local Guild selected · check the host for admission details':'Choose Join to request access';
       const allowance=quota?.includedDailyNeurons!=null?guildNumber(quota.includedDailyNeurons):'—';
       const remaining=quota?.includedRemainingNeurons!=null?guildNumber(quota.includedRemainingNeurons):'—';
       const nodeId=guild.nodeId||session?.nodeId||'Unspecified';
@@ -395,9 +395,9 @@ async function guildAction(action,control){
     }else if(action==='join'||action==='membership'){
       discoveryExpanded=true;renderGuildTab();
       const finder=await ensureGuildFinderRuntime();
-      const status=await finder.inspectOrigin(guild.origin,{nodeId:guild.nodeId});
+      const status=guild.localFederated?await finder.loadStatus(true):await finder.inspectOrigin(guild.origin,{nodeId:guild.nodeId});
       if(!status?.ok)throw new Error('Selected Guild could not be reached. Try again before joining.');
-      guildFeedback(action==='join'?'Review live seats and choose Join & log in below.':'Citizen and Patron choices are managed by the Guild admission and membership services below.');
+      guildFeedback(guild.localFederated?'Local Guild selected. Admission and Guildkeeper tools remain with this local host; no remote HTTPS login is attempted.':action==='join'?'Review live seats and choose Join & log in below.':'Citizen and Patron choices are managed by the Guild admission and membership services below.');
     }else if(action==='chat'){
       globalThis.CivweaveHumanChatGuildContextV1?.sync?.();
       if(!globalThis.CivweaveHumanChatStandaloneV2?.open)
