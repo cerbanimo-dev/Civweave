@@ -5,7 +5,9 @@ import {runPersonaChatTurn,createPersonaChatRuntime} from '../public/app/shared/
 
 const pack={schema:'civweave.persona-library.v1',id:'demo',version:1,
  characters:[{id:'jess',name:'Jess',role:'supporting',modelTier:'2b',improvTier:'0.8b',voice:'dry and protective'},
- {id:'magnus',name:'Magnus',role:'protagonist',modelTier:'4b',improvTier:'0.8b',voice:'wry'}],
+ {id:'magnus',name:'Magnus',role:'protagonist',modelTier:'4b',improvTier:'0.8b',voice:'wry'},
+ {id:'landry',name:'Landry',role:'protagonist',modelTier:'2b',improvTier:'0.8b',voice:'reflective'},
+ {id:'delia',name:'Delia',role:'protagonist',modelTier:'2b',improvTier:'0.8b',voice:'analytic'}],
  events:[{id:'a',stage:1,summary:'Jess and Magnus played a game together.',actors:['jess','magnus'],witnesses:['jess','magnus'],status:'established',source:'chapter:1'}]};
 const owner={kind:'human',principalId:'private:owner'};
 const campaign=()=>createPersonaCampaign({pack,id:'local:1',title:'At the arcade',ownerId:owner.principalId,branchId:'what-if:one',stage:2,scenario:'At the arcade',cast:['jess','magnus']});
@@ -43,4 +45,35 @@ test('session rejects unknown speakers, no silent fallback to ordinary guide or 
  await assert.rejects(()=>runPersonaChatTurn({pack,campaign:campaign(),characterId:'villain',input:'Hi',actor:owner,authorize,invokeModel}),/character|participant|cast/i);
  const rt=createPersonaChatRuntime({pack,campaign:campaign(),actor:owner,authorize,invokeModel});
  assert.throws(()=>rt.replaceCampaign({...campaign(),id:'different'}),/campaign|mismatch/i);
+});
+
+test('split-mind chat uses two 2B voices and 0.8B outward moderator, without mutating canon',async()=>{
+ const s=createPersonaCampaign({pack,id:'local:2',title:'Quiet hospital',ownerId:owner.principalId,
+   branchId:'what-if:split',stage:2,scenario:'In a quiet hallway.',cast:['landry','delia']});
+ const calls=[];const invoke=async request=>{
+   calls.push(request);
+   if(request.modelTier==='4b')return {status:'success',outputJson:{characters:{[request.characterId]:{
+      characterGoal:'listen',emotion:'curious',instructions:'Observe quietly.',
+      knownEventIds:[],escalateWhen:[],improvFreedom:'small gestures'}}}};
+   if(request.modelTier==='2b')return {status:'success',outputJson:{speech:'I think we should leave.',emote:'hesitates',actions:[]}};
+   return {status:'success',outputJson:{speech:'We should leave.',emote:'nods',actions:[]}};
+ };
+ const result=await runPersonaChatTurn({pack,campaign:s,characterId:'landry-delia',input:'What do you do?',
+   actor:owner,authorize,invokeModel:invoke});
+ assert.deepEqual(calls.map(x=>x.modelTier),['4b','4b','2b','2b','0.8b']);
+ assert.match(result.packet.response.answer,/Landry\/Delia/);
+ assert.equal(result.campaign.events[0].status,'unexecuted');
+ assert.equal(result.campaign.willpower.points,2);
+});
+test('author-controlled split-mind bypass spends willpower on a signed local ledger event',async()=>{
+ const s=createPersonaCampaign({pack,id:'local:3',ownerId:owner.principalId,
+   branchId:'what-if:control',scenario:'A hallway',cast:['landry','delia']});
+ const invoke=async request=>request.modelTier==='4b'?
+ {status:'success',outputJson:{characters:{[request.characterId]:{instructions:'Observe',knownEventIds:[]}}}}:
+ {status:'success',outputJson:{speech:'I decide.',actions:[]}};
+ const r=await runPersonaChatTurn({pack,campaign:s,characterId:'landry-delia',input:'Can you move?',
+   actor:owner,authorize,invokeModel:invoke,directControl:'delia'});
+ assert.equal(r.campaign.willpower.points,1);
+ assert.equal(r.campaign.events[0].type,'willpower-spend');
+ assert.equal(r.campaign.events[1].status,'unexecuted');
 });
