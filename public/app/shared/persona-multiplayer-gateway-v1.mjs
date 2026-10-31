@@ -21,7 +21,12 @@ function canRead(state,actor){
 }
 function canMutate(state,actor,command){
   if(actor.kind==='human'){
-    if(actor.principalId===state.ownerId)return true;
+    // Even the owner is a HUMAN, not the Worldweaver runtime or a model.
+    // Reject system-only event types before campaign mutation so forged
+    // actors never reach an error path that could leak as HTTP 500.
+    if(actor.principalId===state.ownerId)
+      return ['assign-player','bind-pilot','player-cue','rehearsal-preview',
+        'willpower-spend','stage-set'].includes(command.type);
     return Object.hasOwn(state.seats,actor.principalId)&&command.type==='player-cue';
   }
   if(actor.kind==='runtime')return ['resolve-proposal','stage-set'].includes(command.type);
