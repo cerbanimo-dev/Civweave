@@ -1,11 +1,11 @@
 (()=>{
 'use strict';
 
-const VERSION='guild-symbol-v1.6-in-shell-guild-search';
+const VERSION='guild-symbol-v1.7-unified-guild-access';
 const SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
 const CHAT_SRC='/app/assets/chat-symbol-v1.png';
-const GUILD_FINDER_SCRIPT='/app/host-node-installer-lobby-v1.js?v=explicit-mount-v3';
+const GUILD_FINDER_SCRIPT='/app/host-node-installer-lobby-v1.js?v=unified-guild-access-v1';
 const STYLE_ID='cw-guild-symbol-v1-style';
 const ICON_CLASS='cw-guild-symbol-icon';
 const MAP_ICON_CLASS='cw-map-symbol-icon';
@@ -15,6 +15,10 @@ const GUILD_CARD_ID='cw-nearby-guilds-card-v1';
 const GUILD_MOUNT_ID='cw-nearby-guilds-mount-v1';
 let queued=false;
 let guildFinderPromise=null;
+let discoveryExpanded=true;
+let guildPanelBusy=false;
+let activeGuildStatus=null;
+let lastGuildNotice='';
 
 function installStyle(doc=document){
   if(!doc?.documentElement||doc.getElementById(STYLE_ID))return;
@@ -40,6 +44,35 @@ function installStyle(doc=document){
 #${GUILD_CARD_ID} .cw-nearby-guilds-card-head strong{display:block;font:850 16px/1.15 system-ui,sans-serif}
 #${GUILD_CARD_ID} .cw-nearby-guilds-card-head small{display:block;margin-top:4px;color:#b7d8d1;font:500 12px/1.3 system-ui,sans-serif}
 #${GUILD_OVERLAY_ID} .cw-guild-manage{min-height:44px;padding:7px 12px;border-radius:11px;border:1px solid #87e4c3;background:#16473e;color:#f1fff9;font-weight:800;cursor:pointer}\n#${GUILD_OVERLAY_ID} .cw-nearby-guilds-close{flex:0 0 42px;width:42px;height:42px;border:1px solid #ffffff38;border-radius:999px;background:#07131fee;color:#fff;font:800 24px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 22px #0008}
+
+#${GUILD_OVERLAY_ID} .cw-nearby-guilds-card-head>div{flex:1;min-width:0}
+#${GUILD_OVERLAY_ID} [hidden]{display:none!important}
+#${GUILD_OVERLAY_ID} .cw-guild-selected{padding:16px 18px;background:linear-gradient(145deg,#0d2a2b,#0c1b30);border-bottom:1px solid #6de0ba35}
+#${GUILD_OVERLAY_ID} .cw-guild-selected-head{display:flex;align-items:start;gap:12px;justify-content:space-between;flex-wrap:wrap}
+#${GUILD_OVERLAY_ID} .cw-guild-selected h2{margin:3px 0 5px;font:800 clamp(1.05rem,3vw,1.45rem)/1.2 system-ui;color:#f1fffa;overflow-wrap:anywhere}
+#${GUILD_OVERLAY_ID} .cw-guild-subtitle{margin:0;color:#b8d6d3;font:.8rem/1.5 system-ui;overflow-wrap:anywhere}
+#${GUILD_OVERLAY_ID} .cw-guild-kicker{font:900 .65rem system-ui;letter-spacing:.15em;color:#93e8be;text-transform:uppercase}
+#${GUILD_OVERLAY_ID} .cw-guild-statline{display:flex;gap:12px;flex-wrap:wrap;color:#d0e9e1;font:.77rem system-ui;margin-top:11px}
+#${GUILD_OVERLAY_ID} .cw-guild-statline b{color:#f0fffb;font-variant-numeric:tabular-nums}
+#${GUILD_OVERLAY_ID} .cw-guild-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+#${GUILD_OVERLAY_ID} .cw-guild-actions button,#${GUILD_OVERLAY_ID} .cw-guild-actions a,#${GUILD_OVERLAY_ID} .cw-guild-discovery button,#${GUILD_OVERLAY_ID} .cw-guild-discovery a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 13px;border-radius:10px;border:1px solid #80cbb45e;background:#173c43;color:#f1fff9;text-decoration:none;font:700 .82rem system-ui;cursor:pointer}
+#${GUILD_OVERLAY_ID} .cw-guild-actions .cw-guild-primary{background:#b3ecd4;color:#09232a}
+#${GUILD_OVERLAY_ID} .cw-guild-actions button:disabled{opacity:.5;cursor:wait}
+#${GUILD_OVERLAY_ID} .cw-guild-access{margin-top:11px;border:1px solid #79d2b644;border-radius:12px;background:#071a23}
+#${GUILD_OVERLAY_ID} .cw-guild-access summary{padding:11px 13px;cursor:pointer;font:750 .83rem system-ui}
+#${GUILD_OVERLAY_ID} .cw-guild-access-body{padding:0 13px 13px}
+#${GUILD_OVERLAY_ID} .cw-guild-help{color:#a6c8c4;font:.75rem/1.5 system-ui;margin:8px 0}
+#${GUILD_OVERLAY_ID} .cw-guild-discovery{border-bottom:1px solid #8de5ef2c;padding:16px}
+#${GUILD_OVERLAY_ID} .cw-guild-discovery h2{margin:0 0 6px;font:800 1.1rem system-ui;color:#f3fff9}
+#${GUILD_OVERLAY_ID} .cw-guild-discovery p{margin:7px 0;color:#b6d3d6;font:.8rem/1.5 system-ui}
+#${GUILD_OVERLAY_ID} .cw-guild-manual{display:grid;gap:7px;margin-top:13px}
+#${GUILD_OVERLAY_ID} .cw-guild-manual label{color:#e6fff8;font:750 .8rem system-ui}
+#${GUILD_OVERLAY_ID} .cw-guild-manual-row{display:flex;gap:8px;flex-wrap:wrap}
+#${GUILD_OVERLAY_ID} .cw-guild-manual input{flex:1 1 190px;min-width:0;min-height:42px;border:1px solid #7ac9b655;border-radius:10px;background:#071b26;color:#fff;padding:8px;font:.82rem system-ui}
+#${GUILD_OVERLAY_ID} .cw-guild-saved{display:grid;gap:6px;margin-top:12px}
+#${GUILD_OVERLAY_ID} .cw-guild-saved button{justify-content:space-between;text-align:left;width:100%}
+#${GUILD_OVERLAY_ID} .cw-guild-discovery-error{color:#ffd9ae!important;min-height:1.5em}
+#${GUILD_OVERLAY_ID} .cw-guild-manage{flex:0 0 auto}
 #${GUILD_MOUNT_ID}{position:relative;z-index:2;padding:12px}
 #${GUILD_MOUNT_ID} .cw-host-node-lobby{margin:0!important;max-width:none!important;position:relative!important;inset:auto!important;transform:none!important;z-index:auto!important}
 #${GUILD_MOUNT_ID} #cw-host-node-search{position:relative!important;inset:auto!important;transform:none!important;z-index:auto!important}
@@ -155,7 +188,22 @@ function ensureNearbyGuildsOverlay(){
   overlay.setAttribute('role','dialog');
   overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label','Find nearby Civweave Guilds');
-  overlay.innerHTML=`<div class="cw-nearby-guilds-shell"><section id="${GUILD_CARD_ID}" aria-label="Nearby Guild search"><header class="cw-nearby-guilds-card-head"><div><strong>Find nearby Guilds</strong><small>Guild search is separate from the Guild Map.</small></div><button class="cw-guild-manage" type="button" data-cw-guild-manage hidden>Manage Guild</button><button class="cw-nearby-guilds-close" type="button" aria-label="Close nearby Guilds">×</button></header><div id="${GUILD_MOUNT_ID}"></div></section></div>`;
+  overlay.innerHTML=`<div class="cw-nearby-guilds-shell"><section id="${GUILD_CARD_ID}" aria-label="Guild discovery and access"><header class="cw-nearby-guilds-card-head"><div><strong>Guilds</strong><small>Find a Guild · Choose your home · Manage access</small></div><button class="cw-guild-manage" type="button" data-cw-guild-manage hidden>Guildkeeper console</button><button class="cw-nearby-guilds-close" type="button" aria-label="Close Guilds">×</button></header>
+  <section data-cw-guild-ui="selected" class="cw-guild-selected" aria-label="Selected Guild" hidden></section>
+  <section data-cw-guild-ui="discovery" class="cw-guild-discovery" aria-label="Discover and choose a Guild">
+    <h2>Discover a Guild</h2>
+    <p>Search nearby Guilds by open Citizen/Patron seats, join with an invitation, or return to a Guild you have already joined.</p>
+    <form class="cw-guild-manual" data-cw-guild-manual>
+      <label for="cw-guild-origin-input">Guild HTTPS address or Civweave invitation link</label>
+      <div class="cw-guild-manual-row"><input id="cw-guild-origin-input" name="guildOrigin" type="url" inputmode="url" autocomplete="url" placeholder="https://your-guild.workers.dev" required><button type="submit">Inspect Guild</button></div>
+    </form>
+    <p class="cw-guild-discovery-error" role="status" aria-live="polite" data-cw-guild-feedback></p>
+    <div class="cw-guild-saved" data-cw-guild-saved></div>
+    <p><a href="/app/index.html#mobile-guild-create">Create or host your own Guild</a></p>
+  </section>
+  <div id="${GUILD_MOUNT_ID}"></div></section></div>`;
+  overlay.addEventListener('click',event=>{const control=event.target.closest?.('[data-guild-ui-action]');if(control){event.preventDefault();void guildAction(control.dataset.guildUiAction,control)}});
+  overlay.addEventListener('submit',event=>{const form=event.target.closest?.('[data-cw-guild-manual]');if(form){event.preventDefault();void inspectGuildInvite(form)}});
   overlay.querySelector('.cw-nearby-guilds-close')?.addEventListener('click',()=>closeNearbyGuilds('button'));
   overlay.addEventListener('click',event=>{if(event.target===overlay)closeNearbyGuilds('backdrop')});
   overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closeNearbyGuilds('escape')}});
@@ -191,15 +239,193 @@ function showGuildFinderState(mount,error=false){
   mount.prepend(state);
 }
 
+
+const guildEsc=value=>String(value??'').slice(0,2000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const guildNumber=value=>Number.isFinite(Number(value))&&Number(value)>=0?Math.floor(Number(value)).toLocaleString():'—';
+function currentGuild(){
+  const api=globalThis.CivweaveHostNodeSessionV1;
+  let selected={};try{selected=JSON.parse(localStorage.getItem('civweave.host-node.selection.v1')||'{}')||{}}catch{}
+  const raw=selected.origin||api?.selectedOrigin?.();
+  try{const url=new URL(raw);const sameOriginLocal=url.protocol==='http:'&&url.origin===location.origin&&/^(localhost|127\\.0\\.0\\.1|\\[::1\\]|10\\.\\d+\\.\\d+\\.\\d+|192\\.168\\.\\d+\\.\\d+|172\\.(1[6-9]|2\\d|3[01])\\.\\d+\\.\\d+)$/i.test(url.hostname);if((url.protocol!=='https:'&&!sameOriginLocal)||url.username||url.password)return null;
+    return {origin:url.origin,nodeId:String(selected.nodeId||'').slice(0,180),displayName:String(selected.displayName||'').slice(0,160),localFederated:sameOriginLocal}}catch{return null}
+}
+function currentGuildSession(guild){
+  const api=globalThis.CivweaveHostNodeSessionV1;
+  if(!guild||!api?.sessionFor)return null;
+  const item=api.sessionFor(guild.nodeId||guild.origin);
+  return item?.origin===guild.origin&&(!guild.nodeId||item.nodeId===guild.nodeId)?item:null;
+}
+function guildFeedback(message){
+  lastGuildNotice=String(message||'').slice(0,800);
+  document.querySelectorAll('#'+GUILD_OVERLAY_ID+' [data-cw-guild-feedback],#'+GUILD_OVERLAY_ID+' [data-cw-guild-notice]').forEach(node=>{node.textContent=lastGuildNotice});
+}
+function renderGuildTab(){
+  const overlay=document.getElementById(GUILD_OVERLAY_ID);
+  if(!overlay)return;
+  const guild=currentGuild(),session=currentGuildSession(guild),api=globalThis.CivweaveHostNodeSessionV1;
+  const selected=overlay.querySelector('[data-cw-guild-ui="selected"]');
+  const discovery=overlay.querySelector('[data-cw-guild-ui="discovery"]');
+  const mount=overlay.querySelector('#'+GUILD_MOUNT_ID);
+  const available=Boolean(guild),ownerAllowed=Boolean(guild&&globalThis.CivweaveGuildOwnerManagementV1?.ownerAvailableFor?.(guild.origin));
+  const manage=overlay.querySelector('[data-cw-guild-manage]');
+  if(manage)manage.hidden=!ownerAllowed;
+  discoveryExpanded=!available||discoveryExpanded;
+  if(discovery)discovery.hidden=available&&!discoveryExpanded;
+  if(mount)mount.hidden=available&&!discoveryExpanded;
+  if(selected){
+    selected.hidden=!available;
+    if(available){
+      const status=session&&activeGuildStatus?.origin===guild.origin?activeGuildStatus?.packet:null;
+      const quota=status?.quota||null,capacity=status?.capacity||null;
+      const label=guild.displayName||guild.origin.replace(/^https:\/\//,'');
+      const seat=session?(session.seatClass==='guildkeeper'?'Guildkeeper':session.seatClass||'Resident'):guild.localFederated?'Local Guild selected':'Not signed in';
+      const health=status?.ok===true?'Connected · verified Guild session':activeGuildStatus?.error?'Session status unavailable: '+activeGuildStatus.error:session?'Signed in · status not refreshed':guild.localFederated?'Local Guild selected · check the host for admission details':'Choose Join to request access';
+      const allowance=quota?.includedDailyNeurons!=null?guildNumber(quota.includedDailyNeurons):'—';
+      const remaining=quota?.includedRemainingNeurons!=null?guildNumber(quota.includedRemainingNeurons):'—';
+      const nodeId=guild.nodeId||session?.nodeId||'Unspecified';
+      selected.innerHTML=`<div class="cw-guild-selected-head"><div><span class="cw-guild-kicker">Selected Guild · ${guildEsc(seat)}</span><h2>${guildEsc(label)}</h2><p class="cw-guild-subtitle">${guildEsc(health)}</p></div><button type="button" class="cw-guild-manage" data-guild-ui-action="discover">${discoveryExpanded?'Hide discovery':'Change Guild'}</button></div>
+        <p class="cw-guild-help" role="status" aria-live="polite" data-cw-guild-notice>${guildEsc(lastGuildNotice)}</p>
+        <div class="cw-guild-statline"><span>Node: <b>${guildEsc(nodeId)}</b></span><span>Remaining included neurons: <b>${remaining}</b></span><span>Daily member allowance: <b>${allowance}</b></span>${capacity?.communitySeatsRemaining!=null?'<span>Open Citizen seats: <b>'+guildNumber(capacity.communitySeatsRemaining)+'</b></span>':''}</div>
+        <div class="cw-guild-actions">
+          ${session?'<a class="cw-guild-primary" href="/app/civweave-guild-quest-v1.html">Guild Quests</a><button type="button" data-guild-ui-action="chat">Guild chat</button>':''}
+          <button type="button" data-guild-ui-action="invite" data-cw-guild-invite>Copy invitation</button>
+          ${session?'<button type="button" data-guild-ui-action="verify">Verify local server</button>':''}
+          ${!session?'<button type="button" class="cw-guild-primary" data-guild-ui-action="'+(api?.hasCredential?.(guild.origin,guild.nodeId)?'relogin':'join')+'">'+(api?.hasCredential?.(guild.origin,guild.nodeId)?'Log back in':'Join as a Hero')+'</button>':''}
+          <button type="button" data-guild-ui-action="refresh">Refresh access</button>
+        </div>
+        <details class="cw-guild-access"><summary>Access, membership &amp; Guildkeeper options</summary><div class="cw-guild-access-body">
+          <p class="cw-guild-help">The Guild selected here is the device's active Guild. Joining or leaving requires the Guild's own server; selecting another Guild does not cancel your membership.</p>
+          <div class="cw-guild-actions">
+            <button type="button" data-guild-ui-action="membership">Citizen / Patron membership</button>
+            ${ownerAllowed?'<button type="button" data-cw-guild-manage>Open Guildkeeper management</button>':''}
+            ${session?'<button type="button" data-guild-ui-action="signout">Sign out on this device</button>':''}
+            ${session&&session.authMode!=='legacy-guildkeeper'&&session.seatClass!=='guildkeeper'?'<button type="button" data-guild-ui-action="leave">Leave Guild &amp; release seat</button>':''}
+            <button type="button" data-guild-ui-action="deselect">Remove active selection</button>
+          </div>
+          <p class="cw-guild-help">Sign out keeps your Guild seat and saved login. Leave asks the Guild server to remove your residency. Removing the selection does neither.</p>
+        </div></details>`;
+    }else selected.innerHTML='';
+  }
+  const saved=overlay.querySelector('[data-cw-guild-saved]');
+  if(saved){
+    const sessions=api?.publicStatus?.()?.sessions||[];
+    const rows=sessions.filter(item=>item?.active&&item.origin&&item.nodeId).slice(0,16);
+    const own=globalThis.CivweaveGuildOwnerManagementV1?.ownedGuild?.();
+    const founded=own?'<strong class="cw-guild-kicker">Guildkeeper</strong><button type="button" data-guild-ui-action="founder-manage">Manage my founded Guild · '+guildEsc(own.displayName||own.origin)+'</button>':'';
+    saved.innerHTML=founded+(rows.length?'<strong class="cw-guild-kicker">Your logged-in Guilds</strong>'+rows.map(row=>
+      `<button type="button" data-guild-ui-action="switch" data-guild-node="${guildEsc(row.nodeId)}" data-guild-origin="${guildEsc(row.origin)}"><span>${guildEsc(row.origin.replace(/^https:\/\//,''))} · ${guildEsc(row.seatClass||'Hero')}</span><span>${guild&&guild.origin===row.origin?'Selected':'Select'}</span></button>`).join(''):'<p>Joined Guilds from this browser session appear here. Your device-bound login can be restored after a restart by choosing the Guild again.</p>');
+  }
+}
+async function refreshGuildAccess(){
+  const guild=currentGuild(),session=currentGuildSession(guild),api=globalThis.CivweaveHostNodeSessionV1;
+  if(!guild||!session||!api?.status){activeGuildStatus=null;renderGuildTab();return}
+  const origin=guild.origin,nodeId=session.nodeId;
+  try{
+    const packet=await api.status(nodeId);
+    const selected=currentGuild();
+    if(selected?.origin===origin&&currentGuildSession(selected)?.nodeId===nodeId)
+      activeGuildStatus={origin,packet};
+  }catch(error){
+    if(currentGuild()?.origin===origin)activeGuildStatus={origin,error:String(error?.message||error)};
+  }
+  renderGuildTab();
+}
+async function inspectGuildInvite(form){
+  if(guildPanelBusy)return;
+  guildPanelBusy=true;
+  const input=form.querySelector('[name="guildOrigin"]'),value=String(input?.value||'').trim();
+  guildFeedback('Checking this Guild without joining…');
+  try{
+    const parsed=new URL(value);
+    let origin=value,nodeId='';
+    const invited=parsed.searchParams.get('host');
+    if(invited){
+      if(parsed.origin!==location.origin&&parsed.origin!=='https://civweave.cc')
+        throw new Error('Invitation links must come from Civweave. Alternatively enter the Guild HTTPS address directly.');
+      origin=invited;nodeId=parsed.searchParams.get('node')||'';
+    }
+    const finder=await ensureGuildFinderRuntime();
+    const result=await finder.inspectOrigin(origin,{nodeId});
+    if(!result?.ok)throw new Error(result?.error||'Guild capacity could not be verified.');
+    guildFeedback('Guild verified. Review its open seats below, then choose Join & log in. No membership was purchased.');
+  }catch(error){guildFeedback('Could not inspect Guild: '+String(error?.message||error))}
+  finally{guildPanelBusy=false}
+}
+async function guildAction(action,control){
+  if(guildPanelBusy)return;
+  const guild=currentGuild(),session=currentGuildSession(guild),api=globalThis.CivweaveHostNodeSessionV1;
+  if(action==='discover'){discoveryExpanded=!discoveryExpanded;renderGuildTab();if(discoveryExpanded)globalThis.CivweaveHostNodeInstallerLobbyV1?.showSearch?.(true);return}
+  if(action==='switch'){
+    try{api.selectSession({origin:control.dataset.guildOrigin,nodeId:control.dataset.guildNode});discoveryExpanded=false;activeGuildStatus=null;renderGuildTab();await refreshGuildAccess();}
+    catch(error){guildFeedback('Cannot select Guild: '+String(error?.message||error))}return;
+  }
+  if(action==='founder-manage'){
+    if(!globalThis.CivweaveGuildOwnerManagementV1?.ownedGuild?.())return;
+    closeNearbyGuilds('founder-management');
+    await globalThis.CivweaveGuildOwnerManagementV1.open();
+    return;
+  }
+  if(!guild)return;
+  guildPanelBusy=true;
+  try{
+    if(action==='invite'){
+      const invite=new URL('/app/working-campus-v440.html',location.origin);
+      invite.searchParams.set('host',guild.origin);
+      if(guild.nodeId)invite.searchParams.set('node',guild.nodeId);
+      await navigator.clipboard.writeText(invite.href);
+      guildFeedback('Invitation copied. It contains no passwords or membership tokens.');
+    }else if(action==='refresh'){activeGuildStatus=null;await refreshGuildAccess()}
+    else if(action==='signout'){
+      if(!session)throw new Error('No active Guild session.');
+      api.signOut(session.nodeId);activeGuildStatus=null;renderGuildTab();
+      guildFeedback('Signed out on this device. Your Guild seat is still reserved; log back in when ready.');
+    }else if(action==='deselect'){
+      api.deselectGuild();activeGuildStatus=null;discoveryExpanded=true;renderGuildTab();
+      guildFeedback('Guild deselected. Membership and saved logins were not changed.');
+    }else if(action==='leave'){
+      if(!session)throw new Error('No active Guild session.');
+      if(!confirm('Leave this Guild and release your Citizen/Patron seat? You may need to rejoin, and available seats can fill.'))return;
+      await api.leaveGuild(session.nodeId);activeGuildStatus=null;discoveryExpanded=true;renderGuildTab();
+      guildFeedback('The Guild confirmed your departure. Your local login and active selection were cleared.');
+    }else if(action==='relogin'){
+      const legacy=api.legacyGuildkeeperCredential?.(guild.origin,guild.nodeId);
+      const joined=legacy?api.reconnectLegacyGuildkeeper(guild.origin,guild.nodeId):await api.join(guild.origin,{nodeId:guild.nodeId,createCredential:false});
+      api.selectSession({origin:guild.origin,nodeId:joined.session.nodeId,displayName:guild.displayName});
+      discoveryExpanded=false;activeGuildStatus=null;await refreshGuildAccess();
+    }else if(action==='join'||action==='membership'){
+      discoveryExpanded=true;renderGuildTab();
+      const finder=await ensureGuildFinderRuntime();
+      const status=guild.localFederated?await finder.loadStatus(true):await finder.inspectOrigin(guild.origin,{nodeId:guild.nodeId});
+      if(!status?.ok)throw new Error('Selected Guild could not be reached. Try again before joining.');
+      guildFeedback(guild.localFederated?'Local Guild selected. Admission and Guildkeeper tools remain with this local host; no remote HTTPS login is attempted.':action==='join'?'Review live seats and choose Join & log in below.':'Citizen and Patron choices are managed by the Guild admission and membership services below.');
+    }else if(action==='chat'){
+      globalThis.CivweaveHumanChatGuildContextV1?.sync?.();
+      if(!globalThis.CivweaveHumanChatStandaloneV2?.open)
+        await globalThis.CivweaveHumanChatGuildContextV1?.bootStandalone?.();
+      const chat=globalThis.CivweaveHumanChatStandaloneV2;
+      if(!chat?.open||!session)throw new Error('Guild chat is unavailable without a signed-in Guild.');
+      closeNearbyGuilds('open-guild-chat');
+      await chat.open('guild:'+session.nodeId);
+    }else if(action==='verify'){
+      closeNearbyGuilds('verify-physical-node');
+      if(!globalThis.CivweaveGuildNodeCommunityCheckV1?.open)throw new Error('Physical node verification is not available.');
+      await globalThis.CivweaveGuildNodeCommunityCheckV1.open();
+    }
+  }catch(error){guildFeedback('Guild action unavailable: '+String(error?.message||error))}
+  finally{guildPanelBusy=false}
+}
 async function openNearbyGuilds(){
   const overlay=ensureNearbyGuildsOverlay(),mount=overlay.querySelector(`#${GUILD_MOUNT_ID}`);
   overlay.hidden=false;
   if(!mount)return false;
+  discoveryExpanded=!Boolean(currentGuild());
+  lastGuildNotice='';
+  renderGuildTab();
   showGuildFinderState(mount);
   try{
     const api=await ensureGuildFinderRuntime();
     await api.boot?.({mount});
-    api.showSearch?.(true);
+    api.showSearch?.(!Boolean(currentGuild()));
     const lobby=document.getElementById('cw-host-node-lobby');
     if(!lobby)throw new Error('Nearby Guild finder card was not created.');
     if(lobby.parentElement!==mount)mount.append(lobby);
@@ -207,7 +433,9 @@ async function openNearbyGuilds(){
     lobby.dataset.openedFrom='working-campus-guilds-nav';
     lobby.dataset.surface='standalone-guild-search-card';
     overlay.hidden=false;
-    requestAnimationFrame(()=>document.getElementById('cw-host-node-search-run')?.focus?.({preventScroll:true}));
+    renderGuildTab();
+    requestAnimationFrame(()=>{const guild=currentGuild(),focus=guild?overlay.querySelector('[data-guild-ui-action="discover"]'):document.getElementById('cw-host-node-search-run');focus?.focus?.({preventScroll:true})});
+    void refreshGuildAccess();
     try{dispatchEvent(new CustomEvent('civweave:nearby-guilds-opened',{detail:{source:'working-campus-nav',surface:'standalone-guild-search-card'}}))}catch{}
     return true;
   }catch(error){
@@ -282,6 +510,20 @@ function wire(doc=document){
   observer.observe(doc.documentElement,{childList:true,subtree:true,characterData:true});
 }
 
+function syncGuildAccess(event){
+  const overlay=document.getElementById(GUILD_OVERLAY_ID);
+  if(!overlay||overlay.hidden)return;
+  if(event?.type==='civweave:host-node-selected'){
+    discoveryExpanded=!Boolean(event.detail?.origin);
+    activeGuildStatus=null;
+    lastGuildNotice='';
+  }
+  renderGuildTab();
+  if(event?.type==='civweave:host-node-selected'||event?.type==='civweave:host-node-logged-in')
+    void refreshGuildAccess();
+}
+for(const name of ['civweave:host-node-selected','civweave:host-node-logged-in','civweave:capacity-session-ready','civweave:capacity-session-cleared','civweave:host-node-left'])
+  addEventListener(name,syncGuildAccess);
 function start(){wire(document)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
 else start();

@@ -5,7 +5,7 @@ let pending=null,scope=null;
 const deps=[
  ['/app/shared/civweave-passport-identity-v1.js?v=1.0.0',()=>globalThis.CivweavePassportIdentityV1],
  ['/app/cw-reward-ledger-v2.js?v=2.1.1',()=>globalThis.CivweaveCanonicalRewardsV2],
- ['/app/host-node-session-v1.js?v=1.0.0',()=>globalThis.CivweaveHostNodeSessionV1],
+ ['/app/host-node-session-v1.js?v=1.0.138-unified-guild-access',()=>globalThis.CivweaveHostNodeSessionV1],
  ['/app/guild-quest-client-v1.js?v=1.0.1-quest-map-dependencies',()=>globalThis.CivweaveGuildQuestsV1],
  ['/app/guild-starling-client-v1.js?v=1.0.0',()=>globalThis.CivweaveGuildStarlingV1],
  ['/app/starling-collective-v1.js?v=1.1.0',()=>globalThis.CivweaveStarlingCollectiveV1]

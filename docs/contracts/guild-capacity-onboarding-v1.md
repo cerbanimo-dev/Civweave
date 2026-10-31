@@ -17,6 +17,22 @@ The Guild identity remains local-first. Its original founder holds a separate ow
 
 Existing Guilds retain pre-existing capacity allocations. Earned seats and enrolled residents are retained even when a physical server is later removed, avoiding abrupt displacement.
 
+## Unified Guild tab: discovery, selection, Hero access and Guildkeeper management
+
+The canonical Guilds control in the Working Campus uses the existing `public/app/guild-symbol-v1.js` overlay, which mounts the sole finder/admission owner `public/app/host-node-installer-lobby-v1.js`. It does not create a second Guild locator, member authentication store, session engine, membership checkout service, chat runtime, Quest publication owner, or credits ledger.
+
+**No Guild selected:** the Guilds tab displays discovery. Heroes can request an opt-in approximate-location search of nearby Guilds, filter Citizen/Patron open slots, inspect a direct HTTPS Guild Cloud origin or a Civweave invitation URL without joining, choose a verified Guild, join/login via the existing admission service, switch among currently logged-in Guild sessions or open the established mobile Guild creation installer. Location is requested only when the user presses the existing nearby-search control; exact location is not transmitted by this workflow.
+
+**Guild selected:** the overlay defaults to a compact active Guild panel. Nearby search, full capacity/admission information, and membership checkout are collapsed under **Change Guild** / **Access, membership & Guildkeeper options** until requested. The panel reports actual authenticated session state, current member seat type, verified Cloud allowance/remaining neurons when available, invitation-copy action (no secrets), Guild chat through the canonical human-chat standalone surface, Guild Quests, and physical-node location verification. Unknown quota is shown as unavailable rather than invented. Server access is refreshed on open/explicit request, not through another polling loop.
+
+**Distinct Hero actions:** `selectSession` switches between already authenticated Guild sessions and emits the canonical selected event; `signOut` drops only the current device capacity session, preserving the resident seat and saved login credential; `deselectGuild` removes the active Guild choice without changing admission or membership. **Leave Guild** is a deliberate server-authenticated `DELETE /api/ai/node/session?nodeId=...` request and only clears the device's selection/login and saved credential **after** the Guild server confirms that it removed the resident from the current Guild and released the slot. Network errors, older Guild runtimes without leave support and unauthenticated requests fail without pretending a seat has been released. A legacy founding Guildkeeper cannot leave through the resident departure endpoint.
+
+**Guildkeeper access:** the existing owner panel provides invitations, member removal, physical-node pairing, recovery, offline-location checks and neuron-flow monitoring. Its Guildkeeper button appears only when the **selected** Guild origin matches the device's saved founder-owner credential. Owner rights are always rechecked by the Cloudflare Guild management endpoint, not by the browser's claim. Delegated Guildkeeper powers are not introduced by this UI overhaul.
+
+**Access scope:** the direct Guild finder is live-network dependent; offline selected Guild identity and saved session state remain visible where available, but admission, membership changes, node verification and hosted quota refresh cannot be performed without the corresponding server. Do not interpret choosing a Guild as admission, payment, membership transfer, a new seat or proof of Cloudflare billing capacity.
+
+Verification: `scripts/test-guild-tab-access-v1.mjs`, existing `scripts/test-guild-capacity-progression-v1.mjs` and the Guild owner CI workflow.
+
 ## Guildkeeper neuron-flow monitor
 
 The Guilds tab's existing **Manage Guild** action is available to the founding Guild owner (the currently supported Guildkeeper management credential). The owner-only management response now includes a read-only **Neuron flow** projection produced inside the Guild's canonical Capacity Durable Object from the existing `resident_usage` ledger; ordinary resident capacity sessions cannot read it.

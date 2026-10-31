@@ -5,6 +5,15 @@ const clean=(value,max=2000)=>String(value??'').slice(0,max);
 const esc=value=>clean(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const state=()=>{try{return JSON.parse(localStorage.getItem(STATE_KEY)||'null')}catch{return null}};
 const owner=()=>{const v=state();return v?.cloudAttached&&v?.primaryOrigin&&/^[A-Za-z0-9_-]{40,200}$/.test(v.ownerKey||'')?v:null};
+function ownedGuild(){
+  const v=owner();if(!v)return null;
+  try{return Object.freeze({origin:new URL(v.primaryOrigin).origin,guildId:String(v.guildId||'').slice(0,180),
+    displayName:String(v.displayName||'').slice(0,160)})}catch{return null}
+}
+function ownerAvailableFor(origin){
+  const v=owner();if(!v||!origin)return false;
+  try{return new URL(v.primaryOrigin).origin===new URL(origin).origin}catch{return false}
+}
 let root=null,packet=null,busy=false;
 function installStyle(){
   if(document.getElementById(STYLE))return;
@@ -108,7 +117,7 @@ async function perform(action,button){
   if(busy)return;busy=true;
   try{
     if(action==='refresh'){await refresh();return}
-    if(action==='copy-invite'){await navigator.clipboard.writeText(owner()?.primaryOrigin||'');feedback('Guild origin copied. Invitation and admission still use the existing resident login flow.');return}
+    if(action==='copy-invite'){const v=owner(),invite=new URL('/app/working-campus-v440.html',location.origin);invite.searchParams.set('host',new URL(v.primaryOrigin).origin);if(v.cloudFabric?.starterNodes?.[0]?.nodeId)invite.searchParams.set('node',v.cloudFabric.starterNodes[0].nodeId);await navigator.clipboard.writeText(invite.href);feedback('Guild invitation copied. It contains no owner credential; residents still join using the normal login flow.');return}
     if(action==='remove-member'&&!confirm('Remove this resident and invalidate their Guild sessions?'))return;
     if(action==='revoke'&&!confirm('Revoke the current physical server key? Already earned slots remain unlocked.'))return;
     feedback('Checking '+action+'…');
@@ -134,10 +143,11 @@ async function open(){
   root.querySelector('[data-gm-close]')?.focus({preventScroll:true});return true;
 }
 function close(){if(root)root.hidden=true}
-function syncNav(){const v=owner();document.querySelectorAll('[data-cw-guild-manage]').forEach(button=>{button.hidden=!v;button.disabled=!v})}
+function syncNav(){const selected=globalThis.CivweaveHostNodeSessionV1?.selectedOrigin?.()||'';const can=ownerAvailableFor(selected);document.querySelectorAll('[data-cw-guild-manage]').forEach(button=>{button.hidden=!can;button.disabled=!can})}
 document.addEventListener('click',event=>{if(event.target.closest?.('[data-cw-guild-manage]')){event.preventDefault();void open()}});
 addEventListener('civweave:nearby-guilds-opened',syncNav);
+addEventListener('civweave:host-node-selected',syncNav);
 addEventListener('civweave:mobile-guild-cloud-attached',syncNav);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncNav,{once:true});else syncNav();
-globalThis.CivweaveGuildOwnerManagementV1=Object.freeze({version:VERSION,open,close,refresh,ownerAvailable:()=>Boolean(owner())});
+globalThis.CivweaveGuildOwnerManagementV1=Object.freeze({version:VERSION,open,close,refresh,ownerAvailable:()=>Boolean(owner()),ownerAvailableFor,ownedGuild});
 })();

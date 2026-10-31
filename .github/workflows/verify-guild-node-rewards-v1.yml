@@ -5,6 +5,11 @@ on:
       - 'cloudflare/mobile-guild-edge/src/**'
       - 'public/app/guild-owner-management-v1.js'
       - 'public/app/guild-symbol-v1.js'
+      - 'public/app/host-node-session-v1.js'
+      - 'public/app/host-node-installer-lobby-v1.js'
+      - 'public/app/host-node-local-capacity-v1.js'
+      - 'public/app/minilm-decision-strip-v1.js'
+      - 'public/app/starling-integration-v1.js'
       - 'public/app/mobile-guild-create-v1.mjs'
       - 'public/app/working-campus-v440.html'
       - 'public/app/working-campus-v156.html'
@@ -12,6 +17,8 @@ on:
       - 'scripts/test-guild-capacity-progression-v1.mjs'
       - 'scripts/test-guildkeeper-neuron-flow-v1.mjs'
       - 'scripts/test-guild-community-proof-v1.mjs'
+      - 'scripts/test-guild-tab-access-v1.mjs'
+      - 'scripts/test-guild-session-runtime-compat-v1.mjs'
       - 'public/app/guild-node-community-check-v1.js'
       - 'package.json'
       - '.github/workflows/verify-guild-node-rewards-v1.yml'
@@ -21,10 +28,17 @@ on:
       - 'cloudflare/mobile-guild-edge/src/**'
       - 'public/app/guild-owner-management-v1.js'
       - 'public/app/guild-symbol-v1.js'
+      - 'public/app/host-node-session-v1.js'
+      - 'public/app/host-node-installer-lobby-v1.js'
+      - 'public/app/host-node-local-capacity-v1.js'
+      - 'public/app/minilm-decision-strip-v1.js'
+      - 'public/app/starling-integration-v1.js'
       - 'public/app/mobile-guild-create-v1.mjs'
       - 'scripts/guild-physical-node-agent-v1.mjs'
       - 'scripts/test-guild-capacity-progression-v1.mjs'
       - 'scripts/test-guild-community-proof-v1.mjs'
+      - 'scripts/test-guild-tab-access-v1.mjs'
+      - 'scripts/test-guild-session-runtime-compat-v1.mjs'
       - 'public/app/guild-node-community-check-v1.js'
       - '.github/workflows/verify-guild-node-rewards-v1.yml'
 jobs:
@@ -45,7 +59,13 @@ jobs:
           node --check cloudflare/mobile-guild-edge/src/guild-community-proof-v1.mjs
           node --check public/app/guild-node-community-check-v1.js
           node --check public/app/guild-owner-management-v1.js
+          node --check public/app/guild-symbol-v1.js
+          node --check public/app/host-node-session-v1.js
+          node --check public/app/host-node-installer-lobby-v1.js
+          node --check public/app/host-node-local-capacity-v1.js
+          node --check public/app/minilm-decision-strip-v1.js
+          node --check public/app/starling-integration-v1.js
           node --check public/app/mobile-guild-create-v1.mjs
           node --check scripts/guild-physical-node-agent-v1.mjs
       - name: Guild capacity progression and onboarding contract
-        run: node --test scripts/test-guild-capacity-progression-v1.mjs scripts/test-guild-community-proof-v1.mjs scripts/test-guildkeeper-neuron-flow-v1.mjs
+        run: node --test scripts/test-guild-capacity-progression-v1.mjs scripts/test-guild-community-proof-v1.mjs scripts/test-guildkeeper-neuron-flow-v1.mjs scripts/test-guild-tab-access-v1.mjs scripts/test-guild-session-runtime-compat-v1.mjs
