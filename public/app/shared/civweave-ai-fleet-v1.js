@@ -2,7 +2,7 @@
 'use strict';
 // One presentation/catalogue owner. Existing inference, download, Settings,
 // privacy/consent and device-fit contracts remain the execution authorities.
-const VERSION='1.2.0-single-screen-fleet-installer';
+const VERSION='1.3.0-local-guild-fleet-nav';
 if(globalThis.CivweaveAIFleetV1?.version===VERSION)return;
 const MEMORY_KEY='civweave.ai.fleet.memory-gb.v1';
 const CHOICE_KEY='civweave.ai.fleet.choices.v1';
@@ -206,7 +206,7 @@ function setBackend(value){if(!BACKENDS[value])throw Error('Unsupported local ba
 function style(){
  if(document.getElementById(STYLE_ID))return;
  const element=document.createElement('style');element.id=STYLE_ID;
- element.textContent='#cw-ai-fleet-v1{display:grid;gap:14px}#cw-ai-fleet-v1 .cw-fleet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}#cw-ai-fleet-v1 .cw-fleet-card{display:grid;gap:8px;border:1px solid #ffffff30;border-radius:14px;padding:12px;background:#0b1b2c}#cw-ai-fleet-v1 .cw-fleet-card h4,#cw-ai-fleet-v1 .cw-fleet-card p{margin:0}#cw-ai-fleet-v1 .cw-fleet-card p,#cw-ai-fleet-v1 .cw-fleet-meta{color:#ccd9e7;font-size:.88rem}#cw-ai-fleet-v1 .cw-fleet-choices{display:flex;gap:7px;flex-wrap:wrap}#cw-ai-fleet-v1 [data-ai-fleet-backend][aria-pressed=true]{border-color:#6ddfbd;background:#193b3a;color:white}#cw-ai-fleet-v1 select{width:100%;min-height:42px}#cw-ai-fleet-v1 button{min-height:44px}#cw-ai-fleet-v1 output{display:block;white-space:pre-wrap}#cw-ai-fleet-v1 .cw-fleet-label{font-weight:650}';
+ element.textContent='#cw-ai-fleet-v1 .cw-fleet-scope-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#cw-ai-fleet-v1 .cw-fleet-scope-nav button{border-radius:10px;text-align:left;border:1px solid #95c9bc7b;background:#192d38;color:#e7f3ea}#cw-ai-fleet-v1 .cw-fleet-scope-nav button[aria-pressed=true]{border:2px solid #b1ead4;background:#305f55}#cw-ai-fleet-v1{display:grid;gap:14px}#cw-ai-fleet-v1 .cw-fleet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}#cw-ai-fleet-v1 .cw-fleet-card{display:grid;gap:8px;border:1px solid #ffffff30;border-radius:14px;padding:12px;background:#0b1b2c}#cw-ai-fleet-v1 .cw-fleet-card h4,#cw-ai-fleet-v1 .cw-fleet-card p{margin:0}#cw-ai-fleet-v1 .cw-fleet-card p,#cw-ai-fleet-v1 .cw-fleet-meta{color:#ccd9e7;font-size:.88rem}#cw-ai-fleet-v1 .cw-fleet-choices{display:flex;gap:7px;flex-wrap:wrap}#cw-ai-fleet-v1 [data-ai-fleet-backend][aria-pressed=true]{border-color:#6ddfbd;background:#193b3a;color:white}#cw-ai-fleet-v1 select{width:100%;min-height:42px}#cw-ai-fleet-v1 button{min-height:44px}#cw-ai-fleet-v1 output{display:block;white-space:pre-wrap}#cw-ai-fleet-v1 .cw-fleet-label{font-weight:650}';
  document.head?.append(element);
 }
 function canUse(entry,row){
@@ -407,7 +407,7 @@ function render(layer){
  const buttons=Object.entries(BACKENDS).map(([key,value])=>'<button type="button" data-ai-fleet-backend="'+key+
    '" aria-pressed="'+(key===backend)+'">'+esc(value.label)+'</button>').join('');
  const memoryOptions=[4,6,8,12,16,24,32,48,64,96,128].map(n=>'<option value="'+n+'"'+(device.budgetGB===n?' selected':'')+'>'+n+' GB</option>').join('');
- const header='<h3>AI Fleet</h3><p>Choose your runtime, install models, assign roles and activate local inference—all here. Changing configuration views does not start AI.</p>'+
+ const header='<h3>AI Fleet</h3><div class="cw-fleet-scope-nav" role="group" aria-label="Fleet scope"><button type="button" data-ai-fleet-local aria-pressed="true">Local Fleet · this device</button><button type="button" data-ai-fleet-guild>Guild Fleet · shared Worldweaver</button></div><p>Install models and assign private roles here. Guild Fleet uses signed Guild pilots and authorized Worldweaver rooms; local model files are never automatically shared.</p>'+
   '<div class="cw-fleet-choices" role="group" aria-label="Local inference backend">'+buttons+'</div>';
  let body='';
  if(backend==='browser')body='<p>Install and assign the models on this phone. Keep 2B and 4B as separate imports; they can share the five fleet roles without duplicating weights.</p>'+
@@ -466,6 +466,23 @@ function render(layer){
    });
    panel.addEventListener('click',event=>{
      const el=event.target.closest?.('button');if(!el)return;
+     if(el.hasAttribute('data-ai-fleet-guild')){
+       const api=globalThis.CivweaveStarlingIntegrationV1;
+       if(typeof api?.open!=='function'){
+         panel.querySelector('[data-ai-fleet-message]').textContent='Open a Guild in Civweave to access its signed Worldweaver fleet.';
+         return;
+       }
+       el.disabled=true;
+       void Promise.resolve(api.open()).then(()=>{
+         const lounge=globalThis.CivweaveStarlingLoungeV1;
+         if(!lounge?.setFleetScope?.('guild'))throw new Error('Connect to a Guild to access its Fleet. Local models remain private.');
+         globalThis.CivweaveSettingsV320?.close?.();
+       }).catch(error=>{
+         const status=panel.querySelector('[data-ai-fleet-message]');
+         if(status)status.textContent=String(error?.message||error);
+       }).finally(()=>{el.disabled=false});
+       return;
+     }
      const backendChoice=el.dataset.aiFleetBackend;
      if(backendChoice){if(activeImport)activeImport.abort();setBackend(backendChoice);render(layer);return}
      const presetId=el.dataset.aiFleetDownloadPreset;
