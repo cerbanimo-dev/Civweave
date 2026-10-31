@@ -332,3 +332,70 @@
  #cw-starling-lounge .sl-room-select{flex:1;min-width:135px}
  #cw-starling-lounge .sl-room-select select{max-width:calc(100vw - 195px);min-width:105px}
 }
+
+/* Two first-class fleet scopes: device-private vs verified Guild world. */
+#cw-starling-lounge .sl-fleet-switch{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;
+ padding:10px 14px;background:#152d34;border-bottom:1px solid #8dc2af58
+}
+#cw-starling-lounge .sl-fleet-switch button{
+ display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;
+ background:#213841;color:#b9d3cd;border:1px solid #86b8ad46;
+ border-radius:12px;text-align:left;padding:10px 14px
+}
+#cw-starling-lounge .sl-fleet-switch b{font-size:15px;letter-spacing:.025em}
+#cw-starling-lounge .sl-fleet-switch small{font-size:10px;opacity:.87}
+#cw-starling-lounge .sl-fleet-switch button[aria-pressed="true"]{
+ background:linear-gradient(125deg,#376b62,#2d4649);
+ border:2px solid #d3f3df;color:#fff
+}
+#cw-starling-lounge .sl-fleet-switch button:disabled{opacity:.38;cursor:not-allowed}
+#cw-starling-lounge .sl-fleet-panel{padding:14px;margin-bottom:10px}
+#cw-starling-lounge .sl-local-roles,#cw-starling-lounge .sl-guild-pilots{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,156px),1fr));gap:8px
+}
+#cw-starling-lounge .sl-local-role{
+ min-width:0;padding:10px;border:1px solid #95c8b257;background:#233b4178;border-radius:10px
+}
+#cw-starling-lounge .sl-local-role b{display:block;font-size:12px;overflow-wrap:anywhere}
+#cw-starling-lounge .sl-local-role p{font-size:11px;margin:4px 0;overflow-wrap:anywhere}
+#cw-starling-lounge .sl-coordinates{display:flex;align-items:center;gap:5px;font-size:11px}
+#cw-starling-lounge .sl-coordinates input{
+ width:66px;padding:5px;background:#1c3039;border:1px solid #88b9ac;color:#ecf6ec;border-radius:6px
+}
+#cw-starling-lounge .sl-tool-observation{
+ max-height:170px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;
+ margin:8px 0;padding:8px;border-radius:8px;background:#13252d;color:#c5dfd7;font-size:10px
+}
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-guild-only],
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-guild-fleet],
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-world-host],
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-room-holder],
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-action="world-provision"],
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-action="world-2d"],
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-action="world-3d"],
+#cw-starling-lounge[data-sl-fleet="local"] .sl-figure:not(.sl-figure-guide){
+ display:none!important
+}
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-stage]{
+ display:block!important
+}
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-scene-context]{
+ color:#dbeddc
+}
+#cw-starling-lounge[data-sl-fleet="guild"] [data-sl-local-fleet]{
+ display:none!important
+}
+@media(max-width:700px){
+ #cw-starling-lounge .sl-fleet-switch{padding:7px 9px;gap:6px}
+ #cw-starling-lounge .sl-fleet-switch button{padding:8px 10px;border-radius:9px}
+ #cw-starling-lounge .sl-fleet-switch b{font-size:12px}
+ #cw-starling-lounge .sl-fleet-switch small{font-size:9px}
+ #cw-starling-lounge .sl-local-roles,#cw-starling-lounge .sl-guild-pilots{
+   grid-template-columns:repeat(2,minmax(0,1fr))
+ }
+ #cw-starling-lounge .sl-fleet-panel{padding:10px}
+}
+@media(max-width:390px){
+ #cw-starling-lounge .sl-local-roles,#cw-starling-lounge .sl-guild-pilots{grid-template-columns:minmax(0,1fr)}
+}
