@@ -15,11 +15,17 @@ function delegatedGuildkeeper(){
   const session=api?.sessionFor?.(origin);
   return session?.origin===origin&&session.seatClass==='guildkeeper'?session:null;
 }
+let founderMode=false;
 function managementAuth(){
-  const founder=owner();
-  if(founder)return {origin:founder.primaryOrigin,token:founder.ownerKey,founder:true};
-  const member=delegatedGuildkeeper();
-  return member?{origin:member.origin,token:member.token,founder:false}:null;
+  const founder=owner(),member=delegatedGuildkeeper();
+  const selected=founderMode?'':globalThis.CivweaveHostNodeSessionV1?.selectedOrigin?.()||'';
+  if(!founderMode&&member&&member.origin===selected)
+    return {origin:member.origin,token:member.token,founder:false};
+  if(founder){
+    const origin=new URL(founder.primaryOrigin).origin;
+    if(founderMode||!selected||origin===selected)return {origin,token:founder.ownerKey,founder:true};
+  }
+  return null;
 }
 function ownerAvailableFor(origin){
   if(!origin)return false;
@@ -147,14 +153,15 @@ async function perform(action,button){
   }catch(error){feedback('Unable to complete Guild action: '+clean(error?.message||error,400))}
   finally{busy=false}
 }
-async function open(){
+async function open({founded=false}={}){
+  founderMode=Boolean(founded);
   if(!managementAuth())return false;
   globalThis.CivweaveGuildSymbolV1?.closeNearbyGuilds?.('owner-management');
   ensure().hidden=false;feedback('Loading owner-only Guild configuration…');
   try{await refresh()}catch(error){feedback('Guild Management unavailable: '+clean(error?.message||error,400))}
   root.querySelector('[data-gm-close]')?.focus({preventScroll:true});return true;
 }
-function close(){if(root)root.hidden=true}
+function close(){founderMode=false;if(root)root.hidden=true}
 function syncNav(){const selected=globalThis.CivweaveHostNodeSessionV1?.selectedOrigin?.()||'';const can=ownerAvailableFor(selected);document.querySelectorAll('[data-cw-guild-manage]').forEach(button=>{button.hidden=!can;button.disabled=!can})}
 document.addEventListener('click',event=>{if(event.target.closest?.('[data-cw-guild-manage]')){event.preventDefault();void open()}});
 addEventListener('civweave:nearby-guilds-opened',syncNav);
