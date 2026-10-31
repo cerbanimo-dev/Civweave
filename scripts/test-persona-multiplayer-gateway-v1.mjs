@@ -51,3 +51,27 @@ test('caller supplied principal, verified bit, or model ID never substitutes for
    actor:{kind:'human',principalId:'member:owner',verified:true},
    command:{type:'stage-set',stage:8}}),/membership|seat|access/i);
 });
+
+test('successful NPC outcomes require an independently verified Worldweaver action receipt',async()=>{
+ const id='w:receipt';const starting=createPersonaCampaign({pack,id,ownerId:'member:owner',
+   branchId:'what-if:receipts',scenario:'An improv scene',cast:['jess','magnus']});
+ records.set(id,starting);
+ authenticated.set('model-jess',{kind:'model',principalId:'pilot:jess',
+   modelId:'qwen3.5:0.8b',personaRef:'world:jess'});
+ authenticated.set('runtime',{kind:'runtime',principalId:'server:world-adapter'});
+ const noVerifier=gateway();
+ await noVerifier.dispatch({authToken:'owner',campaignId:id,expectedRevision:0,
+   command:{type:'bind-pilot',characterId:'jess',principalId:'pilot:jess',modelId:'qwen3.5:0.8b'}});
+ const proposed=await noVerifier.dispatch({authToken:'model-jess',campaignId:id,expectedRevision:1,
+   command:{type:'npc-proposal',characterId:'jess',speech:'Hi',proposedActions:[{tool:'speak',args:{text:'Hi'}}]}});
+ const proposal=proposed.events.at(-1);
+ await assert.rejects(()=>noVerifier.dispatch({authToken:'runtime',campaignId:id,expectedRevision:2,
+   command:{type:'resolve-proposal',proposalId:proposal.id,outcome:'succeeded',worldReceiptId:'fabricated'}}),/Worldweaver|receipt|verified/i);
+ const approved=createPersonaMultiplayerGateway({authenticate:auth,load:loads,writeIfRevision:writes,
+   verifyWorldReceipt:async({worldReceiptId,proposal})=>worldReceiptId==='trusted:receipt-1'&&proposal.id==='event-2'});
+ await assert.rejects(()=>approved.dispatch({authToken:'runtime',campaignId:id,expectedRevision:2,
+   command:{type:'resolve-proposal',proposalId:proposal.id,outcome:'succeeded',worldReceiptId:'fabricated'}}),/Worldweaver|receipt|verified/i);
+ const result=await approved.dispatch({authToken:'runtime',campaignId:id,expectedRevision:2,
+   command:{type:'resolve-proposal',proposalId:proposal.id,outcome:'succeeded',worldReceiptId:'trusted:receipt-1'}});
+ assert.equal(result.events.at(-1).worldChanged,true);
+});
