@@ -280,7 +280,7 @@ let fleetScriptPromise=null;
 async function ensureLocalFleetCatalog(){
   if(globalThis.CivweaveAIFleetV1?.catalogue)return globalThis.CivweaveAIFleetV1;
   if(!fleetScriptPromise)fleetScriptPromise=new Promise((resolve,reject)=>{
-    const script=document.createElement('script');script.src='/app/shared/civweave-ai-fleet-v1.js?v=1.3.0-local-guild-nav';
+    const script=document.createElement('script');script.src='/app/shared/civweave-ai-fleet-v1.js?v=1.3.1-backend-switch-fix';
     script.onload=()=>resolve(globalThis.CivweaveAIFleetV1||null);
     script.onerror=()=>reject(new Error('The canonical local fleet catalogue could not load.'));
     document.head.append(script);
