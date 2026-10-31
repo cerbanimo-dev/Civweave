@@ -8,7 +8,7 @@
  */
 import {validatePersonaPack} from './persona-library-v1.mjs';
 import {prepareDirectedScene,performPersonaTurn,runSplitMindTurn,advanceSceneTurn,needsDirectorRefresh} from './persona-scene-bridge-v1.mjs';
-import {applyCampaignEvent,campaignPublicTimeline} from './persona-campaign-v1.mjs';
+import {applyCampaignEvent,campaignPublicTimeline,importCampaignSnapshot} from './persona-campaign-v1.mjs';
 
 const trim=(v,max=1500)=>typeof v==='string'?v.trim().slice(0,max):'';
 const same=(a,b)=>a?.id===b?.id&&a?.ownerId===b?.ownerId&&a?.packId===b?.packId&&a?.branchId===b?.branchId;
@@ -93,7 +93,7 @@ export function createPersonaChatRuntime({pack,campaign,actor,authorize,invokeMo
      if(!same(current,next))throw new Error('Campaign mismatch: cannot change session identity.');
      // Re-loading a valid signed multiplayer snapshot requires external server validation.
      if(next.revision!==current.revision)throw new Error('Cannot replace an active campaign revision without trusted reconciliation.');
-     current=JSON.parse(JSON.stringify(next));scenes=new Map();return true;
+     current=importCampaignSnapshot(JSON.stringify(next),{pack:p});scenes=new Map();return true;
    },
    resetDirections:()=>{scenes=new Map();}
  });
