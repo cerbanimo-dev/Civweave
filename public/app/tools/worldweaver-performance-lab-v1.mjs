@@ -1,3 +1,5 @@
+import {validatePersonaPack,chooseModelDownloads} from '../shared/persona-library-v1.mjs';
+import {prepareDirectedScene,performPersonaTurn,advanceSceneTurn,needsDirectorRefresh} from '../shared/persona-scene-bridge-v1.mjs';
 import {createPerformanceStudio,performanceObservation} from '../shared/worldweaver-performance-studio-v1.mjs';
 import {compileStageScene,compilePerformanceScore} from '../shared/worldweaver-stagecraft-v1.mjs';
 import {proposeScreenplayViaModel,proposeStageViaModel} from '../shared/worldweaver-adaptation-model-v1.mjs';
@@ -329,3 +331,115 @@ $('export-state').addEventListener('click',()=>{
 });
 addEventListener('pagehide',()=>{viewer?.close();recognizer?.stop?.();globalThis.speechSynthesis?.cancel?.();},{once:true});
 updateScenes();showStage();
+
+/** One explicit rehearsal-cue surface in the existing Performance Studio.
+ * It is not another chat listener or a standing generative-agent loop.
+ * Imported unpublished cast data stays in memory, never localStorage or cloud
+ * unless the user deliberately initiates inference with remote consent.
+ */
+let personaCast=null,personaScene=null;
+let personaRecent=[],personaGenerating=false;
+const personaStatus=s=>$('persona-result').textContent=text(s,2500);
+const personaRoster=()=>Array.from($('persona-cast').selectedOptions).map(o=>o.value);
+$('persona-manifest-file').addEventListener('change',async()=>{
+ personaCast=null;personaScene=null;personaRecent=[];
+ $('persona-cast').replaceChildren();$('persona-speaker').replaceChildren();
+ const file=$('persona-manifest-file').files?.[0];
+ if(!file)return;
+ try{
+  if(file.size>1200000)throw new Error('Manifest too large. Import only the JSON manifest, not the manuscript shards or zip archive.');
+  const p=validatePersonaPack(JSON.parse(await file.text()));
+  if(p.characters.length>1000)throw new Error('Cast limit exceeded.');
+  personaCast=p;
+  for(const c of p.characters){
+   for(const id of ['persona-cast','persona-speaker']){
+    const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.name;
+    $(id).append(opt);
+   }
+  }
+  for(const opt of $('persona-cast').options)opt.selected=['jess','magnus'].includes(opt.value);
+  if(!personaRoster().length&&$('persona-cast').options.length)$('persona-cast').options[0].selected=true;
+  $('persona-speaker').value=personaRoster()[0]||p.characters[0]?.id||'';
+  const tiers=chooseModelDownloads(p,personaRoster()).tiers.join(', ');
+  $('persona-import-status').textContent=p.characters.length+' persona/identity entries loaded locally. Model tiers: '+tiers+'.';
+  personaStatus('Cast manifest imported. Next: prepare a scene with the configured 4B director.');
+ }catch(error){
+  $('persona-import-status').textContent='Import rejected: '+text(error.message,280);
+  personaStatus('No persona data imported.');
+ }
+});
+$('persona-cast').addEventListener('change',()=>{
+ personaScene=null;personaRecent=[];
+ const ids=personaRoster();
+ if(!ids.includes($('persona-speaker').value))$('persona-speaker').value=ids[0]||'';
+ if(personaCast)$('persona-import-status').textContent=ids.length+' selected actors; required tiers: '+
+   chooseModelDownloads(personaCast,ids).tiers.join(', ')+'. No models downloaded.';
+});
+async function runPersonaSelectedModel({messages,modelTier,purpose,maxOutputTokens}){
+ const runtime=globalThis.CivweaveModelRuntime;
+ const cfg=runtime?.readSharedConfig?.('agentic')||runtime?.readSharedConfig?.('interactive');
+ if(!cfg?.provider||['manual','deterministic'].includes(cfg.provider))
+  throw new Error('Select a real local model in Civweave AI settings before running.');
+ if(!['ollama','openai-compatible','compatible','local-api'].includes(String(cfg.provider).toLowerCase()))
+  throw new Error('Per-role switching in this lab currently requires an Ollama or OpenAI-compatible provider.');
+ if(runtime?.endpointLeavesDevice?.(cfg)&&!$('cloud-consent').checked)
+  throw new Error('Explicit remote-model manuscript consent required.');
+ const target=$(modelTier==='4b'?'persona-director-model':'persona-actor-model').value.trim();
+ if(!/^[A-Za-z0-9_.:/-]{1,100}$/.test(target))throw new Error('Enter an installed provider model ID.');
+ const {runCodeInference}=await import('/creator-suite/shared/code-inference-route-v1.mjs');
+ const loaders=await import('/creator-suite/shared/creator-inference-loaders-v1.mjs');
+ const response=await runCodeInference({...cfg,model:target},messages,{
+  selection:loaders.currentCreatorLocalSelection(),loadLocal:loaders.loadCreatorLocalRuntime,
+  loadServer:loaders.loadCreatorServerRuntime,sharedRuntime:runtime,
+  purpose,taskTier:'complex',mediaType:'text',maxTokens:Math.min(2048,Math.max(512,maxOutputTokens||650)),
+  requiresTools:false
+ });
+ if(response?.status!=='success'||response?.fallback?.provider==='deterministic')
+  throw new Error('The selected model did not return completed, structured inference.');
+ if(response?.actual?.model&&response.actual.model!==target)
+  throw new Error('Selected-model runtime returned '+text(response.actual.model,100)+' instead of requested '+target+'.');
+ return response;
+}
+async function personaRun(phase){
+ if(personaGenerating||modelBusy)return;
+ personaGenerating=true;modelBusy=true;
+ $('persona-prepare').disabled=true;$('persona-act').disabled=true;
+ try{
+  if(!personaCast)throw new Error('Import a private persona-pack.json first.');
+  const stage=Number($('persona-stage').value);
+  const scenario=$('persona-scenario').value.trim();
+  const participants=personaRoster();
+  if(!Number.isInteger(stage)||stage<0||!scenario||participants.length<1||participants.length>12)
+   throw new Error('Choose a numbered story stage, a scenario, and 1–12 participating characters.');
+  if(phase==='prepare'){
+   personaStatus('Directing '+participants.length+' character(s) separately with the selected 4B model…');
+   personaScene=await prepareDirectedScene({pack:personaCast,stage,scenario,participants,
+    goals:['Respect canonical facts and personal knowledge; improvise without silently rewriting historical events.'],
+    previousScene:personaScene,invokeModel:runPersonaSelectedModel});
+   personaRecent=[];
+   personaStatus('Director brief revision '+personaScene.revision+' prepared for '+participants.join(', ')+
+    '. The actor may now improvise one cue at a time; new events require approval.');
+  }else{
+   if(!personaScene)throw new Error('Prepare scene direction before improvising.');
+   if(personaScene.stage!==stage||personaScene.scenario!==scenario||
+    JSON.stringify(personaScene.participants)!==JSON.stringify(participants)||
+    needsDirectorRefresh(personaScene))throw new Error('Scenario or cast changed, or instructions expired. Prepare fresh 4B direction.');
+   const id=$('persona-speaker').value;
+   if(!participants.includes(id))throw new Error('Select an active participant to perform.');
+   personaStatus('Invoking 0.8B improv for '+id+'…');
+   const result=await performPersonaTurn({pack:personaCast,scene:personaScene,characterId:id,
+    playerInput:$('persona-player-cue').value,history:personaRecent,invokeModel:runPersonaSelectedModel});
+   personaRecent=[...personaRecent,('Player: '+text($('persona-player-cue').value,450)),
+    (id+': '+result.speech)].slice(-6);
+   personaScene=advanceSceneTurn(personaScene,{expectedTurn:personaScene.turn});
+   personaStatus(JSON.stringify({character:id,speech:result.speech,emote:result.emote,
+     proposedActions:result.proposedActions,worldChanged:false,actionsExecuted:false,
+     directorRevision:result.directorRevision,nextSceneTurn:personaScene.turn,
+     refreshRequired:needsDirectorRefresh(personaScene)},null,2));
+  }
+ }catch(error){personaStatus('Persona rehearsal stopped: '+text(error.message,420));}
+ finally{personaGenerating=false;modelBusy=false;$('persona-prepare').disabled=false;
+  $('persona-act').disabled=false;$('cloud-consent').checked=false;}
+}
+$('persona-prepare').addEventListener('click',()=>personaRun('prepare'));
+$('persona-act').addEventListener('click',()=>personaRun('act'));
