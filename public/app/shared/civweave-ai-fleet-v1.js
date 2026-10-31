@@ -211,7 +211,7 @@ function render(layer){
   const cards=rows.filter(x=>x.group===group).map(x=>{
    const picked=all[x.role]?.modelId===x.modelId;
    const meta=[x.purpose,x.ramGB+' GB working RAM estimate',x.experimental?'Experimental':'Local',picked?'Preferred':''].filter(Boolean).join(' · ');
-   return '<article class="cw-fleet-card" data-fleet-role="'+esc(x.role)+'"><small>'+esc(meta)+'</small><h4>'+esc(x.name)+'</h4><strong data-ai-fleet-model-label="'+esc(x.role)+'">'+esc(x.label)+'</strong><p>'+esc(x.description)+'</p>'+(x.runtime==='browser-gguf'?'<p data-ai-fleet-connection="'+esc(x.role)+'">Checking installed GGUF…</p>':'')'+(x.notes?'<p>'+esc(x.notes)+'</p>':'')+'<button type="button" data-ai-fleet-setup="'+esc(x.platform+':'+x.role)+'">'+(picked?'Configure preferred AI':'Select & configure')+'</button></article>';
+   return '<article class="cw-fleet-card" data-fleet-role="'+esc(x.role)+'"><small>'+esc(meta)+'</small><h4>'+esc(x.name)+'</h4><strong data-ai-fleet-model-label="'+esc(x.role)+'">'+esc(x.label)+'</strong><p>'+esc(x.description)+'</p>'+(x.runtime==='browser-gguf'?'<p data-ai-fleet-connection="'+esc(x.role)+'">Checking installed GGUF…</p>':'')+(x.notes?'<p>'+esc(x.notes)+'</p>':'')+'<button type="button" data-ai-fleet-setup="'+esc(x.platform+':'+x.role)+'">'+(picked?'Configure preferred AI':'Select & configure')+'</button></article>';
   }).join('');
   return '<div class="cw-fleet-group"><h4>'+esc(group)+'</h4><div class="cw-fleet-grid">'+cards+'</div></div>';
  }).join('');
