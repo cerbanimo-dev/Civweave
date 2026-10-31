@@ -54,6 +54,24 @@ test('sign out clears only one Guild session and blocks silent re-login until ex
   assert.equal(h.localStorage.getItem('federation-finder.physical-node-endpoint'),null);
   assert.equal(h.localStorage.getItem('civweave.host-node.selection.v1'),null);
 });
+test('a founding Guildkeeper can explicitly restore legacy owner identity without silently enrolling as a new Citizen',async()=>{
+  const h=loadSessionRuntime(),{api}=h;
+  const origin='https://founded.example',nodeId='my-guild-a';
+  h.localStorage.setItem('civweave.mobile-guild.v1',JSON.stringify({
+    cloudAttached:true,primaryOrigin:origin,membershipKey:'K'.repeat(48),
+    guildId:'my-guild',deviceId:'founder-device-id',cloudFabric:{starterNodes:[{nodeId}]}
+  }));
+  const first=api.reconnectLegacyGuildkeeper(origin,nodeId);
+  assert.equal(first.session.seatClass,'guildkeeper');
+  assert.equal(first.session.authMode,'legacy-guildkeeper');
+  api.selectSession({origin,nodeId});
+  api.signOut(nodeId);
+  assert.equal(await api.ensureSelected(),null);
+  const after=api.reconnectLegacyGuildkeeper(origin,nodeId);
+  assert.equal(after.session.authMode,'legacy-guildkeeper');
+  assert.equal(h.requests.length,0);
+});
+
 test('no Guild selection never silently promotes an unrelated logged-in Guild session',async()=>{
   const h=loadSessionRuntime(),{api}=h;
   api.setSession(guildA);
