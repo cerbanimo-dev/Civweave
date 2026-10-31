@@ -5,7 +5,7 @@ import {webcrypto} from 'node:crypto';
 import {majority,ballotSpec,ballotOutcome,qualifiedContributors,GUILD_CONTRIBUTION_WINDOW_MS} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-v1.mjs';
 import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,
   delegatedRole,isBanned,governanceStatus,reportQueue,reportReceipt,markReportDelivery} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
-import {distanceKm} from '../cloudflare/core/src/guild-peer-reports-v1.mjs';
+import {distanceKm,deliverVerifiedGuildReport} from '../cloudflare/core/src/guild-peer-reports-v1.mjs';
 
 if(!globalThis.crypto)globalThis.crypto=webcrypto;
 const NOW=()=>new Date().toISOString();
@@ -102,4 +102,50 @@ test('nearby Guild relay uses location bounds, never all worldwide Guilds',()=>{
   assert.ok(distanceKm({latitude:40.7,longitude:-74},{latitude:40.75,longitude:-74})<25);
   assert.ok(distanceKm({latitude:40.7,longitude:-74},{latitude:45,longitude:-74})>25);
   assert.equal(distanceKm(null,{latitude:40,longitude:-74}),Infinity);
+});
+
+test('directory relay independently fetches source Guild receipt and delivers only to mapped nearby registered Guilds',async()=>{
+  const id='guild-vote:12345678-1234-4234-9234-123456789abc';
+  const origin='https://guild-a.workers.dev';
+  const locations=[
+    {node_id:'guild-a',location_json:JSON.stringify({latitude:40.0,longitude:-74.0})},
+    {node_id:'guild-b',location_json:JSON.stringify({latitude:40.1,longitude:-74.0})},
+    {node_id:'guild-c',location_json:JSON.stringify({latitude:41,longitude:-74})}
+  ];
+  const delivered=new Set,seen=[];
+  const DB={
+    prepare(query){
+      const entry={args:[],bind(...values){this.args=values;return this;},
+        async first(){
+          if(query.includes('FROM nodes WHERE node_id='))return {node_id:'guild-a',public_origin:origin,
+            location_json:locations[0].location_json};
+          if(query.includes('COUNT(*)'))return {n:delivered.has(this.args[1])?1:0};
+          throw new Error('Unknown DB single query');
+        },
+        async all(){
+          if(query.includes('SELECT node_id,location_json'))return {results:locations.slice(1)};
+          throw new Error('Unknown DB query');
+        },
+        async run(){
+          if(!query.includes('INSERT OR IGNORE INTO guild_peer_report_inbox'))throw new Error('Unknown mutation');
+          delivered.add(this.args[2]);seen.push({recipient:this.args[2],receipt:JSON.parse(this.args[3])});
+          return{meta:{changes:1}};
+        }
+      };return entry;
+    },
+    async batch(writes){return Promise.all(writes.map(write=>write.run()))}
+  };
+  const receipt={schema:'civweave.guild-peer-report.v1',ballotId:id,guildId:'guild-a',origin,
+    subjectPseudonym:'a'.repeat(64),reasonCode:'fraud',classification:'community-approved-unverified-allegation',
+    radiusKm:25,createdAt:NOW()};
+  let calls=0;
+  const fetcher=async url=>{calls++;assert.match(String(url),/\/api\/guild\/governance\/receipt/);
+    return{ok:true,json:async()=>({ok:true,receipt})}};
+  const result=await deliverVerifiedGuildReport({DB},{guildId:'guild-a',origin,ballotId:id},fetcher);
+  assert.equal(result.deliveredToNearbyGuilds,1);
+  assert.equal(seen.length,1);assert.equal(seen[0].recipient,'guild-b');
+  assert.equal(JSON.stringify(seen[0].receipt).includes(C),false);
+  assert.equal((await deliverVerifiedGuildReport({DB},{guildId:'guild-a',origin,ballotId:id},fetcher)).idempotent,true);
+  assert.equal(calls,1);
+  await assert.rejects(()=>deliverVerifiedGuildReport({DB},{guildId:'guild-a',origin:'https://imposter.test',ballotId:id},fetcher),/not an independently registered/);
 });
