@@ -107,7 +107,7 @@ function presenceFor(agentId){
   // Only explicit local generation or a real host job may claim "working".
   if(state.turnsRunning&&state.activePersona===agentId)return {status:'working',label:'Generating now'};
   const job=state.hostJob;
-  if(job?.guildId===state.guild?.id&&job.personaId===agentId){
+  if(job&&state.guild?.id&&job.guildId===state.guild.id&&job.personaId===agentId){
     if(['running','working','processing','started'].includes(job.state))return {status:'working',label:'Host running'};
     if(['queued','pending'].includes(job.state))return {status:'queued',label:'Host queued'};
   }
