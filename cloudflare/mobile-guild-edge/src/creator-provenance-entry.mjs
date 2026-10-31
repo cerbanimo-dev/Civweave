@@ -405,7 +405,7 @@ export default{
             return json(packet);
           }
           if(url.pathname!=='/api/guild/governance')return json({ok:false,error:'Not found.'},404);
-          const pending=stub.pendingPeerReports();
+          const pending=await stub.pendingPeerReports();
           if(pending?.length&&ctx?.waitUntil)ctx.waitUntil(sendApprovedPeerReports(env,stub,url.origin).catch(()=>{}));
           return json({...session,members:await stub.memberDirectory()});
         }
