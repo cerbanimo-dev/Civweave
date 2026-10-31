@@ -1005,3 +1005,27 @@
 @media(max-width:900px){
  #cw-starling-lounge .sl-layout{padding-right:max(10px,env(safe-area-inset-right,0px))}
 }
+
+/* Comfortable controls and sensible text wrapping at compact widths. */
+@media(max-width:900px){
+ #cw-starling-lounge .sl-view-nav button{
+  min-height:44px;font-size:11px
+ }
+ #cw-starling-lounge .sl-scene-controls button{
+  min-height:44px
+ }
+ #cw-starling-lounge .sl-room-select select,
+ #cw-starling-lounge .sl-coordinate-fields input{min-height:44px}
+ #cw-starling-lounge .sl-compose button{
+  min-height:44px
+ }
+ #cw-starling-lounge .sl-head-right button{min-height:44px}
+}
+#cw-starling-lounge[data-sl-fleet=local] .sl-run,
+#cw-starling-lounge[data-sl-fleet=local] [data-sl-turn-status]{
+ display:none!important
+}
+#cw-starling-lounge .sl-brand-copy h1,
+#cw-starling-lounge .sl-focus-copy h3{
+ overflow-wrap:normal;word-break:normal
+}
