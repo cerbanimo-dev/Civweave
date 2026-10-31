@@ -130,6 +130,18 @@ function openSetup(row,layer){
  return true;
 }
 
+function matchImportedRoles(rows,installed,previous={}){
+ const available=installed.filter(entry=>entry?.verified);
+ const roles={};
+ for(const row of rows.filter(row=>row.runtime==='browser-gguf')){
+  const matches=available.filter(entry=>entry.family===row.preset);
+  const prior=matches.find(entry=>entry.importId===previous.roles?.[row.role]?.importId);
+  const item=prior||matches.sort((a,b)=>String(a.importedAt||'').localeCompare(String(b.importedAt||''))).at(-1);
+  if(item)roles[row.role]={model:item.model,importId:item.importId,
+   family:item.family,label:item.label,quantization:item.quantization,bytes:item.bytes};
+ }
+ return roles;
+}
 async function connectInstalledGGUF(layer,panel,sequence){
  const rows=catalogue().filter(row=>row.runtime==='browser-gguf');
  const message=panel.querySelector('[data-ai-fleet-message]');
@@ -139,15 +151,7 @@ async function connectInstalledGGUF(layer,panel,sequence){
   const entries=await gguf.installedImports({verify:true});
   if(sequence!==inventorySequence||layer.hidden||!panel.isConnected)return;
   const previous=read(BINDING_KEY,{});
-  const available=entries.filter(entry=>entry.verified);
-  const roles={};
-  for(const row of rows){
-   const matches=available.filter(entry=>entry.family===row.preset);
-   const prior=matches.find(entry=>entry.importId===previous.roles?.[row.role]?.importId);
-   const installed=prior||matches.sort((a,b)=>a.importedAt.localeCompare(b.importedAt)).at(-1);
-   if(installed)roles[row.role]={model:installed.model,importId:installed.importId,
-    family:installed.family,label:installed.label,quantization:installed.quantization,bytes:installed.bytes};
-  }
+  const roles=matchImportedRoles(rows,entries,previous);
   const state={schema:'civweave.ai.fleet.bindings.v1',enabled:Object.keys(roles).length>0,
    budgetGB:detectDevice().budgetGB,platform:'android',roles};
   if(previous.schema!==state.schema||previous.enabled!==state.enabled||
@@ -239,5 +243,5 @@ function render(layer){
  if(device.platform==='android')void connectInstalledGGUF(layer,panel,++inventorySequence);
  return true;
 }
-globalThis.CivweaveAIFleetV1=Object.freeze({version:VERSION,detectDevice,setMemoryBudget,catalogue,roles:ROLES,suites:SUITES,chosen,select,openSetup,render});
+globalThis.CivweaveAIFleetV1=Object.freeze({version:VERSION,detectDevice,setMemoryBudget,catalogue,roles:ROLES,suites:SUITES,chosen,select,openSetup,matchImportedRoles,render});
 })();
