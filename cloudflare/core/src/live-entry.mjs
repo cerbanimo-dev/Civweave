@@ -5,6 +5,8 @@ import {
   moneyEdgeError
 } from './money-edge.mjs';
 import { registerPublicGuildEdge } from './guild-directory.mjs';
+import { handleHeadquartersFundingRequest } from './headquarters-starling-funding-v1.mjs';
+import { handleHeadquartersPrepaidRequest } from './headquarters-starling-prepaid-v1.mjs';
 
 export * from './index.mjs';
 
@@ -169,6 +171,10 @@ async function liveMoneyRoute(request, env) {
 
 export default {
   async fetch(request, env, ctx) {
+    const prepaid = await handleHeadquartersPrepaidRequest(request, env, env => new PublicHostCloudflareMoneyEdge(env));
+    if (prepaid) return prepaid;
+    const headquartersFunding = await handleHeadquartersFundingRequest(request, env, env => new PublicHostCloudflareMoneyEdge(env));
+    if (headquartersFunding) return headquartersFunding;
     const live = await liveMoneyRoute(request, env);
     if (live) return live;
     return core.fetch(request, env, ctx);

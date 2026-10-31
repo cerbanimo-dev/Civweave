@@ -31,6 +31,21 @@ document.documentElement.dataset.civweaveFreshCampus='working-campus-v440';
 html,body{min-height:100%;background:#07162f}body{margin:0}main.app{min-height:100vh}
 #cw-v440-recovery{position:fixed;inset:14px;z-index:2147483647;display:none;place-items:center;padding:20px;background:#07111ff5;color:#fff;font:15px/1.45 system-ui,sans-serif}#cw-v440-recovery[data-open="1"]{display:grid}#cw-v440-recovery>div{width:min(620px,100%);padding:20px;border:1px solid #8af5d277;border-radius:18px;background:#0d1830;box-shadow:0 18px 60px #000b}#cw-v440-recovery h1{margin:0 0 8px;font:700 24px/1.15 Georgia,serif}#cw-v440-recovery p{color:#dbe7ee}#cw-v440-recovery a{display:inline-flex;padding:10px 13px;border:1px solid #8af5d299;border-radius:10px;background:#17394a;color:#fff;text-decoration:none;font-weight:800}
 </style>
+<style>
+#cw-headquarters-funding-open[hidden]{display:none!important}
+#cw-starling-fund-dialog{color:#e9f8f2;background:#0b1a28;border:1px solid #7ce3c188;border-radius:18px;max-width:min(450px,calc(100vw - 36px));width:100%;box-sizing:border-box;padding:20px;box-shadow:0 22px 70px #0009;font:14px/1.5 system-ui,sans-serif}
+#cw-starling-fund-dialog::backdrop{background:#010b15cc}
+#cw-starling-fund-dialog h2{font-size:22px;margin:0 0 8px}
+#cw-starling-fund-dialog p,#cw-starling-fund-dialog small{color:#b6d3d1}
+#cw-starling-fund-form{display:grid;gap:14px}
+.cw-starling-fund-amounts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.cw-starling-fund-amounts label{display:flex;gap:2px;justify-content:center;align-items:center;padding:8px 2px;border:1px solid #82d9c366;border-radius:9px}
+#cw-starling-fund-custom{width:100%;box-sizing:border-box;margin-top:4px;background:#071622;border:1px solid #79bdb777;border-radius:8px;color:inherit;padding:9px}
+.cw-starling-fund-actions{display:flex;gap:9px;justify-content:space-between}
+.cw-starling-fund-actions button{padding:10px 13px;border:1px solid #80d9ca88;border-radius:9px;background:#12353b;color:inherit;font:inherit;font-weight:700;cursor:pointer}
+.cw-starling-fund-actions button:disabled{opacity:.5;cursor:not-allowed}
+#cw-starling-fund-message{min-height:2.8em;font-size:12px}
+</style>
 <script>
 (()=>{
 'use strict';
@@ -110,13 +125,33 @@ document.addEventListener('pointerup',()=>setTimeout(()=>queue('post-interaction
         <button class="btn primary" id="weaveling-chat-send" type="submit">Send</button>
         <small id="weaveling-chat-status" class="muted">Local history · deterministic by default</small>
       </form>
-      <div class="guide-foot"><button class="btn" type="button" data-cw-onboarding-replay>Tour</button><button class="btn" id="export-button" type="button">Export Quest</button></div>
+      <div class="guide-foot"><button class="btn" type="button" data-cw-onboarding-replay>Tour</button><button class="btn" id="export-button" type="button">Export Quest</button><button class="btn" id="cw-headquarters-funding-open" type="button" hidden>Fund Starling</button></div>
     </aside>
     <section class="work"><header class="work-head"><b id="view-title">Current Quest</b><span class="muted" id="state-label">Local draft</span></header><div class="workspace" id="workspace"></div></section>
   </section>
 </main>
+<dialog id="cw-starling-fund-dialog" aria-labelledby="cw-starling-fund-title">
+  <h2 id="cw-starling-fund-title">Fund the Starling Collective</h2>
+  <p>Support free Worldweaver classrooms, Learning Journeys, reusable Guild Quests and public-interest art. Contributions are set aside to purchase prepaid Cloudflare AI Gateway credits for headquarters inference. No membership or account is required.</p>
+  <form id="cw-starling-fund-form">
+    <fieldset style="border:0;padding:0;margin:0"><legend>Choose a contribution (USD)</legend>
+      <div class="cw-starling-fund-amounts">
+        <label><input name="cw-starling-fund-choice" type="radio" value="500" checked>$5</label>
+        <label><input name="cw-starling-fund-choice" type="radio" value="1000">$10</label>
+        <label><input name="cw-starling-fund-choice" type="radio" value="2500">$25</label>
+        <label><input name="cw-starling-fund-choice" type="radio" value="5000">$50</label>
+      </div>
+      <label style="display:block;margin-top:9px"><input name="cw-starling-fund-choice" type="radio" value="custom"> Other whole-dollar amount, $5–$1,000 <input id="cw-starling-fund-custom" type="number" min="5" max="1000" step="1" value="5" aria-label="Custom amount in US dollars"></label>
+    </fieldset>
+    <small>These purchases are not tax-deductible charitable donations and do not award personal neurons, credits, votes or other benefits. After Stripe processing fees, Cloudflare charges another 5% when prepaid AI Gateway credits are loaded. The operator purchases the credits separately; funds are not automatically loaded. No recurring subscription, and publishing new resources is not guaranteed.</small>
+    <output id="cw-starling-fund-total" aria-live="polite"></output>
+    <p id="cw-starling-fund-message" role="status" aria-live="polite">Checking checkout availability…</p>
+    <div class="cw-starling-fund-actions"><button id="cw-starling-fund-close" type="button">Close</button><button id="cw-starling-fund-pay" type="submit" disabled>Continue to secure payment</button></div>
+  </form>
+</dialog>
 <div class="toast" id="toast" hidden></div>
 <section id="cw-v440-recovery" role="alert"><div><h1>Civweave could not paint the fresh campus.</h1><p id="cw-v440-recovery-detail">The cache-distinct Working Campus did not finish rendering.</p><p>This page will not reload itself or enter the old recovery loop.</p><a href="/app/working-campus-v440.html?installed=1&version=1.0.163&retry=1&settingsRecovery=v342">Retry fresh campus</a></div></section>
+<script src="/app/headquarters-starling-funding-v1.js?v=1.0.0"></script>
 <script src="/app/system-routes-v227.js?v=working-campus-v440-live-guild-balance-v1"></script>
 <script src="/app/release-version-v2.js?v=working-campus-v440"></script>
 <script src="/app/platform-experience-v160.js?v=1.0.7-review-queue"></script>
