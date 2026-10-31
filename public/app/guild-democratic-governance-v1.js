@@ -57,7 +57,7 @@ function render(){
     (cases.length?cases.map(c=>{
       const ready=Date.now()>=Date.parse(c.noticeUntil);
       const canOpen=packet.actorEligible&&!c.ballotId&&ready;
-      const response=c.targetUserId===identity&&!c.ballotId?'<form data-gc-case-response data-case-id="'+esc(c.id)+'"><label>Your response<textarea name="response" minlength="20" maxlength="2000" required placeholder="Give your account of the circumstances."></textarea></label><button type="submit">Submit my response</button></form>':'';
+      const response=c.targetUserId===identity&&(!c.ballotId||ballots.some(b=>b.id===c.ballotId&&b.status==='open'))?'<form data-gc-case-response data-case-id="'+esc(c.id)+'"><label>Your response<textarea name="response" minlength="20" maxlength="2000" required placeholder="Give your account of the circumstances."></textarea></label><button type="submit">Submit my response</button></form>':'';
       return '<article class="gc-item"><strong>'+esc(c.action)+' · '+esc(c.targetUserId)+'</strong><p>'+esc(c.statement)+'</p><p>Opened: '+esc(c.createdAt)+' · response period until '+esc(c.noticeUntil)+'</p>'+(c.response?'<p><strong>Member response:</strong> '+esc(c.response)+'</p>':'<p class="gc-muted">No response recorded yet.</p>')+response+
         (canOpen?'<button type="button" data-gc-start-ballot="'+esc(c.id)+'">Start majority ballot</button>':'')+
         (c.ballotId?'<p>Ballot opened · '+esc(c.ballotId)+'</p>':!ready?'<p class="gc-muted">Waiting for the response period to finish.</p>':'')+'</article>';
