@@ -2,8 +2,8 @@
 // automatically executed vote receipt to registered neighbouring Guild inboxes.
 const bad=(message,status=409)=>Object.assign(new Error(message),{status});
 const clean=(v,n=220)=>String(v??'').trim().slice(0,n);
-const clampLat=v=>Number.isFinite(Number(v))&&Math.abs(Number(v))<=90?Number(v):null;
-const clampLon=v=>Number.isFinite(Number(v))&&Math.abs(Number(v))<=180?Number(v):null;
+const clampLat=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))&&Math.abs(Number(v))<=90?Number(v):null;
+const clampLon=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))&&Math.abs(Number(v))<=180?Number(v):null;
 export function distanceKm(a,b){
   const aLat=clampLat(a?.latitude),aLon=clampLon(a?.longitude),bLat=clampLat(b?.latitude),bLon=clampLon(b?.longitude);
   if([aLat,aLon,bLat,bLon].some(v=>v===null))return Infinity;
