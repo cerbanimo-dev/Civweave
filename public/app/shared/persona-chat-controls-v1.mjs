@@ -28,6 +28,21 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    if(file.size>limit)throw new RangeError(label+' exceeds safe size.');
    return JSON.parse(await file.text());
  }
+ function showWillpower(){
+   const current=session?.snapshot()||campaign;
+   const pool=current?.willpower,display=el(root,'willpower'),control=el(root,'control');
+   if(display)display.textContent=pool?
+     'Shared willpower: '+pool.points+'/'+pool.max+' · +1 per '+pool.renewEvery+' accepted turns':
+     'Load a campaign to view shared willpower.';
+   if(control){
+     for(const option of control.options){
+       if(option.value==='both')option.disabled=!pool||pool.points<2;
+       else if(option.value==='landry'||option.value==='delia')
+         option.disabled=!pool||pool.points<1;
+     }
+     if(control.selectedOptions[0]?.disabled)control.value='';
+   }
+ }
  function castSelector(){
    const control=el(root,'cast-list');const previously=new Set(
      Array.from(control?.selectedOptions||[]).map(x=>x.value));
@@ -55,6 +70,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    if(campaign?.cast.includes(selected)||selected==='landry-delia'&&campaign?.cast.includes('landry')&&campaign?.cast.includes('delia'))
      control.value=selected;
    if(el(root,'control'))el(root,'control').hidden=control.value!=='landry-delia';
+   showWillpower();
  }
  async function model(req){
    const runtime=globalThis.CivweaveModelRuntime;
@@ -93,7 +109,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    loading=true;
    try{
      const p=validatePersonaPack(await acceptFile(el(root,'pack'),1200000,'persona manifest'));
-     stop();cast=p;campaign=null;castSelector();
+     stop();cast=p;campaign=null;castSelector();showWillpower();
      status('Cast loaded: '+p.characters.length+' identities. Choose a scene, story stage and cast, then create a private what-if campaign.');
    }catch(error){status('Cast import rejected: '+small(error?.message||error,400));}
    finally{loading=false;}
@@ -113,7 +129,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      const next=createPersonaCampaign({pack:p,id:'local:'+sessionId,
        title:'Private what-if rehearsal',ownerId:'local:author',
        branchId:'what-if:'+sessionId,stage,scenario,cast:selected});
-     stop();cast=p;campaign=next;speakers();
+     stop();cast=p;campaign=next;speakers();showWillpower();
      status('New private '+next.branchId+' created with '+selected.length+' characters. Activate, then use the existing Weaveling composer.');
    }catch(error){status('New campaign rejected: '+small(error?.message||error,400));}
    finally{loading=false;}
@@ -149,11 +165,11 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
        authorize:({actor})=>actor?.kind==='human'&&actor.principalId===campaign.ownerId,
        invokeModel:model
      });
-     switchOn(true);
+     switchOn(true);showWillpower();
      status('Private preview active in Weaveling chat. Responses are fictional and proposed actions remain unexecuted. Export your save before leaving.');
    }catch(error){stop();status(small(error?.message||error,400));}
  });
- el(root,'end').addEventListener('click',()=>{stop();status('Campaign preview off. Normal guide chat resumed; imported data remains only in this tab.');});
+ el(root,'end').addEventListener('click',()=>{stop();showWillpower();status('Campaign preview off. Normal guide chat resumed; imported data remains only in this tab.');});
  el(root,'export').addEventListener('click',()=>{
    try{
      const snapshot=session?.snapshot()||campaign;
@@ -177,7 +193,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
        const result=await session.respond({characterId:id,input:small(text,1200),
          directControl:selectedControl,worldChanged:deviation});
        if(el(root,'deviation'))el(root,'deviation').checked=false;
-       campaign=result.campaign;
+       campaign=result.campaign;showWillpower();
        const spent=result.packet?.persona?.overrideSpends?.length||0;
        const remaining=result.packet?.persona?.remainingWillpower;
        status('Turn '+campaign.turn+' · '+campaign.branchId+
@@ -186,6 +202,6 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
        return result.packet;
      }finally{if(el(root,'consent'))el(root,'consent').checked=false;}
    },
-   dispose:()=>{stop();cast=null;campaign=null;status('Campaign data released from this tab.');}
+   dispose:()=>{stop();cast=null;campaign=null;showWillpower();status('Campaign data released from this tab.');}
  });
 }
