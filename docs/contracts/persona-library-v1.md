@@ -95,3 +95,9 @@ When Landry and Delia are both selected, the same panel exposes a checked split-
 ### Planned multiplayer authority boundary
 
 The future mesh/session owner must verify the player's Passport and seat assignment, enforce one revision per accepted change, authenticate each NPC pilot using the canonical model principal, and confirm action receipts through Worldweaver's runtime adapter. A browser file import is suitable for private rehearsal, **not** for shared authoritative state. Private character memories remain separately access controlled; a player-visible public timeline contains only dialog/actions already exposed in the scene.
+
+### Improvised deviation handling (feature-branch control)
+
+The rehearsal panel now offers a manual **player breaks the planned scene** checkbox. In addition, a structured 0.8B actor response may return `requestDirection:true`. Either trigger expires the current temporary 4B instruction block after accepting that preview turn. The next cue cannot reuse the old brief; the author must explicitly prepare a new 4B pass.
+
+The new director pass receives only the recent player-visible rehearsal exchanges, explicitly marked as *unverified dialogue, not canon*. It may adapt motives, intentions, immediate environment suggestions and likely reactions, but cannot declare player world actions successful. The old story remains immutable; even on a what-if branch, actual world modifications require trusted Worldweaver acknowledgments. The refresh uses the already configured selected model and honors the same remote-inference consent boundary as other requests.
