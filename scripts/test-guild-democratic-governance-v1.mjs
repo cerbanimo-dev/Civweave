@@ -120,6 +120,8 @@ test('nearby Guild relay uses location bounds, never all worldwide Guilds',()=>{
   assert.ok(distanceKm({latitude:40.7,longitude:-74},{latitude:40.75,longitude:-74})<25);
   assert.ok(distanceKm({latitude:40.7,longitude:-74},{latitude:45,longitude:-74})>25);
   assert.equal(distanceKm(null,{latitude:40,longitude:-74}),Infinity);
+  assert.equal(distanceKm({latitude:null,longitude:null},{latitude:0,longitude:0}),Infinity);
+  assert.equal(distanceKm({latitude:'',longitude:''},{latitude:0,longitude:0}),Infinity);
 });
 
 test('directory relay independently fetches source Guild receipt and delivers only to mapped nearby registered Guilds',async()=>{
