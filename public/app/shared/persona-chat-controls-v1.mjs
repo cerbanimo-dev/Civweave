@@ -46,6 +46,26 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      if(control.selectedOptions[0]?.disabled)control.value='';
    }
  }
+ function showGuildRoom(){
+   const role=el(root,'guild-seat-role'),prior=role?.value;
+   role?.replaceChildren();
+   for(const id of guildRoom?.cast||[]){
+     const option=document.createElement('option');option.value=id;
+     option.textContent=cast?.characters?.find(row=>row.id===id)?.name||id;
+     role?.append(option);
+   }
+   if(guildRoom?.cast.includes(prior))role.value=prior;
+   const timeline=el(root,'guild-timeline');
+   if(timeline)timeline.textContent=guildRoom?.events?.length?
+     guildRoom.events.slice(-20).map(e=>e.id+' · '+e.type+' · '+
+       (e.type==='player-cue'?e.actorId+': '+small(e.text,250):
+        e.type==='assign-player'?e.playerId+' as '+e.roleId:
+        e.type==='npc-proposal'?e.characterId+': pending world action':
+        e.type==='resolve-proposal'?e.outcome+' (trusted receipt)':
+        e.type==='rehearsal-preview'?e.characterId+': '+small(e.speech,250):
+        e.characterId||'')).join('\n'):
+     'No shared turns recorded.';
+ }
  function castSelector(){
    const control=el(root,'cast-list');const previously=new Set(
      Array.from(control?.selectedOptions||[]).map(x=>x.value));
@@ -183,7 +203,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
        title:campaign.title,stage:campaign.stage,scenario:campaign.scenario,confirmedShare:true});
      stop();guildRoom=result.room;campaign=result.room;session=null;
      if(el(root,'guild-room'))el(root,'guild-room').value=guildRoom.id;
-     speakers();switchOn(true);showWillpower();
+     speakers();switchOn(true);showWillpower();showGuildRoom();
      guildStatus('Hosted on '+result.scope.nodeId+' as '+result.scope.userId+'. Room '+guildRoom.id+
       '. The room is private to authorized seats; assign players before they join.');
      status('Guild campaign active: model NPCs are NOT automatically run by the server. Player turns use authenticated Guild storage.');
@@ -203,19 +223,36 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    }catch(error){guildStatus('Guild join failed: '+small(error?.message||error));}
    finally{loading=false;}
  });
+ el(root,'guild-assign').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     if(!guildRoom)throw new Error('Host or join a shared Guild room first.');
+     const userId=small(el(root,'guild-seat-user')?.value,90);
+     const roleId=el(root,'guild-seat-role')?.value;
+     if(!/^[A-Za-z0-9:_-]{1,90}$/.test(userId))throw new TypeError('Enter a valid Guild member ID.');
+     if(!guildRoom.cast.includes(roleId))throw new TypeError('Choose a character seat in the current scene.');
+     const result=await guildClient.dispatch(guildRoom.id,guildRoom.revision,{
+       type:'assign-player',playerId:'member:'+userId,roleId
+     });
+     guildRoom=result.room;campaign=guildRoom;showWillpower();showGuildRoom();
+     guildStatus('Assigned '+roleId+' to '+userId+'. Share room ID '+guildRoom.id+
+       ' with this Guild member so they can join.');
+   }catch(error){guildStatus('Seat assignment failed: '+small(error?.message||error,500));}
+   finally{loading=false;}
+ });
  el(root,'guild-refresh').addEventListener('click',async()=>{
    if(loading)return;loading=true;
    try{
      const id=guildRoom?.id||el(root,'guild-room')?.value?.trim();
      const result=await guildClient.snapshot(id);
-     guildRoom=result.room;campaign=result.room;showWillpower();
+     guildRoom=result.room;campaign=result.room;showWillpower();showGuildRoom();
      if(guildRoom)guildStatus('Server revision '+guildRoom.revision+' · '+guildRoom.events.length+
        ' accepted events · shared turn '+guildRoom.turn+'.');
    }catch(error){guildStatus('Refresh failed: '+small(error?.message||error));}
    finally{loading=false;}
  });
  el(root,'end').addEventListener('click',()=>{stop();showWillpower();
-   guildStatus('Not connected. Shared Guild records remain on their server.');
+   guildStatus('Not connected. Shared Guild records remain on their server.');showGuildRoom();
    status('Campaign preview off. Normal guide chat resumed; imported data remains only in this tab.');});
  el(root,'export').addEventListener('click',()=>{
    try{
@@ -235,7 +272,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      try{
        if(guildRoom){
          const result=await guildClient.dispatch(guildRoom.id,guildRoom.revision,{type:'player-cue',text:small(text,1200)});
-         guildRoom=result.room;campaign=guildRoom;showWillpower();
+         guildRoom=result.room;campaign=guildRoom;showWillpower();showGuildRoom();
          guildStatus('Guild accepted turn '+guildRoom.turn+' at revision '+guildRoom.revision+'.');
          return {provider:'guild-persona-session',model:'none',
            response:{answer:'Your player action was recorded in the authenticated Guild campaign (turn '+guildRoom.turn+'). It is not yet an NPC reaction or a confirmed world action. Refresh to see other players’ moves.',
