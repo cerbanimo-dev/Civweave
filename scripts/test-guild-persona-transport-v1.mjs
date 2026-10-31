@@ -186,16 +186,35 @@ test('dual override is atomic and records both speech receipts without suppressi
  assert.equal(latest.data.world.speeches.every(x=>x.status==='succeeded'),true);
  assert.equal(latest.data.pendingDrafts.length,0);
 });
-test('dual override cannot spend one voice when total willpower insufficient',async()=>{
+test('dual override rejects insufficient shared willpower before any Worldweaver speech or second spend',async()=>{
  const h=harness(),made=await h.request('create',{input:starting}),campaignId=made.data.room.id;
- const a=await h.request('draft',{input:{campaignId,expectedRevision:0,characterId:'landry',speech:'First'}});
- const b=await h.request('draft',{input:{campaignId,expectedRevision:0,characterId:'delia',speech:'Second'}});
- const single=await h.request('approve',{input:{campaignId,expectedRevision:0,draftId:a.data.draft.id}});
- assert.equal(single.status,200);
- const next=await h.request('approve-both',{input:{campaignId,expectedRevision:single.data.room.revision,
+ const initial=await h.request('dispatch',{input:{campaignId,expectedRevision:0,
+   command:{type:'willpower-spend',characterId:'landry',cost:1}}});
+ assert.equal(initial.status,200);
+ const a=await h.request('draft',{input:{campaignId,expectedRevision:1,characterId:'landry',speech:'First'}});
+ const b=await h.request('draft',{input:{campaignId,expectedRevision:1,characterId:'delia',speech:'Second'}});
+ const refused=await h.request('approve-both',{input:{campaignId,expectedRevision:1,
    draftIds:[a.data.draft.id,b.data.draft.id]}});
- assert.equal(next.status,409);
+ assert.equal(refused.status,409);
  const snapshot=await h.request('snapshot',{input:{campaignId}});
- assert.equal(snapshot.data.room.events.filter(x=>x.type==='willpower-spend').length,0);
- assert.equal(snapshot.data.world.speeches.length,1);
+ assert.equal(snapshot.data.room.events.filter(x=>x.type==='willpower-spend').length,1);
+ assert.equal(snapshot.data.room.willpower.points,1);
+ assert.equal(snapshot.data.room.events.filter(x=>x.type==='npc-proposal').length,0);
+ assert.equal(snapshot.data.world,null);
+ assert.equal(snapshot.data.pendingDrafts.length,2);
+});
+
+test('reviewed speech cannot differ from the Worldweaver speak tool and a Guild room cannot be flooded with drafts',async()=>{
+ const h=harness(),made=await h.request('create',{input:starting}),campaignId=made.data.room.id;
+ const mismatched=await h.request('draft',{input:{campaignId,expectedRevision:0,
+   characterId:'landry',speech:'This is what the host sees.',
+   actions:[{tool:'speak',args:{text:'Hidden different action.'}}]}});
+ assert.equal(mismatched.status,400);
+ for(let i=0;i<24;i++){
+   const row=await h.request('draft',{input:{campaignId,expectedRevision:0,
+     characterId:'landry',speech:'Bounded line '+i}});
+   assert.equal(row.status,200,JSON.stringify(row.data));
+ }
+ assert.equal((await h.request('draft',{input:{campaignId,expectedRevision:0,
+   characterId:'landry',speech:'One too many'}})).status,409);
 });
