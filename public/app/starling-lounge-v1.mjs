@@ -21,7 +21,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false};
+const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -114,6 +114,12 @@ function presenceFor(agentId){
   const recent=state.feed.findLast?.(row=>row.personaId===agentId);
   const age=recent?Date.now()-Date.parse(recent.at):Infinity;
   if(Number.isFinite(age)&&age>=0&&age<15*60*1000)return {status:'recent',label:'Signed turn recently'};
+  if(SYSTEM_GUIDES[agentId]){
+    const signal=state.guideActivity[agentId];
+    if(signal?.status==='working')return {status:'working',label:'Guide working · service reported'};
+    if(signal?.status==='idle')return {status:'standby',label:'Guide idle · service reported'};
+    if(signal?.status==='offline')return {status:'offline',label:'Guide offline · service reported'};
+  }
   if(agentId==='kami'&&state.workerEnabled)return {status:'scheduled',label:'Local autopilot armed'};
   return {status:'standby',label:STARLING_PERSONAS[agentId]?'Standby · no current run':'Guide · no live signal'};
 }
@@ -273,7 +279,7 @@ async function refresh(){
   }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
 }
-function close(){if(!state.root)return;state.root.hidden=true;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();document.body.style.removeProperty('overflow')}
+function close(){if(!state.root)return;state.root.hidden=true;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();unbindGuideActivity();document.body.style.removeProperty('overflow')}
 function open(guild){
   if(!guild?.id)throw new TypeError('Select an existing Guild first.');
   setup();
@@ -614,5 +620,44 @@ function detachWorldSource(){
   if(state.root){const host=$('[data-sl-world-host]');if(host){host.hidden=true;host.replaceChildren()}const stage=$('[data-sl-stage]');if(stage)stage.hidden=false;
     const message=$('[data-sl-scene-context]');if(message)message.textContent='Preview layout; locations are illustrative until an authorized Worldweaver region is connected.'}
 }
-export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.1.0',open,close,refresh,attachWorldSource,detachWorldSource});
+/** Bridge authenticated guide-runtime reports into presentation state.
+ * Must be called by the existing Civweave runtime owner, not by DOM events or model output.
+ * Reports expire after two minutes; missing reports never become fabricated activity. */
+async function bindGuideActivity({read,subscribe}={}){
+  if(typeof read!=='function')throw new TypeError('Guide status requires a runtime-owned reader.');
+  unbindGuideActivity();
+  const epoch=state.guideEpoch;
+  const update=async()=>{
+    try{
+      const snapshot=await read();
+      if(epoch!==state.guideEpoch)return;
+      const entries=Array.isArray(snapshot?.agents)?snapshot.agents:[];
+      const next=Object.create(null),now=Date.now();
+      for(const row of entries.slice(0,24)){
+        if(!SYSTEM_GUIDES[row?.id]||!['working','idle','offline'].includes(row.status))continue;
+        const timestamp=Date.parse(row.at);
+        if(!Number.isFinite(timestamp)||timestamp>now+5000||now-timestamp>120000)continue;
+        next[row.id]={status:row.status,at:row.at};
+      }
+      state.guideActivity=next;
+      renderSpeaker();
+    }catch{
+      if(epoch!==state.guideEpoch)return;
+      state.guideActivity=Object.create(null);renderSpeaker();
+    }
+  };
+  if(typeof subscribe==='function'){
+    const stop=subscribe(()=>{void update()});
+    if(typeof stop==='function')state.guideUnsubscribe=stop;
+  }
+  await update();
+  return unbindGuideActivity;
+}
+function unbindGuideActivity(){
+  state.guideEpoch++;
+  if(typeof state.guideUnsubscribe==='function')state.guideUnsubscribe();
+  state.guideUnsubscribe=null;state.guideActivity=Object.create(null);
+  if(state.root)renderSpeaker();
+}
+export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.1.0',open,close,refresh,attachWorldSource,detachWorldSource,bindGuideActivity,unbindGuideActivity});
 if(typeof globalThis!=='undefined')globalThis.CivweaveStarlingLoungeV1=CivweaveStarlingLoungeV1;
