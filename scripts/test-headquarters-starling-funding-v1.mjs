@@ -42,7 +42,7 @@ function harness({ ready = true } = {}) {
         } else if(sql.includes("stripe_payment_intent_id=?2")){
           if(row.settled_at)return {meta:{changes:0}};
           Object.assign(row,{stripe_session_id:args[0],stripe_payment_intent_id:args[1],
-            stripe_charge_id:args[2],processor_fee_cents:args[3],backing_cents:args[4],status:'settled',settled_at:args[5]});
+            stripe_charge_id:args[2],processor_fee_cents:args[3],backing_cents:args[4],refunded_gross_cents:args[5],disputed_gross_cents:args[6],status:'settled',settled_at:args[7]});
         }else if(sql.includes('refunded_gross_cents=?1')){
           row.refunded_gross_cents=args[0];row.status=args[0]>=row.gross_cents?'refunded':'partially-refunded';
         }else if(sql.includes('disputed_gross_cents=?1')){
