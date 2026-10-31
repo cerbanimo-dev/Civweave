@@ -200,7 +200,7 @@ const BACKENDS=Object.freeze({
  android:{label:'Android APK backend',detail:'Native Starling bridge · installed wrapper required'}
 });
 const GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v8-prefill-observer';
-const STYLE_ID='cw-ai-fleet-style-v1';
+const STYLE_ID='cw-ai-fleet-style-v2';
 function currentBackend(){const value=read(BACKEND_KEY,'browser');return BACKENDS[value]?value:'browser'}
 function setBackend(value){if(!BACKENDS[value])throw Error('Unsupported local backend.');localStorage.setItem(BACKEND_KEY,value);return value}
 function style(){
@@ -306,8 +306,8 @@ async function installChosenGGUF(layer,panel){
  if(activeImport)throw Error('Another GGUF import is already in progress.');
  const controller=new AbortController();
  activeImport=controller;button.disabled=true;cancel.hidden=false;cancel.disabled=false;
- const gguf=await import(GGUF_MODULE);
  try{
+   const gguf=await import(GGUF_MODULE);
    const record=await gguf.importFiles(files,{signal:controller.signal,onProgress:part=>{
      if(!status?.isConnected)return;
      const pct=part.total?Math.round(100*part.loaded/part.total):0;
@@ -385,7 +385,7 @@ function render(layer){
  const buttons=Object.entries(BACKENDS).map(([key,value])=>'<button type="button" data-ai-fleet-backend="'+key+
    '" aria-pressed="'+(key===backend)+'">'+esc(value.label)+'</button>').join('');
  const memoryOptions=[4,6,8,12,16,24,32,48,64,96,128].map(n=>'<option value="'+n+'"'+(device.budgetGB===n?' selected':'')+'>'+n+' GB</option>').join('');
- const header='<h3>Local AI · Fleet & model configuration</h3><p>Three supported configuration paths; changing views never loads, downloads or switches a model.</p>'+
+ const header='<h3>AI Fleet</h3><p>Choose your runtime, install models, assign roles and activate local inference—all here. Changing configuration views does not start AI.</p>'+
   '<div class="cw-fleet-choices" role="group" aria-label="Local inference backend">'+buttons+'</div>';
  let body='';
  if(backend==='browser')body='<p>Install and assign the models on this phone. Keep 2B and 4B as separate imports; they can share the five fleet roles without duplicating weights.</p>'+
@@ -441,7 +441,7 @@ function render(layer){
    panel.addEventListener('click',event=>{
      const el=event.target.closest?.('button');if(!el)return;
      const backendChoice=el.dataset.aiFleetBackend;
-     if(backendChoice){setBackend(backendChoice);render(layer);return}
+     if(backendChoice){if(activeImport)activeImport.abort();setBackend(backendChoice);render(layer);return}
      if(el.hasAttribute('data-ai-fleet-import-cancel')){activeImport?.abort();return}
      if(el.hasAttribute('data-ai-fleet-apk-connect')){
        el.disabled=true;void checkNativeHost(panel).catch(error=>{const out=panel.querySelector('[data-ai-fleet-apk-status]');if(out)out.textContent=String(error?.message||error)}).finally(()=>{el.disabled=false});return;
