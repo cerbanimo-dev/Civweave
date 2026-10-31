@@ -294,7 +294,7 @@ function open(guild){
   if(!guild?.id)throw new TypeError('Select an existing Guild first.');
   setup();
   if(state.guild?.id!==guild.id){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.selectedAgent='kami';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
-  state.root.hidden=false;document.body.style.overflow='hidden';setView('world');render();state.root.querySelector('[data-sl-action=close]').focus();void refresh();void refreshTurns();void refreshWorkerStatus();void connectWorld();
+  state.root.hidden=false;document.body.style.overflow='hidden';setView('world');render();state.root.querySelector('[data-sl-action=close]').focus();void refresh();void refreshTurns();void refreshWorkerStatus();void connectWorld();void connectGuideRuntime();
 }
 async function send(event){
   event.preventDefault();
@@ -726,6 +726,39 @@ function detachWorldSource(){
   if(state.root){const host=$('[data-sl-world-host]');if(host){host.hidden=true;host.replaceChildren()}
     const stage=$('[data-sl-stage]');if(stage)stage.hidden=false;
     const message=$('[data-sl-scene-context]');if(message)message.textContent='Fallback visual scene · awaiting Guild-signed Worldweaver manifest.'}
+}
+/** Observe the canonical one-chat owner. Events only prompt a re-read; their
+ * contents never authorize or assert agent activity. No additional model starts. */
+async function connectGuideRuntime(){
+  const runtime=()=>{
+    const own=globalThis.CivweaveGuideChatSurfaceV350;
+    if(own?.canonicalOwner&&typeof own.state==='function')return own;
+    try{
+      const parentOwner=globalThis.parent!==globalThis?globalThis.parent.CivweaveGuideChatSurfaceV350:null;
+      if(parentOwner?.canonicalOwner&&typeof parentOwner.state==='function')return parentOwner;
+    }catch{}
+    return null;
+  };
+  const systems={civweave:'weaveling','living-school':'moss',cerbanimo:'kamiya',fellowfare:'rook',anarchadia:'merlin'};
+  try{
+    await bindGuideActivity({
+      read:async()=>{
+        const snapshot=runtime()?.state?.();
+        const id=systems[snapshot?.activeSystem];
+        if(!id||!snapshot?.canonicalOwner)return {agents:[]};
+        return {agents:[{id,status:snapshot.busy===true?'working':'idle',at:new Date().toISOString()}]};
+      },
+      subscribe:notify=>{
+        const types=['civweave:guide-chat-state','civweave:avatar-direct-text','civweave:guide-chat-ready'];
+        const windows=[globalThis];
+        try{if(globalThis.parent&&globalThis.parent!==globalThis)windows.push(globalThis.parent)}catch{}
+        for(const win of windows)for(const type of types)win.addEventListener(type,notify);
+        return()=>{for(const win of windows)for(const type of types)win.removeEventListener(type,notify)};
+      }
+    });
+  }catch(error){
+    if(state.root&&!state.root.hidden)state.worldError=state.worldError||'Guide activity link unavailable: '+clean(String(error?.message||error),120);
+  }
 }
 /** Bridge authenticated guide-runtime reports into presentation state.
  * Must be called by the existing Civweave runtime owner, not by DOM events or model output.
