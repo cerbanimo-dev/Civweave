@@ -17,7 +17,7 @@ const bound=x=>typeof x==='string'&&/^[A-Za-z0-9][A-Za-z0-9:._/-]{0,179}$/.test(
 const clean=(x,n=800)=>typeof x==='string'?x.trim().slice(0,n):'';
 const deny=(m,status=403)=>{throw Object.assign(new Error(m),{status})};
 const clone=v=>structuredClone(v);
-const key=(node,id)=>prefix+node+':'+id;
+export const personaRuntimeKey=(node,id)=>prefix+node+':'+id;
 const draftKey=(node,id,code)=>draftPrefix+node+':'+id+':'+code;
 function owners(room,actor){return actor?.kind==='human'&&actor.principalId===room.ownerId}
 function access(room,actor){return owners(room,actor)||Object.hasOwn(room.seats,actor?.principalId||'')}
@@ -28,7 +28,7 @@ function allowedActions(values){
     Object.keys(values[0].args).some(k=>k!=='text'))deny('Only one bounded simulated speech action is currently supported.',400);
  return [{tool:'speak',args:{text:values[0].args.text.trim()}}];
 }
-function actorAuthorization({actor,command}){
+export function actorAuthorization({actor,command}){
  if(actor?.principalId==='server:persona-world'&&actor.kind==='runtime')
   return ['report-action'].includes(command.type);
  if(actor?.kind==='model'&&actor.principalId?.startsWith('server:persona-pilot:'))
@@ -37,7 +37,7 @@ function actorAuthorization({actor,command}){
   return ['create','rig-npc'].includes(command.type);
  return false;
 }
-function runtimeWorld(row,room){
+export function runtimeWorld(row,room){
  let i=row?.sequence||0;
  const world=createWorldweaver({
   initialState:row?.world,
@@ -98,7 +98,7 @@ export async function approveNpcDraft(tx,{nodeId,room,actor,input}){
     current.pilots[draft.characterId].modelId!==modelId)
    current=applyCampaignEvent(current,{type:'bind-pilot',characterId:draft.characterId,
      principalId:pilotId,modelId},{actor:actorOwner,expectedRevision:current.revision,authorize:()=>true});
- const entry=await tx.get(key(nodeId,room.id));
+ const entry=await tx.get(personaRuntimeKey(nodeId,room.id));
  const runtime=runtimeWorld(entry,current),world=runtime.world;
  let instanceId=entry?.instanceId;
  if(!instanceId){
@@ -112,8 +112,8 @@ export async function approveNpcDraft(tx,{nodeId,room,actor,input}){
    n.pilotPrincipalId===pilotId&&n.instanceId===instanceId);
  if(!npc){
    npc=world.dispatch({type:'rig-npc',instanceId,modelId,pilotPrincipalId:pilotId,
-    name:draft.characterId,pilotPrompt:'Human-reviewed dialogue only. No independent model authorization.',
-    personaRef,capabilities:['speak']},actorOwner).npc;
+    name:draft.characterId,pilotPrompt:'Human-reviewed dialogue and approved bounded motion only.',
+    personaRef,capabilities:['speak','move']},actorOwner).npc;
  }
  const pilot={kind:'model',principalId:pilotId,modelId,personaRef};
  current=applyCampaignEvent(current,{type:'npc-proposal',characterId:draft.characterId,
@@ -140,7 +140,7 @@ export async function approveNpcDraft(tx,{nodeId,room,actor,input}){
  current=applyCampaignEvent(current,{type:'resolve-proposal',
    proposalId:proposal.id,outcome:'succeeded',worldReceiptId:receiptId},
    {actor:worldActor,expectedRevision:current.revision,authorize:()=>true});
- await tx.put(key(nodeId,room.id),{world:world.snapshot(),
+ await tx.put(personaRuntimeKey(nodeId,room.id),{world:world.snapshot(),
    sequence:runtime.nextSequence(),instanceId,bindings:{
     ...(entry?.bindings||{}),[proposal.id]:binding
    }});
@@ -154,7 +154,7 @@ export async function approveNpcDraft(tx,{nodeId,room,actor,input}){
 }
 export async function guildPersonaWorldSnapshot(tx,{nodeId,room,actor}){
  if(!access(room,actor))deny('Room access required.');
- const entry=await tx.get(key(nodeId,room.id));
+ const entry=await tx.get(personaRuntimeKey(nodeId,room.id));
  if(!entry)return null;
  const snapshot=runtimeWorld(entry,room).world.snapshot();
  // Never disclose pilot prompts/private world details. Only room-scoped NPC
