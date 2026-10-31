@@ -363,7 +363,7 @@ async function guildAction(action,control){
   if(action==='founder-manage'){
     if(!globalThis.CivweaveGuildOwnerManagementV1?.ownedGuild?.())return;
     closeNearbyGuilds('founder-management');
-    await globalThis.CivweaveGuildOwnerManagementV1.open();
+    await globalThis.CivweaveGuildOwnerManagementV1.open({founded:true});
     return;
   }
   if(!guild)return;
