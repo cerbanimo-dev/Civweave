@@ -7,13 +7,15 @@ test('performance studio exposes private opt-in one-cue persona improvisation wi
  const js=readFileSync(new URL('../public/app/tools/worldweaver-performance-lab-v1.mjs',import.meta.url),'utf8');
  for(const id of ['persona-manifest-file','persona-scenario','persona-stage','persona-cast','persona-speaker',
   'persona-director-model','persona-actor-model','persona-inner-model','persona-split-mode','persona-direct-control','persona-willpower','persona-player-cue','persona-prepare','persona-act','persona-result','persona-new-campaign','persona-save-campaign','persona-session-file',
-  'persona-campaign-status','persona-campaign-timeline']){
+  'persona-campaign-status','persona-campaign-timeline','persona-force-redirect']){
   assert.match(html,new RegExp('id="'+id+'"'),id);
  }
  assert.match(js,/prepareDirectedScene/);
  assert.match(js,/performPersonaTurn/);
  assert.match(js,/advanceSceneTurn/);
  assert.match(js,/runSplitMindTurn/);
+ assert.match(js,/needsDirection/);
+ assert.match(js,/persona-force-redirect/);
  assert.match(js,/createPersonaCampaign/);
  assert.match(js,/applyCampaignEvent/);
  assert.match(js,/exportCampaignSnapshot/);
