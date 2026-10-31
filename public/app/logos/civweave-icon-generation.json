@@ -1,10 +1,10 @@
 {
-  "schema": "civweave.icon-generation.v3",
-  "source": "civweave-day-logo.jpg",
+  "schema": "civweave.icon-generation.v4",
+  "source": "civweave-branded-heart-source-v449.webp",
   "nightCompanion": "civweave-night-logo.jpg",
-  "treatment": "current-approved-artwork-resize-only",
-  "targetFill": "100% source canvas; no crop, no substitute mark",
-  "generatedAt": "2026-08-15T18:16:06.039Z",
+  "treatment": "approved-branded-heart-artwork-resize-only",
+  "targetFill": "complete heart and Civweave wordmark; separate maskable safe-zone image",
+  "generatedAt": "2026-10-31",
   "files": [
     "civweave-icon-16.png",
     "civweave-icon-32.png",
@@ -25,6 +25,10 @@
     "civweave-adaptive-foreground-512.png",
     "civweave-pwa-192-v247.png",
     "civweave-pwa-512-v247.png",
-    "civweave-pwa-maskable-512-v247.png"
+    "civweave-pwa-maskable-512-v247.png",
+    "civweave-branded-heart-192-v449.png",
+    "civweave-branded-heart-512-v449.png",
+    "civweave-branded-heart-maskable-512-v449.png",
+    "civweave-branded-heart-source-v449.webp"
   ]
 }
