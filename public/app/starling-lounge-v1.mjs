@@ -864,7 +864,8 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
   detachWorldSource();
   const host=$('[data-sl-world-host]'),canvas=el('canvas','sl-world-3d'),map=el('div','sl-world-2d'),avatars=el('div','sl-world-avatars');
   canvas.setAttribute('aria-label','Worldweaver local 3D perspective. Drag to orbit and scroll to zoom.');
-  avatars.setAttribute('aria-label','Illustrative agent activity portraits; not authoritative world coordinates');
+  avatars.setAttribute('aria-label','Signed registered NPC pilot portraits in the HUD dock; not authoritative world coordinates');
+  avatars.dataset.worldPresence='signed';
   const drawSignedPilots=()=>{
     avatars.replaceChildren();
     const members=getSnapshot()?.npcs?.filter(npc=>npc.instanceId===worldRef&&
