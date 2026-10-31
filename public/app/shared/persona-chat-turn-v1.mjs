@@ -14,7 +14,10 @@ const trim=(v,max=1500)=>typeof v==='string'?v.trim().slice(0,max):'';
 const same=(a,b)=>a?.id===b?.id&&a?.ownerId===b?.ownerId&&a?.packId===b?.packId&&a?.branchId===b?.branchId;
 function responsePacket(character,turn){
   return {provider:'persona-library-local',model:'selected-0.8b-performer',
-    response:{answer:(character.name+': '+turn.speech+(turn.emote?'\n*'+turn.emote+'*':'')),
+    response:{answer:(turn.spokenTurns?.length?
+        turn.spokenTurns.map(x=>(x.characterId==='landry'?'Landry':'Delia')+': '+x.speech+
+          (x.emote?'\n*'+x.emote+'*':'')).join('\n\n'):
+        character.name+': '+turn.speech+(turn.emote?'\n*'+turn.emote+'*':'')),
       choice:{mode:'Play',system:'civweave',nextAction:'Continue your scene or switch character.'},
       requiresConsent:false},
     context:{guide:{system:'civweave'},capability:'persona-campaign',characterId:character.id},
@@ -53,21 +56,26 @@ export async function runPersonaChatTurn({
  }
  const result=split?await runSplitMindTurn({pack:p,scene:activeScene,
    playerInput:input,history:recent,invokeModel,willpower:campaign.willpower,
-   ...(directControl?{directControl:{characterId:directControl,cost:1},
-      authorizeDirectControl:()=>true}:{})}):
+   ...(directControl?{directControl:directControl==='both'?
+     [{characterId:'landry',cost:1},{characterId:'delia',cost:1}]:
+     {characterId:directControl,cost:1},
+     authorizeDirectControl:()=>true}:{})}):
    await performPersonaTurn({pack:p,scene:activeScene,characterId,playerInput:input,
      history:recent,invokeModel});
  // Rehearsal only: a deterministic willpower spend is committed before the
  // preview. Failure does not mutate the caller's original snapshot.
  let updated=campaign;
- if(split&&result.directControlReceipt){
+ for(const receipt of split?result.directControlReceipts||[]:[]){
    updated=applyCampaignEvent(updated,{type:'willpower-spend',
-     characterId:result.directControlReceipt.characterId,
-     cost:result.directControlReceipt.cost},
+     characterId:receipt.characterId,cost:receipt.cost},
      {actor,authorize,expectedRevision:updated.revision});
  }
+ if(split&&updated.willpower.points!==result.willpower.points)
+   throw new Error('Override ledger does not match the shared willpower calculation.');
  const next=applyCampaignEvent(updated,{type:'rehearsal-preview',characterId,
-   playerCue:input,speech:result.speech,emote:result.emote,sceneRevision:activeScene.revision,
+   playerCue:input,speech:result.speech,emote:result.emote,
+   ...(split&&result.spokenTurns?.length?{spokenTurns:result.spokenTurns}:{}),
+   sceneRevision:activeScene.revision,
    proposedActions:result.proposedActions},{actor,authorize,expectedRevision:updated.revision});
  activeScene=advanceSceneTurn(activeScene,{expectedTurn:activeScene.turn});
  if(worldChanged===true||result.needsDirection)activeScene.expireAfterTurn=activeScene.turn;
