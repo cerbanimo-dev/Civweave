@@ -9,6 +9,7 @@ import {
   gatewayCashCostCents,
   initializePrepaidBaseline,
   reconcilePrepaidCreditLoad,
+  rebasePrepaidBalanceAfterUsage,
   headquartersPrepaidStatus,
   runBoundedHeadquartersPrepaidInference,
   handleHeadquartersPrepaidRequest
@@ -119,6 +120,22 @@ test('prepaid model requests require approved model, quote and live balance, res
   await assert.rejects(()=>runBoundedHeadquartersPrepaidInference(f.edge,{...input,requestId:key+'x',model:'openai/gpt-5.5'},{fetchImpl:f.fetchImpl}),/not approved/);
   f.sqlite.prepare('UPDATE headquarters_starling_contributions SET refunded_gross_cents=1500').run();
   await assert.rejects(()=>runBoundedHeadquartersPrepaidInference(f.edge,{...input,requestId:key+'y'},{fetchImpl:f.fetchImpl}),/No verified prepaid credits/);
+});
+
+test('operator can lower observed baseline after account usage before recognizing next manual load',async()=>{
+  const f=fixture();
+  await initializePrepaidBaseline(f.edge,{fetchImpl:f.fetchImpl});
+  f.setBalance(10);
+  await reconcilePrepaidCreditLoad(f.edge,{providerReference:'cf-charge-1',creditCents:1000},{fetchImpl:f.fetchImpl});
+  f.setBalance(9);
+  const lowered=await rebasePrepaidBalanceAfterUsage(f.edge,{fetchImpl:f.fetchImpl});
+  assert.equal(lowered.providerBalanceMicroUsd,9_000_000);
+  f.setBalance(11);
+  await assert.rejects(()=>rebasePrepaidBalanceAfterUsage(f.edge,{fetchImpl:f.fetchImpl}),/increase/);
+  // The remaining verified cash is too low for another $10 purchase, even if
+  // Cloudflare shows new credits purchased by someone else.
+  f.setBalance(19);
+  await assert.rejects(()=>reconcilePrepaidCreditLoad(f.edge,{providerReference:'cf-charge-2',creditCents:1000},{fetchImpl:f.fetchImpl}),/contributions/);
 });
 
 test('Cloudflare account mode, gateway spend caps and auto topup are verified, not assumed',async()=>{
