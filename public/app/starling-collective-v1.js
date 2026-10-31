@@ -252,7 +252,7 @@ async function handleAction(button){
   if(action==='enter-commune'){
     const selectedGuild=await connectGuild();
     if(!selectedGuild?.guildId)throw new Error('Select and connect to an existing Guild to enter its commune.');
-    const module=await import('/app/starling-lounge-v1.mjs?v=commune-hud-r2');
+    const module=await import('/app/starling-lounge-v1.mjs?v=worldweaver-commune-r3');
     if(dialog?.open)dialog.close();else if(root)root.hidden=true;
     module.CivweaveStarlingLoungeV1.open({id:selectedGuild.guildId,name:'Selected Guild'});
     return;
