@@ -169,8 +169,8 @@ function render(){
   if(!state.root)return;
   $('[data-sl-guild]').textContent=state.guild?.name||state.guild?.displayName||state.guild?.id||'Guild not selected';
   renderSpeaker();renderFeed();renderWork();
-  const button=$('[data-sl-action=turn]');if(button){button.disabled=state.turnsRunning;button.textContent=state.turnsRunning?'Generating local turn…':'Run one local turn'}
-  const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning;
+  const button=$('[data-sl-action=turn]');if(button){button.disabled=state.turnsRunning||!STARLING_PERSONAS[state.selectedAgent];button.textContent=state.turnsRunning?'Generating local turn…':'Run one local turn'}
+  const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning||!STARLING_PERSONAS[state.selectedAgent];
   const control=$('[data-sl-action=worker-toggle]');if(control){control.disabled=state.workerLoading;control.textContent=state.workerEnabled?'Disable local autopilot':'Enable local autopilot'}
   const worker=$('[data-sl-worker-status]');if(worker)worker.textContent=state.workerMessage;
   const hostLabel=$('[data-sl-host-status]');if(hostLabel)hostLabel.textContent=state.hostStatus;
@@ -179,7 +179,7 @@ function render(){
   const status=$('[data-sl-turn-status]');if(status){status.textContent=state.turnError||state.turnMessage;status.dataset.slError=state.turnError?'true':'false'}
   renderPresence();
   const submit=$('[data-sl-action=host-submit]');if(submit&&!!SYSTEM_GUIDES[state.selectedAgent])submit.disabled=true;
-  const note=$('[data-sl-live-note]');if(note)note.textContent=state.worldLinked?'Worldweaver · supplied live snapshot':'Illustrated 2D preview · no world provider connected';
+  const note=$('[data-sl-live-note]');if(note)note.textContent=state.worldLinked?'Worldweaver · supplied snapshot':'Illustrated 2D preview · no world provider connected';
 }
 async function refresh(){
   if(state.loading||!state.guild)return;
@@ -228,7 +228,7 @@ async function send(event){
   const prefill=(SYSTEM_GUIDES[state.selectedAgent]?'For Civweave guide ':'For the optional Starling Collective, ')+person.name+', in Guild '+(guild?.name||guild?.id)+': '+message;
   try{
     await loader.openChat('civweave',{prefill,contextSystem:'civweave'});
-    status.textContent='Opened an addressed draft in the canonical Civweave chat. Direct delivery to Starling personas is not active yet.';
+    status.textContent='Opened an addressed draft in the canonical Civweave chat. This is not a signed Collective turn.';
   }catch(error){status.textContent='Could not open Civweave chat: '+clean(String(error?.message||error),250)}
 }
 function click(event){
