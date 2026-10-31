@@ -1,5 +1,5 @@
 import {validatePersonaPack,chooseModelDownloads} from '../shared/persona-library-v1.mjs';
-import {prepareDirectedScene,performPersonaTurn,advanceSceneTurn,needsDirectorRefresh} from '../shared/persona-scene-bridge-v1.mjs';
+import {prepareDirectedScene,performPersonaTurn,advanceSceneTurn,needsDirectorRefresh,runSplitMindTurn} from '../shared/persona-scene-bridge-v1.mjs';
 import {createPerformanceStudio,performanceObservation} from '../shared/worldweaver-performance-studio-v1.mjs';
 import {compileStageScene,compilePerformanceScore} from '../shared/worldweaver-stagecraft-v1.mjs';
 import {proposeScreenplayViaModel,proposeStageViaModel} from '../shared/worldweaver-adaptation-model-v1.mjs';
@@ -339,10 +339,16 @@ updateScenes();showStage();
  */
 let personaCast=null,personaScene=null;
 let personaRecent=[],personaGenerating=false;
+let personaWillpower={points:2,max:2,renewEvery:4,lastRenewedTurn:0};
+function showPersonaWillpower(){
+ $('persona-willpower').textContent='Split-mind willpower: '+personaWillpower.points+'/'+personaWillpower.max+
+  ' · restores one point every '+personaWillpower.renewEvery+' accepted rehearsal turns.';
+}
 const personaStatus=s=>$('persona-result').textContent=text(s,2500);
 const personaRoster=()=>Array.from($('persona-cast').selectedOptions).map(o=>o.value);
 $('persona-manifest-file').addEventListener('change',async()=>{
  personaCast=null;personaScene=null;personaRecent=[];
+ personaWillpower={points:2,max:2,renewEvery:4,lastRenewedTurn:0};showPersonaWillpower();
  $('persona-cast').replaceChildren();$('persona-speaker').replaceChildren();
  const file=$('persona-manifest-file').files?.[0];
  if(!file)return;
@@ -384,7 +390,7 @@ async function runPersonaSelectedModel({messages,modelTier,purpose,maxOutputToke
   throw new Error('Per-role switching in this lab currently requires an Ollama or OpenAI-compatible provider.');
  if(runtime?.endpointLeavesDevice?.(cfg)&&!$('cloud-consent').checked)
   throw new Error('Explicit remote-model manuscript consent required.');
- const target=$(modelTier==='4b'?'persona-director-model':'persona-actor-model').value.trim();
+ const target=$(modelTier==='4b'?'persona-director-model':modelTier==='2b'?'persona-inner-model':'persona-actor-model').value.trim();
  if(!/^[A-Za-z0-9_.:/-]{1,100}$/.test(target))throw new Error('Enter an installed provider model ID.');
  const {runCodeInference}=await import('/creator-suite/shared/code-inference-route-v1.mjs');
  const loaders=await import('/creator-suite/shared/creator-inference-loaders-v1.mjs');
@@ -427,12 +433,24 @@ async function personaRun(phase){
    const id=$('persona-speaker').value;
    if(!participants.includes(id))throw new Error('Select an active participant to perform.');
    personaStatus('Invoking 0.8B improv for '+id+'…');
-   const result=await performPersonaTurn({pack:personaCast,scene:personaScene,characterId:id,
-    playerInput:$('persona-player-cue').value,history:personaRecent,invokeModel:runPersonaSelectedModel});
+   const split=$('persona-split-mode').checked;
+   if(split&&(!participants.includes('landry')||!participants.includes('delia')))
+    throw new Error('Split-mind rehearsal requires Landry and Delia in the selected cast.');
+   const directChoice=$('persona-direct-control').value;
+   const result=split?await runSplitMindTurn({pack:personaCast,scene:personaScene,
+    playerInput:$('persona-player-cue').value,history:personaRecent,
+    invokeModel:runPersonaSelectedModel,willpower:personaWillpower,
+    ...(directChoice?{directControl:{characterId:directChoice,cost:1},
+      authorizeDirectControl:()=>true}:{})}):
+    await performPersonaTurn({pack:personaCast,scene:personaScene,characterId:id,
+      playerInput:$('persona-player-cue').value,history:personaRecent,invokeModel:runPersonaSelectedModel});
+   if(split){personaWillpower=result.willpower;showPersonaWillpower();}
    personaRecent=[...personaRecent,('Player: '+text($('persona-player-cue').value,450)),
-    (id+': '+result.speech)].slice(-6);
+    ((split?'Landry/Delia':id)+': '+result.speech)].slice(-6);
    personaScene=advanceSceneTurn(personaScene,{expectedTurn:personaScene.turn});
-   personaStatus(JSON.stringify({character:id,speech:result.speech,emote:result.emote,
+   personaStatus(JSON.stringify({character:split?'landry-delia':id,speech:result.speech,emote:result.emote,
+     route:split?result.route:'individual',remainingWillpower:split?personaWillpower.points:undefined,
+     directControlReceipt:split?result.directControlReceipt:undefined,
      proposedActions:result.proposedActions,worldChanged:false,actionsExecuted:false,
      directorRevision:result.directorRevision,nextSceneTurn:personaScene.turn,
      refreshRequired:needsDirectorRefresh(personaScene)},null,2));
@@ -443,3 +461,5 @@ async function personaRun(phase){
 }
 $('persona-prepare').addEventListener('click',()=>personaRun('prepare'));
 $('persona-act').addEventListener('click',()=>personaRun('act'));
+
+showPersonaWillpower();
