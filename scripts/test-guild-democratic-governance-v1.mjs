@@ -285,3 +285,31 @@ test('existing Guild ballot ledger acquires case_id without destroying older vot
   assert.ok(db.prepare("PRAGMA table_info(guild_governance_ballots)").all().some(row=>row.name==='case_id'));
   ensureGovernanceTables(sql);
 });
+
+test('small and larger Guilds apply active-member majority to case-backed sanction votes',()=>{
+  for(const count of [1,2,5,10]){
+    const f=fixture(),ids=Array.from({length:count},(_,i)=>'cwres:active-member-'+String(i).padStart(4,'0'));
+    for(const id of ids)f.member(id);
+    f.contributor(ids[0]);
+    if(count===1){
+      assert.throws(()=>openGovernanceCase(f.sql,{...f.context,actorId:ids[0],action:'remove',targetUserId:ids[0],
+        statement:'A sole member should use voluntary departure, not sanction.'}),/self-removal/);
+      continue;
+    }
+    const caseRow=openGovernanceCase(f.sql,{...f.context,actorId:ids[0],action:'remove',targetUserId:ids[count-1],
+      statement:'An individual should have time to reply to this proposed decision.'});
+    f.sql.exec('UPDATE guild_governance_cases SET notice_until=? WHERE id=?',
+      new Date(Date.now()-1000).toISOString(),caseRow.id);
+    const ballot=proposeGovernance(f.sql,{...f.context,actorId:ids[0],action:'remove',targetUserId:ids[count-1],
+      statement:'An individual should have time to reply to this proposed decision.',caseId:caseRow.id});
+    assert.equal(ballot.requiredYes,Math.floor(count/2)+1);
+    assert.equal(f.memberCount(),count);
+    for(let i=1;i<Math.floor(count/2);i++){
+      assert.equal(castGovernanceVote(f.sql,{...f.context,actorId:ids[i],ballotId:ballot.id,choice:'yes'}).status,'open');
+      assert.equal(f.memberCount(),count);
+    }
+    const deciding=castGovernanceVote(f.sql,{...f.context,actorId:ids[Math.floor(count/2)],ballotId:ballot.id,choice:'yes'});
+    assert.equal(deciding.status,'approved');
+    assert.equal(f.memberCount(),count-1);
+  }
+});
