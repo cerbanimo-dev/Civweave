@@ -23,7 +23,8 @@ test('reject antagonist downgraded below 2B',()=>assert.throws(()=>validatePerso
 test('knowledge is bounded by event stage and individual awareness',()=>{
   const p=validatePersonaPack(pack);
   assert.deepEqual(availableKnowledge(p,'jess',1).map(e=>e.id),['e1','e2']);
-  assert.deepEqual(availableKnowledge(p,'magnus',1).map(e=>e.id),['e1']);\n  assert.deepEqual(availableKnowledge(p,'magnus',9).map(e=>e.id),['e1','e2']);
+  assert.deepEqual(availableKnowledge(p,'magnus',1).map(e=>e.id),['e1']);
+  assert.deepEqual(availableKnowledge(p,'magnus',9).map(e=>e.id),['e1','e2']);
   assert.deepEqual(availableKnowledge(p,'raven',9).map(e=>e.id),['e2']);
 });
 test('director receives only current canon and role instructions',()=>{
