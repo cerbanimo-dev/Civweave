@@ -83,7 +83,7 @@ export async function approvePersonaMove(tx,{scope,room,actor,input}={}){
      principalId:pilotId,modelId},
     {actor:human,authorize:()=>true,expectedRevision:current.revision});
  let npc=world.snapshot().npcs.find(n=>n.instanceId===instanceId&&
-   n.personaRef===personaRef&&n.pilotPrincipalId===pilotId);
+   n.personaRef===personaRef&&n.pilotPrincipalId===pilotId&&n.capabilities.includes('move'));
  if(!npc){
   npc=world.dispatch({type:'rig-npc',instanceId,modelId,pilotPrincipalId:pilotId,
     name:draft.characterId,personaRef,capabilities:['speak','move'],
