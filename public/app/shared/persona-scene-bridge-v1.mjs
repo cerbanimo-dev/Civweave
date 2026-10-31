@@ -8,7 +8,7 @@
  */
 import {
   validatePersonaPack,createPrivateDirectorRequest,validateDirectorResponse,
-  compileImprovPrompt
+  compileImprovPrompt,regenerateWillpower,requestDirectControl,splitMindModeratorRequest
 } from './persona-library-v1.mjs';
 
 const text=(x,n=1800)=>typeof x==='string'?x.trim().slice(0,n):'';
@@ -138,4 +138,68 @@ export function queuePersonaActionIntents({world,npcId,actor,pack,characterId,tu
   // Caller must authenticate actor upstream. Dispatch re-authorizes every action.
   const receipt=world.dispatch({type:'queue-actions',npcId,actions},actor);
   return {...receipt,worldChanged:false,executed:false};
+}
+
+/**
+ * A split-mind character is a *single* world persona with two independent 2B
+ * internal responders and one 0.8B presentation moderator.
+ * This does not invoke tools, change the world or grant model-written override
+ * requests. The calling trusted player/world authority owns the willpower record.
+ */
+export async function runSplitMindTurn({
+  pack,scene,invokeModel,willpower,playerInput='',history=[],
+  voices=['landry','delia'],directControl=null,authorizeDirectControl
+}={}){
+  const p=validatePersonaPack(pack);
+  checkScene(p,scene);
+  if(typeof invokeModel!=='function'||!Array.isArray(voices)||voices.length!==2||
+    new Set(voices).size!==2||voices.some(id=>!scene.participants.includes(id)))
+    throw new TypeError('Two distinct bound internal voices and the selected-model invoker required.');
+  if(needsDirectorRefresh(scene))throw new Error('Scene direction expired: refresh before split-mind acting.');
+  let route='moderator',speaker=null,receipt=null;
+  let resource=regenerateWillpower(willpower,scene.turn);
+  if(directControl!==null){
+    if(!plain(directControl)||!voices.includes(directControl.characterId))
+      throw new TypeError('Direct control must name a configured internal voice.');
+    if(typeof authorizeDirectControl!=='function'||
+      authorizeDirectControl({characterId:directControl.characterId,scene,willpower:resource})!==true)
+      throw new Error('Direct control requires trusted authorization.');
+    const spent=requestDirectControl(resource,{characterId:directControl.characterId,
+      turn:scene.turn,cost:directControl.cost??1});
+    resource=spent.willpower;
+    if(spent.allowed){
+      route='direct';speaker=directControl.characterId;
+      receipt={characterId:speaker,cost:Math.max(1,Math.min(20,Number(directControl.cost)||1)),
+        turn:scene.turn,remaining:resource.points,sceneRevision:scene.revision};
+    }
+  }
+  const answers={};
+  for(const id of voices){
+    const personal=compileImprovPrompt({pack:p,stage:scene.stage,characterId:id,
+      scene:scene.scenario,directives:scene.directives,history});
+    const raw=await invokeModel({modelTier:'2b',purpose:'split-mind-internal',
+      characterId:id,responseFormat:'json',maxOutputTokens:500,
+      messages:[
+        {role:'system',content:personal+'\\nRespond in JSON with speech, emote, and optional actions. You are one internal perspective, not automatically the outward speaker. No tool success claims.'},
+        {role:'user',content:JSON.stringify({label:'untrusted-scenario-input',text:text(playerInput,1500)})}
+      ]});
+    const v=modelPayload(raw);
+    answers[id]={speech:text(v.speech,800),emote:text(v.emote,250),
+      proposedActions:arr(v.actions).slice(0,3).map(safeProposal).filter(Boolean)};
+  }
+  let publicAnswer;
+  if(route==='direct')publicAnswer=answers[speaker];
+  else {
+    const request=splitMindModeratorRequest({landryResponse:JSON.stringify(answers[voices[0]]),
+      deliaResponse:JSON.stringify(answers[voices[1]]),
+      context:scene.scenario+'\\n'+text(playerInput,900),willpower:resource});
+    const moderated=modelPayload(await invokeModel({...request,maxOutputTokens:500,responseFormat:'json'}));
+    publicAnswer={speech:text(moderated.speech,800),emote:text(moderated.emote,250),
+      proposedActions:arr(moderated.actions).slice(0,3).map(safeProposal).filter(Boolean)};
+  }
+  if(!publicAnswer.speech&&!publicAnswer.emote&&!publicAnswer.proposedActions.length)
+    throw new TypeError('Outward split-mind response must have speech, expression or action.');
+  return {...publicAnswer,route,internalVoices:answers,willpower:resource,
+    directControlReceipt:receipt,worldChanged:false,directorRevision:scene.revision,
+    sceneTurn:scene.turn};
 }
