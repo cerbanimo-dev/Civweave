@@ -264,7 +264,7 @@ async function ensureLocalFleetCatalog(){
 }
 function fleetIsGuild(){return state.fleetScope==='guild'&&Boolean(state.guild?.id)}
 function setFleetScope(scope){
-  if(!['local','guild'].includes(scope)||scope==='guild'&&!state.guild)return;
+  if(!['local','guild'].includes(scope)||scope==='guild'&&!state.guild)return false;
   state.fleetScope=scope;
   if(scope==='local'&&['work','operations'].includes(state.view))setView('world');
   if(scope==='local'&&(!SYSTEM_GUIDES[state.selectedAgent]))state.selectedAgent='weaveling';
@@ -273,6 +273,7 @@ function setFleetScope(scope){
   for(const button of state.root?.querySelectorAll('[data-sl-fleet]')||[])button.setAttribute('aria-pressed',String(button.dataset.slFleet===scope));
   render();
   if(scope==='guild'&&state.worldLinked&&state.view==='world')state.worldViewer?.update();
+  return true;
 }
 function renderFleetScopes(){
   if(!state.root)return;
