@@ -5,7 +5,7 @@
  */
 import {validatePersonaPack} from './persona-library-v1.mjs';
 import {createPersonaCampaign,importCampaignSnapshot,exportCampaignSnapshot} from './persona-campaign-v1.mjs';
-import {createPersonaChatRuntime} from './persona-chat-turn-v1.mjs';
+import {createPersonaChatRuntime,runPersonaChatTurn} from './persona-chat-turn-v1.mjs';
 import {createGuildPersonaClient} from './guild-persona-client-v1.mjs';
 
 const el=(root,name)=>root.querySelector('[data-persona-'+name+']');
@@ -15,7 +15,8 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
  if(!root?.querySelector)throw new TypeError('The existing guide-chat root is required.');
  const button=el(root,'toggle'),panel=el(root,'panel');
  if(!button||!panel)throw new TypeError('Persona chat controls are not mounted in canonical guide chat.');
- let cast=null,campaign=null,session=null,guildRoom=null,enabled=false,loading=false;
+ let cast=null,campaign=null,session=null,guildRoom=null,guildDrafts=[],guildWorld=null,enabled=false,loading=false;
+ let syncTimer=null,syncBusy=false;
  const guildClient=createGuildPersonaClient();
  const status=message=>{const x=el(root,'status');if(x)x.textContent=small(message,1000);};
  const switchOn=value=>{
@@ -23,7 +24,8 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    button.textContent=enabled?'Cast: on':'Cast';
    onModeChange(enabled);
  };
- const stop=()=>{session=null;guildRoom=null;switchOn(false);};
+ const stop=()=>{session=null;guildRoom=null;guildDrafts=[];guildWorld=null;
+   if(syncTimer){clearInterval(syncTimer);syncTimer=null;}switchOn(false);};
  const guildStatus=message=>{const x=el(root,'guild-status');if(x)x.textContent=small(message,800);};
  async function acceptFile(input,limit,label){
    const file=input?.files?.[0];
@@ -49,6 +51,36 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      if(control.selectedOptions[0]?.disabled)control.value='';
    }
  }
+ function absorbGuild(result){
+   guildRoom=result.room;campaign=guildRoom;
+   if(Array.isArray(result.pendingDrafts))guildDrafts=result.pendingDrafts;
+   if(Object.hasOwn(result,'world'))guildWorld=result.world;
+   showWillpower();showGuildRoom();
+ }
+ async function refreshGuild({quiet=false}={}){
+   if(!guildRoom)return;
+   const id=guildRoom.id;
+   const result=await guildClient.snapshot(id);
+   if(!guildRoom||guildRoom.id!==id)return;
+   const changed=result.room.revision!==guildRoom.revision||
+     result.pendingDrafts?.length!==guildDrafts.length||
+     result.world?.revision!==guildWorld?.revision;
+   absorbGuild(result);
+   if(!quiet||changed)guildStatus('Guild synchronized · revision '+guildRoom.revision+
+     ' · '+guildRoom.turn+' player turns · '+guildDrafts.length+' pending drafts.');
+ }
+ function startGuildSync(){
+   if(syncTimer)clearInterval(syncTimer);
+   // Polling is opt-in while actively connected, not a new global socket,
+   // background worker, or public room feed. Reads revalidate Guild identity.
+   syncTimer=setInterval(async()=>{
+     if(!guildRoom||!enabled||syncBusy||loading||document.visibilityState==='hidden')return;
+     syncBusy=true;
+     try{await refreshGuild({quiet:true});}
+     catch(error){guildStatus('Sync suspended: '+small(error?.message||error,350)+'. Reconnect or refresh.');stop();}
+     finally{syncBusy=false;}
+   },4000);
+ }
  function showGuildRoom(){
    const role=el(root,'guild-seat-role'),prior=role?.value;
    role?.replaceChildren();
@@ -58,6 +90,19 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      role?.append(option);
    }
    if(guildRoom?.cast.includes(prior))role.value=prior;
+   const pending=el(root,'guild-draft-list'),selected=pending?.value;
+   pending?.replaceChildren();
+   for(const draft of guildDrafts){
+     const option=document.createElement('option');option.value=draft.id;
+     option.textContent=draft.characterId+' · '+small(draft.speech,90);
+     pending?.append(option);
+   }
+   if(guildDrafts.some(x=>x.id===selected))pending.value=selected;
+   const view=el(root,'guild-world');
+   if(view)view.textContent=guildWorld?.speeches?.length?
+      'Worldweaver accepted speech ('+guildWorld.speeches.length+' entries, simulated): '+
+      guildWorld.speeches.slice(-3).map(x=>small(x.text,130)).join(' | '):
+      'Worldweaver: no approved simulation speech yet.';
    const timeline=el(root,'guild-timeline');
    if(timeline)timeline.textContent=guildRoom?.events?.length?
      guildRoom.events.slice(-20).map(e=>e.id+' · '+e.type+' · '+
@@ -206,7 +251,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
        title:campaign.title,stage:campaign.stage,scenario:campaign.scenario,confirmedShare:true});
      stop();guildRoom=result.room;campaign=result.room;session=null;
      if(el(root,'guild-room'))el(root,'guild-room').value=guildRoom.id;
-     speakers();switchOn(true);showWillpower();showGuildRoom();
+     speakers();switchOn(true);showWillpower();showGuildRoom();startGuildSync();
      guildStatus('Hosted on '+result.scope.nodeId+' as '+result.scope.userId+'. Room '+guildRoom.id+
       '. The room is private to authorized seats; assign players before they join.');
      status('Guild campaign active: model NPCs are NOT automatically run by the server. Player turns use authenticated Guild storage.');
@@ -219,7 +264,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      const id=el(root,'guild-room')?.value?.trim();
      const result=await guildClient.snapshot(id);
      stop();guildRoom=result.room;campaign=result.room;session=null;
-     speakers();switchOn(true);showWillpower();
+     speakers();switchOn(true);showWillpower();startGuildSync();await refreshGuild({quiet:true});
      guildStatus('Joined authenticated room '+guildRoom.id+' on '+result.scope.nodeId+
        '. Only server-approved members may read and submit turns.');
      status('Guild shared mode: submit player cues through this Weaveling chat. No model actions are automatically executed.');
@@ -248,10 +293,59 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    try{
      const id=guildRoom?.id||el(root,'guild-room')?.value?.trim();
      const result=await guildClient.snapshot(id);
-     guildRoom=result.room;campaign=result.room;showWillpower();showGuildRoom();
+     if(guildRoom&&guildRoom.id!==id)throw new Error('Room changed during refresh.');
+     absorbGuild(result);
      if(guildRoom)guildStatus('Server revision '+guildRoom.revision+' · '+guildRoom.events.length+
        ' accepted events · shared turn '+guildRoom.turn+'.');
    }catch(error){guildStatus('Refresh failed: '+small(error?.message||error));}
+   finally{loading=false;}
+ });
+ el(root,'guild-generate').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     if(!cast||!guildRoom||cast.id!==guildRoom.packId)
+       throw new Error('The matching private cast manifest must be loaded on this device to generate a character draft.');
+     const id=el(root,'speaker')?.value;
+     if(!id||id==='landry-delia')
+       throw new Error('Select one named character for a Guild NPC draft. Split-mind presentation remains in local rehearsal.');
+     const cue=[...guildRoom.events].reverse().find(e=>e.type==='player-cue')?.text||guildRoom.scenario;
+     const preview=await runPersonaChatTurn({pack:cast,campaign:guildRoom,
+       characterId:id,input:cue,actor:{kind:'human',principalId:guildRoom.ownerId},
+       authorize:({actor})=>actor.principalId===guildRoom.ownerId,invokeModel:model});
+     const line=preview.campaign.events.at(-1)?.speech;
+     if(!line)throw new Error('The selected model produced no audible line.');
+     el(root,'guild-draft-text').value=small(line,400);
+     guildStatus('Draft generated locally for '+id+'. Edit and submit for Guild owner approval. No Worldweaver action was executed.');
+   }catch(error){guildStatus('NPC draft generation failed: '+small(error?.message||error,400));}
+   finally{loading=false;if(el(root,'consent'))el(root,'consent').checked=false;}
+ });
+ el(root,'guild-draft').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     if(!guildRoom)throw new Error('Connect to an authenticated Guild room first.');
+     const characterId=el(root,'speaker')?.value,speech=small(el(root,'guild-draft-text')?.value,400);
+     if(!guildRoom.cast.includes(characterId)||!speech)
+       throw new Error('Select one character and write a bounded spoken line.');
+     const result=await guildClient.draft(guildRoom.id,guildRoom.revision,{
+       characterId,speech,actions:[{tool:'speak',args:{text:speech}}]});
+     if(el(root,'guild-draft-text'))el(root,'guild-draft-text').value='';
+     guildStatus('Draft '+result.draft?.id+' awaiting host approval. The world has not changed.');
+     await refreshGuild({quiet:true});
+   }catch(error){guildStatus('NPC draft failed: '+small(error?.message||error,400));}
+   finally{loading=false;}
+ });
+ el(root,'guild-approve').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     if(!guildRoom)throw new Error('Connect to a Guild room first.');
+     const draftId=el(root,'guild-draft-list')?.value;
+     if(!draftId)throw new Error('No pending NPC draft is selected.');
+     const result=await guildClient.approve(guildRoom.id,guildRoom.revision,draftId);
+     absorbGuild(result);
+     guildStatus('Worldweaver confirmed simulated speech: '+small(result.speech,200)+
+       ' · receipt '+result.worldReceiptId+'.');
+     await refreshGuild({quiet:true});
+   }catch(error){guildStatus('NPC approval failed: '+small(error?.message||error,400));}
    finally{loading=false;}
  });
  el(root,'end').addEventListener('click',()=>{stop();showWillpower();
