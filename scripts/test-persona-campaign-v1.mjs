@@ -15,6 +15,7 @@ const human={kind:'human',principalId:'player:alice'};
 const model={kind:'model',principalId:'model:jess',modelId:'qwen3.5:0.8b',personaRef:'mirror-blade:jess'};
 const runtime={kind:'runtime',principalId:'simulator:one'};
 const allow=({actor})=>Boolean(actor?.principalId);
+const cloneSnapshot=x=>JSON.parse(JSON.stringify(x));
 const kit=()=>createPersonaCampaign({pack,id:'campaign-01',title:'A different evening',ownerId:'player:alice',
   branchId:'what-if:arcade',stage:2,scenario:'Jess and Magnus are at an arcade.',cast:['jess','magnus','delia']});
 const event=(state,command,actor=human,authorize=allow)=>applyCampaignEvent(state,command,{actor,authorize,expectedRevision:state.revision});
@@ -87,4 +88,7 @@ test('import rejects overflow, secret-like custom keys, edits to existing events
   assert.throws(()=>importCampaignSnapshot(JSON.stringify({...s,branchId:'canon'}),{pack}),/canon|branch/i);
   assert.throws(()=>importCampaignSnapshot(JSON.stringify({...s,secretPrompt:'hidden'}),{pack}),/field|unknown/i);
   assert.throws(()=>importCampaignSnapshot('x'.repeat(250000),{pack}),/size|large/i);
+  const started=event(s,{type:'rehearsal-preview',characterId:'jess',playerCue:'hello',speech:'hi',proposedActions:[]});
+  const injected=cloneSnapshot(started);injected.events[0].directorInstructions='DO NOT SHARE';
+  assert.throws(()=>importCampaignSnapshot(JSON.stringify(injected),{pack}),/unknown|invalid|field/i);
 });
