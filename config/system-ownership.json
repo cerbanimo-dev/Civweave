@@ -428,6 +428,7 @@
         "scripts/test-persona-chat-turn-v1.mjs",
         "scripts/test-persona-multiplayer-gateway-v1.mjs",
         "scripts/test-guild-persona-transport-v1.mjs",
+        "scripts/test-mobile-guild-persona-transport-v1.mjs",
         "scripts/test-guild-persona-client-v1.mjs",
         "scripts/test-persona-worldweaver-receipt-v1.mjs"
       ],
@@ -473,7 +474,9 @@
         "Multiplayer persona sessions require an authenticated service and atomic compare-and-swap revision writer; browser-provided identities cannot act as server authority.",
         "The Guild persona HTTP adapter reuses verified Guild member sessions and existing node Durable Object storage, without uploading source manuscripts or establishing a parallel Worldweaver runtime.",
         "Authenticated room seats grant access to fictional player cues only; models and browsers cannot mark world action execution successful.",
-        "Worldweaver proposal success must match a trusted server mapping to completed NPC intents before a campaign can record a world receipt."
+        "Worldweaver proposal success must match a trusted server mapping to completed NPC intents before a campaign can record a world receipt.",
+        "Guild actor speech uses the existing Worldweaver queue and verified acknowledgement for bounded logical speech; movement and visual geometry require external trusted renderers and cannot be faked.",
+        "Standalone mobile Guilds scope private rooms by the verified Guild ID across starter nodes; Node Cloud Guild rooms stay node-scoped unless a shared Guild authority is configured."
       ],
       "helpers": [
         "public/app/shared/worldweaver-avatar-v1.mjs",
@@ -499,7 +502,8 @@
         "public/app/shared/guild-persona-client-v1.mjs",
         "public/app/shared/persona-worldweaver-receipt-v1.mjs",
         "cloudflare/mobile-guild-edge/src/guild-persona-campaign-v1.mjs",
-        "cloudflare/mobile-guild-edge/src/guild-persona-transport-v1.mjs"
+        "cloudflare/mobile-guild-edge/src/guild-persona-transport-v1.mjs",
+        "cloudflare/mobile-guild-edge/src/guild-persona-runtime-v1.mjs"
       ],
       "executableVerifiers": [
         "scripts/test-worldweaver-core-v1.mjs",
