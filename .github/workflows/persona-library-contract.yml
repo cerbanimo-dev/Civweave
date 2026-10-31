@@ -16,6 +16,11 @@ on:
       - 'scripts/test-persona-chat-turn-v1.mjs'
       - 'scripts/test-persona-dual-override-v1.mjs'
       - 'scripts/test-guild-persona-transport-v1.mjs'
+      - 'scripts/test-worldweaver-persona-motion-v1.mjs'
+      - 'scripts/test-worldweaver-opensim-motion-bridge-v1.mjs'
+      - 'public/app/shared/worldweaver-persona-motion-v1.mjs'
+      - 'public/app/shared/worldweaver-opensim-motion-bridge-v1.mjs'
+      - 'cloudflare/mobile-guild-edge/src/guild-persona-motion-v1.mjs'
       - 'scripts/test-mobile-guild-persona-transport-v1.mjs'
       - 'cloudflare/mobile-guild-edge/src/guild-persona-runtime-v1.mjs'
       - 'public/service-worker-shell-assets-v1.js'
@@ -50,7 +55,7 @@ jobs:
         with:
           node-version: '22'
       - name: Verify canon and improv contract
-        run: node --test scripts/test-persona-library-v1.mjs scripts/test-persona-scene-bridge-v1.mjs scripts/test-persona-performance-lab-v1.mjs scripts/test-persona-campaign-v1.mjs scripts/test-persona-chat-turn-v1.mjs scripts/test-persona-dual-override-v1.mjs scripts/test-persona-chat-surface-v1.mjs scripts/test-persona-multiplayer-gateway-v1.mjs scripts/test-guild-persona-transport-v1.mjs scripts/test-mobile-guild-persona-transport-v1.mjs scripts/test-guild-persona-client-v1.mjs scripts/test-persona-worldweaver-receipt-v1.mjs
+        run: node --test scripts/test-persona-library-v1.mjs scripts/test-persona-scene-bridge-v1.mjs scripts/test-persona-performance-lab-v1.mjs scripts/test-persona-campaign-v1.mjs scripts/test-persona-chat-turn-v1.mjs scripts/test-persona-dual-override-v1.mjs scripts/test-persona-chat-surface-v1.mjs scripts/test-persona-multiplayer-gateway-v1.mjs scripts/test-guild-persona-transport-v1.mjs scripts/test-worldweaver-persona-motion-v1.mjs scripts/test-worldweaver-opensim-motion-bridge-v1.mjs scripts/test-mobile-guild-persona-transport-v1.mjs scripts/test-guild-persona-client-v1.mjs scripts/test-persona-worldweaver-receipt-v1.mjs
       - name: Syntax-check Worldweaver rehearsal module
         run: |
           node --check public/app/tools/worldweaver-performance-lab-v1.mjs
@@ -58,6 +63,9 @@ jobs:
           node --check public/app/shared/persona-chat-controls-v1.mjs
           node --check cloudflare/mobile-guild-edge/src/guild-persona-transport-v1.mjs
           node --check cloudflare/mobile-guild-edge/src/guild-persona-runtime-v1.mjs
+          node --check cloudflare/mobile-guild-edge/src/guild-persona-motion-v1.mjs
+          node --check public/app/shared/worldweaver-persona-motion-v1.mjs
+          node --check public/app/shared/worldweaver-opensim-motion-bridge-v1.mjs
           node --check cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs
           node --check public/app/shared/guild-persona-client-v1.mjs
           node --check public/service-worker-shell-assets-v1.js
