@@ -8,7 +8,7 @@ const deps=[
  ['/app/host-node-session-v1.js?v=1.0.0',()=>globalThis.CivweaveHostNodeSessionV1],
  ['/app/guild-quest-client-v1.js?v=1.0.1-quest-map-dependencies',()=>globalThis.CivweaveGuildQuestsV1],
  ['/app/guild-starling-client-v1.js?v=1.0.0',()=>globalThis.CivweaveGuildStarlingV1],
- ['/app/starling-collective-v1.js?v=1.0.0',()=>globalThis.CivweaveStarlingCollectiveV1]
+ ['/app/starling-collective-v1.js?v=1.1.0',()=>globalThis.CivweaveStarlingCollectiveV1]
 ];
 function load([src,ready]){
  if(ready())return Promise.resolve();
@@ -44,7 +44,7 @@ const transport=Object.freeze({
 async function ready(){
  if(pending)return pending;
  pending=(async()=>{
-  if(!document.querySelector('link[data-cw-starling-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='/app/starling-collective-v1.css?v=1.0.0';link.dataset.cwStarlingStyle='1';document.head.append(link);}
+  if(!document.querySelector('link[data-cw-starling-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='/app/starling-collective-v1.css?v=1.1.0';link.dataset.cwStarlingStyle='1';document.head.append(link);}
   // Loading capability code is inert: no model, planning, sharing or publication.
   for(const dependency of deps)await load(dependency);
   globalThis.CivweaveStarlingCollectiveV1.configure({guildTransport:transport});
