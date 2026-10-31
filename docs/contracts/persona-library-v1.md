@@ -203,3 +203,5 @@ Contracts/test commands:
 `node --test scripts/test-worldweaver-persona-motion-v1.mjs scripts/test-worldweaver-opensim-motion-bridge-v1.mjs scripts/test-guild-persona-transport-v1.mjs scripts/test-mobile-guild-persona-transport-v1.mjs`.
 
 Release gates include green branch CI, a real two-device Guild session smoke test, a provisioned OpenSim region if native movement is desired, and native adapter attestation using independently observed region positions.
+
+The Guild 3D canvas smooths new *already-confirmed* moves over an 800-ms local interpolation, and cancels the animation on tab hiding, departure or a newer authoritative scene revision. The animation modifies a transient preview geometry copy only. Worldweaver's durable body coordinates remain the authoritative final position.
