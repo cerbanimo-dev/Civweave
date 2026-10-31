@@ -43,11 +43,23 @@ export function normalizeCloudflareCreditBalance(result) {
 export async function fetchVerifiedCloudflareBalance(env, fetchImpl = globalThis.fetch) {
   if (!envReady(env)) throw fail('Cloudflare prepaid account has not been configured.', 503);
   if (typeof fetchImpl !== 'function') throw fail('Cloudflare balance fetch unavailable.', 503);
-  const url = 'https://api.cloudflare.com/client/v4/accounts/' + env.CLOUDFLARE_ACCOUNT_ID + '/ai-gateway/billing/credit-balance';
-  const response = await fetchImpl(url, { method: 'GET', headers: { authorization: 'Bearer ' + env.HQ_STARLING_CLOUDFLARE_READ_TOKEN,
-    accept: 'application/json' }, cache: 'no-store' });
-  if (!response.ok) throw fail('Cloudflare prepaid balance lookup failed.', 503);
-  return normalizeCloudflareCreditBalance(await response.json());
+  const prefix = 'https://api.cloudflare.com/client/v4/accounts/' + env.CLOUDFLARE_ACCOUNT_ID + '/ai-gateway';
+  const headers = { authorization: 'Bearer ' + env.HQ_STARLING_CLOUDFLARE_READ_TOKEN, accept: 'application/json' };
+  const [balanceResponse, gatewayResponse] = await Promise.all([
+    fetchImpl(prefix + '/billing/credit-balance', { method:'GET',headers,cache:'no-store' }),
+    fetchImpl(prefix + '/gateways/' + encodeURIComponent(env.HQ_STARLING_GATEWAY_ID), { method:'GET',headers,cache:'no-store' })
+  ]);
+  if (!balanceResponse.ok || !gatewayResponse.ok) throw fail('Cloudflare prepaid balance or gateway configuration could not be verified.', 503);
+  const gateway = await gatewayResponse.json();
+  if (gateway?.success !== true || gateway?.result?.workers_ai_billing_mode !== 'unified') {
+    throw fail('Cloudflare Gateway is not configured for prepaid Unified Billing.', 503);
+  }
+  const limits = gateway?.result?.spend_limits;
+  const hasGlobalLimit = limits?.enabled === true && Array.isArray(limits.rules) && limits.rules.some(rule =>
+    rule.enabled !== false && Number(rule.limit) > 0 && Number(rule.window) > 0
+    && !rule.model && !rule.provider && (!rule.metadata || !Object.keys(rule.metadata).length));
+  if (!hasGlobalLimit) throw fail('Prepaid AI Gateway must have an active global spend limit.', 503);
+  return normalizeCloudflareCreditBalance(await balanceResponse.json());
 }
 
 async function prepaidRow(edge) {
@@ -95,15 +107,15 @@ export async function reconcilePrepaidCreditLoad(edge, { providerReference, cred
   const now = nowIso(), loadId = crypto.randomUUID();
   // One atomic transaction per load. D1 batch avoids minting the same balance twice.
   const statements = [
+    // A stale snapshot attempts to insert a NULL PK (constraint failure);
+    // D1 batch rolls the whole transaction back, including credit changes.
+    edge.db.prepare('INSERT INTO headquarters_starling_prepaid_loads(load_id,provider_reference,purchased_credit_cents,cash_cost_cents,balance_before_micro_usd,balance_after_micro_usd,recorded_at) VALUES((SELECT CASE WHEN version=?1 AND provider_balance_micro_usd=?2 AND reserved_micro_usd=0 THEN ?3 ELSE NULL END FROM headquarters_starling_prepaid_state WHERE singleton=1),?4,?5,?6,?7,?8,?9)')
+      .bind(Number(row.version),previous,loadId,reference,creditCents,cashCost,previous,current,now),
     edge.db.prepare('UPDATE headquarters_starling_prepaid_state SET provider_balance_micro_usd=?1,confirmed_credit_micro_usd=confirmed_credit_micro_usd+?2,cash_committed_cents=cash_committed_cents+?3,version=version+1,updated_at=?4 WHERE singleton=1 AND version=?5 AND provider_balance_micro_usd=?6 AND reserved_micro_usd=0')
-      .bind(current, increment, cashCost, now, Number(row.version), previous),
-    edge.db.prepare('INSERT INTO headquarters_starling_prepaid_loads(load_id,provider_reference,purchased_credit_cents,cash_cost_cents,balance_before_micro_usd,balance_after_micro_usd,recorded_at) VALUES(?1,?2,?3,?4,?5,?6,?7)')
-      .bind(loadId,reference,creditCents,cashCost,previous,current,now)
+      .bind(current, increment, cashCost, now, Number(row.version), previous)
   ];
-  // D1 batch is transactional. Check the version after batch; a stale concurrent
-  // refresh cannot be used to recognize a second purchase of the same credits.
   const results = await edge.db.batch(statements);
-  if (changes(results[0]) !== 1) throw fail('Prepaid balance changed during reconciliation. Retry after rechecking Cloudflare.');
+  if (changes(results[0]) !== 1 || changes(results[1]) !== 1) throw fail('Prepaid balance changed during reconciliation.');
   return Object.freeze({ schema: HQ_STARLING_PREPAID_SCHEMA, creditCents, cashCostCents: cashCost,
     loadId, confirmed: true, gatewayCreditsLoaded: true });
 }
