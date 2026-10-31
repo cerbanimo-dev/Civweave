@@ -14,6 +14,15 @@ export function distanceKm(a,b){
 const parse=(v,f=null)=>{try{return JSON.parse(v)}catch{return f}};
 const header={'cache-control':'no-store','content-type':'application/json; charset=utf-8','access-control-allow-origin':'*','access-control-allow-methods':'GET, POST, OPTIONS','access-control-allow-headers':'content-type'};
 const json=(v,status=200)=>Response.json(v,{status,headers:header});
+function authorizedRelay(request,env){
+  const secret=clean(env?.CIVWEAVE_GUILD_REPORT_RELAY_TOKEN,200);
+  if(!/^[A-Za-z0-9_-]{40,200}$/.test(secret))throw bad('Guild report relay has not been configured.',503);
+  const candidate=clean((request.headers.get('authorization')||'').replace(/^Bearer\\s+/i,''),200);
+  if(candidate.length!==secret.length)throw bad('Authenticated Guild relay required.',403);
+  let mismatch=0;
+  for(let i=0;i<secret.length;i++)mismatch|=secret.charCodeAt(i)^candidate.charCodeAt(i);
+  if(mismatch)throw bad('Authenticated Guild relay required.',403);
+}
 function originOf(value){
   const url=new URL(clean(value,2000));
   if(url.protocol!=='https:'||url.username||url.password||url.pathname!=='/'||
@@ -70,6 +79,7 @@ export async function handleGuildPeerDirectoryRoute(request,env){
   if(!['/api/guild-directory/report','/api/guild-directory/reports'].includes(url.pathname))return null;
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:header});
   try{
+    authorizedRelay(request,env);
     if(url.pathname==='/api/guild-directory/report'&&request.method==='POST'){
       const body=await request.text();if(body.length>4096)return json({ok:false,error:'Request too large.'},413);
       return json(await deliverVerifiedGuildReport(env,JSON.parse(body)),201);
