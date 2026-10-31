@@ -6,6 +6,7 @@
 import {validatePersonaPack} from './persona-library-v1.mjs';
 import {createPersonaCampaign,importCampaignSnapshot,exportCampaignSnapshot} from './persona-campaign-v1.mjs';
 import {createPersonaChatRuntime} from './persona-chat-turn-v1.mjs';
+import {createGuildPersonaClient} from './guild-persona-client-v1.mjs';
 
 const el=(root,name)=>root.querySelector('[data-persona-'+name+']');
 const small=(value,max=400)=>String(value??'').trim().slice(0,max);
@@ -14,14 +15,16 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
  if(!root?.querySelector)throw new TypeError('The existing guide-chat root is required.');
  const button=el(root,'toggle'),panel=el(root,'panel');
  if(!button||!panel)throw new TypeError('Persona chat controls are not mounted in canonical guide chat.');
- let cast=null,campaign=null,session=null,enabled=false,loading=false;
+ let cast=null,campaign=null,session=null,guildRoom=null,enabled=false,loading=false;
+ const guildClient=createGuildPersonaClient();
  const status=message=>{const x=el(root,'status');if(x)x.textContent=small(message,1000);};
  const switchOn=value=>{
    enabled=Boolean(value);button.setAttribute('aria-pressed',String(enabled));
    button.textContent=enabled?'Cast: on':'Cast';
    onModeChange(enabled);
  };
- const stop=()=>{session=null;switchOn(false);};
+ const stop=()=>{session=null;guildRoom=null;switchOn(false);};
+ const guildStatus=message=>{const x=el(root,'guild-status');if(x)x.textContent=small(message,800);};
  async function acceptFile(input,limit,label){
    const file=input?.files?.[0];
    if(!file)throw new TypeError('Choose '+label+' JSON file.');
@@ -29,7 +32,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    return JSON.parse(await file.text());
  }
  function showWillpower(){
-   const current=session?.snapshot()||campaign;
+   const current=guildRoom||session?.snapshot()||campaign;
    const pool=current?.willpower,display=el(root,'willpower'),control=el(root,'control');
    if(display)display.textContent=pool?
      'Shared willpower: '+pool.points+'/'+pool.max+' · +1 per '+pool.renewEvery+' accepted turns':
@@ -59,9 +62,9 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    const control=el(root,'speaker');const selected=control?.value;
    control?.replaceChildren();
    for(const id of campaign?.cast||[]){
-     const c=cast.characters.find(row=>row.id===id);
-     if(!c)continue;
-     const option=document.createElement('option');option.value=id;option.textContent=c.name;control.append(option);
+     const c=cast?.characters?.find(row=>row.id===id);
+     if(!c&&!guildRoom)continue;
+     const option=document.createElement('option');option.value=id;option.textContent=c?.name||id;control.append(option);
    }
    if(campaign?.cast.includes('landry')&&campaign?.cast.includes('delia')){
      const option=document.createElement('option');option.value='landry-delia';
@@ -169,10 +172,54 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      status('Private preview active in Weaveling chat. Responses are fictional and proposed actions remain unexecuted. Export your save before leaving.');
    }catch(error){stop();status(small(error?.message||error,400));}
  });
- el(root,'end').addEventListener('click',()=>{stop();showWillpower();status('Campaign preview off. Normal guide chat resumed; imported data remains only in this tab.');});
+ // This is a real authenticated Guild write, distinct from local model preview.
+ // No source archive, private director prompt or unseen memory is uploaded.
+ el(root,'guild-host').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     if(!cast||!campaign)throw new Error('Create a private scene and choose its cast first.');
+     if(el(root,'guild-consent')?.checked!==true)throw new Error('Confirm sharing the scene description with the selected Guild.');
+     const result=await guildClient.create({pack:cast,cast:campaign.cast,
+       title:campaign.title,stage:campaign.stage,scenario:campaign.scenario,confirmedShare:true});
+     stop();guildRoom=result.room;campaign=result.room;session=null;
+     if(el(root,'guild-room'))el(root,'guild-room').value=guildRoom.id;
+     speakers();switchOn(true);showWillpower();
+     guildStatus('Hosted on '+result.scope.nodeId+' as '+result.scope.userId+'. Room '+guildRoom.id+
+      '. The room is private to authorized seats; assign players before they join.');
+     status('Guild campaign active: model NPCs are NOT automatically run by the server. Player turns use authenticated Guild storage.');
+   }catch(error){guildStatus('Guild hosting failed: '+small(error?.message||error));}
+   finally{if(el(root,'guild-consent'))el(root,'guild-consent').checked=false;loading=false;}
+ });
+ el(root,'guild-join').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     const id=el(root,'guild-room')?.value?.trim();
+     const result=await guildClient.snapshot(id);
+     stop();guildRoom=result.room;campaign=result.room;session=null;
+     speakers();switchOn(true);showWillpower();
+     guildStatus('Joined authenticated room '+guildRoom.id+' on '+result.scope.nodeId+
+       '. Only server-approved members may read and submit turns.');
+     status('Guild shared mode: submit player cues through this Weaveling chat. No model actions are automatically executed.');
+   }catch(error){guildStatus('Guild join failed: '+small(error?.message||error));}
+   finally{loading=false;}
+ });
+ el(root,'guild-refresh').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     const id=guildRoom?.id||el(root,'guild-room')?.value?.trim();
+     const result=await guildClient.snapshot(id);
+     guildRoom=result.room;campaign=result.room;showWillpower();
+     if(guildRoom)guildStatus('Server revision '+guildRoom.revision+' · '+guildRoom.events.length+
+       ' accepted events · shared turn '+guildRoom.turn+'.');
+   }catch(error){guildStatus('Refresh failed: '+small(error?.message||error));}
+   finally{loading=false;}
+ });
+ el(root,'end').addEventListener('click',()=>{stop();showWillpower();
+   guildStatus('Not connected. Shared Guild records remain on their server.');
+   status('Campaign preview off. Normal guide chat resumed; imported data remains only in this tab.');});
  el(root,'export').addEventListener('click',()=>{
    try{
-     const snapshot=session?.snapshot()||campaign;
+     const snapshot=guildRoom||session?.snapshot()||campaign;
      if(!snapshot)throw new Error('No campaign loaded.');
      const data=exportCampaignSnapshot(snapshot);
      const url=URL.createObjectURL(new Blob([data],{type:'application/json'}));
@@ -182,10 +229,19 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    }catch(error){status('Export failed: '+small(error?.message||error));}
  });
  return Object.freeze({
-   active:()=>enabled&&Boolean(session),
+   active:()=>enabled&&Boolean(session||guildRoom),
    respond:async({text,systemId}={})=>{
-     if(!enabled||!session||systemId!=='civweave')throw new Error('Private persona mode is not active in Civweave chat.');
+     if(!enabled||(!session&&!guildRoom)||systemId!=='civweave')throw new Error('Persona campaign is not active in Civweave chat.');
      try{
+       if(guildRoom){
+         const result=await guildClient.dispatch(guildRoom.id,guildRoom.revision,{type:'player-cue',text:small(text,1200)});
+         guildRoom=result.room;campaign=guildRoom;showWillpower();
+         guildStatus('Guild accepted turn '+guildRoom.turn+' at revision '+guildRoom.revision+'.');
+         return {provider:'guild-persona-session',model:'none',
+           response:{answer:'Your player action was recorded in the authenticated Guild campaign (turn '+guildRoom.turn+'). It is not yet an NPC reaction or a confirmed world action. Refresh to see other players’ moves.',
+             choice:{mode:'Play',system:'civweave',nextAction:'Continue playing or refresh the shared session.'}},
+           context:{guide:{system:'civweave'},capability:'guild-persona-campaign'}};
+       }
        const id=el(root,'speaker')?.value;
        status('Playing '+id+' with the selected model; no world actions are authorized.');
        const selectedControl=id==='landry-delia'?el(root,'control')?.value||null:null;
@@ -202,6 +258,6 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
        return result.packet;
      }finally{if(el(root,'consent'))el(root,'consent').checked=false;}
    },
-   dispose:()=>{stop();cast=null;campaign=null;showWillpower();status('Campaign data released from this tab.');}
+   dispose:()=>{stop();cast=null;campaign=null;showWillpower();guildStatus('Disconnected.');status('Campaign data released from this tab.');}
  });
 }
