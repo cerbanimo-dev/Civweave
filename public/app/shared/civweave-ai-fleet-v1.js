@@ -2,7 +2,7 @@
 'use strict';
 // One presentation/catalogue owner. Existing inference, download, Settings,
 // privacy/consent and device-fit contracts remain the execution authorities.
-const VERSION='1.3.1-local-backend-switch-persistence';
+const VERSION='1.3.2-local-backend-switch-and-gguf-uninstall';
 if(globalThis.CivweaveAIFleetV1?.version===VERSION)return;
 const MEMORY_KEY='civweave.ai.fleet.memory-gb.v1';
 const CHOICE_KEY='civweave.ai.fleet.choices.v1';
@@ -200,7 +200,7 @@ const BACKENDS=Object.freeze({
  android:{label:'Android APK backend',detail:'Native Starling bridge · installed wrapper required'}
 });
 const GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install';
-const STYLE_ID='cw-ai-fleet-style-v2';
+const STYLE_ID='cw-ai-fleet-style-v3';
 function currentBackend(){
  // Previous releases saved the raw string, while read() parses JSON.
  // Honor those existing selections without changing any model assignments.
@@ -218,6 +218,7 @@ function style(){
  if(document.getElementById(STYLE_ID))return;
  const element=document.createElement('style');element.id=STYLE_ID;
  element.textContent='#cw-ai-fleet-v1 .cw-fleet-scope-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#cw-ai-fleet-v1 .cw-fleet-scope-nav button{border-radius:10px;text-align:left;border:1px solid #95c9bc7b;background:#192d38;color:#e7f3ea}#cw-ai-fleet-v1 .cw-fleet-scope-nav button[aria-pressed=true]{border:2px solid #b1ead4;background:#305f55}#cw-ai-fleet-v1{display:grid;gap:14px}#cw-ai-fleet-v1 .cw-fleet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}#cw-ai-fleet-v1 .cw-fleet-card{display:grid;gap:8px;border:1px solid #ffffff30;border-radius:14px;padding:12px;background:#0b1b2c}#cw-ai-fleet-v1 .cw-fleet-card h4,#cw-ai-fleet-v1 .cw-fleet-card p{margin:0}#cw-ai-fleet-v1 .cw-fleet-card p,#cw-ai-fleet-v1 .cw-fleet-meta{color:#ccd9e7;font-size:.88rem}#cw-ai-fleet-v1 .cw-fleet-choices{display:flex;gap:7px;flex-wrap:wrap}#cw-ai-fleet-v1 [data-ai-fleet-backend][aria-pressed=true]{border-color:#6ddfbd;background:#193b3a;color:white}#cw-ai-fleet-v1 select{width:100%;min-height:42px}#cw-ai-fleet-v1 button{min-height:44px}#cw-ai-fleet-v1 output{display:block;white-space:pre-wrap}#cw-ai-fleet-v1 .cw-fleet-label{font-weight:650}';
+ element.textContent+='#cw-ai-fleet-v1 [data-ai-fleet-uninstall]{border:1px solid #cc898f;background:#3b242e;color:#ffe6e8}#cw-ai-fleet-v1 [data-ai-fleet-uninstall]:focus-visible{outline:3px solid #ffe6e8;outline-offset:2px}';
  document.head?.append(element);
 }
 function canUse(entry,row){
@@ -260,9 +261,12 @@ function renderBrowserInventory(panel,entries){
  if(!list)return;
  const cards=entries.map(entry=>'<article class="cw-fleet-card"><h4>'+esc(entry.label)+'</h4>'+
    '<p>'+importOption(entry)+'</p><p>Shards: '+entry.sourceNames.length+' · '+(entry.verified?'Stored and verified':'Unavailable: '+esc(entry.error))+'</p>'+
-   (entry.verified?'<div class="cw-fleet-choices"><button type="button" data-ai-fleet-activate="'+esc(entry.importId)+'">'+
-     (active?.importId===entry.importId&&isActive?'Active primary':'Use as primary')+'</button>'+
-     '<button type="button" data-ai-fleet-test="'+esc(entry.importId)+'">Run meaningful-text test</button></div>':'')+'</article>').join('');
+   '<p class="cw-fleet-meta">Install ID: '+esc(entry.importId.slice(-8))+(entry.importedAt?' · '+esc(new Date(entry.importedAt).toLocaleDateString()):'')+'</p>'+
+   '<div class="cw-fleet-choices">'+
+     (entry.verified?'<button type="button" data-ai-fleet-activate="'+esc(entry.importId)+'">'+
+       (active?.importId===entry.importId&&isActive?'Active primary':'Use as primary')+'</button>'+
+       '<button type="button" data-ai-fleet-test="'+esc(entry.importId)+'">Run meaningful-text test</button>':'')+
+     '<button type="button" data-ai-fleet-uninstall="'+esc(entry.importId)+'" aria-label="Uninstall '+esc(entry.label)+' installation '+esc(entry.importId.slice(-8))+'">Uninstall model</button></div></article>').join('');
  const selectors=rows.map(row=>{
    const matches=available.filter(entry=>canUse(entry,row));
    const existing=roles[row.role]?.importId||'';
@@ -388,6 +392,53 @@ async function activateSavedImport(layer,panel,id){
  if(status)status.textContent='Activated '+record.label+'; other verified imports remain available for fleet roles.';
  await refreshInventory(layer,panel,++inventorySequence);
 }
+async function uninstallSavedImport(layer,panel,id){
+ if(activeImport)throw Error('Finish or cancel the model installation before uninstalling.');
+ const gguf=await import(GGUF_MODULE);
+ const entries=await gguf.installedImports({verify:false});
+ const entry=entries.find(item=>item.importId===id);
+ if(!entry)throw Error('This saved GGUF is no longer installed. Refresh the inventory.');
+ const saved=read(BINDING_KEY,{});
+ const assigned=Object.entries(saved.roles||{}).filter(([,row])=>row.importId===id).map(([role])=>ROLES[role]?.label||role);
+ const isPrimary=gguf.current()?.importId===id;
+ const size=(entry.bytes/1e9).toFixed(2);
+ const question='Uninstall '+entry.label+' (installation '+id.slice(-8)+') from Civweave?\n\n'+
+   'This removes '+entry.sourceNames.length+' saved GGUF shard(s), about '+size+' GB, from this browser profile.'+
+   (assigned.length?'\nFleet roles affected: '+assigned.join(', ')+'.':'')+
+   (isPrimary?'\nThis is the active primary model; browser inference will be disabled until another model is selected.':'')+
+   '\n\nYour original Android Downloads file, other imports, and Termux models will not be deleted.';
+ if(typeof globalThis.confirm!=='function')throw Error('A confirmation dialog is required before uninstalling a model.');
+ if(!globalThis.confirm(question))return;
+ const result=await gguf.uninstallImported(id);
+ // Fleet owns role preferences. Prune exact bindings; the inventory may
+ // subsequently choose another compatible, still-verified installed import.
+ const previous=read(BINDING_KEY,{});
+ const remaining=Object.fromEntries(Object.entries(previous.roles||{}).filter(([,row])=>row.importId!==id));
+ saveBindings(remaining,previous.unassigned||[]);
+ let routeNote='';
+ if(result.wasPrimary){
+   const current=globalThis.CivweaveSettingsV320?.readState?.();
+   if(current?.route==='openai-compatible'&&current.model===result.model&&current.endpoint==='http://127.0.0.1:8080/v1'){
+     const form=layer?.querySelector?.('[data-cw-settings-form]');
+     const route=form?.elements?.namedItem?.('route');
+     try{
+       if(!route||typeof form.requestSubmit!=='function')throw Error('Settings form is not available.');
+       route.value='deterministic';
+       route.dispatchEvent(new Event('change',{bubbles:true}));
+       form.requestSubmit(); // Canonical Settings owner saves the disabled route.
+       if(globalThis.CivweaveSettingsV320?.readState?.()?.route!=='deterministic')
+         throw Error('Settings could not confirm the disabled route.');
+       routeNote=' Primary inference was disabled.';
+     }catch(error){routeNote=' WARNING: reopen AI Settings and choose a different route: '+String(error?.message||error);}
+   }
+ }
+ await refreshInventory(layer,panel,++inventorySequence);
+ const status=panel.querySelector('[data-ai-fleet-message]');
+ if(status)status.textContent='Uninstalled '+entry.label+' ('+id.slice(-8)+'). '+
+   (Number.isFinite(result.reclaimedBytes)?'Removed '+(result.reclaimedBytes/1e9).toFixed(2)+' GB of stored shards. ':'')+
+   'Other model imports are preserved.'+routeNote;
+}
+
 async function testSavedImport(panel,id){
  const status=panel.querySelector('[data-ai-fleet-message]');
  const gguf=await import(GGUF_MODULE),entries=await gguf.installedImports({verify:true});
@@ -519,6 +570,14 @@ function render(layer){
      if(el.hasAttribute('data-ai-fleet-rescan')){void refreshInventory(layer,panel,++inventorySequence);return}
      if(el.hasAttribute('data-ai-fleet-import')){
        el.disabled=true;void installChosenGGUF(layer,panel).catch(error=>{const out=panel.querySelector('[data-ai-fleet-import-status]');if(out)out.textContent=String(error?.message||error)}).finally(()=>{if(!activeImport)el.disabled=false});return;
+     }
+     const uninstall=el.dataset.aiFleetUninstall;
+     if(uninstall){
+       el.disabled=true;
+       void uninstallSavedImport(layer,panel,uninstall)
+         .catch(error=>{const msg=panel.querySelector('[data-ai-fleet-message]');if(msg)msg.textContent='Uninstall failed: '+String(error?.message||error)})
+         .finally(()=>{el.disabled=false});
+       return;
      }
      const activate=el.dataset.aiFleetActivate,test=el.dataset.aiFleetTest;
      if(activate||test){

@@ -85,3 +85,27 @@ export async function removeGGUFShards(importId,indexes){
     try{await dir.removeEntry(filename(importId,index))}catch{}
   }
 }
+
+/**
+ * Remove ONLY the origin-private shards named in one saved import manifest.
+ * Unlike import-cancellation cleanup this reports I/O failures: callers must
+ * keep the manifest when removal is incomplete so the user can retry.
+ */
+export async function deleteGGUFShards(importId,indexes){
+  if(!Array.isArray(indexes)||!indexes.length)throw problem('GGUF_UNINSTALL_INDEX','No saved shard indexes were supplied.');
+  const dir=await directory();
+  let removedBytes=0;
+  for(const index of indexes){
+    const name=filename(importId,index);
+    try{
+      const handle=await dir.getFileHandle(name);
+      const file=await handle.getFile();
+      await dir.removeEntry(name);
+      removedBytes+=file.size;
+    }catch(error){
+      if(error?.name==='NotFoundError')continue; // permits retry after partial removal
+      throw problem('GGUF_UNINSTALL_FAILED','Could not remove '+name+': '+String(error?.message||error));
+    }
+  }
+  return removedBytes;
+}
