@@ -19,6 +19,7 @@ on:
       - 'scripts/test-guild-community-proof-v1.mjs'
       - 'scripts/test-guild-tab-access-v1.mjs'
       - 'scripts/test-guild-session-runtime-compat-v1.mjs'
+      - 'docs/contracts/guild-democratic-governance-v1.md'
       - 'public/app/guild-node-community-check-v1.js'
       - 'package.json'
       - '.github/workflows/verify-guild-node-rewards-v1.yml'
