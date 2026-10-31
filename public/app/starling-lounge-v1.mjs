@@ -266,6 +266,7 @@ function fleetIsGuild(){return state.fleetScope==='guild'&&Boolean(state.guild?.
 function setFleetScope(scope){
   if(!['local','guild'].includes(scope)||scope==='guild'&&!state.guild)return;
   state.fleetScope=scope;
+  if(scope==='local'&&['work','operations'].includes(state.view))setView('world');
   if(scope==='local'&&(!SYSTEM_GUIDES[state.selectedAgent]))state.selectedAgent='weaveling';
   if(scope==='guild'&&SYSTEM_GUIDES[state.selectedAgent])state.selectedAgent='kami';
   if(state.root)state.root.dataset.slFleet=scope;
@@ -294,7 +295,7 @@ function renderFleetScopes(){
       const card=el('article','sl-local-role');
       card.append(el('b','',role.label+' · '+(role.purpose||'AI role')));
       para(card,role.installedModelId||role.configuredModelId||'No compatible model selected','sl-role-model');
-      para(card,role.status==='verified-local-import'?'Verified on-device GGUF · not necessarily running':role.status==='configured-not-verified'?'Chosen · installation/runtime not verified':'Not configured','sl-sub');
+      para(card,role.status==='verified-local-import'?'Previously verified GGUF import · recheck in Settings':role.status==='configured-not-verified'?'Chosen · installation/runtime not verified':'Not configured','sl-sub');
       roles.append(card);
     }
   }
@@ -456,7 +457,7 @@ function click(event){
   if(fleet){setFleetScope(fleet);return}
   const persona=event.target.closest('[data-sl-persona]')?.dataset.slPersona;
   const guide=event.target.closest('[data-sl-guide]')?.dataset.slGuide;
-  if(persona&&STARLING_PERSONAS[persona]){state.speaker=persona;state.selectedAgent=persona;renderSpeaker();renderFleetScopes();if(event.target.closest('.sl-persona'))setView('world');return}
+  if(persona&&STARLING_PERSONAS[persona]&&fleetIsGuild()){state.speaker=persona;state.selectedAgent=persona;renderSpeaker();renderFleetScopes();if(event.target.closest('.sl-persona'))setView('world');return}
   if(guide&&SYSTEM_GUIDES[guide]){state.selectedAgent=guide;renderSpeaker();renderFleetScopes();if(event.target.closest('.sl-persona'))setView('world');return}
   const view=event.target.closest('[data-sl-view]')?.dataset.slView;
   if(view){setView(view);return}
@@ -470,17 +471,17 @@ function click(event){
     else{state.fleetMessage='AI Settings is not loaded in this shell. Open Civweave Settings → AI & safety to install or configure models.';renderFleetScopes()}
   }
   if(cmd==='pilot-register')void registerSelectedPilot();
-  if(cmd==='world-observe')observeWorld();
-  if(cmd==='world-move-proposal')prepareMove();
+  if(cmd==='world-observe'&&fleetIsGuild())observeWorld();
+  if(cmd==='world-move-proposal'&&fleetIsGuild())prepareMove();
   if(cmd==='refresh'){if(state.guild){void refresh();void refreshTurns();if(state.hostTransport)void refreshHost();void state.worldHost?.refresh()}state.worldView?.update();renderFleetScopes()}
   if(cmd==='focus-active')focusActivity();
-  if(cmd==='world-provision')void provisionWorld();
-  if(cmd==='world-3d')switchWorldMode('3d');
-  if(cmd==='world-2d')switchWorldMode('2d');
+  if(cmd==='world-provision'&&fleetIsGuild())void provisionWorld();
+  if(cmd==='world-3d'&&fleetIsGuild())switchWorldMode('3d');
+  if(cmd==='world-2d'&&fleetIsGuild())switchWorldMode('2d');
   if(cmd==='focus-chat'){setView('conversation');$('#cw-sl-message')?.focus()}
   if(cmd==='open-planner'){close();globalThis.CivweaveStarlingCollectiveV1?.open?.()}
-  if(cmd==='turn')void runLocalTurn();
-  if(cmd==='round')void runLocalRound();
+  if(cmd==='turn'&&fleetIsGuild())void runLocalTurn();
+  if(cmd==='round'&&fleetIsGuild())void runLocalRound();
   if(cmd==='worker-toggle')void toggleWorker();
   if(cmd==='host-connect')void connectHost();
   if(cmd==='host-submit')void submitHostDraft();
