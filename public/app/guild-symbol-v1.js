@@ -279,7 +279,7 @@ function renderGuildTab(){
       const quota=status?.quota||null,capacity=status?.capacity||null;
       const label=guild.displayName||guild.origin.replace(/^https:\/\//,'');
       const seat=session?(session.seatClass==='guildkeeper'?'Guildkeeper':session.seatClass||'Resident'):'Not signed in';
-      const health=status?.ok===true?'Connected · verified Guild session':status?.error?'Session status unavailable: '+status.error:session?'Signed in · status not refreshed':'Choose Join to request access';
+      const health=status?.ok===true?'Connected · verified Guild session':activeGuildStatus?.error?'Session status unavailable: '+activeGuildStatus.error:session?'Signed in · status not refreshed':'Choose Join to request access';
       const allowance=quota?.includedDailyNeurons!=null?guildNumber(quota.includedDailyNeurons):'—';
       const remaining=quota?.includedRemainingNeurons!=null?guildNumber(quota.includedRemainingNeurons):'—';
       const nodeId=guild.nodeId||session?.nodeId||'Unspecified';
@@ -287,7 +287,7 @@ function renderGuildTab(){
         <p class="cw-guild-help" role="status" aria-live="polite" data-cw-guild-notice>${guildEsc(lastGuildNotice)}</p>
         <div class="cw-guild-statline"><span>Node: <b>${guildEsc(nodeId)}</b></span><span>Remaining included neurons: <b>${remaining}</b></span><span>Daily member allowance: <b>${allowance}</b></span>${capacity?.communitySeatsRemaining!=null?'<span>Open Citizen seats: <b>'+guildNumber(capacity.communitySeatsRemaining)+'</b></span>':''}</div>
         <div class="cw-guild-actions">
-          ${session?'<a class="cw-guild-primary" href="/app/civweave-guild-quest-v1.html">Guild Quests</a>':''}
+          ${session?'<a class="cw-guild-primary" href="/app/civweave-guild-quest-v1.html">Guild Quests</a><button type="button" data-guild-ui-action="chat">Guild chat</button>':''}
           <button type="button" data-guild-ui-action="invite" data-cw-guild-invite>Copy invitation</button>
           ${session?'<button type="button" data-guild-ui-action="verify">Verify local server</button>':''}
           ${!session?'<button type="button" class="cw-guild-primary" data-guild-ui-action="'+(api?.hasCredential?.(guild.origin,guild.nodeId)?'relogin':'join')+'">'+(api?.hasCredential?.(guild.origin,guild.nodeId)?'Log back in':'Join as a Hero')+'</button>':''}
@@ -389,6 +389,14 @@ async function guildAction(action,control){
       const status=await finder.inspectOrigin(guild.origin,{nodeId:guild.nodeId});
       if(!status?.ok)throw new Error('Selected Guild could not be reached. Try again before joining.');
       guildFeedback(action==='join'?'Review live seats and choose Join & log in below.':'Citizen and Patron choices are managed by the Guild admission and membership services below.');
+    }else if(action==='chat'){
+      globalThis.CivweaveHumanChatGuildContextV1?.sync?.();
+      if(!globalThis.CivweaveHumanChatStandaloneV2?.open)
+        await globalThis.CivweaveHumanChatGuildContextV1?.bootStandalone?.();
+      const chat=globalThis.CivweaveHumanChatStandaloneV2;
+      if(!chat?.open||!session)throw new Error('Guild chat is unavailable without a signed-in Guild.');
+      closeNearbyGuilds('open-guild-chat');
+      await chat.open('guild:'+session.nodeId);
     }else if(action==='verify'){
       closeNearbyGuilds('verify-physical-node');
       if(!globalThis.CivweaveGuildNodeCommunityCheckV1?.open)throw new Error('Physical node verification is not available.');
