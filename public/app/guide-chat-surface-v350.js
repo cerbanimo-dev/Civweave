@@ -12,7 +12,7 @@ try{
   }
 }catch{}
 
-const VERSION='1.0.200-interwoven-quest-map';
+const VERSION='1.0.201-persona-campaign-opt-in';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
