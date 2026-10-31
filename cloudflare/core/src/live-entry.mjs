@@ -1,3 +1,4 @@
+import {handleGuildPeerDirectoryRoute} from './guild-peer-reports-v1.mjs';
 import core, { CORE_SCHEMA, launchTopology } from './index.mjs';
 import {
   CloudflareMoneyEdge,
@@ -171,6 +172,8 @@ async function liveMoneyRoute(request, env) {
 
 export default {
   async fetch(request, env, ctx) {
+    const guildPeerReport = await handleGuildPeerDirectoryRoute(request, env);
+    if (guildPeerReport) return guildPeerReport;
     const prepaid = await handleHeadquartersPrepaidRequest(request, env, env => new PublicHostCloudflareMoneyEdge(env));
     if (prepaid) return prepaid;
     const headquartersFunding = await handleHeadquartersFundingRequest(request, env, env => new PublicHostCloudflareMoneyEdge(env));
