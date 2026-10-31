@@ -18,7 +18,7 @@ on:
       - 'scripts/test-guildkeeper-neuron-flow-v1.mjs'
       - 'scripts/test-guild-community-proof-v1.mjs'
       - 'scripts/test-guild-tab-access-v1.mjs'
-      - 'scripts/verify-guild-neuron-strip-v1.mjs'
+      - 'scripts/test-guild-session-runtime-compat-v1.mjs'
       - 'public/app/guild-node-community-check-v1.js'
       - 'package.json'
       - '.github/workflows/verify-guild-node-rewards-v1.yml'
@@ -38,7 +38,7 @@ on:
       - 'scripts/test-guild-capacity-progression-v1.mjs'
       - 'scripts/test-guild-community-proof-v1.mjs'
       - 'scripts/test-guild-tab-access-v1.mjs'
-      - 'scripts/verify-guild-neuron-strip-v1.mjs'
+      - 'scripts/test-guild-session-runtime-compat-v1.mjs'
       - 'public/app/guild-node-community-check-v1.js'
       - '.github/workflows/verify-guild-node-rewards-v1.yml'
 jobs:
@@ -67,7 +67,5 @@ jobs:
           node --check public/app/starling-integration-v1.js
           node --check public/app/mobile-guild-create-v1.mjs
           node --check scripts/guild-physical-node-agent-v1.mjs
-      - name: Guild session and neuron-strip loader parity
-        run: node scripts/verify-guild-neuron-strip-v1.mjs
       - name: Guild capacity progression and onboarding contract
-        run: node --test scripts/test-guild-capacity-progression-v1.mjs scripts/test-guild-community-proof-v1.mjs scripts/test-guildkeeper-neuron-flow-v1.mjs scripts/test-guild-tab-access-v1.mjs
+        run: node --test scripts/test-guild-capacity-progression-v1.mjs scripts/test-guild-community-proof-v1.mjs scripts/test-guildkeeper-neuron-flow-v1.mjs scripts/test-guild-tab-access-v1.mjs scripts/test-guild-session-runtime-compat-v1.mjs
