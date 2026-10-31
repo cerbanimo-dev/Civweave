@@ -55,6 +55,7 @@ async function refresh(){
   if(busy)return;busy=true;
   try{
     packet=await request();
+    try{const member=session();if(member)await globalThis.CivweaveHostNodeSessionV1?.status?.(member.nodeId)}catch{}
     try{const nearby=await request('GET',null,'/nearby');packet.nearbyReports=nearby.reports||[]}catch{packet.nearbyReports=[]}
     render();say('Council records synchronized.');
   }catch(error){say('Guild Council unavailable: '+clean(error.message))}
