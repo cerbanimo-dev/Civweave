@@ -79,12 +79,14 @@ test('Guild tab uses existing discovery and membership owners, starts collapsed 
   assert.match(view,/data-guild-ui-action="discover"/);
   assert.match(view,/data-guild-ui-action="signout"/);
   assert.match(view,/data-guild-ui-action="leave"/);
-  assert.match(view,/data-guild-ui-action="relogin"/);
-  assert.match(view,/data-guild-ui-action="inspect"/);
+  assert.match(view,/action===\x27relogin\x27/);
+  assert.match(view,/data-cw-guild-manual/);
   assert.match(view,/data-cw-guild-manage/);
   assert.match(view,/CivweaveHostNodeSessionV1/);
   assert.match(view,/CivweaveHostNodeInstallerLobbyV1/);
   assert.match(view,/data-cw-guild-invite/);
+  assert.match(view,/data-guild-ui-action="founder-manage"/);
+  assert.match(view,/CivweaveHumanChatStandaloneV2/);
   assert.match(finder,/inspectOrigin/);
   assert.match(edge,/leaveResident\(/);
   assert.match(edge,/request\.method==='DELETE'/);
