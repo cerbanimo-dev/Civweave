@@ -4,7 +4,7 @@
  * This browser-only author preview cannot establish multiplayer identities.
  */
 import {validatePersonaPack} from './persona-library-v1.mjs';
-import {importCampaignSnapshot,exportCampaignSnapshot} from './persona-campaign-v1.mjs';
+import {createPersonaCampaign,importCampaignSnapshot,exportCampaignSnapshot} from './persona-campaign-v1.mjs';
 import {createPersonaChatRuntime} from './persona-chat-turn-v1.mjs';
 
 const el=(root,name)=>root.querySelector('[data-persona-'+name+']');
@@ -27,6 +27,18 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    if(!file)throw new TypeError('Choose '+label+' JSON file.');
    if(file.size>limit)throw new RangeError(label+' exceeds safe size.');
    return JSON.parse(await file.text());
+ }
+ function castSelector(){
+   const control=el(root,'cast-list');const previously=new Set(
+     Array.from(control?.selectedOptions||[]).map(x=>x.value));
+   control?.replaceChildren();
+   for(const row of cast?.characters||[]){
+     const opt=document.createElement('option');
+     opt.value=row.id;opt.textContent=row.name;
+     opt.selected=previously.has(row.id)||(previously.size===0&&['landry','delia'].includes(row.id));
+     control?.append(opt);
+   }
+   if(control&&!control.selectedOptions.length&&control.options.length)control.options[0].selected=true;
  }
  function speakers(){
    const control=el(root,'speaker');const selected=control?.value;
@@ -76,6 +88,36 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    return reply;
  }
  button.addEventListener('click',()=>{panel.hidden=!panel.hidden;});
+ el(root,'inspect').addEventListener('click',async()=>{
+   if(loading)return;
+   loading=true;
+   try{
+     const p=validatePersonaPack(await acceptFile(el(root,'pack'),1200000,'persona manifest'));
+     stop();cast=p;campaign=null;castSelector();
+     status('Cast loaded: '+p.characters.length+' identities. Choose a scene, story stage and cast, then create a private what-if campaign.');
+   }catch(error){status('Cast import rejected: '+small(error?.message||error,400));}
+   finally{loading=false;}
+ });
+ el(root,'new').addEventListener('click',async()=>{
+   if(loading)return;
+   loading=true;
+   try{
+     const p=cast||validatePersonaPack(await acceptFile(el(root,'pack'),1200000,'persona manifest'));
+     const selected=Array.from(el(root,'cast-list')?.selectedOptions||[]).map(o=>o.value);
+     if(!selected.length)throw new TypeError('Read the cast and select at least one character.');
+     const stage=Number(el(root,'stage')?.value);
+     if(!Number.isInteger(stage)||stage<0||stage>99999)throw new TypeError('Story stage must be 0–99999.');
+     const scenario=small(el(root,'scenario')?.value,8000);
+     if(!scenario)throw new TypeError('Describe the new scenario before starting.');
+     const sessionId=crypto.randomUUID();
+     const next=createPersonaCampaign({pack:p,id:'local:'+sessionId,
+       title:'Private what-if rehearsal',ownerId:'local:author',
+       branchId:'what-if:'+sessionId,stage,scenario,cast:selected});
+     stop();cast=p;campaign=next;speakers();
+     status('New private '+next.branchId+' created with '+selected.length+' characters. Activate, then use the existing Weaveling composer.');
+   }catch(error){status('New campaign rejected: '+small(error?.message||error,400));}
+   finally{loading=false;}
+ });
  el(root,'speaker').addEventListener('change',()=>{
    if(el(root,'control'))el(root,'control').hidden=el(root,'speaker').value!=='landry-delia';
  });
@@ -87,7 +129,11 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      // previous guide's memory or a private browser storage key.
      const p=validatePersonaPack(await acceptFile(el(root,'pack'),1200000,'persona manifest'));
      const s=importCampaignSnapshot(JSON.stringify(await acceptFile(el(root,'save'),200000,'campaign save')),{pack:p});
-     cast=p;campaign=s;speakers();
+     cast=p;campaign=s;castSelector();
+     for(const opt of el(root,'cast-list')?.options||[])opt.selected=s.cast.includes(opt.value);
+     if(el(root,'stage'))el(root,'stage').value=String(s.stage);
+     if(el(root,'scenario'))el(root,'scenario').value=s.scenario;
+     speakers();
      status('Private '+s.branchId+' loaded for '+s.cast.length+' characters. Use Activate to play; no model requests yet.');
    }catch(error){cast=null;campaign=null;status('Import rejected: '+small(error?.message||error,400));}
    finally{loading=false;}
