@@ -172,7 +172,7 @@ async function connectInstalledGGUF(layer,panel,sequence){
    const binding=roles[row.role];
    if(binding){
     if(label)label.textContent=binding.label+' · '+binding.quantization;
-    if(status)status.textContent=(active?'Connected':'Installed, not active')+' · '+binding.quantization+
+    if(status)status.textContent=(active?'Linked · model load pending first use':'Installed · fleet not active')+' · '+binding.quantization+
       ' · '+Math.round(binding.bytes/1e6)+' MB';
     if(button)button.textContent='Configure role';
    }else{
