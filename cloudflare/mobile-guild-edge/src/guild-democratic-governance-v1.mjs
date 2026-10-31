@@ -1,6 +1,6 @@
 // Canonical democratic member action policy. No UI or owner key can override it.
 export const GUILD_GOVERNANCE_SCHEMA='civweave.guild-governance.v1';
-export const GUILD_GOVERNANCE_ACTIONS=Object.freeze(['transfer-role','remove','ban','report']);
+export const GUILD_GOVERNANCE_ACTIONS=Object.freeze(['transfer-role','remove','ban','lift-ban','report']);
 export const GUILD_CONTRIBUTION_WINDOW_MS=30*86400000;
 export const GUILD_BALLOT_WINDOW_MS=7*86400000;
 export const GUILD_REPORT_RADIUS_KM=25;
