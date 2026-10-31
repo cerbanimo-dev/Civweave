@@ -117,10 +117,12 @@ export async function settleHeadquartersFundingCheckout(edge, session) {
   const fee = Number(balance.fee), amount = Number(row.gross_cents);
   if (!Number.isSafeInteger(fee) || fee < 0 || fee > amount) throw error('Stripe processor fee is invalid.', 409);
   const net = amount - fee;
+  const refunded = Math.min(amount, Math.max(0, Number(charge.amount_refunded || 0)));
+  const disputed = charge.disputed === true ? amount : 0;
   const updated = new Date().toISOString();
   const result = await edge.db.prepare(
-    "UPDATE headquarters_starling_contributions SET stripe_session_id=?1,stripe_payment_intent_id=?2,stripe_charge_id=?3,processor_fee_cents=?4,backing_cents=?5,status='settled',settled_at=?6,updated_at=?6 WHERE contribution_id=?7 AND settled_at IS NULL"
-  ).bind(session.id,pi.id,charge.id,fee,net,updated,id).run();
+    "UPDATE headquarters_starling_contributions SET stripe_session_id=?1,stripe_payment_intent_id=?2,stripe_charge_id=?3,processor_fee_cents=?4,backing_cents=?5,refunded_gross_cents=?6,disputed_gross_cents=?7,status='settled',settled_at=?8,updated_at=?8 WHERE contribution_id=?9 AND settled_at IS NULL"
+  ).bind(session.id,pi.id,charge.id,fee,net,refunded,disputed,updated,id).run();
   return { matched: true, applied: changed(result) === 1, contributionId: id, backingCents: net };
 }
 export async function handleHeadquartersFundingPaymentEvent(edge, event) {
@@ -171,7 +173,11 @@ export async function handleHeadquartersFundingRequest(request, env, createEdge)
     const actor = clean(request.headers.get('cf-connecting-ip'),100);
     const permitted = await env.HQ_FUNDING_RATE_LIMITER.limit({key:'hq-fund:'+actor});
     if (!permitted?.success) return json({ error: 'Too many checkout attempts.' },429);
-    const input = await request.json().catch(()=>({}));
+    if (Number(request.headers.get('content-length') || 0) > 2048) return json({ error: 'Checkout request is too large.' }, 413);
+    const raw = await request.text();
+    if (raw.length > 2048) return json({ error: 'Checkout request is too large.' }, 413);
+    let input;
+    try { input = JSON.parse(raw); } catch { return json({ error: 'Invalid checkout request.' }, 400); }
     return json({ checkout: await createHeadquartersFundingCheckout(edge,input,request.headers.get('origin')) },201);
   } catch (cause) {
     return json({ error: String(cause?.message||'Checkout is unavailable.') }, Number.isSafeInteger(cause?.status)?cause.status:503);
