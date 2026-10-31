@@ -1,0 +1,41 @@
+name: Verify chat visual expressions
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/chat-visual-expressions-v1.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/guide-capability-passover-v1.js'
+      - 'public/app/assistant-runtime-v141.js'
+      - 'public/app/local-provider-authority-v1.js'
+      - 'public/app/smollm2-small-model-v137.js'
+      - 'public/app/local-ai/native-server-guide-fastpath-v1.js'
+      - 'scripts/verify-chat-visual-expressions-v1.mjs'
+      - '.github/workflows/verify-chat-visual-expressions-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/chat-visual-expressions-v1.js'
+      - 'scripts/verify-chat-visual-expressions-v1.mjs'
+  workflow_dispatch:
+
+jobs:
+  visual-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/app/chat-visual-expressions-v1.js
+          node --check public/app/guide-chat-surface-v350.js
+          node --check public/app/guide-capability-passover-v1.js
+          node --check public/app/assistant-runtime-v141.js
+          node --check public/app/local-provider-authority-v1.js
+          node --check public/app/smollm2-small-model-v137.js
+          node --check public/app/local-ai/native-server-guide-fastpath-v1.js
+      - name: Verify visual tool tiers and safe interactions
+        run: node scripts/verify-chat-visual-expressions-v1.mjs
