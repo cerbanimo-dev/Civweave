@@ -419,6 +419,11 @@ async function personaRun(phase){
    throw new Error('Choose a numbered story stage, a scenario, and 1–12 participating characters.');
   if(phase==='prepare'){
    personaStatus('Directing '+participants.length+' character(s) separately with the selected 4B model…');
+   if(!personaScene||personaScene.stage!==stage||personaScene.scenario!==scenario||
+      JSON.stringify(personaScene.participants)!==JSON.stringify(participants)){
+     personaWillpower={points:2,max:2,renewEvery:4,lastRenewedTurn:0};
+     showPersonaWillpower();
+   }
    personaScene=await prepareDirectedScene({pack:personaCast,stage,scenario,participants,
     goals:['Respect canonical facts and personal knowledge; improvise without silently rewriting historical events.'],
     previousScene:personaScene,invokeModel:runPersonaSelectedModel});
@@ -431,9 +436,10 @@ async function personaRun(phase){
     JSON.stringify(personaScene.participants)!==JSON.stringify(participants)||
     needsDirectorRefresh(personaScene))throw new Error('Scenario or cast changed, or instructions expired. Prepare fresh 4B direction.');
    const id=$('persona-speaker').value;
-   if(!participants.includes(id))throw new Error('Select an active participant to perform.');
-   personaStatus('Invoking 0.8B improv for '+id+'…');
    const split=$('persona-split-mode').checked;
+   if(!split&&!participants.includes(id))throw new Error('Select an active participant to perform.');
+   personaStatus(split?'Invoking two 2B voices and an optional 0.8B moderator…':
+     'Invoking 0.8B improv for '+id+'…');
    if(split&&(!participants.includes('landry')||!participants.includes('delia')))
     throw new Error('Split-mind rehearsal requires Landry and Delia in the selected cast.');
    const directChoice=$('persona-direct-control').value;
