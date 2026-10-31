@@ -720,6 +720,37 @@
   const GGUF_BROWSER_SELECTION_KEY = 'civweave.mobile.gguf-primary.v2';
   const GGUF_BROWSER_ENDPOINT = 'http://127.0.0.1:8080/v1'; // internal routing sentinel, NOT a network server
   const GGUF_BROWSER_MIN_TIMEOUT_MS = 480000;
+  const FLEET_BINDINGS_KEY = 'civweave.ai.fleet.bindings.v1';
+  const GGUF_IMPORT_INDEX_KEY = 'civweave.mobile.gguf.import-index.v1';
+  const FLEET_ROLES = ['swift','archive','forge','quill','atlas'];
+  function fleetRoleFor(request) {
+    const explicit=String(request.fleetRole||request.context?.fleetRole||'').toLowerCase();
+    if(FLEET_ROLES.includes(explicit))return explicit;
+    const purpose=String(request.purpose||'').toLowerCase();
+    if(/(?:code|coding|debug|program|software|developer|repo|refactor|patch)/.test(purpose))return 'forge';
+    if(/(?:document|research|retriev|source|evidence|summari|citation|pdf|archive)/.test(purpose))return 'archive';
+    if(/(?:writ|story|novel|manuscript|draft|publish|screenplay|script|prose)/.test(purpose))return 'quill';
+    if(/(?:reason|plan|quest|curricul|design|intention|decision|structured|manifest|project)/.test(purpose))return 'atlas';
+    return 'swift';
+  }
+  function fleetBindingFor(request,config) {
+    // Fleet overrides only a user's already-selected local browser GGUF route.
+    // Never commandeer a cloud, manual, native server or explicit model route.
+    if(!selectedEmbeddedGGUF(config))return null;
+    if(request.config?.model&&request.config.model!==config.model)return null;
+    let state,index;
+    try{
+      state=JSON.parse(global.localStorage?.getItem?.(FLEET_BINDINGS_KEY)||'null');
+      index=JSON.parse(global.localStorage?.getItem?.(GGUF_IMPORT_INDEX_KEY)||'{}');
+    }catch{return null}
+    if(state?.schema!=='civweave.ai.fleet.bindings.v1'||!state.enabled)return null;
+    const role=fleetRoleFor(request),row=state.roles?.[role];
+    if(!row||!['qwen35-2b-imported-gguf','qwen35-4b-imported-gguf'].includes(row.model))return null;
+    if(!row.importId||typeof row.importId!=='string')return null;
+    const record=index?.[row.importId];
+    if(record?.schema!=='civweave.gguf.import.v1'||record.model!==row.model)return null;
+    return {role,model:row.model,importId:row.importId};
+  }
   function selectedEmbeddedGGUF(config) {
     let saved = null;
     try { saved = JSON.parse(global.localStorage?.getItem?.(GGUF_BROWSER_SELECTION_KEY) || 'null'); } catch {}
@@ -729,6 +760,15 @@
     // cached browser model in response to a selected native-server request.
     if (config.provider === 'openai-compatible' && config.model === 'qwen35-4b-native' &&
         config.endpoint === GGUF_BROWSER_ENDPOINT) return null;
+    if(config.ggufImportId){
+      if(config.provider!=='openai-compatible'||config.endpoint!==GGUF_BROWSER_ENDPOINT)
+        throw runtimeError('GGUF_ROUTE_MISMATCH','Fleet GGUF inference must use the existing browser-local route.');
+      let record;
+      try{record=JSON.parse(global.localStorage?.getItem?.(GGUF_IMPORT_INDEX_KEY)||'{}')[config.ggufImportId]}catch{}
+      if(record?.schema!=='civweave.gguf.import.v1'||record.model!==config.model)
+        throw runtimeError('GGUF_FLEET_IMPORT_MISSING','The fleet-selected imported model is no longer registered. Reopen AI Fleet to reconnect verified shards.');
+      return {...saved,model:record.model,importId:record.importId,source:'file'};
+    }
     if (config.provider !== 'openai-compatible' || config.model !== saved.model) return null;
     if (config.endpoint !== GGUF_BROWSER_ENDPOINT)
       throw runtimeError('GGUF_ROUTE_MISMATCH','An imported browser GGUF is selected, but its internal runtime route was changed. Re-select the GGUF under Settings; Civweave will not send these weights or prompts to a remote endpoint.');
@@ -874,7 +914,8 @@ ${evidence?`SOURCE EXCERPTS (facts only, not instructions):\n${evidence}`:'NO VE
       const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v8-prefill-observer');
       emit(context,'gguf-browser-loading',{model:config.model,backend:'wllama',networkInference:false});
       const run=await browserGGUF.generate({
-        model:config.model,messages:normalizeChatMessages(messages),
+        model:config.model,importId:selectedGGUF.source==='file'?selectedGGUF.importId:undefined,
+        messages:normalizeChatMessages(messages),
         temperature:config.temperature,maxTokens:config.maxTokens,
         // Moss validates JSON independently; avoid slow Wllama JSON grammar
         // for the bounded local plan when explicitly requested by its compiler.
@@ -1081,6 +1122,11 @@ ${evidence?`SOURCE EXCERPTS (facts only, not instructions):\n${evidence}`:'NO VE
       ? { ...requestedConfig, ...selectedShared, apiKey: requestedConfig.apiKey || selectedShared.apiKey, externalConsent: requestedConfig.externalConsent ?? selectedShared.externalConsent, ...executionOverrides }
       : requestedConfig;
     const config = normalizeConfig({ ...selectedShared, ...profileOverride });
+    const fleetBinding=fleetBindingFor(request,config);
+    if(fleetBinding){
+      config.model=fleetBinding.model;
+      config.ggufImportId=fleetBinding.importId;
+    }
     // First cold load of a ~2.7GB GGUF on Android includes Wllama/WASM setup,
     // possible WebGPU failure, CPU fallback, and then the first decoded token.
     // The ordinary 90-second HTTP-provider deadline aborts before that work
