@@ -10,7 +10,7 @@
  * accepted or retained by this service. Only a bounded cast roster/scene and
  * player-visible campaign ledger may be uploaded on deliberate user action.
  */
-import {createPersonaCampaign,exportCampaignSnapshot} from '../../../public/app/shared/persona-campaign-v1.mjs';
+import {createPersonaCampaign,applyCampaignEvent,exportCampaignSnapshot} from '../../../public/app/shared/persona-campaign-v1.mjs';
 import {createPersonaMultiplayerGateway} from '../../../public/app/shared/persona-multiplayer-gateway-v1.mjs';
 import {stageNpcDraft,pendingNpcDrafts,approveNpcDraft,guildPersonaWorldSnapshot} from './guild-persona-runtime-v1.mjs';
 
@@ -46,7 +46,7 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
   if(typeof storage?.transaction!=='function')fail('Guild transactional storage is required.',503);
   const nodeId=text(options.nodeId,96);
   const actor=memberActor(member,nodeId);
-  if(!['create','snapshot','dispatch','draft','approve'].includes(action))fail('Unsupported private campaign action.',405);
+  if(!['create','snapshot','dispatch','draft','approve','approve-both'].includes(action))fail('Unsupported private campaign action.',405);
   if(!input||typeof input!=='object'||Array.isArray(input))fail('Campaign JSON object required.');
   const id=text(input.campaignId,96);
   if(action!=='create'&&!bounded(id))fail('Campaign ID required.');
@@ -73,18 +73,56 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
     }
     const room=await tx.get(roomKey);
     if(!room)fail('Private campaign not found.',404);
-    if(action==='draft'||action==='approve'){
-      const result=action==='draft'?
-        await stageNpcDraft(tx,{nodeId,room,actor,input}):
-        await approveNpcDraft(tx,{nodeId,room,actor,input});
-      if(action==='approve')await tx.put(roomKey,result.room);
-      return {ok:true,schema:GUILD_PERSONA_SCHEMA,
-        room:action==='approve'?result.room:room,
-        ...(action==='draft'?{draft:result.draft}:{
-          worldReceiptId:result.worldReceiptId,
-          world:result.world,
-          speech:result.speech
-        }),serverAuthoritative:true};
+    if(['draft','approve','approve-both'].includes(action)){
+      if(action==='draft'){
+        const result=await stageNpcDraft(tx,{nodeId,room,actor,input});
+        return {ok:true,schema:GUILD_PERSONA_SCHEMA,room,draft:result.draft,serverAuthoritative:true};
+      }
+      if(action==='approve'){
+        const result=await approveNpcDraft(tx,{nodeId,room,actor,input});
+        await tx.put(roomKey,result.room);
+        return {ok:true,schema:GUILD_PERSONA_SCHEMA,...result,serverAuthoritative:true};
+      }
+      // Simultaneous direct speech: both verified human-reviewed drafts must
+      // exist, be different voices, and have TWO shared willpower points.
+      // All six-plus ledger events, both Worldweaver acknowledgments and
+      // both draft resolutions commit in one DO storage.transaction.
+      if(actor.principalId!==room.ownerId||actor.kind!=='human')
+        fail('Only the Guild room owner can approve simultaneous overrides.',403);
+      if(room.revision!==input.expectedRevision)fail('Stale campaign revision.',409);
+      const ids=input.draftIds;
+      if(!room.cast.includes('landry')||!room.cast.includes('delia')||
+        !Array.isArray(ids)||ids.length!==2||new Set(ids).size!==2)
+        fail('Two distinct Landry and Delia speech drafts are required.',400);
+      const drafts=await Promise.all(ids.map(draftId=>
+        tx.get('guild-persona:draft:'+nodeId+':'+room.id+':'+draftId)));
+      if(drafts.some(d=>!d||d.status==='approved')||
+        new Set(drafts.map(d=>d.characterId)).size!==2||
+        !drafts.some(d=>d.characterId==='landry')||
+        !drafts.some(d=>d.characterId==='delia'))
+        fail('Both unapproved, distinct internal voices must be present.',409);
+      if(room.willpower.points<2)fail('Insufficient shared willpower for simultaneous overrides.',409);
+      const owner={kind:'human',principalId:room.ownerId};
+      let current=room;
+      // Keep narrative order deterministic regardless of selection order.
+      const ordered=['landry','delia'].map(id=>drafts.find(d=>d.characterId===id));
+      for(const d of ordered){
+        current=applyCampaignEvent(current,{type:'willpower-spend',characterId:d.characterId,cost:1},
+          {actor:owner,authorize:()=>true,expectedRevision:current.revision});
+      }
+      const outcomes=[];
+      for(const d of ordered){
+        const result=await approveNpcDraft(tx,{nodeId,room:current,actor,
+          input:{draftId:d.id,expectedRevision:current.revision}});
+        current=result.room;outcomes.push(result);
+      }
+      await tx.put(roomKey,current);
+      return {ok:true,schema:GUILD_PERSONA_SCHEMA,room:current,
+        world:outcomes.at(-1).world,
+        worldReceiptIds:outcomes.map(x=>x.worldReceiptId),
+        speech:ordered.map((x,i)=>
+          (x.characterId==='landry'?'Landry':'Delia')+': '+outcomes[i].speech).join('\n'),
+        bothSpoke:true,serverAuthoritative:true};
     }
     const gateway=createPersonaMultiplayerGateway({
       authenticate:async()=>actor,
