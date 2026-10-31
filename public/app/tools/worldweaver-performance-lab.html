@@ -88,6 +88,18 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <p class="compact">Import the <strong>persona-pack.json</strong> manifest extracted from a rights-cleared cast archive. Author-only files stay in this page until you explicitly generate with the selected AI. No automatic publication or world action execution. This is a rehearsal cue inside Worldweaver, not a second chat system.</p>
 <label for="persona-manifest-file">Local persona manifest (.json)</label><input id="persona-manifest-file" type="file" accept="application/json,.json">
 <p id="persona-import-status" class="compact">No cast loaded. Importing does not download any models.</p>
+<div class="project" aria-label="Private campaign session manager">
+ <h3>Private campaign continuity</h3>
+ <p class="compact">An explicit what-if branch records player cues, actor previews and limited willpower. Export a JSON save to keep it; no automatic storage, sharing, model download, or multiplayer sync. Reload the cast manifest first when restoring.</p>
+ <div class="controls">
+  <button id="persona-new-campaign" type="button">Start a new what-if campaign</button>
+  <button id="persona-save-campaign" type="button">Export private campaign save</button>
+ </div>
+ <label for="persona-session-file">Restore a saved campaign (.json; untrusted local preview only)</label>
+ <input id="persona-session-file" type="file" accept="application/json,.json">
+ <p id="persona-campaign-status" class="compact">No campaign started. Prepare a scene to create one.</p>
+ <pre id="persona-campaign-timeline" aria-label="Private campaign event history">No turns recorded.</pre>
+</div>
 <label for="persona-scenario">Scenario and intended beats</label><textarea id="persona-scenario" rows="3" maxlength="8000" placeholder="Setting, goals, what the players may change, and what should be avoided"></textarea>
 <label for="persona-stage">Story stage (integer from the manifest)</label><input id="persona-stage" type="number" min="0" max="99999" value="11">
 <label for="persona-cast">Scene participants (multiple selection)</label><select id="persona-cast" multiple size="5" aria-describedby="persona-cast-help"></select>
