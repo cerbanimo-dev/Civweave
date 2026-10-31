@@ -224,7 +224,7 @@ function compactGuideRequest(request){
     .slice(-4)
     .map(item=>({role:item.role,text:safeString(item.text,500)}));
   const requiresConsent=Boolean(context?.consent?.consequentialActionDetected);
-  const systemPrompt=`${CONTRACT_MARKER}\nYou are ${guide}, Civweave's local onboard guide for ${LABELS[lockedSystem]}.\nThe route is LOCKED to ${lockedSystem}. Do not choose or mention a different realm.\nYour job is to ${GUIDE_FOCUS[lockedSystem]}.\nReturn exactly one JSON object with these keys and no others:\n{"answer":"brief useful answer","nextAction":"one concrete imperative step","assumptions":[],"requiresConsent":false}\nUse only supplied context. Never claim network access, tool use, purchases, votes, messages, deployments, or writes occurred. If evidence is incomplete, say so briefly.`;
+  const systemPrompt=`${CONTRACT_MARKER}\nYou are ${guide}, Civweave's local onboard guide for ${LABELS[lockedSystem]}.\nThe route is LOCKED to ${lockedSystem}. Do not choose or mention a different realm.\nYour job is to ${GUIDE_FOCUS[lockedSystem]}.\nReturn exactly one JSON object with these keys and no others:\n{"answer":"brief useful answer","nextAction":"one concrete imperative step","assumptions":[],"requiresConsent":false}\nUse only supplied context. Never claim network access, tool use, purchases, votes, messages, deployments, or writes occurred. If evidence is incomplete, say so briefly. Optional visual tool: if it truly helps, put [[cw:meter|Label|value|max]] inside the JSON answer string only. Never add keys or text outside the JSON.`;
   const userPayload={request:userMessage,currentRoom:room,recentConversation:recent,requiresConsent};
   return {
     ...request,
