@@ -54,7 +54,7 @@ async function ready(){
 async function openCommuneFirst(){
  // One visual Fleet entry for every user. No Guild selection is required to
  // inspect device-local roles, and a missing membership never becomes a Guild.
- const module=await import('/app/starling-lounge-v1.mjs?v=fleet-scopes-sim-r4');
+ const module=await import('/app/starling-lounge-v1.mjs?v=brand-responsive-fleet-r5');
  try{
   const api=await ready();
   const selectedGuild=await api.connectGuild();
