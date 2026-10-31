@@ -286,7 +286,7 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
   async joinResident({requestedNodeId,userId,credentialHash,origin}={}){
     this.ensureResidentTables();
     let nodeId=this.resolveResidentNode(requestedNodeId);if(!nodeId)return{ok:false,status:404,error:'Guild starter node not found.'};
-    if(isBanned(this.sql,userId))return{ok:false,status:403,error:'This Guild has an active community-approved temporary ban for this resident.'};
+    if(isBanned(this.sql,userId,{credentialHash}))return{ok:false,status:403,error:'This Guild has an active community-approved temporary ban for this resident.'};
     const existingAny=this.memberByUser(userId);let idempotent=false;
     if(existingAny){if(existingAny.credential_hash!==credentialHash)return{ok:false,status:403,error:'This Guild login belongs to a different device credential.'};nodeId=existingAny.node_id;idempotent=true}
     else{
