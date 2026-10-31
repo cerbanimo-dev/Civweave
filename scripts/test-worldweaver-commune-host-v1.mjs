@@ -54,6 +54,15 @@ test('Guild creator provisions one signed, canonical Worldweaver manifest after 
   const projection=projectWorld2D(host.getSnapshot(),{worldRef:host.worldRef(),layout:host.getLayout()});
   assert.ok(projection.nodes.some(node=>node.type==='building'));
   assert.equal(host.getLayout(),host.getLayout(),'geometry stays stable across perspective redraws');
+  const second=packet.snapshot.instances[1];
+  assert.equal(host.selectRoom(second.id).id,second.id);
+  assert.equal(host.worldRef(),second.id);
+  const otherProjection=projectWorld2D(host.getSnapshot(),{worldRef:host.worldRef(),layout:host.getLayout()});
+  assert.ok(otherProjection.nodes.some(node=>node.type==='building'));
+  assert.ok(otherProjection.nodes.every(node=>node.type!=='building'||node.instanceId===second.id));
+  assert.notEqual(host.getLayout().sceneGeometry.regionId,'');
+  assert.throws(()=>host.selectRoom('outside-guild'),/unavailable/);
+  host.selectRoom(packet.worldRef);
   assert.equal(host.status,'live-local');
   await host.provision({rendererReady:()=>{throw Error('Should not provision twice')}});
   assert.equal(objects.size,2,'one signed world object and the genesis');
