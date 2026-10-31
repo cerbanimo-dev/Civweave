@@ -310,8 +310,10 @@ function renderGuildTab(){
   if(saved){
     const sessions=api?.publicStatus?.()?.sessions||[];
     const rows=sessions.filter(item=>item?.active&&item.origin&&item.nodeId).slice(0,16);
-    saved.innerHTML=rows.length?'<strong class="cw-guild-kicker">Your logged-in Guilds</strong>'+rows.map(row=>
-      `<button type="button" data-guild-ui-action="switch" data-guild-node="${guildEsc(row.nodeId)}" data-guild-origin="${guildEsc(row.origin)}"><span>${guildEsc(row.origin.replace(/^https:\/\//,''))} · ${guildEsc(row.seatClass||'Hero')}</span><span>${guild&&guild.origin===row.origin?'Selected':'Select'}</span></button>`).join(''):'<p>Joined Guilds from this browser session appear here. Your device-bound login can be restored after a restart by choosing the Guild again.</p>';
+    const own=globalThis.CivweaveGuildOwnerManagementV1?.ownedGuild?.();
+    const founded=own?'<strong class="cw-guild-kicker">Guildkeeper</strong><button type="button" data-guild-ui-action="founder-manage">Manage my founded Guild · '+guildEsc(own.displayName||own.origin)+'</button>':'';
+    saved.innerHTML=founded+(rows.length?'<strong class="cw-guild-kicker">Your logged-in Guilds</strong>'+rows.map(row=>
+      `<button type="button" data-guild-ui-action="switch" data-guild-node="${guildEsc(row.nodeId)}" data-guild-origin="${guildEsc(row.origin)}"><span>${guildEsc(row.origin.replace(/^https:\/\//,''))} · ${guildEsc(row.seatClass||'Hero')}</span><span>${guild&&guild.origin===row.origin?'Selected':'Select'}</span></button>`).join(''):'<p>Joined Guilds from this browser session appear here. Your device-bound login can be restored after a restart by choosing the Guild again.</p>');
   }
 }
 async function refreshGuildAccess(){
@@ -356,6 +358,12 @@ async function guildAction(action,control){
   if(action==='switch'){
     try{api.selectSession({origin:control.dataset.guildOrigin,nodeId:control.dataset.guildNode});discoveryExpanded=false;activeGuildStatus=null;renderGuildTab();await refreshGuildAccess();}
     catch(error){guildFeedback('Cannot select Guild: '+String(error?.message||error))}return;
+  }
+  if(action==='founder-manage'){
+    if(!globalThis.CivweaveGuildOwnerManagementV1?.ownedGuild?.())return;
+    closeNearbyGuilds('founder-management');
+    await globalThis.CivweaveGuildOwnerManagementV1.open();
+    return;
   }
   if(!guild)return;
   guildPanelBusy=true;
