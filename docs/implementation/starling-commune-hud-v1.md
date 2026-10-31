@@ -11,6 +11,13 @@
 - Existing authenticated Guild Quest beats, provenance-gated suggestions, local/browser autopilot, paired Termux or Android execution host, signed transcript, and canonical shared chat are retained. No synthetic votes, Quest completions, neuron spending, or silent jobs.
 - Reduced-motion and safe-area controls are included. No inference is started by opening the scene.
 
+## Navigation and planning-console parity
+
+- The main Starling integration's `open()` now attempts a read-only authenticated Guild connection and opens the visual Commune first. If no Guild is available, it preserves access to the original local planning workbench rather than inventing a Guild context.
+- The selected Guild card also opens the Commune, with a cache-busted module URL and updated "Starling Commune" action.
+- The original planning workbench is retained as a companion console, styled to match the Commune and reachable through Commune → Controls → Open planning workbench. It can return to the Commune through its own header control after authenticated Guild connection.
+- Existing planning APIs, pending reviews, publish confirmations, local Quest import, Guild capacity introspection, and privacy controls remain with their current owners.
+
 ## Actual Worldweaver binding (prepared; requires runtime owner to connect)
 
 `CivweaveStarlingLoungeV1.attachWorldSource({ getSnapshot, getLayout, worldRef, subscribe, onActivate })` installs the existing `createWorldMap2DView` projection of **the same authorized snapshot** Worldweaver would give its 3D renderer. The fallback illustration hides while the map is displayed. This method never manufactures a world snapshot, permissions, NPC commands, or simulated model responses. `detachWorldSource()` unmounts and closes the subscription, including on page close.
