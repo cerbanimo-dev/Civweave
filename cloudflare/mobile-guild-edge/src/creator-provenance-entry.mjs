@@ -3,7 +3,7 @@ import {CHECK_POLICY,nodeLiveness,locationVerdict,rewardAllowed,proofFresh} from
 import {GUILD_STARLING_ROUTE,executeGuildStarlingAction} from './guild-starling-collective-v1.mjs';
 import {guildStarlingAction} from './guild-starling-transport-v1.mjs';
 import {buildGuildNeuronFlow} from './guild-neuron-flow-v1.mjs';
-import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,governanceStatus,reportQueue,markReportDelivery,reportReceipt,delegatedRole,isBanned} from './guild-democratic-governance-state-v1.mjs';
+import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,governanceStatus,reportQueue,markReportDelivery,reportReceipt,delegatedRole,isBanned} from './guild-democratic-governance-state-v1.mjs';
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
 import {GUILD_QUEST_ROUTE,GUILD_QUEST_CORS,guildQuestAction,readGuildQuestInput,executeGuildQuestAction,guildQuestJson,guildQuestError} from './guild-quest-publications-v1.mjs';
 
@@ -55,11 +55,28 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     // One SQLite Durable Object transaction owns the deciding vote, the
     // audit receipt, and the resulting member/role/ban/report mutation.
     // Failed execution rolls back the deciding vote too.
+    if(input?.action==='open-case')return this.ctx.storage.transactionSync(()=>({ok:true,case:openGovernanceCase(this.sql,{
+      actorId:session.userId,action:input.kind,targetUserId:input.targetUserId,reasonCode:input.reasonCode,statement:input.statement})}));
+    if(input?.action==='respond-case')return this.ctx.storage.transactionSync(()=>({ok:true,case:respondToGovernanceCase(this.sql,{
+      actorId:session.userId,caseId:clean(input.caseId,140),response:input.response})}));
     if(input?.action==='propose')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:proposeGovernance(this.sql,{guildId,origin,
-      actorId:session.userId,action:input.kind,targetUserId:input.targetUserId,role:input.role,reasonCode:input.reasonCode,statement:input.statement})}));
+      actorId:session.userId,action:input.kind,targetUserId:input.targetUserId,role:input.role,reasonCode:input.reasonCode,statement:input.statement,caseId:input.caseId})}));
     if(input?.action==='vote')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:castGovernanceVote(this.sql,{guildId,origin,
       actorId:session.userId,ballotId:clean(input.ballotId,200),choice:input.choice})}));
+    if(input?.action==='review-work')return this.ctx.storage.transactionSync(()=>({ok:true,proof:reviewWorkProof(this.sql,{
+      actorId:session.userId,proofId:clean(input.proofId,140),decision:clean(input.decision,30)})}));
     throw Object.assign(new Error('Unknown Guild vote action.'),{status:400});
+  }
+  async submitGovernanceWork({tokenHash,requestedNodeId,input}={}){
+    const session=this.sessionForHash({tokenHash,requestedNodeId});
+    if(!session.ok)throw Object.assign(new Error(session.error),{status:session.status});
+    const guildId=this.baseStatus().guildId,questId=clean(input?.questId,90);
+    if(!/^guild-quest:[a-f0-9]{64}$/.test(questId))throw Object.assign(new Error('Select a real published Guild Quest.'),{status:400});
+    // Authorship / Quest existence are never attested by the submitting browser.
+    const row=await this.ctx.storage.get('guild-quest:record:'+guildId+':'+questId);
+    if(!row||row.status!=='published'||row.guildId!==guildId)throw Object.assign(new Error('Published Guild Quest not found.'),{status:404});
+    return this.ctx.storage.transactionSync(()=>({ok:true,proof:submitWorkProof(this.sql,{
+      actorId:session.userId,questId,statement:input?.statement})}));
   }
   governanceDelegation({tokenHash,requestedNodeId}={}){
     const session=this.sessionForHash({tokenHash,requestedNodeId});
@@ -81,10 +98,8 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     if(!session?.ok)throw Object.assign(new Error(session?.error||'Guild session is invalid.'),{status:session?.status||401});
     const guildId=this.baseStatus().guildId;
     const outcome=await executeGuildQuestAction(this.ctx.storage,{guildId,nodeId:session.nodeId,userId:session.userId},action,input);
-    if(action==='publish'&&outcome?.ok===true&&outcome?.idempotent!==true&&outcome?.publication?.status==='published'){
-      creditVerifiedContribution(this.sql,{id:'quest:'+outcome.publication.id+':'+outcome.publication.revision,
-        userId:session.userId,kind:'published-quest'});
-    }
+    // Publishing work is authorship, not accepted evidence of completed work.
+    // Independent reviews or physical verification determine proposal eligibility.
     return outcome;
   }
 
@@ -413,7 +428,9 @@ export default{
         const raw=await request.text();
         if(enc.encode(raw).byteLength>12000)return json({ok:false,error:'Guild governance input too large.'},413);
         const input=JSON.parse(raw);
-        const outcome=await stub.governanceAction({...args,input,origin:url.origin});
+        const outcome=input?.action==='submit-work'?
+          await stub.submitGovernanceWork({...args,input}):
+          await stub.governanceAction({...args,input,origin:url.origin});
         if(outcome?.ballot?.action==='report'&&outcome?.ballot?.status==='approved'){
           const forward=sendApprovedPeerReports(env,stub,url.origin).catch(error=>console.error('Guild peer report relay pending:',String(error?.message||error)));
           if(ctx?.waitUntil)ctx.waitUntil(forward);else await forward;
