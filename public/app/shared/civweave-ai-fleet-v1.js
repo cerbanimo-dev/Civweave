@@ -321,6 +321,28 @@ async function installChosenGGUF(layer,panel){
  }catch(error){if(status)status.textContent='Import not completed: '+String(error?.message||error)}
  finally{if(activeImport===controller)activeImport=null;button.disabled=false;cancel.hidden=true;cancel.disabled=true;}
 }
+async function downloadFleetPreset(layer,panel,presetId){
+ if(activeImport)throw Error('Another GGUF import or download is running.');
+ const status=panel.querySelector('[data-ai-fleet-import-status]');
+ const cancel=panel.querySelector('[data-ai-fleet-import-cancel]');
+ const controller=new AbortController();
+ activeImport=controller;cancel.hidden=false;cancel.disabled=false;
+ try{
+   const gguf=await import(GGUF_MODULE);
+   const preset=gguf.GGUF_PRESETS.find(p=>p.id===presetId);
+   if(!preset)throw Error('Choose an approved Qwen 3.5 GGUF preset.');
+   if(!globalThis.confirm?.('Download '+preset.label+' to this device? It uses about '+preset.sizeHint+' of storage and network data.'))return;
+   if(status)status.textContent='Downloading '+preset.label+' directly into saved GGUF storage…';
+   const result=await gguf.installPresetIntoImports(presetId,{signal:controller.signal,onProgress:part=>{
+     if(!status?.isConnected)return;
+     status.textContent='Installing '+preset.label+' · '+Math.round(part.loaded/1e6)+' MB'+
+       (part.total?' / '+Math.round(part.total/1e6)+' MB ('+Math.round(part.loaded/part.total*100)+'%)':'')+'.';
+   }});
+   if(status)status.textContent='Installed '+result.label+'. Choose a fleet role and test generation below.';
+   await refreshInventory(layer,panel,++inventorySequence);
+ }catch(error){if(status)status.textContent='Download not completed: '+String(error?.message||error)}
+ finally{if(activeImport===controller)activeImport=null;cancel.hidden=true;cancel.disabled=true;}
+}
 async function mountTermuxInline(layer,panel){
  const target=panel.querySelector('[data-ai-fleet-termux-mount]');
  if(!target||target.dataset.nativeServerMounted==='1')return;
@@ -394,6 +416,10 @@ function render(layer){
    '<section class="cw-fleet-card" data-ai-fleet-install><h4>1 · Install a model</h4>'+
    '<p>Select an existing Qwen 3.5 2B or 4B GGUF, or all split parts of that model together. Importing does not erase previously installed GGUFs.</p>'+
    '<label>Model file(s) <input type="file" accept=".gguf" multiple data-ai-fleet-gguf-files></label>'+
+   '<p><strong>Download a compatible model directly</strong></p>'+
+   '<div class="cw-fleet-choices"><button type="button" data-ai-fleet-download-preset="qwen35-2b-q4km-gguf">Install 2B Q4_K_M · ~1.3 GB</button>'+
+   '<button type="button" data-ai-fleet-download-preset="qwen35-4b-iq2m-gguf">Install 4B IQ2_M · ~1.6 GB</button></div>'+
+   '<p class="cw-fleet-meta">The downloadable 4B is a smaller, lower-fidelity quantization. To keep your original 4B Q4_K_M weights, choose its local GGUF/shards above.</p>'+
    '<div class="cw-fleet-choices"><button type="button" data-ai-fleet-import>Import selected GGUF and shards</button>'+
    '<button type="button" data-ai-fleet-import-cancel hidden disabled>Cancel import</button>'+
    '<button type="button" data-ai-fleet-rescan>Refresh installed models</button></div>'+
@@ -442,6 +468,12 @@ function render(layer){
      const el=event.target.closest?.('button');if(!el)return;
      const backendChoice=el.dataset.aiFleetBackend;
      if(backendChoice){if(activeImport)activeImport.abort();setBackend(backendChoice);render(layer);return}
+     const presetId=el.dataset.aiFleetDownloadPreset;
+     if(presetId){
+       el.disabled=true;void downloadFleetPreset(layer,panel,presetId)
+         .catch(error=>{const out=panel.querySelector('[data-ai-fleet-import-status]');if(out)out.textContent=String(error?.message||error)})
+         .finally(()=>{el.disabled=false});return;
+     }
      if(el.hasAttribute('data-ai-fleet-import-cancel')){activeImport?.abort();return}
      if(el.hasAttribute('data-ai-fleet-apk-connect')){
        el.disabled=true;void checkNativeHost(panel).catch(error=>{const out=panel.querySelector('[data-ai-fleet-apk-status]');if(out)out.textContent=String(error?.message||error)}).finally(()=>{el.disabled=false});return;
