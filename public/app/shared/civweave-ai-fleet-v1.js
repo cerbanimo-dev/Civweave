@@ -2,11 +2,28 @@
 'use strict';
 // One presentation/catalogue owner. Existing inference, download, Settings,
 // privacy/consent and device-fit contracts remain the execution authorities.
-const VERSION='1.3.2-local-backend-switch-and-gguf-uninstall';
+const VERSION='1.3.3-gguf-text-test-health';
 if(globalThis.CivweaveAIFleetV1?.version===VERSION)return;
 const MEMORY_KEY='civweave.ai.fleet.memory-gb.v1';
 const CHOICE_KEY='civweave.ai.fleet.choices.v1';
 const BINDING_KEY='civweave.ai.fleet.bindings.v1';
+// Inference correctness belongs to an individual import, not its model family.
+// Storage verification alone must never be presented as passing inference.
+const HEALTH_KEY='civweave.ai.fleet.gguf-health.v1';
+function importTestHealth(id){return read(HEALTH_KEY,{})[id]||null}
+function recordTestHealth(id,passed,detail=''){
+ const all=read(HEALTH_KEY,{});
+ localStorage.setItem(HEALTH_KEY,JSON.stringify({...all,[id]:{
+  passed:Boolean(passed),detail:String(detail).slice(0,180),testedAt:new Date().toISOString()
+ }}));
+}
+function clearTestHealth(id){
+ const all=read(HEALTH_KEY,{});
+ if(Object.prototype.hasOwnProperty.call(all,id)){
+  delete all[id];
+  localStorage.setItem(HEALTH_KEY,JSON.stringify(all));
+ }
+}
 let inventorySequence=0;
 const ROLES=Object.freeze({
  swift:{label:'Swift',purpose:'Everyday',description:'Conversation, quick help and lightweight everyday tasks.'},
@@ -260,6 +277,7 @@ function renderBrowserInventory(panel,entries){
  const list=panel.querySelector('[data-ai-fleet-inventory]');
  if(!list)return;
  const cards=entries.map(entry=>'<article class="cw-fleet-card"><h4>'+esc(entry.label)+'</h4>'+
+   '<p>Text inference: '+esc(!entry.verified?'Unavailable':importTestHealth(entry.importId)?.passed===true?'PASS · meaningful-text test':importTestHealth(entry.importId)?.passed===false?'FAILED · '+importTestHealth(entry.importId).detail:'Not tested · storage verification only')+'</p>'+
    '<p>'+importOption(entry)+'</p><p>Shards: '+entry.sourceNames.length+' · '+(entry.verified?'Stored and verified':'Unavailable: '+esc(entry.error))+'</p>'+
    '<p class="cw-fleet-meta">Install ID: '+esc(entry.importId.slice(-8))+(entry.importedAt?' · '+esc(new Date(entry.importedAt).toLocaleDateString()):'')+'</p>'+
    '<div class="cw-fleet-choices">'+
@@ -274,7 +292,7 @@ function renderBrowserInventory(panel,entries){
    return '<article class="cw-fleet-card"><h4>'+esc(ROLES[row.role].label)+' · '+esc(ROLES[row.role].purpose)+'</h4>'+
      '<p>'+esc(ROLES[row.role].description)+'</p><label class="cw-fleet-label">Installed model'+
      '<select data-ai-fleet-role-assign="'+esc(row.role)+'"'+(matches.length?'':' disabled')+'>'+opts+'</select></label>'+
-     '<p>'+(!matches.length?'No GGUF import verified within your RAM budget':isActive?'Role binding available for browser inference':'Model assigned; activate a primary GGUF to route chat')+'</p></article>';
+     '<p>'+(!matches.length?'No GGUF import verified within your RAM budget':!existing?'No model assigned':importTestHealth(existing)?.passed===true?(isActive?'Text test passed · browser route configured':'Text test passed · activate a primary for chat'):'Model assigned · meaningful-text test not passed')+'</p></article>';
  }).join('');
  list.innerHTML='<h4>Saved GGUF models · '+entries.length+'</h4>'+
    '<div class="cw-fleet-grid">'+(cards||'<p>No saved GGUF manifests found in this browser profile.</p>')+'</div>'+
@@ -282,7 +300,7 @@ function renderBrowserInventory(panel,entries){
  const msg=panel.querySelector('[data-ai-fleet-message]');
  if(msg)msg.textContent=(available.length?available.length+' complete GGUF model(s) found. ':'No complete imported GGUF found. ')+
    Object.keys(roles).length+' of '+rows.length+' compatible roles linked. '+
-   (isActive?'Browser inference is configured.':'Role links are saved, but browser inference is not the active model route.');
+   (isActive?'Browser route configured. Check the text-inference result for each installed model.':'Role links are saved, but browser inference is not the active model route.');
 }
 async function refreshInventory(layer,panel,sequence){
  const msg=panel.querySelector('[data-ai-fleet-message]');
@@ -387,6 +405,8 @@ async function activateSavedImport(layer,panel,id){
  const gguf=await import(GGUF_MODULE),installed=await gguf.installedImports({verify:true});
  const record=installed.find(item=>item.importId===id&&item.verified);
  if(!record)throw Error('Imported model is missing or its shards could not be verified. Nothing was activated.');
+ if(importTestHealth(id)?.passed===false)
+   throw Error('This imported GGUF failed the meaningful-text test. Rerun the test successfully or select another import before activating it.');
  const selected=await gguf.activateImported(id);
  activateSharedRoute(layer,{model:selected.model,endpoint:'http://127.0.0.1:8080/v1'});
  if(status)status.textContent='Activated '+record.label+'; other verified imports remain available for fleet roles.';
@@ -410,6 +430,7 @@ async function uninstallSavedImport(layer,panel,id){
  if(typeof globalThis.confirm!=='function')throw Error('A confirmation dialog is required before uninstalling a model.');
  if(!globalThis.confirm(question))return;
  const result=await gguf.uninstallImported(id);
+ clearTestHealth(id);
  // Fleet owns role preferences. Prune exact bindings; the inventory may
  // subsequently choose another compatible, still-verified installed import.
  const previous=read(BINDING_KEY,{});
@@ -454,7 +475,13 @@ async function testSavedImport(panel,id){
    });
    const answer=String(result.text||'').trim().replace(/[.!]+$/,'').toUpperCase();
    if(answer!=='READY')throw Error('The model emitted "'+String(result.text||'').trim().slice(0,130)+'" rather than READY. Inference ran but the answer is invalid; do not mark this model healthy.');
+   recordTestHealth(id,true,'Verified READY');
+   renderBrowserInventory(panel,entries);
    if(status)status.textContent='PASS · '+entry.label+' · verified READY · meaningful output. Role assignments were not changed.';
+ }catch(error){
+   recordTestHealth(id,false,String(error?.message||error));
+   renderBrowserInventory(panel,entries);
+   throw error;
  }finally{clearTimeout(timer)}
 }
 function render(layer){
