@@ -35,13 +35,16 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    const current=guildRoom||session?.snapshot()||campaign;
    const pool=current?.willpower,display=el(root,'willpower'),control=el(root,'control');
    if(display)display.textContent=pool?
-     'Shared willpower: '+pool.points+'/'+pool.max+' · +1 per '+pool.renewEvery+' accepted turns':
+     (guildRoom?'Guild willpower: ':'Shared willpower: ')+pool.points+'/'+pool.max+
+       (guildRoom?' · NPC direct overrides require a trusted live simulator.':
+         ' · +1 per '+pool.renewEvery+' accepted turns'):
      'Load a campaign to view shared willpower.';
    if(control){
+     control.disabled=Boolean(guildRoom);
      for(const option of control.options){
-       if(option.value==='both')option.disabled=!pool||pool.points<2;
+       if(option.value==='both')option.disabled=Boolean(guildRoom)||!pool||pool.points<2;
        else if(option.value==='landry'||option.value==='delia')
-         option.disabled=!pool||pool.points<1;
+         option.disabled=Boolean(guildRoom)||!pool||pool.points<1;
      }
      if(control.selectedOptions[0]?.disabled)control.value='';
    }
