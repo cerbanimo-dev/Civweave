@@ -59,7 +59,7 @@ async function openCommuneFirst(){
   const selectedGuild=await api.connectGuild();
   const guildId=selectedGuild?.guildId;
   if(typeof guildId==='string'&&guildId){
-   const module=await import('/app/starling-lounge-v1.mjs?v=commune-hud-r2');
+   const module=await import('/app/starling-lounge-v1.mjs?v=worldweaver-commune-r3');
    return module.CivweaveStarlingLoungeV1.open({id:guildId,name:'Selected Guild'});
   }
  }catch(error){
