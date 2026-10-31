@@ -1,5 +1,7 @@
 import {STARLING_PERSONAS,guildQuestBeatSnapshot,discoverGuildOpportunities} from './shared/starling-collective-v1.mjs';
 import {COLLECTIVE_TOOL_CATALOG} from './shared/starling-collective-tools-v1.mjs';
+import {localFleetProjection,guildFleetProjection} from './shared/civweave-fleet-scopes-v1.mjs';
+import {createSimulatorToolBridge} from './shared/worldweaver-simulator-tools-v1.mjs';
 
 const ID='cw-starling-lounge';
 const PEOPLE=Object.values(STARLING_PERSONAS);
@@ -21,19 +23,23 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
+const state={guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
 const human=person=>person?.name||'Unknown persona';
 function setup(){
   if(state.root)return state.root;
-  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=worldweaver-commune-r3';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=fleet-scopes-sim-r4';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
   root.innerHTML=`<header class="sl-head">
-  <div class="sl-brand"><small>CIVWEAVE · COLLECTIVE COMMONS</small><h1>Starling Commune</h1><p>One Guild · many minds · shared work</p></div>
+  <div class="sl-brand"><small>CIVWEAVE · WORLDWEAVER</small><h1 data-sl-main-title>AI Fleets</h1><p data-sl-main-description>Local device and Guild simulation spaces</p></div>
   <div class="sl-head-right"><span class="sl-live-pill" data-sl-activity-status>Awaiting activity</span><small data-sl-guild></small><button type="button" data-sl-action="refresh" aria-label="Refresh commune information">↻ Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Commune">Close ×</button></div>
 </header>
+<nav class="sl-fleet-switch" aria-label="Choose an AI fleet">
+ <button type="button" data-sl-fleet="local" aria-pressed="true"><b>Local Fleet</b><small>My device · private models</small></button>
+ <button type="button" data-sl-fleet="guild" aria-pressed="false"><b>Guild Fleet</b><small>Shared pilots · signed world</small></button>
+</nav>
 <nav class="sl-view-nav" aria-label="Commune HUD panels">
  <button type="button" data-sl-view="world" aria-pressed="true">Commune</button>
  <button type="button" data-sl-view="agents" aria-pressed="false">Residents</button>
@@ -81,11 +87,11 @@ function setup(){
   </section>
  </div>
  <div class="sl-side">
-  <aside class="sl-card sl-work" data-sl-panel="work" aria-label="Quest work HUD">
+  <aside class="sl-card sl-work" data-sl-panel="work" data-sl-guild-only aria-label="Quest work HUD">
    <div class="sl-panel-title"><div><span class="sl-kicker">03 · QUEST WATCH</span><h2>What we are building</h2></div></div>
    <div class="sl-metric-row" data-sl-metrics></div><h3>Quest beats and outputs</h3><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><p class="sl-status" data-sl-work-status></p>
   </aside>
-  <aside class="sl-card sl-operations" data-sl-panel="operations" aria-label="Compute and execution controls">
+  <aside class="sl-card sl-operations" data-sl-panel="operations" data-sl-guild-only aria-label="Compute and execution controls">
    <div class="sl-panel-title"><div><span class="sl-kicker">04 · OPERATIONS</span><h2>Control room</h2></div></div>
    <p class="sl-sub">Plan, run and review without leaving this shared scene.</p><button type="button" data-sl-action="open-planner">Open legacy planning workbench</button>
    <div class="sl-operation-block"><h3>Browser-local collective</h3><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button></div><p class="sl-status" data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</p></div>
@@ -167,21 +173,22 @@ function renderPresence(){
     const short=button.querySelector('.sl-figure-presence');if(short)short.textContent=current.status;
     button.title=(STARLING_PERSONAS[id]||SYSTEM_GUIDES[id]).name+' · '+current.label;
   }
-  const working=Object.keys(STAGE_POSITIONS).filter(id=>presenceFor(id).status==='working');
+  const visibleIds=fleetIsGuild()?Object.keys(STAGE_POSITIONS):Object.keys(SYSTEM_GUIDES);
+  const working=visibleIds.filter(id=>presenceFor(id).status==='working');
   const pill=$('[data-sl-activity-status]');
   if(pill){pill.textContent=working.length?working.length+' active model'+(working.length===1?'':'s'):'No active model reported';pill.dataset.slActivity=working.length?'working':'standby'}
   const count=$('[data-sl-transcript-count]');
   if(count)count.textContent=state.feed.length+' signed turn'+(state.feed.length===1?'':'s');
 }
 function renderSpeaker(){
-  const person=STARLING_PERSONAS[state.selectedAgent]||SYSTEM_GUIDES[state.selectedAgent]||STARLING_PERSONAS.kami;
+  const person=STARLING_PERSONAS[state.selectedAgent]||SYSTEM_GUIDES[state.selectedAgent]||SYSTEM_GUIDES.weaveling;
   const portrait=$('[data-sl-focus-avatar]');if(portrait){portrait.src=residentAvatar(person);portrait.alt=person.name+' avatar'}
   $('[data-sl-stage-name]').textContent=person.name+' · '+person.role;
   $('[data-sl-summary]').textContent=person.goal+'. '+(person.style||'Guide activity is shown only when an authenticated service reports it.');
   $('[data-sl-focus-status]').textContent=presenceFor(person.id).label;
   const turn=$('[data-sl-action=turn]'),round=$('[data-sl-action=round]');
-  if(turn)turn.disabled=state.turnsRunning||!STARLING_PERSONAS[state.selectedAgent];
-  if(round)round.disabled=state.turnsRunning||!STARLING_PERSONAS[state.selectedAgent];
+  if(turn)turn.disabled=state.turnsRunning||!fleetIsGuild()||!STARLING_PERSONAS[state.selectedAgent];
+  if(round)round.disabled=state.turnsRunning||!fleetIsGuild()||!STARLING_PERSONAS[state.selectedAgent];
   renderPresence();
 }
 function setView(view){
@@ -192,9 +199,9 @@ function setView(view){
   for(const button of state.root.querySelectorAll('[data-sl-view]'))button.setAttribute('aria-pressed',String(button.dataset.slView===view));
 }
 function focusActivity(){
-  const working=Object.keys(STARLING_PERSONAS).find(id=>presenceFor(id).status==='working');
+  const working=(fleetIsGuild()?Object.keys(STARLING_PERSONAS):Object.keys(SYSTEM_GUIDES)).find(id=>presenceFor(id).status==='working');
   const recent=state.feed.at(-1)?.personaId;
-  const id=working||recent||state.selectedAgent;
+  const id=working||(fleetIsGuild()?recent:null)||state.selectedAgent;
   if(id&&STARLING_PERSONAS[id])state.speaker=id;
   state.selectedAgent=id;
   renderSpeaker();setView('world');
@@ -243,12 +250,142 @@ function renderWork(){
   const bench=$('[data-sl-toolbench]');bench.replaceChildren();for(const tool of COLLECTIVE_TOOL_CATALOG){const entry=el('section','sl-output');entry.append(el('b','',tool.name+' · '+tool.kind),el('p','sl-sub',tool.description));entry.append(el('small','',tool.status==='migration-pending'?'Porting existing Starling adapter':'Not installed yet'));bench.append(entry)}
   $('[data-sl-work-status]').textContent=state.loading?'Loading authenticated Guild Quests…':state.error||('Guild board: '+state.status+'. Progress is member-reported, not automatically verified.');
 }
+const safeLocalRead=key=>{try{return JSON.parse(localStorage.getItem(key)||'{}')}catch{return{}}};
+let fleetScriptPromise=null;
+async function ensureLocalFleetCatalog(){
+  if(globalThis.CivweaveAIFleetV1?.catalogue)return globalThis.CivweaveAIFleetV1;
+  if(!fleetScriptPromise)fleetScriptPromise=new Promise((resolve,reject)=>{
+    const script=document.createElement('script');script.src='/app/shared/civweave-ai-fleet-v1.js?v=1.0.2-gguf-inventory-autobind';
+    script.onload=()=>resolve(globalThis.CivweaveAIFleetV1||null);
+    script.onerror=()=>reject(new Error('The canonical local fleet catalogue could not load.'));
+    document.head.append(script);
+  }).catch(error=>{fleetScriptPromise=null;throw error});
+  return fleetScriptPromise;
+}
+function fleetIsGuild(){return state.fleetScope==='guild'&&Boolean(state.guild?.id)}
+function setFleetScope(scope){
+  if(!['local','guild'].includes(scope)||scope==='guild'&&!state.guild)return;
+  state.fleetScope=scope;
+  if(scope==='local'&&(!SYSTEM_GUIDES[state.selectedAgent]))state.selectedAgent='weaveling';
+  if(scope==='guild'&&SYSTEM_GUIDES[state.selectedAgent])state.selectedAgent='kami';
+  if(state.root)state.root.dataset.slFleet=scope;
+  for(const button of state.root?.querySelectorAll('[data-sl-fleet]')||[])button.setAttribute('aria-pressed',String(button.dataset.slFleet===scope));
+  render();
+  if(scope==='guild'&&state.worldLinked&&state.view==='world')state.worldViewer?.update();
+}
+function renderFleetScopes(){
+  if(!state.root)return;
+  const guild=state.guild;
+  state.root.dataset.slFleet=state.fleetScope;
+  const guildButton=$('[data-sl-fleet=guild]');if(guildButton)guildButton.disabled=!guild;
+  const title=$('[data-sl-main-title]');if(title)title.textContent=fleetIsGuild()?'Guild Fleet':'Local Fleet';
+  const sub=$('[data-sl-main-description]');if(sub)sub.textContent=fleetIsGuild()?'Shared Worldweaver pilots and Guild work':'Device-owned models, private AI and my tools';
+  for(const b of state.root.querySelectorAll('[data-sl-fleet]'))b.setAttribute('aria-pressed',String(b.dataset.slFleet===state.fleetScope));
+  const api=globalThis.CivweaveAIFleetV1;
+  const projection=localFleetProjection({
+    catalogue:api?.catalogue?.()||[],chosen:api?.chosen?.()||safeLocalRead('civweave.ai.fleet.choices.v1'),
+    bindings:safeLocalRead('civweave.ai.fleet.bindings.v1'),
+    runtimeState:globalThis.CivweaveModelRuntime?.readSharedConfig?.('interactive')||{}
+  });
+  const roles=$('[data-sl-local-roles]');
+  if(roles){
+    roles.replaceChildren();
+    for(const role of projection.roles){
+      const card=el('article','sl-local-role');
+      card.append(el('b','',role.label+' · '+(role.purpose||'AI role')));
+      para(card,role.installedModelId||role.configuredModelId||'No compatible model selected','sl-role-model');
+      para(card,role.status==='verified-local-import'?'Verified on-device GGUF · not necessarily running':role.status==='configured-not-verified'?'Chosen · installation/runtime not verified':'Not configured','sl-sub');
+      roles.append(card);
+    }
+  }
+  const localStatus=$('[data-sl-local-status]');
+  if(localStatus)localStatus.textContent=state.fleetMessage||('Local inference route: '+(projection.activeRoute||'not selected')+
+    ' · '+(projection.selectedModel||'no active model')+' · choices remain device-private.');
+  const available=guildFleetProjection({guildId:guild?.id,worldSnapshot:state.worldHost?.getSnapshot(),
+    turns:state.feed,hostJob:state.hostJob});
+  const count=$('[data-sl-guild-count]');if(count)count.textContent=available.registered.length+' registered NPCs · '+available.signedTurns+' signed turns';
+  const pilots=$('[data-sl-guild-pilots]');
+  if(pilots){
+    pilots.replaceChildren();
+    if(!available.available)para(pilots,'A signed Guild Worldweaver room is required. The Guild founder can provision it from the scene controls.','sl-sub');
+    else{
+      for(const p of available.registered){
+        const item=el('div','sl-local-role');
+        item.append(el('b','',p.name+' · '+p.modelId));
+        para(item,p.capabilities.join(', ')+' · registered, not running','sl-sub');pilots.append(item);
+      }
+      if(!available.registered.length)para(pilots,'No Worldweaver NPC pilots registered. Choose a Starling persona and register its local model binding.','sl-sub');
+      para(pilots,available.eligible.length+' Starling personas have no pilot registration in this Guild.','sl-sub');
+    }
+  }
+  const register=$('[data-sl-action=pilot-register]');
+  if(register)register.disabled=!fleetIsGuild()||!state.worldLinked||!STARLING_PERSONAS[state.selectedAgent]||state.worldOpening;
+  const observation=$('[data-sl-action=world-observe]');
+  if(observation)observation.disabled=!fleetIsGuild()||!state.worldLinked;
+  const move=$('[data-sl-action=world-move-proposal]');
+  if(move)move.disabled=!fleetIsGuild()||!state.worldLinked||!STARLING_PERSONAS[state.selectedAgent];
+  const simStatus=$('[data-sl-simulator-status]');if(simStatus)simStatus.textContent=state.simMessage||
+     'Observe reads authorized map state. Move proposals need a registered model pilot and do not execute movement.';
+}
+function worldTools(){
+  const host=state.worldHost;
+  if(!host?.getSnapshot()||!host.worldRef())throw new Error('Select a signed Worldweaver room first.');
+  return createSimulatorToolBridge({getSnapshot:host.getSnapshot,getLayout:host.getLayout,getWorldRef:host.worldRef});
+}
+function showObservation(data,message){
+  const output=$('[data-sl-observation]');if(output)output.textContent=JSON.stringify(data,null,2).slice(0,9500);
+  state.simMessage=message;renderFleetScopes();
+}
+function observeWorld(){
+  try{
+    const result=worldTools().observe();
+    showObservation(result,'Read-only observation · signed world revision '+result.revision+' · no simulation action executed.');
+  }catch(error){state.simMessage='World observation unavailable: '+clean(String(error?.message||error),260);renderFleetScopes()}
+}
+function prepareMove(){
+  try{
+    const x=Number($('[data-sl-move-x]').value),y=Number($('[data-sl-move-y]').value);
+    const result=worldTools().prepare({personaId:state.selectedAgent,tool:'move',args:{x,y,z:0}});
+    showObservation(result,'Move proposal prepared for runtime authorization; no movement executed or reported.');
+  }catch(error){state.simMessage='Move proposal blocked: '+clean(String(error?.message||error),260);renderFleetScopes()}
+}
+async function registerSelectedPilot(){
+  if(!fleetIsGuild()||!STARLING_PERSONAS[state.selectedAgent]||state.worldOpening)return;
+  const guild=state.guild,personaId=state.selectedAgent;
+  state.worldOpening=true;state.simMessage='Checking selected local model and signing authority…';renderFleetScopes();
+  try{
+    const model=globalThis.CivweaveModelRuntime;
+    const original=model?.readSharedConfig?.('interactive');
+    const config=model?.normalizeConfig?.(original)||original;
+    if(!config?.model||!['ollama','downloaded-local','openai-compatible'].includes(config.provider)||
+       model?.endpointLeavesDevice?.(config)!==false)
+      throw new Error('Configure an actually local model in AI Settings before registering it.');
+    const npc=await state.worldHost.registerPilot({personaId,modelId:config.model});
+    if(state.guild?.id!==guild.id)return;
+    state.simMessage='Registered '+npc.name+' with selected local model '+npc.modelId+
+      '. Tool execution still requires a separately verified model-runtime adapter.';
+    await mountCurrentRoom(state.worldHost);
+  }catch(error){if(state.guild?.id===guild.id)state.simMessage='Pilot registration rejected: '+clean(String(error?.message||error),280)}
+  finally{state.worldOpening=false;render()}
+}
+async function worldObservationPrompt(task){
+  if(!fleetIsGuild()||!state.worldLinked)return clean(task,1200);
+  try{
+    const observation=worldTools().observe();
+    const room=state.worldHost?.getSnapshot()?.instances.find(x=>x.id===observation.worldRef);
+    const details=observation.entities.slice(0,8).map(x=>x.label+' ['+x.type+']').join('; ');
+    const prefix='Worldweaver observed room: '+clean(room?.title||'Commune',70)+
+      ', revision '+observation.revision+'. Visible: '+details+
+      '. These are read-only observations, not proof of agent movement or tool use. ';
+    return clean(prefix+' User request: '+clean(task,550),1200);
+  }catch{return clean(task,1200)}
+}
 function render(){
   if(!state.root)return;
   $('[data-sl-guild]').textContent=state.guild?.name||state.guild?.displayName||state.guild?.id||'Guild not selected';
-  renderSpeaker();renderFeed();renderWork();
-  const button=$('[data-sl-action=turn]');if(button){button.disabled=state.turnsRunning||!STARLING_PERSONAS[state.selectedAgent];button.textContent=state.turnsRunning?'Generating local turn…':'Run one local turn'}
-  const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning||!STARLING_PERSONAS[state.selectedAgent];
+  renderSpeaker();renderFeed();renderWork();renderFleetScopes();
+  const button=$('[data-sl-action=turn]');if(button){button.disabled=state.turnsRunning||!fleetIsGuild()||!STARLING_PERSONAS[state.selectedAgent];button.textContent=state.turnsRunning?'Generating local turn…':'Run one local turn'}
+  const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning||!fleetIsGuild()||!STARLING_PERSONAS[state.selectedAgent];
   const control=$('[data-sl-action=worker-toggle]');if(control){control.disabled=state.workerLoading;control.textContent=state.workerEnabled?'Disable local autopilot':'Enable local autopilot'}
   const worker=$('[data-sl-worker-status]');if(worker)worker.textContent=state.workerMessage;
   const hostLabel=$('[data-sl-host-status]');if(hostLabel)hostLabel.textContent=state.hostStatus;
@@ -257,7 +394,7 @@ function render(){
   const status=$('[data-sl-turn-status]');if(status){status.textContent=state.turnError||state.turnMessage;status.dataset.slError=state.turnError?'true':'false'}
   renderPresence();
   const submit=$('[data-sl-action=host-submit]');if(submit&&!!SYSTEM_GUIDES[state.selectedAgent])submit.disabled=true;
-  const note=$('[data-sl-live-note]');if(note)note.textContent=state.worldLinked?'Worldweaver · signed local scene':state.worldError||'Illustrated fallback · no signed local world yet';
+  const note=$('[data-sl-live-note]');if(note)note.textContent=fleetIsGuild()?(state.worldLinked?'Worldweaver · signed Guild scene':state.worldError||'Guild world not connected'):'Private device view · no Guild scene published';
   const provision=$('[data-sl-action=world-provision]');if(provision){provision.hidden=state.worldLinked;provision.disabled=state.worldOpening||!state.worldHost;provision.textContent=state.worldOpening?'Connecting…':'Start local world'}
   for(const type of ['3d','2d']){const btn=$('[data-sl-action=world-'+type+']');if(btn){btn.hidden=!state.worldLinked;btn.setAttribute('aria-pressed',String(state.worldMode===type))}}
 }
@@ -292,10 +429,13 @@ async function refresh(){
 }
 function close(){if(!state.root)return;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
 function open(guild){
-  if(!guild?.id)throw new TypeError('Select an existing Guild first.');
+  if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
-  if(state.guild?.id!==guild.id){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.selectedAgent='kami';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
-  state.root.hidden=false;document.body.style.overflow='hidden';setView('world');render();state.root.querySelector('[data-sl-action=close]').focus();void refresh();void refreshTurns();void refreshWorkerStatus();void connectWorld();void connectGuideRuntime();
+  if(state.guild?.id!==(guild?.id||null)){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  state.root.hidden=false;document.body.style.overflow='hidden';setView('world');setFleetScope('local');state.root.querySelector('[data-sl-action=close]').focus();
+  void ensureLocalFleetCatalog().then(()=>{if(!state.root?.hidden)renderFleetScopes()}).catch(error=>{state.fleetMessage=clean(String(error?.message||error),200);renderFleetScopes()});
+  void connectGuideRuntime();
+  if(state.guild){void refresh();void refreshTurns();void refreshWorkerStatus();void connectWorld()}
 }
 async function send(event){
   event.preventDefault();
@@ -305,13 +445,15 @@ async function send(event){
   const loader=globalThis.CivweaveFamilyAILoaderV105;
   if(typeof loader?.openChat!=='function'){status.textContent='Civweave’s shared chat is not available here. No message was sent.';return}
   const person=STARLING_PERSONAS[state.selectedAgent]||SYSTEM_GUIDES[state.selectedAgent],guild=state.guild;
-  const prefill=(SYSTEM_GUIDES[state.selectedAgent]?'For Civweave guide ':'For the optional Starling Collective, ')+person.name+', in Guild '+(guild?.name||guild?.id)+': '+message;
+  const prefill=fleetIsGuild()?(SYSTEM_GUIDES[state.selectedAgent]?'For Civweave guide ':'For the optional Starling Collective, ')+person.name+', in Guild '+(guild?.name||guild?.id)+': '+message:'For local Civweave guide '+person.name+' (private device): '+message;
   try{
     await loader.openChat('civweave',{prefill,contextSystem:'civweave'});
     status.textContent='Opened an addressed draft in the canonical Civweave chat. This is not a signed Collective turn.';
   }catch(error){status.textContent='Could not open Civweave chat: '+clean(String(error?.message||error),250)}
 }
 function click(event){
+  const fleet=event.target.closest('[data-sl-fleet]')?.dataset.slFleet;
+  if(fleet){setFleetScope(fleet);return}
   const persona=event.target.closest('[data-sl-persona]')?.dataset.slPersona;
   const guide=event.target.closest('[data-sl-guide]')?.dataset.slGuide;
   if(persona&&STARLING_PERSONAS[persona]){state.speaker=persona;state.selectedAgent=persona;renderSpeaker();if(event.target.closest('.sl-persona'))setView('world');return}
@@ -322,7 +464,11 @@ function click(event){
   if(station&&STATIONS[station]){state.station=station;$('[data-sl-scene-context]').textContent=STATIONS[station]+' This is a schematic, not a verified character location.';for(const node of state.root.querySelectorAll('[data-sl-station]'))node.setAttribute('aria-pressed',String(node.dataset.slStation===station));return}
   const cmd=event.target.closest('[data-sl-action]')?.dataset.slAction;
   if(cmd==='close')close();
-  if(cmd==='refresh'){void refresh();void refreshTurns();if(state.hostTransport)void refreshHost();state.worldView?.update()}
+  if(cmd==='fleet-settings')globalThis.CivweaveSettingsV320?.open?.();
+  if(cmd==='pilot-register')void registerSelectedPilot();
+  if(cmd==='world-observe')observeWorld();
+  if(cmd==='world-move-proposal')prepareMove();
+  if(cmd==='refresh'){if(state.guild){void refresh();void refreshTurns();if(state.hostTransport)void refreshHost();void state.worldHost?.refresh()}state.worldView?.update();renderFleetScopes()}
   if(cmd==='focus-active')focusActivity();
   if(cmd==='world-provision')void provisionWorld();
   if(cmd==='world-3d')switchWorldMode('3d');
@@ -387,7 +533,7 @@ async function refreshTurns(){
   }finally{state.turnsLoading=false;if(state.guild?.id===guild.id)render()}
 }
 async function runLocalTurn(){
-  if(state.turnsRunning||!state.guild)return;
+  if(state.turnsRunning||!fleetIsGuild())return;
   const guild=state.guild,personaId=state.selectedAgent;
   if(!STARLING_PERSONAS[personaId])return;
   state.activePersona=personaId;state.turnsRunning=true;state.turnError='';
@@ -396,7 +542,7 @@ async function runLocalTurn(){
   try{
     await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
     const service=await turnService();
-    await service.runOneTurn({guildId:guild.id,personaId,taskPrompt:clean($('#cw-sl-message')?.value,1200)});
+    await service.runOneTurn({guildId:guild.id,personaId,taskPrompt:await worldObservationPrompt($('#cw-sl-message')?.value)});
     if(state.guild?.id===guild.id){$('#cw-sl-message').value='';state.turnMessage='Local model turn saved and signed to Guild mesh.';await refreshTurns()}
   }catch(error){if(state.guild?.id===guild.id)state.turnError=clean(String(error?.message||error),500)}
   finally{state.activePersona=null;state.turnsRunning=false;if(state.guild?.id===guild.id)render()}
@@ -414,7 +560,7 @@ async function runLocalRound(){
     await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
     const service=await turnService();
     const result=await service.runRound({
-      guildId:guild.id,personas,taskPrompt:clean($('#cw-sl-message')?.value,1200),
+      guildId:guild.id,personas,taskPrompt:await worldObservationPrompt($('#cw-sl-message')?.value),
       onTurn:(record,completed,total)=>{
         if(state.guild?.id===guild.id){
           state.turnMessage=completed+'/'+total+' personas have submitted signed local turns.';
@@ -820,5 +966,5 @@ function unbindGuideActivity(){
   state.guideUnsubscribe=null;state.guideActivity=Object.create(null);
   if(state.root)renderSpeaker();
 }
-export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.2.0',open,close,refresh,connectWorld,provisionWorld,attachWorldSource,detachWorldSource,bindGuideActivity,unbindGuideActivity});
+export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.3.0',open,close,setFleetScope,refresh,connectWorld,provisionWorld,attachWorldSource,detachWorldSource,bindGuideActivity,unbindGuideActivity});
 if(typeof globalThis!=='undefined')globalThis.CivweaveStarlingLoungeV1=CivweaveStarlingLoungeV1;
