@@ -410,7 +410,6 @@ $('persona-manifest-file').addEventListener('change',async()=>{
  personaCast=null;personaScene=null;personaCampaign=null;personaRecent=[];
  showCampaign();
  personaWillpower={points:2,max:2,renewEvery:4,lastRenewedTurn:0};showPersonaWillpower();
-showCampaign();
  $('persona-cast').replaceChildren();$('persona-speaker').replaceChildren();
  const file=$('persona-manifest-file').files?.[0];
  if(!file)return;
@@ -440,8 +439,7 @@ $('persona-cast').addEventListener('change',()=>{
  personaScene=null;personaRecent=[];
  const ids=personaRoster();
  if(personaCampaign&&JSON.stringify(ids)!==JSON.stringify(personaCampaign.cast)){
-  personaCampaign=null;showCampaign();
-  personaStatus('Cast changed. The previous local campaign has been detached; export a save before changing cast if you want to keep it.');
+  personaStatus('Cast changed. Your existing campaign is still in memory and can be exported. Restore its cast or start a new what-if campaign before preparing.');
  }
  if(!ids.includes($('persona-speaker').value))$('persona-speaker').value=ids[0]||'';
  if(personaCast)$('persona-import-status').textContent=ids.length+' selected actors; required tiers: '+
@@ -488,17 +486,16 @@ async function personaRun(phase){
      JSON.stringify(personaCampaign.cast)!==JSON.stringify(participants)))
     throw new Error('The saved campaign is bound to its starting scenario and cast. Export it, then choose Start a new what-if campaign.');
    personaStatus('Directing '+participants.length+' character(s) separately with the selected 4B model…');
-   const prior=personaScene||(personaCampaign?{revision:0,turn:personaCampaign.turn}:null);
+   const startingCampaign=personaCampaign||createPersonaCampaign({pack:personaCast,
+    id:'campaign:'+crypto.randomUUID(),ownerId:human.principalId,
+    branchId:'what-if:'+crypto.randomUUID(),title:'Private rehearsal',
+    scenario,stage,cast:participants});
+   const prior=personaScene||{revision:0,turn:startingCampaign.turn};
    personaScene=await prepareDirectedScene({pack:personaCast,stage,scenario,participants,
     goals:['Respect canonical facts and personal knowledge; improvise without silently rewriting historical events.'],
-    branchId:personaCampaign?.branchId||'what-if:pending',
+    branchId:startingCampaign.branchId,
     previousScene:prior,invokeModel:runPersonaSelectedModel});
-   if(!personaCampaign){
-    personaCampaign=createPersonaCampaign({pack:personaCast,
-     id:'campaign:'+crypto.randomUUID(),ownerId:human.principalId,
-     branchId:'what-if:'+crypto.randomUUID(),title:'Private rehearsal',
-     scenario,stage,cast:participants});
-   }
+   personaCampaign=startingCampaign;
    personaWillpower=personaCampaign.willpower;
    rebuildPersonaRecent();showPersonaWillpower();showCampaign();
    personaStatus('Director brief revision '+personaScene.revision+' prepared for '+participants.join(', ')+
@@ -550,3 +547,4 @@ $('persona-prepare').addEventListener('click',()=>personaRun('prepare'));
 $('persona-act').addEventListener('click',()=>personaRun('act'));
 
 showPersonaWillpower();
+showCampaign();
