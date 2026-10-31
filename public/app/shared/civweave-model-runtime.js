@@ -719,7 +719,7 @@
 
   const GGUF_BROWSER_SELECTION_KEY = 'civweave.mobile.gguf-primary.v2';
   const GGUF_BROWSER_ENDPOINT = 'http://127.0.0.1:8080/v1'; // internal routing sentinel, NOT a network server
-  const GGUF_BROWSER_MIN_TIMEOUT_MS = 480000;
+  const GGUF_BROWSER_MIN_TIMEOUT_MS = 780000;
   const FLEET_BINDINGS_KEY = 'civweave.ai.fleet.bindings.v1';
   const GGUF_IMPORT_INDEX_KEY = 'civweave.mobile.gguf.import-index.v1';
   const FLEET_ROLES = ['swift','archive','forge','quill','atlas'];
