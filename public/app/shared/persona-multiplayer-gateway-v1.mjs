@@ -32,7 +32,7 @@ function canMutate(state,actor,command){
   }
   return false;
 }
-export function createPersonaMultiplayerGateway({authenticate,load,writeIfRevision,authorize}={}){
+export function createPersonaMultiplayerGateway({authenticate,load,writeIfRevision,authorize,verifyWorldReceipt}={}){
   if(typeof authenticate!=='function'||typeof load!=='function'||typeof writeIfRevision!=='function')
     throw new TypeError('A real auth provider, storage reader and atomic writer are required.');
   const read=async request=>{
@@ -62,6 +62,16 @@ export function createPersonaMultiplayerGateway({authenticate,load,writeIfRevisi
         throw new Error('Owner, assigned player, or authorized runtime required for this action.');
       if(typeof authorize==='function'&&await authorize({actor,command,state})!==true)
         throw new Error('Campaign action denied by server permission policy.');
+      if(command.type==='resolve-proposal'&&command.outcome==='succeeded'){
+        const proposal=state.events.find(e=>e.id===command.proposalId&&e.type==='npc-proposal');
+        if(!proposal)throw new RangeError('Unknown model action proposal.');
+        // A runtime identity alone is not enough to assert a particular
+        // simulated action succeeded. Validate the actual Worldweaver receipt.
+        if(typeof verifyWorldReceipt!=='function'||await verifyWorldReceipt({
+          worldReceiptId:command.worldReceiptId,proposal,
+          campaignId:state.id,actor,expectedRevision:state.revision
+        })!==true)throw new Error('Verified Worldweaver action receipt required.');
+      }
       const next=applyCampaignEvent(state,command,{
         actor,expectedRevision:request.expectedRevision,authorize:()=>true
       });
