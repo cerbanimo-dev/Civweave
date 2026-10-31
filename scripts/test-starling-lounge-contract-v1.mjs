@@ -7,7 +7,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 test('Lounge imports the one native Collective owner and existing Guild read client',()=>{
  const src=read('public/app/starling-lounge-v1.mjs');
- assert.equal(CivweaveStarlingLoungeV1.version,'1.0.0');
+ assert.equal(CivweaveStarlingLoungeV1.version,'1.1.0');
  assert.match(src,/starling-collective-v1\.mjs/);
  assert.match(src,/starling-collective-tools-v1\.mjs/);
  assert.match(src,/CivweaveGuildQuestsV1/);
@@ -71,4 +71,36 @@ test('Guildkeeper controls local automation while Lounge is open; no hidden host
  assert.match(src,/\.start\(/);
  assert.match(src,/\.stop\(/);
  assert.match(src,/navigator\.locks/);
+});
+
+test('Commune HUD includes the collective cast and system guides without inventing agent status',()=>{
+ const source=read('public/app/starling-lounge-v1.mjs');
+ const css=read('public/app/starling-lounge-v1.css');
+ for(const name of ['weaveling','moss','kamiya','rook','merlin']){
+   assert.match(source,new RegExp(name+":\\\\{"));
+   assert.match(source,new RegExp("/app/assets/ai/"+name+"\\\\.png"));
+ }
+ assert.match(source,/data-sl-ensemble/);
+ assert.match(source,/data-sl-guides/);
+ assert.match(source,/data-sl-view="world"/);
+ assert.match(source,/data-sl-view="operations"/);
+ assert.match(source,/data-sl-world-host/);
+ assert.match(source,/aria-pressed/);
+ assert.match(source,/reduced-motion/);
+ assert.match(css,/prefers-reduced-motion/);
+ assert.match(css,/safe-area-inset-bottom/);
+ assert.match(source,/return \{status:'standby'/);
+ assert.match(source,/status:'working'/);
+ assert.match(source,/\!STARLING_PERSONAS\[state\.selectedAgent\]/);
+ assert.doesNotMatch(source,/setInterval\(|Math\.random\(/);
+});
+
+test('Visual Worldweaver handoff requires a snapshot provider and never creates model authority',()=>{
+ const source=read('public/app/starling-lounge-v1.mjs');
+ assert.match(source,/function attachWorldSource/);
+ assert.match(source,/createWorldMap2DView/);
+ assert.match(source,/function detachWorldSource/);
+ assert.match(source,/getSnapshot/);
+ assert.doesNotMatch(source,/createWorldweaver\(/);
+ assert.match(source,/This is a schematic, not a verified character location/);
 });
