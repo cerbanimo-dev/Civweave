@@ -318,11 +318,13 @@ async function sendApprovedPeerReports(env,stub,origin){
   if(!endpoint)return {ok:false,pending:true,reason:'relay-unconfigured'};
   const url=new URL(endpoint);
   if(url.protocol!=='https:'||url.pathname!=='/api/guild-directory/report')throw new Error('Guild report relay must be an explicitly configured HTTPS Civweave directory endpoint.');
+  const relayToken=clean(env.CIVWEAVE_GUILD_REPORT_RELAY_TOKEN,200);
+  if(!/^[A-Za-z0-9_-]{40,200}$/.test(relayToken))return {ok:false,pending:true,reason:'relay-secret-unconfigured'};
   const queued=await stub.pendingPeerReports();
   for(const row of queued){
     // The directory independently verifies the receipt by fetching the
     // reporting Guild's publicly accessible, immutable approved receipt.
-    const response=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},
+    const response=await fetch(url,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+relayToken},
       body:JSON.stringify({guildId:row.receipt.guildId,origin,ballotId:row.ballotId})});
     const confirmation=response.ok?await response.json().catch(()=>null):null;
     const delivered=response.ok&&confirmation?.ok===true;
@@ -393,9 +395,13 @@ export default{
           if(url.pathname==='/api/guild/governance/nearby'){
             const relay=clean(env.CIVWEAVE_GUILD_REPORT_RELAY_URL,2000);
             if(!relay)return json({ok:false,unavailable:true,error:'Nearby Guild report relay has not been configured.'},503);
+            const relayToken=clean(env.CIVWEAVE_GUILD_REPORT_RELAY_TOKEN,200);
+            if(!/^[A-Za-z0-9_-]{40,200}$/.test(relayToken))return json({ok:false,unavailable:true,error:'Guild report relay credentials not configured.'},503);
             const endpoint=new URL(relay);endpoint.pathname='/api/guild-directory/reports';endpoint.search='';
             endpoint.searchParams.set('guildId',(await stub.status()).guildId);
-            const packet=await fetch(endpoint,{cache:'no-store',headers:{accept:'application/json'}}).then(r=>r.json());
+            const response=await fetch(endpoint,{cache:'no-store',headers:{accept:'application/json',authorization:'Bearer '+relayToken}});
+            if(!response.ok)return json({ok:false,error:'Nearby reports are temporarily unavailable.'},503);
+            const packet=await response.json();
             return json(packet);
           }
           if(url.pathname!=='/api/guild/governance')return json({ok:false,error:'Not found.'},404);
