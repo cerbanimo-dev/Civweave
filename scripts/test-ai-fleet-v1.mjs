@@ -129,6 +129,28 @@ test('Manually unassigned roles stay unassigned across re-scans of 2B and 4B',()
  assert.equal(manual.forge.importId,'saved-4b');
 });
 
+test('Backend buttons persist their selection for browser, Termux and Android APK',()=>{
+ const {fleet,data}=boot('Mozilla/5.0 (Linux; Android 16; A069P)',8);
+ const key='civweave.ai.fleet.backend.v2';
+ assert.equal(fleet.currentBackend(),'browser');
+ for(const backend of ['termux','android','browser']){
+  assert.equal(fleet.setBackend(backend),backend);
+  assert.equal(data.get(key),JSON.stringify(backend),'Stored backend must parse as JSON');
+  assert.equal(fleet.currentBackend(),backend,'Selection must survive the next render');
+ }
+});
+test('Legacy raw-string backend selections remain usable after the fix',()=>{
+ const {fleet,data}=boot('Mozilla/5.0 (Linux; Android 16; A069P)',8);
+ const key='civweave.ai.fleet.backend.v2';
+ data.set(key,'termux');
+ assert.equal(fleet.currentBackend(),'termux');
+ data.set(key,'android');
+ assert.equal(fleet.currentBackend(),'android');
+ data.set(key,'unknown');
+ assert.equal(fleet.currentBackend(),'browser');
+ assert.throws(()=>fleet.setBackend('remote'),/Unsupported local backend/);
+});
+
 test('A missing 4B still allows the installed 2B to serve the full fleet at sufficient RAM',()=>{
  const {fleet}=boot('Mozilla/5.0 (Linux; Android 16; A069P)',8);
  const entries=[{family:'2b',importId:'saved-2b',model:'qwen35-2b-imported-gguf',verified:true}];
