@@ -147,7 +147,7 @@ function updateHeader(layer=document.getElementById(LAYER_ID)){
   layer.dataset.settingsVisibleVersion='v325';return true;
 }
 
-const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.3.0-local-guild-nav';
+const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.3.1-backend-switch-fix';
 function showUnifiedFleet(layer=document.getElementById('cw-settings-v320')){
   const target=layer?.querySelector?.('[data-settings-tab-panel="local-models"]');
   if(!target||!layer?.isConnected||layer.hidden)return false;
