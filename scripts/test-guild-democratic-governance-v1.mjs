@@ -5,7 +5,7 @@ import {webcrypto} from 'node:crypto';
 import {majority,ballotSpec,ballotOutcome,qualifiedContributors,activeGuildVoters,GUILD_CONTRIBUTION_WINDOW_MS} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-v1.mjs';
 import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,
   delegatedRole,isBanned,governanceStatus,reportQueue,reportReceipt,markReportDelivery,
-  openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
+  openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,ensureGovernanceTables} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
 import {distanceKm,deliverVerifiedGuildReport,handleGuildPeerDirectoryRoute} from '../cloudflare/core/src/guild-peer-reports-v1.mjs';
 
 if(!globalThis.crypto)globalThis.crypto=webcrypto;
@@ -271,4 +271,17 @@ test('work review requires an independent rejection quorum and permits corrected
     statement:'I revised the proof with additional independently checkable details.'});
   assert.equal(corrected.status,'pending');
   assert.notEqual(original.id,corrected.id);
+});
+
+test('existing Guild ballot ledger acquires case_id without destroying older votes',()=>{
+  const db=new DatabaseSync(':memory:');
+  db.exec("CREATE TABLE guild_governance_ballots(id TEXT PRIMARY KEY,action TEXT NOT NULL,target_user_id TEXT NOT NULL,proposer_id TEXT NOT NULL,role TEXT,reason_code TEXT,statement TEXT NOT NULL,electorate_json TEXT NOT NULL,required_yes INTEGER NOT NULL,status TEXT NOT NULL,created_at TEXT NOT NULL,expires_at TEXT NOT NULL,resolved_at TEXT,execution_error TEXT)");
+  db.prepare("INSERT INTO guild_governance_ballots(id,action,target_user_id,proposer_id,statement,electorate_json,required_yes,status,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?)")
+    .run('legacy-vote','remove',A,B,'Original vote retained','[]',1,'rejected',NOW(),NOW());
+  const sql={exec(query,...params){const statement=db.prepare(query);
+    return /^\s*(SELECT|PRAGMA)\b/i.test(query)?statement.all(...params):(statement.run(...params),[])}};
+  ensureGovernanceTables(sql);
+  assert.equal(db.prepare("SELECT status FROM guild_governance_ballots WHERE id='legacy-vote'").get().status,'rejected');
+  assert.ok(db.prepare("PRAGMA table_info(guild_governance_ballots)").all().some(row=>row.name==='case_id'));
+  ensureGovernanceTables(sql);
 });
