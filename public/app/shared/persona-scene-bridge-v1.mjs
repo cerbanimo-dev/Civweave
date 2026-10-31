@@ -162,23 +162,38 @@ export async function runSplitMindTurn({
     new Set(voices).size!==2||voices.some(id=>!scene.participants.includes(id)))
     throw new TypeError('Two distinct bound internal voices and the selected-model invoker required.');
   if(needsDirectorRefresh(scene))throw new Error('Scene direction expired: refresh before split-mind acting.');
-  let route='moderator',speaker=null,receipt=null;
+  // Direct control consumes a SHARED pool. For simultaneous overrides, check
+  // all costs and authorizations first: there is never a partial override.
+  const requests=directControl===null?[]:Array.isArray(directControl)?directControl:[directControl];
+  if(requests.length>voices.length||new Set(requests.map(x=>x?.characterId)).size!==requests.length)
+    throw new TypeError('Direct-control requests must name distinct voices; duplicates are prohibited.');
   let resource=regenerateWillpower(willpower,scene.turn);
-  if(directControl!==null){
-    if(!plain(directControl)||!voices.includes(directControl.characterId))
+  const confirmed=[];
+  for(const choice of requests){
+    if(!plain(choice)||!voices.includes(choice.characterId))
       throw new TypeError('Direct control must name a configured internal voice.');
+    if(!Number.isInteger(choice.cost)||choice.cost<1||choice.cost>5)
+      throw new TypeError('A positive integer override cost (1–5) is required.');
     if(typeof authorizeDirectControl!=='function'||
-      authorizeDirectControl({characterId:directControl.characterId,scene,willpower:resource})!==true)
+      authorizeDirectControl({characterId:choice.characterId,scene,willpower:resource})!==true)
       throw new Error('Direct control requires trusted authorization.');
-    const spent=requestDirectControl(resource,{characterId:directControl.characterId,
-      turn:scene.turn,cost:directControl.cost??1});
-    resource=spent.willpower;
-    if(spent.allowed){
-      route='direct';speaker=directControl.characterId;
-      receipt={characterId:speaker,cost:Math.max(1,Math.min(20,Number(directControl.cost)||1)),
-        turn:scene.turn,remaining:resource.points,sceneRevision:scene.revision};
-    }
+    confirmed.push({characterId:choice.characterId,cost:choice.cost});
   }
+  if(confirmed.reduce((sum,x)=>sum+x.cost,0)>resource.points)
+    throw new Error('Insufficient shared willpower for all requested overrides.');
+  // Preserve narrative cast order even if the caller submitted requests backward.
+  const ordered=voices.flatMap(id=>confirmed.filter(x=>x.characterId===id));
+  const receipts=[];
+  for(const choice of ordered){
+    const spent=requestDirectControl(resource,{characterId:choice.characterId,
+      turn:scene.turn,cost:choice.cost});
+    if(!spent.allowed)throw new Error('Insufficient shared willpower for override.');
+    resource=spent.willpower;
+    receipts.push({characterId:choice.characterId,cost:choice.cost,
+      turn:scene.turn,remaining:resource.points,sceneRevision:scene.revision});
+  }
+  const route=receipts.length===2?'dual-direct':receipts.length===1?'direct':'moderator';
+  const speaker=receipts.length===1?receipts[0].characterId:null;
   const answers={};
   for(const id of voices){
     const personal=compileImprovPrompt({pack:p,stage:scene.stage,characterId:id,
@@ -193,9 +208,24 @@ export async function runSplitMindTurn({
     answers[id]={speech:text(v.speech,800),emote:text(v.emote,250),
       proposedActions:arr(v.actions).slice(0,3).map(safeProposal).filter(Boolean)};
   }
-  let publicAnswer;
-  if(route==='direct')publicAnswer=answers[speaker];
-  else {
+  let publicAnswer,spokenTurns=[];
+  if(route==='direct'||route==='dual-direct'){
+    // The outward body can articulate both autonomous perspectives in one
+    // accepted scene beat. Each voice retains its own identity and lines.
+    const outward=ordered.map(({characterId})=>({
+      characterId,speech:text(answers[characterId]?.speech,330),
+      emote:text(answers[characterId]?.emote,180)
+    }));
+    if(outward.some(x=>!x.speech))
+      throw new TypeError('Each overriding voice must produce an outward spoken line.');
+    spokenTurns=outward;
+    const speech=outward.map(x=>(x.characterId==='landry'?'Landry':'Delia')+': '+x.speech).join('\n');
+    const emote=outward.filter(x=>x.emote).map(x=>x.characterId+': '+x.emote).join('; ');
+    // The existing Worldweaver intent gate permits at most three actions per
+    // turn. Both spoken proposals are retained in the separate spokenTurns.
+    const proposedActions=ordered.flatMap(x=>answers[x.characterId].proposedActions).slice(0,3);
+    publicAnswer={speech,emote,proposedActions};
+  }else {
     const request=splitMindModeratorRequest({landryResponse:JSON.stringify(answers[voices[0]]),
       deliaResponse:JSON.stringify(answers[voices[1]]),
       context:scene.scenario+'\\n'+text(playerInput,900),willpower:resource});
@@ -205,8 +235,11 @@ export async function runSplitMindTurn({
   }
   if(!publicAnswer.speech&&!publicAnswer.emote&&!publicAnswer.proposedActions.length)
     throw new TypeError('Outward split-mind response must have speech, expression or action.');
-  return {...publicAnswer,route,internalVoices:answers,willpower:resource,
-    directControlReceipt:receipt,worldChanged:false,directorRevision:scene.revision,
+  return {...publicAnswer,route,speaker,spokenTurns,internalVoices:answers,willpower:resource,
+    // Preserve the single-voice field for existing callers; new callers use the
+    // complete receipts array for atomic dual override accounting.
+    directControlReceipt:receipts.length===1?receipts[0]:null,
+    directControlReceipts:receipts,worldChanged:false,directorRevision:scene.revision,
     sceneTurn:scene.turn};
 }
 
