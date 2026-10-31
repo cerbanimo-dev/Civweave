@@ -30,7 +30,7 @@ function harness(){
    return{fetch:(url,opts)=>node.fetch(new Request(url,opts))};
  }};
  return {env,stores,async request(action,{user='alice',node='arcadia',input,auth=token(user,node),method}={}){
-  const route={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve','approve-both':'/approve-both'}[action];
+  const route={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve','approve-both':'/approve-both','move-draft':'/move-draft','move-approve':'/move-approve'}[action];
   if(route===undefined)throw new Error('Unsupported harness operation');
   const target=new URL('https://guild.example.test'+GUILD_PERSONA_ROUTE+route);
   target.searchParams.set('nodeId',node);
@@ -217,4 +217,77 @@ test('reviewed speech cannot differ from the Worldweaver speak tool and a Guild 
  }
  assert.equal((await h.request('draft',{input:{campaignId,expectedRevision:0,
    characterId:'landry',speech:'One too many'}})).status,409);
+});
+
+test('two authenticated Guild members share one 3D scene; approved movement changes both 3D region and Worldweaver intent',async()=>{
+ const h=harness(),made=await h.request('create',{input:starting}),campaignId=made.data.room.id;
+ assert.equal(made.status,201);
+ const before=await h.request('snapshot',{input:{campaignId}});
+ assert.equal(before.status,200);
+ assert.equal(before.data.motion.revision,0);
+ assert.deepEqual(before.data.motion.actors[0].position,{x:10,y:13,z:0});
+ assert.equal(before.data.motion.region.objects.find(x=>x.id==='actor:landry').position.x,10);
+ const assigned=await h.request('dispatch',{input:{campaignId,expectedRevision:0,
+   command:{type:'assign-player',playerId:'member:bob',roleId:'delia'}}});
+ assert.equal(assigned.status,200);
+ const staged=await h.request('move-draft',{user:'bob',input:{campaignId,expectedRevision:1,
+   characterId:'delia',to:{x:23,y:13,z:0}}});
+ assert.equal(staged.status,200,JSON.stringify(staged.data));
+ const guest=await h.request('snapshot',{user:'bob',input:{campaignId}});
+ assert.equal(guest.status,200);
+ assert.equal(guest.data.pendingMoves.length,0);
+ assert.equal(guest.data.motion.actors[1].position.x,21);
+ const ownerView=await h.request('snapshot',{input:{campaignId}});
+ assert.equal(ownerView.data.pendingMoves.length,1);
+ const approved=await h.request('move-approve',{input:{campaignId,expectedRevision:1,
+   draftId:staged.data.motionDraft.id}});
+ assert.equal(approved.status,200,JSON.stringify(approved.data));
+ assert.equal(approved.data.movement.distance,2);
+ assert.equal(approved.data.motion.revision,1);
+ assert.equal(approved.data.movement.characterId,'delia');
+ assert.equal(approved.data.motion.region.objects.find(x=>x.id==='actor:delia').position.x,23);
+ assert.match(approved.data.worldReceiptId,/^world:/);
+ assert.equal(approved.data.room.events.at(-1).type,'resolve-proposal');
+ const second=await h.request('snapshot',{user:'bob',input:{campaignId}});
+ assert.equal(second.data.motion.actors[1].position.x,23);
+ assert.equal(second.data.motion.movements.length,1);
+ const forged=await h.request('move-approve',{user:'bob',input:{campaignId,
+   expectedRevision:approved.data.room.revision,draftId:staged.data.motionDraft.id}});
+ assert.equal(forged.status,403);
+});
+test('kinematic movement cannot teleport, fly, cross boundaries, ignore player seats or accept forged runtime claims',async()=>{
+ const h=harness(),made=await h.request('create',{input:starting}),campaignId=made.data.room.id;
+ const attempts=[
+  {characterId:'landry',to:{x:22,y:13,z:0}},
+  {characterId:'landry',to:{x:12,y:13,z:1}},
+  {characterId:'landry',to:{x:0,y:13,z:0}},
+ ];
+ for(const attempt of attempts){
+   const result=await h.request('move-draft',{input:{campaignId,expectedRevision:0,...attempt,
+     actor:{kind:'runtime',principalId:'server:persona-world'}}});
+   assert.equal(result.status,400,JSON.stringify(result.data));
+ }
+ const unauthorized=await h.request('move-draft',{user:'mallory',input:{campaignId,
+   expectedRevision:0,characterId:'landry',to:{x:12,y:13,z:0}}});
+ assert.equal(unauthorized.status,403);
+ const scene=await h.request('snapshot',{input:{campaignId}});
+ assert.equal(scene.data.motion.revision,0);
+ assert.equal(scene.data.room.revision,0);
+});
+test('a stale 3D movement proposal cannot overwrite the newer authoritative physics position',async()=>{
+ const h=harness(),made=await h.request('create',{input:starting}),campaignId=made.data.room.id;
+ const first=await h.request('move-draft',{input:{campaignId,expectedRevision:0,
+   characterId:'landry',to:{x:12,y:13,z:0}}});
+ const other=await h.request('move-draft',{input:{campaignId,expectedRevision:0,
+   characterId:'landry',to:{x:11,y:13,z:0}}});
+ assert.equal(first.status,200);assert.equal(other.status,200);
+ const accepted=await h.request('move-approve',{input:{campaignId,expectedRevision:0,
+   draftId:first.data.motionDraft.id}});
+ assert.equal(accepted.status,200,JSON.stringify(accepted.data));
+ const stale=await h.request('move-approve',{input:{campaignId,expectedRevision:accepted.data.room.revision,
+   draftId:other.data.motionDraft.id}});
+ assert.equal(stale.status,409,JSON.stringify(stale.data));
+ const after=await h.request('snapshot',{input:{campaignId}});
+ assert.equal(after.data.motion.actors[0].position.x,12);
+ assert.equal(after.data.motion.revision,1);
 });
