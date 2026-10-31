@@ -141,3 +141,75 @@ test('Local/Guild Fleet scopes are first class and canonical local model invento
  assert.match(settings,/data-ai-fleet-guild/);
  assert.match(settings,/data-ai-fleet-local/);
 });
+
+
+test('Fleet interface contains all rendered Local and Guild sections and valid nested markup',()=>{
+ const source=read('public/app/starling-lounge-v1.mjs');
+ const match=source.match(/root\.innerHTML=`([\s\S]*?)`;/);
+ assert.ok(match,'Lounge contains a static, inspectable initial UI');
+ const markup=match[1];
+ const unique=[
+  'data-sl-local-fleet','data-sl-local-roles','data-sl-local-status',
+  'data-sl-guild-fleet','data-sl-guild-pilots','data-sl-guild-count',
+  'data-sl-simulator-status','data-sl-observation',
+  'data-sl-fallback-dock','data-sl-ensemble','data-sl-world-host',
+  'data-sl-fleet="local"','data-sl-fleet="guild"',
+  'data-sl-move-x','data-sl-move-y'
+ ];
+ for(const key of unique){
+  assert.equal(markup.split(key).length-1,1,key+' must be present exactly once');
+ }
+ const stack=[],voidTags=new Set(['img','input','br','hr','meta','link']),tags=[...markup.matchAll(/<\/?([a-z][a-z0-9-]*)\b[^>]*>/g)];
+ for(const match of tags){
+  const name=match[1],end=match[0].startsWith('</');
+  if(voidTags.has(name))continue;
+  if(!end)stack.push(name);
+  else assert.equal(stack.pop(),name,'mismatched '+name+' container');
+ }
+ assert.deepEqual(stack,[],'no unterminated HUD containers');
+ assert.match(markup,/class="sl-chrome"/);
+ assert.match(markup,/class="sl-stage-dock"/);
+});
+test('Civweave brand chrome and avatar decks use flow-based collision-safe layouts',()=>{
+ const css=read('public/app/starling-lounge-v1.css');
+ const src=read('public/app/starling-lounge-v1.mjs');
+ const brand=css.indexOf('Civweave Fleet Design System');
+ assert.ok(brand>0,'brand design layer installed');
+ const responsive=css.slice(brand);
+ for(const token of [
+  '--sl-cyan:#8af5d2','--sl-gold:#f1c68b','--sl-lilac:#e4b7fa',
+  '.sl-chrome{','.sl-ensemble{','.sl-world-avatars{',
+  '.sl-world-legend,','grid-template-columns:repeat(auto-fit,',
+  '@media(max-width:900px)','@media(max-width:700px)','@media(max-width:380px)',
+  'prefers-reduced-motion','env(safe-area-inset-bottom'
+ ])assert.ok(css.includes(token),'Expected '+token);
+ assert.match(responsive,/\.sl-chrome\{[\s\S]*?position:sticky;top:0/);
+ assert.match(responsive,/\.sl-ensemble\{[\s\S]*?position:relative/);
+ assert.match(responsive,/\.sl-world-avatars\{[\s\S]*?position:relative/);
+ assert.match(responsive,/\.sl-world-legend,[\s\S]*?position:relative/);
+ assert.match(src,/if\(avatars\)avatars.hidden=false/);
+ assert.match(css,/\[data-sl-fleet=local\] \.sl-side\{display:none!important\}/);
+ assert.match(css,/data-sl-view=world\] \[data-sl-panel=world\]/);
+ assert.match(src,/style\.href='\/app\/starling-lounge-v1\.css\?v=brand-responsive-fleet-r5'/);
+});
+test('Schematic building footprints cannot collide at targeted phone and desktop widths',()=>{
+ const intersects=(a,b)=>a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom;
+ const positions=(width,height)=>{
+  const small=width<=700;
+  const positions=small?[[26,29],[74,29],[26,63],[74,63]]:[[14,35],[38,34],[63,35],[86,34]];
+  const buildingWidth=small?Math.min(width*.35,128):Math.max(86,Math.min(width*.16,144));
+  const buildingHeight=small?84:104; // Includes raised ornamental roof
+  return positions.map(([x,y])=>({left:width*x/100-buildingWidth/2,right:width*x/100+buildingWidth/2,
+   top:height*y/100-buildingHeight/2,bottom:height*y/100+buildingHeight/2}));
+ };
+ for(const [width,height] of [[260,310],[300,310],[360,320],[390,320],[600,390],[700,390],[701,420],[900,420],[1100,420]]){
+  const rects=positions(width,height);
+  for(let i=0;i<rects.length;i++)for(let j=i+1;j<rects.length;j++)
+   assert.equal(intersects(rects[i],rects[j]),false,'Building '+i+' and '+j+' collide at '+width+'px');
+ }
+ const css=read('public/app/starling-lounge-v1.css');
+ assert.match(css,/\.sl-building-school\{left:26%;top:29%\}/);
+ assert.match(css,/\.sl-building-forge\{left:74%;top:29%\}/);
+ assert.match(css,/\.sl-building-supply\{left:26%;top:63%\}/);
+ assert.match(css,/\.sl-building-council\{left:74%;top:63%\}/);
+});
