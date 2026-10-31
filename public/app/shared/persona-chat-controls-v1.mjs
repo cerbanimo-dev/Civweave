@@ -36,7 +36,13 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      if(!c)continue;
      const option=document.createElement('option');option.value=id;option.textContent=c.name;control.append(option);
    }
-   if(campaign?.cast.includes(selected))control.value=selected;
+   if(campaign?.cast.includes('landry')&&campaign?.cast.includes('delia')){
+     const option=document.createElement('option');option.value='landry-delia';
+     option.textContent='Landry + Delia (split mind)';control.append(option);
+   }
+   if(campaign?.cast.includes(selected)||selected==='landry-delia'&&campaign?.cast.includes('landry')&&campaign?.cast.includes('delia'))
+     control.value=selected;
+   if(el(root,'control'))el(root,'control').hidden=control.value!=='landry-delia';
  }
  async function model(req){
    const runtime=globalThis.CivweaveModelRuntime;
@@ -70,6 +76,9 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    return reply;
  }
  button.addEventListener('click',()=>{panel.hidden=!panel.hidden;});
+ el(root,'speaker').addEventListener('change',()=>{
+   if(el(root,'control'))el(root,'control').hidden=el(root,'speaker').value!=='landry-delia';
+ });
  el(root,'load').addEventListener('click',async()=>{
    if(loading)return;
    loading=true;stop();
@@ -117,7 +126,11 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      try{
        const id=el(root,'speaker')?.value;
        status('Playing '+id+' with the selected model; no world actions are authorized.');
-       const result=await session.respond({characterId:id,input:small(text,1200)});
+       const selectedControl=id==='landry-delia'?el(root,'control')?.value||null:null;
+       const deviation=el(root,'deviation')?.checked===true;
+       const result=await session.respond({characterId:id,input:small(text,1200),
+         directControl:selectedControl,worldChanged:deviation});
+       if(el(root,'deviation'))el(root,'deviation').checked=false;
        campaign=result.campaign;
        status('Turn '+campaign.turn+' · '+campaign.branchId+' · '+(result.needsRefresh?'4B refresh next cue':'improv ready')+'. Export explicitly to keep progress.');
        return result.packet;
