@@ -29,7 +29,9 @@ export function createGuildPersonaClient({getSession=currentPersonaGuildSession,
  if(typeof getSession!=='function'||typeof send!=='function')throw new TypeError('Guild session and transport required.');
  const request=async(action,input=null)=>{
   const member=realSession(await getSession());
-  const url=new URL(GUILD_PERSONA_ROUTE+(action==='create'?'':action==='snapshot'?'/snapshot':'/dispatch'),member.origin);
+  const suffix={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve'}[action];
+  if(suffix===undefined)throw new TypeError('Unsupported Guild campaign action.');
+  const url=new URL(GUILD_PERSONA_ROUTE+suffix,member.origin);
   url.searchParams.set('nodeId',member.nodeId);
   if(action==='snapshot'){
     if(!id(input?.campaignId))throw new TypeError('Campaign room ID required.');
@@ -56,7 +58,15 @@ export function createGuildPersonaClient({getSession=currentPersonaGuildSession,
     throw new Error('Server returned a different campaign room.');
    if(action==='create'&&packet.room.ownerId!=='member:'+member.userId)
     throw new Error('Campaign owner does not match the authenticated Guild member.');
-   return {room:packet.room,scope:{origin:member.origin,nodeId:member.nodeId,userId:member.userId}};
+   return {room:packet.room,
+     ...(action==='snapshot'?{
+       pendingDrafts:Array.isArray(packet.pendingDrafts)?packet.pendingDrafts:[],
+       world:packet.world||null
+     }:{}),
+     ...(action==='draft'?{draft:packet.draft}:{}),
+     ...(action==='approve'?{worldReceiptId:packet.worldReceiptId,
+       world:packet.world,speech:packet.speech}:{}),
+     scope:{origin:member.origin,nodeId:member.nodeId,userId:member.userId}};
   }catch(error){if(error.name==='AbortError')throw new Error('Guild campaign request timed out. Refresh before retrying a write.');throw error}
   finally{clearTimeout(timer)}
  };
@@ -76,6 +86,10 @@ export function createGuildPersonaClient({getSession=currentPersonaGuildSession,
    },
    snapshot:campaignId=>request('snapshot',{campaignId}),
    dispatch:(campaignId,expectedRevision,command)=>request('dispatch',{campaignId,expectedRevision,command}),
+   draft:(campaignId,expectedRevision,{characterId,speech,emote,actions})=>
+     request('draft',{campaignId,expectedRevision,characterId,speech,emote,actions}),
+   approve:(campaignId,expectedRevision,draftId)=>
+     request('approve',{campaignId,expectedRevision,draftId}),
    validateRoom:(raw,{pack})=>importCampaignSnapshot(JSON.stringify(raw),{pack})
  });
 }
