@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 test('same canonical chat composer presents opt-in campaign controls without alternate transcript',()=>{
  const s=read('../public/app/guide-chat-surface-v350.js');
- for(const name of ['data-persona-toggle','data-persona-panel','data-persona-pack','data-persona-save' ,'data-persona-speaker','data-persona-control','data-persona-deviation','data-persona-director-model','data-persona-actor-model']){
+ for(const name of ['data-persona-toggle','data-persona-panel','data-persona-pack','data-persona-inspect','data-persona-cast-list','data-persona-stage','data-persona-scenario','data-persona-new','data-persona-save' ,'data-persona-speaker','data-persona-control','data-persona-deviation','data-persona-director-model','data-persona-actor-model']){
    assert.match(s,new RegExp(name));
  }
  assert.match(s,/personaChatAdapter\.respond/);
@@ -15,6 +15,7 @@ test('same canonical chat composer presents opt-in campaign controls without alt
 test('persona import is deliberately user-selected and excludes automatic cloud or hidden memory merging',()=>{
  const c=read('../public/app/shared/persona-chat-controls-v1.mjs');
  assert.match(c,/importCampaignSnapshot/);
+ assert.match(c,/createPersonaCampaign/);
  assert.match(c,/validatePersonaPack/);
  assert.match(c,/endpointLeavesDevice/);
  assert.match(c,/consent/);
