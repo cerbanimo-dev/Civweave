@@ -4,7 +4,8 @@ import { DatabaseSync } from 'node:sqlite';
 import {webcrypto} from 'node:crypto';
 import {majority,ballotSpec,ballotOutcome,qualifiedContributors,activeGuildVoters,GUILD_CONTRIBUTION_WINDOW_MS} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-v1.mjs';
 import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,
-  delegatedRole,isBanned,governanceStatus,reportQueue,reportReceipt,markReportDelivery} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
+  delegatedRole,isBanned,governanceStatus,reportQueue,reportReceipt,markReportDelivery,
+  openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
 import {distanceKm,deliverVerifiedGuildReport,handleGuildPeerDirectoryRoute} from '../cloudflare/core/src/guild-peer-reports-v1.mjs';
 
 if(!globalThis.crypto)globalThis.crypto=webcrypto;
@@ -201,4 +202,54 @@ test('nearby report relay and inbox reject anonymous reads and writes even when 
   assert.equal((await handleGuildPeerDirectoryRoute(forged,env)).status,403);
   const disabled=await handleGuildPeerDirectoryRoute(read,{DB:env.DB});
   assert.equal(disabled.status,503);
+});
+
+test('disciplinary case provides 24-hour response window before a sanction ballot can start',()=>{
+  const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A,'physical-check-in');
+  const initial=Date.now();
+  assert.throws(()=>proposeGovernance(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C,
+    statement:'This should not bypass the right to respond.'}),/case/i);
+  const opened=openGovernanceCase(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C,
+    statement:'The subject must have a reasonable opportunity to respond.',now:initial});
+  assert.equal(opened.status,'notice');
+  assert.ok(Date.parse(opened.noticeUntil)-initial>=24*3600000);
+  assert.throws(()=>proposeGovernance(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C,caseId:opened.id,
+    statement:'The subject must have a reasonable opportunity to respond.',now:initial}),/notice/i);
+  const replied=respondToGovernanceCase(f.sql,{actorId:C,caseId:opened.id,
+    response:'I dispute this claim and ask other members to review the evidence.',now:initial+1000});
+  assert.match(replied.response,/dispute/);
+  assert.throws(()=>respondToGovernanceCase(f.sql,{actorId:B,caseId:opened.id,
+    response:'An unauthorized user should not impersonate the subject.'}),/target/i);
+  const ballot=proposeGovernance(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C,caseId:opened.id,
+    statement:'The subject must have a reasonable opportunity to respond.',now:initial+25*3600000});
+  assert.equal(ballot.status,'open');
+  assert.equal(ballot.caseId,opened.id);
+  assert.equal(f.memberCount(),3);
+});
+test('a drafted quest publication never grants proposal power without accepted work or physical proof',()=>{
+  const f=fixture();[A,B,C].forEach(id=>f.member(id));
+  f.contributor(A,'published-quest');
+  assert.throws(()=>openGovernanceCase(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C,
+    statement:'Publishing a Quest alone is not proof of productive work.'}),/verified contribution/);
+  const proof=submitWorkProof(f.sql,{actorId:A,questId:'guild-quest:'+'a'.repeat(64),
+    statement:'I completed the published work; the supplied record is ready for independent review.'});
+  assert.equal(proof.status,'pending');
+  assert.throws(()=>reviewWorkProof(f.sql,{actorId:A,proofId:proof.id,decision:'accept'}),/independent/i);
+  const one=reviewWorkProof(f.sql,{actorId:B,proofId:proof.id,decision:'accept'});
+  assert.equal(one.status,'pending'); // 3-person Guild requires two independent reviewers
+  const two=reviewWorkProof(f.sql,{actorId:C,proofId:proof.id,decision:'accept'});
+  assert.equal(two.status,'accepted');
+  assert.equal(governanceStatus(f.sql,{actorId:A}).actorEligible,true);
+  assert.equal(reviewWorkProof(f.sql,{actorId:B,proofId:proof.id,decision:'accept'}).status,'accepted');
+});
+test('single member cannot self-approve completion, two-member Guild needs independent reviewer',()=>{
+  const one=fixture();one.member(A);
+  const only=submitWorkProof(one.sql,{actorId:A,questId:'guild-quest:'+'b'.repeat(64),
+    statement:'This work is awaiting someone else to independently review it.'});
+  assert.equal(only.status,'pending');
+  assert.throws(()=>reviewWorkProof(one.sql,{actorId:A,proofId:only.id,decision:'accept'}),/independent/i);
+  const duo=fixture();duo.member(A);duo.member(B);
+  const proof=submitWorkProof(duo.sql,{actorId:A,questId:'guild-quest:'+'c'.repeat(64),
+    statement:'This work can be reviewed by the other Guild member.'});
+  assert.equal(reviewWorkProof(duo.sql,{actorId:B,proofId:proof.id,decision:'accept'}).status,'accepted');
 });
