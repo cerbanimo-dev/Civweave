@@ -1,3 +1,4 @@
+import {handleGuildPeerDirectoryRoute} from './guild-peer-reports-v1.mjs';
 import {registerPublicGuildEdge} from './guild-directory.mjs';
 
 const VERSION='civweave-public-guild-directory-v1';
@@ -37,6 +38,8 @@ export default{
   async fetch(request,env){
     if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
     const url=new URL(request.url);
+    const guildPeerReport=await handleGuildPeerDirectoryRoute(request,env);
+    if(guildPeerReport)return guildPeerReport;
     try{
       if(request.method==='GET'&&url.pathname==='/api/health')return json({ok:true,service:VERSION,d1:Boolean(env?.DB),publicGuildDirectory:true});
       if(request.method==='GET'&&url.pathname==='/api/nodes')return await listNodes(env,request);
