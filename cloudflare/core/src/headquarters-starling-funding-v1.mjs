@@ -34,16 +34,11 @@ export async function publicHeadquartersFundingStatus(edge) {
   // No new privileges: the aggregate exposes neither buyer emails nor payment identifiers.
   let fundedCents = 0, paidContributions = 0;
   if (edge.db) {
-    const rows = await edge.db.prepare(
-      "SELECT gross_cents,backing_cents,refunded_gross_cents,disputed_gross_cents FROM headquarters_starling_contributions WHERE settled_at IS NOT NULL"
-    ).all();
-    for (const row of (rows.results || [])) {
-      fundedCents += residualBackingCents({
-        grossCents: Number(row.gross_cents), backingCents: Number(row.backing_cents),
-        refundedGrossCents: Number(row.refunded_gross_cents || 0), disputedGrossCents: Number(row.disputed_gross_cents || 0)
-      });
-      paidContributions++;
-    }
+    const aggregate = await edge.db.prepare(
+      "SELECT COUNT(*) AS paid_count, COALESCE(SUM(MAX(0,backing_cents - CAST((backing_cents * MIN(gross_cents,refunded_gross_cents + disputed_gross_cents) + gross_cents - 1) / gross_cents AS INTEGER))),0) AS funded_cents FROM headquarters_starling_contributions WHERE settled_at IS NOT NULL"
+    ).first();
+    fundedCents = Math.max(0, Number(aggregate?.funded_cents || 0));
+    paidContributions = Math.max(0, Number(aggregate?.paid_count || 0));
   }
   return Object.freeze({
     schema: HQ_STARLING_FUNDING_SCHEMA, enabled, donations: false, acceptsGuestCheckout: enabled,
@@ -137,7 +132,11 @@ export async function handleHeadquartersFundingPaymentEvent(edge, event) {
     return settleHeadquartersFundingCheckout(edge, object);
   }
   if (!['charge.refunded','charge.dispute.created','charge.dispute.funds_withdrawn','charge.dispute.funds_reinstated'].includes(event.type)) return { matched: false };
-  const row = await edge.db.prepare('SELECT * FROM headquarters_starling_contributions WHERE stripe_charge_id=?1').bind(object.id).first();
+  const chargeId = event.type.startsWith('charge.dispute.') ? clean(object.charge) : clean(object.id);
+  if (!chargeId) return { matched: false };
+  let row;
+  try { row = await edge.db.prepare('SELECT * FROM headquarters_starling_contributions WHERE stripe_charge_id=?1').bind(chargeId).first(); }
+  catch (cause) { if (/no such table: headquarters_starling_contributions/i.test(String(cause?.message||''))) return { matched:false }; throw cause; }
   if (!row) return { matched: false };
   const gross = Number(row.gross_cents), updated = new Date().toISOString();
   if (event.type === 'charge.refunded') {
@@ -146,7 +145,6 @@ export async function handleHeadquartersFundingPaymentEvent(edge, event) {
       .bind(refunded,updated,row.contribution_id).run();
   } else {
     const disputed = event.type === 'charge.dispute.funds_reinstated' ? 0 : Math.min(gross,Number(object.amount || 0));
-    // A Stripe dispute object refers to the charge via charge, not id.
     await edge.db.prepare("UPDATE headquarters_starling_contributions SET disputed_gross_cents=?1,updated_at=?2 WHERE contribution_id=?3")
       .bind(disputed,updated,row.contribution_id).run();
   }
