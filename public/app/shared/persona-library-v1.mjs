@@ -50,16 +50,20 @@ export function availableKnowledge(input,characterId,stage){
     (Number.isInteger(e.knownFrom?.[characterId])?e.knownFrom[characterId]:e.stage)<=stage)
     .map(e=>({id:e.id,stage:e.stage,summary:e.summary,source:e.source}));
 }
-const compactCharacter=c=>({id:c.id,name:c.name,role:c.role,voice:safe(c.voice,1000),
+// Old freeform 'emotes' excerpts are unreviewed and can mention future plot.
+const safeEmotes=(c,stage)=>array(c.verifiedEmotes)
+  .filter(e=>e&&e.verified===true&&Number.isInteger(e.stage)&&e.stage<=stage&&safe(e.source,180))
+  .slice(0,8).map(e=>safe(e.text,240)).filter(Boolean);
+const compactCharacter=(c,stage)=>({id:c.id,name:c.name,role:c.role,voice:safe(c.voice,1000),
     traits:array(c.traits).slice(0,20),wants:array(c.wants).slice(0,20),
-    fears:array(c.fears).slice(0,20),emotes:array(c.emotes).slice(0,12)});
+    fears:array(c.fears).slice(0,20),emotes:safeEmotes(c,stage)});
 /** One 4B call prepares scene-specific instructions for many 0.8B actors. */
 export function createDirectorRequest({pack,stage,scenario,participants,goals=[],branchId='canon'}={}){
   const p=validatePersonaPack(pack);
   if(!Number.isInteger(stage)||stage<0||!safe(scenario,8000))throw new TypeError('Scenario and numbered stage required.');
   const ids=array(participants);
   if(!ids.length||ids.length>24||!unique(ids))throw new TypeError('Choose 1–24 distinct characters.');
-  const cast=ids.map(id=>compactCharacter(member(p,id)));
+  const cast=ids.map(id=>compactCharacter(member(p,id),stage));
   const awareness=Object.fromEntries(ids.map(id=>[id,availableKnowledge(p,id,stage).map(e=>e.id)]));
   // A single multi-character director must see only common knowledge. A
   // character's private memories are directed in an isolated request below.
@@ -106,7 +110,7 @@ export function compileImprovPrompt({pack,stage,characterId,scene,directives,his
   if(!array(d.knownEventIds).every(id=>allowed.has(id)))throw new Error('Director knowledge is not authorized.');
   const events=availableKnowledge(p,characterId,stage);
   const selected=events.filter(e=>d.knownEventIds.includes(e.id));
-  const sample=array(c.emotes).slice(0,6).map(x=>safe(x,250));
+  const sample=safeEmotes(c,stage);
   return [
     'FICTIONAL PERSONA — '+safe(c.name,100),
     'Voice: '+safe(c.voice,1200),
@@ -201,7 +205,7 @@ export function createPrivateDirectorRequest({pack,stage,scenario,characterId,pa
   const memory=availableKnowledge(p,characterId,stage);
   const payload={scenario:safe(scenario,8000),branchId,stage,targetCharacter:characterId,
     goals:array(goals).slice(0,16).map(x=>safe(x,350)),
-    character:compactCharacter(target),
+    character:compactCharacter(target,stage),
     others:otherIds.filter(id=>id!==characterId).map(id=>({id,name:member(p,id).name})),
     knownEvents:memory,allowedEventIds:memory.map(e=>e.id),
     output:{characters:{[characterId]:{characterGoal:'string',emotion:'string',instructions:'string',
