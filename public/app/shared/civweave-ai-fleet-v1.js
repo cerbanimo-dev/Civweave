@@ -147,7 +147,7 @@ async function connectInstalledGGUF(layer,panel,sequence){
  const message=panel.querySelector('[data-ai-fleet-message]');
  try{
   // Only manifests + OPFS shard headers are read; no engine, inference or download.
-  const gguf=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v5-opfs-progress');
+  const gguf=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install');
   const entries=await gguf.installedImports({verify:true});
   if(sequence!==inventorySequence||layer.hidden||!panel.isConnected)return;
   const previous=read(BINDING_KEY,{});
@@ -199,7 +199,7 @@ const BACKENDS=Object.freeze({
  termux:{label:'Termux server',detail:'llama.cpp · localhost 8080 · explicit server test'},
  android:{label:'Android APK backend',detail:'Native Starling bridge · installed wrapper required'}
 });
-const GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v8-prefill-observer';
+const GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install';
 const STYLE_ID='cw-ai-fleet-style-v2';
 function currentBackend(){const value=read(BACKEND_KEY,'browser');return BACKENDS[value]?value:'browser'}
 function setBackend(value){if(!BACKENDS[value])throw Error('Unsupported local backend.');localStorage.setItem(BACKEND_KEY,value);return value}
