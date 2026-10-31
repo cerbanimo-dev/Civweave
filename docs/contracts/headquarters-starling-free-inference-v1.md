@@ -55,11 +55,12 @@ Priority weights guide queued proposals, not rigid quotas. All weights refer to 
 
 | Priority | Workstream | Nominal share | Example durable output |
 | --- | --- | ---: | --- |
-| 1 | Worldweaver + Moss Learning Journeys | 40% | Compact learning-workshop template with explanation, interactive stations, quiz rubric and low-power 2D projection |
+| 1 | Worldweaver + Moss Learning Journeys | 35% | Compact learning-workshop template with explanation, interactive stations, quiz rubric and low-power 2D projection |
 | 2 | Cross-system Quest mixes | 25% | Learn → practice → build → verify → help/coordinate Quest scaffold, with references to the respective owners |
 | 3 | Simulated learner, accessibility and quality review | 20% | Offline accessibility checks, NPC rehearsal notes, clarity/factual/provenance audits and bounded correction proposals |
 | 4 | Documentation, adaptation and distribution | 10% | Versioned lesson adaptation, translations where verified, citations, install notes and text-only fallbacks |
-| 5 | Experimental improvements | 5% | Research questions, template gap analysis and proposed changes to future tools; no autonomous code deployment |
+| 5 | Civic-art and storytelling releases | 5% | Original public-interest satire, reflective interactive media and manipulation-literacy stories that may also be adapted into learning workshops |
+| 6 | Experimental improvements | 5% | Research questions, template gap analysis and proposed changes to future tools; no autonomous code deployment |
 
 Work may be carried across several days. Weights can yield to urgent review/blockers without ever bypassing the hard budget. Prefer a completed, tested artifact to a high volume of unfinished idea drafts.
 
