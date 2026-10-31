@@ -4,7 +4,7 @@
 
 - Core behavior is `public/app/shared/persona-library-v1.mjs`, a provider-neutral **shared capability**. It **does not** own the chat composer, model runtime, world simulator, storage, or verification of the actor.
 - The shared chat surface is the only chat/event input owner. Worldweaver remains the sole NPC tool-intent authority; a `worldweaverNpcCommand` is an *unexecuted* command proposal. Use the existing AI Fleet to select actual installed model weights.
-- This increment exports the scene brief, prompt, continuity and willpower primitives. UI activation, model invocations, persistence and world-adapter wiring are **not yet included**. No assertion of a working deployed game is made.
+- This increment also exports the injected-invoker bridge `public/app/shared/persona-scene-bridge-v1.mjs`. Its `prepareDirectedScene`, `performPersonaTurn`, `runSplitMindTurn` and `queuePersonaActionIntents` work with the existing selected-model adapter and Worldweaver's authenticated dispatch. An end-user UI route, on-device pack installer, durable saved sessions and automatic speaker scheduling are **not yet included**. No assertion of a working deployed game is made.
 
 ## Pack and privacy
 
@@ -17,9 +17,9 @@ Characters have `modelTier` (deep role reasoning) and `improvTier: '0.8b'` (per-
 ## 4B / 0.8B hierarchy
 
 1. Author/player submits a scenario, participating characters, world branch, point in story (`stage`), desired beats and optional forbidden events.
-2. A deterministic reader restricts source events to current story stage; the 4B director receives canon and a per-character *awareness map*. **Future plot facts are not sent to it** in a reader-facing session.
-3. 4B returns JSON keyed by character: `characterGoal`, `emotion`, `instructions`, `knownEventIds`, `escalateWhen`, `improvFreedom`. `validateDirectorResponse` rejects event references that actor has not personally witnessed/experienced.
-4. A character's 0.8B live improv context includes permanent persona, exemplars, character-visible memory, recent speech and the director's current instructions. Director updates when world changes invalidate the brief, when a trigger is reported, or when the scenario branches.
+2. A deterministic reader restricts source events to character-visible facts at the current story stage. A shared multi-character 4B request contains only facts common to **all** selected actors. `prepareDirectedScene` instead uses **one isolated 4B director call per character** so private memories cannot leak through another character's direction.
+3. For each character, 4B returns JSON keyed by character: `characterGoal`, `emotion`, `instructions`, `knownEventIds`, `escalateWhen`, `improvFreedom`. `validateDirectorResponse` rejects event references that actor has not personally witnessed/experienced.
+4. A character's 0.8B live improv context includes permanent persona, exemplars, character-visible memory, recent speech and the director's current instructions. Direction expires after four accepted turns by default or when a trusted world change invalidates the brief. The caller advances turns explicitly with `advanceSceneTurn`. An optional Worldweaver snapshot revision prevents stale director output from being published.
 5. Model dialogue and action proposals are **not** authoritative canonical records. The local runtime logs a proposal; Worldweaver validates and acknowledges environment changes, including actor permissions. A director/human must review statements that could contradict canon or declare a new consequential fact.
 6. On meaningful deviation, write an explicit `what-if` branch ID. Historical canon remains immutable; player changes produce a distinct event log.
 7. Save and resume must persist branch ID, story stage, last scene brief revision, per-character awareness and willpower turn counters. Multiple players and NPCs share a trusted world state, **not** a model-written diary.
@@ -53,4 +53,17 @@ Willpower: shared 2-point pool by default, +1 per 4 completed simulation turns (
 
 ## Executable contracts
 
-Run `node --test scripts/test-persona-library-v1.mjs` as a standalone capability test before integration. Future tests: director invalidation, multi-user race/conflict, spoiler isolation, Worldweaver tool authorization, deterministic branch replay, memory budgets and 0.8B characterization quality.
+Run `node --test scripts/test-persona-library-v1.mjs scripts/test-persona-scene-bridge-v1.mjs`. The CI contract tests 4B private instruction isolation, 0.8B structured acting, Worldweaver tool-intent queueing, stale world revision, 2B Landry and 2B Delia with 0.8B moderated expression and authorized willpower bypass. Future tests: director invalidation, multi-user race/conflict, spoiler isolation, Worldweaver tool authorization, deterministic branch replay, memory budgets and 0.8B characterization quality.
+
+## Present bridge protocol
+
+- `prepareDirectedScene({pack,stage,scenario,participants,invokeModel,world?})`: serial 4B JSON director calls using only the designated character's memories. Fails closed on invalid output or concurrent world-state modification.
+- `performPersonaTurn({pack,scene,characterId,playerInput,invokeModel})`: one 0.8B JSON acting call, no automatic world write. Returns `speech`, `emote`, action **proposals** and director-refresh flag.
+- `queuePersonaActionIntents({world,npcId,actor,pack,characterId,turnResult})`: checks the bound principal, model and persona before invoking canonical `world.dispatch({type:'queue-actions'})`. All intents stay queued until runtime acknowledgment.
+- `runSplitMindTurn({pack,scene,invokeModel,willpower,directControl?,authorizeDirectControl?})`: two serial 2B internal calls and a 0.8B outward moderator unless a trusted authority approves a named voice, a deterministic spend succeeds and a receipt is returned. The moderator never invents a spend. World mutations remain separate.
+- `advanceSceneTurn(scene,{expectedTurn,worldChanged?})`: compare-and-advance of accepted local turn state. This is **not** an authority to approve an action or increment a multiplayer world.
+- The bridge recognizes the existing Civweave selected-model result envelopes `{status:'success',outputJson:...}` and `{outputText:'...'}` as well as OpenAI-compatible chat completion messages. Only structured JSON is accepted. A reported failure aborts.
+
+### Author pack v2 (not in GitHub)
+
+The private author zip stores 51 curated names, 219 indexed source scenes and 1,016 **unverified** grammatical-action candidates. These candidate excerpts are a source review work queue, **not facts, witnessed memories or dialogue training labels**. Ten previously curated event anchors remain the only promoted events. A reader-facing package must be compiled with an explicit publication/spoiler policy and omit unapproved manuscript content.
