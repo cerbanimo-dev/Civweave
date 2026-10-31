@@ -57,6 +57,9 @@ jobs:
           const ui=fs.readFileSync('public/app/guild-symbol-v1.js','utf8');
           const app=fs.readFileSync('public/app/working-campus-v440.html','utf8');
           if(!edge.includes('this.ctx.storage.transactionSync'))throw Error('Atomic approval/action transaction is missing');
+          if(!edge.includes('await stub.pendingPeerReports()'))throw Error('Approved report outbox is not awaited for retry');
+          const relay=fs.readFileSync('cloudflare/core/src/guild-peer-reports-v1.mjs','utf8');
+          if(!relay.includes('authorizedRelay(request,env)'))throw Error('Private report inbox is not server-authenticated');
           if(!edge.includes("action==='remove-member')throw"))throw Error('Founder bypass is not disabled');
           if(owner.includes('data-gm-action="remove-member"'))throw Error('Unilateral remove button remains');
           if(!ui.includes('data-guild-ui-action="council"'))throw Error('Council is not reachable from Guild tab');
