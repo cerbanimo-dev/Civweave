@@ -1,12 +1,15 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v38-persona-guild-rehearsal';
+const REVISION='shell-assets-v1-repair-v39-persona-3d-motion';
 const OPTIONAL=['/app/action-board-v1.css','/app/action-board-v1.mjs','/app/shared/action-board-core-v1.mjs','/app/shared/quest-pathway-map-v1.js','/app/shared/quest-pathway-map-v1.css','/app/assets/ai/weaveling-review-sprites-v1.png','/app/assets/ai/moss-review-sprites-v1.png','/app/assets/ai/rook-review-sprites-v1.png','/app/assets/ai/merlin-review-sprites-v1.png','/app/installer-repair-only-v2.js','/app/starling-collective-v1.js','/app/starling-collective-v1.css','/app/starling-integration-v1.js','/app/guild-starling-client-v1.js','/app/assets/ai/lari-review-sprites-v1.png','/app/assets/ai/kamiya-review-sprites-v1.png','/app/shared/guide-outcome-scene-v1.js','/app/shared/guide-outcome-scene-v1.css'];
 const OPTIONAL_PERSONA=[
   '/app/shared/persona-library-v1.mjs',
   '/app/shared/persona-scene-bridge-v1.mjs',
   '/app/shared/persona-campaign-v1.mjs',
   '/app/shared/persona-chat-turn-v1.mjs',
+  '/app/shared/worldweaver-persona-motion-v1.mjs',
+  '/app/shared/worldweaver-opensim-geometry-v1.mjs',
+  '/app/shared/worldweaver-3d-preview-v1.mjs',
   '/app/shared/persona-chat-controls-v1.mjs',
   '/app/shared/guild-persona-client-v1.mjs',
   '/app/tools/worldweaver-performance-lab-v1.mjs',
