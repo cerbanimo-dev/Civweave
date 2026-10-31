@@ -24,7 +24,7 @@ test('explicit Guild hosting sends only selected cast ID/name and scene, never u
   stage:2,scenario:'A hallway',confirmedShare:true});
  assert.equal(output.room.id,'room:abc');
  const text=requests[0].options.body;
- assert.doesNotMatch(text,/SECRET|privateMemories|voice|events|source/i);
+ assert.doesNotMatch(text,/SECRET|privateMemories|voice|events|sourceText|unpublishedExcerpt/i);
  assert.match(text,/"packId":"private-source"/);
  assert.equal(requests[0].options.credentials,'omit');
  assert.match(requests[0].options.headers.authorization,/^Bearer /);
