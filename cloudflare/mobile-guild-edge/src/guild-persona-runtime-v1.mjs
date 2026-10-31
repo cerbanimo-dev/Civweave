@@ -83,6 +83,8 @@ export async function approveNpcDraft(tx,{nodeId,room,actor,input}){
  const dk=draftKey(nodeId,room.id,draftId);
  const draft=await tx.get(dk);
  if(!draft||draft.status==='approved')deny('NPC draft not found or already approved.',404);
+ if(draft.submittedBy!==room.ownerId&&room.seats[draft.submittedBy]!==draft.characterId)
+   deny('The draft author no longer holds the assigned character seat.',403);
  const actions=allowedActions(draft.actions);
  if(draft.campaignRevision>room.revision)deny('Invalid draft timeline.',409);
  const actorOwner={kind:'human',principalId:room.ownerId};
