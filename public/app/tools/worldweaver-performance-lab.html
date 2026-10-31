@@ -95,6 +95,11 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <label for="persona-speaker">Performing character</label><select id="persona-speaker"></select>
 <label for="persona-director-model">Installed 4B director model ID (Ollama or compatible)</label><input id="persona-director-model" value="qwen3.5:4b" maxlength="100">
 <label for="persona-actor-model">Installed 0.8B improv model ID (Ollama or compatible)</label><input id="persona-actor-model" value="qwen3.5:0.8b" maxlength="100">
+<label for="persona-inner-model">Installed 2B internal voice model (Landry / Delia)</label><input id="persona-inner-model" value="qwen3.5:2b" maxlength="100">
+<label class="check" for="persona-split-mode"><input id="persona-split-mode" type="checkbox"> Rehearse Landry + Delia as two internal 2B voices and one outward 0.8B moderator</label>
+<label for="persona-direct-control">Optional author-simulated willpower intervention</label>
+<select id="persona-direct-control"><option value="">No override: let the moderator combine the voices</option><option value="landry">Landry spends 1 willpower to speak directly</option><option value="delia">Delia spends 1 willpower to speak directly</option></select>
+<p id="persona-willpower" class="compact">Split-mind willpower: 2/2, restores 1 every four accepted rehearsal turns. Author-only demonstration of the mechanic.</p>
 <div class="controls"><button id="persona-prepare" type="button">Prepare scenario with 4B</button></div>
 <label for="persona-player-cue">One player cue / improvised question</label><textarea id="persona-player-cue" maxlength="1500" rows="2" placeholder="What do you say or try?"></textarea>
 <div class="controls"><button id="persona-act" type="button">Preview character's next action</button></div>
