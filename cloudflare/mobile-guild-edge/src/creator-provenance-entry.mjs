@@ -241,7 +241,7 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
   }
   memberDirectory(){
     this.ensureResidentTables();
-    return [...this.sql.exec('SELECT node_id,user_id,seat_class,created_at,last_seen_at FROM resident_members ORDER BY created_at LIMIT 100')].map(row=>({nodeId:row.node_id,userId:row.user_id,seatClass:row.seat_class,createdAt:row.created_at,lastSeenAt:row.last_seen_at}));
+    return [...this.sql.exec('SELECT node_id,user_id,seat_class,created_at,last_seen_at FROM resident_members ORDER BY created_at LIMIT 100')].map(row=>({nodeId:row.node_id,userId:row.user_id,seatClass:row.seat_class,role:delegatedRole(this.sql,row.user_id),createdAt:row.created_at,lastSeenAt:row.last_seen_at}));
   }
   removeResident(userId){
     this.ensureResidentTables();const id=loginUserId(userId);
@@ -290,10 +290,10 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
       const members=Number([...this.sql.exec('SELECT COUNT(DISTINCT user_id) AS count FROM resident_members')][0]?.count||0);const seatLimit=this.onboardingStatus()?.unlockedSlots||COMMUNITY_SEAT_LIMIT;if(members>=seatLimit)return{ok:false,status:409,error:'This Guild has no Citizen slots available right now.'};const stamp=new Date().toISOString();this.sql.exec('INSERT INTO resident_members (node_id,user_id,credential_hash,seat_class,created_at,last_seen_at) VALUES (?,?,?,?,?,?)',nodeId,userId,credentialHash,'community',stamp,stamp)
     }
     const stamp=new Date().toISOString(),expiresAt=new Date(Date.now()+SESSION_TTL_MS).toISOString(),token=randomToken();this.sql.exec('UPDATE resident_members SET last_seen_at=? WHERE node_id=? AND user_id=?',stamp,nodeId,userId);this.sql.exec('DELETE FROM resident_sessions WHERE expires_at<=?',stamp);this.sql.exec('INSERT OR REPLACE INTO resident_sessions (token_hash,node_id,user_id,created_at,expires_at) VALUES (?,?,?,?,?)',await sessionTokenHash(token),nodeId,userId,stamp,expiresAt);
-    return{ok:true,idempotent,nodeId,userId,seatClass:delegatedRole(this.sql,userId)==='guildkeeper'?'guildkeeper':'community',token,origin:clean(origin,2000),expiresAt,member:{nodeId,userId,seatClass:'community',billingStatus:'free',createdAt:existingAny?.created_at||stamp,lastSeenAt:stamp},quota:this.quotaFor(nodeId,userId),capacity:this.status()};
+    return{ok:true,idempotent,nodeId,userId,seatClass:delegatedRole(this.sql,userId)==='guildkeeper'?'guildkeeper':'community',token,origin:clean(origin,2000),expiresAt,member:{nodeId,userId,seatClass:delegatedRole(this.sql,userId)==='guildkeeper'?'guildkeeper':'community',billingStatus:'free',createdAt:existingAny?.created_at||stamp,lastSeenAt:stamp},quota:this.quotaFor(nodeId,userId),capacity:this.status()};
   }
   sessionForHash({tokenHash,requestedNodeId}={}){
-    this.ensureResidentTables();const stamp=new Date().toISOString();this.sql.exec('DELETE FROM resident_sessions WHERE expires_at<=?',stamp);const row=[...this.sql.exec('SELECT token_hash,node_id,user_id,created_at,expires_at FROM resident_sessions WHERE token_hash=? LIMIT 1',tokenHash)][0];if(!row)return{ok:false,status:401,error:'Guild capacity session is invalid or expired.'};const expected=this.resolveResidentNode(requestedNodeId);if(expected&&row.node_id!==expected)return{ok:false,status:403,error:'Guild capacity session belongs to a different starter node.'};const member=this.memberRow(row.node_id,row.user_id);if(!member)return{ok:false,status:401,error:'Guild resident no longer exists.'};return{ok:true,nodeId:row.node_id,userId:row.user_id,seatClass:delegatedRole(this.sql,row.user_id)==='guildkeeper'?'guildkeeper':member.seat_class,expiresAt:row.expires_at,member:{nodeId:row.node_id,userId:row.user_id,seatClass:member.seat_class,billingStatus:'free',createdAt:member.created_at,lastSeenAt:member.last_seen_at},quota:this.quotaFor(row.node_id,row.user_id),capacity:this.status()}
+    this.ensureResidentTables();const stamp=new Date().toISOString();this.sql.exec('DELETE FROM resident_sessions WHERE expires_at<=?',stamp);const row=[...this.sql.exec('SELECT token_hash,node_id,user_id,created_at,expires_at FROM resident_sessions WHERE token_hash=? LIMIT 1',tokenHash)][0];if(!row)return{ok:false,status:401,error:'Guild capacity session is invalid or expired.'};const expected=this.resolveResidentNode(requestedNodeId);if(expected&&row.node_id!==expected)return{ok:false,status:403,error:'Guild capacity session belongs to a different starter node.'};const member=this.memberRow(row.node_id,row.user_id);if(!member)return{ok:false,status:401,error:'Guild resident no longer exists.'};return{ok:true,nodeId:row.node_id,userId:row.user_id,seatClass:delegatedRole(this.sql,row.user_id)==='guildkeeper'?'guildkeeper':member.seat_class,expiresAt:row.expires_at,member:{nodeId:row.node_id,userId:row.user_id,seatClass:delegatedRole(this.sql,row.user_id)==='guildkeeper'?'guildkeeper':member.seat_class,billingStatus:'free',createdAt:member.created_at,lastSeenAt:member.last_seen_at},quota:this.quotaFor(row.node_id,row.user_id),capacity:this.status()}
   }
   leaveResident({tokenHash,requestedNodeId}={}){
     // Only the authenticated resident can relinquish their own Guild seat.
@@ -383,8 +383,19 @@ export default{
         const tokenHash=await sessionTokenHash(bearer(request));
         const args={tokenHash,requestedNodeId:requestedNodeId(request)};
         if(request.method==='GET'){
+          const session=await stub.governanceRead(args); // verify resident first for all read endpoints
+          if(url.pathname==='/api/guild/governance/nearby'){
+            const relay=clean(env.CIVWEAVE_GUILD_REPORT_RELAY_URL,2000);
+            if(!relay)return json({ok:false,unavailable:true,error:'Nearby Guild report relay has not been configured.'},503);
+            const endpoint=new URL(relay);endpoint.pathname='/api/guild-directory/reports';endpoint.search='';
+            endpoint.searchParams.set('guildId',(await stub.status()).guildId);
+            const packet=await fetch(endpoint,{cache:'no-store',headers:{accept:'application/json'}}).then(r=>r.json());
+            return json(packet);
+          }
           if(url.pathname!=='/api/guild/governance')return json({ok:false,error:'Not found.'},404);
-          return json(await stub.governanceRead(args));
+          const pending=stub.pendingPeerReports();
+          if(pending?.length&&ctx?.waitUntil)ctx.waitUntil(sendApprovedPeerReports(env,stub,url.origin).catch(()=>{}));
+          return json({...session,members:await stub.memberDirectory()});
         }
         if(request.method!=='POST'||url.pathname!=='/api/guild/governance')return json({ok:false,error:'Method not allowed.'},405);
         const raw=await request.text();
