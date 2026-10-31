@@ -30,7 +30,7 @@ const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);retu
 const human=person=>person?.name||'Unknown persona';
 function setup(){
   if(state.root)return state.root;
-  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=fleet-scopes-sim-r4';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=brand-responsive-fleet-r5';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
   root.innerHTML=`<div class="sl-chrome"><header class="sl-head">
   <div class="sl-brand"><img class="sl-brand-mark" src="/app/logos/civweave-icon-192.png" alt="" width="48" height="48"><div class="sl-brand-copy"><small>CIVWEAVE · WORLDWEAVER</small><h1 data-sl-main-title>AI Fleets</h1><p data-sl-main-description>Local device and Guild simulation spaces</p></div></div>
@@ -302,6 +302,7 @@ function renderFleetScopes(){
   const guildButton=$('[data-sl-fleet=guild]');if(guildButton)guildButton.disabled=!guild;
   const dock=$('[data-sl-fallback-dock]');if(dock)dock.hidden=fleetIsGuild()&&state.worldLinked;
   const sceneTab=$('[data-sl-view=world]');if(sceneTab)sceneTab.textContent=fleetIsGuild()?'Commune':'Studio';
+  const peopleTab=$('[data-sl-view=agents]');if(peopleTab)peopleTab.textContent=fleetIsGuild()?'Residents':'Guides';
   const title=$('[data-sl-main-title]');if(title)title.textContent=fleetIsGuild()?'Guild Fleet':'Local Fleet';
   const sub=$('[data-sl-main-description]');if(sub)sub.textContent=fleetIsGuild()?'Shared Worldweaver pilots and Guild work':'Device-owned models, private AI and my tools';
   for(const b of state.root.querySelectorAll('[data-sl-fleet]'))b.setAttribute('aria-pressed',String(b.dataset.slFleet===state.fleetScope));
@@ -870,7 +871,7 @@ function switchWorldMode(mode){
   const viewer=$('.sl-world-3d'),map=$('.sl-world-2d'),avatars=$('.sl-world-avatars');
   if(viewer)viewer.hidden=mode!=='3d';
   if(map)map.hidden=mode!=='2d';
-  if(avatars)avatars.hidden=mode!=='3d';
+  if(avatars)avatars.hidden=false; // Pilot deck remains accessible in 2D and 3D.
   if(mode==='3d')state.worldViewer?.update();else state.worldView?.update();
   render();
 }
