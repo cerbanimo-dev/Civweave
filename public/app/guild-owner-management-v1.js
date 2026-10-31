@@ -159,6 +159,7 @@ function syncNav(){const selected=globalThis.CivweaveHostNodeSessionV1?.selected
 document.addEventListener('click',event=>{if(event.target.closest?.('[data-cw-guild-manage]')){event.preventDefault();void open()}});
 addEventListener('civweave:nearby-guilds-opened',syncNav);
 addEventListener('civweave:host-node-selected',syncNav);
+addEventListener('civweave:host-node-health',syncNav);
 addEventListener('civweave:mobile-guild-cloud-attached',syncNav);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncNav,{once:true});else syncNav();
 globalThis.CivweaveGuildOwnerManagementV1=Object.freeze({version:VERSION,open,close,refresh,ownerAvailable:()=>Boolean(owner()),ownerAvailableFor,ownedGuild});
