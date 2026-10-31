@@ -29,7 +29,7 @@ assert.match(strip, /function sharedUsageSnapshot/);
 assert.match(strip, /CivweaveGuildChatUsageV1\?\.snapshot/);
 assert.match(strip, /function requestGuildUsageRefresh/);
 assert.match(strip, /ensureBalanceRuntime/);
-assert.match(strip, /1\.0\.137-mobile-guild-quota/);
+assert.match(strip, /1\.0\.138-unified-guild-access/);
 assert.match(strip, /1\.0\.2-mobile-session-upgrade/);
 assert.match(strip, /guildTelemetry/);
 assert.match(strip, /neurons syncing/);
@@ -73,7 +73,7 @@ assert.match(systemRoutes, /GUILD_USAGE_VERSION='1\.0\.2-'/);
 assert.match(systemRoutes, /civweaveGuildUsageRepair='v2'/);
 
 assert.match(localCapacity, /host-node-local-capacity-v6-live-guild-quota/);
-assert.match(localCapacity, /host-node-session-v1\.js\?v=1\.0\.137-mobile-guild-quota/);
+assert.match(localCapacity, /host-node-session-v1\.js\?v=1\.0\.138-unified-guild-access/);
 assert.match(localCapacity, /SESSION_RUNTIME_VERSION = '1\.0\.137-'/);
 assert.match(localCapacity, /repair=\$\{Date\.now\(\)\}/);
 
