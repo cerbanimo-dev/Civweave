@@ -131,7 +131,7 @@ document.addEventListener('pointerup',()=>setTimeout(()=>queue('post-interaction
 </main>
 <dialog id="cw-starling-fund-dialog" aria-labelledby="cw-starling-fund-title">
   <h2 id="cw-starling-fund-title">Fund the Starling Collective</h2>
-  <p>Support free Worldweaver classrooms, Learning Journeys, reusable Guild Quests and public-interest art. Contributions fund extra headquarters AI inference after processor fees. No membership or account is required.</p>
+  <p>Support free Worldweaver classrooms, Learning Journeys, reusable Guild Quests and public-interest art. Contributions are set aside to purchase prepaid Cloudflare AI Gateway credits for headquarters inference. No membership or account is required.</p>
   <form id="cw-starling-fund-form">
     <fieldset style="border:0;padding:0;margin:0"><legend>Choose a contribution (USD)</legend>
       <div class="cw-starling-fund-amounts">
@@ -142,7 +142,7 @@ document.addEventListener('pointerup',()=>setTimeout(()=>queue('post-interaction
       </div>
       <label style="display:block;margin-top:9px"><input name="cw-starling-fund-choice" type="radio" value="custom"> Other whole-dollar amount, $5–$1,000 <input id="cw-starling-fund-custom" type="number" min="5" max="1000" step="1" value="5" aria-label="Custom amount in US dollars"></label>
     </fieldset>
-    <small>These purchases are not tax-deductible charitable donations and do not award personal neurons, credits, votes or other benefits. Funds are held for Starling compute; publishing new resources is not guaranteed.</small>
+    <small>These purchases are not tax-deductible charitable donations and do not award personal neurons, credits, votes or other benefits. After Stripe processing fees, Cloudflare charges another 5% when prepaid AI Gateway credits are loaded. The operator purchases the credits separately; funds are not automatically loaded. No recurring subscription, and publishing new resources is not guaranteed.</small>
     <output id="cw-starling-fund-total" aria-live="polite"></output>
     <p id="cw-starling-fund-message" role="status" aria-live="polite">Checking checkout availability…</p>
     <div class="cw-starling-fund-actions"><button id="cw-starling-fund-close" type="button">Close</button><button id="cw-starling-fund-pay" type="submit" disabled>Continue to secure payment</button></div>
