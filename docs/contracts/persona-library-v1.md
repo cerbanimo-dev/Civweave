@@ -4,7 +4,7 @@
 
 - Core behavior is `public/app/shared/persona-library-v1.mjs`, a provider-neutral **shared capability**. It **does not** own the chat composer, model runtime, world simulator, storage, or verification of the actor.
 - The shared chat surface is the only chat/event input owner. Worldweaver remains the sole NPC tool-intent authority; a `worldweaverNpcCommand` is an *unexecuted* command proposal. Use the existing AI Fleet to select actual installed model weights.
-- This increment also exports the injected-invoker bridge `public/app/shared/persona-scene-bridge-v1.mjs`. Its `prepareDirectedScene`, `performPersonaTurn`, `runSplitMindTurn` and `queuePersonaActionIntents` work with the existing selected-model adapter and Worldweaver's authenticated dispatch. An end-user UI route, on-device pack installer, durable saved sessions and automatic speaker scheduling are **not yet included**. No assertion of a working deployed game is made.
+- This increment also exports the injected-invoker bridge `public/app/shared/persona-scene-bridge-v1.mjs`. Its `prepareDirectedScene`, `performPersonaTurn`, `runSplitMindTurn` and `queuePersonaActionIntents` work with the existing selected-model adapter and Worldweaver's authenticated dispatch. An opt-in private rehearsal panel is now attached to the existing Worldweaver Performance Studio tool (not a new chat). On-device pack ZIP installation, durable saved sessions, full multiplayer world-state changes and automatic speaker scheduling are **not yet included**. No assertion of a working deployed game is made.
 
 ## Pack and privacy
 
@@ -67,3 +67,9 @@ Run `node --test scripts/test-persona-library-v1.mjs scripts/test-persona-scene-
 ### Author pack v3 (not in GitHub)
 
 The private author zip stores 51 curated names, 219 indexed source scenes and 1,016 **unverified** grammatical-action candidates. These candidate excerpts are a source review work queue, **not facts, witnessed memories or dialogue training labels**. Ten previously curated event anchors remain the only promoted events. Legacy freeform emotion excerpts are now unreviewed author-only suggestions; only source-approved, story-stage-gated `verifiedEmotes` can be sent to any director or acting model. The manuscript archive is not committed to a public repository. A reader-facing package must be compiled with an explicit publication/spoiler policy and omit unapproved manuscript content.
+
+## Opt-in Performance Studio test surface (draft PR)
+
+At the existing Worldweaver Performance Studio, section 5A imports a **local JSON persona-pack manifest** (extract it from the author-only ZIP, or use the separate JSON download); it never silently imports model weights or the full source shards. Select a story stage, a cast, the scene and a lead speaker. Prepare director briefs first, then preview a single player cue as a character action. This uses the same configured Civweave model-runtime and Creator Suite inference route as the existing screenplay proposal tool.
+
+Currently tested with an explicitly selected Ollama or OpenAI-compatible provider that supports per-request model IDs; the author enters the installed 4B and 0.8B IDs. A source pack is never automatically sent to any cloud model; an existing explicit consent checkbox applies whenever the configured provider leaves the device. Model outputs never modify the approved screenplay, known canon or world state by themselves. The panel is **in-memory and a rehearsal preview**, not a new chat transcript, an automated installation flow, or a claim that a whole D&D session is already implemented. It is shipped only on the feature branch until reviewed and merged.
