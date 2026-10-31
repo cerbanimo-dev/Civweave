@@ -131,7 +131,11 @@ export function personaMotionRegion(source){
  const s=validatePersonaMotionScene(source);
  const objects=[...staticSet(s.instanceId),...s.actors.map((a,i)=>
    avatar(s.instanceId,a.characterId,i,a.position))];
- return validateOpenSimRegion({schema:OPENSIM_GEOMETRY_SCHEMA,
+ const region={schema:OPENSIM_GEOMETRY_SCHEMA,
    regionId:s.regionId,size:s.size,revision:s.revision,objects,
-   source:'provisional-or-imported'});
+   source:'provisional-or-imported'};
+ // Validate once, but return the RAW module-export contract: buildOpenSimGeometry
+ // owns the normalization pass and cannot ingest validator-only mesh fields.
+ validateOpenSimRegion(region);
+ return region;
 }
