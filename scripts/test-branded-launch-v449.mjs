@@ -55,3 +55,17 @@ test('offline shell integrity hashes are in sync after changing launch files', (
     assert.equal(createHash('sha256').update(bytes).digest('hex'), integrity.assets[pathname], pathname);
   }
 });
+
+
+test('installed PWA header and installer use the approved branded heart, never outdoor day/night art', () => {
+  const runtime=read('public/app/working-campus-v156.js');
+  const installer=read('public/app/civweave-brand.js');
+  const gateway=read('public/app/index.html');
+  for (const source of [runtime,installer,gateway]) {
+    assert.equal(source.includes('civweave-day-logo.jpg'),false);
+    assert.equal(source.includes('civweave-night-logo.jpg'),false);
+  }
+  for (const page of ['working-campus-v156.html','working-campus-v437.html','working-campus-v440.html']) {
+    assert.ok(read('public/app/'+page).includes('src="/app/logos/civweave-branded-heart-512-v449.png" alt="Civweave"'),page);
+  }
+});
