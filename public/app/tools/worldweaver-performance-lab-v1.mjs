@@ -365,6 +365,7 @@ function showCampaign(){
  $('persona-campaign-timeline').textContent=visible.length?
   visible.map(e=>e.type==='rehearsal-preview'?
    ('Turn '+e.id+' · '+e.characterId+' · '+e.speech+'\n  Player: '+e.playerCue+
+    (e.spokenTurns?.length?'\n  Outward voices: '+e.spokenTurns.map(v=>v.characterId).join(' + '):'')+
     (e.proposedActions.length?'\n  Proposed actions (not executed): '+e.proposedActions.length:''))
     :e.id+' · '+e.type+' · '+(e.text||e.characterId||e.outcome||'')).join('\n'):
   'No turns recorded.';
@@ -521,18 +522,22 @@ async function personaRun(phase){
    const result=split?await runSplitMindTurn({pack:personaCast,scene:personaScene,
     playerInput:$('persona-player-cue').value,history:personaRecent,
     invokeModel:runPersonaSelectedModel,willpower:personaWillpower,
-    ...(directChoice?{directControl:{characterId:directChoice,cost:1},
+    ...(directChoice?{directControl:directChoice==='both'?
+       [{characterId:'landry',cost:1},{characterId:'delia',cost:1}]:
+       {characterId:directChoice,cost:1},
       authorizeDirectControl:()=>true}:{})}):
     await performPersonaTurn({pack:personaCast,scene:personaScene,characterId:id,
       playerInput:$('persona-player-cue').value,history:personaRecent,invokeModel:runPersonaSelectedModel});
    // The local ledger records preview dialogue only. No Worldweaver intent or
    // canonical event is marked executed by a model response.
-   if(split&&result.directControlReceipt){
-    campaignEvent({type:'willpower-spend',characterId:result.directControlReceipt.characterId,
-     cost:result.directControlReceipt.cost});
+   for(const receipt of split?result.directControlReceipts||[]:[]){
+    campaignEvent({type:'willpower-spend',characterId:receipt.characterId,cost:receipt.cost});
    }
+   if(split&&personaCampaign.willpower.points!==result.willpower.points)
+    throw new Error('Shared willpower ledger mismatch; rehearsal stopped.');
    campaignEvent({type:'rehearsal-preview',characterId:split?'landry-delia':id,
     playerCue:$('persona-player-cue').value,speech:result.speech,emote:result.emote,
+    ...(split&&result.spokenTurns?.length?{spokenTurns:result.spokenTurns}:{}),
     sceneRevision:personaScene.revision,proposedActions:result.proposedActions||[]});
    personaWillpower=personaCampaign.willpower;showPersonaWillpower();
    rebuildPersonaRecent();
@@ -547,7 +552,8 @@ async function personaRun(phase){
    personaStatus(JSON.stringify({character:split?'landry-delia':id,speech:result.speech,emote:result.emote,
      playerDeviationRequested:redirected,
      route:split?result.route:'individual',remainingWillpower:split?personaWillpower.points:undefined,
-     directControlReceipt:split?result.directControlReceipt:undefined,
+     directControlReceipts:split?result.directControlReceipts:undefined,
+     outwardSpeakers:split?result.spokenTurns:undefined,
      proposedActions:result.proposedActions,worldChanged:false,actionsExecuted:false,
      directorRevision:result.directorRevision,nextSceneTurn:personaScene.turn,
      refreshRequired:needsDirectorRefresh(personaScene)},null,2));
