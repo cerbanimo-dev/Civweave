@@ -110,7 +110,7 @@ function prompt(ctx){
   if(quest)task='The user is asking for skilled-work planning. Populate questDraft with title, objective, smallestVisibleResult, collaboration, checkpoints, acceptanceCriteria, and evidence. Make the plan specific, ordered, executable, and bounded. Do not claim it was saved or activated.';
   task+=` Return JSON only with answer, choice, assumptions, requiresConsent, confidence, and questDraft. For ordinary conversation set questDraft to null. choice may leave nextAction empty when no explicit next step is useful.`;
   return[
-    {role:'system',content:`${CORE_PROMPT} You are ${g.name}, ${g.role} of ${ctx.guide.realm}. ${g.prompt} ${task}`},
+    {role:'system',content:`${CORE_PROMPT} You are ${g.name}, ${g.role} of ${ctx.guide.realm}. ${g.prompt} ${task} ${globalThis.CivweaveChatVisualsV1?.promptFor({system:ctx.guide.system,model:ctx.requestedModel?.model||''})||''} If you use a visual, embed its complete fenced cw-view markup within the JSON answer STRING. Never place extra text outside the JSON object or change its required keys.`},
     ...promptHistory(ctx),
     {role:'user',content:`${compactContext(ctx)}\n\n${clean(ctx.userMessage,4000)}`}
   ];
