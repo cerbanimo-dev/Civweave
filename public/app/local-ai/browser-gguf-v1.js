@@ -310,7 +310,6 @@ export async function removeImported(importId){
   await generationTail;
   const wasSelected=current()?.importId===id;
   if(wasSelected||loadedUrl==='civweave-gguf-import:'+id)await release();
-  if(wasSelected)localStorage.removeItem(GGUF_SELECTION_KEY);
   if(record.storage==='civweave.gguf.import-opfs.v1'){
     const store=await import(OPFS);
     await store.removeGGUFShards(id,(record.files||[]).map(file=>file.index),{strict:true});
@@ -320,6 +319,7 @@ export async function removeImported(importId){
   }
   const index=importIndex();delete index[id];
   localStorage.setItem(IMPORT_INDEX_KEY,JSON.stringify(index));
+  if(wasSelected)localStorage.removeItem(GGUF_SELECTION_KEY);
   notify('uninstalled',{model:record.model,importId:id,bytes:record.bytes});
   return{importId:id,model:record.model,bytes:record.bytes,wasSelected};
 }
