@@ -456,15 +456,19 @@ function click(event){
   if(fleet){setFleetScope(fleet);return}
   const persona=event.target.closest('[data-sl-persona]')?.dataset.slPersona;
   const guide=event.target.closest('[data-sl-guide]')?.dataset.slGuide;
-  if(persona&&STARLING_PERSONAS[persona]){state.speaker=persona;state.selectedAgent=persona;renderSpeaker();if(event.target.closest('.sl-persona'))setView('world');return}
-  if(guide&&SYSTEM_GUIDES[guide]){state.selectedAgent=guide;renderSpeaker();if(event.target.closest('.sl-persona'))setView('world');return}
+  if(persona&&STARLING_PERSONAS[persona]){state.speaker=persona;state.selectedAgent=persona;renderSpeaker();renderFleetScopes();if(event.target.closest('.sl-persona'))setView('world');return}
+  if(guide&&SYSTEM_GUIDES[guide]){state.selectedAgent=guide;renderSpeaker();renderFleetScopes();if(event.target.closest('.sl-persona'))setView('world');return}
   const view=event.target.closest('[data-sl-view]')?.dataset.slView;
   if(view){setView(view);return}
   const station=event.target.closest('[data-sl-station]')?.dataset.slStation;
   if(station&&STATIONS[station]){state.station=station;$('[data-sl-scene-context]').textContent=STATIONS[station]+' This is a schematic, not a verified character location.';for(const node of state.root.querySelectorAll('[data-sl-station]'))node.setAttribute('aria-pressed',String(node.dataset.slStation===station));return}
   const cmd=event.target.closest('[data-sl-action]')?.dataset.slAction;
   if(cmd==='close')close();
-  if(cmd==='fleet-settings')globalThis.CivweaveSettingsV320?.open?.();
+  if(cmd==='fleet-settings'){
+    const settings=globalThis.CivweaveSettingsV320;
+    if(typeof settings?.open==='function'){close();settings.open()}
+    else{state.fleetMessage='AI Settings is not loaded in this shell. Open Civweave Settings → AI & safety to install or configure models.';renderFleetScopes()}
+  }
   if(cmd==='pilot-register')void registerSelectedPilot();
   if(cmd==='world-observe')observeWorld();
   if(cmd==='world-move-proposal')prepareMove();
