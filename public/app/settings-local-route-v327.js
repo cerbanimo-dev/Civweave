@@ -278,7 +278,7 @@ function renderDock(){
 function localPanel(form){return form?.querySelector(`#${PANEL_ID}`)||null}
 
 
-const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.2.0-single-screen-fleet-installer';
+const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.3.1-backend-switch-fix';
 function showUnifiedFleet(layer=document.getElementById('cw-settings-v320')){
   const target=layer?.querySelector?.('[data-settings-tab-panel="local-models"]');
   if(!target||!layer?.isConnected||layer.hidden)return false;
