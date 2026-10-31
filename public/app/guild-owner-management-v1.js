@@ -80,7 +80,9 @@ function feedback(message){const node=root?.querySelector('.gm-status');if(node)
 function address(endpoint){const v=managementAuth();if(!v)throw Error('This device has no authorized Guildkeeper session.');const base=new URL(v.origin);if(base.protocol!=='https:')throw Error('Guild Cloud must use HTTPS.');return new URL(endpoint,base.origin)}
 async function request(method='GET',action='',extra={}){
   const v=managementAuth();if(!v)throw Error('Guild management requires a verified founder or delegated Guildkeeper credential.');
-  const response=await fetch(address('/api/guild/manage'),{method,cache:'no-store',headers:{'authorization':'Bearer '+v.token,'content-type':'application/json'},...(method==='POST'?{body:JSON.stringify({action,...extra})}:{})});
+  const url=address('/api/guild/manage');
+  if(!v.founder){const member=delegatedGuildkeeper();if(!member)throw Error('Delegated Guildkeeper session is missing.');url.searchParams.set('nodeId',member.nodeId)}
+  const response=await fetch(url,{method,cache:'no-store',headers:{'authorization':'Bearer '+v.token,'content-type':'application/json'},...(method==='POST'?{body:JSON.stringify({action,...extra})}:{})});
   const body=await response.json().catch(()=>({}));if(!response.ok||body.ok===false)throw Error(body.error||'Guild Cloud returned HTTP '+response.status);return body;
 }
 const neurons=value=>Number.isSafeInteger(Number(value))&&Number(value)>=0?Number(value).toLocaleString():'—';
