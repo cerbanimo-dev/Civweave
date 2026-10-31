@@ -1,4 +1,4 @@
-# Threshold acceptance evidence — 2026-10-30
+# Threshold acceptance evidence — updated 2026-10-31
 
 Governing handoff: [PR #903](https://github.com/cerbanimo-dev/Civweave/pull/903). Staging is the integration base. Private manuscripts, scripts and training samples are excluded from Git. Source tests do not establish human authority or external execution.
 
@@ -10,25 +10,29 @@ Governing handoff: [PR #903](https://github.com/cerbanimo-dev/Civweave/pull/903)
 | Private source | Producer confirmed sole ownership and Gemini sharing; complete Book One privately imported, 94,960 characters with exact CRLF newlines, source hash and rights | No separate training consent |
 | Gemini | `creation-run:e4695f73-eb7b-494b-ad7f-f43580591239`: real Gemini 3.1 Flash-Lite SSE, 1,529 visible characters, STOP, 25,483 input / 455 output tokens, checkpoint and saved edit receipt | Actual provider stream; free-tier restriction retained; no billing statement inspected |
 | Failure/repair | Earlier zero-text provider error preserved in `creation-run:6df3a377-4538-410b-8d1c-68524c871543`. Repaired standalone Creator's missing shared Settings restoration; readiness makes no request; retry journal explicitly links prior attempt | No silent restart |
-| Editorial loop | Original Creator revision 1 preserved; independent revisions 2–4 corrected source continuity/designs, pacing, departments and count annotations through real document tools | Three editorial passes, zero added inference; producer review pending |
-| Evidence export | Real Creator download contains original/final revisions, four exact tool receipts, checkpoint, prior failure, zero missing artifacts and no complete manuscript body | Portable local evidence verified |
+| Editorial loop | Original Creator revision 1 preserved; independent revisions 2–5 corrected continuity, pacing, departments, counts and a mistaken source-design judgment through real document tools | Four editorial passes, zero added inference; producer review pending |
+| Evidence export | Real Creator prepare/inspect/download contains all five document revisions, five exact tool receipts, checkpoint, prior failure, zero missing artifacts and no complete manuscript body | Portable local evidence verified |
 | Trailer | Real Performance Studio file import: six shots, exactly900frames/30fps, 15 spoken words, 35 missing-media jobs; JSON/VTT downloaded | Validated review package; no rendered media |
-| Saved package | `production-export:c8fd55c0-5231-48a4-9502-c3551fe1b09c`, linked to run revision7/document revision4 | Explicitly persisted in existing Creator artifact store; human approval pending |
-| Mobile | Actual390×844 browser smoke; available375px content width had no horizontal overflow; import/shot/save controls fit | Emulation, not Android hardware or installed-device offline proof |
+| Saved package | `production-export:6b0217f4-e01b-41df-ace2-099820fda8f3`, linked to run revision8/document revision5 and device review revision4 | Explicitly persisted in existing Creator artifact store; human approval pending |
+| Device file review | Eight semantic review tabs; eleven typed file viewers/downloads, editable screenplay, sets, rigs, blocking, timing, directions and captions; full proposed revision snapshots | Actual saved blocking/rig/design edits and downloads exercised; draft same-geometry2D/3D markers, not loaded rigs |
+| Mobile | Actual390×844 browser smoke; available375px content width had no horizontal overflow in rig and blocking panels; controls and rig schematic fit | Emulation, not Android hardware or installed-device offline proof |
+| Private Quest archive | Available visible prompts/responses, references, tool records and immutable output/input versions archived with SHA256, MIME, provenance and consent labels; generic protocol documented separately | Private filesystem snapshot outside Git; no canonical Cerbanimo Quest or training authorization invented |
 | Guild training | Synthetic authenticated custody, consent/purpose, idempotency, withdrawal and closed-release tests | No live sample delivery, collective decision, payout, burn or training job |
 | ArtCraft/OpenSimulator | Existing content/geometry/rig owners retained; import/render/world flags stay false or pending | No authenticated bridge, rig, native editor import or renderer verified |
 
 Weaveling contract: `/extensions/civweave-weaveling-plan-json-v190.js`, revision `1.3.0-weaveling-plan-json-v190-authored-import`, digest `sha256:56dfb2867ce944e2a08bd475f8784bb83d67f6ca03a94e3327bf6f8a1d1b8d68`.
 
-Creator document-stage digest: `sha256:d65311da310fcdecd0137a32a504d7b8048ec8b45b199fb6502f2a15befd486f`. Successful Gemini edit: `creator-tool:7ec28ed8-69bd-4853-9b74-4723a96617db`. Editorial receipts: `creator-tool:690eeeea-64a8-4a5e-90d2-708a262a6fd4`, `creator-tool:e1abb831-c98f-4b01-b542-8d3ba89a383b`, `creator-tool:3838d06e-2748-4cb0-ab7d-284946be9497`.
+Creator document-stage digest: `sha256:d65311da310fcdecd0137a32a504d7b8048ec8b45b199fb6502f2a15befd486f`. Successful Gemini edit: `creator-tool:7ec28ed8-69bd-4853-9b74-4723a96617db`. Editorial receipts: `creator-tool:690eeeea-64a8-4a5e-90d2-708a262a6fd4`, `creator-tool:e1abb831-c98f-4b01-b542-8d3ba89a383b`, `creator-tool:3838d06e-2748-4cb0-ab7d-284946be9497`, `creator-tool:fb05f50a-0693-4c61-8170-908b859abbe7`. The final correction restores manuscript-supported character traits that the editor had mistakenly called invented; the earlier error and original model draft remain in history.
 
-Saved package digest: `sha256:50d64c3268c73370c16d90b47ce0f9d0b1d9bf53cfb688e11b98a7e69a41b3b5`. Imported source digest: `sha256:ed6117802870fd3653efafeb1ca2e431eb21f476f0eecbc3e245af864618412e`. ZIP LF source and imported CRLF source compare exactly after newline normalization. These IDs are device artifacts, not human or cloud credentials.
+Latest saved package digest: `sha256:338ea15539626f2498269fb1366d1ccc0478c2450703454353df1f4415e4efd6`. Imported source digest: `sha256:ed6117802870fd3653efafeb1ca2e431eb21f476f0eecbc3e245af864618412e`. ZIP LF source and imported CRLF source compare exactly after newline normalization. These IDs are device artifacts, not human or cloud credentials.
+
+The private archive explicitly marks the unavailable historical composite Gemini request rather than reconstructing it from today's code. Its saved objective, source reference, stage digest and actual visible checkpoint remain available. Hidden reasoning and internal instructions are excluded; credentials are redacted. Archive retention does not authorize Guild release, training or publication.
 
 ## Gates still open
 
 Gate1 is substantially exercised locally. Its deployed-staging session, actual device/offline checks, receiving guide acceptance and live stop/resume evidence remain open. Synthetic negative-path tests do not replace those checks.
 
-Gate2 remains open: producer approval of this exact screenplay/assets, approved stage compilation, real rig bindings, same-scene2D/3D runtime proof, trusted actor/render receipts, voluntary audience rehearsal, native target import and media assembly. Lab source intake is explicitly synthetic; no human authorization was impersonated.
+Gate2 remains open: producer approval of this exact screenplay/assets, approved stage compilation, real rig bindings, approved rehearsal2D/3D runtime proof, trusted actor/render receipts, voluntary audience rehearsal, native target import and media assembly. Draft geometry parity is now visible and tested; it does not establish an approved live stage. Lab source intake is explicitly synthetic; no human authorization was impersonated.
 
 Host Guild release, dataset access and negotiation remain unavailable without trusted exact-purpose collective and Guildkeeper adapters. Custody alone never authorizes training or settlement.
 
@@ -36,7 +40,11 @@ Host Guild release, dataset access and negotiation remain unavailable without tr
 
 Run `npm run test:threshold` and `npm run test:worldweaver`; final counts accompany delivery. The earlier Settings ownership failure was repaired by aligning both active Settings query pins with the actual owner's version; its unchanged verifier passes. The unchanged Gemini tier verifier still expects a different guide model from current staging.
 
-The targeted QA pass on the current local source completed **69 Threshold tests**, including the exact prepare/inspect/download evidence controls, **112 Worldweaver tests**, and `npm run check:syntax`: **1,539 source files**, selected release entrypoints, Guild access checks and the canonical Settings/ownership postchecks passed. Creator package isolation also passed. These counts describe the source snapshot before the later staging merge and subsequent artifact-view changes; those changes require their own checks before publication.
+After merging staging `70d2d99da`, the targeted QA pass completed **69 Threshold tests**, including prepare/inspect/download evidence controls, **126 Worldweaver tests**, and `npm run check:syntax`: **1,548 source files**, selected release entrypoints, Guild access checks and canonical Settings/ownership postchecks passed. Creator package isolation, worker asset graph and authenticated Guild custody tests passed. Local HTTP tests passed outside the sandbox, whose loopback restrictions had produced a fetch failure.
+
+The final `npm run build:install` passed, including installer resume/hardening smoke checks and indexing192device-package files. Generated installer/catalog outputs were restored after verification; the review commits contain maintained source and contracts, without private production files or regenerated release bundles.
+
+Every command in the 36-command `npm run check` chain was exercised; **34 passed**, with two pre-existing assertions still failing. The navigation verifier expects the old v233 dock revision while the owner declares v235 viewport. The Render verifier rejects all devDependencies while staging already declares fake-indexeddb/jsdom. Both verifiers and their relevant owner/config/VERSION blobs are identical to staging `70d2d99da`; they were not weakened. An introduced stale exact offline-root assertion was repaired to retain all original20 roots plus Worldweaver as root21, and it passes. These broad results do not turn separate Map/Creator package failures below into passing checks.
 
 The earlier published PR #904 snapshot (`3905cee7a7b4689194f55e184b9ac806b3e6fbde`) had two independently reproduced staging baseline failures:
 
