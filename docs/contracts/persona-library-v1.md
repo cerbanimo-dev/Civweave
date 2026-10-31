@@ -134,3 +134,19 @@ The Cast control also offers a one-cue *break the planned scene* checkbox. This 
 ### Trusted action receipts
 
 The multiplayer gateway's `verifyWorldReceipt({worldReceiptId,proposal,campaignId,actor,expectedRevision})` callback must independently verify an actual completed Worldweaver action before a `resolve-proposal/outcome=succeeded` event. A missing verifier, mismatch or reused receipt is rejected. Runtime identity alone does not establish that a particular action occurred. A real deployment must connect this verification to its protected Worldweaver record/adapter and enforce one-time receipt use atomically.
+
+## Simultaneous Landry + Delia overrides (2026-10-31 refinement)
+
+Landry and Delia share a willpower pool but each has their own direct-control request. In either Cast chat or Worldweaver rehearsal, the **Both override** choice submits **two author-approved spends in the same turn** (one point each by default). The two independent 2B internal performers then both produce player-visible outward speech, attributed to Landry and Delia separately. The 0.8B moderator is bypassed for that turn only. The implementation does **not** treat the second voice as silent, overwrite its line with the first, or collapse attribution into a single narrator.
+
+- No override: existing 0.8B moderator speaks outwardly.
+- One override: one named 2B voice speaks outwardly, spending one point. The other remains internal.
+- Both override: two individually attributed outward utterances appear in narrative cast order, using two separate spend receipts. Player-visible dialogue is rendered as Landry and Delia's respective speech with separate gestures.
+- If fewer than two points are available, **both** simultaneous requests fail before inference and before any spend can be committed. Duplicate voices, invalid costs, or unauthorized requests also fail without a partial override.
+- The deterministic campaign ledger retains each spend as an append-only `willpower-spend` event, then one `rehearsal-preview` record with `spokenTurns: [{characterId,speech,emote},...]`. Export/import preserves individual speaker identity; these are **unexecuted** simulated performances, not canonical events or server-certified body actions.
+- AI-written actions remain proposals, bounded to the existing Worldweaver tool-intent gate. Simultaneous speech is not equivalent to independent simultaneous world control.
+- New regression tests: `scripts/test-persona-dual-override-v1.mjs`.
+
+### Direct new-campaign creation in Cast chat
+
+The Cast panel can read a locally selected persona manifest, choose 1–12 character IDs, provide a numbered story stage and scenario, and **start a private what-if campaign without importing an existing save**. An explicit Activate action starts model-backed play in the same canonical Weaveling chat. The campaign is in memory until the user exports its JSON; no new app-wide chat store, implicit publication or authenticated multiplayer claim is introduced. A matching campaign JSON can still be restored via the existing controls.
