@@ -6,7 +6,8 @@
  */
 export const HQ_STARLING_FUNDING_SCHEMA = 'civweave.headquarters-starling-funding.v1';
 export const HQ_STARLING_FUNDING_ROUTE = '/api/money-edge/headquarters/starling-funding';
-export const HQ_STARLING_NEURON_MICRO_USD = 11; // Published Workers AI rate, Oct 2026; reverify before enabling.
+export const HQ_STARLING_NEURON_MICRO_USD = 11; // Equivalent Workers AI rate only, not a guarantee of prepaid credit volume.
+export const HQ_GATEWAY_CREDIT_FEE_BPS = 500; // Cloudflare AI Gateway applies 5% when prepaid credits are purchased.
 export const HQ_STARLING_CONTRIBUTION_AMOUNTS = Object.freeze([500, 1000, 2500, 5000]);
 const HQ_ORIGIN = 'https://civweave.cc';
 const clean = (value, max = 180) => String(value ?? '').trim().slice(0, max);
@@ -14,14 +15,22 @@ const error = (message, status = 400) => Object.assign(new Error(message), { sta
 const changed = result => Number(result?.meta?.changes ?? result?.changes ?? 0);
 
 function moneyReady(edge) {
+  // Explicitly prepaid: never depend on Workers Paid or standard-billing overage.
+  // The operator must separately confirm the gateway uses Unified Billing and has a safe, manual credit-loading process.
   return edge.readiness().liveReady && edge.env.CIVWEAVE_HEADQUARTERS_FUNDING_ENABLED === '1'
-    && edge.env.CIVWEAVE_HEADQUARTERS_PAID_AI_ENABLED === '1'
+    && edge.env.CIVWEAVE_HEADQUARTERS_GATEWAY_PREPAID_READY === '1'
+    && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(String(edge.env.HQ_STARLING_GATEWAY_ID || ''))
     && Boolean(edge.env.HQ_FUNDING_RATE_LIMITER?.limit);
 }
-export function approximateFundedNeurons(backingCents, microUsdPerNeuron = HQ_STARLING_NEURON_MICRO_USD) {
+export function estimatePrepaidGatewayCreditsCents(backingCents, feeBps = HQ_GATEWAY_CREDIT_FEE_BPS) {
   if (!Number.isSafeInteger(backingCents) || backingCents < 0) throw new RangeError('backingCents must be a non-negative integer.');
+  if (!Number.isSafeInteger(feeBps) || feeBps < 0 || feeBps > 10000) throw new RangeError('Invalid Gateway prepaid credit purchase fee.');
+  // Dollar charged = credits * (1 + 5%); purchases use full-cent conservative estimates.
+  return Math.floor(backingCents * 10000 / (10000 + feeBps));
+}
+export function approximateFundedNeurons(backingCents, microUsdPerNeuron = HQ_STARLING_NEURON_MICRO_USD) {
   if (!Number.isSafeInteger(microUsdPerNeuron) || microUsdPerNeuron < 1) throw new RangeError('Neuron price must be a positive micro-USD integer.');
-  return Math.floor(backingCents * 10000 / microUsdPerNeuron);
+  return Math.floor(estimatePrepaidGatewayCreditsCents(backingCents) * 10000 / microUsdPerNeuron);
 }
 export function residualBackingCents({ grossCents, backingCents, refundedGrossCents = 0, disputedGrossCents = 0 }) {
   if (![grossCents, backingCents, refundedGrossCents, disputedGrossCents].every(Number.isSafeInteger)
@@ -42,11 +51,13 @@ export async function publicHeadquartersFundingStatus(edge) {
   }
   return Object.freeze({
     schema: HQ_STARLING_FUNDING_SCHEMA, enabled, donations: false, acceptsGuestCheckout: enabled,
-    destination: 'headquarters-starling-paid-inference-only', currency: 'usd',
+    destination: 'headquarters-starling-prepaid-ai-gateway-only', billingMode: 'ai-gateway-prepaid-unified', currency: 'usd',
     choicesCents: HQ_STARLING_CONTRIBUTION_AMOUNTS,
-    fundedCents, paidContributions, estimatedPurchasedNeurons: approximateFundedNeurons(fundedCents),
-    neuronRateMicroUsd: HQ_STARLING_NEURON_MICRO_USD,
-    note: 'All proceeds after actual processing fees are restricted to additional headquarters Starling inference. Not tax deductible. No personal neuron credits, membership benefits or guaranteed publication. Unused backing is held for future work.'
+    fundedCents, paidContributions, estimatedGatewayCreditCents: estimatePrepaidGatewayCreditsCents(fundedCents),
+    estimatedEquivalentNeurons: approximateFundedNeurons(fundedCents),
+    creditLoadConfirmed: false, // A money-edge payment is NOT a receipt for Cloudflare Gateway credit loading.
+    gatewayPurchaseFeeBps: HQ_GATEWAY_CREDIT_FEE_BPS, neuronRateMicroUsd: HQ_STARLING_NEURON_MICRO_USD,
+    note: 'Funds after Stripe fees are earmarked for prepaid AI Gateway credits. Cloudflare charges an additional 5% credit purchase fee. No credits are counted as loaded until separately reconciled with Cloudflare. Not tax deductible; no member benefits or guaranteed publication. No automatic recharges or Workers Paid dependency.'
   });
 }
 export async function createHeadquartersFundingCheckout(edge, input, origin) {
