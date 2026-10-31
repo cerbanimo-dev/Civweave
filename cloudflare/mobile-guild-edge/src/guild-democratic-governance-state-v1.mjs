@@ -7,7 +7,7 @@ const safe=(v,n=200)=>String(v??'').trim().slice(0,n);
 
 export function ensureGovernanceTables(sql){
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_roles(user_id TEXT PRIMARY KEY, role TEXT NOT NULL CHECK(role IN ('guildkeeper','member')),assigned_at TEXT NOT NULL, ballot_id TEXT NOT NULL)");
-  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_bans(user_id TEXT PRIMARY KEY, ballot_id TEXT NOT NULL, imposed_at TEXT NOT NULL, expires_at TEXT NOT NULL)");
+  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_bans(user_id TEXT PRIMARY KEY, credential_hash TEXT, ballot_id TEXT NOT NULL, imposed_at TEXT NOT NULL, expires_at TEXT NOT NULL)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_contributions(id TEXT PRIMARY KEY, user_id TEXT NOT NULL, kind TEXT NOT NULL, at TEXT NOT NULL)");
   sql.exec("CREATE INDEX IF NOT EXISTS guild_gov_contrib_recent ON guild_governance_contributions(at,user_id)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_ballots(id TEXT PRIMARY KEY, action TEXT NOT NULL, target_user_id TEXT NOT NULL, proposer_id TEXT NOT NULL, role TEXT, reason_code TEXT, electorate_json TEXT NOT NULL, required_yes INTEGER NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL, expires_at TEXT NOT NULL, resolved_at TEXT, execution_error TEXT)");
@@ -37,10 +37,11 @@ export function delegatedRole(sql,userId){
   const row=rows(sql,'SELECT role FROM guild_governance_roles WHERE user_id=? LIMIT 1',userId)[0];
   return row?.role==='guildkeeper'?'guildkeeper':'member';
 }
-export function isBanned(sql,userId,{now=Date.now()}={}){
+export function isBanned(sql,userId,{now=Date.now(),credentialHash=''}={}){
   ensureGovernanceTables(sql);
-  const row=rows(sql,'SELECT expires_at FROM guild_governance_bans WHERE user_id=? LIMIT 1',userId)[0];
-  return Boolean(row&&Date.parse(row.expires_at)>now);
+  const row=rows(sql,'SELECT expires_at FROM guild_governance_bans WHERE (user_id=? OR (credential_hash IS NOT NULL AND credential_hash=?)) AND expires_at>? LIMIT 1',
+    userId,credentialHash,new Date(now).toISOString())[0];
+  return Boolean(row);
 }
 function ballotRow(sql,id){
   const row=rows(sql,'SELECT * FROM guild_governance_ballots WHERE id=? LIMIT 1',id)[0];
@@ -59,9 +60,11 @@ function applyApproved(sql,row,{guildId,origin}){
   const ballot=viewBallot(row),now=nowIso(),target=row.target_user_id;
   if(row.action==='remove'||row.action==='ban'){
     const member=rows(sql,'SELECT user_id FROM resident_members WHERE user_id=? LIMIT 1',target)[0];
-    if(row.action==='ban')sql.exec(
-      'INSERT OR REPLACE INTO guild_governance_bans(user_id,ballot_id,imposed_at,expires_at) VALUES(?,?,?,?)',
-      target,row.id,now,new Date(Date.parse(now)+90*86400000).toISOString());
+    if(row.action==='ban'){
+      const credential=rows(sql,'SELECT credential_hash FROM resident_members WHERE user_id=? LIMIT 1',target)[0]?.credential_hash||null;
+      sql.exec('INSERT OR REPLACE INTO guild_governance_bans(user_id,credential_hash,ballot_id,imposed_at,expires_at) VALUES(?,?,?,?,?)',
+        target,credential,row.id,now,new Date(Date.parse(now)+90*86400000).toISOString());
+    }
     sql.exec('DELETE FROM resident_sessions WHERE user_id=?',target);
     sql.exec('DELETE FROM resident_members WHERE user_id=?',target);
     sql.exec('DELETE FROM guild_governance_roles WHERE user_id=?',target);
@@ -76,10 +79,8 @@ function applyApproved(sql,row,{guildId,origin}){
     // Do not broadcast a private member ID. A narrowly scoped pseudonym is
     // stable for this Guild only, never a cross-Guild automated block list.
     // Report delivery is an automatically queued effect of this approved vote.
-    const toHash=new TextEncoder().encode('civweave.guild-report.v1:'+guildId+':'+target);
-    // Hashing occurs outside this synchronous transaction; use a uniformly
-    // random opaque pseudonym as the privacy-preserving reference instead.
-    void toHash;
+    // Each report uses an opaque, uniformly random reference; a Guild's
+    // internal user ID never enters the inter-Guild bulletin.
     const pseudonym=Array.from(crypto.getRandomValues(new Uint8Array(32)),v=>v.toString(16).padStart(2,'0')).join('');
     const receipt=safeReportReceipt({guildId,ballotId:row.id,targetUserId:target,reasonCode:row.reason_code,
       createdAt:now,origin},pseudonym);
