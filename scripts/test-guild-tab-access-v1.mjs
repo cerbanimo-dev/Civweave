@@ -38,7 +38,7 @@ test('only an authenticated Guild session can be activated; switching changes se
   assert.equal(h.events.filter(event=>event.type==='civweave:host-node-selected').length,1);
   assert.throws(()=>api.selectSession({origin:guildA.origin,nodeId:guildB.nodeId}),/does not belong/);
 });
-test('sign out clears only the chosen Guild session, preserving the device credentials and selection for explicit re-login',()=>{
+test('sign out clears only one Guild session and blocks silent re-login until explicit join',async()=>{
   const h=loadSessionRuntime(),{api}=h;
   api.setSession(guildA);api.setSession(guildB);
   api.selectSession({origin:guildB.origin,nodeId:guildB.nodeId});
@@ -46,6 +46,8 @@ test('sign out clears only the chosen Guild session, preserving the device crede
   assert.equal(api.sessionFor(guildB.nodeId),null);
   assert.ok(api.sessionFor(guildA.nodeId));
   assert.equal(api.selectedOrigin(),guildB.origin);
+  assert.equal(await api.ensureSelected(),null);
+  assert.equal(h.requests.length,0);
   assert.equal(h.events.filter(event=>event.type==='civweave:capacity-session-cleared').length,1);
   assert.equal(api.deselectGuild(),true);
   assert.equal(api.selectedOrigin(),'');
