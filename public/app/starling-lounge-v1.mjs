@@ -228,7 +228,12 @@ function focusActivity(){
 }
 function renderFeed(){
   const node=$('[data-sl-feed]');node.replaceChildren();
-  if(!state.feed.length){para(node,'No signed Collective turns recorded for this Guild yet. Select a persona and explicitly run a local model turn on the founding device.','sl-sub');return}
+  if(!state.feed.length){
+    para(node,fleetIsGuild()
+      ?'No signed Collective turns recorded for this Guild yet. Select a Starling persona and explicitly run a local model turn on the founding device.'
+      :'Local conversations use Civweave’s existing guide chat. Signed Guild Collective turns appear only in Guild Fleet.','sl-sub');
+    return
+  }
   for(const message of state.feed.slice(-120)){
     const entry=el('article','sl-entry');
     const who=STARLING_PERSONAS[message.personaId];
