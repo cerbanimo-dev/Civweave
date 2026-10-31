@@ -29,7 +29,7 @@ export function createGuildPersonaClient({getSession=currentPersonaGuildSession,
  if(typeof getSession!=='function'||typeof send!=='function')throw new TypeError('Guild session and transport required.');
  const request=async(action,input=null)=>{
   const member=realSession(await getSession());
-  const suffix={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve','approve-both':'/approve-both'}[action];
+  const suffix={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve','approve-both':'/approve-both','move-draft':'/move-draft','move-approve':'/move-approve'}[action];
   if(suffix===undefined)throw new TypeError('Unsupported Guild campaign action.');
   const url=new URL(GUILD_PERSONA_ROUTE+suffix,member.origin);
   url.searchParams.set('nodeId',member.nodeId);
@@ -61,9 +61,14 @@ export function createGuildPersonaClient({getSession=currentPersonaGuildSession,
    return {room:packet.room,
      ...(action==='snapshot'?{
        pendingDrafts:Array.isArray(packet.pendingDrafts)?packet.pendingDrafts:[],
-       world:packet.world||null
+       world:packet.world||null,
+       motion:packet.motion||null,
+       pendingMoves:Array.isArray(packet.pendingMoves)?packet.pendingMoves:[]
      }:{}),
      ...(action==='draft'?{draft:packet.draft}:{}),
+     ...(action==='move-draft'?{motionDraft:packet.motionDraft}:{}),
+     ...(action==='move-approve'?{movement:packet.movement,
+       worldReceiptId:packet.worldReceiptId,motion:packet.motion}:{}),
      ...(action==='approve'?{worldReceiptId:packet.worldReceiptId,
        world:packet.world,speech:packet.speech}:{}),
      ...(action==='approve-both'?{worldReceiptIds:packet.worldReceiptIds,
@@ -94,6 +99,10 @@ export function createGuildPersonaClient({getSession=currentPersonaGuildSession,
      request('approve',{campaignId,expectedRevision,draftId}),
    approveBoth:(campaignId,expectedRevision,draftIds)=>
      request('approve-both',{campaignId,expectedRevision,draftIds}),
+   draftMove:(campaignId,expectedRevision,characterId,to)=>
+     request('move-draft',{campaignId,expectedRevision,characterId,to}),
+   approveMove:(campaignId,expectedRevision,draftId)=>
+     request('move-approve',{campaignId,expectedRevision,draftId}),
    validateRoom:(raw,{pack})=>importCampaignSnapshot(JSON.stringify(raw),{pack})
  });
 }
