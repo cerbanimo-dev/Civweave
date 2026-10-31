@@ -16,6 +16,7 @@ export function createPersonaWorldReceiptVerifier({world,getBinding}={}){
      !valid(campaignId)||proposal?.type!=='npc-proposal')return false;
    const binding=await getBinding({campaignId,proposalId:proposal.id});
    if(!binding||binding.receiptId!==worldReceiptId||
+     binding.campaignId!==campaignId||binding.proposalId!==proposal.id||
      !valid(binding.npcId)||!valid(binding.instanceId)||
      !Array.isArray(binding.intentIds)||binding.intentIds.length<1||binding.intentIds.length>3||
      new Set(binding.intentIds).size!==binding.intentIds.length)return false;
