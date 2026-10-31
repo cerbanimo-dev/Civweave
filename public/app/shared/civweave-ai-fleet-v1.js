@@ -2,11 +2,19 @@
 'use strict';
 // One presentation/catalogue owner. Existing inference, download, Settings,
 // privacy/consent and device-fit contracts remain the execution authorities.
-const VERSION='1.3.0-local-guild-fleet-nav';
+const VERSION='1.3.1-browser-uninstall-inference-health';
 if(globalThis.CivweaveAIFleetV1?.version===VERSION)return;
 const MEMORY_KEY='civweave.ai.fleet.memory-gb.v1';
 const CHOICE_KEY='civweave.ai.fleet.choices.v1';
 const BINDING_KEY='civweave.ai.fleet.bindings.v1';
+const HEALTH_KEY='civweave.ai.fleet.gguf-health.v1';
+function testHealth(id){return read(HEALTH_KEY,{})[id]||null}
+function recordTestHealth(id,passed,detail=''){
+ const old=read(HEALTH_KEY,{});
+ localStorage.setItem(HEALTH_KEY,JSON.stringify({...old,[id]:{
+  passed:Boolean(passed),detail:String(detail).slice(0,180),testedAt:new Date().toISOString()
+ }}));
+}
 let inventorySequence=0;
 const ROLES=Object.freeze({
  swift:{label:'Swift',purpose:'Everyday',description:'Conversation, quick help and lightweight everyday tasks.'},
@@ -248,10 +256,12 @@ function renderBrowserInventory(panel,entries){
  const list=panel.querySelector('[data-ai-fleet-inventory]');
  if(!list)return;
  const cards=entries.map(entry=>'<article class="cw-fleet-card"><h4>'+esc(entry.label)+'</h4>'+
+   '<p>Text inference: '+esc(!entry.verified?'Unavailable':testHealth(entry.importId)?.passed===true?'PASS · meaningful-text test':testHealth(entry.importId)?.passed===false?'FAILED · '+testHealth(entry.importId).detail:'Not tested · storage verification only')+'</p>'+
    '<p>'+importOption(entry)+'</p><p>Shards: '+entry.sourceNames.length+' · '+(entry.verified?'Stored and verified':'Unavailable: '+esc(entry.error))+'</p>'+
    (entry.verified?'<div class="cw-fleet-choices"><button type="button" data-ai-fleet-activate="'+esc(entry.importId)+'">'+
      (active?.importId===entry.importId&&isActive?'Active primary':'Use as primary')+'</button>'+
-     '<button type="button" data-ai-fleet-test="'+esc(entry.importId)+'">Run meaningful-text test</button></div>':'')+'</article>').join('');
+     '<button type="button" data-ai-fleet-test="'+esc(entry.importId)+'">Run meaningful-text test</button></div>':'')+
+   '<div class="cw-fleet-choices"><button type="button" data-ai-fleet-uninstall="'+esc(entry.importId)+'" aria-label="Uninstall '+esc(entry.label)+' browser copy">Uninstall model</button></div></article>').join('');
  const selectors=rows.map(row=>{
    const matches=available.filter(entry=>canUse(entry,row));
    const existing=roles[row.role]?.importId||'';
@@ -259,7 +269,7 @@ function renderBrowserInventory(panel,entries){
    return '<article class="cw-fleet-card"><h4>'+esc(ROLES[row.role].label)+' · '+esc(ROLES[row.role].purpose)+'</h4>'+
      '<p>'+esc(ROLES[row.role].description)+'</p><label class="cw-fleet-label">Installed model'+
      '<select data-ai-fleet-role-assign="'+esc(row.role)+'"'+(matches.length?'':' disabled')+'>'+opts+'</select></label>'+
-     '<p>'+(!matches.length?'No GGUF import verified within your RAM budget':isActive?'Role binding available for browser inference':'Model assigned; activate a primary GGUF to route chat')+'</p></article>';
+     '<p>'+(!matches.length?'No GGUF import verified within your RAM budget':!existing?'No model assigned':testHealth(existing)?.passed===true?(isActive?'Text test passed · browser route configured':'Text test passed · activate a primary for chat'):'Model assigned · meaningful-text test not passed')+'</p></article>';
  }).join('');
  list.innerHTML='<h4>Saved GGUF models · '+entries.length+'</h4>'+
    '<div class="cw-fleet-grid">'+(cards||'<p>No saved GGUF manifests found in this browser profile.</p>')+'</div>'+
@@ -267,7 +277,7 @@ function renderBrowserInventory(panel,entries){
  const msg=panel.querySelector('[data-ai-fleet-message]');
  if(msg)msg.textContent=(available.length?available.length+' complete GGUF model(s) found. ':'No complete imported GGUF found. ')+
    Object.keys(roles).length+' of '+rows.length+' compatible roles linked. '+
-   (isActive?'Browser inference is configured.':'Role links are saved, but browser inference is not the active model route.');
+   (isActive?'Browser route configured; only imports passing a text test are verified for generation.':'Role links are saved, but browser inference is not the active model route.');
 }
 async function refreshInventory(layer,panel,sequence){
  const msg=panel.querySelector('[data-ai-fleet-message]');
@@ -377,6 +387,26 @@ async function activateSavedImport(layer,panel,id){
  if(status)status.textContent='Activated '+record.label+'; other verified imports remain available for fleet roles.';
  await refreshInventory(layer,panel,++inventorySequence);
 }
+async function uninstallSavedImport(layer,panel,id){
+ if(activeImport)throw Error('Finish or cancel the current model installation first.');
+ const gguf=await import(GGUF_MODULE),entries=await gguf.installedImports({verify:false});
+ const entry=entries.find(row=>row.importId===id);
+ if(!entry)throw Error('The saved import no longer exists.');
+ if(typeof globalThis.confirm==='function'&&!globalThis.confirm(
+  'Uninstall '+entry.label+' ('+Math.round(entry.bytes/1e6)+' MB) from Civweave browser storage? This removes only this saved copy; your original GGUF in Downloads is untouched.'))return;
+ const result=await gguf.removeImported(id);
+ const health=read(HEALTH_KEY,{});delete health[id];localStorage.setItem(HEALTH_KEY,JSON.stringify(health));
+ // A missing primary must not fall through to a localhost HTTP request.
+ if(result.wasSelected){
+  const form=layer?.querySelector?.('[data-cw-settings-form]');
+  const route=form?.elements?.namedItem?.('route');
+  if(route){route.value='deterministic';route.dispatchEvent(new Event('change',{bubbles:true}));form.requestSubmit();}
+ }
+ await refreshInventory(layer,panel,++inventorySequence);
+ const msg=panel.querySelector('[data-ai-fleet-message]');
+ if(msg)msg.textContent='Uninstalled one saved '+entry.label+' copy ('+Math.round(entry.bytes/1e6)+' MB). Original Downloads file unchanged.'+
+  (result.wasSelected?' Primary switched to offline rules; select and test another model to reactivate AI.':' Remaining role bindings were refreshed.');
+}
 async function testSavedImport(panel,id){
  const status=panel.querySelector('[data-ai-fleet-message]');
  const gguf=await import(GGUF_MODULE),entries=await gguf.installedImports({verify:true});
@@ -392,7 +422,13 @@ async function testSavedImport(panel,id){
    });
    const answer=String(result.text||'').trim().replace(/[.!]+$/,'').toUpperCase();
    if(answer!=='READY')throw Error('The model emitted "'+String(result.text||'').trim().slice(0,130)+'" rather than READY. Inference ran but the answer is invalid; do not mark this model healthy.');
+   recordTestHealth(id,true,'Verified READY');
+   renderBrowserInventory(panel,entries);
    if(status)status.textContent='PASS · '+entry.label+' · verified READY · meaningful output. Role assignments were not changed.';
+ }catch(error){
+   recordTestHealth(id,false,String(error?.message||error));
+   renderBrowserInventory(panel,entries);
+   throw error;
  }finally{clearTimeout(timer)}
 }
 function render(layer){
@@ -499,10 +535,10 @@ function render(layer){
      if(el.hasAttribute('data-ai-fleet-import')){
        el.disabled=true;void installChosenGGUF(layer,panel).catch(error=>{const out=panel.querySelector('[data-ai-fleet-import-status]');if(out)out.textContent=String(error?.message||error)}).finally(()=>{if(!activeImport)el.disabled=false});return;
      }
-     const activate=el.dataset.aiFleetActivate,test=el.dataset.aiFleetTest;
-     if(activate||test){
+     const activate=el.dataset.aiFleetActivate,test=el.dataset.aiFleetTest,uninstall=el.dataset.aiFleetUninstall;
+     if(activate||test||uninstall){
        el.disabled=true;
-       const work=activate?activateSavedImport(layer,panel,activate):testSavedImport(panel,test);
+       const work=activate?activateSavedImport(layer,panel,activate):test?testSavedImport(panel,test):uninstallSavedImport(layer,panel,uninstall);
        void work.catch(error=>{const msg=panel.querySelector('[data-ai-fleet-message]');if(msg)msg.textContent=String(error?.message||error)})
          .finally(()=>{el.disabled=false});
      }
