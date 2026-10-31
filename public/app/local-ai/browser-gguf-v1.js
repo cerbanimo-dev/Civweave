@@ -188,6 +188,46 @@ export async function importFiles(input,{onProgress,signal}={}){
     throw error;
   }finally{importing=false}
 }
+// Read only Civweave's persisted import manifest and the actual saved shard
+// headers/sizes. Fleet discovery never initializes Wllama, starts a model or
+// downloads weights, and works with any imported quantization of these sizes.
+export async function installedImports({verify=true}={}){
+  const records=Object.values(importIndex()).filter(record=>
+    record?.schema==='civweave.gguf.import.v1'&&
+    ['qwen35-2b-imported-gguf','qwen35-4b-imported-gguf'].includes(record.model));
+  const available=[];
+  for(const record of records){
+    let verified=false,error='';
+    try{
+      if(!Array.isArray(record.files)||!record.files.length)throw Error('Missing shard manifest.');
+      if(verify)await blobsFor(record);
+      verified=true;
+    }catch(cause){error=String(cause?.message||cause).slice(0,240)}
+    const name=String(record.sourceNames?.[0]||'');
+    const quantization=(name.match(/(?:^|[-_.])(IQ[1-4]_[A-Za-z0-9_]+|Q[2-8]_[A-Za-z0-9_]+)/i)||[])[1]||'imported GGUF';
+    available.push(Object.freeze({
+      importId:String(record.importId),model:record.model,
+      family:record.model.includes('-2b-')?'2b':'4b',
+      label:String(record.label||record.model),quantization,
+      sourceNames:Array.isArray(record.sourceNames)?record.sourceNames.slice(0,24):[],
+      bytes:Number(record.bytes||0),importedAt:String(record.importedAt||''),
+      verified,error
+    }));
+  }
+  return available;
+}
+// Role-specific selection is transient. Activating a fleet role must not
+// overwrite the primary GGUF selection shared with legacy consumers.
+export function selectionForImported(importId){
+  const record=importIndex()[String(importId||'')];
+  if(!record||record.schema!=='civweave.gguf.import.v1'||
+      !['qwen35-2b-imported-gguf','qwen35-4b-imported-gguf'].includes(record.model))
+    throw err('GGUF_IMPORT_NOT_FOUND','The fleet-selected GGUF import is missing from Civweave storage.');
+  return{schema:'civweave.mobile.gguf-browser.v2',enabled:true,engine:'wllama',
+    source:'file',importId:record.importId,model:record.model,label:record.label,
+    url:'civweave-gguf-import:'+record.importId,bytes:record.bytes};
+}
+
 export async function activateImported(importId){
   const record=importIndex()[String(importId||'')];
   if(!record||record.schema!=='civweave.gguf.import.v1')
@@ -246,8 +286,8 @@ async function start(selected,onPhase=()=>{}){
   })().finally(()=>{loading=null});
   return loading;
 }
-export async function generate({model,messages,temperature=.6,maxTokens=1024,structured=false,signal,onToken,onPhase=()=>{}}={}){
-  const selected=current();
+export async function generate({model,importId,messages,temperature=.6,maxTokens=1024,structured=false,signal,onToken,onPhase=()=>{}}={}){
+  const selected=importId?selectionForImported(importId):current();
   if(!selected||selected.model!==model)throw err('GGUF_SELECTION_MISMATCH','Browser GGUF is not selected, or another model replaced the selected ID.');
   if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled before model loading.');
   let phase='model-loading';
