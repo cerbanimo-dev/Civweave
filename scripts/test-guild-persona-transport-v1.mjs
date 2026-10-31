@@ -8,6 +8,7 @@ class Storage {
  async get(k){return structuredClone(this.rows.get(k));}
  async put(k,v){this.rows.set(k,structuredClone(v));}
  async delete(k){return this.rows.delete(k);}
+ async list({prefix='',limit=1000}={}){return new Map([...this.rows].filter(([k])=>k.startsWith(prefix)).slice(0,limit));}
  transaction(run){
   const job=this.pending.then(async()=>{const old=structuredClone(this.rows);
    try{return await run(this)}catch(error){this.rows=old;throw error}});
@@ -103,4 +104,59 @@ test('internal Durable Object route rejects forged member records without shared
  const options=await worker.fetch(new Request('https://guild.example.test'+GUILD_PERSONA_ROUTE+'/dispatch',
   {method:'OPTIONS'}),h.env,{});
  assert.equal(options.status,204);
+});
+
+test('host approves one bounded NPC line: queued Worldweaver speak becomes a real server-verified receipt',async()=>{
+ const h=harness(),made=await h.request('create',{input:starting}),roomId=made.data.room.id;
+ assert.equal(made.status,201);
+ const stage=await h.request('draft',{input:{campaignId:roomId,expectedRevision:0,
+  characterId:'landry',speech:'The door is moving.',
+  actions:[{tool:'speak',args:{text:'The door is moving.'}}],
+  actor:{kind:'runtime',principalId:'server:spoof'}}});
+ assert.equal(stage.status,200,JSON.stringify(stage.data));
+ assert.equal(stage.data.draft.origin,'untrusted-player-submitted');
+ const before=await h.request('snapshot',{input:{campaignId:roomId}});
+ assert.equal(before.data.world,null);
+ assert.equal(before.data.pendingDrafts.length,1);
+ assert.equal(before.data.room.revision,0);
+ const approved=await h.request('approve',{input:{campaignId:roomId,expectedRevision:0,draftId:stage.data.draft.id}});
+ assert.equal(approved.status,200,JSON.stringify(approved.data));
+ assert.match(approved.data.worldReceiptId,/^world:/);
+ assert.equal(approved.data.world.simulatedOnly,true);
+ assert.deepEqual(approved.data.room.events.map(e=>e.type),
+  ['bind-pilot','npc-proposal','resolve-proposal']);
+ assert.equal(approved.data.room.events.at(-1).worldChanged,true);
+ const after=await h.request('snapshot',{input:{campaignId:roomId}});
+ assert.equal(after.status,200,JSON.stringify(after.data));
+ assert.equal(after.data.room.revision,3);
+ assert.equal(after.data.world.speeches.length,1);
+ assert.equal(after.data.world.speeches[0].status,'succeeded');
+ assert.equal(after.data.world.speeches[0].text,'The door is moving.');
+ assert.equal(after.data.pendingDrafts.length,0);
+ const again=await h.request('approve',{input:{campaignId:roomId,expectedRevision:3,draftId:stage.data.draft.id}});
+ assert.equal(again.status,404);
+});
+test('unseated members cannot submit draft, members cannot self-approve, movement is rejected',async()=>{
+ const h=harness(),made=await h.request('create',{input:starting}),campaignId=made.data.room.id;
+ const unauth=await h.request('draft',{user:'mallory',input:{campaignId,expectedRevision:0,
+   characterId:'landry',speech:'Impersonation'}});
+ assert.equal(unauth.status,403);
+ const seat=await h.request('dispatch',{input:{campaignId,expectedRevision:0,
+   command:{type:'assign-player',playerId:'member:bob',roleId:'delia'}}});
+ assert.equal(seat.status,200);
+ const illegal=await h.request('draft',{user:'bob',input:{campaignId,expectedRevision:1,
+   characterId:'landry',speech:'Not mine'}});
+ assert.equal(illegal.status,403);
+ const badMove=await h.request('draft',{user:'bob',input:{campaignId,expectedRevision:1,
+   characterId:'delia',speech:'Move',actions:[{tool:'move',args:{direction:'north'}}]}});
+ assert.equal(badMove.status,400);
+ const legal=await h.request('draft',{user:'bob',input:{campaignId,expectedRevision:1,
+   characterId:'delia',speech:'I disagree!'}});
+ assert.equal(legal.status,200,JSON.stringify(legal.data));
+ const wrongApprover=await h.request('approve',{user:'bob',input:{campaignId,expectedRevision:1,
+   draftId:legal.data.draft.id}});
+ assert.equal(wrongApprover.status,403);
+ const bobRead=await h.request('snapshot',{user:'bob',input:{campaignId}});
+ assert.equal(bobRead.status,200);
+ assert.equal(bobRead.data.pendingDrafts.length,0);
 });
