@@ -160,3 +160,41 @@ test('unseated members cannot submit draft, members cannot self-approve, movemen
  assert.equal(bobRead.status,200);
  assert.equal(bobRead.data.pendingDrafts.length,0);
 });
+
+test('dual override is atomic and records both speech receipts without suppressing either voice',async()=>{
+ const h=harness(),made=await h.request('create',{input:starting}),campaignId=made.data.room.id;
+ const a=await h.request('draft',{input:{campaignId,expectedRevision:0,
+   characterId:'landry',speech:'I want to open the door.'}});
+ const b=await h.request('draft',{input:{campaignId,expectedRevision:0,
+   characterId:'delia',speech:'Wait. We need a plan.'}});
+ assert.equal(a.status,200,JSON.stringify(a.data));
+ assert.equal(b.status,200,JSON.stringify(b.data));
+ const result=await h.request('approve-both',{input:{campaignId,expectedRevision:0,
+   draftIds:[b.data.draft.id,a.data.draft.id]}});
+ assert.equal(result.status,200,JSON.stringify(result.data));
+ assert.equal(result.data.bothSpoke,true);
+ assert.equal(result.data.room.willpower.points,0);
+ assert.equal(result.data.worldReceiptIds.length,2);
+ assert.match(result.data.speech,/Landry: I want to open the door\./);
+ assert.match(result.data.speech,/Delia: Wait\. We need a plan\./);
+ assert.deepEqual(result.data.room.events.slice(0,2).map(e=>e.characterId),['landry','delia']);
+ assert.deepEqual(result.data.room.events.slice(0,2).map(e=>e.type),['willpower-spend','willpower-spend']);
+ assert.equal(result.data.room.events.filter(e=>e.type==='resolve-proposal'&&e.worldChanged).length,2);
+ const latest=await h.request('snapshot',{input:{campaignId}});
+ assert.equal(latest.data.world.speeches.length,2);
+ assert.equal(latest.data.world.speeches.every(x=>x.status==='succeeded'),true);
+ assert.equal(latest.data.pendingDrafts.length,0);
+});
+test('dual override cannot spend one voice when total willpower insufficient',async()=>{
+ const h=harness(),made=await h.request('create',{input:starting}),campaignId=made.data.room.id;
+ const a=await h.request('draft',{input:{campaignId,expectedRevision:0,characterId:'landry',speech:'First'}});
+ const b=await h.request('draft',{input:{campaignId,expectedRevision:0,characterId:'delia',speech:'Second'}});
+ const single=await h.request('approve',{input:{campaignId,expectedRevision:0,draftId:a.data.draft.id}});
+ assert.equal(single.status,200);
+ const next=await h.request('approve-both',{input:{campaignId,expectedRevision:single.data.room.revision,
+   draftIds:[a.data.draft.id,b.data.draft.id]}});
+ assert.equal(next.status,409);
+ const snapshot=await h.request('snapshot',{input:{campaignId}});
+ assert.equal(snapshot.data.room.events.filter(x=>x.type==='willpower-spend').length,0);
+ assert.equal(snapshot.data.world.speeches.length,1);
+});
