@@ -52,3 +52,11 @@ The canonical guide chat now supplies real processing/idle signals through `Civw
 Remaining deployment boundaries: a non-Pocket Guild without a signed founding record needs an equivalent authenticated world-state authority; OpenSimulator / Overte native world navigation and independently acknowledged `move` receipts, authoritative avatar positions, real multiplayer transport and historical-scene recovery are **not yet implemented**. Never represent portrait motion as executed NPC travel.
 
 Verification: `npm run test:worldweaver` now includes `scripts/test-worldweaver-commune-host-v1.mjs`. The host's signed lifecycle, four canonical rooms, geometry projection, idempotency, unauthorized user, failed renderer and tampered records are covered. Browser/mobile acceptance is still required before production promotion.
+
+### Signed Worldweaver room navigation
+
+The single Guild-signed Worldweaver manifest includes four live-local spaces. The Commune HUD now offers a responsive **Space** selector and the canonical 2D map's space nodes navigate into any available signed room, reusing `selectRoom()` on the same `createCommuneWorldHost` rather than creating a second world. The 3D and 2D projections share the selected room reference and geometries, and the renderer caches each active revision. Unrecognized or foreign room IDs are rejected. The interactive 3D facade remains explicitly local/provisional; never imply OpenSimulator connectivity or external NPC locomotion.
+
+### Guide work-state parity
+
+System guides now read `CivweaveGuideChatSurfaceV350.state()` at scene opening and when the canonical chat surface emits its own `civweave:guide-chat-state` or `civweave:avatar-direct-text` signals. These events are refresh notifications only; the Commune does not accept their payload as authority. When the canonical guide is busy processing a request, that guide's portrait visibly works and travels by a **symbolic UI transition** toward the thematic station. At completion or loss of status the avatar returns to standby; existing Starling signed turn and host signals drive the fictional cast. No unverified background inference or movement receipt is generated.
