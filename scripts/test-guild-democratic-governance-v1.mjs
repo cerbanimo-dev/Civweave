@@ -260,3 +260,15 @@ test('single member cannot self-approve completion, two-member Guild needs indep
     statement:'This work can be reviewed by the other Guild member.'});
   assert.equal(reviewWorkProof(duo.sql,{actorId:B,proofId:proof.id,decision:'accept'}).status,'accepted');
 });
+
+test('work review requires an independent rejection quorum and permits corrected resubmission',()=>{
+  const f=fixture();[A,B,C].forEach(id=>f.member(id));
+  const original=submitWorkProof(f.sql,{actorId:A,questId:'guild-quest:'+'d'.repeat(64),
+    statement:'This claim needs a fair two-reviewer opportunity to correct mistakes.'});
+  assert.equal(reviewWorkProof(f.sql,{actorId:B,proofId:original.id,decision:'reject'}).status,'pending');
+  assert.equal(reviewWorkProof(f.sql,{actorId:C,proofId:original.id,decision:'reject'}).status,'rejected');
+  const corrected=submitWorkProof(f.sql,{actorId:A,questId:'guild-quest:'+'d'.repeat(64),
+    statement:'I revised the proof with additional independently checkable details.'});
+  assert.equal(corrected.status,'pending');
+  assert.notEqual(original.id,corrected.id);
+});
