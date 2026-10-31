@@ -14,6 +14,10 @@ export function ensureGovernanceTables(sql){
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_votes(ballot_id TEXT NOT NULL,user_id TEXT NOT NULL,choice TEXT NOT NULL CHECK(choice IN ('yes','no')),voted_at TEXT NOT NULL,PRIMARY KEY(ballot_id,user_id))");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_reports(ballot_id TEXT PRIMARY KEY,receipt_json TEXT NOT NULL,delivery_state TEXT NOT NULL CHECK(delivery_state IN ('queued','delivered','failed')),attempts INTEGER NOT NULL DEFAULT 0,recipient_count INTEGER NOT NULL DEFAULT 0,delivered_at TEXT)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_audit(id TEXT PRIMARY KEY,ballot_id TEXT NOT NULL,event TEXT NOT NULL,user_id TEXT NOT NULL,at TEXT NOT NULL)");
+  // Existing live Guilds were created before the case_id column existed.
+  // SQLite Durable Object state is persistent; do not assume CREATE IF NOT EXISTS migrates it.
+  if(![...sql.exec('PRAGMA table_info(guild_governance_ballots)')].some(row=>row.name==='case_id'))
+    sql.exec('ALTER TABLE guild_governance_ballots ADD COLUMN case_id TEXT');
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_cases(id TEXT PRIMARY KEY,action TEXT NOT NULL,target_user_id TEXT NOT NULL,opened_by TEXT NOT NULL,reason_code TEXT,statement TEXT NOT NULL,created_at TEXT NOT NULL,notice_until TEXT NOT NULL,response TEXT,responded_at TEXT,ballot_id TEXT)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_work_proofs(id TEXT PRIMARY KEY,author_id TEXT NOT NULL,quest_id TEXT NOT NULL,statement TEXT NOT NULL,status TEXT NOT NULL,required_approvals INTEGER NOT NULL,created_at TEXT NOT NULL,accepted_at TEXT)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_work_reviews(proof_id TEXT NOT NULL,reviewer_id TEXT NOT NULL,decision TEXT NOT NULL,at TEXT NOT NULL,PRIMARY KEY(proof_id,reviewer_id))");
