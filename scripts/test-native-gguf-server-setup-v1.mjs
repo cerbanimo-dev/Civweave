@@ -14,10 +14,11 @@ assert.match(COMMANDS[1],/termux-setup-storage/);
 assert.match(COMMANDS[1],/Qwen3\.5-4B-Q4_K_M\.gguf/);
 assert.match(COMMANDS[2],/--host 127\.0\.0\.1 --port 8080/);
 assert.match(COMMANDS[2],/--alias qwen35-4b-native/);
-assert.match(COMMANDS[2],/--cors-origins https:\/\/civweave-staging\.pages\.dev/);
+assert.match(COMMANDS[2],/--reasoning off/);
 assert.match(source,/f-droid\.org\/packages\/com\.termux/);
 assert.match(source,/github\.com\/termux\/termux-app\/releases/);
 assert.match(source,/github\.com\/ggml-org\/llama\.cpp\/blob\/master\/docs\/android\.md/);
+assert.match(source,/data-server-model/);
 assert.match(settings,/data-native-gguf-server/);
 assert.match(settings,/mountNativeServerSetup/);
 assert.match(settings,/model!=='qwen35-4b-native'/);
@@ -52,4 +53,12 @@ assert.equal(body.stream,false);
 await assert.rejects(checkServer({fetcher:async()=>answer({data:[{id:'unexpected-model'}]})}),/Unexpected loaded model/);
 await assert.rejects(generateServerTest({fetcher:async()=>answer({choices:[{message:{content:''}}]})}),/no visible generated text/);
 await assert.rejects(checkServer({fetcher:async()=>answer({error:'down'},500)}),/HTTP 500/);
+const alternate=async(url)=>url.endsWith('/models')?answer({data:[{id:'qwen35-2b-native'}]}):
+ answer({choices:[{message:{content:'READY'}}]});
+const foundTwo=await checkServer({model:'qwen35-2b-native',fetcher:alternate});
+assert.deepEqual(foundTwo.models,['qwen35-2b-native']);
+const testedTwo=await generateServerTest({model:'qwen35-2b-native',fetcher:alternate});
+assert.equal(testedTwo.model,'qwen35-2b-native');
+await assert.rejects(generateServerTest({fetcher:async()=>answer({choices:[{message:{content:'gibberish'}}]})}),/not the requested READY/);
+
 console.log('Native Termux server guide tests passed: official download links, original Q4 file, loopback binding, explicit model and generation tests, and no settings-open networking.');
