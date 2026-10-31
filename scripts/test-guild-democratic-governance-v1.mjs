@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
 import {webcrypto} from 'node:crypto';
-import {majority,ballotSpec,ballotOutcome,qualifiedContributors,GUILD_CONTRIBUTION_WINDOW_MS} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-v1.mjs';
+import {majority,ballotSpec,ballotOutcome,qualifiedContributors,activeGuildVoters,GUILD_CONTRIBUTION_WINDOW_MS} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-v1.mjs';
 import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,
   delegatedRole,isBanned,governanceStatus,reportQueue,reportReceipt,markReportDelivery} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
 import {distanceKm,deliverVerifiedGuildReport,handleGuildPeerDirectoryRoute} from '../cloudflare/core/src/guild-peer-reports-v1.mjs';
@@ -41,12 +41,27 @@ test('majority is strict and cannot be met by an owner alone when multiple membe
   assert.throws(()=>ballotSpec({action:'remove',targetUserId:A,initiatorUserId:A,eligible:[A],statement:'Verified concerns require a documented member decision.',now:t}),/normal account departure/);
   assert.throws(()=>ballotSpec({action:'ban',targetUserId:A,initiatorUserId:B,eligible:[A],statement:'Verified concerns require a documented member decision.',now:t}),/recent verified contribution/);
 });
-test('approved ballots auto-remove and invalidate sessions; a proposer alone cannot act in a two-voter Guild',()=>{
+test('all active Guild members can vote, but only recent verified contributors can propose',()=>{
+  const now=Date.now(),members=[A,B,C].map(id=>({userId:id,lastSeenAt:new Date(now-1000).toISOString()}));
+  const receipts=[{userId:A,kind:'published-quest',at:new Date(now-1000).toISOString()}];
+  assert.deepEqual(qualifiedContributors(members,receipts,{now}),[A]);
+  assert.deepEqual(activeGuildVoters(members,receipts,{now}),[A,B,C]);
+  assert.deepEqual(activeGuildVoters([...members,{userId:D,lastSeenAt:new Date(now-31*86400000).toISOString()}],receipts,{now}),[A,B,C]);
+  const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);
+  const proposed=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a democratic member decision.',actorId:A,action:'remove',targetUserId:C});
+  assert.equal(proposed.status,'open');assert.equal(proposed.requiredYes,2);
+  assert.equal(f.memberCount(),3);
+  assert.equal(castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:proposed.id,choice:'yes'}).status,'approved');
+  assert.equal(f.memberCount(),2);
+  assert.throws(()=>proposeGovernance(f.sql,{...f.context,statement:'Resident has not contributed recently; proposal should fail.',actorId:B,action:'transfer-role',targetUserId:A,role:'guildkeeper'}),/recent verified contribution/);
+});
+test('approved ballots auto-remove and invalidate sessions; a proposer alone cannot act in a multi-voter Guild',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
   const first=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
   assert.equal(first.status,'open');assert.equal(first.yes,1);assert.equal(first.requiredYes,2);assert.equal(f.memberCount(),3);
   const declined=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:first.id,choice:'no'});
-  assert.equal(declined.status,'rejected');assert.equal(f.memberCount(),3);
+  assert.equal(declined.status,'open');assert.equal(f.memberCount(),3);
+  assert.equal(castGovernanceVote(f.sql,{...f.context,actorId:C,ballotId:first.id,choice:'no'}).status,'rejected');
   const second=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
   const final=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:second.id,choice:'yes'});
   assert.equal(final.status,'approved');assert.equal(final.executed,true);assert.equal(f.memberCount(),2);
