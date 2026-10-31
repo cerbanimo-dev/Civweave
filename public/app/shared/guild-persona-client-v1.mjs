@@ -29,7 +29,7 @@ export function createGuildPersonaClient({getSession=currentPersonaGuildSession,
  if(typeof getSession!=='function'||typeof send!=='function')throw new TypeError('Guild session and transport required.');
  const request=async(action,input=null)=>{
   const member=realSession(await getSession());
-  const suffix={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve'}[action];
+  const suffix={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve','approve-both':'/approve-both'}[action];
   if(suffix===undefined)throw new TypeError('Unsupported Guild campaign action.');
   const url=new URL(GUILD_PERSONA_ROUTE+suffix,member.origin);
   url.searchParams.set('nodeId',member.nodeId);
@@ -66,6 +66,8 @@ export function createGuildPersonaClient({getSession=currentPersonaGuildSession,
      ...(action==='draft'?{draft:packet.draft}:{}),
      ...(action==='approve'?{worldReceiptId:packet.worldReceiptId,
        world:packet.world,speech:packet.speech}:{}),
+     ...(action==='approve-both'?{worldReceiptIds:packet.worldReceiptIds,
+       world:packet.world,speech:packet.speech,bothSpoke:packet.bothSpoke}:{}),
      scope:{origin:member.origin,nodeId:member.nodeId,userId:member.userId}};
   }catch(error){if(error.name==='AbortError')throw new Error('Guild campaign request timed out. Refresh before retrying a write.');throw error}
   finally{clearTimeout(timer)}
@@ -90,6 +92,8 @@ export function createGuildPersonaClient({getSession=currentPersonaGuildSession,
      request('draft',{campaignId,expectedRevision,characterId,speech,emote,actions}),
    approve:(campaignId,expectedRevision,draftId)=>
      request('approve',{campaignId,expectedRevision,draftId}),
+   approveBoth:(campaignId,expectedRevision,draftIds)=>
+     request('approve-both',{campaignId,expectedRevision,draftIds}),
    validateRoom:(raw,{pack})=>importCampaignSnapshot(JSON.stringify(raw),{pack})
  });
 }
