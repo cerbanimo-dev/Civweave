@@ -288,6 +288,7 @@ function renderGuildTab(){
         <div class="cw-guild-statline"><span>Node: <b>${guildEsc(nodeId)}</b></span><span>Remaining included neurons: <b>${remaining}</b></span><span>Daily member allowance: <b>${allowance}</b></span>${capacity?.communitySeatsRemaining!=null?'<span>Open Citizen seats: <b>'+guildNumber(capacity.communitySeatsRemaining)+'</b></span>':''}</div>
         <div class="cw-guild-actions">
           ${session?'<a class="cw-guild-primary" href="/app/civweave-guild-quest-v1.html">Guild Quests</a><button type="button" data-guild-ui-action="chat">Guild chat</button>':''}
+          ${session?'<button type="button" data-guild-ui-action="council">Guild Council &amp; votes</button>':''}
           <button type="button" data-guild-ui-action="invite" data-cw-guild-invite>Copy invitation</button>
           ${session?'<button type="button" data-guild-ui-action="verify">Verify local server</button>':''}
           ${!session?'<button type="button" class="cw-guild-primary" data-guild-ui-action="'+(api?.hasCredential?.(guild.origin,guild.nodeId)?'relogin':'join')+'">'+(api?.hasCredential?.(guild.origin,guild.nodeId)?'Log back in':'Join as a Hero')+'</button>':''}
@@ -398,6 +399,12 @@ async function guildAction(action,control){
       const status=guild.localFederated?await finder.loadStatus(true):await finder.inspectOrigin(guild.origin,{nodeId:guild.nodeId});
       if(!status?.ok)throw new Error('Selected Guild could not be reached. Try again before joining.');
       guildFeedback(guild.localFederated?'Local Guild selected. Admission and Guildkeeper tools remain with this local host; no remote HTTPS login is attempted.':action==='join'?'Review live seats and choose Join & log in below.':'Citizen and Patron choices are managed by the Guild admission and membership services below.');
+    }else if(action==='council'){
+      if(!session)throw new Error('Sign in to your selected Guild to participate in Council.');
+      const council=globalThis.CivweaveGuildGovernanceV1;
+      if(!council?.open)throw new Error('Guild Council is not loaded by this campus.');
+      closeNearbyGuilds('open-guild-council');
+      await council.open();
     }else if(action==='chat'){
       globalThis.CivweaveHumanChatGuildContextV1?.sync?.();
       if(!globalThis.CivweaveHumanChatStandaloneV2?.open)
