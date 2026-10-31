@@ -1,0 +1,47 @@
+name: Verify headquarters Starling funding v1
+
+on:
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'cloudflare/core/src/headquarters-starling-funding-v1.mjs'
+      - 'cloudflare/core/src/live-entry.mjs'
+      - 'cloudflare/core/src/money-edge-with-memberships.mjs'
+      - 'cloudflare/core/migrations/0014_headquarters_starling_contributions.sql'
+      - 'public/app/headquarters-starling-funding-v1.js'
+      - 'public/app/working-campus-v440.html'
+      - 'scripts/test-headquarters-starling-funding-v1.mjs'
+      - '.github/workflows/verify-headquarters-starling-funding-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check cloudflare/core/src/headquarters-starling-funding-v1.mjs
+      - run: node --check cloudflare/core/src/live-entry.mjs
+      - run: node --check cloudflare/core/src/money-edge-with-memberships.mjs
+      - run: node --check public/app/headquarters-starling-funding-v1.js
+      - run: node --test scripts/test-headquarters-starling-funding-v1.mjs
+      - name: Verify core only boundary
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const page = fs.readFileSync('public/app/working-campus-v440.html', 'utf8');
+          const ui = fs.readFileSync('public/app/headquarters-starling-funding-v1.js', 'utf8');
+          const core = fs.readFileSync('cloudflare/core/src/live-entry.mjs', 'utf8');
+          const policy = fs.readFileSync('cloudflare/core/src/headquarters-starling-funding-v1.mjs','utf8');
+          if (!page.includes('cw-headquarters-funding-open') || !page.includes('/app/headquarters-starling-funding-v1.js')) throw new Error('Active page has no headquarters funding CTA');
+          if (!ui.includes('if(location.origin!==ORIGIN)return')) throw new Error('Presentation hostname is not exact');
+          if (!core.includes('handleHeadquartersFundingRequest')) throw new Error('Canonical core does not handle the funding endpoint');
+          if (!policy.includes("CIVWEAVE_HEADQUARTERS_FUNDING_ENABLED === '1'")) throw new Error('HQ checkout is not default-off');
+          if (!policy.includes("CIVWEAVE_HEADQUARTERS_PAID_AI_ENABLED === '1'")) throw new Error('Paid inference gate missing');
+          NODE
