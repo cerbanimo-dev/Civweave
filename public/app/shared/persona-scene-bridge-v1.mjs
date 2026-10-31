@@ -20,7 +20,10 @@ const MAX_RESPONSE=16000;
 
 function modelPayload(value){
   let v=value;
-  if(plain(v)&&Array.isArray(v.choices))v=v.choices[0]?.message?.content;
+  if(plain(v)&&v.status&&v.status!=='success')throw new Error('Selected-model inference did not complete successfully.');
+  if(plain(v)&&v.outputJson!==undefined&&v.outputJson!==null)v=v.outputJson;
+  else if(plain(v)&&v.outputText!==undefined)v=v.outputText;
+  else if(plain(v)&&Array.isArray(v.choices))v=v.choices[0]?.message?.content;
   else if(plain(v)&&v.content!==undefined)v=v.content;
   if(Array.isArray(v)&&v.every(x=>plain(x)&&typeof x.text==='string'))v=v.map(x=>x.text).join('');
   if(typeof v==='string'){
