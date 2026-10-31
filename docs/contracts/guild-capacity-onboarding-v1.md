@@ -2,7 +2,7 @@
 
 ## Roles and authority
 
-The Guild identity remains local-first. Its original founder holds a separate owner-management credential; ordinary residents authenticate with a capacity session. The Cloudflare Capacity Durable Object already owns admission; it also owns the physical-node check-in state and capped **Guild verification tokens**. These are nontransferable recognition credits local to the Guild, not Acorns, Buttons, Neurons, money or canonical Passport Reward Ledger assets. A future governance-approved bridge may convert validation receipts into canonical rewards; no currency conversion is implied.
+The Guild identity remains local-first. Its original founder retains a separate founder-management credential. Other Guildkeepers receive delegated Guildkeeper roles only through the Guild Council's verified-contributor majority vote; ordinary residents authenticate with capacity sessions. The Cloudflare Capacity Durable Object already owns admission; it also owns the physical-node check-in state and capped **Guild verification tokens**. These are nontransferable recognition credits local to the Guild, not Acorns, Buttons, Neurons, money or canonical Passport Reward Ledger assets. A future governance-approved bridge may convert validation receipts into canonical rewards; no currency conversion is implied.
 
 ## Five cumulative capacity milestones
 
@@ -27,7 +27,7 @@ The canonical Guilds control in the Working Campus uses the existing `public/app
 
 **Distinct Hero actions:** `selectSession` switches between already authenticated Guild sessions and emits the canonical selected event; `signOut` drops only the current device capacity session, preserving the resident seat and saved login credential; `deselectGuild` removes the active Guild choice without changing admission or membership. **Leave Guild** is a deliberate server-authenticated `DELETE /api/ai/node/session?nodeId=...` request and only clears the device's selection/login and saved credential **after** the Guild server confirms that it removed the resident from the current Guild and released the slot. Network errors, older Guild runtimes without leave support and unauthenticated requests fail without pretending a seat has been released. A legacy founding Guildkeeper cannot leave through the resident departure endpoint.
 
-**Guildkeeper access:** the existing owner panel provides invitations, member removal, physical-node pairing, recovery, offline-location checks and neuron-flow monitoring. Its Guildkeeper button appears only when the **selected** Guild origin matches the device's saved founder-owner credential. Owner rights are always rechecked by the Cloudflare Guild management endpoint, not by the browser's claim. Delegated Guildkeeper powers are not introduced by this UI overhaul.
+**Guildkeeper access:** the existing Guild management panel provides invitations, physical-node pairing, recovery, offline-location checks and neuron-flow monitoring. The founder's credential remains separate, while voted Guildkeeper delegates can also use the node-management tools via authenticated resident sessions. No Guildkeeper can unilaterally remove, ban, report or change member roles; those decisions belong to the server-enforced Guild Council majority protocol in `docs/contracts/guild-democratic-governance-v1.md`.
 
 **Access scope:** the direct Guild finder is live-network dependent; offline selected Guild identity and saved session state remain visible where available, but admission, membership changes, node verification and hosted quota refresh cannot be performed without the corresponding server. Do not interpret choosing a Guild as admission, payment, membership transfer, a new seat or proof of Cloudflare billing capacity.
 
@@ -41,7 +41,7 @@ It displays today's settled Guild Cloud neurons charged, remaining included allo
 
 **Scope:** This is Guild Cloud Workers AI charge reporting, *not* a provider-wide Cloudflare account consumption meter, real-time token-by-token activity stream, device-local inference telemetry, external physical node usage, paid Gateway credit monitor or financial transaction view. Missing telemetry is shown as unavailable, not fabricated as zero. Historic data is daily aggregates, not per-request logs.
 
-Server authorization reuses the founding owner credential verification on `GET /api/guild/manage`, which is separate from resident sessions or physical-node pairing keys. Delegated Guildkeeper privileges are not currently active; this screen grants no role delegation or rights to ordinary residents. The UI is part of the existing `public/app/guild-owner-management-v1.js` management surface. See `cloudflare/mobile-guild-edge/src/guild-neuron-flow-v1.mjs` and `scripts/test-guildkeeper-neuron-flow-v1.mjs`.
+Server authorization on `GET /api/guild/manage` accepts the original founding credential or an authenticated resident session whose delegated Guildkeeper role was created by a majority-approved Guild Council vote. Both are rechecked server-side; physical-node pairing keys and ordinary resident sessions grant no owner privileges. See `docs/contracts/guild-democratic-governance-v1.md`. The UI is part of the existing `public/app/guild-owner-management-v1.js` management surface. See `cloudflare/mobile-guild-edge/src/guild-neuron-flow-v1.mjs` and `scripts/test-guildkeeper-neuron-flow-v1.mjs`.
 
 ## Resident check-in and Guild verification tokens
 
@@ -85,7 +85,7 @@ node scripts/guild-physical-node-agent-v1.mjs
 - `POST /api/guild/physical/check-in` requires a resident Bearer token, short-lived code and one-time location. The Worker validates the pin without storing precise coordinates.
 - `POST /api/guild/physical/connect` uses the one-time pairing code.
 - `POST /api/guild/physical/heartbeat` requires the physical node's secret, plus its current code hash.
-- `GET/POST /api/guild/manage` remains founder-only.
+- `GET/POST /api/guild/manage` requires the founder key or a vote-delegated Guildkeeper role. The former unilateral `remove-member` action returns 403; removal, bans, reports and role transfers use Council ballots.
 
 ## Validation
 
