@@ -44,18 +44,20 @@ test('neuron flow presents verified Guild Cloud charges, remaining allowance, se
   assert.equal(flow.coverage.cloudflareAccountFreePoolIncluded,false);
   assert.equal(flow.resetsAt,'2026-11-01T00:00:00.000Z');
 });
-test('unknown residents or nodes and invalid charges cannot inflate published flow',()=>{
+test('departed residents remain in Guild totals anonymously, unknown nodes and invalid charges are excluded',()=>{
   const flow=buildGuildNeuronFlow({now,capacity,members,usageRows:[
-    {day:'2026-10-31',node_id:'node-a',user_id:'alice',neurons:999999},
-    {day:'2026-10-31',node_id:'node-a',user_id:'hacker',neurons:900},
+    {day:'2026-10-31',node_id:'node-a',user_id:'alice',neurons:120},
+    {day:'2026-10-31',node_id:'node-a',user_id:'former-member',neurons:50},
     {day:'2026-10-31',node_id:'unknown',user_id:'alice',neurons:900},
     {day:'2026-10-31',node_id:'node-b',user_id:'bob',neurons:-5},
     {day:'2026-10-31',node_id:'node-b',user_id:'bob',neurons:'nan'}
   ]});
-  assert.equal(flow.today.chargedNeurons,900);
-  assert.equal(flow.today.includedRemainingNeurons,1800);
+  assert.equal(flow.today.chargedNeurons,170);
+  assert.equal(flow.today.includedRemainingNeurons,2530);
+  assert.equal(flow.today.unassignedNeurons,50);
   assert.equal(flow.today.overdrawnNeurons,0);
-  assert.equal(flow.history.at(-1).chargedNeurons,900);
+  assert.equal(flow.history.at(-1).chargedNeurons,170);
+  assert.equal(flow.residents.find(x=>x.userId==='alice').chargedNeuronsToday,120);
 });
 test('Guildkeeper neuron monitor is a server-authenticated owner-only read on the canonical Guild management route',()=>{
   const edge=source('cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs');
