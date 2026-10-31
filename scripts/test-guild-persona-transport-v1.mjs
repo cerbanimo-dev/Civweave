@@ -30,7 +30,8 @@ function harness(){
    return{fetch:(url,opts)=>node.fetch(new Request(url,opts))};
  }};
  return {env,stores,async request(action,{user='alice',node='arcadia',input,auth=token(user,node),method}={}){
-  const route=action==='create'?'':action==='snapshot'?'/snapshot':'/dispatch';
+  const route={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve','approve-both':'/approve-both'}[action];
+  if(route===undefined)throw new Error('Unsupported harness operation');
   const target=new URL('https://guild.example.test'+GUILD_PERSONA_ROUTE+route);
   target.searchParams.set('nodeId',node);
   if(action==='snapshot')target.searchParams.set('campaignId',input?.campaignId||'');
