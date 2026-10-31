@@ -52,22 +52,20 @@ async function ready(){
  })().catch(error=>{pending=null;throw error});return pending;
 }
 async function openCommuneFirst(){
- const api=await ready();
- // The authenticated Guild transport is read-only until a separate, confirmed action.
- // Keep the local planning workbench available without a selected Guild.
+ // One visual Fleet entry for every user. No Guild selection is required to
+ // inspect device-local roles, and a missing membership never becomes a Guild.
+ const module=await import('/app/starling-lounge-v1.mjs?v=fleet-scopes-sim-r4');
  try{
+  const api=await ready();
   const selectedGuild=await api.connectGuild();
   const guildId=selectedGuild?.guildId;
-  if(typeof guildId==='string'&&guildId){
-   const module=await import('/app/starling-lounge-v1.mjs?v=worldweaver-commune-r3');
+  if(typeof guildId==='string'&&guildId)
    return module.CivweaveStarlingLoungeV1.open({id:guildId,name:'Selected Guild'});
-  }
- }catch(error){
-  // The legacy local planning UI remains the fallback if Guild access is absent
-  // or the visual renderer is unavailable; never fabricate a Guild session.
+ }catch{
+  // No authenticated Guild: local-only Fleet is still available.
  }
- return api.open();
+ return module.CivweaveStarlingLoungeV1.open(null);
 }
-globalThis.CivweaveStarlingIntegrationV1=Object.freeze({version:'1.1.0',open:openCommuneFirst,openPlanner:async()=>{const api=await ready();return api.open()}});
+globalThis.CivweaveStarlingIntegrationV1=Object.freeze({version:'1.2.0',open:openCommuneFirst,openPlanner:async()=>{const api=await ready();return api.open()}});
 
 })();
