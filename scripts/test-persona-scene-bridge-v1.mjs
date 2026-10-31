@@ -16,6 +16,7 @@ const jsonReply=content=>({choices:[{message:{content:JSON.stringify(content)}}]
 test('public 4B prompt excludes facts known only to one participant',()=>{
  const q=createDirectorRequest({pack,stage:1,scenario:'Meet at a cafe',participants:['jess','magnus']});
  assert.doesNotMatch(q.messages[1].content,/Jess knew Raven/);
+ assert.doesNotMatch(q.messages[1].content,/\"history\"/);
  assert.match(q.messages[1].content,/played games/);
 });
 test('personal 4B director prompt can see only the selected character private facts',()=>{
