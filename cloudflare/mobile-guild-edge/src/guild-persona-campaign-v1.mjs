@@ -12,6 +12,7 @@
  */
 import {createPersonaCampaign,exportCampaignSnapshot} from '../../../public/app/shared/persona-campaign-v1.mjs';
 import {createPersonaMultiplayerGateway} from '../../../public/app/shared/persona-multiplayer-gateway-v1.mjs';
+import {stageNpcDraft,pendingNpcDrafts,approveNpcDraft,guildPersonaWorldSnapshot} from './guild-persona-runtime-v1.mjs';
 
 export const GUILD_PERSONA_ROUTE='/api/node/persona-campaigns';
 export const GUILD_PERSONA_SCHEMA='civweave.guild-persona-room.v1';
@@ -45,7 +46,7 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
   if(typeof storage?.transaction!=='function')fail('Guild transactional storage is required.',503);
   const nodeId=text(options.nodeId,96);
   const actor=memberActor(member,nodeId);
-  if(!['create','snapshot','dispatch'].includes(action))fail('Unsupported private campaign action.',405);
+  if(!['create','snapshot','dispatch','draft','approve'].includes(action))fail('Unsupported private campaign action.',405);
   if(!input||typeof input!=='object'||Array.isArray(input))fail('Campaign JSON object required.');
   const id=text(input.campaignId,96);
   if(action!=='create'&&!bounded(id))fail('Campaign ID required.');
@@ -70,6 +71,21 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
       await tx.put(ownerKey,count+1);
       return {ok:true,schema:GUILD_PERSONA_SCHEMA,room:JSON.parse(exportCampaignSnapshot(room)),serverAuthoritative:true};
     }
+    const room=await tx.get(roomKey);
+    if(!room)fail('Private campaign not found.',404);
+    if(action==='draft'||action==='approve'){
+      const result=action==='draft'?
+        await stageNpcDraft(tx,{nodeId,room,actor,input}):
+        await approveNpcDraft(tx,{nodeId,room,actor,input});
+      if(action==='approve')await tx.put(roomKey,result.room);
+      return {ok:true,schema:GUILD_PERSONA_SCHEMA,
+        room:action==='approve'?result.room:room,
+        ...(action==='draft'?{draft:result.draft}:{
+          worldReceiptId:result.worldReceiptId,
+          world:result.world,
+          speech:result.speech
+        }),serverAuthoritative:true};
+    }
     const gateway=createPersonaMultiplayerGateway({
       authenticate:async()=>actor,
       load:async campaignId=>tx.get(ROOM_PREFIX+nodeId+':'+campaignId),
@@ -88,7 +104,11 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
         ?await gateway.snapshot({campaignId:id})
         :await gateway.dispatch({campaignId:id,expectedRevision:input.expectedRevision,
           command:input.command});
-      return {ok:true,schema:GUILD_PERSONA_SCHEMA,room:snapshot,serverAuthoritative:true};
+      const extra=action==='snapshot'?{
+        pendingDrafts:await pendingNpcDrafts(tx,{nodeId,room:snapshot,actor}),
+        world:await guildPersonaWorldSnapshot(tx,{nodeId,room:snapshot,actor})
+      }:{};
+      return {ok:true,schema:GUILD_PERSONA_SCHEMA,room:snapshot,...extra,serverAuthoritative:true};
     }catch(error){
       if(/membership|seat access|not found|unknown campaign/i.test(String(error.message)))
         fail('Private campaign not found or access denied.',404);
