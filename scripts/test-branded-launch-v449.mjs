@@ -62,9 +62,10 @@ test('installed PWA header and installer use the approved branded heart, never o
   const installer=read('public/app/civweave-brand.js');
   const gateway=read('public/app/index.html');
   for (const source of [runtime,installer,gateway]) {
-    assert.doesNotMatch(source,/civweave-(?:day|night)-logo\\.jpg/);
+    assert.equal(source.includes('civweave-day-logo.jpg'),false);
+    assert.equal(source.includes('civweave-night-logo.jpg'),false);
   }
   for (const page of ['working-campus-v156.html','working-campus-v437.html','working-campus-v440.html']) {
-    assert.match(read('public/app/'+page),/src="\\/app\\/logos\\/civweave-branded-heart-512-v449\\.png" alt="Civweave"/);
+    assert.ok(read('public/app/'+page).includes('src="/app/logos/civweave-branded-heart-512-v449.png" alt="Civweave"'),page);
   }
 });
