@@ -11,7 +11,7 @@ const MOBILE_GUILD_STATE_KEY='civweave.mobile-guild.v1';
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
 const MINILM_ROUTER_SRC='/app/minilm-response-router-v347.js?v=1.3.2-bounded-classification';
 const SERVER_ROUTER_SRC='/app/server-ai-router-v301.js?v=1.0.121-guild-telemetry';
-const HOST_SESSION_SRC='/app/host-node-session-v1.js?v=1.0.137-mobile-guild-quota';
+const HOST_SESSION_SRC='/app/host-node-session-v1.js?v=1.0.138-unified-guild-access';
 const GUILD_USAGE_SRC='/app/guild-chat-usage-v1.js?v=1.0.2-mobile-session-upgrade';
 let pendingTimer=0;
 let hardTimer=0;
