@@ -70,9 +70,8 @@ export function respondToGovernanceCase(sql,{actorId,caseId,response,now=Date.no
   if(typeof response!=='string'||response.trim().length<20||response.trim().length>2000)
     throw fail('A response must be 20–2,000 characters.',400);
   sql.exec('UPDATE guild_governance_cases SET response=?,responded_at=? WHERE id=?',response.trim(),new Date(now).toISOString(),row.id);
-  return viewCase(caseRow(sql,idOr(row)));
+  return viewCase(caseRow(sql,row.id));
 }
-function idOr(row){return row.id}
 const viewWork=row=>({id:row.id,authorId:row.author_id,questId:row.quest_id,statement:row.statement,
   status:row.status,requiredApprovals:Number(row.required_approvals),createdAt:row.created_at,acceptedAt:row.accepted_at||null});
 export function submitWorkProof(sql,{actorId,questId,statement,now=Date.now()}){
@@ -82,8 +81,8 @@ export function submitWorkProof(sql,{actorId,questId,statement,now=Date.now()}){
   if(!/^guild-quest:[a-f0-9]{64}$/.test(String(questId||'')))throw fail('Accepted work must reference a canonical published Guild Quest.',400);
   if(typeof statement!=='string'||statement.trim().length<20||statement.trim().length>1000)
     throw fail('Explain the completed work for independent review (20–1,000 characters).',400);
-  const prior=rows(sql,'SELECT id FROM guild_work_proofs WHERE author_id=? AND quest_id=?',actorId,questId)[0];
-  if(prior)throw fail('A verification record already exists for this Guild Quest and member.',409);
+  const prior=rows(sql,"SELECT id FROM guild_work_proofs WHERE author_id=? AND quest_id=? AND status!='rejected' LIMIT 1",actorId,questId)[0];
+  if(prior)throw fail('A pending or accepted verification record already exists for this Guild Quest and member.',409);
   const n=Number(rows(sql,'SELECT COUNT(DISTINCT user_id) AS n FROM resident_members')[0]?.n||0);
   const id='guild-work:'+crypto.randomUUID(),requiredApprovals=n>=3?2:n===2?1:2;
   sql.exec("INSERT INTO guild_work_proofs(id,author_id,quest_id,statement,status,required_approvals,created_at) VALUES(?,?,?,?,'pending',?,?)",
@@ -102,7 +101,9 @@ export function reviewWorkProof(sql,{actorId,proofId,decision,now=Date.now()}){
     throw fail('This reviewer has already reviewed the work.',409);
   sql.exec('INSERT INTO guild_work_reviews(proof_id,reviewer_id,decision,at) VALUES(?,?,?,?)',proofId,actorId,decision,new Date(now).toISOString());
   const approvals=Number(rows(sql,"SELECT COUNT(*) AS n FROM guild_work_reviews WHERE proof_id=? AND decision='accept'",proofId)[0]?.n||0);
-  const status=decision==='reject'?'rejected':approvals>=Number(row.required_approvals)?'accepted':'pending';
+  const rejections=Number(rows(sql,"SELECT COUNT(*) AS n FROM guild_work_reviews WHERE proof_id=? AND decision='reject'",proofId)[0]?.n||0);
+  const status=approvals>=Number(row.required_approvals)?'accepted':
+    rejections>=Number(row.required_approvals)?'rejected':'pending';
   if(status!=='pending'){
     sql.exec('UPDATE guild_work_proofs SET status=?,accepted_at=? WHERE id=?',status,status==='accepted'?new Date(now).toISOString():null,proofId);
     if(status==='accepted')creditVerifiedContribution(sql,{id:'work:'+proofId,userId:row.author_id,kind:'accepted-work-proof',at:new Date(now).toISOString()});
