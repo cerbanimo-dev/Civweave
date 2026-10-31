@@ -27,6 +27,8 @@ export async function deliverVerifiedGuildReport(env,{guildId,origin,ballotId},f
   const sourceOrigin=originOf(origin);
   const source=await env.DB.prepare("SELECT node_id,public_origin,location_json FROM nodes WHERE node_id=? AND status='active' LIMIT 1").bind(guildId).first();
   if(!source||originOf(source.public_origin)!==sourceOrigin)throw bad('Reporting Guild is not an independently registered, active source.',403);
+  const existing=await env.DB.prepare("SELECT COUNT(*) AS n FROM guild_peer_report_inbox WHERE source_guild_id=? AND report_id=?").bind(guildId,ballotId).first();
+  if(Number(existing?.n||0)>0)return {ok:true,idempotent:true,reportId:ballotId,deliveredToNearbyGuilds:Number(existing.n)};
   const receiptUrl=new URL('/api/guild/governance/receipt',sourceOrigin);receiptUrl.searchParams.set('ballotId',ballotId);
   const response=await fetchImpl(receiptUrl,{headers:{accept:'application/json'},cache:'no-store',redirect:'error'});
   if(!response.ok)throw bad('Guild governance ballot receipt cannot be verified.',409);
@@ -36,8 +38,6 @@ export async function deliverVerifiedGuildReport(env,{guildId,origin,ballotId},f
     receipt.guildId!==guildId||receipt.origin!==sourceOrigin||receipt.classification!=='community-approved-unverified-allegation'||
     !/^[a-f0-9]{64}$/.test(receipt.subjectPseudonym)||!['harassment','threats','fraud','impersonation','safety','repeated-disruption','other'].includes(receipt.reasonCode)||
     receipt.radiusKm!==25)throw bad('Reported receipt does not describe an approved, privacy-limited Guild vote.',403);
-  const existing=await env.DB.prepare("SELECT COUNT(*) AS n FROM guild_peer_report_inbox WHERE source_guild_id=? AND report_id=?").bind(guildId,ballotId).first();
-  if(Number(existing?.n||0)>0)return {ok:true,idempotent:true,reportId:ballotId,deliveredToNearbyGuilds:Number(existing.n)};
   const created=Date.parse(receipt.createdAt);
   if(!Number.isFinite(created)||Math.abs(Date.now()-created)>7*86400000)throw bad('Approved report has expired before relay.',410);
   // Fresh directory location is the only source of proximity. Do not accept
