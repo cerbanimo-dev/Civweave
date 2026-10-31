@@ -70,8 +70,11 @@ export function createDirectorRequest({pack,stage,scenario,participants,goals=[]
   const common=ids.length?awareness[ids[0]].filter(id=>ids.every(k=>awareness[k].includes(id))):[];
   const events=p.events.filter(e=>e.status==='established'&&common.includes(e.id))
     .map(e=>({id:e.id,stage:e.stage,summary:e.summary,source:e.source}));
+  // Even descriptive private event IDs can be spoilers. Expose only mutually
+  // known IDs here; private details require createPrivateDirectorRequest.
+  const sharedAwareness=Object.fromEntries(ids.map(id=>[id,common]));
   const payload={scenario:safe(scenario,8000),goals:array(goals).map(x=>safe(x,350)).slice(0,20),
-    branchId,stage,cast,events,awareness,
+    branchId,stage,cast,events,awareness:sharedAwareness,
     output:{characters:{'[id]':{characterGoal:'string',emotion:'string',instructions:'string',
       knownEventIds:['event-id'],escalateWhen:['string'],improvFreedom:'bounded|string'}}}};
   return {modelTier:'4b',purpose:'persona-scene-direction',responseFormat:'json',
