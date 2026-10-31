@@ -1,0 +1,25 @@
+name: Persona Library Contract
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/shared/persona-library-v1.mjs'
+      - 'scripts/test-persona-library-v1.mjs'
+      - '.github/workflows/persona-library-contract.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/shared/persona-library-v1.mjs'
+      - 'scripts/test-persona-library-v1.mjs'
+      - '.github/workflows/persona-library-contract.yml'
+
+jobs:
+  persona-library:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify canon and improv contract
+        run: node --test scripts/test-persona-library-v1.mjs
