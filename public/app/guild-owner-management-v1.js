@@ -112,7 +112,7 @@ async function perform(action,button){
   if(busy)return;busy=true;
   try{
     if(action==='refresh'){await refresh();return}
-    if(action==='copy-invite'){await navigator.clipboard.writeText(owner()?.primaryOrigin||'');feedback('Guild origin copied. Invitation and admission still use the existing resident login flow.');return}
+    if(action==='copy-invite'){const v=owner(),invite=new URL('/app/working-campus-v440.html',location.origin);invite.searchParams.set('host',new URL(v.primaryOrigin).origin);if(v.cloudFabric?.starterNodes?.[0]?.nodeId)invite.searchParams.set('node',v.cloudFabric.starterNodes[0].nodeId);await navigator.clipboard.writeText(invite.href);feedback('Guild invitation copied. It contains no owner credential; residents still join using the normal login flow.');return}
     if(action==='remove-member'&&!confirm('Remove this resident and invalidate their Guild sessions?'))return;
     if(action==='revoke'&&!confirm('Revoke the current physical server key? Already earned slots remain unlocked.'))return;
     feedback('Checking '+action+'…');
