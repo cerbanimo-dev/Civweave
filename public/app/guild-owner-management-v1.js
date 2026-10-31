@@ -5,6 +5,10 @@ const clean=(value,max=2000)=>String(value??'').slice(0,max);
 const esc=value=>clean(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const state=()=>{try{return JSON.parse(localStorage.getItem(STATE_KEY)||'null')}catch{return null}};
 const owner=()=>{const v=state();return v?.cloudAttached&&v?.primaryOrigin&&/^[A-Za-z0-9_-]{40,200}$/.test(v.ownerKey||'')?v:null};
+function ownerAvailableFor(origin){
+  const v=owner();if(!v||!origin)return false;
+  try{return new URL(v.primaryOrigin).origin===new URL(origin).origin}catch{return false}
+}
 let root=null,packet=null,busy=false;
 function installStyle(){
   if(document.getElementById(STYLE))return;
@@ -134,10 +138,11 @@ async function open(){
   root.querySelector('[data-gm-close]')?.focus({preventScroll:true});return true;
 }
 function close(){if(root)root.hidden=true}
-function syncNav(){const v=owner();document.querySelectorAll('[data-cw-guild-manage]').forEach(button=>{button.hidden=!v;button.disabled=!v})}
+function syncNav(){const selected=globalThis.CivweaveHostNodeSessionV1?.selectedOrigin?.()||'';const can=ownerAvailableFor(selected);document.querySelectorAll('[data-cw-guild-manage]').forEach(button=>{button.hidden=!can;button.disabled=!can})}
 document.addEventListener('click',event=>{if(event.target.closest?.('[data-cw-guild-manage]')){event.preventDefault();void open()}});
 addEventListener('civweave:nearby-guilds-opened',syncNav);
+addEventListener('civweave:host-node-selected',syncNav);
 addEventListener('civweave:mobile-guild-cloud-attached',syncNav);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncNav,{once:true});else syncNav();
-globalThis.CivweaveGuildOwnerManagementV1=Object.freeze({version:VERSION,open,close,refresh,ownerAvailable:()=>Boolean(owner())});
+globalThis.CivweaveGuildOwnerManagementV1=Object.freeze({version:VERSION,open,close,refresh,ownerAvailable:()=>Boolean(owner()),ownerAvailableFor});
 })();
