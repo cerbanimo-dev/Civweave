@@ -212,11 +212,13 @@ function style(){
 function fleetRolesFor(entries,previous={}){
  // Preserve manual role choices whenever the exact import remains complete.
  // A later import must never make an earlier 4B or 2B disappear.
- return matchImportedRoles(catalogue().filter(row=>row.runtime==='browser-gguf'),entries,previous);
+ const result=matchImportedRoles(catalogue().filter(row=>row.runtime==='browser-gguf'),entries,previous);
+ for(const role of previous.unassigned||[])if(ROLES[role])delete result[role];
+ return result;
 }
-function saveBindings(roles){
+function saveBindings(roles,unassigned=[]){
  const state={schema:'civweave.ai.fleet.bindings.v1',enabled:Object.keys(roles).length>0,
-   platform:'android',budgetGB:detectDevice().budgetGB,roles,updatedAt:new Date().toISOString()};
+   platform:'android',budgetGB:detectDevice().budgetGB,roles,unassigned,updatedAt:new Date().toISOString()};
  localStorage.setItem(BINDING_KEY,JSON.stringify(state));
  try{globalThis.dispatchEvent?.(new CustomEvent('civweave:ai-fleet-bound',{detail:{source:'user-verified-gguf',roles:Object.keys(roles)}}))}catch{}
  return state;
@@ -229,7 +231,7 @@ function renderBrowserInventory(panel,entries){
  const roles=fleetRolesFor(entries,prior);
  const available=entries.filter(entry=>entry.verified);
  const changed=JSON.stringify(roles)!==JSON.stringify(prior.roles||{})||prior.platform!=='android'||prior.budgetGB!==detectDevice().budgetGB;
- if(changed)saveBindings(roles);
+ if(changed)saveBindings(roles,prior.unassigned||[]);
  const state=globalThis.CivweaveSettingsV320?.readState?.()||{};
  const active=read('civweave.mobile.gguf-primary.v2',null);
  const isActive=active?.enabled&&active?.engine==='wllama'&&state.route==='openai-compatible'&&
@@ -367,7 +369,9 @@ function render(layer){
          quantization:selected.quantization,bytes:selected.bytes};
        else delete roles[role];
        // Preserve explicit unassignment instead of silently restoring an auto match.
-       saveBindings(roles);
+       const unassigned=(previous.unassigned||[]).filter(item=>item!==role);
+       if(!selected)unassigned.push(role);
+       saveBindings(roles,unassigned);
        panel.querySelector('[data-ai-fleet-message]').textContent=ROLES[role].label+' assignment saved; no model was loaded.';
      })().catch(error=>{panel.querySelector('[data-ai-fleet-message]').textContent=String(error.message)})}
    });
