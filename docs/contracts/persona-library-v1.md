@@ -64,6 +64,6 @@ Run `node --test scripts/test-persona-library-v1.mjs scripts/test-persona-scene-
 - `advanceSceneTurn(scene,{expectedTurn,worldChanged?})`: compare-and-advance of accepted local turn state. This is **not** an authority to approve an action or increment a multiplayer world.
 - The bridge recognizes the existing Civweave selected-model result envelopes `{status:'success',outputJson:...}` and `{outputText:'...'}` as well as OpenAI-compatible chat completion messages. Only structured JSON is accepted. A reported failure aborts.
 
-### Author pack v2 (not in GitHub)
+### Author pack v3 (not in GitHub)
 
-The private author zip stores 51 curated names, 219 indexed source scenes and 1,016 **unverified** grammatical-action candidates. These candidate excerpts are a source review work queue, **not facts, witnessed memories or dialogue training labels**. Ten previously curated event anchors remain the only promoted events. A reader-facing package must be compiled with an explicit publication/spoiler policy and omit unapproved manuscript content.
+The private author zip stores 51 curated names, 219 indexed source scenes and 1,016 **unverified** grammatical-action candidates. These candidate excerpts are a source review work queue, **not facts, witnessed memories or dialogue training labels**. Ten previously curated event anchors remain the only promoted events. Legacy freeform emotion excerpts are now unreviewed author-only suggestions; only source-approved, story-stage-gated `verifiedEmotes` can be sent to any director or acting model. The manuscript archive is not committed to a public repository. A reader-facing package must be compiled with an explicit publication/spoiler policy and omit unapproved manuscript content.
