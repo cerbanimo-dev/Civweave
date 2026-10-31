@@ -5,7 +5,7 @@ import sharp from 'sharp';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const logoDir=path.join(root,'public','app','logos');
-const sourcePath=path.join(logoDir,'civweave-day-logo.jpg');
+const sourcePath=path.join(logoDir,'civweave-branded-heart-source-v449.webp');
 const nightSourcePath=path.join(logoDir,'civweave-night-logo.jpg');
 const soft=process.argv.includes('--soft');
 const ICON_SIZES=[16,32,48,72,96,128,144,152,180,192,384,512,1024];
@@ -33,12 +33,16 @@ async function main(){
   await writeIcon('civweave-pwa-192-v247.png',rendered.get(192));
   await writeIcon('civweave-pwa-512-v247.png',rendered.get(512));
   await writeIcon('civweave-pwa-maskable-512-v247.png',rendered.get(512));
+  await writeIcon('civweave-branded-heart-192-v449.png',rendered.get(192));
+  await writeIcon('civweave-branded-heart-512-v449.png',rendered.get(512));
+  // Dedicated safe-zone master; do not overwrite the curated maskable source.
+  await fsp.access(path.join(logoDir,'civweave-branded-heart-maskable-512-v449.png'));
   const summary={
-    schema:'civweave.icon-generation.v3',
-    source:'civweave-day-logo.jpg',
+    schema:'civweave.icon-generation.v4',
+    source:'civweave-branded-heart-source-v449.webp',
     nightCompanion:'civweave-night-logo.jpg',
-    treatment:'current-approved-artwork-resize-only',
-    targetFill:'100% source canvas; no crop, no substitute mark',
+    treatment:'approved-branded-heart-artwork-resize-only',
+    targetFill:'complete heart and Civweave wordmark; separate maskable safe-zone image',
     generatedAt:new Date().toISOString(),
     files:[
       ...ICON_SIZES.map(size=>`civweave-icon-${size}.png`),
@@ -48,11 +52,14 @@ async function main(){
       'civweave-adaptive-foreground-512.png',
       'civweave-pwa-192-v247.png',
       'civweave-pwa-512-v247.png',
-      'civweave-pwa-maskable-512-v247.png'
+      'civweave-pwa-maskable-512-v247.png',
+      'civweave-branded-heart-192-v449.png',
+      'civweave-branded-heart-512-v449.png',
+      'civweave-branded-heart-maskable-512-v449.png'
     ]
   };
   await fsp.writeFile(path.join(logoDir,'civweave-icon-generation.json'),JSON.stringify(summary,null,2));
-  console.log(`[Civweave] Generated ${summary.files.length} Civweave icon assets from the preserved current day logo. Night artwork remains preserved for clock-aware browser presentation.`);
+  console.log(`[Civweave] Generated ${summary.files.length} icon references from the approved Civweave wordmark heart. Day/night header artwork remains separate.`);
 }
 
 main().catch(error=>{
