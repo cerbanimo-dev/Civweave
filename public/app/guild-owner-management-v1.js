@@ -10,9 +10,22 @@ function ownedGuild(){
   try{return Object.freeze({origin:new URL(v.primaryOrigin).origin,guildId:String(v.guildId||'').slice(0,180),
     displayName:String(v.displayName||'').slice(0,160)})}catch{return null}
 }
+function delegatedGuildkeeper(){
+  const api=globalThis.CivweaveHostNodeSessionV1,origin=api?.selectedOrigin?.();
+  const session=api?.sessionFor?.(origin);
+  return session?.origin===origin&&session.seatClass==='guildkeeper'?session:null;
+}
+function managementAuth(){
+  const founder=owner();
+  if(founder)return {origin:founder.primaryOrigin,token:founder.ownerKey,founder:true};
+  const member=delegatedGuildkeeper();
+  return member?{origin:member.origin,token:member.token,founder:false}:null;
+}
 function ownerAvailableFor(origin){
-  const v=owner();if(!v||!origin)return false;
-  try{return new URL(v.primaryOrigin).origin===new URL(origin).origin}catch{return false}
+  if(!origin)return false;
+  const founder=owner(),delegate=delegatedGuildkeeper();
+  try{return Boolean(founder&&new URL(founder.primaryOrigin).origin===new URL(origin).origin||
+    delegate&&new URL(delegate.origin).origin===new URL(origin).origin)}catch{return false}
 }
 let root=null,packet=null,busy=false;
 function installStyle(){
@@ -48,7 +61,7 @@ function installStyle(){
 function ensure(){
   if(root?.isConnected)return root;installStyle();
   root=document.createElement('aside');root.id=ID;root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Guild management');
-  root.innerHTML=`<div class="gm-shell"><header class="gm-head"><div><h2>Guild Management</h2><div class="gm-small">Founding owner · Cloudflare + physical server</div></div><button type="button" data-gm-close aria-label="Close Guild Management">Close</button></header><div class="gm-body"><p class="gm-status" role="status" aria-live="polite"></p><div class="gm-reward" hidden aria-live="polite"></div><section data-gm-overview></section><section data-gm-neuron-flow aria-label="Guild neuron flow"></section><section data-gm-server></section><section data-gm-members></section><section data-gm-location></section><section data-gm-settings></section></div></div>`;
+  root.innerHTML=`<div class="gm-shell"><header class="gm-head"><div><h2>Guild Management</h2><div class="gm-small">Guildkeepers · Cloudflare + physical server</div></div><button type="button" data-gm-close aria-label="Close Guild Management">Close</button></header><div class="gm-body"><p class="gm-status" role="status" aria-live="polite"></p><div class="gm-reward" hidden aria-live="polite"></div><section data-gm-overview></section><section data-gm-neuron-flow aria-label="Guild neuron flow"></section><section data-gm-server></section><section data-gm-members></section><section data-gm-location></section><section data-gm-settings></section></div></div>`;
   root.addEventListener('click',event=>{
     if(event.target===root||event.target.closest?.('[data-gm-close]')){close();return}
     const action=event.target.closest?.('[data-gm-action]')?.dataset.gmAction;
@@ -58,10 +71,10 @@ function ensure(){
   document.body.append(root);return root;
 }
 function feedback(message){const node=root?.querySelector('.gm-status');if(node)node.textContent=message}
-function address(endpoint){const v=owner();if(!v)throw Error('This device does not hold a Guild owner credential.');const base=new URL(v.primaryOrigin);if(base.protocol!=='https:')throw Error('Guild Cloud must use HTTPS.');return new URL(endpoint,base.origin)}
+function address(endpoint){const v=managementAuth();if(!v)throw Error('This device has no authorized Guildkeeper session.');const base=new URL(v.origin);if(base.protocol!=='https:')throw Error('Guild Cloud must use HTTPS.');return new URL(endpoint,base.origin)}
 async function request(method='GET',action='',extra={}){
-  const v=owner();if(!v)throw Error('Guild Management is only available to the original owning device.');
-  const response=await fetch(address('/api/guild/manage'),{method,cache:'no-store',headers:{'authorization':'Bearer '+v.ownerKey,'content-type':'application/json'},...(method==='POST'?{body:JSON.stringify({action,...extra})}:{})});
+  const v=managementAuth();if(!v)throw Error('Guild management requires a verified founder or delegated Guildkeeper credential.');
+  const response=await fetch(address('/api/guild/manage'),{method,cache:'no-store',headers:{'authorization':'Bearer '+v.token,'content-type':'application/json'},...(method==='POST'?{body:JSON.stringify({action,...extra})}:{})});
   const body=await response.json().catch(()=>({}));if(!response.ok||body.ok===false)throw Error(body.error||'Guild Cloud returned HTTP '+response.status);return body;
 }
 const neurons=value=>Number.isSafeInteger(Number(value))&&Number(value)>=0?Number(value).toLocaleString():'—';
@@ -99,9 +112,9 @@ function render(){
   root.querySelector('[data-gm-overview]').innerHTML=`<h3>${esc(guild.displayName||'Your Guild')}</h3><p class="gm-info">${esc(capacity.memberCount||0)} members · ${available} unlocked of ${on?10:capacity.maxMembers||available} slots ${on?('· '+on.progressPercent+'% physical-server setup'):''}</p><div class="gm-grid" aria-label="Ten Guild membership slots">${Array.from({length:on?10:available},(_,i)=>`<div class="gm-slot" data-guild-reward-slot="${i+1}" data-locked="${i>=available}" aria-label="Member slot ${i+1} ${i>=available?'locked':'unlocked'}">${i>=available?'🔒':'♟'} ${i+1}</div>`).join('')}</div>${on?`<ol class="gm-milestones">${on.milestones.map(m=>`<li data-done="${m.complete}">${m.complete?'✓':'○'} ${esc(m.label)}</li>`).join('')}</ol>`:'<p>This existing Guild retains its legacy membership settings. Physical-node rewards apply to newly paired Guilds.</p>'}<div class="gm-actions"><button data-gm-action="refresh">Refresh Guild status</button></div>`;
   root.querySelector('[data-gm-neuron-flow]').innerHTML=renderNeuronFlow(packet.neuronFlow);
   root.querySelector('[data-gm-server]').innerHTML=`<h3>Physical server</h3><p>${on?.nodeId?'Node: '+esc(on.nodeId):'No physical server currently listed'} · ${esc(on?.nodeState||'unpaired')}</p><p class="gm-small">Last heartbeat: ${esc(on?.lastSeenAt||'none')} · Down since: ${esc(on?.downSince||'not down')} · Earned slots and existing memberships remain intact when a node is retired.</p>${on?`<div class="gm-actions"><button data-gm-action="pair">Create 10-minute pairing code</button><button data-gm-action="finalize" ${stage<4?'disabled':''}>Complete final checks</button><button data-gm-action="revoke">Revoke physical node</button></div><p class="gm-small" data-gm-pair-help>Run the physical-node companion with the pairing code on the server you own. The code is shown once and never shared with ordinary Guild members.</p>`:''}`;
-  root.querySelector('[data-gm-members]').innerHTML=`<h3>Members &amp; invitations</h3><p class="gm-small">Cloudflare enforces ${available} currently unlocked Citizen slots. Residents retain access if the server goes offline.</p><div class="gm-actions"><button data-gm-action="copy-invite">Copy Guild invitation link</button></div>${members.length?members.map(m=>`<div class="gm-member"><span>${esc(m.userId)} <small class="gm-small">(${esc(m.seatClass)})</small></span><button data-gm-action="remove-member" data-member-id="${esc(m.userId)}">Remove</button></div>`).join(''):'<p class="gm-small">No enrolled Cloudflare residents yet.</p>'}`;
+  root.querySelector('[data-gm-members]').innerHTML=`<h3>Members &amp; invitations</h3><p class="gm-small">Cloudflare enforces ${available} currently unlocked Citizen slots. Residents retain access if the server goes offline.</p><div class="gm-actions"><button data-gm-action="copy-invite">Copy Guild invitation link</button></div>${members.length?members.map(m=>`<div class="gm-member"><span>${esc(m.userId)} <small class="gm-small">(${esc(m.role==='guildkeeper'?'Guildkeeper':m.seatClass)})</small></span><button data-gm-action="council">Council vote</button></div>`).join(''):'<p class="gm-small">No enrolled Cloudflare residents yet.</p>'}`;
   root.querySelector('[data-gm-location]').innerHTML=`<h3>Community location checks</h3><p class="gm-small">Guild Map pin: ${guild.location?'Saved':'Unavailable'}. Residents visit the public location, read the physical server's rotating check code, and can earn one nontransferable Guild verification token per day. Their raw location coordinates are not retained.</p><p class="gm-small">Latest accepted community check: ${esc(on?.lastCommunityVerifiedAt||'none')} · Milestone: ${esc(on?.locationVerification?.kind||'pending')}</p><p class="gm-small">Status: ${esc(on?.nodeState||'unpaired')} ${on?.downReason?'· '+esc(on.downReason):''}. A first valid off-pin code flags a discrepancy; two independent reports can mark the node down. A missing heartbeat also marks it down. A sustained 72-hour outage retires the node, not the Guild or its members. No nearby volunteers does not count as a failure.</p><div class="gm-actions"><button data-gm-action="open-check">Open member verification</button></div>`;
-  root.querySelector('[data-gm-settings]').innerHTML=`<h3>Roles, permissions &amp; activity</h3><p class="gm-small">Founding owner controls are bound to this device's separate key; Guild members cannot use the owner endpoints. Delegated Guildkeeper privileges are not activated by this release.</p><p class="gm-small">Cloudflare origin: ${esc(owner()?.primaryOrigin||'none')}. Reward progress and node heartbeat history are preserved server-side.</p>`;
+  root.querySelector('[data-gm-settings]').innerHTML=`<h3>Roles, permissions &amp; activity</h3><p class="gm-small">Delegated Guildkeepers may manage node operations. Member removals, bans, reports and role changes require majority-approved Council ballots. No Guildkeeper may override an active contributor's vote.</p><p class="gm-small">Cloudflare origin: ${esc(owner()?.primaryOrigin||'none')}. Reward progress and node heartbeat history are preserved server-side.</p>`;
 }
 function apply(next){
   const on=next?.capacity?.onboarding,v=owner();
@@ -117,14 +130,13 @@ async function perform(action,button){
   if(busy)return;busy=true;
   try{
     if(action==='refresh'){await refresh();return}
-    if(action==='copy-invite'){const v=owner(),invite=new URL('/app/working-campus-v440.html',location.origin);invite.searchParams.set('host',new URL(v.primaryOrigin).origin);if(v.cloudFabric?.starterNodes?.[0]?.nodeId)invite.searchParams.set('node',v.cloudFabric.starterNodes[0].nodeId);await navigator.clipboard.writeText(invite.href);feedback('Guild invitation copied. It contains no owner credential; residents still join using the normal login flow.');return}
-    if(action==='remove-member'&&!confirm('Remove this resident and invalidate their Guild sessions?'))return;
+    if(action==='copy-invite'){const v=owner(),a=managementAuth(),invite=new URL('/app/working-campus-v440.html',location.origin);invite.searchParams.set('host',new URL(a.origin).origin);if(v?.cloudFabric?.starterNodes?.[0]?.nodeId)invite.searchParams.set('node',v.cloudFabric.starterNodes[0].nodeId);await navigator.clipboard.writeText(invite.href);feedback('Guild invitation copied. It contains no owner credential; residents still join using the normal login flow.');return}
+    if(action==='council'){close();await globalThis.CivweaveGuildGovernanceV1?.open?.();return}
     if(action==='revoke'&&!confirm('Revoke the current physical server key? Already earned slots remain unlocked.'))return;
     feedback('Checking '+action+'…');
     let extra={};
     if(action==='open-check'){await globalThis.CivweaveGuildNodeCommunityCheckV1?.open?.();return}
-    if(action==='remove-member')extra.userId=button.dataset.memberId;
-    const names={pair:'pair-node',revoke:'revoke-node','remove-member':'remove-member',finalize:'finalize'};
+    const names={pair:'pair-node',revoke:'revoke-node',finalize:'finalize'};
     const result=await request('POST',names[action],extra);
     await refresh();
     if(action==='pair'){
@@ -136,7 +148,7 @@ async function perform(action,button){
   finally{busy=false}
 }
 async function open(){
-  if(!owner())return false;
+  if(!managementAuth())return false;
   globalThis.CivweaveGuildSymbolV1?.closeNearbyGuilds?.('owner-management');
   ensure().hidden=false;feedback('Loading owner-only Guild configuration…');
   try{await refresh()}catch(error){feedback('Guild Management unavailable: '+clean(error?.message||error,400))}
