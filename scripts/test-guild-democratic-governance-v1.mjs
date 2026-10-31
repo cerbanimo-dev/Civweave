@@ -5,7 +5,7 @@ import {webcrypto} from 'node:crypto';
 import {majority,ballotSpec,ballotOutcome,qualifiedContributors,GUILD_CONTRIBUTION_WINDOW_MS} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-v1.mjs';
 import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,
   delegatedRole,isBanned,governanceStatus,reportQueue,reportReceipt,markReportDelivery} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
-import {distanceKm,deliverVerifiedGuildReport} from '../cloudflare/core/src/guild-peer-reports-v1.mjs';
+import {distanceKm,deliverVerifiedGuildReport,handleGuildPeerDirectoryRoute} from '../cloudflare/core/src/guild-peer-reports-v1.mjs';
 
 if(!globalThis.crypto)globalThis.crypto=webcrypto;
 const NOW=()=>new Date().toISOString();
@@ -148,4 +148,22 @@ test('directory relay independently fetches source Guild receipt and delivers on
   assert.equal((await deliverVerifiedGuildReport({DB},{guildId:'guild-a',origin,ballotId:id},fetcher)).idempotent,true);
   assert.equal(calls,1);
   await assert.rejects(()=>deliverVerifiedGuildReport({DB},{guildId:'guild-a',origin:'https://imposter.test',ballotId:id},fetcher),/not an independently registered/);
+});
+
+test('nearby report relay and inbox reject anonymous reads and writes even when a Guild ID is known',async()=>{
+  const token='T'.repeat(60);
+  const env={CIVWEAVE_GUILD_REPORT_RELAY_TOKEN:token,DB:{prepare(query){
+    if(!query.includes('FROM guild_peer_report_inbox'))throw Error('Unexpected database query');
+    return {bind(){return this},async all(){return {results:[]}}};
+  }}};
+  const read=new Request('https://core.example/api/guild-directory/reports?guildId=guild-a');
+  const anonymous=await handleGuildPeerDirectoryRoute(read,env);
+  assert.equal(anonymous.status,403);
+  const signed=await handleGuildPeerDirectoryRoute(new Request(read.url,{headers:{authorization:'Bearer '+token}}),env);
+  assert.equal(signed.status,200);
+  assert.deepEqual((await signed.json()).reports,[]);
+  const forged=new Request('https://core.example/api/guild-directory/report',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({guildId:'guild-a',ballotId:'guild-vote:12345678-1234-4234-9234-123456789abc',origin:'https://guild-a.workers.dev'})});
+  assert.equal((await handleGuildPeerDirectoryRoute(forged,env)).status,403);
+  const disabled=await handleGuildPeerDirectoryRoute(read,{DB:env.DB});
+  assert.equal(disabled.status,503);
 });
