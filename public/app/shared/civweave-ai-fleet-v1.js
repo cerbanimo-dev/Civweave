@@ -331,7 +331,7 @@ async function downloadFleetPreset(layer,panel,presetId){
    const gguf=await import(GGUF_MODULE);
    const preset=gguf.GGUF_PRESETS.find(p=>p.id===presetId);
    if(!preset)throw Error('Choose an approved Qwen 3.5 GGUF preset.');
-   if(!globalThis.confirm?.('Download '+preset.label+' to this device? It uses about '+preset.sizeHint+' of storage and network data.'))return;
+   if(typeof globalThis.confirm==='function'&&!globalThis.confirm('Download '+preset.label+' to this device? It uses about '+preset.sizeHint+' of storage and network data.'))return;
    if(status)status.textContent='Downloading '+preset.label+' directly into saved GGUF storage…';
    const result=await gguf.installPresetIntoImports(presetId,{signal:controller.signal,onProgress:part=>{
      if(!status?.isConnected)return;
