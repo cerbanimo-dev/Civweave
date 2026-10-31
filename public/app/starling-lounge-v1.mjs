@@ -21,14 +21,14 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
+const state={guild:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
 const human=person=>person?.name||'Unknown persona';
 function setup(){
   if(state.root)return state.root;
-  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=starling-commune-hud-r2';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=worldweaver-commune-r3';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
   root.innerHTML=`<header class="sl-head">
   <div class="sl-brand"><small>CIVWEAVE · COLLECTIVE COMMONS</small><h1>Starling Commune</h1><p>One Guild · many minds · shared work</p></div>
@@ -50,7 +50,7 @@ function setup(){
  </aside>
  <div class="sl-center">
   <section class="sl-scene-panel" data-sl-panel="world" aria-label="Virtual commune visualization">
-   <div class="sl-scene-heading"><div><span class="sl-kicker">THE LIVING COMMUNE</span><h2>Commune grounds</h2></div><div class="sl-scene-controls"><span data-sl-live-note>Illustrated 2D preview · no world provider connected</span><button type="button" data-sl-action="focus-active">Focus activity</button></div></div>
+   <div class="sl-scene-heading"><div><span class="sl-kicker">THE LIVING COMMUNE</span><h2>Commune grounds</h2></div><div class="sl-scene-controls"><span data-sl-live-note>Connecting Worldweaver…</span><button type="button" data-sl-action="world-provision" hidden>Start local world</button><button type="button" data-sl-action="world-3d" hidden>3D Scene</button><button type="button" data-sl-action="world-2d" hidden>2D Map</button><button type="button" data-sl-action="focus-active">Focus activity</button></div></div>
    <div class="sl-scene-shell">
     <div class="sl-stage" data-sl-stage role="group" aria-label="Schematic virtual commune and resident avatars">
      <div class="sl-sky" aria-hidden="true"><span class="sl-sun"></span><span class="sl-stars"></span></div>
@@ -62,7 +62,7 @@ function setup(){
      <div class="sl-ensemble" data-sl-ensemble aria-label="Select a commune resident"></div>
      <div class="sl-scene-caption"><span class="sl-scene-orbit" aria-hidden="true"></span>Avatars idle decoratively; work animation follows actual execution signals</div>
     </div>
-    <div class="sl-world-host" data-sl-world-host hidden aria-label="Authorized Worldweaver 2D map"></div>
+    <div class="sl-world-host" data-sl-world-host hidden aria-label="Guild Worldweaver 3D scene and accessible 2D map"></div>
    </div>
    <div class="sl-focus-strip" aria-live="polite">
     <img data-sl-focus-avatar class="sl-focus-avatar" alt="">
@@ -157,6 +157,12 @@ function renderPresence(){
     button.dataset.slPresence=current.status;
     button.setAttribute('aria-pressed',String(id===state.selectedAgent));
     const status=button.querySelector('.sl-presence-label');if(status)status.textContent=current.label;
+    if(button.classList.contains('sl-world-actor')){
+      const base=STAGE_POSITIONS[id]||[50,70];
+      const activity=({moss:[20,58],kamiya:[42,56],rook:[66,58],merlin:[85,57],weaveling:[50,48]})[id]||[50,70];
+      const coords=current.status==='working'?activity:base;
+      button.style.setProperty('--sl-x',coords[0]+'%');button.style.setProperty('--sl-y',coords[1]+'%');
+    }
     const short=button.querySelector('.sl-figure-presence');if(short)short.textContent=current.status;
     button.title=(STARLING_PERSONAS[id]||SYSTEM_GUIDES[id]).name+' · '+current.label;
   }
@@ -181,6 +187,7 @@ function setView(view){
   if(!['world','agents','conversation','work','operations'].includes(view))return;
   state.view=view;if(!state.root)return;
   state.root.dataset.slView=view;
+  if(view==='world')state.worldViewer?.update();
   for(const button of state.root.querySelectorAll('[data-sl-view]'))button.setAttribute('aria-pressed',String(button.dataset.slView===view));
 }
 function focusActivity(){
@@ -249,7 +256,9 @@ function render(){
   const status=$('[data-sl-turn-status]');if(status){status.textContent=state.turnError||state.turnMessage;status.dataset.slError=state.turnError?'true':'false'}
   renderPresence();
   const submit=$('[data-sl-action=host-submit]');if(submit&&!!SYSTEM_GUIDES[state.selectedAgent])submit.disabled=true;
-  const note=$('[data-sl-live-note]');if(note)note.textContent=state.worldLinked?'Worldweaver · supplied snapshot':'Illustrated 2D preview · no world provider connected';
+  const note=$('[data-sl-live-note]');if(note)note.textContent=state.worldLinked?'Worldweaver · signed local scene':state.worldError||'Illustrated fallback · no signed local world yet';
+  const provision=$('[data-sl-action=world-provision]');if(provision){provision.hidden=state.worldLinked;provision.disabled=state.worldOpening||!state.worldHost;provision.textContent=state.worldOpening?'Connecting…':'Start local world'}
+  for(const type of ['3d','2d']){const btn=$('[data-sl-action=world-'+type+']');if(btn){btn.hidden=!state.worldLinked;btn.setAttribute('aria-pressed',String(state.worldMode===type))}}
 }
 async function refresh(){
   if(state.loading||!state.guild)return;
@@ -280,12 +289,12 @@ async function refresh(){
   }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
 }
-function close(){if(!state.root)return;state.root.hidden=true;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();unbindGuideActivity();document.body.style.removeProperty('overflow')}
+function close(){if(!state.root)return;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
 function open(guild){
   if(!guild?.id)throw new TypeError('Select an existing Guild first.');
   setup();
-  if(state.guild?.id!==guild.id){state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.selectedAgent='kami';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
-  state.root.hidden=false;document.body.style.overflow='hidden';setView('world');render();state.root.querySelector('[data-sl-action=close]').focus();void refresh();void refreshTurns();void refreshWorkerStatus();
+  if(state.guild?.id!==guild.id){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.guild={id:guild.id,name:clean(guild.name||guild.displayName,240)};state.feed=[];state.selectedAgent='kami';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  state.root.hidden=false;document.body.style.overflow='hidden';setView('world');render();state.root.querySelector('[data-sl-action=close]').focus();void refresh();void refreshTurns();void refreshWorkerStatus();void connectWorld();
 }
 async function send(event){
   event.preventDefault();
@@ -314,6 +323,9 @@ function click(event){
   if(cmd==='close')close();
   if(cmd==='refresh'){void refresh();void refreshTurns();if(state.hostTransport)void refreshHost();state.worldView?.update()}
   if(cmd==='focus-active')focusActivity();
+  if(cmd==='world-provision')void provisionWorld();
+  if(cmd==='world-3d')switchWorldMode('3d');
+  if(cmd==='world-2d')switchWorldMode('2d');
   if(cmd==='focus-chat'){setView('conversation');$('#cw-sl-message')?.focus()}
   if(cmd==='open-planner'){close();globalThis.CivweaveStarlingCollectiveV1?.open?.()}
   if(cmd==='turn')void runLocalTurn();
@@ -603,24 +615,117 @@ async function importHostDraft(){
   }catch(error){state.hostStatus='Import rejected: '+clean(String(error?.message||error),330)}
   finally{state.hostBusy=false;render()}
 }
-/** Attach an authenticated Worldweaver source supplied by its owning runtime.
- * This visualization never authenticates a user or executes an NPC command. */
+/** Connect only to the same Guild-signed object mesh already used by Starling.
+ * Worlds are actually provisioned by the Guild founding device on an explicit action. */
+async function connectWorld(){
+  if(!state.guild||state.root?.hidden||state.worldOpening)return;
+  const guild=state.guild,epoch=++state.worldEpoch;
+  state.worldOpening=true;state.worldError='';render();
+  try{
+    const [mobile,mod]=await Promise.all([
+      import('./mobile-guild-create-v1.mjs'),
+      import('./shared/worldweaver-commune-host-v1.mjs')
+    ]);
+    const mesh=state.turnMesh||await mobile.ensurePocketMesh();
+    if(state.root?.hidden||state.guild?.id!==guild.id||epoch!==state.worldEpoch)return;
+    state.worldHost?.close();
+    const host=mod.createCommuneWorldHost({
+      guildId:guild.id,mesh,founder:mobile.mobileGuildStatus,
+      verifyReader:()=>{
+        const own=mobile.mobileGuildStatus();
+        return Boolean(globalThis.CivweaveGuildQuestsV1?.sessionForGuild?.(guild)||
+          own?.guildId===guild.id&&own.deviceId);
+      }
+    });
+    state.worldHost=host;
+    const packet=await host.refresh();
+    if(state.root?.hidden||epoch!==state.worldEpoch)return;
+    if(packet)await attachWorldSource({
+      getSnapshot:host.getSnapshot,getLayout:host.getLayout,worldRef:host.worldRef(),
+      subscribe:host.subscribe,onActivate:selection=>{
+        const obj=selection?.objectId||'world object';
+        $('[data-sl-scene-context]').textContent='Worldweaver inspect · '+clean(obj,120)+
+        '. Interactions must be authorized by the Worldweaver runtime.';
+      }
+    });
+    else state.worldError='No signed Worldweaver commune yet · Guild founding device may start the local renderer.';
+  }catch(error){
+    if(epoch===state.worldEpoch)state.worldError='Worldweaver unavailable: '+clean(String(error?.message||error),190);
+  }finally{
+    if(epoch===state.worldEpoch){state.worldOpening=false;render()}
+  }
+}
+async function provisionWorld(){
+  if(state.worldOpening||!state.guild)return;
+  const host=state.worldHost;if(!host){void connectWorld();return}
+  const epoch=state.worldEpoch;state.worldOpening=true;state.worldError='Verifying local renderer…';render();
+  try{
+    await host.provision({rendererReady:async({geometry})=>{
+      // Confirm that an actual canvas renderer can initialize before signing "live-local".
+      const {createOpenSim3DPreview}=await import('./shared/worldweaver-3d-preview-v1.mjs');
+      const canvas=document.createElement('canvas');canvas.width=720;canvas.height=460;
+      const preview=createOpenSim3DPreview({canvas,getGeometry:()=>geometry});
+      try{return Boolean(preview.update()?.faces?.length)}finally{preview.close()}
+    }});
+    if(epoch===state.worldEpoch&&!state.root?.hidden)
+      await attachWorldSource({getSnapshot:host.getSnapshot,getLayout:host.getLayout,
+        worldRef:host.worldRef(),subscribe:host.subscribe,
+        onActivate:selection=>{
+          $('[data-sl-scene-context]').textContent='Worldweaver object: '+
+          clean(selection?.objectId||'',100)+' · inspection only; no action authorized.';
+        }});
+  }catch(error){if(epoch===state.worldEpoch)state.worldError='Could not start Worldweaver: '+clean(String(error?.message||error),240)}
+  finally{if(epoch===state.worldEpoch){state.worldOpening=false;render()}}
+}
+function switchWorldMode(mode){
+  if(!state.worldLinked||!['3d','2d'].includes(mode))return;
+  state.worldMode=mode;
+  const viewer=$('.sl-world-3d'),map=$('.sl-world-2d'),avatars=$('.sl-world-avatars');
+  if(viewer)viewer.hidden=mode!=='3d';
+  if(map)map.hidden=mode!=='2d';
+  if(avatars)avatars.hidden=mode!=='3d';
+  if(mode==='3d')state.worldViewer?.update();else state.worldView?.update();
+  render();
+}
+/** Both renderers receive the SAME revisioned Worldweaver snapshot and geometry.
+ * Avatar portraits on 3D are an illustrative HUD overlay, NOT actual NPC positions. */
 async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onActivate}={}){
   setup();
-  if(typeof getSnapshot!=='function'||typeof worldRef!=='string'||!worldRef)throw new TypeError('Worldweaver requires a snapshot provider and world reference.');
+  if(typeof getSnapshot!=='function'||typeof getLayout!=='function'||typeof worldRef!=='string'||!worldRef)
+    throw new TypeError('Worldweaver requires a snapshot and geometry provider.');
+  const [mapMod,visualMod]=await Promise.all([
+    import('./shared/worldweaver-map-2d-v1.mjs'),import('./shared/worldweaver-3d-preview-v1.mjs')
+  ]);
   detachWorldSource();
-  const mod=await import('./shared/worldweaver-map-2d-v1.mjs');
-  const host=$('[data-sl-world-host]');
-  const view=mod.createWorldMap2DView({getSnapshot,getLayout,worldRef,container:host,subscribe,onActivate});
-  state.worldView=view;state.worldLinked=true;
+  const host=$('[data-sl-world-host]'),canvas=el('canvas','sl-world-3d'),map=el('div','sl-world-2d'),avatars=el('div','sl-world-avatars');
+  canvas.setAttribute('aria-label','Worldweaver local 3D perspective. Drag to orbit and scroll to zoom.');
+  avatars.setAttribute('aria-label','Illustrative agent activity portraits; not authoritative world coordinates');
+  for(const person of [...PEOPLE,...Object.values(SYSTEM_GUIDES)]){
+    const node=makeFigure(person,{guide:!!SYSTEM_GUIDES[person.id]});
+    node.classList.add('sl-world-actor');avatars.append(node);
+  }
+  const legend=el('p','sl-world-legend','Signed local Worldweaver scene · provisional geometry · portraits show reported inference, not physical NPC movement');
+  host.append(canvas,map,avatars,legend);
+  let viewer=null,view=null;
+  try{
+    const geometry=getLayout()?.sceneGeometry;
+    viewer=visualMod.createOpenSim3DPreview({canvas,getGeometry:()=>getLayout().sceneGeometry,
+      onSelect:hit=>onActivate?.({type:'inspect',objectType:'building',objectId:hit.objectId,instanceId:worldRef})});
+    if(!viewer.update()?.faces?.length)throw new Error('No renderable Worldweaver geometry');
+    view=mapMod.createWorldMap2DView({getSnapshot,getLayout,worldRef,container:map,subscribe,onActivate});
+  }catch(error){viewer?.close();view?.close();host.replaceChildren();throw error}
+  state.worldViewer=viewer;state.worldView=view;state.worldLinked=true;
   host.hidden=false;$('[data-sl-stage]').hidden=true;
-  $('[data-sl-scene-context]').textContent='Authorized Worldweaver 2D projection. Objects and revisions come from the attached provider; model status remains separately reported.';
-  render();return view;
+  state.worldMode='3d';
+  $('[data-sl-scene-context]').textContent='Guild-signed Worldweaver local renderer · same manifest in 3D and accessible 2D. Scene geometry is provisional; NPC locomotion is not implemented.';
+  switchWorldMode('3d');renderPresence();return view;
 }
 function detachWorldSource(){
+  state.worldViewer?.close();state.worldViewer=null;
   state.worldView?.close();state.worldView=null;state.worldLinked=false;
-  if(state.root){const host=$('[data-sl-world-host]');if(host){host.hidden=true;host.replaceChildren()}const stage=$('[data-sl-stage]');if(stage)stage.hidden=false;
-    const message=$('[data-sl-scene-context]');if(message)message.textContent='Preview layout; locations are illustrative until an authorized Worldweaver region is connected.'}
+  if(state.root){const host=$('[data-sl-world-host]');if(host){host.hidden=true;host.replaceChildren()}
+    const stage=$('[data-sl-stage]');if(stage)stage.hidden=false;
+    const message=$('[data-sl-scene-context]');if(message)message.textContent='Fallback visual scene · awaiting Guild-signed Worldweaver manifest.'}
 }
 /** Bridge authenticated guide-runtime reports into presentation state.
  * Must be called by the existing Civweave runtime owner, not by DOM events or model output.
@@ -661,5 +766,5 @@ function unbindGuideActivity(){
   state.guideUnsubscribe=null;state.guideActivity=Object.create(null);
   if(state.root)renderSpeaker();
 }
-export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.1.0',open,close,refresh,attachWorldSource,detachWorldSource,bindGuideActivity,unbindGuideActivity});
+export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.2.0',open,close,refresh,connectWorld,provisionWorld,attachWorldSource,detachWorldSource,bindGuideActivity,unbindGuideActivity});
 if(typeof globalThis!=='undefined')globalThis.CivweaveStarlingLoungeV1=CivweaveStarlingLoungeV1;
