@@ -21,18 +21,19 @@ export function qualifiedContributors(members,receipts,{now=Date.now(),windowMs=
   }
   return [...verified].sort();
 }
-export function ballotSpec({action,targetUserId,initiatorUserId,eligible,reasonCode='',role='',now=Date.now()}){
+export function ballotSpec({action,targetUserId,initiatorUserId,eligible,reasonCode='',role='',statement='',now=Date.now()}){
   if(!GUILD_GOVERNANCE_ACTIONS.includes(action))throw reject('Invalid Guild governance action.',400);
   if(!validGuildUser(targetUserId)||!validGuildUser(initiatorUserId))throw reject('Guild member identifiers are invalid.',400);
   if(!eligible.includes(initiatorUserId))throw reject('Only a member with a recent verified contribution may propose moderation.',403);
   if(eligible.length===0)throw reject('No active verified contributors can form an electorate.');
   if(action==='transfer-role'&&!['guildkeeper','member'].includes(role))throw reject('Choose an approved Guild role.',400);
   if(action==='report'&&!GUILD_REPORT_REASON_CODES.includes(reasonCode))throw reject('Select a bounded report reason.',400);
+  if(typeof statement!=='string'||statement.trim().length<20||statement.trim().length>1000)throw reject('Explain the proposed action in 20–1,000 characters for informed voting.',400);
   if(action!=='report'&&targetUserId===initiatorUserId&&action!=='transfer-role')throw reject('Use the normal account departure process for yourself.',400);
   if(eligible.length===1&&eligible.includes(targetUserId)&&['remove','ban','report'].includes(action))
     throw reject('An active contributor cannot be removed, banned or reported by a sole member acting alone.');
   return Object.freeze({action,targetUserId,initiatorUserId,eligible:[...eligible].sort(),
-    requiredYes:majority(eligible.length),createdAt:new Date(now).toISOString(),
+    requiredYes:majority(eligible.length),statement:statement.trim(),createdAt:new Date(now).toISOString(),
     expiresAt:new Date(now+GUILD_BALLOT_WINDOW_MS).toISOString(),role,reasonCode});
 }
 export function ballotOutcome(ballot,votes,{now=Date.now()}={}){
