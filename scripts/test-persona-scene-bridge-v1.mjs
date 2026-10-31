@@ -101,7 +101,7 @@ test('two 2B internal voices are moderated by 0.8B unless authorized willpower b
  assert.equal(normal.speech,'We should go carefully.');assert.equal(normal.willpower.points,2);
  calls.length=0;
  const direct=await runSplitMindTurn({...common,directControl:{characterId:'delia',cost:1},authorizeDirectControl:()=>true});
- assert.equal(direct.route,'direct');assert.equal(direct.speech,'I will protect us.');
+ assert.equal(direct.route,'direct');assert.equal(direct.speech,'Delia: I will protect us.');
  assert.deepEqual(calls.map(c=>c.modelTier),['2b','2b']);assert.equal(direct.willpower.points,1);
  assert.equal(direct.directControlReceipt.characterId,'delia');
  calls.length=0;
