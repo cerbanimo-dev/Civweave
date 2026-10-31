@@ -50,7 +50,7 @@ function setup(){
  </aside>
  <div class="sl-center">
   <section class="sl-scene-panel" data-sl-panel="world" aria-label="Virtual commune visualization">
-   <div class="sl-scene-heading"><div><span class="sl-kicker">THE LIVING COMMUNE</span><h2>Commune grounds</h2></div><div class="sl-scene-controls"><span data-sl-live-note>Connecting Worldweaver…</span><button type="button" data-sl-action="world-provision" hidden>Start local world</button><button type="button" data-sl-action="world-3d" hidden>3D Scene</button><button type="button" data-sl-action="world-2d" hidden>2D Map</button><button type="button" data-sl-action="focus-active">Focus activity</button></div></div>
+   <div class="sl-scene-heading"><div><span class="sl-kicker">THE LIVING COMMUNE</span><h2>Commune grounds</h2></div><div class="sl-scene-controls"><span data-sl-live-note>Connecting Worldweaver…</span><label class="sl-room-select" data-sl-room-holder hidden>Space <select data-sl-world-room aria-label="Choose a Worldweaver commune space"></select></label><button type="button" data-sl-action="world-provision" hidden>Start local world</button><button type="button" data-sl-action="world-3d" hidden>3D Scene</button><button type="button" data-sl-action="world-2d" hidden>2D Map</button><button type="button" data-sl-action="focus-active">Focus activity</button></div></div>
    <div class="sl-scene-shell">
     <div class="sl-stage" data-sl-stage role="group" aria-label="Schematic virtual commune and resident avatars">
      <div class="sl-sky" aria-hidden="true"><span class="sl-sun"></span><span class="sl-stars"></span></div>
@@ -96,6 +96,7 @@ function setup(){
  </div>
 </div>`;
   root.addEventListener('click',click);
+  root.addEventListener('change',event=>{if(event.target.matches?.('[data-sl-world-room]'))void enterWorldRoom(event.target.value)});
   root.querySelector('[data-sl-form]').addEventListener('submit',send);
   root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close()}});
   document.body.append(root);state.root=root;setView(state.view);
@@ -640,14 +641,7 @@ async function connectWorld(){
     state.worldHost=host;
     const packet=await host.refresh();
     if(state.root?.hidden||epoch!==state.worldEpoch)return;
-    if(packet)await attachWorldSource({
-      getSnapshot:host.getSnapshot,getLayout:host.getLayout,worldRef:host.worldRef(),
-      subscribe:host.subscribe,onActivate:selection=>{
-        const obj=selection?.objectId||'world object';
-        $('[data-sl-scene-context]').textContent='Worldweaver inspect · '+clean(obj,120)+
-        '. Interactions must be authorized by the Worldweaver runtime.';
-      }
-    });
+    if(packet)await mountCurrentRoom(host);
     else state.worldError='No signed Worldweaver commune yet · Guild founding device may start the local renderer.';
   }catch(error){
     if(epoch===state.worldEpoch)state.worldError='Worldweaver unavailable: '+clean(String(error?.message||error),190);
@@ -667,15 +661,34 @@ async function provisionWorld(){
       const preview=createOpenSim3DPreview({canvas,getGeometry:()=>geometry});
       try{return Boolean(preview.update()?.faces?.length)}finally{preview.close()}
     }});
-    if(epoch===state.worldEpoch&&!state.root?.hidden)
-      await attachWorldSource({getSnapshot:host.getSnapshot,getLayout:host.getLayout,
-        worldRef:host.worldRef(),subscribe:host.subscribe,
-        onActivate:selection=>{
-          $('[data-sl-scene-context]').textContent='Worldweaver object: '+
-          clean(selection?.objectId||'',100)+' · inspection only; no action authorized.';
-        }});
+    if(epoch===state.worldEpoch&&!state.root?.hidden)await mountCurrentRoom(host);
   }catch(error){if(epoch===state.worldEpoch)state.worldError='Could not start Worldweaver: '+clean(String(error?.message||error),240)}
   finally{if(epoch===state.worldEpoch){state.worldOpening=false;render()}}
+}
+async function mountCurrentRoom(host){
+  const room=host.worldRef();
+  return attachWorldSource({getSnapshot:host.getSnapshot,getLayout:host.getLayout,
+    worldRef:room,subscribe:host.subscribe,
+    onActivate:selection=>{
+      if(selection?.objectType==='space'&&selection.objectId!==room){
+        void enterWorldRoom(selection.objectId);return;
+      }
+      $('[data-sl-scene-context]').textContent='Worldweaver inspected '+clean(selection?.objectId||'world object',130)+
+        ' · no NPC action or movement was authorized.';
+    }
+  });
+}
+async function enterWorldRoom(worldRef){
+  const host=state.worldHost;
+  if(!host||!state.worldLinked)return;
+  try{
+    const selected=host.selectRoom(worldRef);
+    await mountCurrentRoom(host);
+    $('[data-sl-scene-context]').textContent=selected.title+
+      ' · actual signed Worldweaver space, rendered with provisional local geometry.';
+  }catch(error){
+    state.worldError='Cannot enter room: '+clean(String(error?.message||error),150);render();
+  }
 }
 function switchWorldMode(mode){
   if(!state.worldLinked||!['3d','2d'].includes(mode))return;
@@ -715,6 +728,13 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
     view=mapMod.createWorldMap2DView({getSnapshot,getLayout,worldRef,container:map,subscribe,onActivate});
   }catch(error){viewer?.close();view?.close();host.replaceChildren();throw error}
   state.worldViewer=viewer;state.worldView=view;state.worldLinked=true;
+  const holder=$('[data-sl-room-holder]'),select=$('[data-sl-world-room]');
+  if(holder&&select){
+    select.replaceChildren();
+    const rooms=getSnapshot().instances.filter(row=>row.guildId===state.guild?.id&&row.status==='live');
+    for(const room of rooms){const option=el('option','',room.title);option.value=room.id;select.append(option)}
+    select.value=worldRef;holder.hidden=false;
+  }
   host.hidden=false;$('[data-sl-stage]').hidden=true;
   state.worldMode='3d';
   $('[data-sl-scene-context]').textContent='Guild-signed Worldweaver local renderer · same manifest in 3D and accessible 2D. Scene geometry is provisional; NPC locomotion is not implemented.';
@@ -723,6 +743,7 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
 function detachWorldSource(){
   state.worldViewer?.close();state.worldViewer=null;
   state.worldView?.close();state.worldView=null;state.worldLinked=false;
+  const holder=$('[data-sl-room-holder]');if(holder)holder.hidden=true;
   if(state.root){const host=$('[data-sl-world-host]');if(host){host.hidden=true;host.replaceChildren()}
     const stage=$('[data-sl-stage]');if(stage)stage.hidden=false;
     const message=$('[data-sl-scene-context]');if(message)message.textContent='Fallback visual scene · awaiting Guild-signed Worldweaver manifest.'}
