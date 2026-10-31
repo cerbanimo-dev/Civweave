@@ -51,5 +51,23 @@ async function ready(){
   return globalThis.CivweaveStarlingCollectiveV1;
  })().catch(error=>{pending=null;throw error});return pending;
 }
-globalThis.CivweaveStarlingIntegrationV1=Object.freeze({version:'1.0.0',open:async()=>{const api=await ready();return api.open();}});
+async function openCommuneFirst(){
+ const api=await ready();
+ // The authenticated Guild transport is read-only until a separate, confirmed action.
+ // Keep the local planning workbench available without a selected Guild.
+ try{
+  const selectedGuild=await api.connectGuild();
+  const guildId=selectedGuild?.guildId;
+  if(typeof guildId==='string'&&guildId){
+   const module=await import('/app/starling-lounge-v1.mjs?v=commune-hud-r2');
+   return module.CivweaveStarlingLoungeV1.open({id:guildId,name:'Selected Guild'});
+  }
+ }catch(error){
+  // The legacy local planning UI remains the fallback if Guild access is absent
+  // or the visual renderer is unavailable; never fabricate a Guild session.
+ }
+ return api.open();
+}
+globalThis.CivweaveStarlingIntegrationV1=Object.freeze({version:'1.1.0',open:openCommuneFirst,openPlanner:async()=>{const api=await ready();return api.open()}});
+
 })();
