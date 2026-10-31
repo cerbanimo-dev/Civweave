@@ -299,6 +299,31 @@ export function selectionForImported(importId){
     url:'civweave-gguf-import:'+record.importId,bytes:record.bytes};
 }
 
+// Remove only Civweave's browser-owned copy, never the original in Downloads.
+// Wait for the in-flight request before unloading or deleting its shards.
+export async function removeImported(importId){
+  const id=String(importId||'');
+  if(importing||downloading)throw err('GGUF_REMOVE_BUSY','Finish the current GGUF import/download before uninstalling.');
+  const record=importIndex()[id];
+  if(!record||record.schema!=='civweave.gguf.import.v1')
+    throw err('GGUF_IMPORT_NOT_FOUND','The imported model was already removed.');
+  await generationTail;
+  const wasSelected=current()?.importId===id;
+  if(wasSelected||loadedUrl==='civweave-gguf-import:'+id)await release();
+  if(wasSelected)localStorage.removeItem(GGUF_SELECTION_KEY);
+  if(record.storage==='civweave.gguf.import-opfs.v1'){
+    const store=await import(OPFS);
+    await store.removeGGUFShards(id,(record.files||[]).map(file=>file.index),{strict:true});
+  }else{
+    const cache=await caches.open(IMPORT_CACHE);
+    for(const file of record.files||[])await cache.delete(cachePath(id,file.index));
+  }
+  const index=importIndex();delete index[id];
+  localStorage.setItem(IMPORT_INDEX_KEY,JSON.stringify(index));
+  notify('uninstalled',{model:record.model,importId:id,bytes:record.bytes});
+  return{importId:id,model:record.model,bytes:record.bytes,wasSelected};
+}
+
 export async function activateImported(importId){
   const record=importIndex()[String(importId||'')];
   if(!record||record.schema!=='civweave.gguf.import.v1')
