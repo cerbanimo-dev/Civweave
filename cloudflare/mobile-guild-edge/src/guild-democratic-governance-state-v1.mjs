@@ -10,7 +10,7 @@ export function ensureGovernanceTables(sql){
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_bans(user_id TEXT PRIMARY KEY, credential_hash TEXT, ballot_id TEXT NOT NULL, imposed_at TEXT NOT NULL, expires_at TEXT NOT NULL)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_contributions(id TEXT PRIMARY KEY, user_id TEXT NOT NULL, kind TEXT NOT NULL, at TEXT NOT NULL)");
   sql.exec("CREATE INDEX IF NOT EXISTS guild_gov_contrib_recent ON guild_governance_contributions(at,user_id)");
-  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_ballots(id TEXT PRIMARY KEY, action TEXT NOT NULL, target_user_id TEXT NOT NULL, proposer_id TEXT NOT NULL, role TEXT, reason_code TEXT, electorate_json TEXT NOT NULL, required_yes INTEGER NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL, expires_at TEXT NOT NULL, resolved_at TEXT, execution_error TEXT)");
+  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_ballots(id TEXT PRIMARY KEY, action TEXT NOT NULL, target_user_id TEXT NOT NULL, proposer_id TEXT NOT NULL, role TEXT, reason_code TEXT, statement TEXT NOT NULL, electorate_json TEXT NOT NULL, required_yes INTEGER NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL, expires_at TEXT NOT NULL, resolved_at TEXT, execution_error TEXT)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_votes(ballot_id TEXT NOT NULL,user_id TEXT NOT NULL,choice TEXT NOT NULL CHECK(choice IN ('yes','no')),voted_at TEXT NOT NULL,PRIMARY KEY(ballot_id,user_id))");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_reports(ballot_id TEXT PRIMARY KEY,receipt_json TEXT NOT NULL,delivery_state TEXT NOT NULL CHECK(delivery_state IN ('queued','delivered','failed')),attempts INTEGER NOT NULL DEFAULT 0,delivered_at TEXT)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_audit(id TEXT PRIMARY KEY,ballot_id TEXT NOT NULL,event TEXT NOT NULL,user_id TEXT NOT NULL,at TEXT NOT NULL)");
@@ -49,7 +49,7 @@ function ballotRow(sql,id){
   return row;
 }
 const viewBallot=row=>({id:row.id,action:row.action,targetUserId:row.target_user_id,
-  proposerId:row.proposer_id,role:row.role,reasonCode:row.reason_code,
+  proposerId:row.proposer_id,role:row.role,reasonCode:row.reason_code,statement:row.statement,
   eligible:JSON.parse(row.electorate_json),requiredYes:Number(row.required_yes),status:row.status,
   createdAt:row.created_at,expiresAt:row.expires_at,resolvedAt:row.resolved_at||null});
 function recordAudit(sql,ballotId,event,userId){
@@ -105,18 +105,18 @@ function settle(sql,id,{guildId,origin,now=Date.now()}){
   recordAudit(sql,id,outcome.status,row.proposer_id);
   return {...viewBallot(ballotRow(sql,id)),yes:outcome.yes,no:outcome.no,executed:outcome.execute};
 }
-export function proposeGovernance(sql,{guildId,origin,actorId,action,targetUserId,reasonCode='',role='',now=Date.now()}){
+export function proposeGovernance(sql,{guildId,origin,actorId,action,targetUserId,reasonCode='',role='',statement='',now=Date.now()}){
   ensureGovernanceTables(sql);
   const members=rows(sql,'SELECT user_id FROM resident_members');
   if(!members.some(row=>row.user_id===targetUserId))throw fail('Target member must be currently enrolled.',404);
   const eligible=electorate(sql,{now});
-  const spec=ballotSpec({action,targetUserId,initiatorUserId:actorId,eligible,reasonCode,role,now});
+  const spec=ballotSpec({action,targetUserId,initiatorUserId:actorId,eligible,reasonCode,role,statement,now});
   const pending=rows(sql,"SELECT id FROM guild_governance_ballots WHERE target_user_id=? AND action=? AND status='open' AND expires_at>? LIMIT 1",
     targetUserId,action,new Date(now).toISOString())[0];
   if(pending)throw fail('An active vote already exists for this member and action.');
   const id='guild-vote:'+crypto.randomUUID();
-  sql.exec("INSERT INTO guild_governance_ballots(id,action,target_user_id,proposer_id,role,reason_code,electorate_json,required_yes,status,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-    id,action,targetUserId,actorId,role,reasonCode,JSON.stringify(spec.eligible),spec.requiredYes,'open',
+  sql.exec("INSERT INTO guild_governance_ballots(id,action,target_user_id,proposer_id,role,reason_code,statement,electorate_json,required_yes,status,created_at,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+    id,action,targetUserId,actorId,role,reasonCode,spec.statement,JSON.stringify(spec.eligible),spec.requiredYes,'open',
     spec.createdAt,spec.expiresAt);
   recordAudit(sql,id,'proposed',actorId);
   // Sponsoring the proposal is an explicit yes. With a single eligible voter
