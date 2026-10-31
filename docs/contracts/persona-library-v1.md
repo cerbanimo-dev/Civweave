@@ -124,3 +124,13 @@ The new director pass receives only the recent player-visible rehearsal exchange
 - Security contracts: `scripts/test-persona-multiplayer-gateway-v1.mjs`, `scripts/test-persona-chat-turn-v1.mjs`, and `scripts/test-persona-chat-surface-v1.mjs`.
 
 All hidden/unpublished book contents remain in local author-only packages rather than the public Civweave repository.
+
+### Split-mind private Cast chat
+
+When the imported campaign contains both `landry` and `delia`, the speaker menu offers `Landry + Delia (split mind)`. This path calls the configured 4B director individually for both perspectives, then the two independently prompted 2B internal voices; the 0.8B outward moderator decides what becomes player-visible unless the author explicitly selects a named voice to spend one point of campaign willpower. The deterministic campaign ledger records the spend before the outward preview. The model cannot grant itself points or confirm world actions, and private internal responses are not stored in the shared chat transcript.
+
+The Cast control also offers a one-cue *break the planned scene* checkbox. This expires the current 4B brief after the action and requires renewed direction next turn; the flag never attests a world mutation.
+
+### Trusted action receipts
+
+The multiplayer gateway's `verifyWorldReceipt({worldReceiptId,proposal,campaignId,actor,expectedRevision})` callback must independently verify an actual completed Worldweaver action before a `resolve-proposal/outcome=succeeded` event. A missing verifier, mismatch or reused receipt is rejected. Runtime identity alone does not establish that a particular action occurred. A real deployment must connect this verification to its protected Worldweaver record/adapter and enforce one-time receipt use atomically.
