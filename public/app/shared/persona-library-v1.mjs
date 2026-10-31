@@ -61,8 +61,10 @@ export function createDirectorRequest({pack,stage,scenario,participants,goals=[]
   if(!ids.length||ids.length>24||!unique(ids))throw new TypeError('Choose 1–24 distinct characters.');
   const cast=ids.map(id=>compactCharacter(member(p,id)));
   const awareness=Object.fromEntries(ids.map(id=>[id,availableKnowledge(p,id,stage).map(e=>e.id)]));
-  const awareIds=new Set(Object.values(awareness).flat());
-  const events=p.events.filter(e=>e.status==='established'&&(e.stage<=stage||awareIds.has(e.id)))
+  // A single multi-character director must see only common knowledge. A
+  // character's private memories are directed in an isolated request below.
+  const common=ids.length?awareness[ids[0]].filter(id=>ids.every(k=>awareness[k].includes(id))):[];
+  const events=p.events.filter(e=>e.status==='established'&&common.includes(e.id))
     .map(e=>({id:e.id,stage:e.stage,summary:e.summary,source:e.source}));
   const payload={scenario:safe(scenario,8000),goals:array(goals).map(x=>safe(x,350)).slice(0,20),
     branchId,stage,cast,events,awareness,
@@ -183,4 +185,28 @@ export function worldweaverNpcCommand({pack,characterId,instanceId,modelId,pilot
     pilotPrompt:('You play fictional '+c.name+'. '+safe(c.voice,450)+'. Established personal knowledge: '+
       knowledge.map(e=>e.summary).join('; ')).slice(0,2500),
     capabilities:['observe','inspect','speak','move','present']};
+}
+
+/**
+ * One 4B director call per performer protects character-specific knowledge.
+ * No other actor's private event summary appears in this request.
+ */
+export function createPrivateDirectorRequest({pack,stage,scenario,characterId,participants=[],goals=[],branchId='canon'}={}){
+  const p=validatePersonaPack(pack),target=member(p,characterId);
+  if(!Number.isInteger(stage)||stage<0||!safe(scenario,8000))throw new TypeError('Scenario and numbered stage required.');
+  const otherIds=array(participants);
+  if(!otherIds.includes(characterId)||otherIds.length>24||!unique(otherIds))
+    throw new TypeError('Target must participate in the scene with no duplicate participants.');
+  otherIds.forEach(id=>member(p,id));
+  const memory=availableKnowledge(p,characterId,stage);
+  const payload={scenario:safe(scenario,8000),branchId,stage,targetCharacter:characterId,
+    goals:array(goals).slice(0,16).map(x=>safe(x,350)),
+    character:compactCharacter(target),
+    others:otherIds.filter(id=>id!==characterId).map(id=>({id,name:member(p,id).name})),
+    knownEvents:memory,allowedEventIds:memory.map(e=>e.id),
+    output:{characters:{[characterId]:{characterGoal:'string',emotion:'string',instructions:'string',
+      knownEventIds:['event-id'],escalateWhen:['string'],improvFreedom:'string'}}}};
+  return {modelTier:'4b',purpose:'persona-private-scene-direction',responseFormat:'json',
+    messages:[{role:'system',content:'You direct exactly one fictional character. JSON only. Use only that character\'s supplied memories, not any assumed omniscient or future knowledge. Draft a succinct temporary 0.8B improv prompt: intention, mood, likely interactions and reasons to request an update. The other character names reveal no private knowledge. Never force dialogue or claim tools executed.'},
+      {role:'user',content:JSON.stringify(payload)}]};
 }
