@@ -404,6 +404,25 @@ async function loadStatus(force = false) {
   }
 }
 
+async function inspectOrigin(input,{nodeId=''}={}){
+  let url;
+  try{url=new URL(String(input||'').trim())}catch{throw new TypeError('Enter a complete Guild HTTPS address.')}
+  if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash)
+    throw new TypeError('Guild address must be HTTPS without embedded credentials, query or fragment.');
+  if(!url.hostname||url.pathname!=='/'&&url.pathname!=='')
+    throw new TypeError('Enter the Guild origin only, for example https://guild.example.');
+  const id=String(nodeId||'').trim();
+  if(id&&!/^[a-z0-9-]{1,120}$/.test(id))throw new TypeError('Invalid starter node ID.');
+  activeHost=url.origin;activeNodeId=id;localFederated=false;latestStatus=null;
+  const section=el('cw-host-node-lobby');
+  if(section)section.dataset.localFederated='false';
+  const title=el('cw-host-node-title');
+  if(title)title.textContent='Checking this Guild…';
+  const refresh=el('cw-host-node-refresh');
+  if(refresh)refresh.hidden=false;
+  revealSearch(false);
+  return loadStatus(true);
+}
 async function joinHostNode() {
   const host = normalizedHost();
   const button = el('cw-host-node-join');
@@ -498,6 +517,7 @@ globalThis.CivweaveHostNodeInstallerLobbyV1 = Object.freeze({
   loadStatus,
   joinHostNode,
   searchNearest,
+  inspectOrigin,
   showSearch: revealSearch,
   boot,
 });
