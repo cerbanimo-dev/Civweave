@@ -103,3 +103,25 @@ test('Visual Worldweaver handoff requires a snapshot provider and never creates 
  assert.doesNotMatch(source,/createWorldweaver\(/);
  assert.match(source,/This is a schematic, not a verified character location/);
 });
+
+test('Worldweaver Commune mounts signed world and real 3D/2D providers without duplicate NPC runtime',()=>{
+ const src=read('public/app/starling-lounge-v1.mjs');
+ const host=read('public/app/shared/worldweaver-commune-host-v1.mjs');
+ const styles=read('public/app/starling-lounge-v1.css');
+ assert.match(src,/worldweaver-commune-host-v1\.mjs/);
+ assert.match(src,/createOpenSim3DPreview/);
+ assert.match(src,/createWorldMap2DView/);
+ assert.match(src,/data-sl-action="world-provision"/);
+ assert.match(src,/data-sl-action="world-3d"/);
+ assert.match(src,/data-sl-action="world-2d"/);
+ assert.match(src,/civweave:guide-chat-state/);
+ assert.match(src,/CivweaveGuideChatSurfaceV350/);
+ assert.match(src,/\.state\?\.\(\)/);
+ assert.match(host,/createWorldweaver/);
+ assert.match(host,/validateObject/);
+ assert.match(host,/foundingDeviceId/);
+ assert.match(host,/local-renderer/);
+ assert.doesNotMatch(src,/\.dispatch\(\{type:'queue-actions'/);
+ assert.match(styles,/sl-world-avatars/);
+ assert.match(styles,/prefers-reduced-motion/);
+});
