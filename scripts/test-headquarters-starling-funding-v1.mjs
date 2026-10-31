@@ -4,6 +4,8 @@ import {
   HQ_STARLING_FUNDING_SCHEMA,
   HQ_STARLING_FUNDING_ROUTE,
   approximateFundedNeurons,
+  estimatePrepaidGatewayCreditsCents,
+  HQ_GATEWAY_CREDIT_FEE_BPS,
   residualBackingCents,
   publicHeadquartersFundingStatus,
   createHeadquartersFundingCheckout,
@@ -12,8 +14,12 @@ import {
   handleHeadquartersFundingRequest
 } from '../cloudflare/core/src/headquarters-starling-funding-v1.mjs';
 
-test('HQ contributions back inference only; returns do not mint personal or member neurons', () => {
-  assert.equal(approximateFundedNeurons(110), 100000);
+test('HQ contributions estimate *prepaid Gateway* credits after Cloudflare 5% load fee, not Workers Paid overage', () => {
+  assert.equal(HQ_GATEWAY_CREDIT_FEE_BPS, 500);
+  assert.equal(estimatePrepaidGatewayCreditsCents(105), 100);
+  assert.equal(approximateFundedNeurons(105), 90909);
+  assert.equal(estimatePrepaidGatewayCreditsCents(0), 0);
+  assert.throws(()=>estimatePrepaidGatewayCreditsCents(-1));
   assert.equal(residualBackingCents({ grossCents: 1000,backingCents: 940,refundedGrossCents: 500 }), 470);
   assert.equal(residualBackingCents({ grossCents: 1000,backingCents: 940,refundedGrossCents: 500,disputedGrossCents: 500 }), 0);
   assert.throws(()=>approximateFundedNeurons(-1));
@@ -67,7 +73,8 @@ function harness({ ready = true } = {}) {
   }};
   const env={
     CIVWEAVE_HEADQUARTERS_FUNDING_ENABLED:ready?'1':'0',
-    CIVWEAVE_HEADQUARTERS_PAID_AI_ENABLED:'1',
+    CIVWEAVE_HEADQUARTERS_GATEWAY_PREPAID_READY:'1',
+    HQ_STARLING_GATEWAY_ID:'starling-prepaid',
     HQ_FUNDING_RATE_LIMITER:{limit:async()=>({success:true})},
     DB:db
   };
@@ -85,12 +92,16 @@ function harness({ ready = true } = {}) {
   return {edge,rows,calls};
 }
 const valid={amountCents:1000,idempotencyKey:'testcheckoutrequest123456'};
-test('headquarters route remains closed unless configured for funded paid compute',async()=>{
+test('headquarters route remains closed unless prepaid gateway is configured; no Workers Paid plan requirement',async()=>{
   const h=harness({ready:false});
   const res=await handleHeadquartersFundingRequest(new Request('https://core.example'+HQ_STARLING_FUNDING_ROUTE,{
     method:'POST',headers:{origin:'https://civweave.cc','content-type':'application/json'},body:JSON.stringify(valid)
   }),h.edge.env,()=>h.edge);
   assert.equal(res.status,503);assert.equal(h.calls.length,0);
+  const noGateway=harness(); delete noGateway.edge.env.HQ_STARLING_GATEWAY_ID;
+  const noGatewayResult=await handleHeadquartersFundingRequest(new Request('https://core.example'+HQ_STARLING_FUNDING_ROUTE,{method:'POST',headers:{origin:'https://civweave.cc','content-type':'application/json'},body:JSON.stringify(valid)}),noGateway.edge.env,()=>noGateway.edge);
+  assert.equal(noGatewayResult.status,503);
+  assert.equal(noGateway.calls.length,0);
   const denied=await handleHeadquartersFundingRequest(new Request('https://core.example'+HQ_STARLING_FUNDING_ROUTE,{
     method:'POST',headers:{origin:'https://evil.example','content-type':'application/json'},body:JSON.stringify(valid)
   }),h.edge.env,()=>h.edge);
@@ -108,7 +119,12 @@ test('public checkout is guest friendly and settles only after verified Stripe c
     id:'cs_hq_test',metadata:{civweave_schema:HQ_STARLING_FUNDING_SCHEMA,civweave_contribution_id:created.contributionId}
   });
   assert.equal(applied.backingCents,941);
-  assert.equal((await publicHeadquartersFundingStatus(h.edge)).fundedCents,941);
+  const fundedStatus=await publicHeadquartersFundingStatus(h.edge);
+  assert.equal(fundedStatus.fundedCents,941);
+  assert.equal(fundedStatus.billingMode,'ai-gateway-prepaid-unified');
+  assert.equal(fundedStatus.estimatedGatewayCreditCents,Math.floor(941*10000/10500));
+  assert.equal(fundedStatus.creditLoadConfirmed,false);
+  assert.equal('estimatedPurchasedNeurons' in fundedStatus,false);
   const again=await settleHeadquartersFundingCheckout(h.edge,{
     id:'cs_hq_test',metadata:{civweave_schema:HQ_STARLING_FUNDING_SCHEMA,civweave_contribution_id:created.contributionId}
   });
