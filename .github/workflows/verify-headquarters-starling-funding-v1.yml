@@ -43,5 +43,7 @@ jobs:
           if (!ui.includes('if(location.origin!==ORIGIN)return')) throw new Error('Presentation hostname is not exact');
           if (!core.includes('handleHeadquartersFundingRequest')) throw new Error('Canonical core does not handle the funding endpoint');
           if (!policy.includes("CIVWEAVE_HEADQUARTERS_FUNDING_ENABLED === '1'")) throw new Error('HQ checkout is not default-off');
-          if (!policy.includes("CIVWEAVE_HEADQUARTERS_PAID_AI_ENABLED === '1'")) throw new Error('Paid inference gate missing');
+          if (!policy.includes("CIVWEAVE_HEADQUARTERS_GATEWAY_PREPAID_READY === '1'")) throw new Error('Prepaid AI Gateway gate missing');
+          if (!policy.includes("HQ_STARLING_GATEWAY_ID")) throw new Error('Prepaid Gateway identity is missing');
+          if (policy.includes("CIVWEAVE_HEADQUARTERS_PAID_AI_ENABLED")) throw new Error('Legacy Workers Paid gating must not return');
           NODE
