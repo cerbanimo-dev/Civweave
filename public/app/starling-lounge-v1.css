@@ -405,3 +405,10 @@
 #cw-starling-lounge[data-sl-fleet="local"] [data-sl-station]{
  display:none!important
 }
+
+#cw-starling-lounge .sl-world-host .sl-world-legend{
+ top:8px;bottom:auto;pointer-events:none
+}
+#cw-starling-lounge .sl-world-avatars[data-world-presence="signed"] .sl-world-actor{
+ background:#23464bdc;border-color:#bce9be
+}
