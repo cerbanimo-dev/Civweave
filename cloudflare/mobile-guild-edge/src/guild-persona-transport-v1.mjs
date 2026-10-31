@@ -9,6 +9,7 @@ export function guildPersonaAction(request){
  if(tail==='/dispatch'&&request.method==='POST')return'dispatch';
  if(tail==='/draft'&&request.method==='POST')return'draft';
  if(tail==='/approve'&&request.method==='POST')return'approve';
+ if(tail==='/approve-both'&&request.method==='POST')return'approve-both';
  throw Object.assign(new Error('Private persona route or method is unsupported.'),{status:405});
 }
 async function internalSecret(env){
