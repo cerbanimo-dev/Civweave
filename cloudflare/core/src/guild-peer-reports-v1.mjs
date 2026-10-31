@@ -37,7 +37,7 @@ export async function deliverVerifiedGuildReport(env,{guildId,origin,ballotId},f
     !/^[a-f0-9]{64}$/.test(receipt.subjectPseudonym)||!['harassment','threats','fraud','impersonation','safety','repeated-disruption','other'].includes(receipt.reasonCode)||
     receipt.radiusKm!==25)throw bad('Reported receipt does not describe an approved, privacy-limited Guild vote.',403);
   const existing=await env.DB.prepare("SELECT COUNT(*) AS n FROM guild_peer_report_inbox WHERE source_guild_id=? AND report_id=?").bind(guildId,ballotId).first();
-  if(Number(existing?.n||0)>0)return {ok:true,idempotent:true,reportId:ballotId};
+  if(Number(existing?.n||0)>0)return {ok:true,idempotent:true,reportId:ballotId,deliveredToNearbyGuilds:Number(existing.n)};
   const created=Date.parse(receipt.createdAt);
   if(!Number.isFinite(created)||Math.abs(Date.now()-created)>7*86400000)throw bad('Approved report has expired before relay.',410);
   // Fresh directory location is the only source of proximity. Do not accept
