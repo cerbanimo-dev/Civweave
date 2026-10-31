@@ -54,6 +54,13 @@ test('sign out clears only one Guild session and blocks silent re-login until ex
   assert.equal(h.localStorage.getItem('federation-finder.physical-node-endpoint'),null);
   assert.equal(h.localStorage.getItem('civweave.host-node.selection.v1'),null);
 });
+test('no Guild selection never silently promotes an unrelated logged-in Guild session',async()=>{
+  const h=loadSessionRuntime(),{api}=h;
+  api.setSession(guildA);
+  assert.equal(api.selectedOrigin(),'');
+  assert.equal(await api.ensureSelected(),null);
+  assert.equal(api.selectedOrigin(),'');
+});
 test('leave Guild requires a currently authenticated session, calls server before clearing local selection, and never removes a Guildkeeper founder',async()=>{
   const h=loadSessionRuntime(),{api}=h;
   api.setSession(guildA);
