@@ -106,3 +106,14 @@ test('two 2B internal voices are moderated by 0.8B unless authorized willpower b
  await assert.rejects(runSplitMindTurn({...common,directControl:{characterId:'delia',cost:1}}),/trusted authorization/i);
  assert.equal(calls.length,0);
 });
+
+test('existing Civweave selected-model result envelopes are accepted, failed inference is rejected',async()=>{
+ const single={revision:1,turn:0,expireAfterTurn:4,stage:1,scenario:'Arcade',participants:['jess'],
+   directives:{characters:{jess:{knownEventIds:['history','shared'],instructions:'Make a joke',characterGoal:'Listen',
+     emotion:'amused',escalateWhen:[],improvFreedom:'playful'}}}};
+ const good=await performPersonaTurn({pack,scene:single,characterId:'jess',invokeModel:async()=>({status:'success',
+  outputJson:{speech:'Try again.',emote:'smirks',actions:[]}})});
+ assert.equal(good.speech,'Try again.');
+ await assert.rejects(performPersonaTurn({pack,scene:single,characterId:'jess',invokeModel:async()=>({
+  status:'model-error',outputText:'Try again.'})}),/inference|success/i);
+});
