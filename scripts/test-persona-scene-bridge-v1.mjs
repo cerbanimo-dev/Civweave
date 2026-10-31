@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createWorldweaver} from '../public/app/shared/worldweaver-core-v1.mjs';
 import {createDirectorRequest,createPrivateDirectorRequest,validatePersonaPack} from '../public/app/shared/persona-library-v1.mjs';
-import {prepareDirectedScene,performPersonaTurn,queuePersonaActionIntents,needsDirectorRefresh,runSplitMindTurn} from '../public/app/shared/persona-scene-bridge-v1.mjs';
+import {prepareDirectedScene,performPersonaTurn,queuePersonaActionIntents,needsDirectorRefresh,runSplitMindTurn,advanceSceneTurn} from '../public/app/shared/persona-scene-bridge-v1.mjs';
 
 const pack=validatePersonaPack({schema:'civweave.persona-library.v1',id:'test-cast',version:1,
  characters:[
@@ -116,4 +116,25 @@ test('existing Civweave selected-model result envelopes are accepted, failed inf
  assert.equal(good.speech,'Try again.');
  await assert.rejects(performPersonaTurn({pack,scene:single,characterId:'jess',invokeModel:async()=>({
   status:'model-error',outputText:'Try again.'})}),/inference|success/i);
+});
+
+test('turns advance once, reject conflicting writers and force a fresh 4B brief after deviation',()=>{
+ const s={schema:'civweave.persona-scene.v1',revision:2,turn:0,expireAfterTurn:4,
+   stage:3,scenario:'Campfire',participants:['jess'],directives:{characters:{jess:{instructions:'Talk',knownEventIds:[]}}}};
+ const a=advanceSceneTurn(s,{expectedTurn:0});
+ assert.equal(a.turn,1);assert.equal(needsDirectorRefresh(a),false);
+ assert.equal(s.turn,0);
+ assert.throws(()=>advanceSceneTurn(a,{expectedTurn:0}),/stale|conflict/i);
+ const b=advanceSceneTurn(a,{expectedTurn:1,worldChanged:true});
+ assert.equal(b.turn,2);assert.equal(needsDirectorRefresh(b),true);
+});
+test('world revision change during director inference prevents stale scene publication',async()=>{
+ let rev=7;
+ const world={snapshot:()=>({revision:rev})};
+ const invokeModel=async()=>{
+   rev++;
+   return jsonReply({characters:{jess:{instructions:'Speak',knownEventIds:['history'],emotion:'wary',characterGoal:'help'}}});
+ };
+ await assert.rejects(prepareDirectedScene({pack,stage:1,scenario:'Arcade',participants:['jess'],
+   world,invokeModel}),/changed during|stale/i);
 });
