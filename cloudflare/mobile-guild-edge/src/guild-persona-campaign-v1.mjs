@@ -13,6 +13,8 @@
 import {createPersonaCampaign,applyCampaignEvent,exportCampaignSnapshot} from '../../../public/app/shared/persona-campaign-v1.mjs';
 import {createPersonaMultiplayerGateway} from '../../../public/app/shared/persona-multiplayer-gateway-v1.mjs';
 import {stageNpcDraft,pendingNpcDrafts,approveNpcDraft,guildPersonaWorldSnapshot} from './guild-persona-runtime-v1.mjs';
+import {draftPersonaMove,pendingPersonaMoves,approvePersonaMove,worldMotionView} from './guild-persona-motion-v1.mjs';
+import {personaRuntimeKey} from './guild-persona-runtime-v1.mjs';
 
 export const GUILD_PERSONA_ROUTE='/api/node/persona-campaigns';
 export const GUILD_PERSONA_SCHEMA='civweave.guild-persona-room.v1';
@@ -52,7 +54,7 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
   const scope=options.guildId?text(options.guildId,96):nodeId;
   if(!bounded(scope)||options.guildId&&scope!==member.guildId)
     fail('Trusted Guild storage scope mismatch.',403);
-  if(!['create','snapshot','dispatch','draft','approve','approve-both'].includes(action))fail('Unsupported private campaign action.',405);
+  if(!['create','snapshot','dispatch','draft','approve','approve-both','move-draft','move-approve'].includes(action))fail('Unsupported private campaign action.',405);
   if(!input||typeof input!=='object'||Array.isArray(input))fail('Campaign JSON object required.');
   const id=text(input.campaignId,96);
   if(action!=='create'&&!bounded(id))fail('Campaign ID required.');
@@ -79,6 +81,19 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
     }
     const room=await tx.get(roomKey);
     if(!room)fail('Private campaign not found.',404);
+    if(action==='move-draft'||action==='move-approve'){
+      const result=action==='move-draft'?
+        await draftPersonaMove(tx,{scope,room,actor,input}):
+        await approvePersonaMove(tx,{scope,room,actor,input});
+      if(action==='move-approve')await tx.put(roomKey,result.room);
+      return {ok:true,schema:GUILD_PERSONA_SCHEMA,
+        room:result.room||room,
+        ...(action==='move-draft'?{motionDraft:result.draft}:{
+           movement:result.movement,
+           worldReceiptId:result.worldReceiptId,
+           motion:worldMotionView(result.room,await tx.get(personaRuntimeKey(scope,room.id)))
+        }),serverAuthoritative:true};
+    }
     if(['draft','approve','approve-both'].includes(action)){
       if(action==='draft'){
         const result=await stageNpcDraft(tx,{nodeId:scope,room,actor,input});
@@ -150,7 +165,9 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
           command:input.command});
       const extra=action==='snapshot'?{
         pendingDrafts:await pendingNpcDrafts(tx,{nodeId:scope,room:snapshot,actor}),
-        world:await guildPersonaWorldSnapshot(tx,{nodeId:scope,room:snapshot,actor})
+        world:await guildPersonaWorldSnapshot(tx,{nodeId:scope,room:snapshot,actor}),
+        motion:worldMotionView(snapshot,await tx.get(personaRuntimeKey(scope,snapshot.id))),
+        pendingMoves:await pendingPersonaMoves(tx,{scope,room:snapshot,actor})
       }:{};
       return {ok:true,schema:GUILD_PERSONA_SCHEMA,room:snapshot,...extra,serverAuthoritative:true};
     }catch(error){
