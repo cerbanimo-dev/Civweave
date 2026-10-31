@@ -2,7 +2,7 @@
 'use strict';
 // One presentation/catalogue owner. Existing inference, download, Settings,
 // privacy/consent and device-fit contracts remain the execution authorities.
-const VERSION='1.0.2-gguf-inventory-autobind';
+const VERSION='1.2.0-single-screen-fleet-installer';
 if(globalThis.CivweaveAIFleetV1?.version===VERSION)return;
 const MEMORY_KEY='civweave.ai.fleet.memory-gb.v1';
 const CHOICE_KEY='civweave.ai.fleet.choices.v1';
@@ -147,7 +147,7 @@ async function connectInstalledGGUF(layer,panel,sequence){
  const message=panel.querySelector('[data-ai-fleet-message]');
  try{
   // Only manifests + OPFS shard headers are read; no engine, inference or download.
-  const gguf=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v5-opfs-progress');
+  const gguf=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install');
   const entries=await gguf.installedImports({verify:true});
   if(sequence!==inventorySequence||layer.hidden||!panel.isConnected)return;
   const previous=read(BINDING_KEY,{});
@@ -192,12 +192,208 @@ async function connectInstalledGGUF(layer,panel,sequence){
  }
 }
 
-const STYLE_ID='cw-ai-fleet-style-v1';
+
+const BACKEND_KEY='civweave.ai.fleet.backend.v2';
+const BACKENDS=Object.freeze({
+ browser:{label:'In-browser GGUF',detail:'Wllama · WebGPU or WASM · saved GGUF shards'},
+ termux:{label:'Termux server',detail:'llama.cpp · localhost 8080 · explicit server test'},
+ android:{label:'Android APK backend',detail:'Native Starling bridge · installed wrapper required'}
+});
+const GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install';
+const STYLE_ID='cw-ai-fleet-style-v2';
+function currentBackend(){const value=read(BACKEND_KEY,'browser');return BACKENDS[value]?value:'browser'}
+function setBackend(value){if(!BACKENDS[value])throw Error('Unsupported local backend.');localStorage.setItem(BACKEND_KEY,value);return value}
 function style(){
  if(document.getElementById(STYLE_ID))return;
  const element=document.createElement('style');element.id=STYLE_ID;
- element.textContent='#cw-ai-fleet-v1{display:grid;gap:12px}#cw-ai-fleet-v1 .cw-fleet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}#cw-ai-fleet-v1 .cw-fleet-card{display:grid;gap:7px;border:1px solid #ffffff26;border-radius:13px;padding:12px;background:#091629}#cw-ai-fleet-v1 .cw-fleet-card h4,#cw-ai-fleet-v1 .cw-fleet-card p{margin:0}#cw-ai-fleet-v1 .cw-fleet-card small{color:#90efd8}#cw-ai-fleet-v1 .cw-fleet-card p{color:#cbd4ee;font-size:.88rem}#cw-ai-fleet-v1 .cw-fleet-group{display:grid;gap:8px}#cw-ai-fleet-v1 .cw-fleet-group h4{margin:0}#cw-ai-fleet-v1 .cw-fleet-meta{font-size:.82rem;color:#bdc9df}#cw-ai-fleet-v1 [data-ai-fleet-connection]{color:#90efd8;font-size:.83rem}#cw-ai-fleet-v1 button{min-height:44px}#cw-ai-fleet-v1 select{width:auto;min-width:78px}';
+ element.textContent='#cw-ai-fleet-v1{display:grid;gap:14px}#cw-ai-fleet-v1 .cw-fleet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px}#cw-ai-fleet-v1 .cw-fleet-card{display:grid;gap:8px;border:1px solid #ffffff30;border-radius:14px;padding:12px;background:#0b1b2c}#cw-ai-fleet-v1 .cw-fleet-card h4,#cw-ai-fleet-v1 .cw-fleet-card p{margin:0}#cw-ai-fleet-v1 .cw-fleet-card p,#cw-ai-fleet-v1 .cw-fleet-meta{color:#ccd9e7;font-size:.88rem}#cw-ai-fleet-v1 .cw-fleet-choices{display:flex;gap:7px;flex-wrap:wrap}#cw-ai-fleet-v1 [data-ai-fleet-backend][aria-pressed=true]{border-color:#6ddfbd;background:#193b3a;color:white}#cw-ai-fleet-v1 select{width:100%;min-height:42px}#cw-ai-fleet-v1 button{min-height:44px}#cw-ai-fleet-v1 output{display:block;white-space:pre-wrap}#cw-ai-fleet-v1 .cw-fleet-label{font-weight:650}';
  document.head?.append(element);
+}
+function canUse(entry,row){
+ const required=entry?.family==='4b'?6:entry?.family==='2b'?4:Infinity;
+ return Boolean(entry?.verified&&row&&required<=detectDevice().budgetGB);
+}
+function fleetRolesFor(entries,previous={}){
+ const rows=Object.keys(ROLES).map(role=>({role}));
+ const available=entries.filter(entry=>canUse(entry,rows[0]));
+ const assignments={};
+ for(const row of rows){
+   if((previous.unassigned||[]).includes(row.role))continue;
+   const last=available.find(entry=>entry.importId===previous.roles?.[row.role]?.importId);
+   const best=last||available.find(entry=>entry.family===(row.role==='swift'?'2b':'4b'))||available[0];
+   if(best)assignments[row.role]={model:best.model,importId:best.importId,family:best.family,
+     label:best.label,quantization:best.quantization,bytes:best.bytes};
+ }
+ return assignments;
+}
+function saveBindings(roles,unassigned=[]){
+ const state={schema:'civweave.ai.fleet.bindings.v1',enabled:Object.keys(roles).length>0,
+   platform:'android',budgetGB:detectDevice().budgetGB,roles,unassigned,updatedAt:new Date().toISOString()};
+ localStorage.setItem(BINDING_KEY,JSON.stringify(state));
+ try{globalThis.dispatchEvent?.(new CustomEvent('civweave:ai-fleet-bound',{detail:{source:'user-verified-gguf',roles:Object.keys(roles)}}))}catch{}
+ return state;
+}
+function importOption(entry){return esc(entry.label)+' · '+esc(entry.quantization)+' · '+Math.round(entry.bytes/1e6)+' MB'}
+function renderBrowserInventory(panel,entries){
+ const rows=Object.keys(ROLES).map(role=>({role}));
+ const prior=read(BINDING_KEY,{});
+ const roles=fleetRolesFor(entries,prior);
+ const available=entries.filter(entry=>entry.verified);
+ const changed=JSON.stringify(roles)!==JSON.stringify(prior.roles||{})||prior.platform!=='android'||prior.budgetGB!==detectDevice().budgetGB;
+ if(changed)saveBindings(roles,prior.unassigned||[]);
+ const state=globalThis.CivweaveSettingsV320?.readState?.()||{};
+ const active=read('civweave.mobile.gguf-primary.v2',null);
+ const isActive=active?.enabled&&active?.engine==='wllama'&&state.route==='openai-compatible'&&
+   state.endpoint==='http://127.0.0.1:8080/v1'&&state.model===active.model;
+ const list=panel.querySelector('[data-ai-fleet-inventory]');
+ if(!list)return;
+ const cards=entries.map(entry=>'<article class="cw-fleet-card"><h4>'+esc(entry.label)+'</h4>'+
+   '<p>'+importOption(entry)+'</p><p>Shards: '+entry.sourceNames.length+' · '+(entry.verified?'Stored and verified':'Unavailable: '+esc(entry.error))+'</p>'+
+   (entry.verified?'<div class="cw-fleet-choices"><button type="button" data-ai-fleet-activate="'+esc(entry.importId)+'">'+
+     (active?.importId===entry.importId&&isActive?'Active primary':'Use as primary')+'</button>'+
+     '<button type="button" data-ai-fleet-test="'+esc(entry.importId)+'">Run meaningful-text test</button></div>':'')+'</article>').join('');
+ const selectors=rows.map(row=>{
+   const matches=available.filter(entry=>canUse(entry,row));
+   const existing=roles[row.role]?.importId||'';
+   const opts='<option value="">Unassigned</option>'+matches.map(entry=>'<option value="'+esc(entry.importId)+'"'+(existing===entry.importId?' selected':'')+'>'+importOption(entry)+'</option>').join('');
+   return '<article class="cw-fleet-card"><h4>'+esc(ROLES[row.role].label)+' · '+esc(ROLES[row.role].purpose)+'</h4>'+
+     '<p>'+esc(ROLES[row.role].description)+'</p><label class="cw-fleet-label">Installed model'+
+     '<select data-ai-fleet-role-assign="'+esc(row.role)+'"'+(matches.length?'':' disabled')+'>'+opts+'</select></label>'+
+     '<p>'+(!matches.length?'No GGUF import verified within your RAM budget':isActive?'Role binding available for browser inference':'Model assigned; activate a primary GGUF to route chat')+'</p></article>';
+ }).join('');
+ list.innerHTML='<h4>Saved GGUF models · '+entries.length+'</h4>'+
+   '<div class="cw-fleet-grid">'+(cards||'<p>No saved GGUF manifests found in this browser profile.</p>')+'</div>'+
+   '<h4>Fleet role assignments</h4><div class="cw-fleet-grid">'+selectors+'</div>';
+ const msg=panel.querySelector('[data-ai-fleet-message]');
+ if(msg)msg.textContent=(available.length?available.length+' complete GGUF model(s) found. ':'No complete imported GGUF found. ')+
+   Object.keys(roles).length+' of '+rows.length+' compatible roles linked. '+
+   (isActive?'Browser inference is configured.':'Role links are saved, but browser inference is not the active model route.');
+}
+async function refreshInventory(layer,panel,sequence){
+ const msg=panel.querySelector('[data-ai-fleet-message]');
+ try{
+   const gguf=await import(GGUF_MODULE);
+   const entries=await gguf.installedImports({verify:true});
+   if(sequence!==inventorySequence||!panel.isConnected||layer.hidden||currentBackend()!=='browser')return;
+   renderBrowserInventory(panel,entries);
+ }catch(error){if(sequence===inventorySequence&&msg?.isConnected)msg.textContent='GGUF inventory failed: '+String(error?.message||error)}
+}
+// All configuration actions live in this Fleet view. The canonical Settings
+// form remains the sole writer of shared inference configuration.
+function activateSharedRoute(layer,{model,endpoint}){
+ const form=layer?.querySelector?.('[data-cw-settings-form]');
+ const route=form?.elements?.namedItem?.('route');
+ const modelInput=form?.elements?.namedItem?.('model');
+ const endpointInput=form?.elements?.namedItem?.('endpoint');
+ if(!route||!modelInput||!endpointInput||typeof form.requestSubmit!=='function')
+   throw Error('The shared Settings route cannot be saved from this session.');
+ route.value='openai-compatible';modelInput.value=model;endpointInput.value=endpoint;
+ const consent=form.elements.namedItem('consent');if(consent)consent.checked=false;
+ form.requestSubmit();
+ const state=globalThis.CivweaveSettingsV320?.readState?.();
+ if(state?.model!==model||state?.endpoint!==endpoint||state.route!=='openai-compatible')
+   throw Error('The canonical AI route was not confirmed. Your installed models are unchanged.');
+ return state;
+}
+let activeImport=null;
+async function installChosenGGUF(layer,panel){
+ const picker=panel.querySelector('[data-ai-fleet-gguf-files]');
+ const button=panel.querySelector('[data-ai-fleet-import]');
+ const cancel=panel.querySelector('[data-ai-fleet-import-cancel]');
+ const status=panel.querySelector('[data-ai-fleet-import-status]');
+ const files=Array.from(picker?.files||[]);
+ if(!files.length)throw Error('Select a GGUF file or every split shard of one model using the file picker.');
+ if(activeImport)throw Error('Another GGUF import is already in progress.');
+ const controller=new AbortController();
+ activeImport=controller;button.disabled=true;cancel.hidden=false;cancel.disabled=false;
+ try{
+   const gguf=await import(GGUF_MODULE);
+   const record=await gguf.importFiles(files,{signal:controller.signal,onProgress:part=>{
+     if(!status?.isConnected)return;
+     const pct=part.total?Math.round(100*part.loaded/part.total):0;
+     status.textContent='Import '+pct+'% · '+(part.phase||'working')+
+       (part.count?' · shard '+part.index+'/'+part.count:'')+
+       ' · '+Math.round(part.loaded/1e6)+' / '+Math.round(part.total/1e6)+' MB';
+   }});
+   picker.value='';
+   if(status)status.textContent='Saved '+record.label+' ('+record.files.length+' shard(s)). Your other imported models remain installed. Choose role assignments below.';
+   await refreshInventory(layer,panel,++inventorySequence);
+ }catch(error){if(status)status.textContent='Import not completed: '+String(error?.message||error)}
+ finally{if(activeImport===controller)activeImport=null;button.disabled=false;cancel.hidden=true;cancel.disabled=true;}
+}
+async function downloadFleetPreset(layer,panel,presetId){
+ if(activeImport)throw Error('Another GGUF import or download is running.');
+ const status=panel.querySelector('[data-ai-fleet-import-status]');
+ const cancel=panel.querySelector('[data-ai-fleet-import-cancel]');
+ const controller=new AbortController();
+ activeImport=controller;cancel.hidden=false;cancel.disabled=false;
+ try{
+   const gguf=await import(GGUF_MODULE);
+   const preset=gguf.GGUF_PRESETS.find(p=>p.id===presetId);
+   if(!preset)throw Error('Choose an approved Qwen 3.5 GGUF preset.');
+   if(typeof globalThis.confirm==='function'&&!globalThis.confirm('Download '+preset.label+' to this device? It uses about '+preset.sizeHint+' of storage and network data.'))return;
+   if(status)status.textContent='Downloading '+preset.label+' directly into saved GGUF storage…';
+   const result=await gguf.installPresetIntoImports(presetId,{signal:controller.signal,onProgress:part=>{
+     if(!status?.isConnected)return;
+     status.textContent='Installing '+preset.label+' · '+Math.round(part.loaded/1e6)+' MB'+
+       (part.total?' / '+Math.round(part.total/1e6)+' MB ('+Math.round(part.loaded/part.total*100)+'%)':'')+'.';
+   }});
+   if(status)status.textContent='Installed '+result.label+'. Choose a fleet role and test generation below.';
+   await refreshInventory(layer,panel,++inventorySequence);
+ }catch(error){if(status)status.textContent='Download not completed: '+String(error?.message||error)}
+ finally{if(activeImport===controller)activeImport=null;cancel.hidden=true;cancel.disabled=true;}
+}
+async function mountTermuxInline(layer,panel){
+ const target=panel.querySelector('[data-ai-fleet-termux-mount]');
+ if(!target||target.dataset.nativeServerMounted==='1')return;
+ try{
+   const native=await import('/app/local-ai/native-gguf-server-setup-v1.js?v=inline-fleet-2b-4b-v1');
+   if(!target.isConnected||currentBackend()!=='termux')return;
+   native.mountNativeServerSetup(target,{activate:async({model,endpoint})=>{
+     activateSharedRoute(layer,{model,endpoint});
+     const summary=panel.querySelector('[data-ai-fleet-message]');
+     if(summary)summary.textContent='Termux '+model+' activated as the shared local route for Civweave. Other GGUF browser imports are preserved.';
+   }});
+ }catch(error){if(target.isConnected)target.textContent='Termux setup failed to load: '+String(error?.message||error)}
+}
+async function checkNativeHost(panel){
+ const output=panel.querySelector('[data-ai-fleet-apk-status]');
+ const port=globalThis.CivweaveStarlingNative;
+ if(typeof port?.postMessage!=='function')throw Error('No trusted Android APK bridge is installed. The PWA cannot launch native WorkManager jobs by itself.');
+ const {createStarlingHostTransport}=await import('/app/shared/starling-execution-transport-v1.mjs');
+ const host=createStarlingHostTransport({kind:'android',nativePort:port});
+ const snapshot=await host.status();
+ if(snapshot?.backend!=='android'||snapshot?.mode!=='local-only')
+   throw Error('The APK responded, but did not identify a compatible local-only Starling backend.');
+ if(output)output.textContent='Connected Android host · '+Number(snapshot.jobs||0)+' local jobs. Native draft execution is available; main-chat inference requires the APK to supply a model engine.';
+}
+async function activateSavedImport(layer,panel,id){
+ const status=panel.querySelector('[data-ai-fleet-message]');
+ const gguf=await import(GGUF_MODULE),installed=await gguf.installedImports({verify:true});
+ const record=installed.find(item=>item.importId===id&&item.verified);
+ if(!record)throw Error('Imported model is missing or its shards could not be verified. Nothing was activated.');
+ const selected=await gguf.activateImported(id);
+ activateSharedRoute(layer,{model:selected.model,endpoint:'http://127.0.0.1:8080/v1'});
+ if(status)status.textContent='Activated '+record.label+'; other verified imports remain available for fleet roles.';
+ await refreshInventory(layer,panel,++inventorySequence);
+}
+async function testSavedImport(panel,id){
+ const status=panel.querySelector('[data-ai-fleet-message]');
+ const gguf=await import(GGUF_MODULE),entries=await gguf.installedImports({verify:true});
+ const entry=entries.find(item=>item.importId===id&&item.verified);
+ if(!entry)throw Error('Cannot test an incomplete imported GGUF.');
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),720000);
+ try{
+   if(status)status.textContent='Testing '+entry.label+' with a short, deterministic text prompt. This may take several minutes on WASM/CPU.';
+   const result=await gguf.generate({model:entry.model,importId:entry.importId,structured:false,temperature:0,maxTokens:24,
+     messages:[{role:'user',content:'Reply with exactly READY and nothing else.'}],signal:controller.signal,
+     onPhase:(stage,detail)=>{if(status)status.textContent='GGUF '+stage+(detail?.processed!==undefined?' · prompt '+detail.processed+'/'+detail.total:'')},
+   });
+   const answer=String(result.text||'').trim().replace(/[.!]+$/,'').toUpperCase();
+   if(answer!=='READY')throw Error('The model emitted "'+String(result.text||'').trim().slice(0,130)+'" rather than READY. Inference ran but the answer is invalid; do not mark this model healthy.');
+   if(status)status.textContent='PASS · '+entry.label+' · verified READY · meaningful output. Role assignments were not changed.';
+ }finally{clearTimeout(timer)}
 }
 function render(layer){
  const form=layer?.querySelector?.('[data-cw-settings-form]');
@@ -206,42 +402,99 @@ function render(layer){
  style();
  let panel=target.querySelector('#cw-ai-fleet-v1');
  if(!panel){target.replaceChildren();panel=document.createElement('section');panel.id='cw-ai-fleet-v1';panel.className='cw-clean-panel';target.append(panel)}
- // Remove obsolete catalog renderers. There is exactly one user-facing fleet.
  for(const child of [...target.children])if(child!==panel)child.remove();
- const device=detectDevice(),rows=catalogue(),all=chosen();
- const groups=[...new Set(rows.map(x=>x.group))];
- const options=[4,6,8,12,16,24,32,48,64,96,128].map(n=>'<option value="'+n+'"'+(device.budgetGB===n?' selected':'')+'>'+n+' GB</option>').join('');
- const groupHtml=groups.map(group=>{
-  const cards=rows.filter(x=>x.group===group).map(x=>{
-   const picked=all[x.role]?.modelId===x.modelId;
-   const meta=[x.purpose,x.ramGB+' GB working RAM estimate',x.experimental?'Experimental':'Local',picked?'Preferred':''].filter(Boolean).join(' · ');
-   return '<article class="cw-fleet-card" data-fleet-role="'+esc(x.role)+'"><small>'+esc(meta)+'</small><h4>'+esc(x.name)+'</h4><strong data-ai-fleet-model-label="'+esc(x.role)+'">'+esc(x.label)+'</strong><p>'+esc(x.description)+'</p>'+(x.runtime==='browser-gguf'?'<p data-ai-fleet-connection="'+esc(x.role)+'">Checking installed GGUF…</p>':'')+(x.notes?'<p>'+esc(x.notes)+'</p>':'')+'<button type="button" data-ai-fleet-setup="'+esc(x.platform+':'+x.role)+'">'+(picked?'Configure preferred AI':'Select & configure')+'</button></article>';
-  }).join('');
-  return '<div class="cw-fleet-group"><h4>'+esc(group)+'</h4><div class="cw-fleet-grid">'+cards+'</div></div>';
- }).join('');
- panel.innerHTML='<div><h3>AI Fleet</h3><p>Choose what the AI does first. Each role uses an actual model format supported by this device. Shared model weights are reused across roles where practical.</p></div>'+
-  '<label>Usable model-memory budget <select data-ai-fleet-memory aria-label="Usable model memory">'+options+'</select></label>'+
-  '<p class="cw-fleet-meta">Device: '+esc(device.platform)+' · '+(device.platform==='ios'?(device.webgpuApi?'WebGPU API present':'WebGPU unavailable; ai.local adapter')+' · ':'')+esc(device.source)+' · '+esc(device.note)+'</p>'+
-  '<p class="cw-fleet-meta">These are working RAM estimates, not download sizes or measured peaks. Opening this view never downloads, starts or tests an AI. Hidden roles need more memory or a different runtime.</p>'+
-  (groupHtml||'<p>No model in this fleet fits the configured memory budget.</p>')+
-  '<output data-ai-fleet-message role="status" aria-live="polite">Checking saved GGUF shards without starting or downloading a model…</output>';
+ const backend=currentBackend(),device=detectDevice();
+ const buttons=Object.entries(BACKENDS).map(([key,value])=>'<button type="button" data-ai-fleet-backend="'+key+
+   '" aria-pressed="'+(key===backend)+'">'+esc(value.label)+'</button>').join('');
+ const memoryOptions=[4,6,8,12,16,24,32,48,64,96,128].map(n=>'<option value="'+n+'"'+(device.budgetGB===n?' selected':'')+'>'+n+' GB</option>').join('');
+ const header='<h3>AI Fleet</h3><p>Choose your runtime, install models, assign roles and activate local inference—all here. Changing configuration views does not start AI.</p>'+
+  '<div class="cw-fleet-choices" role="group" aria-label="Local inference backend">'+buttons+'</div>';
+ let body='';
+ if(backend==='browser')body='<p>Install and assign the models on this phone. Keep 2B and 4B as separate imports; they can share the five fleet roles without duplicating weights.</p>'+
+   '<label>Usable model-memory budget <select data-ai-fleet-memory>'+memoryOptions+'</select></label>'+
+   '<p class="cw-fleet-meta">Device: '+esc(device.platform)+' · '+esc(device.source)+'. Model files remain in your device browser storage. A complete file import is not a passing inference test.</p>'+
+   '<section class="cw-fleet-card" data-ai-fleet-install><h4>1 · Install a model</h4>'+
+   '<p>Select an existing Qwen 3.5 2B or 4B GGUF, or all split parts of that model together. Importing does not erase previously installed GGUFs.</p>'+
+   '<label>Model file(s) <input type="file" accept=".gguf" multiple data-ai-fleet-gguf-files></label>'+
+   '<p><strong>Download a compatible model directly</strong></p>'+
+   '<div class="cw-fleet-choices"><button type="button" data-ai-fleet-download-preset="qwen35-2b-q4km-gguf">Install 2B Q4_K_M · ~1.3 GB</button>'+
+   '<button type="button" data-ai-fleet-download-preset="qwen35-4b-iq2m-gguf">Install 4B IQ2_M · ~1.6 GB</button></div>'+
+   '<p class="cw-fleet-meta">The downloadable 4B is a smaller, lower-fidelity quantization. To keep your original 4B Q4_K_M weights, choose its local GGUF/shards above.</p>'+
+   '<div class="cw-fleet-choices"><button type="button" data-ai-fleet-import>Import selected GGUF and shards</button>'+
+   '<button type="button" data-ai-fleet-import-cancel hidden disabled>Cancel import</button>'+
+   '<button type="button" data-ai-fleet-rescan>Refresh installed models</button></div>'+
+   '<output data-ai-fleet-import-status aria-live="polite">Choose files to begin. Files over 2 GB are automatically split where supported.</output></section>'+
+   '<section><h4>2 · Assign fleet roles, test and activate</h4>'+
+   '<div data-ai-fleet-inventory><p>Checking the saved GGUF model list…</p></div></section>';
+ else if(backend==='termux'){
+   body='<h4>Termux · native llama.cpp</h4><p>Configure, pair, install, start, test and activate your native server here. Commands that require Termux remain copyable; when paired, the Companion can manage the server from this panel.</p>'+
+     '<div data-ai-fleet-termux-mount><p>Loading native Termux setup controls…</p></div>';
+ }else{
+   const native=Boolean(globalThis.CivweaveStarlingNative&&typeof globalThis.CivweaveStarlingNative.postMessage==='function');
+   body='<h4>Android APK · native backend</h4>'+
+     '<p>Bridge: '+(native?'Detected in this installed Android shell.':'Unavailable in this PWA/browser session.')+'</p>'+
+     '<p>The currently installed APK bridge can manage local Starling drafts and WorkManager jobs. It does not yet install GGUF weights or replace the main Civweave chat engine. An Android APK containing the trusted native bridge is required.</p>'+
+     '<div class="cw-fleet-choices"><button type="button" data-ai-fleet-apk-connect'+(native?'':' disabled')+'>Test native bridge</button></div>'+
+     '<output data-ai-fleet-apk-status role="status">Native inference is not active until a compatible APK engine and model are installed.</output>';
+ }
+
+ panel.innerHTML=header+body+'<output data-ai-fleet-message role="status" aria-live="polite">No inference started.</output>';
  if(panel.dataset.fleetBound!=='1'){
-  panel.dataset.fleetBound='1';
-  panel.addEventListener('change',event=>{
-   if(!event.target?.matches?.('[data-ai-fleet-memory]'))return;
-   try{setMemoryBudget(event.target.value);localStorage.removeItem(BINDING_KEY);render(layer)}catch(e){const out=panel.querySelector('[data-ai-fleet-message]');if(out)out.textContent=String(e.message)}
-  });
-  panel.addEventListener('click',event=>{
-   const btn=event.target?.closest?.('[data-ai-fleet-setup]');if(!btn)return;
-   const id=btn.dataset.aiFleetSetup;
-   const row=catalogue().find(x=>x.platform+':'+x.role===id);
-   if(!row)return;
-   try{openSetup(row,layer)}catch(e){const out=panel.querySelector('[data-ai-fleet-message]');if(out)out.textContent=String(e?.message||e)}
-  });
+   panel.dataset.fleetBound='1';
+   panel.addEventListener('change',event=>{
+     const el=event.target;
+     if(el?.matches?.('[data-ai-fleet-memory]')){
+       try{setMemoryBudget(el.value);render(layer)}catch(error){panel.querySelector('[data-ai-fleet-message]').textContent=String(error.message)}return;
+     }
+     const role=el?.dataset?.aiFleetRoleAssign;
+     if(role){void (async()=>{
+       const gguf=await import(GGUF_MODULE),entries=await gguf.installedImports({verify:true});
+       const row=ROLES[role]?{role}:null;
+       const selected=entries.find(item=>item.importId===el.value&&canUse(item,row));
+       if(el.value&&!selected)throw Error('That GGUF import is incomplete or incompatible with this role.');
+       const previous=read(BINDING_KEY,{});
+       const roles={...fleetRolesFor(entries,previous)};
+       if(selected)roles[role]={model:selected.model,importId:selected.importId,family:selected.family,label:selected.label,
+         quantization:selected.quantization,bytes:selected.bytes};
+       else delete roles[role];
+       // Preserve explicit unassignment instead of silently restoring an auto match.
+       const unassigned=(previous.unassigned||[]).filter(item=>item!==role);
+       if(!selected)unassigned.push(role);
+       saveBindings(roles,unassigned);
+       panel.querySelector('[data-ai-fleet-message]').textContent=ROLES[role].label+' assignment saved; no model was loaded.';
+     })().catch(error=>{panel.querySelector('[data-ai-fleet-message]').textContent=String(error.message)})}
+   });
+   panel.addEventListener('click',event=>{
+     const el=event.target.closest?.('button');if(!el)return;
+     const backendChoice=el.dataset.aiFleetBackend;
+     if(backendChoice){if(activeImport)activeImport.abort();setBackend(backendChoice);render(layer);return}
+     const presetId=el.dataset.aiFleetDownloadPreset;
+     if(presetId){
+       el.disabled=true;void downloadFleetPreset(layer,panel,presetId)
+         .catch(error=>{const out=panel.querySelector('[data-ai-fleet-import-status]');if(out)out.textContent=String(error?.message||error)})
+         .finally(()=>{el.disabled=false});return;
+     }
+     if(el.hasAttribute('data-ai-fleet-import-cancel')){activeImport?.abort();return}
+     if(el.hasAttribute('data-ai-fleet-apk-connect')){
+       el.disabled=true;void checkNativeHost(panel).catch(error=>{const out=panel.querySelector('[data-ai-fleet-apk-status]');if(out)out.textContent=String(error?.message||error)}).finally(()=>{el.disabled=false});return;
+     }
+     if(el.hasAttribute('data-ai-fleet-rescan')){void refreshInventory(layer,panel,++inventorySequence);return}
+     if(el.hasAttribute('data-ai-fleet-import')){
+       el.disabled=true;void installChosenGGUF(layer,panel).catch(error=>{const out=panel.querySelector('[data-ai-fleet-import-status]');if(out)out.textContent=String(error?.message||error)}).finally(()=>{if(!activeImport)el.disabled=false});return;
+     }
+     const activate=el.dataset.aiFleetActivate,test=el.dataset.aiFleetTest;
+     if(activate||test){
+       el.disabled=true;
+       const work=activate?activateSavedImport(layer,panel,activate):testSavedImport(panel,test);
+       void work.catch(error=>{const msg=panel.querySelector('[data-ai-fleet-message]');if(msg)msg.textContent=String(error?.message||error)})
+         .finally(()=>{el.disabled=false});
+     }
+   });
  }
  target.dataset.aiFleetOwner='v1';
- if(device.platform==='android')void connectInstalledGGUF(layer,panel,++inventorySequence);
+ if(backend==='browser')void refreshInventory(layer,panel,++inventorySequence);
+ else{inventorySequence++;if(backend==='termux')void mountTermuxInline(layer,panel)}
  return true;
 }
-globalThis.CivweaveAIFleetV1=Object.freeze({version:VERSION,detectDevice,setMemoryBudget,catalogue,roles:ROLES,suites:SUITES,chosen,select,openSetup,matchImportedRoles,render});
+globalThis.CivweaveAIFleetV1=Object.freeze({version:VERSION,detectDevice,setMemoryBudget,catalogue,roles:ROLES,suites:SUITES,chosen,select,openSetup,matchImportedRoles,render,currentBackend,setBackend,fleetRolesFor,saveBindings});
 })();

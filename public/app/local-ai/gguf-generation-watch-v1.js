@@ -2,7 +2,7 @@
 // AFTER Wllama has loaded the GGUF, without touching OPFS weights.
 export const GGUF_FIRST_VISIBLE_MS=120000;
 export const GGUF_OUTPUT_IDLE_MS=75000;
-export const GGUF_MAX_GENERATE_MS=240000;
+export const GGUF_MAX_GENERATE_MS=720000;
 
 export function createGGUFGenerationWatch({
   signal,onProgress=()=>{},firstVisibleMs=GGUF_FIRST_VISIBLE_MS,
@@ -17,6 +17,7 @@ export function createGGUFGenerationWatch({
   };
   const clear=()=>{for(const timer of timers)timerClear(timer);timers.clear()};
   const progress=(phase,details)=>{try{onProgress(phase,details)}catch{}};
+  const progressEvent=progress;
   const abort=(code,message)=>{
     if(own.signal.aborted)return;
     reason=error(code,message);clear();progress('watchdog-timeout',{code,visibleChunks,hiddenChunks,elapsedMs:now()-started});
@@ -26,8 +27,19 @@ export function createGGUFGenerationWatch({
     const id=timerSet(callback,ms);timers.add(id);
     return id;
   };
-  const firstTimer=schedule(firstVisibleMs,()=>abort('GGUF_FIRST_VISIBLE_TOKEN_TIMEOUT',
-    'Wllama produced no visible text within '+Math.ceil(firstVisibleMs/1000)+' seconds after generation began. The current GGUF remains installed.'));
+  // The first-visible clock is a *stall* deadline, not a prefill deadline.
+  // Every advancing prompt-evaluation progress packet renews it. A slow CPU
+  // evaluating 1,700 prompt tokens must not be mistaken for an idle decoder.
+  let firstTimer=null;
+  const armFirst=()=>{
+    if(firstTimer!==null){timerClear(firstTimer);timers.delete(firstTimer)}
+    firstTimer=schedule(firstVisibleMs,()=>abort('GGUF_FIRST_VISIBLE_TOKEN_TIMEOUT',
+      'Wllama stopped making progress for '+Math.ceil(firstVisibleMs/1000)+
+      ' seconds before a visible token. Last prompt prefill: '+
+      (lastPrefill?lastPrefill.processed+'/'+lastPrefill.total:'not reported')+
+      '. The current GGUF remains installed.'));
+  };
+  armFirst();
   schedule(maxMs,()=>abort('GGUF_GENERATION_TIME_LIMIT',
     'Wllama generation exceeded '+Math.ceil(maxMs/1000)+' seconds. The current GGUF remains installed.'));
   let idleTimer=null;
@@ -54,8 +66,11 @@ export function createGGUFGenerationWatch({
     prefill(progress={}){
       if(own.signal.aborted)throw reason;
       prefillEvents++;
-      lastPrefill={processed:Number(progress.processed||0),total:Number(progress.total||0),
-        cached:Number(progress.cached||0),elapsedMs:now()-started};
+      const processed=Number(progress.processed||0),total=Number(progress.total||0);
+      const advanced=Number.isFinite(processed)&&processed>(lastPrefill?.processed??-1);
+      lastPrefill={processed,total,cached:Number(progress.cached||0),elapsedMs:now()-started};
+      if(advanced&&firstVisibleAt===null){armFirst();
+        progressEvent('prefill-progress',{processed,total,percent:total?Math.round(processed/total*100):null,elapsedMs:lastPrefill.elapsedMs});}
     },
     chunk({visible=false,hidden=false}={}){
       if(own.signal.aborted)throw reason;

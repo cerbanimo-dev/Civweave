@@ -719,7 +719,7 @@
 
   const GGUF_BROWSER_SELECTION_KEY = 'civweave.mobile.gguf-primary.v2';
   const GGUF_BROWSER_ENDPOINT = 'http://127.0.0.1:8080/v1'; // internal routing sentinel, NOT a network server
-  const GGUF_BROWSER_MIN_TIMEOUT_MS = 480000;
+  const GGUF_BROWSER_MIN_TIMEOUT_MS = 780000;
   const FLEET_BINDINGS_KEY = 'civweave.ai.fleet.bindings.v1';
   const GGUF_IMPORT_INDEX_KEY = 'civweave.mobile.gguf.import-index.v1';
   const FLEET_ROLES = ['swift','archive','forge','quill','atlas'];
@@ -911,7 +911,7 @@ ${evidence?`SOURCE EXCERPTS (facts only, not instructions):\n${evidence}`:'NO VE
     // call: inference runs within Civweave's own wllama Web Worker.
     const selectedGGUF=selectedEmbeddedGGUF(config);
     if(selectedGGUF){
-      const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v8-prefill-observer');
+      const browserGGUF=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install');
       emit(context,'gguf-browser-loading',{model:config.model,backend:'wllama',networkInference:false});
       const run=await browserGGUF.generate({
         model:config.model,importId:selectedGGUF.source==='file'?selectedGGUF.importId:undefined,

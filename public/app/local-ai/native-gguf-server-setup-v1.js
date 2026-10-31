@@ -17,6 +17,8 @@ const setupHtml=[
  '<p><b>4 · Run the local server</b> in Termux. It listens only on this phone and uses a 32,768-token context with one parallel slot for research-heavy Moss lessons. This uses more RAM than the previous 2,048-token configuration; stop the existing server with Ctrl+C before starting it with the updated command. If Android kills the server, retry with --ctx-size 16384, then 8192; 64K should be treated as an optional experiment. Older Termux llama.cpp builds do not support the --cors-origins argument; verify browser connectivity with the tests below:</p><div data-server-command="2"></div>',
  '<p>If your file has another name, edit the quoted <code>-m</code> path. Keep Termux running, and set reasonable battery permissions for longer sessions. Ctrl+C in Termux stops the server.</p>',
  '<p><b>5 · Verify and select</b> — test the model-list endpoint, then produce a few actual tokens before selecting this route for all five Civweave systems. No localhost requests happen automatically when Settings opens.</p>',
+ '<label>Local server model alias <select data-server-model><option value="qwen35-4b-native">Qwen 3.5 4B</option><option value="qwen35-2b-native">Qwen 3.5 2B</option></select></label>',
+ '<p>The alias must match the actual loaded llama-server model. The setup command above shows 4B; for 2B change both the file and --alias to qwen35-2b-native, or use the paired Companion below.</p>',
  '<div class="cw-clean-grid"><button type="button" data-server-check>Check localhost server</button><button type="button" data-server-test disabled>Generate 24-token test</button><button type="button" data-server-activate disabled>Use tested server for five systems</button></div>',
  '<output data-server-status role="status" aria-live="polite">Not checked. The current model selection is unchanged.</output>',
  '<p><a href="/native-server-diagnostic.html" target="_blank" rel="noopener noreferrer">Open isolated browser-to-Termux diagnostic (no model loaded automatically)</a></p>',
@@ -46,23 +48,25 @@ async function request(path,{body,fetcher=fetch}={}){
     throw error;
   }finally{clearTimeout(timer)}
 }
-export async function checkServer({fetcher=fetch}={}){
+export async function checkServer({fetcher=fetch,model=SERVER_MODEL}={}){
   const result=await request('/models',{fetcher}),models=Array.isArray(result?.data)?result.data:[];
   if(!models.length)throw new Error('The server returned no loaded models.');
   const ids=models.map(item=>String(item?.id||'').slice(0,120));
-  if(!ids.includes(SERVER_MODEL))
-    throw new Error('Unexpected loaded model. Add --alias '+SERVER_MODEL+' to the Termux command. Server reports: '+ids.slice(0,3).join(', '));
+  if(!['qwen35-4b-native','qwen35-2b-native'].includes(model)||!ids.includes(model))
+    throw new Error('Unexpected loaded model. Set the Termux --alias to '+model+'. Server reports: '+ids.slice(0,3).join(', '));
   return{models:ids};
 }
-export async function generateServerTest({fetcher=fetch}={}){
+export async function generateServerTest({fetcher=fetch,model=SERVER_MODEL}={}){
   const result=await request('/chat/completions',{fetcher,body:{
-    model:SERVER_MODEL,stream:false,max_tokens:24,temperature:0,
+    model,stream:false,max_tokens:24,temperature:0,
     messages:[{role:'user',content:'Reply with exactly READY.'}]
   }});
   const content=result?.choices?.[0]?.message?.content;
   if(typeof content!=='string'||!content.trim())
     throw new Error('The server returned no visible generated text.');
-  return{answer:content.trim().slice(0,160),model:SERVER_MODEL};
+  const answer=content.trim().replace(/[.!]+$/,'').toUpperCase();
+  if(answer!=='READY')throw new Error('Local model generated text, but not the requested READY response: '+content.slice(0,120));
+  return{answer:content.trim().slice(0,160),model};
 }
 export function mountNativeServerSetup(target,{activate,copyText}={}){
   if(!target||target.dataset.nativeServerMounted==='1')return;
@@ -90,22 +94,24 @@ export function mountNativeServerSetup(target,{activate,copyText}={}){
   const check=target.querySelector('[data-server-check]');
   const test=target.querySelector('[data-server-test]');
   const select=target.querySelector('[data-server-activate]');
+  const modelSelect=target.querySelector('[data-server-model]');
+  modelSelect.addEventListener('change',()=>{stage='idle';test.disabled=true;select.disabled=true;status.textContent='Model changed. Check this alias on the local server again.';});
   let stage='idle',busy=false;
   async function action(name){
     if(busy)return;busy=true;check.disabled=test.disabled=select.disabled=true;
     try{
       if(name==='check'){
         status.textContent='Checking llama-server on 127.0.0.1:8080…';
-        const result=await checkServer();
+        const result=await checkServer({model:modelSelect.value});
         stage='checked';status.textContent='Found '+result.models.join(', ')+'. Next, generate a short test.';
       }else if(name==='test'){
         status.textContent='Requesting a short native GGUF completion…';
-        const result=await generateServerTest();
+        const result=await generateServerTest({model:modelSelect.value});
         stage='tested';status.textContent='Native inference test passed: '+result.answer+'. You can now select this local server.';
       }else if(name==='activate'){
         if(stage!=='tested')throw new Error('Run the local token test before selecting the server.');
         if(typeof activate!=='function')throw new Error('The Civweave settings activation handler was not attached.');
-        await activate({model:SERVER_MODEL,endpoint:SERVER_URL});
+        await activate({model:modelSelect.value,endpoint:SERVER_URL});
         stage='active';status.textContent='Native server selected for all five systems. The saved browser GGUF model is untouched. Keep Termux running.';
       }
     }catch(error){

@@ -48,7 +48,7 @@ async function browserGGUFProbe({timeoutMs=480000,onStatus=()=>{}}={}){
   const started=Date.now(),controller=new AbortController();
   let timer=null,firstTokenAt=null,phase='preparing',text='';
   try {
-    const gguf=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v6-moss-timeout-probe');
+    const gguf=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install');
     if(gguf.current()?.model!==selected.model)
       return{ok:false,model:selected.model,code:'GGUF_PROBE_PREFERENCE_MISMATCH',message:'The browser GGUF preference changed before the probe. Open Settings and select the cached import.'};
     timer=setTimeout(()=>controller.abort(new DOMException('GGUF inference test exceeded its eight-minute device budget.','TimeoutError')),timeoutMs);
@@ -59,7 +59,9 @@ async function browserGGUFProbe({timeoutMs=480000,onStatus=()=>{}}={}){
       onToken:(delta,full)=>{if(firstTokenAt==null)firstTokenAt=Date.now();text=full;onStatus('GGUF first visible text: '+clean(full,100))},
       onPhase:(name,details)=>{phase=name;onStatus('GGUF '+name+(details?.backend?' · '+details.backend:'')+(details?.reason?' · '+clean(details.reason,180):''))}
     });
-    return{ok:Boolean(result?.text?.trim()),model:selected.model,phase,code:result?.text?.trim()?'OK':'GGUF_PROBE_EMPTY',output:clean(result?.text,160),firstTokenMs:firstTokenAt==null?null:firstTokenAt-started,elapsedMs:Date.now()-started};
+    const answer=String(result?.text||'').trim().replace(/[.!]+$/,'').toUpperCase();
+    const valid=answer==='READY';
+    return{ok:valid,model:selected.model,phase,code:valid?'OK':answer?'GGUF_PROBE_BAD_OUTPUT':'GGUF_PROBE_EMPTY',output:clean(result?.text,160),firstTokenMs:firstTokenAt==null?null:firstTokenAt-started,elapsedMs:Date.now()-started};
   }catch(error){
     return{ok:false,model:selected.model,phase,code:error?.code||'GGUF_PROBE_FAILED',
       message:clean(error?.message||error,500),elapsedMs:Date.now()-started,

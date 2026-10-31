@@ -188,6 +188,77 @@ export async function importFiles(input,{onProgress,signal}={}){
     throw error;
   }finally{importing=false}
 }
+// Direct preset installs stream into OPFS instead of buffering a multi-GB
+// Response.blob(), duplicating CacheStorage weights or opening another tab.
+// Only curated, explicitly selected sub-2GB GGUF URLs are accepted here.
+export async function installPresetIntoImports(presetId,{signal,onProgress=()=>{},fetcher=fetch}={}){
+ if(downloading||importing)throw err('GGUF_IMPORT_BUSY','Another model install/import is running.');
+ const preset=GGUF_PRESETS.find(row=>row.id===presetId);
+ if(!preset)throw err('GGUF_PRESET_UNKNOWN','This GGUF preset is not in the approved browser catalog.');
+ const url=validateURL(preset.url);
+ const name=decodeURIComponent(new URL(url).pathname.split('/').pop()||'');
+ const model=modelFromFile(name);
+ downloading=true;
+ let store=null,importId=null,stream=null,complete=false;
+ const progress=(loaded,total)=>{
+   notify('importing',{model:model.id,loaded,total,file:name,phase:'downloading'});
+   try{onProgress({model:model.id,loaded,total,file:name,phase:'downloading'})}catch{}
+ };
+ try{
+   if(signal?.aborted)throw err('GGUF_IMPORT_CANCELLED','GGUF download cancelled.');
+   const response=await fetcher(url,{mode:'cors',credentials:'omit',cache:'no-store',signal});
+   if(!response.ok||!response.body?.getReader)
+     throw err('GGUF_PRESET_DOWNLOAD_FAILED','The GGUF source did not provide a readable download stream (HTTP '+response.status+').');
+   const declared=Number(response.headers?.get?.('content-length')||0);
+   if(declared>MAX_GGUF_SHARD_BYTES)
+     throw err('GGUF_FILE_TOO_LARGE','The chosen model is larger than the Wllama 2 GB limit; import pre-split GGUF files instead.');
+   store=await import(OPFS);
+   if(declared>0)await store.checkCapacity(declared);
+   const dir=await store.directory();
+   importId='file-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+   const handle=await dir.getFileHandle(importId+'-00000.gguf',{create:true});
+   stream=await handle.createWritable();
+   const reader=response.body.getReader();
+   let bytes=0;
+   try{
+     while(true){
+       if(signal?.aborted)throw err('GGUF_IMPORT_CANCELLED','GGUF download cancelled. Existing GGUFs are preserved.');
+       const {done,value}=await reader.read();
+       if(done)break;
+       bytes+=value.byteLength;
+       if(bytes>MAX_GGUF_SHARD_BYTES)
+         throw err('GGUF_FILE_TOO_LARGE','Download exceeded this browser engine’s 2 GB single-shard limit.');
+       await stream.write(value);
+       progress(bytes,declared||0);
+     }
+   }finally{try{await reader.cancel()}catch{}}
+   await stream.close();stream=null;
+   const file=await handle.getFile();
+   if(file.size!==bytes||bytes<24||(declared&&declared!==bytes))
+     throw err('GGUF_IMPORT_DAMAGED','Downloaded GGUF size does not match the response.');
+   const magic=new Uint8Array(await file.slice(0,4).arrayBuffer());
+   if(magic.length!==4||magic[0]!==71||magic[1]!==71||magic[2]!==85||magic[3]!==70)
+     throw err('GGUF_BAD_HEADER','The downloaded data is not a GGUF file.');
+   const record={schema:'civweave.gguf.import.v1',storage:store.GGUF_OPFS_SCHEMA,
+     importId,model:model.id,label:model.label,sourceNames:[name],bytes,
+     files:[{name:importId+'-00000.gguf',index:0,size:bytes}],importedAt:new Date().toISOString()};
+   await store.readGGUFShards(record);
+   const index=importIndex();
+   index[importId]=record;
+   localStorage.setItem(IMPORT_INDEX_KEY,JSON.stringify(index));
+   complete=true;progress(bytes,bytes);
+   notify('imported',{model:record.model,loaded:bytes,total:bytes,count:1,storage:'opfs'});
+   return record;
+ }catch(error){
+   notify('import-failed',{reason:String(error?.message||error).slice(0,240)});
+   throw error;
+ }finally{
+   if(stream)try{await stream.abort()}catch{}
+   if(store&&importId&&!complete)await store.removeGGUFShards(importId,[0]);
+   downloading=false;
+ }
+}
+
 // Read only Civweave's persisted import manifest and the actual saved shard
 // headers/sizes. Fleet discovery never initializes Wllama, starts a model or
 // downloads weights, and works with any imported quantization of these sizes.

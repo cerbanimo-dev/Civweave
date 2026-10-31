@@ -147,7 +147,7 @@ function updateHeader(layer=document.getElementById(LAYER_ID)){
   layer.dataset.settingsVisibleVersion='v325';return true;
 }
 
-const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.0.1-device-aware-ios-fallback';
+const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.2.0-single-screen-fleet-installer';
 function showUnifiedFleet(layer=document.getElementById('cw-settings-v320')){
   const target=layer?.querySelector?.('[data-settings-tab-panel="local-models"]');
   if(!target||!layer?.isConnected||layer.hidden)return false;

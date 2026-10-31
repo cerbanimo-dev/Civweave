@@ -98,3 +98,57 @@ test('Fleet browser runtime keeps role selections transient and blocks unintende
  assert.match(gguf,/if\(verify\)await blobsFor\(record\)/);
  assert.match(gguf,/importId\?selectionForImported\(importId\):current\(\)/);
 });
+
+test('Only the three proven local configuration paths are rendered by the fleet',()=>{
+ assert.match(source,/const BACKENDS=Object\.freeze\(\{/);
+ for(const key of ['browser','termux','android'])assert.match(source,new RegExp(key+':\\{label:'));
+ assert.match(source,/data-ai-fleet-backend/);
+ assert.match(source,/data-ai-fleet-inventory/);
+ assert.match(source,/data-ai-fleet-role-assign/);
+ assert.match(source,/data-ai-fleet-termux-mount/);
+ assert.match(source,/data-ai-fleet-apk-connect/);
+ assert.match(source,/data-ai-fleet-gguf-files/);
+ assert.match(source,/data-ai-fleet-import/);
+ assert.match(source,/data-ai-fleet-download-preset/);
+ assert.match(source,/mountNativeServerSetup/);
+ assert.doesNotMatch(source,/configurationTab\(layer/);
+ assert.doesNotMatch(source,/CivweaveStarlingLoungeV1\?\.open/);
+ assert.doesNotMatch(source,/data-ai-fleet-backend="ollama"/);
+});
+test('Manually unassigned roles stay unassigned across re-scans of 2B and 4B',()=>{
+ const {fleet}=boot('Mozilla/5.0 (Linux; Android 16; A069P)',8);
+ const installed=[
+  {family:'2b',importId:'saved-2b',model:'qwen35-2b-imported-gguf',verified:true},
+  {family:'4b',importId:'saved-4b',model:'qwen35-4b-imported-gguf',verified:true}
+ ];
+ const auto=fleet.fleetRolesFor(installed);
+ assert.equal(auto.swift.importId,'saved-2b');
+ assert.equal(auto.atlas.importId,'saved-4b');
+ const manual=fleet.fleetRolesFor(installed,{roles:auto,unassigned:['atlas']});
+ assert.equal(manual.atlas,undefined);
+ assert.equal(manual.forge.importId,'saved-4b');
+});
+
+test('A missing 4B still allows the installed 2B to serve the full fleet at sufficient RAM',()=>{
+ const {fleet}=boot('Mozilla/5.0 (Linux; Android 16; A069P)',8);
+ const entries=[{family:'2b',importId:'saved-2b',model:'qwen35-2b-imported-gguf',verified:true}];
+ const result=fleet.fleetRolesFor(entries);
+ assert.equal(Object.keys(result).length,5);
+ assert.ok(Object.values(result).every(row=>row.importId==='saved-2b'));
+});
+test('4GB memory tier does not accidentally bind the larger 4B quantization',()=>{
+ const {fleet}=boot('Mozilla/5.0 (Linux; Android 16; A069P)',8);
+ fleet.setMemoryBudget(4);
+ const entries=[{family:'2b',importId:'saved-2b',model:'qwen35-2b-imported-gguf',verified:true},
+  {family:'4b',importId:'saved-4b',model:'qwen35-4b-imported-gguf',verified:true}];
+ const result=fleet.fleetRolesFor(entries);
+ assert.equal(Object.keys(result).length,5);
+ assert.ok(Object.values(result).every(row=>row.importId==='saved-2b'));
+});
+test('Direct browser preset installs create normal fleet imports, without duplicate browser storage',()=>{
+ const gguf=fs.readFileSync(new URL('../public/app/local-ai/browser-gguf-v1.js',import.meta.url),'utf8');
+ assert.match(gguf,/export async function installPresetIntoImports\(/);
+ assert.match(gguf,/response\.body\.getReader\(\)/);
+ assert.match(gguf,/store\.readGGUFShards\(record\)/);
+ assert.doesNotMatch(gguf.slice(gguf.indexOf('export async function installPresetIntoImports'),gguf.indexOf('export async function installedImports')),/response\.blob\(\)|cache\.put\(/);
+});
