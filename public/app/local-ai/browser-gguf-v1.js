@@ -286,7 +286,7 @@ async function start(selected,onPhase=()=>{}){
   })().finally(()=>{loading=null});
   return loading;
 }
-export async function generate({model,importId,messages,temperature=.6,maxTokens=1024,structured=false,signal,onToken,onPhase=()=>{}}={}){
+async function generateInternal({model,importId,messages,temperature=.6,maxTokens=1024,structured=false,signal,onToken,onPhase=()=>{}}={}){
   const selected=importId?selectionForImported(importId):current();
   if(!selected||selected.model!==model)throw err('GGUF_SELECTION_MISMATCH','Browser GGUF is not selected, or another model replaced the selected ID.');
   if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled before model loading.');
@@ -372,6 +372,17 @@ export async function generate({model,importId,messages,temperature=.6,maxTokens
     }
     throw err(error?.code||'GGUF_INFERENCE_FAILED','Browser GGUF '+phase+' failed: '+reason+'. Imported Q4 weights were not removed.');
   }finally{watchdog.stop()}
+}
+// Wllama keeps one active model. Serializing complete generations prevents a
+// 2B request from reusing an in-progress 4B load or unloading live inference.
+let generationTail=Promise.resolve();
+export function generate(request={}){
+  const queued=generationTail.then(()=>{
+    if(request.signal?.aborted)throw err('GGUF_ABORTED','Fleet generation was cancelled before its turn.');
+    return generateInternal(request);
+  });
+  generationTail=queued.catch(()=>{});
+  return queued;
 }
 export async function release(){
   if(loading)try{await loading}catch{}
