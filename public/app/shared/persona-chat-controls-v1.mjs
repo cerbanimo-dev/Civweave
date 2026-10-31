@@ -132,7 +132,11 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
          directControl:selectedControl,worldChanged:deviation});
        if(el(root,'deviation'))el(root,'deviation').checked=false;
        campaign=result.campaign;
-       status('Turn '+campaign.turn+' · '+campaign.branchId+' · '+(result.needsRefresh?'4B refresh next cue':'improv ready')+'. Export explicitly to keep progress.');
+       const spent=result.packet?.persona?.overrideSpends?.length||0;
+       const remaining=result.packet?.persona?.remainingWillpower;
+       status('Turn '+campaign.turn+' · '+campaign.branchId+
+         (spent?' · '+spent+' override'+(spent===1?'':'s')+' used · willpower '+remaining+'/'+campaign.willpower.max:'')+
+         ' · '+(result.needsRefresh?'4B refresh next cue':'improv ready')+'. Export explicitly to keep progress.');
        return result.packet;
      }finally{if(el(root,'consent'))el(root,'consent').checked=false;}
    },
