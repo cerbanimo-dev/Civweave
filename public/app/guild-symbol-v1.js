@@ -388,7 +388,8 @@ async function guildAction(action,control){
       await api.leaveGuild(session.nodeId);activeGuildStatus=null;discoveryExpanded=true;renderGuildTab();
       guildFeedback('The Guild confirmed your departure. Your local login and active selection were cleared.');
     }else if(action==='relogin'){
-      const joined=await api.join(guild.origin,{nodeId:guild.nodeId,createCredential:false});
+      const legacy=api.legacyGuildkeeperCredential?.(guild.origin,guild.nodeId);
+      const joined=legacy?api.reconnectLegacyGuildkeeper(guild.origin,guild.nodeId):await api.join(guild.origin,{nodeId:guild.nodeId,createCredential:false});
       api.selectSession({origin:guild.origin,nodeId:joined.session.nodeId,displayName:guild.displayName});
       discoveryExpanded=false;activeGuildStatus=null;await refreshGuildAccess();
     }else if(action==='join'||action==='membership'){
