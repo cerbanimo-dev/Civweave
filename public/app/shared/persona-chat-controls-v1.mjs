@@ -16,7 +16,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
  const button=el(root,'toggle'),panel=el(root,'panel');
  if(!button||!panel)throw new TypeError('Persona chat controls are not mounted in canonical guide chat.');
  let cast=null,campaign=null,session=null,guildRoom=null,guildDrafts=[],guildWorld=null,
-   guildMotion=null,guildMoves=[],sceneViewer=null,sceneGeometry=null,sceneRevision=-1,
+   guildMotion=null,guildMoves=[],sceneViewer=null,sceneGeometry=null,sceneRevision=-1,sceneAnimationFrame=null,
    enabled=false,loading=false;
  let syncTimer=null,syncBusy=false;
  const guildClient=createGuildPersonaClient();
@@ -27,6 +27,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    onModeChange(enabled);
  };
  const stop=()=>{session=null;guildRoom=null;guildDrafts=[];guildWorld=null;guildMotion=null;guildMoves=[];
+   if(sceneAnimationFrame!==null){cancelAnimationFrame(sceneAnimationFrame);sceneAnimationFrame=null;}
    sceneViewer?.close();sceneViewer=null;sceneGeometry=null;sceneRevision=-1;
    if(syncTimer){clearInterval(syncTimer);syncTimer=null;}switchOn(false);};
  const guildStatus=message=>{const x=el(root,'guild-status');if(x)x.textContent=small(message,800);};
@@ -92,8 +93,13 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    const canvas=el(root,'guild-3d');
    if(!canvas||!guildMotion?.region)return;
    try{
+     const changing=sceneRevision>=0&&sceneRevision!==guildMotion.revision;
+     const lastMove=guildMotion.movements?.at(-1);
+     const animate=changing&&lastMove?.sceneRevision===guildMotion.revision&&
+       document.visibilityState!=='hidden'&&typeof requestAnimationFrame==='function';
+     const {buildOpenSimGeometry}=await import('./worldweaver-opensim-geometry-v1.mjs');
+     if(sceneAnimationFrame!==null){cancelAnimationFrame(sceneAnimationFrame);sceneAnimationFrame=null;}
      if(sceneRevision!==guildMotion.revision||!sceneGeometry){
-       const {buildOpenSimGeometry}=await import('./worldweaver-opensim-geometry-v1.mjs');
        sceneGeometry=buildOpenSimGeometry(guildMotion.region);
        sceneRevision=guildMotion.revision;
      }
@@ -104,6 +110,27 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
            '. Camera selection does not move or authorize the character.')});
      }
      sceneViewer.update();
+     if(animate){
+       const canonical=structuredClone(guildMotion.region);
+       const id='actor:'+lastMove.characterId;
+       const dest=canonical.objects.find(x=>x.id===id);
+       if(!dest||!['x','y','z'].every(k=>dest.position[k]===lastMove.to[k]))return;
+       const start=performance.now();
+       const tick=now=>{
+         if(!guildRoom||sceneRevision!==guildMotion.revision||document.visibilityState==='hidden'){
+           sceneAnimationFrame=null;sceneGeometry=buildOpenSimGeometry(canonical);
+           sceneViewer?.update();return;
+         }
+         const t=Math.min(1,Math.max(0,(now-start)/800));
+         const region=structuredClone(canonical),body=region.objects.find(x=>x.id===id);
+         if(body)for(const axis of ['x','y','z'])
+           body.position[axis]=lastMove.from[axis]+(lastMove.to[axis]-lastMove.from[axis])*t;
+         sceneGeometry=buildOpenSimGeometry(region);sceneViewer?.update();
+         sceneAnimationFrame=t<1?requestAnimationFrame(tick):null;
+         if(t>=1){sceneGeometry=buildOpenSimGeometry(canonical);sceneViewer?.update();}
+       };
+       sceneAnimationFrame=requestAnimationFrame(tick);
+     }
    }catch(error){
      const target=el(root,'guild-motion-status');
      if(target)target.textContent='3D render failed: '+small(error?.message||error,240);
