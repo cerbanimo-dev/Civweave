@@ -59,6 +59,9 @@ export async function stageNpcDraft(tx,{nodeId,room,actor,input}){
  const speech=clean(input.speech,400);
  if(!speech)deny('Spoken text is required.',400);
  const actions=allowedActions(input.actions||[{tool:'speak',args:{text:speech}}]);
+ if(actions[0].args.text!==speech)deny('The reviewed spoken line and the queued speech must match.',400);
+ const existing=await tx.list({prefix:draftPrefix+nodeId+':'+room.id+':',limit:25});
+ if(existing.size>=24)deny('Review or clear existing drafts before submitting more.',409);
  // Any client-provided modelId, pilot ID, verified flag or receipt is discarded.
  const draft={id:'draft:'+crypto.randomUUID(),characterId,speech,emote:clean(input.emote,180),
   actions,submittedBy:actor.principalId,origin:'untrusted-player-submitted',
@@ -139,8 +142,9 @@ export async function approveNpcDraft(tx,{nodeId,room,actor,input}){
    sequence:runtime.nextSequence(),instanceId,bindings:{
     ...(entry?.bindings||{}),[proposal.id]:binding
    }});
- await tx.put(dk,{...draft,status:'approved',approvedAt:new Date().toISOString(),
-   approvedBy:actor.principalId,proposalId:proposal.id,worldReceiptId:receiptId});
+ // Once the authoritative world/campaign receipts are stored, the untrusted
+ // temporary draft is no longer needed. Prevent indefinite storage growth.
+ await tx.delete(dk);
  // Caller commits room and Worldweaver snapshot in the SAME DO transaction.
  return {room:current,worldReceiptId:receiptId,proposalId:proposal.id,
    world:{instanceId,revision:world.snapshot().revision,kind:'logical-speech',
