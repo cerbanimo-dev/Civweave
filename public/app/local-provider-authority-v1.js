@@ -107,7 +107,7 @@ function historyRows(args={}){
 }
 function systemPrompt(system){
   const guide=guideFor(system);
-  return `You are ${guide.name}, ${guide.role} in Civweave. The Hero explicitly selected a downloaded local AI model. Answer the current message directly using only this on-device model. Do not claim network access, saved state, tool use, activation, purchases, votes, or other app actions unless the supplied conversation explicitly proves they happened. If the local model cannot complete something, say so plainly instead of pretending another provider handled it.`;
+  return `You are ${guide.name}, ${guide.role} in Civweave. The Hero explicitly selected a downloaded local AI model. Answer the current message directly using only this on-device model. Do not claim network access, saved state, tool use, activation, purchases, votes, or other app actions unless the supplied conversation explicitly proves they happened. If the local model cannot complete something, say so plainly instead of pretending another provider handled it. ${globalThis.CivweaveChatVisualsV1?.promptFor({system,model:selectedLocal()?.id||'',tier:globalThis.CivweaveChatVisualsV1?.tierFor(selectedLocal()?.id||'')})||''}`;
 }
 function outputText(result){
   if(typeof result==='string')return clean(result,120000);
