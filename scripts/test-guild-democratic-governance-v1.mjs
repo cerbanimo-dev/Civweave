@@ -38,16 +38,16 @@ test('majority is strict and cannot be met by an owner alone when multiple membe
     {userId:C,kind:'neuron-use',at:new Date(t-1000).toISOString()},
     {userId:C,kind:'published-quest',at:new Date(t-GUILD_CONTRIBUTION_WINDOW_MS-1000).toISOString()}];
   assert.deepEqual(qualifiedContributors(members,receipts,{now:t}),[A,B]);
-  assert.throws(()=>ballotSpec({action:'remove',targetUserId:A,initiatorUserId:A,eligible:[A],now:t}),/normal account departure/);
-  assert.throws(()=>ballotSpec({action:'ban',targetUserId:A,initiatorUserId:B,eligible:[A],now:t}),/recent verified contribution/);
+  assert.throws(()=>ballotSpec({action:'remove',targetUserId:A,initiatorUserId:A,eligible:[A],statement:'Verified concerns require a documented member decision.',now:t}),/normal account departure/);
+  assert.throws(()=>ballotSpec({action:'ban',targetUserId:A,initiatorUserId:B,eligible:[A],statement:'Verified concerns require a documented member decision.',now:t}),/recent verified contribution/);
 });
 test('approved ballots auto-remove and invalidate sessions; a proposer alone cannot act in a two-voter Guild',()=>{
   const f=fixture();[A,B,C].forEach(f.member);f.contributor(A);f.contributor(B);
-  const first=proposeGovernance(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C});
+  const first=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
   assert.equal(first.status,'open');assert.equal(first.yes,1);assert.equal(first.requiredYes,2);assert.equal(f.memberCount(),3);
   const declined=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:first.id,choice:'no'});
   assert.equal(declined.status,'rejected');assert.equal(f.memberCount(),3);
-  const second=proposeGovernance(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C});
+  const second=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
   const final=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:second.id,choice:'yes'});
   assert.equal(final.status,'approved');assert.equal(final.executed,true);assert.equal(f.memberCount(),2);
   assert.equal(f.db.prepare('SELECT COUNT(*) AS n FROM resident_sessions WHERE user_id=?').get(C).n,0);
@@ -56,24 +56,24 @@ test('approved ballots auto-remove and invalidate sessions; a proposer alone can
 });
 test('active productive target stays protected until community majority, even if not the proposer',()=>{
   const f=fixture();[A,B,C].forEach(f.member);[A,B,C].forEach(f.contributor);
-  const ballot=proposeGovernance(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C});
+  const ballot=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
   assert.equal(ballot.status,'open');assert.equal(f.memberCount(),3);
   assert.equal(castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes'}).status,'approved');
   assert.equal(f.memberCount(),2);
 });
 test('majority-approved Guildkeeper role transfer and revocation affect effective authority immediately',()=>{
   const f=fixture();[A,B,C].forEach(f.member);f.contributor(A);f.contributor(B);
-  const ballot=proposeGovernance(f.sql,{...f.context,actorId:A,action:'transfer-role',targetUserId:C,role:'guildkeeper'});
+  const ballot=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'transfer-role',targetUserId:C,role:'guildkeeper'});
   assert.equal(delegatedRole(f.sql,C),'member');
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes'});
   assert.equal(delegatedRole(f.sql,C),'guildkeeper');
-  const next=proposeGovernance(f.sql,{...f.context,actorId:A,action:'transfer-role',targetUserId:C,role:'member'});
+  const next=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'transfer-role',targetUserId:C,role:'member'});
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:next.id,choice:'yes'});
   assert.equal(delegatedRole(f.sql,C),'member');
 });
 test('approved bans block old user IDs and existing device credential reuse, but expire',()=>{
   const f=fixture();[A,B,C].forEach(f.member);f.contributor(A);f.contributor(B);
-  const ballot=proposeGovernance(f.sql,{...f.context,actorId:A,action:'ban',targetUserId:C});
+  const ballot=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'ban',targetUserId:C});
   assert.equal(isBanned(f.sql,C),false);
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes'});
   assert.equal(isBanned(f.sql,C),true);
@@ -83,7 +83,7 @@ test('approved bans block old user IDs and existing device credential reuse, but
 });
 test('approved report is queued without exposing a member ID or enforcing a remote ban; retry idempotent',()=>{
   const f=fixture();[A,B,C].forEach(f.member);f.contributor(A);f.contributor(B);
-  const ballot=proposeGovernance(f.sql,{...f.context,actorId:A,action:'report',targetUserId:C,reasonCode:'harassment'});
+  const ballot=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'report',targetUserId:C,reasonCode:'harassment'});
   assert.equal(reportQueue(f.sql).length,0);
   const done=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes'});
   assert.equal(done.status,'approved');assert.equal(f.memberCount(),3);
