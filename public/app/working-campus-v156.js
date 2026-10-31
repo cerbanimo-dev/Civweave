@@ -155,7 +155,8 @@ function installBrandPresentation(){
   if(!manifest){manifest=document.createElement('link');manifest.rel='manifest';manifest.href='/app/manifest.webmanifest';document.head.append(manifest)}
   let icon=document.querySelector('link[rel~="icon"]');
   if(!icon){icon=document.createElement('link');icon.rel='icon';icon.type='image/png';document.head.append(icon)}
-  icon.type='image/jpeg';icon.href=syncBrandPresentation();
+  icon.type='image/png';icon.href='/app/logos/civweave-branded-heart-192-v449.png';
+  syncBrandPresentation();
   syncBrandPresentation();
   scheduleBrandPresentation();
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncBrandPresentation();scheduleBrandPresentation()}},{signal:controller.signal});
