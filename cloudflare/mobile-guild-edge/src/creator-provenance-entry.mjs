@@ -52,10 +52,13 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     const session=this.sessionForHash({tokenHash,requestedNodeId});
     if(!session.ok)throw Object.assign(new Error(session.error),{status:session.status});
     const guildId=this.baseStatus().guildId;
-    if(input?.action==='propose')return {ok:true,ballot:proposeGovernance(this.sql,{guildId,origin,
-      actorId:session.userId,action:input.kind,targetUserId:input.targetUserId,role:input.role,reasonCode:input.reasonCode})};
-    if(input?.action==='vote')return {ok:true,ballot:castGovernanceVote(this.sql,{guildId,origin,
-      actorId:session.userId,ballotId:clean(input.ballotId,200),choice:input.choice})};
+    // One SQLite Durable Object transaction owns the deciding vote, the
+    // audit receipt, and the resulting member/role/ban/report mutation.
+    // Failed execution rolls back the deciding vote too.
+    if(input?.action==='propose')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:proposeGovernance(this.sql,{guildId,origin,
+      actorId:session.userId,action:input.kind,targetUserId:input.targetUserId,role:input.role,reasonCode:input.reasonCode})}));
+    if(input?.action==='vote')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:castGovernanceVote(this.sql,{guildId,origin,
+      actorId:session.userId,ballotId:clean(input.ballotId,200),choice:input.choice})}));
     throw Object.assign(new Error('Unknown Guild vote action.'),{status:400});
   }
   governanceDelegation({tokenHash,requestedNodeId}={}){
