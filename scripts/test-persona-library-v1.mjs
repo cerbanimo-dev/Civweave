@@ -16,24 +16,24 @@ const pack={
   ],
   events:[
     {id:'e1',stage:1,summary:'Jess and Magnus play games together.',actors:['jess','magnus'],witnesses:['jess','magnus'],source:'book-2:chapter-3',status:'established'},
-    {id:'e2',stage:4,summary:'Jess and Raven were friends before Raven was Turned.',actors:['jess','raven'],witnesses:['jess','raven'],source:'book-4:chapter-what-jess-kept',status:'established',spoiler:true}
+    {id:'e2',stage:4,summary:'Jess and Raven were friends before Raven was Turned.',actors:['jess','raven'],witnesses:['jess','raven','magnus'],knownFrom:{jess:0,raven:0,magnus:4},source:'book-4:chapter-what-jess-kept',status:'established',spoiler:true}
   ]
 };
 test('reject antagonist downgraded below 2B',()=>assert.throws(()=>validatePersonaPack({...pack,characters:pack.characters.map(c=>c.id==='raven'?{...c,modelTier:'0.8b'}:c)}),/antagonist/i));
 test('knowledge is bounded by event stage and individual awareness',()=>{
   const p=validatePersonaPack(pack);
-  assert.deepEqual(availableKnowledge(p,'jess',1).map(e=>e.id),['e1']);
-  assert.deepEqual(availableKnowledge(p,'magnus',9).map(e=>e.id),['e1']);
+  assert.deepEqual(availableKnowledge(p,'jess',1).map(e=>e.id),['e1','e2']);
+  assert.deepEqual(availableKnowledge(p,'magnus',1).map(e=>e.id),['e1']);\n  assert.deepEqual(availableKnowledge(p,'magnus',9).map(e=>e.id),['e1','e2']);
   assert.deepEqual(availableKnowledge(p,'raven',9).map(e=>e.id),['e2']);
 });
 test('director receives only current canon and role instructions',()=>{
-  const request=createDirectorRequest({pack,stage:1,scenario:'At the arcade',participants:['magnus','jess'],goals:['Improv conversation']});
+  const request=createDirectorRequest({pack,stage:1,scenario:'At the arcade',participants:['magnus'],goals:['Improv conversation']});
   assert.match(request.messages[1].content,/At the arcade/);
   assert.doesNotMatch(request.messages[1].content,/before Raven was Turned/);
   assert.equal(request.modelTier,'4b');
 });
-test('4B cannot grant actor nonwitnessed knowledge',()=>{
-  const request={pack,stage:5,participants:['magnus'],scenario:'chat'};
+test('4B cannot grant actor unrevealed knowledge',()=>{
+  const request={pack,stage:1,participants:['magnus'],scenario:'chat'};
   assert.throws(()=>validateDirectorResponse({...request,response:{characters:{magnus:{characterGoal:'stay calm',emotion:'uneasy',knownEventIds:['e2'],instructions:'Respond carefully'}}}}),/not available/i);
 });
 test('improv is character-specific and includes validated scene directives',()=>{
@@ -41,7 +41,7 @@ test('improv is character-specific and includes validated scene directives',()=>
   const d=validateDirectorResponse({pack,stage:1,participants:['jess'],response});
   const p=compileImprovPrompt({pack,stage:1,characterId:'jess',scene:'At home',directives:d,history:['Magnus: Something is wrong.']});
   assert.match(p,/Protect Magnus/);assert.match(p,/Jess/);
-  assert.doesNotMatch(p,/before Raven was Turned/);
+  assert.match(p,/before Raven was Turned/);
 });
 test('download deduplicates model weights across cast and keeps 4B director',()=>{
   const plan=chooseModelDownloads(pack,['jess','raven'],{includeDirector:true});
