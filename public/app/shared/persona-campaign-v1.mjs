@@ -15,6 +15,17 @@ const clone=x=>JSON.parse(JSON.stringify(x));
 const obj=x=>Boolean(x&&typeof x==='object'&&!Array.isArray(x));
 const items=x=>Array.isArray(x)?x:[];
 const EVENT_TYPES=new Set(['assign-player','bind-pilot','player-cue','npc-proposal','resolve-proposal','rehearsal-preview','willpower-spend','stage-set']);
+const BASE_EVENT_FIELDS=['id','type','actorId','actorKind'];
+const EVENT_FIELDS={
+ 'assign-player':['playerId','roleId'],
+ 'bind-pilot':['characterId','principalId','modelId'],
+ 'player-cue':['text','worldChanged'],
+ 'npc-proposal':['characterId','speech','emote','proposedActions','status','worldChanged'],
+ 'resolve-proposal':['proposalId','outcome','worldReceiptId','worldChanged'],
+ 'rehearsal-preview':['characterId','playerCue','speech','emote','proposedActions','sceneRevision','status','worldChanged'],
+ 'willpower-spend':['characterId','cost','remainingPoints'],
+ 'stage-set':['stage']
+};
 const KEYS=['schema','id','title','packId','packVersion','ownerId','branchId','scenario','stage','cast','revision','turn','events','seats','pilots','willpower'];
 const CANON='canon';
 function requireId(s,label){if(!validId(s))throw new TypeError('Invalid '+label+'.');return s;}
@@ -59,8 +70,9 @@ function validateState(s){
     !Number.isInteger(s.turn)||s.events.length!==s.revision||s.events.length>120)
     throw new TypeError('Invalid campaign snapshot or unknown field.');
   if(s.events.some((e,i)=>!obj(e)||!EVENT_TYPES.has(e.type)||e.id!=='event-'+(i+1)||
-    !validId(e.actorId)||!['human','model','runtime'].includes(e.actorKind)))
-    throw new TypeError('Invalid campaign event history.');
+    !validId(e.actorId)||!['human','model','runtime'].includes(e.actorKind)||
+    Object.keys(e).some(k=>![...BASE_EVENT_FIELDS,...EVENT_FIELDS[e.type]].includes(k))))
+    throw new TypeError('Invalid campaign event history or unknown field.');
 }
 export function applyCampaignEvent(input,command,{actor,authorize,expectedRevision}={}){
   validateState(input);
