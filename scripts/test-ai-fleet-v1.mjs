@@ -98,3 +98,27 @@ test('Fleet browser runtime keeps role selections transient and blocks unintende
  assert.match(gguf,/if\(verify\)await blobsFor\(record\)/);
  assert.match(gguf,/importId\?selectionForImported\(importId\):current\(\)/);
 });
+
+test('Only the three proven local configuration paths are rendered by the fleet',()=>{
+ assert.match(source,/const BACKENDS=Object\.freeze\(\{/);
+ for(const key of ['browser','termux','android'])assert.match(source,new RegExp(key+':\\{label:'));
+ assert.match(source,/data-ai-fleet-backend/);
+ assert.match(source,/data-ai-fleet-inventory/);
+ assert.match(source,/data-ai-fleet-role-assign/);
+ assert.match(source,/data-ai-fleet-open-termux/);
+ assert.match(source,/data-ai-fleet-open-starling/);
+ assert.doesNotMatch(source,/data-ai-fleet-backend="ollama"/);
+});
+test('Manually unassigned roles stay unassigned across re-scans of 2B and 4B',()=>{
+ const {fleet}=boot('Mozilla/5.0 (Linux; Android 16; A069P)',8);
+ const installed=[
+  {family:'2b',importId:'saved-2b',model:'qwen35-2b-imported-gguf',verified:true},
+  {family:'4b',importId:'saved-4b',model:'qwen35-4b-imported-gguf',verified:true}
+ ];
+ const auto=fleet.fleetRolesFor(installed);
+ assert.equal(auto.swift.importId,'saved-2b');
+ assert.equal(auto.atlas.importId,'saved-4b');
+ const manual=fleet.fleetRolesFor(installed,{roles:auto,unassigned:['atlas']});
+ assert.equal(manual.atlas,undefined);
+ assert.equal(manual.forge.importId,'saved-4b');
+});
