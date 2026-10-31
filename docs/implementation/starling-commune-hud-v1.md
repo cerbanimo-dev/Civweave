@@ -60,3 +60,38 @@ The single Guild-signed Worldweaver manifest includes four live-local spaces. Th
 ### Guide work-state parity
 
 System guides now read `CivweaveGuideChatSurfaceV350.state()` at scene opening and when the canonical chat surface emits its own `civweave:guide-chat-state` or `civweave:avatar-direct-text` signals. These events are refresh notifications only; the Commune does not accept their payload as authority. When the canonical guide is busy processing a request, that guide's portrait visibly works and travels by a **symbolic UI transition** toward the thematic station. At completion or loss of status the avatar returns to standby; existing Starling signed turn and host signals drive the fictional cast. No unverified background inference or movement receipt is generated.
+
+## 2026-10-31 · Local Fleet / Guild Fleet and AI simulator tool bridge
+
+### Main views, not parallel model registries
+
+**Local Fleet** opens for any user even without a Guild. It reads the single `CivweaveAIFleetV1` device role catalog and browser-private `civweave.ai.fleet.choices.v1` and `civweave.ai.fleet.bindings.v1` records, displaying Swift, Archive, Forge, Quill and Atlas, the selected local inference route, and last-known imported GGUF bindings. Local role preferences, GGUF bytes, local provider credentials and private conversations are **not** inserted into the Guild mesh, Worldweaver snapshots or guild-level UI. Installation/activation remain owned by the canonical AI Settings page; clicking Local Fleet does not run or download any model. A previously saved verified import may be stale until the existing Settings GGUF verifier checks the files again.
+
+**Guild Fleet** is offered only with a selected authenticated Guild, and is reachable both in the Commune’s primary two-tab switcher and from canonical AI Fleet Settings. It reads only existing verified Worldweaver snapshots, grouped Guild pilots and signed Starling turns; the two fleets share no mutable model registry. Switching from Guild-only Quests/Controls back to Local Fleet returns to a visible local panel and hides privileged world controls.
+
+### Registered NPC pilots
+
+The founding Guild device can explicitly click **Register selected Starling pilot** to register a chosen persona’s **currently selected local** model in the existing signed `Worldweaver` manifest. The action is validated by the same canonical Guild genesis and founding-device signer checks as provisioning; it checks the last signed object revision, rejects duplicate pilots, applies the canonical `rig-npc` transition and signs a new revision of the Guild world object. Other Guild readers observe the registered pilot through the standard Worldweaver 2D projection. A registration is a configuration record, **not** proof that a model is online or that NPC movement has executed.
+
+The 3D scene’s overlay now shows **only registered** Worldweaver Starling pilots in an explicitly marked HUD dock. Their activity animations reflect existing Guild-local model and host signals; portrait coordinates are not represented as avatar world-space positions. The rest of the collective remains available as selectable role concepts, but no longer appears to be physically spawned in the 3D world merely because its SVG portrait exists.
+
+### AI simulation observation and tool boundaries
+
+`public/app/shared/worldweaver-simulator-tools-v1.mjs` exposes two bounded programmatic operations:
+
+- `observe()`: reads the signed snapshot through `observeWorld2D`, returns the current world reference, revision, bounded public-in-room entities and pending-intent count; this is the **same** Worldweaver projection owner used by the UI.
+- `prepare({personaId,tool,args})`: requires a registered pilot in the currently selected room, checks approved Worldweaver NPC capabilities, bounds structured arguments and checks move coordinates/screen ownership. It returns `pending-verified-model-pilot`; **does not** call `queue-actions`, execute an OpenSimulator or local-renderer action, or write an invented success receipt.
+
+The Guild HUD exposes **Observe this Worldweaver room** and **Prepare move proposal**; the resulting structured observation/proposal is displayed, with explicit pending status. Manual local Starling turns in the Guild view now include a compact Worldweaver **read-only observation** from the current signed room, so the selected actual local model receives genuine scene context. The model is not granted a simulator execution tool merely by seeing those facts.
+
+### Remaining steps toward true embodied AI
+
+1. Connect the canonical model-runtime identity owner to signed NPC `modelId` / `pilotPrincipalId` bindings, with consent and finite inference/resource budgets. A user-typed or model-generated principal must never count as authentication.
+2. Give the registered local model a typed tool schema and bounded output parser; submit intents through `createWorldweaver.dispatch({type:'queue-actions'})` **only** when the trusted runtime authenticates that model and Guild authorization.
+3. Add a deterministic local-renderer NPC movement/speech engine (and separate OpenSimulator adapter) that actually applies an approved intent, reports a success or failure receipt through `report-action`, and exports authoritative avatar world-space coordinates and movement events. An unexecuted proposal must never appear as a successful action.
+4. Sign and replicate authorized runtime position/pose deltas, lease ownership and replay protection; render both 2D and 3D from the **same provider-authenticated positions**, while marking disconnected/replayed state as stale.
+5. Complete multiplayer/network adapters, per-agent isolation, model selection, user acceptance tests, emulator/mobile testing, offline PWA acceptance, and CI before production promotion.
+
+### Tests and deployment
+
+`scripts/test-worldweaver-fleet-simulator-v1.mjs` covers local/Guild isolation, signed pilot registration, canonical map observation, proposal-only tool states, coordinate/permission limits and rejected Guild authority. It is included in `npm run test:worldweaver`. The Lounge contract suite covers both primary fleet scopes and the single model manager. Fleet and Worldweaver dependencies are added to **optional** offline shell assets rather than expanding required shell files. Direct in-tool evaluation passed the signed-world, registration and tool checks; the complete Node/GitHub CI/browser suites have not yet been run. All changes in this pass target **staging**, not `main`.
