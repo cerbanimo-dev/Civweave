@@ -3,6 +3,7 @@ export const GUILD_GOVERNANCE_SCHEMA='civweave.guild-governance.v1';
 export const GUILD_GOVERNANCE_ACTIONS=Object.freeze(['transfer-role','remove','ban','lift-ban','report']);
 export const GUILD_CONTRIBUTION_WINDOW_MS=30*86400000;
 export const GUILD_BALLOT_WINDOW_MS=7*86400000;
+export const GUILD_CASE_NOTICE_MS=24*3600000;
 export const GUILD_REPORT_RADIUS_KM=25;
 export const GUILD_REPORT_REASON_CODES=Object.freeze(['harassment','threats','fraud','impersonation','safety','repeated-disruption','other']);
 
@@ -15,7 +16,7 @@ export function qualifiedContributors(members,receipts,{now=Date.now(),windowMs=
   const verified=new Set;
   for(const receipt of receipts){
     if(!ids.has(receipt.userId))continue;
-    if(!['published-quest','physical-check-in','accepted-work-proof'].includes(receipt.kind))continue;
+    if(!['physical-check-in','accepted-work-proof'].includes(receipt.kind))continue;
     const time=Date.parse(receipt.at);
     if(Number.isFinite(time)&&time<=now&&time>=earliest)verified.add(receipt.userId);
   }
@@ -31,7 +32,7 @@ export function activeGuildVoters(members,receipts,{now=Date.now(),windowMs=GUIL
     return (Number.isFinite(lastSeen)&&lastSeen>=since&&lastSeen<=now)||recentlyProductive.has(id);
   }).map(row=>row.userId||row.user_id))].sort();
 }
-export function ballotSpec({action,targetUserId,initiatorUserId,eligible,contributors=eligible,reasonCode='',role='',statement='',now=Date.now()}){
+export function ballotSpec({action,targetUserId,initiatorUserId,eligible,contributors=eligible,reasonCode='',role='',statement='',caseId='',now=Date.now()}){
   if(!GUILD_GOVERNANCE_ACTIONS.includes(action))throw reject('Invalid Guild governance action.',400);
   if(!validGuildUser(targetUserId)||!validGuildUser(initiatorUserId))throw reject('Guild member identifiers are invalid.',400);
   if(!contributors.includes(initiatorUserId))throw reject('Only a member with a recent verified contribution may propose moderation.',403);
@@ -45,7 +46,7 @@ export function ballotSpec({action,targetUserId,initiatorUserId,eligible,contrib
     throw reject('An active contributor cannot be removed, banned or reported by a sole member acting alone.');
   return Object.freeze({action,targetUserId,initiatorUserId,eligible:[...eligible].sort(),
     requiredYes:majority(eligible.length),statement:statement.trim(),createdAt:new Date(now).toISOString(),
-    expiresAt:new Date(now+GUILD_BALLOT_WINDOW_MS).toISOString(),role,reasonCode});
+    expiresAt:new Date(now+GUILD_BALLOT_WINDOW_MS).toISOString(),role,reasonCode,caseId});
 }
 export function ballotOutcome(ballot,votes,{now=Date.now()}={}){
   if(ballot.status!=='open')return Object.freeze({status:ballot.status,execute:false});
