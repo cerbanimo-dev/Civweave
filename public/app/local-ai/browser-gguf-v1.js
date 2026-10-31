@@ -6,7 +6,7 @@ export const GGUF_PRESETS=Object.freeze([
   Object.freeze({id:'qwen35-4b-iq2m-gguf',label:'Qwen 3.5 4B · GGUF IQ2_M',url:'https://huggingface.co/eaddario/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-IQ2_M.gguf',sizeHint:'~1.6 GB',primary:true,note:'Lower-quality quantization to fit the browser single-file size limit. Not identical to your GGUF benchmark.'}),
   Object.freeze({id:'qwen35-2b-q4km-gguf',label:'Qwen 3.5 2B · GGUF Q4_K_M',url:'https://huggingface.co/SoAIHQ/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf',sizeHint:'~1.3 GB',primary:false,note:'Optional smaller GGUF; only one model is kept loaded at a time.'})
 ]);
-let instance=null,loadedUrl='',loading=null,downloading=false,importing=false;
+let instance=null,loadedUrl='',loading=null,downloading=false,importing=false,uninstalling=false,pendingGenerations=0;
 const OPFS='/app/local-ai/browser-gguf-opfs-v1.js?v=gguf-opfs-v1';
 const clean=value=>String(value??'').trim();
 function err(code,message){return Object.assign(new Error(message),{code})}
@@ -35,7 +35,7 @@ export async function installed(url){
   return cached.find(item=>item.url===key && item.validate()==='valid')||null;
 }
 export async function download(url,{onProgress}={}){
-  if(downloading)throw err('GGUF_DOWNLOAD_BUSY','Another GGUF download is already running.');
+  if(downloading||uninstalling)throw err('GGUF_DOWNLOAD_BUSY','Another GGUF download is already running.');
   const key=validateURL(url);
   const cached=await installed(key);if(cached)return{url:key,bytes:cached.size,cached:true};
   downloading=true;notify('downloading',{url:key,loaded:0,total:0});
@@ -115,7 +115,7 @@ async function blobsFor(record){
   return blobs;
 }
 export async function importFiles(input,{onProgress,signal}={}){
-  if(downloading||importing)throw err('GGUF_IMPORT_BUSY','A GGUF model download or import is already running.');
+  if(downloading||importing||uninstalling)throw err('GGUF_IMPORT_BUSY','A GGUF model download or import is already running.');
   importing=true;
   let importId=null,store=null,written=[];
   const emitProgress=details=>{
@@ -287,6 +287,52 @@ export async function installedImports({verify=true}={}){
   }
   return available;
 }
+/**
+ * Uninstall a single imported model by its unique import ID, never its family.
+ * Original Android Downloads files and other imported copies are untouched.
+ * The saved manifest remains available for retry if any shard deletion fails.
+ */
+export async function uninstallImported(importId){
+  const id=String(importId||'');
+  const record=importIndex()[id];
+  if(!record||record.schema!=='civweave.gguf.import.v1'||record.importId!==id)
+    throw err('GGUF_IMPORT_NOT_FOUND','Saved GGUF import not found or already removed.');
+  if(!Array.isArray(record.files)||!record.files.length)
+    throw err('GGUF_UNINSTALL_RECORD','This GGUF import has no valid shard manifest.');
+  if(uninstalling||downloading||importing||loading||pendingGenerations)
+    throw err('GGUF_UNINSTALL_BUSY','Another GGUF operation is running. Finish or cancel it before uninstalling.');
+  uninstalling=true;
+  const wasPrimary=current()?.importId===id;
+  try{
+    // Model files must not be deleted from beneath an active Wllama instance.
+    if(wasPrimary||loadedUrl==='civweave-gguf-import:'+id)await release();
+    const indexes=[...new Set(record.files.map(file=>file.index))];
+    if(indexes.some(index=>!Number.isSafeInteger(index)||index<0||index>128))
+      throw err('GGUF_UNINSTALL_RECORD','Saved GGUF shard indexes are invalid.');
+    let reclaimedBytes=0;
+    if(record.storage==='civweave.gguf.import-opfs.v1'){
+      const store=await import(OPFS);
+      reclaimedBytes=await store.deleteGGUFShards(id,indexes);
+    }else if(!record.storage){
+      // Read-only compatibility for the older CacheStorage import format.
+      const cache=await caches.open(IMPORT_CACHE);
+      for(const index of indexes){
+        const file=record.files.find(item=>item.index===index);
+        const path=cachePath(id,index);
+        const existing=await cache.match(path);
+        if(existing)reclaimedBytes+=Number(file?.size||0);
+        await cache.delete(path);
+      }
+    }else throw err('GGUF_UNINSTALL_RECORD','Unknown GGUF storage format; no files were deleted.');
+    const next=importIndex();
+    delete next[id];
+    localStorage.setItem(IMPORT_INDEX_KEY,JSON.stringify(next));
+    if(wasPrimary)localStorage.removeItem(GGUF_SELECTION_KEY);
+    notify('uninstalled',{importId:id,model:record.model,bytes:record.bytes,reclaimedBytes,wasPrimary});
+    return{importId:id,model:record.model,label:record.label,bytes:Number(record.bytes||0),reclaimedBytes,wasPrimary};
+  }finally{uninstalling=false}
+}
+
 // Role-specific selection is transient. Activating a fleet role must not
 // overwrite the primary GGUF selection shared with legacy consumers.
 export function selectionForImported(importId){
@@ -300,6 +346,7 @@ export function selectionForImported(importId){
 }
 
 export async function activateImported(importId){
+  if(uninstalling)throw err('GGUF_UNINSTALL_BUSY','Model removal is in progress.');
   const record=importIndex()[String(importId||'')];
   if(!record||record.schema!=='civweave.gguf.import.v1')
     throw err('GGUF_IMPORT_NOT_FOUND','The selected imported GGUF is not in Civweave browser storage.');
@@ -313,6 +360,7 @@ export async function activateImported(importId){
 }
 
 export async function activate({url,id,label}){
+  if(uninstalling)throw err('GGUF_UNINSTALL_BUSY','Model removal is in progress.');
   const key=validateURL(url);
   const fileName=decodeURIComponent(new URL(key).pathname.split('/').pop()||'');
   const expected=id==='qwen35-4b-iq2m-gguf'?/qwen[._-]?3[._-]?5[._-]?4b/i:id==='qwen35-2b-q4km-gguf'?/qwen[._-]?3[._-]?5[._-]?2b/i:null;
@@ -448,12 +496,14 @@ async function generateInternal({model,importId,messages,temperature=.6,maxToken
 // 2B request from reusing an in-progress 4B load or unloading live inference.
 let generationTail=Promise.resolve();
 export function generate(request={}){
+  if(uninstalling)return Promise.reject(err('GGUF_UNINSTALL_BUSY','Cannot generate while a GGUF is being uninstalled.'));
+  pendingGenerations++;
   const queued=generationTail.then(()=>{
     if(request.signal?.aborted)throw err('GGUF_ABORTED','Fleet generation was cancelled before its turn.');
     return generateInternal(request);
   });
   generationTail=queued.catch(()=>{});
-  return queued;
+  return queued.finally(()=>{pendingGenerations--});
 }
 export async function release(){
   if(loading)try{await loading}catch{}
