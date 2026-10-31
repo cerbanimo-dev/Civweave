@@ -19,7 +19,7 @@ For every cross-cutting change, an agent must perform this sequence before editi
 7. Update the ownership verifier whenever the capability boundary changes.
 8. A PR is incomplete until the ownership verifier proves the active route graph still has one owner.
 
-## Action Board — personal capture and Quest next actions
+## Action Board â€” personal capture and Quest next actions
 
 - Functional and UI owner: `public/app/action-board-v1.mjs`.
 - Deterministic projection model: `public/app/shared/action-board-core-v1.mjs`.
@@ -210,7 +210,13 @@ The Code Workshop `qwen35-4b-native` Termux OpenAI-compatible route uses bounded
 
 ## Worldweaver local planning workspace
 
+Performance Studio's private trailer authoring adapter is `public/app/shared/worldweaver-trailer-authoring-v1.mjs`. It delegates source and scene creation to the existing `worldweaver-performance-studio-v1.mjs` owner, never approves imported scenes, and maps symbolic keys to canonical IDs before the existing film interchange owner exports an exactly thirty-second ArtCraft review package. The lab source-intake identity is explicitly synthetic/unverified and is not authenticated producer approval. Import/review state remains in memory until the user explicitly exports a file; neither optional offline asset caching nor validation grants persistence, native import, rendering, world execution or training authority. The exact authoring format, boundaries and executable contracts are in `docs/contracts/worldweaver-microspaces-v1.md` and the existing `worldweaver` registry entry.
+
 
 The canonical Worldweaver owner is `public/app/shared/worldweaver-core-v1.mjs`. Moss, Kamiya, Rook, and Merlin select typed spaces within the **same** manifest owner; no separate chat, billing, ballot ledger, or model inference loop is created. It records stations, task/listing/ballot references, debate turns, lifecycle requests, and bounded NPC tool intents. Connected world actions require an authenticated external authorizer, and only trusted adapters acknowledge world creation and outcomes.
 
 The local draft workspace at `/app/worldweaver/index.html` is presented by `public/app/worldweaver/workspace.mjs`. Its persistence adapter `public/app/shared/worldweaver-workspace-v1.mjs` delegates all manifest edits to the core and grants only local standalone draft commands with an explicit local principal and placeholder pilot. It cannot provision worlds, queue model actions, report runtime success, claim Guild authority, or grant permissions. The shared `persistent-shell-actions-v1.js` owner supplies the Worlds launcher; existing navigation and guide-feature routes retain their owners. The preview renders readable station plans and never claims a live OpenSimulator connection. Owner, callers, storage, and executable contracts are registered in `config/system-ownership.json`; see `docs/contracts/worldweaver-microspaces-v1.md` and `npm run test:worldweaver`. The old illustrated Living World files are not used as a new authority.
+
+## Hybrid creation and host Guild training custody
+
+The existing Creator document/tool/store owners now retain immutable document revisions and exact edit receipts. `public/creator-suite/shared/creation-run-v1.mjs` journals stage contracts, a single consented Gemini stream, checkpoints, authored repairs and independent edits; `creation-workflow-v1.mjs` presents it in the existing Text editor. Weaveling manual imports reuse its existing schema, normalizer, planner, materializer, shared review and family loader. `public/app/guild-training-client-v1.js` delegates explicitly reviewed visible samples to `/api/node/training`, whose portable custody owner is `cloudflare/mobile-guild-edge/src/guild-training-contributions-v1.mjs`. The existing two authenticated Guild adapters reuse that owner. Purpose release and negotiation remain closed until trusted collective/Guildkeeper adapters are configured; no settlement or training authority is created. See `docs/contracts/creation-workflow-v1.md`, the ownership registry, and `npm run test:threshold`.

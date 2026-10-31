@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='159.7-gemini-research-fallback-generatecontent-v265';
+const VERSION='159.8-gemini-bounded-sse-v1';
 const RUNTIME_NAME='CivweaveModelRuntime';
 const API_REVISION='2026-05-20';
 const DEFAULT_API_BASE='https://generativelanguage.googleapis.com/v1beta';
@@ -10,6 +10,7 @@ const LIVING_SCHOOL_STRUCTURE_PURPOSE='living-school-structure-single-v221';
 const LIVING_SCHOOL_RESEARCH_FALLBACK_PURPOSE='living-school-training-data-research-fallback-v260';
 const LIVING_SCHOOL_ECONOMY_KEYS=new Set(['xp','price','prices','pricing','reward','rewards','ledger','currency','currencies','payout','payouts','coin','coins','acorn','acorns','button','buttons','credit','credits','grant','grants','bonus','bonuses','wage','wages','laborvalue','labourvalue']);
 const REQUIRED_QUIZ_TYPES=['multiple-choice','multi-select','short-answer'];
+const STREAM_LIMITS=Object.freeze({bytes:2*1024*1024,text:512*1024,event:256*1024,events:4096});
 const clean=(value,max=24000)=>String(value??'').trim().slice(0,max);
 const isObject=value=>Boolean(value&&typeof value==='object'&&!Array.isArray(value));
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
@@ -178,8 +179,128 @@ async function pollInteraction(url,id,config,signal){
 function baseResult(original,request,config,profile,elapsedMs){
   return{schema:original.resultSchema||'civweave-model-result-1.0',runtimeVersion:`${original.version||'unknown'}+${VERSION}`,requestId:request.requestId||`gemini-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`,purpose:clean(request.purpose||'generation',120),executionProfile:profile,elapsedMs,requested:{provider:'gemini',model:config.model,endpoint:config.endpoint||DEFAULT_API_BASE},events:[],diagnostics:[`Standard Gemini used explicit proxy routing (${VERSION}).`]};
 }
+function streamError(code,message,extra={}){return Object.assign(new Error(message),{code,...extra})}
+function streamToken(request,text,metadata){
+  if(typeof request.onToken!=='function')return;
+  try{const pending=request.onToken(text,metadata);pending?.catch?.(()=>{})}catch{}
+}
+function abortReason(signal){return signal?.reason||new DOMException('Gemini generation cancelled.','AbortError')}
+function readStreamChunk(reader,signal){
+  if(signal.aborted)return Promise.reject(abortReason(signal));
+  return new Promise((resolve,reject)=>{
+    const abort=()=>{signal.removeEventListener('abort',abort);try{reader.cancel(abortReason(signal))?.catch?.(()=>{})}catch{}reject(abortReason(signal))};
+    signal.addEventListener('abort',abort,{once:true});
+    reader.read().then(value=>{signal.removeEventListener('abort',abort);if(signal.aborted)reject(abortReason(signal));else resolve(value)},error=>{signal.removeEventListener('abort',abort);reject(error)});
+  });
+}
+/** Incremental Google GenerateContent SSE; no retry can replay a partial draft. */
+async function generateWithStream(original,request){
+  const started=Date.now(),profile=executionProfile(original,request),config=effectiveConfig(original,request,profile);
+  const base=baseResult(original,request,config,profile,0),controller=new AbortController();
+  let text='',bytes=0,parsedEvents=0,finishReason='',lastUsage={},model=config.model,reader=null,completed=false;
+  const abort=()=>controller.abort(request.signal?.reason),timeoutId=setTimeout(()=>controller.abort(new DOMException('Gemini stream timed out.','TimeoutError')),Math.max(5000,Number(config.timeoutMs||90000)));
+  request.signal?.addEventListener?.('abort',abort,{once:true});
+  if(request.signal?.aborted)abort();
+  const metadata=extra=>({provider:'gemini',model,streamed:parsedEvents>0,characters:text.length,...extra});
+  let result;
+  try{
+    if(controller.signal.aborted)throw abortReason(controller.signal);
+    if(!config.apiKey)throw streamError('MISSING_API_KEY','A session-only Gemini API key is required.');
+    if(!config.externalConsent&&request.requireExternalConsent!==false)throw streamError('REMOTE_CONSENT_REQUIRED','External provider use requires explicit session consent.');
+    const messages=Array.isArray(request.messages)?request.messages:[],system=systemText(messages);
+    const contents=messages.filter(item=>item?.role!=='system').map(item=>({role:item?.role==='assistant'?'model':'user',parts:[{text:clean(item?.content,48000)}]})).filter(item=>item.parts[0].text);
+    if(!contents.length)contents.push({role:'user',parts:[{text:'Respond helpfully.'}]});
+    const generationConfig={temperature:Number.isFinite(Number(config.temperature))?Number(config.temperature):0.2,maxOutputTokens:Number(config.maxTokens||4096),candidateCount:1};
+    if(request.schema)generationConfig.responseFormat={text:{mimeType:'APPLICATION_JSON',schema:request.schema}};
+    const body={contents,generationConfig,...(system?{systemInstruction:{parts:[{text:system}]}}:{})};
+    const url=generateContentUrl(config).replace(/:generateContent$/,':streamGenerateContent')+'?alt=sse';
+    const requestHeaders={...(isObject(config.headers)?config.headers:{}),'content-type':'application/json',accept:'text/event-stream','x-goog-api-key':config.apiKey};
+    const response=await fetch(url,{method:'POST',headers:requestHeaders,body:JSON.stringify(body),signal:controller.signal,cache:'no-store'});
+    if(!response.ok){
+      // Status is authoritative; never replay an HTTP error as another paid request.
+      try{response.body?.cancel?.()?.catch?.(()=>{})}catch{}
+      throw streamError('GEMINI_STREAM_HTTP_ERROR',`Gemini streaming request returned HTTP ${response.status}.`,{status:response.status});
+    }
+    if(!/^text\/event-stream(?:\s*;|$)/i.test(response.headers?.get?.('content-type')||'')){
+      try{response.body?.cancel?.()?.catch?.(()=>{})}catch{}
+      throw streamError('GEMINI_STREAM_CONTENT_TYPE','Gemini did not return an SSE stream. No whole-response callback was substituted.');
+    }
+    if(typeof response.body?.getReader!=='function')throw streamError('GEMINI_STREAM_UNAVAILABLE','This response does not expose a readable Gemini stream.');
+    reader=response.body.getReader();
+    const decoder=new TextDecoder('utf-8',{fatal:true});let pending='',data=[],eventLength=0,ended=false;
+    function consumeEvent(){
+      if(controller.signal.aborted)throw abortReason(controller.signal);
+      if(!data.length){eventLength=0;return}
+      const raw=data.join('\n');data=[];eventLength=0;
+      if(raw==='[DONE]'){ended=true;return}
+      if(ended)throw streamError('GEMINI_STREAM_PROTOCOL','Gemini sent data after its terminal event.');
+      let payload;try{payload=JSON.parse(raw)}catch{throw streamError('GEMINI_STREAM_JSON','Gemini sent a malformed JSON stream event.');}
+      if(!isObject(payload))throw streamError('GEMINI_STREAM_JSON','Gemini sent a non-object JSON stream event.');
+      if(++parsedEvents>STREAM_LIMITS.events)throw streamError('GEMINI_STREAM_EVENT_LIMIT','Gemini stream event limit exceeded.');
+      if(payload.error)throw streamError('GEMINI_STREAM_PROVIDER_ERROR',clean(payload.error.message||'Gemini reported a stream error.',2400),{status:Number(payload.error.code)||undefined});
+      if(payload.promptFeedback?.blockReason)throw streamError('GEMINI_STREAM_BLOCKED','Gemini blocked the prompt: '+clean(payload.promptFeedback.blockReason,100));
+      if(payload.modelVersion)model=clean(payload.modelVersion,240);
+      if(payload.usageMetadata)lastUsage=usage(payload);
+      const candidates=Array.isArray(payload.candidates)?payload.candidates:[];
+      const selected=candidates.filter(candidate=>candidate?.index===0||(candidate?.index==null&&candidates.length===1));
+      if(selected.length>1)throw streamError('GEMINI_STREAM_CANDIDATE','Gemini returned ambiguous candidate-zero stream data.');
+      const candidate=selected[0];if(!candidate)return;
+      const fragment=(Array.isArray(candidate.content?.parts)?candidate.content.parts:[]).filter(part=>part?.thought!==true&&typeof part?.text==='string').map(part=>part.text).join('');
+      if(fragment){
+        if(finishReason)throw streamError('GEMINI_STREAM_PROTOCOL','Gemini sent text after the selected candidate finished.');
+        if(text.length+fragment.length>STREAM_LIMITS.text)throw streamError('GEMINI_STREAM_OUTPUT_LIMIT','Gemini streamed output limit exceeded. The last complete partial draft is preserved.');
+        text+=fragment;
+        streamToken(request,fragment,metadata({done:false}));
+      }
+      if(candidate.finishReason){
+        const reason=clean(candidate.finishReason,100).toUpperCase();
+        if(finishReason&&finishReason!==reason)throw streamError('GEMINI_STREAM_PROTOCOL','Gemini returned conflicting candidate finish reasons.');
+        finishReason=reason;
+      }
+    }
+    function consumeLines(final=false){
+      let match;
+      while((match=/[\r\n]/.exec(pending))){
+        const at=match.index,character=pending[at];
+        if(character==='\r'&&at===pending.length-1&&!final)break;
+        const line=pending.slice(0,at);pending=pending.slice(at+(character==='\r'&&pending[at+1]==='\n'?2:1));
+        if(!line){consumeEvent();continue}
+        if(line.startsWith(':'))continue;
+        const colon=line.indexOf(':'),field=colon<0?line:line.slice(0,colon),value=colon<0?'':line.slice(colon+1).replace(/^ /,'');
+        if(field==='data'){data.push(value);eventLength+=value.length+1;if(eventLength>STREAM_LIMITS.event)throw streamError('GEMINI_STREAM_EVENT_LIMIT','Gemini stream event size limit exceeded.');}
+      }
+      if(pending.length>STREAM_LIMITS.event)throw streamError('GEMINI_STREAM_EVENT_LIMIT','Gemini stream line size limit exceeded.');
+    }
+    while(true){
+      const item=await readStreamChunk(reader,controller.signal);if(item.done)break;
+      bytes+=item.value?.byteLength||0;if(bytes>STREAM_LIMITS.bytes)throw streamError('GEMINI_STREAM_BYTE_LIMIT','Gemini stream byte limit exceeded.');
+      pending+=decoder.decode(item.value,{stream:true});consumeLines();
+    }
+    pending+=decoder.decode();consumeLines(true);
+    if(pending.trim()||data.length)throw streamError('GEMINI_STREAM_TRUNCATED','Gemini stream ended with an unfinished SSE event.');
+    if(!text)throw streamError('GEMINI_STREAM_EMPTY','Gemini stream returned no visible text output.');
+    if(!finishReason)throw streamError('GEMINI_STREAM_TRUNCATED','Gemini stream ended without a candidate finish reason.');
+    if(finishReason!=='STOP')throw streamError(/MAX.*TOKENS/.test(finishReason)?'GEMINI_STREAM_TOKEN_LIMIT':'GEMINI_STREAM_FINISH_REASON','Gemini draft did not complete: '+finishReason,{resultStatus:'invalid-response'});
+    let outputJson,valid=true,errors=[];
+    if(request.schema){
+      try{outputJson=JSON.parse(text);errors=typeof original.validateSchema==='function'?(original.validateSchema(outputJson,request.schema)||[]):['The canonical schema validator is unavailable; this draft was not materialized.'];valid=Array.isArray(errors)&&errors.length===0}
+      catch(error){valid=false;errors=[`The structured Gemini response was not valid JSON: ${error.message}`]}
+    }
+    completed=true;
+    result={...base,elapsedMs:Date.now()-started,status:valid?'success':'invalid-response',outputText:text,outputJson,finishReason,usage:lastUsage,stream:{requested:true,used:parsedEvents>0},structured:{requested:Boolean(request.schema),valid,repairAttempts:0,errors},fallback:{used:false},actual:{provider:'gemini',model},diagnostics:[`Gemini streamed GenerateContent SSE (${VERSION}); no automatic generation replay.`]};
+  }catch(error){
+    result={...base,elapsedMs:Date.now()-started,status:request.signal?.aborted?'cancelled':controller.signal.aborted?'timeout':error.resultStatus||'provider-error',outputText:text,finishReason,usage:lastUsage,stream:{requested:true,used:parsedEvents>0},structured:{requested:Boolean(request.schema),valid:false,repairAttempts:0},fallback:{used:false},actual:{provider:'gemini',model},error:{code:clean(error.code||'GEMINI_STREAM_FAILED',120),message:clean(error.message||'Gemini stream did not complete.',2400),status:error.status},diagnostics:['Partial stream text is uncommitted and requires repair/review; no second generation was started.']};
+  }finally{
+    clearTimeout(timeoutId);request.signal?.removeEventListener?.('abort',abort);
+    if(reader){if(!completed)try{reader.cancel()?.catch?.(()=>{})}catch{}try{reader.releaseLock()}catch{}}
+  }
+  result=enforceLivingSchoolResult(result,request);
+  streamToken(request,'',metadata({done:true,status:result.status,finishReason,error:result.error?{code:result.error.code,message:result.error.message}:undefined}));
+  return result;
+}
 async function generateWithInteractions(original,request){
   const started=Date.now(),profile=executionProfile(original,request),config=effectiveConfig(original,request,profile),messages=Array.isArray(request.messages)?request.messages:[];
+  if(config.stream)return generateWithStream(original,request);
   const base=baseResult(original,request,config,profile,0);
   if(!config.apiKey)return{...base,elapsedMs:Date.now()-started,status:'provider-error',outputText:'',usage:{},stream:{requested:Boolean(config.stream),used:false},structured:{requested:Boolean(request.schema),valid:false,repairAttempts:0},fallback:{used:false},error:{code:'MISSING_API_KEY',message:'A session-only Gemini API key is required.'}};
   if(!config.externalConsent&&request.requireExternalConsent!==false)return{...base,elapsedMs:Date.now()-started,status:'provider-error',outputText:'',usage:{},stream:{requested:Boolean(config.stream),used:false},structured:{requested:Boolean(request.schema),valid:false,repairAttempts:0},fallback:{used:false},error:{code:'REMOTE_CONSENT_REQUIRED',message:'External provider use requires explicit session consent.'}};
@@ -210,6 +331,7 @@ async function generateWithInteractions(original,request){
 }
 async function generateWithGenerateContent(original,request,interactionFailure){
   const started=Date.now(),profile=executionProfile(original,request),config=effectiveConfig(original,request,profile),messages=Array.isArray(request.messages)?request.messages:[];
+  if(config.stream)return generateWithStream(original,request);
   const base=baseResult(original,request,config,profile,0),controller=new AbortController(),timeout=Math.max(5000,Number(config.timeoutMs||90000));
   const timeoutId=setTimeout(()=>controller.abort(),timeout),abort=()=>controller.abort(request.signal?.reason);
   request.signal?.addEventListener?.('abort',abort,{once:true});
@@ -239,8 +361,8 @@ function wrap(original){
     if(livingSchoolResearchFallbackRequest(prepared))return original.generate(prepared);
     let result=await generateWithInteractions(original,prepared);
     const blocked=['MISSING_API_KEY','REMOTE_CONSENT_REQUIRED'];
-    if(result.status==='provider-error'&&!blocked.includes(result.error?.code)&&!prepared.signal?.aborted)result=await generateWithGenerateContent(original,prepared,result);
-    return enforceLivingSchoolResult(result,prepared);
+    if(result.status==='provider-error'&&!result.stream?.requested&&!blocked.includes(result.error?.code)&&!prepared.signal?.aborted)result=await generateWithGenerateContent(original,prepared,result);
+    return result.stream?.requested?result:enforceLivingSchoolResult(result,prepared);
   };
   const wrapped=Object.freeze({...original,__geminiInteractionsTransport:VERSION,generate});
   installedRuntime=wrapped;
@@ -255,5 +377,5 @@ function install(){
   if(current)installedRuntime=current;
 }
 install();
-globalThis.CivweaveGeminiInteractionsV159={version:VERSION,wrap,generateWithInteractions,generateWithGenerateContent,get runtime(){return installedRuntime}};
+globalThis.CivweaveGeminiInteractionsV159={version:VERSION,wrap,generateWithInteractions,generateWithGenerateContent,generateWithStream,streamLimits:STREAM_LIMITS,get runtime(){return installedRuntime}};
 })();

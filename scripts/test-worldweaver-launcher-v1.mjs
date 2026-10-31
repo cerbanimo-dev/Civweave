@@ -60,7 +60,7 @@ test('every active launcher loader and worker shell cache select the Worldweaver
   }
   const context={REQUIRED_SHELL_ASSETS:[],OPTIONAL_SHELL_ASSETS:[],SHELL_ASSETS:[],self:{}};
   vm.runInNewContext(read('public/service-worker-shell-assets-v1.js'),context);
-  const revision='shell-assets-v1-repair-v38-worldweaver-workspace';
+  const revision='shell-assets-v1-repair-v44-trailer-device-review';
   assert.equal(context.self.CivweaveShellAssetsV1.revision,revision);
   for(const path of ['public/service-worker-v203.js','scripts/build-service-worker-v211.mjs']){
     assert.ok(read(path).includes(`importScripts('/service-worker-shell-assets-v1.js?v=${revision}');`),`${path} must select the current shell asset revision`);

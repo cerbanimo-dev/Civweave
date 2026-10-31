@@ -1,6 +1,6 @@
 {
   "schema": "civweave.creator-suite-package.v1",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "name": "Civweave Creator Suite",
   "scope": "/creator-suite/",
   "entry": "/creator-suite/index.html",
@@ -9,12 +9,17 @@
   "installation": "optional-separate-download",
   "coreIsolation": "This package is not part of public/app/offline-package-v208.json and must remain separately downloadable.",
   "sharedDependencies": [
+    "/app/settings-gateway-v317.js",
     "/app/content-provenance-v1.js",
     "/app/host-node-session-v1.js",
     "/app/local-object-mesh-v146.js",
     "/app/pocket-guild-node-v1.mjs",
     "/app/shared/guild-host-resilience-v1.mjs",
-    "/app/shared/civweave-model-runtime.js"
+    "/app/shared/civweave-model-runtime.js",
+    "/app/gemini-rate-governor-v1.js",
+    "/app/gemini-device-direct-v257.js",
+    "/extensions/civweave-gemini-interactions-v159.js",
+    "/app/guild-training-client-v1.js"
   ],
   "assets": [
     "/creator-suite/index.html",
@@ -46,6 +51,8 @@
     "/creator-suite/text-editor-v1.js",
     "/creator-suite/document-agent-v1.js",
     "/creator-suite/audio-editor-v1.js",
-    "/creator-suite/video-editor-v1.js"
+    "/creator-suite/video-editor-v1.js",
+    "/creator-suite/creation-workflow-v1.mjs",
+    "/creator-suite/shared/creation-run-v1.mjs"
   ]
 }

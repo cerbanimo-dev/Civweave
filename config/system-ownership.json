@@ -422,6 +422,12 @@
         "scripts/test-worldweaver-map-2d-v1.mjs",
         "scripts/test-worldweaver-opensim-geometry-v1.mjs",
         "scripts/test-worldweaver-performance-studio-v1.mjs",
+        "scripts/test-worldweaver-trailer-package-v1.mjs",
+        "scripts/test-worldweaver-trailer-authoring-v1.mjs",
+        "public/app/shared/worldweaver-trailer-authoring-v1.mjs",
+        "public/app/shared/worldweaver-production-review-v1.mjs",
+        "scripts/test-worldweaver-production-review-v1.mjs",
+        "public/app/tools/worldweaver-performance-lab-v1.mjs",
         "public/app/shared/worldweaver-workspace-v1.mjs",
         "public/app/worldweaver/workspace.mjs"
       ],
@@ -462,6 +468,9 @@
         "Models can propose 1-3 scenes at a time with a selected runtime; a verified human must approve scenes, cast bindings and rehearsal starts.",
         "Audience transcription and reactions require voluntary opt-in and a separate opt-in for LoRA training; withdrawals clear active text and revoke the corresponding consent.",
         "FilmCraft interchange and Qwen3.5 LoRA datasets are exports, not rendered footage or model weights; sources need confirmed rights.",
+        "Trailer authoring imports delegate project, source and scene records to Performance Studio; symbolic references map to returned canonical IDs and every imported screenplay remains review-required.",
+        "Lab source-intake and editor identities are explicitly synthetic and unverified; no import, local review or export grants authenticated producer approval.",
+        "The thirty-second trailer handoff validates contiguous integer frame timing and existing scene references; native ArtCraft import, rendering, world execution and producer authorization remain unverified or pending.",
         "The workspace adapter permits device-local standalone draft editing only; its fixed local principal is not authenticated identity or a live pilot binding.",
         "The workspace never provisions a world, publishes a Guild Map marker, invokes a model, attests an action, or mutates an external capability.",
         "External permission adapter, signed persistent store, world renderers and bridge integrations are mandatory before connected world release."
@@ -480,7 +489,9 @@
         "public/app/shared/worldweaver-performance-studio-v1.mjs",
         "public/app/shared/worldweaver-stagecraft-v1.mjs",
         "public/app/shared/worldweaver-adaptation-model-v1.mjs",
-        "public/app/shared/worldweaver-filmcraft-interchange-v1.mjs"
+        "public/app/shared/worldweaver-filmcraft-interchange-v1.mjs",
+        "public/app/shared/worldweaver-trailer-authoring-v1.mjs",
+        "public/app/shared/worldweaver-production-review-v1.mjs"
       ],
       "executableVerifiers": [
         "scripts/test-worldweaver-core-v1.mjs",
@@ -489,7 +500,10 @@
         "scripts/test-worldweaver-labs-hardening-v1.mjs",
         "scripts/test-worldweaver-map-2d-v1.mjs",
         "scripts/test-worldweaver-opensim-geometry-v1.mjs",
-        "scripts/test-worldweaver-performance-studio-v1.mjs"
+        "scripts/test-worldweaver-performance-studio-v1.mjs",
+        "scripts/test-worldweaver-trailer-package-v1.mjs",
+        "scripts/test-worldweaver-trailer-authoring-v1.mjs",
+        "scripts/test-worldweaver-production-review-v1.mjs"
       ],
       "presentationDemos": [
         "public/app/tools/worldweaver-avatar-lab.html",
@@ -499,6 +513,13 @@
         "public/app/tools/worldweaver-performance-lab.html"
       ],
       "workspaceAdapter": "public/app/shared/worldweaver-workspace-v1.mjs",
+      "productionOwner": "public/app/shared/worldweaver-performance-studio-v1.mjs",
+      "trailerAuthoringAdapter": "public/app/shared/worldweaver-trailer-authoring-v1.mjs",
+      "productionReviewPresenter": "public/app/shared/worldweaver-production-review-v1.mjs",
+      "trailerInterchangeOwner": "public/app/shared/worldweaver-filmcraft-interchange-v1.mjs",
+      "trailerPackageApi": "exportArtCraftTrailerPackage",
+      "trailerAuthoringFormat": "civweave.trailer-authoring.v1",
+      "trailerImportPersistence": "memory-only-until-explicit-private-file-export",
       "presentationCaller": "public/app/worldweaver/workspace.mjs",
       "workspaceStorageKey": "civweave.worldweaver.workspace.v1",
       "launcherOwner": "public/app/persistent-shell-actions-v1.js",
@@ -506,6 +527,58 @@
         "scripts/test-worldweaver-workspace-v1.mjs",
         "scripts/test-worldweaver-ui-v1.mjs",
         "scripts/test-worldweaver-launcher-v1.mjs"
+      ]
+    },
+    "creation-workflow": {
+      "capability": "Tracked hybrid creation orchestration under existing Creator content and tool owners",
+      "owner": "public/creator-suite/shared/creation-run-v1.mjs",
+      "contentOwner": "public/creator-suite/text-editor-v1.js",
+      "persistenceOwner": "public/creator-suite/shared/session-store-v1.js",
+      "toolOwner": "public/creator-suite/shared/ai-tools-v1.js",
+      "stageContractOwner": "public/creator-suite/document-agent-v1.js",
+      "presentationCaller": "public/creator-suite/creation-workflow-v1.mjs",
+      "contract": "docs/contracts/creation-workflow-v1.md",
+      "allowedCallers": [
+        "public/creator-suite/creation-workflow-v1.mjs",
+        "scripts/test-creation-run-v1.mjs"
+      ],
+      "executableContracts": [
+        "scripts/test-creation-run-v1.mjs",
+        "scripts/test-gemini-interactions-stream-v1.mjs",
+        "scripts/test-weaveling-authored-import-v1.mjs"
+      ],
+      "rules": [
+        "One canonical Creator store; immutable content revisions and real tool receipts are not copied into a rival planner.",
+        "One explicit Gemini first-draft attempt per run; exclusive lease before paid inference, bounded checkpoints and no automatic retry.",
+        "Editorial edits require the exact reviewed document revision; structural validation never grants human approval.",
+        "Private provider credentials and hidden model reasoning never enter creation journals or training payloads."
+      ]
+    },
+    "guild-training-custody": {
+      "capability": "Explicit purpose-scoped visible training sample custody and withdrawal in the selected host Guild",
+      "owner": "cloudflare/mobile-guild-edge/src/guild-training-contributions-v1.mjs",
+      "browserOwner": "public/app/guild-training-client-v1.js",
+      "canonicalRoute": "/api/node/training",
+      "authenticationOwner": "public/app/host-node-session-v1.js",
+      "presentationCaller": "public/creator-suite/creation-workflow-v1.mjs",
+      "contract": "docs/contracts/creation-workflow-v1.md",
+      "allowedCallers": [
+        "cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs",
+        "cloudflare/node-cloud/src/index.mjs",
+        "cloudflare/node-cloud/src/server-ai-entry-v6.mjs",
+        "scripts/test-guild-training-contributions-v1.mjs",
+        "scripts/test-guild-training-routes-v1.mjs"
+      ],
+      "executableContracts": [
+        "scripts/test-guild-training-contributions-v1.mjs",
+        "scripts/test-guild-training-routes-v1.mjs"
+      ],
+      "rules": [
+        "No ambient collection; exact visible sample, rights and training consent required.",
+        "Authenticated host member identity and content-purpose idempotency; custody ACK is quarantined and never training success.",
+        "Contributor withdrawal erases active custody payload but cannot erase downstream copies or models.",
+        "Trusted exact collective-purpose and Guildkeeper resolvers required for release, dataset access and negotiation; missing adapters fail closed.",
+        "Payout and fulfillment burn are nonexecuting negotiation intents; existing governance, finance and reward owners retain all settlement authority."
       ]
     }
   }

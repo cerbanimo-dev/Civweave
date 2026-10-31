@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-repair-v38-worldweaver-workspace';
+const REVISION='shell-assets-v1-repair-v44-trailer-device-review';
 const OPTIONAL=['/app/action-board-v1.css','/app/action-board-v1.mjs','/app/shared/action-board-core-v1.mjs','/app/shared/quest-pathway-map-v1.js','/app/shared/quest-pathway-map-v1.css','/app/assets/ai/weaveling-review-sprites-v1.png','/app/assets/ai/moss-review-sprites-v1.png','/app/assets/ai/rook-review-sprites-v1.png','/app/assets/ai/merlin-review-sprites-v1.png','/app/installer-repair-only-v2.js','/app/starling-collective-v1.js','/app/starling-collective-v1.css','/app/starling-integration-v1.js','/app/guild-starling-client-v1.js','/app/assets/ai/lari-review-sprites-v1.png','/app/assets/ai/kamiya-review-sprites-v1.png','/app/shared/guide-outcome-scene-v1.js','/app/shared/guide-outcome-scene-v1.css'];
 const REQUIRED_FAMILY_NAV=[
   '/app/persistent-system-shell-v1.html',
@@ -56,7 +56,26 @@ const OPTIONAL_WORLDWEAVER=[
   '/app/worldweaver/workspace.mjs',
   '/app/worldweaver/workspace.css',
   '/app/shared/worldweaver-core-v1.mjs',
-  '/app/shared/worldweaver-workspace-v1.mjs'
+  '/app/shared/worldweaver-workspace-v1.mjs',
+  '/app/tools/worldweaver-performance-lab.html',
+  '/app/tools/worldweaver-performance-lab-v1.mjs',
+  '/app/tools/worldweaver-performance-lab-v1.mjs?v=threshold-device-review-v4',
+  '/app/shared/worldweaver-trailer-authoring-v1.mjs?v=threshold-device-review-v3',
+  '/app/shared/worldweaver-production-review-v1.mjs?v=threshold-device-review-v3',
+  '/app/shared/worldweaver-stagecraft-v1.mjs?v=threshold-device-review-v2',
+  '/app/shared/worldweaver-filmcraft-interchange-v1.mjs?v=threshold-device-review-v1',
+  '/app/shared/worldweaver-performance-studio-v1.mjs',
+  '/app/shared/worldweaver-trailer-authoring-v1.mjs',
+  '/app/shared/worldweaver-production-review-v1.mjs',
+  '/app/shared/worldweaver-filmcraft-interchange-v1.mjs',
+  '/app/shared/worldweaver-stagecraft-v1.mjs',
+  '/app/shared/worldweaver-adaptation-model-v1.mjs',
+  '/app/shared/worldweaver-avatar-v1.mjs',
+  '/app/shared/worldweaver-screen-v1.mjs',
+  '/app/shared/worldweaver-map-2d-v1.mjs',
+  '/app/shared/worldweaver-opensim-geometry-v1.mjs',
+  '/app/shared/worldweaver-3d-preview-v1.mjs',
+  '/app/shared/civweave-model-runtime.js'
 ];
 const OPTIONAL_HUMAN_CHAT=[
   '/app/guild-membership-mesh-v1.js',

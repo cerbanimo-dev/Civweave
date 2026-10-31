@@ -73,11 +73,11 @@ Canonical source changes happen before generated installers or materialized rele
 
 Use `docs/` unless the file is one of the intentionally stable root control documents.
 
-- `docs/contracts/` — canonical behavior and architecture contracts.
-- `docs/architecture/` — ownership maps and repository architecture.
-- `docs/operations/` — installation, hosting, deployment, and operator guidance.
-- `docs/roadmap/` — long-horizon pipeline/rebase/renewal procedures.
-- `docs/history/` — genuine historical records such as release notes, audits, inventories, and design records.
+- `docs/contracts/` â€” canonical behavior and architecture contracts.
+- `docs/architecture/` â€” ownership maps and repository architecture.
+- `docs/operations/` â€” installation, hosting, deployment, and operator guidance.
+- `docs/roadmap/` â€” long-horizon pipeline/rebase/renewal procedures.
+- `docs/history/` â€” genuine historical records such as release notes, audits, inventories, and design records.
 
 Git history is the archive for obsolete implementations. Do not create a live `archive/` tree.
 
@@ -106,7 +106,7 @@ Presentation routing is evidence about composition. It is not permission to rede
 | `public/app/` | Active installed application surfaces and client runtime | Primary starting point for installed UI/client changes. Trace active routes and ownership first. |
 | `public/app/shared/` | Shared browser/runtime contracts and cross-system code | Edit only when the shared capability belongs here; avoid realm-specific forks. |
 | `public/app/cabinets/` | Modular presentation surfaces where currently used | A cabinet may present capabilities but does not automatically own them. |
-| `public/extensions/` | Optional cross-cutting installed-package capabilities | Follow the extension’s explicit contract and callers. |
+| `public/extensions/` | Optional cross-cutting installed-package capabilities | Follow the extensionâ€™s explicit contract and callers. |
 | `public/` | PWA shell, installer, service workers, public static/runtime assets | Change canonical source here when the owning runtime really lives here; keep caches and manifests coherent. |
 | `server/` | Stable local/dev/federated/gateway entrypoints | Keep entrypoint names stable unless the release contract requires a coordinated change. |
 | `lib/` | Shared Node/service logic | Prefer shared domain logic here over duplicating it in entrypoints. |
@@ -335,7 +335,13 @@ Worldweaver screens are shared manifests in `public/app/shared/worldweaver-core-
 Worldweaver's optional same-state low-resource map renderer lives at `public/app/shared/worldweaver-map-2d-v1.mjs`, with demo `public/app/tools/worldweaver-map-lab.html`. `kind:'civweave'` native Weave screen content projects this 2D map rather than embedding the whole app recursively. The 2D/3D world share canonical instance, NPC, station, and screen IDs; no independent world authority or inference provider is added. Test contract: `scripts/test-worldweaver-map-2d-v1.mjs`.\n
 OpenSimulator-compatible geometry projection shared by the browser 3D preview and 2D map: `public/app/shared/worldweaver-opensim-geometry-v1.mjs` and `worldweaver-3d-preview-v1.mjs`. Prototype: `public/app/tools/worldweaver-geometry-lab.html`; provisional district shells from `worldweaver-visual-scene-v1.mjs` refer to `public/app/civweave-living-world.js` for district *names* only. No live native OpenSimulator grid or authoritative geometry service is connected.\n
 Worldweaver Performance Studio lives at `public/app/shared/worldweaver-performance-studio-v1.mjs`; selected-model proposals in `worldweaver-adaptation-model-v1.mjs`; 3D screenplay staging and cue scores in `worldweaver-stagecraft-v1.mjs`; film-edit/LoRA interchange in `worldweaver-filmcraft-interchange-v1.mjs`. Browser lab route: `public/app/tools/worldweaver-performance-lab.html`. Existing Creator Suite video tool and OpenSimulator host are delegated authorities: neither is replaced or silently implemented by this lab. Tests in `scripts/test-worldweaver-performance-studio-v1.mjs`.\n
+
+The same Performance Studio lab accepts private `civweave.trailer-authoring.v1` files through `public/app/shared/worldweaver-trailer-authoring-v1.mjs`. It maps symbolic source/scene references through the existing production owner and keeps scripts proposed in memory. `exportArtCraftTrailerPackage` in the existing film interchange owner validates an exact thirty-second editable handoff with source IDs, script, jobs and captions. Producer authorization, native ArtCraft import, rendering and world execution remain pending/unverified. Its static module graph is declared in the offline package and optional shell cache; caching does not autosave manuscript/project data. See the exact format in `docs/contracts/worldweaver-microspaces-v1.md` and `scripts/test-worldweaver-trailer-authoring-v1.mjs` / `scripts/test-worldweaver-trailer-package-v1.mjs`.
 ## Worldweaver local planning workspace
 
 
 `public/app/shared/worldweaver-core-v1.mjs` owns Worldweaver's typed learning, task-training, shop, and convention manifests and model-piloted NPC proposals. `public/app/shared/worldweaver-workspace-v1.mjs` provides restricted local draft persistence, while `public/app/worldweaver/index.html` and `workspace.mjs` present the library, station preview, references, and character drafts. The existing `persistent-shell-actions-v1.js` owner supplies the Worlds launcher; `themed-system-nav-v178.js` retains five-system travel. Existing feature links delegate to `system-routes-v227.js`. This utility route is not a sixth realm and creates no new chat or capability authority. OpenSimulator hosting, authenticated pilots, and signed mesh persistence remain pending. See `docs/contracts/worldweaver-microspaces-v1.md`, the `worldweaver` ownership entry, and `npm run test:worldweaver`.
+
+## Hybrid creation and host Guild training custody
+
+The existing Creator document/tool/store owners now retain immutable document revisions and exact edit receipts. `public/creator-suite/shared/creation-run-v1.mjs` journals stage contracts, a single consented Gemini stream, checkpoints, authored repairs and independent edits; `creation-workflow-v1.mjs` presents it in the existing Text editor. Weaveling manual imports reuse its existing schema, normalizer, planner, materializer, shared review and family loader. `public/app/guild-training-client-v1.js` delegates explicitly reviewed visible samples to `/api/node/training`, whose portable custody owner is `cloudflare/mobile-guild-edge/src/guild-training-contributions-v1.mjs`. The existing two authenticated Guild adapters reuse that owner. Purpose release and negotiation remain closed until trusted collective/Guildkeeper adapters are configured; no settlement or training authority is created. See `docs/contracts/creation-workflow-v1.md`, the ownership registry, and `npm run test:threshold`.

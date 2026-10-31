@@ -1,6 +1,7 @@
 export { CivweaveCapacityAccount } from './capacity.mjs';
 import { handleGuildStarlingInternal } from '../../mobile-guild-edge/src/guild-starling-transport-v1.mjs';
 import { handleGuildQuestInternal } from '../../mobile-guild-edge/src/guild-quest-publications-v1.mjs';
+import { handleGuildTrainingInternal } from '../../mobile-guild-edge/src/guild-training-contributions-v1.mjs';
 
 export const CLOUD_NODE_SCHEMA = 'civweave.node.v1';
 export const CLOUD_NODE_RUNTIME = 'cloudflare-durable-object-v2';
@@ -196,6 +197,7 @@ export class CivweaveCloudNode {
     const url = new URL(request.url), nodeId = normalizeNodeId(request.headers.get('x-civweave-node-id') || url.searchParams.get('nodeId'));
     if (url.pathname === '/internal/guild-starling') return handleGuildStarlingInternal(request, this);
     if (url.pathname === '/internal/guild-quests') return handleGuildQuestInternal(request, this);
+    if (url.pathname === '/internal/guild-training') return handleGuildTrainingInternal(request, this);
     if (!nodeId) return json({ ok: false, error: 'node-id-missing' }, 400);
     const manifest = await this.manifest(nodeId);
     if (request.method === 'GET' && url.pathname === '/') return new Response(nodePage(manifest), { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });

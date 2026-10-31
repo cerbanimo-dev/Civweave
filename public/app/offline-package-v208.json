@@ -1,6 +1,6 @@
 {
   "version": "1.0.106",
-  "revision": "canonical-ledger-contract-v1-fulfillment-v1-background-campus-v241-systems-mesh-v251-standard-only-moss-metaphor-lab-v1",
+  "revision": "canonical-ledger-contract-v1-fulfillment-v1-background-campus-v241-systems-mesh-v251-standard-only-moss-metaphor-lab-v1-worldweaver-trailer-v1",
   "payloadPolicy": "core-first-lazy-packs-v302-core-labor-v1",
   "description": "Compact Civweave offline core with canonical realm surfaces, deterministic local work, and lazy core O*NET/ESCO labor intelligence. Large media, full federation discovery, decorative visuals, and device-AI model payloads remain optional.",
   "seeds": [
@@ -85,6 +85,20 @@
     "/app/worldweaver/workspace.css",
     "/app/shared/worldweaver-core-v1.mjs",
     "/app/shared/worldweaver-workspace-v1.mjs",
+    "/app/tools/worldweaver-performance-lab.html",
+    "/app/tools/worldweaver-performance-lab-v1.mjs",
+    "/app/shared/worldweaver-performance-studio-v1.mjs",
+    "/app/shared/worldweaver-trailer-authoring-v1.mjs",
+    "/app/shared/worldweaver-production-review-v1.mjs",
+    "/app/shared/worldweaver-filmcraft-interchange-v1.mjs",
+    "/app/shared/worldweaver-stagecraft-v1.mjs",
+    "/app/shared/worldweaver-adaptation-model-v1.mjs",
+    "/app/shared/worldweaver-avatar-v1.mjs",
+    "/app/shared/worldweaver-screen-v1.mjs",
+    "/app/shared/worldweaver-map-2d-v1.mjs",
+    "/app/shared/worldweaver-opensim-geometry-v1.mjs",
+    "/app/shared/worldweaver-3d-preview-v1.mjs",
+    "/app/shared/civweave-model-runtime.js",
     "/app/learning-pack-seeds-v1.js",
     "/app/shared/learning-pack-runtime-v1.mjs",
     "/app/shared/learning-pack-resolver-v1.mjs",
@@ -198,7 +212,12 @@
     "/app/federation-finder-data/atlas-v274/edges-30.json",
     "/app/federation-finder-data/atlas-v274/edges-31.json",
     "/app/federation-finder-data/atlas-v274/search-index.json",
-    "/app/federation-finder-data/atlas-v274/relationships.csv"
+    "/app/federation-finder-data/atlas-v274/relationships.csv",
+    "/app/tools/worldweaver-performance-lab-v1.mjs?v=threshold-device-review-v4",
+    "/app/shared/worldweaver-trailer-authoring-v1.mjs?v=threshold-device-review-v3",
+    "/app/shared/worldweaver-production-review-v1.mjs?v=threshold-device-review-v3",
+    "/app/shared/worldweaver-stagecraft-v1.mjs?v=threshold-device-review-v2",
+    "/app/shared/worldweaver-filmcraft-interchange-v1.mjs?v=threshold-device-review-v1"
   ],
   "lazyPacks": [
     {

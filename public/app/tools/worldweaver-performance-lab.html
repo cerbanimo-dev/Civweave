@@ -26,12 +26,13 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 .project{padding:12px;border:1px solid #60768b;border-radius:8px;margin:10px 0}
 .check{display:flex;gap:9px;align-items:flex-start;font-weight:500}.check input{width:auto;margin-top:4px}
 #models{color:#b1dfcc}
+.production-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0}.production-tabs button{font-size:13px;min-height:44px}.production-tabs [aria-selected="true"]{background:#587861;border-color:#b7dcc4}.production-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;align-items:start}.production-field{min-width:0}#production-device-review{margin-top:18px}#production-device-review [role="tabpanel"]{padding:18px;background:#14212c}#production-device-review form{display:grid;gap:8px}#production-device-review fieldset{min-width:0;border:1px solid #53697d;border-radius:9px}#production-rig-diagram svg,#production-blocking-path svg{display:block;width:100%;max-height:320px}#production-device-status{padding:10px;border:1px solid #5e776e;background:#263c36;border-radius:8px}.production-live-preview{margin-top:15px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.production-live-preview #stage-note{grid-column:1/-1}.production-live-preview #stage-viewer,.production-live-preview #stage-map{height:290px;width:100%}@media(max-width:760px){.production-grid,.production-live-preview{grid-template-columns:1fr}.production-tabs button{flex:1 1 120px}.production-live-preview #stage-viewer,.production-live-preview #stage-map{height:240px}}
 @media(max-width:760px){.layout{grid-template-columns:1fr}#stage-viewer{height:245px}#stage-map{height:245px}}
 </style></head><body>
 <header><small>CIVWEAVE · WORLDWEAVER · PRIVATE DEVELOPMENT LAB</small>
 <h1>Performance Studio</h1>
 <p>Book → reviewed screenplay → staged characters, scenery and cues → rehearsal → voluntary audience participation → film-editing and Qwen training packages. This is a local workflow prototype, not a rendered film or a live OpenSimulator theater.</p>
-<nav><a href="./worldweaver-geometry-lab.html">3D/2D Geometry Lab</a> · <a href="/creator-suite/index.html?tool=video">Creator Suite video editor</a></nav>
+<nav><a href="./worldweaver-geometry-lab.html">3D/2D Geometry Lab</a> · <a href="/creator-suite/index.html?tool=video">Creator Suite video editor</a> · <a href="#production-device-review">Review every production file</a></nav>
 </header>
 <div class="layout">
 <section>
@@ -74,9 +75,9 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <label for="cast-avatar">Avatar / approved rig reference</label><input id="cast-avatar" value="starling:kami" maxlength="180">
 <label for="cast-pilot">Model pilot principal</label><input id="cast-pilot" value="pilot:starling:kami" maxlength="180">
 <div class="controls"><button id="assign-avatar" type="button">Approve role casting</button></div>
-<canvas id="stage-viewer" width="660" height="290" aria-label="Procedural 3D stage and character stand-ins"></canvas>
+<div id="stage-preview-home"><canvas id="stage-viewer" width="660" height="290" aria-label="Procedural 3D stage and character stand-ins"></canvas>
 <div id="stage-map" aria-label="Same-stage 2D footprints"></div>
-<p id="stage-note" class="compact">Review a screenplay scene to build its provisional stage set. These are geometry stand-ins, not rigged OpenSimulator avatars.</p>
+<p id="stage-note" class="compact">Review a screenplay scene to build its provisional stage set. These are geometry stand-ins, not rigged OpenSimulator avatars.</p></div>
 <h2>5 · Cue and performance</h2>
 <div id="script-lines"></div>
 <div class="controls"><button id="rehearse" type="button">Start rehearsal</button><button id="next-cue" type="button">Play next cue</button><button id="finish" type="button">Finish rehearsal</button></div>
@@ -94,6 +95,24 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <p id="audience-status" class="compact">No microphone requested, and no audience data collected.</p>
 <hr>
 <h2>7 · Render/export handoff</h2>
+<div class="project" aria-labelledby="trailer-heading">
+<h3 id="trailer-heading">30-second ArtCraft trailer review package</h3>
+<p class="compact">Load an authored script, local source excerpts, and shot plan without another AI generation. Imports remain proposals. The lab identity is not an authenticated producer; source intake is explicitly simulated and never grants approval.</p>
+<label for="trailer-authoring-file">Private authoring JSON file (up to 2 MiB)</label><input id="trailer-authoring-file" type="file" accept=".json,application/json">
+<label for="trailer-authoring-json">Authoring JSON · or paste a prepared file here</label><textarea id="trailer-authoring-json" rows="5" maxlength="2097152" spellcheck="false" placeholder='{"schema":"civweave.trailer-authoring.v1","project":{},"sourceProvenance":{},"sources":[],"scenes":[],"trailer":{}}'></textarea>
+<details><summary>Supported authoring format</summary><p class="compact">Use project title, sourceTitle, rights and visualBrief; sourceProvenance manuscriptRef, SHA-256 sourceHash and optional edition; sources with symbolic key, chapter, text and optional sourceRef; scenes with key, title, synopsis, sourceKeys, dialogue, set and optional moments, runtimeSeconds and visualDirection. Each shot uses sceneKey, id and global inFrame/outFrame. Dialogue cues use lineIndex; camera, lighting, sound, blocking and plain-text screenCues remain proposed jobs. Shots must cover exactly 30 seconds with no gaps. No status, approval, actor, existing record IDs or permission fields are accepted.</p></details>
+<label class="check"><input id="trailer-import-consent" type="checkbox"> Load this rights-cleared private file as a new in-memory review draft. This replaces the current unsaved lab session; I can export that private session first.</label>
+<button id="import-trailer" type="button">Import authored trailer for local review</button>
+<p id="trailer-import-status" class="compact">Memory only: this page has no autosave. Keep your authoring file and explicitly download the handoff before closing.</p>
+<pre id="trailer-import-receipt" aria-label="Local import identity and reference mapping"></pre>
+<label for="trailer-shot-plan">Mapped shot plan · editable canonical IDs and frame timing</label><textarea id="trailer-shot-plan" rows="7" maxlength="200000" spellcheck="false" placeholder="The imported shot plan appears here with canonical scene IDs."></textarea>
+<div class="controls"><button id="preview-trailer" type="button" disabled>Validate and inspect 30-second package</button><button id="export-trailer" type="button" disabled>Download ArtCraft review package</button><button id="export-trailer-captions" type="button" disabled>Download trailer captions</button></div>
+<div class="controls"><button id="export-trailer-authoring" type="button" disabled>Download revised private authoring file</button></div><p id="trailer-revision-status" class="compact">Import a file to begin local proposed revision history. The authoring file is the resumable source; it includes your private excerpts.</p>
+<p class="compact">Portable editorial handoff only. Producer authorization is pending; native ArtCraft import, media rendering and world execution are unverified. Source excerpts stay out of the handoff. Rigs, voices, sound and visuals retain missing-media placeholders.</p>
+<h3>Exact trailer script and title cues</h3><pre id="trailer-script-preview" aria-label="Exact timed trailer script"></pre>
+<details><summary>Inspect complete review package and missing jobs</summary><pre id="trailer-package-preview" aria-label="Validated ArtCraft trailer package"></pre></details>
+<label for="trailer-creation-run">Edited Creator run ID to link this review export</label><input id="trailer-creation-run" maxlength="180" placeholder="creation-run:…"><button id="save-trailer-artifact" type="button">Save review export in Civweave</button><p class="compact">Explicitly saves the exact exported package in the existing local Creator artifact store. Source excerpts are excluded. The run must be editorially revised and have the same source hash; this does not grant producer approval.</p><pre id="trailer-artifact-receipt" aria-label="Saved Creator artifact receipt"></pre>
+</div>
 <label class="check"><input id="training-authorized" type="checkbox"> I authorize training on the owned or appropriately licensed, human-reviewed screenplay material</label>
 <label class="check"><input id="include-audience" type="checkbox"> Include only responses with separate participant training consent</label>
 <div class="controls">
@@ -104,7 +123,8 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <pre id="exports" aria-label="Export summary"></pre>
 </section>
 </div>
+<section id="production-device-review" aria-label="Review and edit production files"></section>
 <p id="status" role="status" aria-live="polite">Ready to create a private production.</p>
 <script src="/app/shared/civweave-model-runtime.js"></script>
-<script type="module" src="./worldweaver-performance-lab-v1.mjs"></script>
+<script type="module" src="./worldweaver-performance-lab-v1.mjs?v=threshold-device-review-v4"></script>
 </body></html>

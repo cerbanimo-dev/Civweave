@@ -33,15 +33,15 @@ test('the static shell includes common feedback assets without making animation 
   const context={REQUIRED_SHELL_ASSETS:[],OPTIONAL_SHELL_ASSETS:[],SHELL_ASSETS:[],self:{}};vm.runInNewContext(read('public/service-worker-shell-assets-v1.js'),context);
   for(const extension of ['js','css']){const asset=`${common}.${extension}`;assert.ok(context.OPTIONAL_SHELL_ASSETS.includes(asset));assert.ok(context.SHELL_ASSETS.includes(asset));assert.equal(context.REQUIRED_SHELL_ASSETS.includes(asset),false)}
   assert.ok(context.OPTIONAL_SHELL_ASSETS.includes('/app/assets/ai/kamiya-review-sprites-v1.png'));
-  const revision=context.self.CivweaveShellAssetsV1.revision;assert.equal(revision,'shell-assets-v1-repair-v38-worldweaver-workspace');assert.ok(read('scripts/build-service-worker-v211.mjs').includes(`/service-worker-shell-assets-v1.js?v=${revision}`));
+  const revision=context.self.CivweaveShellAssetsV1.revision;assert.equal(revision,'shell-assets-v1-repair-v39-threshold-creation');assert.ok(read('scripts/build-service-worker-v211.mjs').includes(`/service-worker-shell-assets-v1.js?v=${revision}`));
 });
 
 test('active capability pins select the implemented visual-workflow revisions',()=>{
   const expected={
     'public/app/anarchadia-console-v139.html':['anarchadia-console-v158.js?v=1.0.10-civic-work-map','anarchadia-change-review-v165.js?v=1.0.6-receipt-outcome','anarchadia-runtime-stability-v159.js?v=1.0.10-governance-tabs','anarchadia-console-v139.css?v=interior-r6-civic-work-map'],
     'public/app/anarchadia-governance-v145.html':['anarchadia-governance-v145.js?v=native-tabs-r2'],
-    'public/app/persistent-system-shell-v1.html':['persistent-system-shell-v1.js?v=1.1.21-guild-quest-map-route','shared-review-surface-v234.js?v=1.0.7-map-focus-review'],
-    'public/app/working-campus-v440.html':['shared-review-surface-v234.js?v=1.0.7-map-focus-review'],
+    'public/app/persistent-system-shell-v1.html':['persistent-system-shell-v1.js?v=1.1.21-guild-quest-map-route','shared-review-surface-v234.js?v=1.1.0-authored-quest-import'],
+    'public/app/working-campus-v440.html':['shared-review-surface-v234.js?v=1.1.0-authored-quest-import'],
     'public/app/realm-console-v140.html':['cerbanimo-quest-engine-v144.js?v=quest-engine-r37-shared-outcome-scene','cerbanimo-quest-engine-v144.css?v=quest-engine-r37-shared-outcome-scene','cw-reward-ledger-v2.js?v=2.1.1-persisted-grants'],
     'public/app/cabinets/living-school/index.html':['living-school-cleanroom-v218.mjs?v=structured-single-v221-exact-quest-map-selection','living-school-cleanroom-v218.css?v=journey-receipts-v2','cw-reward-ledger-v2.js?v=2.1.1-persisted-grants'],
     'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs':['living-school-cleanroom-render-v218.mjs?v=quiz-journey-receipts-v2'],

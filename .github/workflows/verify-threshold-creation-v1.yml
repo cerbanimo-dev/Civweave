@@ -1,0 +1,114 @@
+name: Verify Threshold Creation
+
+on:
+  pull_request:
+    paths:
+      - 'public/creator-suite/**'
+      - 'public/extensions/civweave-gemini-interactions-v159.js'
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
+      - 'public/app/gemini-*.js'
+      - 'public/app/content-provenance-v1.js'
+      - 'public/app/intention-planner-v141.js'
+      - 'public/app/weaveling-plan-materialization-v265.js'
+      - 'public/app/guide-capability-passover-v1.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/shared/worldweaver-filmcraft-interchange-v1.mjs'
+      - 'public/app/shared/worldweaver-stagecraft-v1.mjs'
+      - 'public/app/shared/worldweaver-performance-studio-v1.mjs'
+      - 'public/app/*trailer*.mjs'
+      - 'public/app/shared/*trailer*.mjs'
+      - 'public/app/shared/worldweaver-production-review-v1.mjs'
+      - 'scripts/test-worldweaver-production-review-v1.mjs'
+      - 'public/app/tools/*trailer*'
+      - 'public/app/tools/worldweaver-performance-lab.html'
+      - 'public/app/tools/worldweaver-performance-lab-v1.mjs'
+      - 'public/app/*training*.js'
+      - 'public/app/*training*.mjs'
+      - 'cloudflare/**/src/*training*.mjs'
+      - 'cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v*.mjs'
+      - 'cloudflare/node-cloud/src/index.mjs'
+      - 'scripts/test-gemini-interactions-stream-v1.mjs'
+      - 'scripts/test-creation-run-v1.mjs'
+      - 'scripts/test-weaveling-authored-import-v1.mjs'
+      - 'scripts/test-weaveling-authored-import-ui-v1.mjs'
+      - 'scripts/test-guide-artifact-reference-passover-v1.mjs'
+      - 'scripts/test-worldweaver-performance-studio-v1.mjs'
+      - 'scripts/test-worldweaver-trailer-package-v1.mjs'
+      - 'scripts/test-worldweaver-trailer-authoring-v1.mjs'
+      - 'scripts/test-guild-training-contributions-v1.mjs'
+      - 'scripts/test-guild-training-routes-v1.mjs'
+      - 'config/system-ownership.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/verify-threshold-creation-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/creator-suite/**'
+      - 'public/extensions/civweave-gemini-interactions-v159.js'
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
+      - 'public/app/gemini-*.js'
+      - 'public/app/content-provenance-v1.js'
+      - 'public/app/intention-planner-v141.js'
+      - 'public/app/weaveling-plan-materialization-v265.js'
+      - 'public/app/guide-capability-passover-v1.js'
+      - 'public/app/shared/civweave-model-runtime.js'
+      - 'public/app/shared/worldweaver-filmcraft-interchange-v1.mjs'
+      - 'public/app/shared/worldweaver-stagecraft-v1.mjs'
+      - 'public/app/shared/worldweaver-performance-studio-v1.mjs'
+      - 'public/app/*trailer*.mjs'
+      - 'public/app/shared/*trailer*.mjs'
+      - 'public/app/shared/worldweaver-production-review-v1.mjs'
+      - 'scripts/test-worldweaver-production-review-v1.mjs'
+      - 'public/app/tools/*trailer*'
+      - 'public/app/tools/worldweaver-performance-lab.html'
+      - 'public/app/tools/worldweaver-performance-lab-v1.mjs'
+      - 'public/app/*training*.js'
+      - 'public/app/*training*.mjs'
+      - 'cloudflare/**/src/*training*.mjs'
+      - 'cloudflare/mobile-guild-edge/src/creator-provenance-entry.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v*.mjs'
+      - 'cloudflare/node-cloud/src/index.mjs'
+      - 'scripts/test-gemini-interactions-stream-v1.mjs'
+      - 'scripts/test-creation-run-v1.mjs'
+      - 'scripts/test-weaveling-authored-import-v1.mjs'
+      - 'scripts/test-weaveling-authored-import-ui-v1.mjs'
+      - 'scripts/test-guide-artifact-reference-passover-v1.mjs'
+      - 'scripts/test-worldweaver-performance-studio-v1.mjs'
+      - 'scripts/test-worldweaver-trailer-package-v1.mjs'
+      - 'scripts/test-worldweaver-trailer-authoring-v1.mjs'
+      - 'scripts/test-guild-training-contributions-v1.mjs'
+      - 'scripts/test-guild-training-routes-v1.mjs'
+      - 'config/system-ownership.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/verify-threshold-creation-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: threshold-creation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Verify streaming, revision history, zero-inference import, and training custody
+        run: npm run test:threshold
+      - name: Verify Worldweaver trailer timing and producer review boundaries
+        run: >-
+          node --test
+          scripts/test-worldweaver-performance-studio-v1.mjs
+          scripts/test-worldweaver-trailer-package-v1.mjs
+          scripts/test-worldweaver-trailer-authoring-v1.mjs
+          scripts/test-worldweaver-production-review-v1.mjs

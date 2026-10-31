@@ -169,5 +169,5 @@ function init(){
   node('cs-agent-server-restart')?.addEventListener('click',()=>restartServer().catch(error=>status(error.message,true)));
 }
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
-globalThis.CivweaveCreatorDocumentAgentV1=Object.freeze({run,stop,isRunning:()=>running,getLastResult:()=>lastResult,smallModel});
+globalThis.CivweaveCreatorDocumentAgentV1=Object.freeze({run,stop,isRunning:()=>running,getLastResult:()=>lastResult,smallModel,stepPrompt,stageContractRevision:'document-agent-v1-creation-contract-v1'});
 })();

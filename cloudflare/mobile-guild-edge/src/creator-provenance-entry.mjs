@@ -2,6 +2,7 @@ import {GUILD_STARLING_ROUTE,executeGuildStarlingAction} from './guild-starling-
 import {guildStarlingAction} from './guild-starling-transport-v1.mjs';
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
 import {GUILD_QUEST_ROUTE,GUILD_QUEST_CORS,guildQuestAction,readGuildQuestInput,executeGuildQuestAction,guildQuestJson,guildQuestError} from './guild-quest-publications-v1.mjs';
+import {GUILD_TRAINING_ROUTE,GUILD_TRAINING_CORS,guildTrainingAction,readGuildTrainingInput,executeGuildTrainingAction,guildTrainingJson,guildTrainingError} from './guild-training-contributions-v1.mjs';
 
 export {CivweaveGuildEdgeState,CivweaveGuildNodeState};
 const RECEIPT_KIND='civweave.creation-receipt.v1';
@@ -49,6 +50,14 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     if(!session?.ok)throw Object.assign(new Error(session?.error||'Guild session is invalid.'),{status:session?.status||401});
     const guildId=this.baseStatus().guildId;
     return executeGuildQuestAction(this.ctx.storage,{guildId,nodeId:session.nodeId,userId:session.userId},action,input);
+  }
+  async guildTrainingAction({tokenHash,requestedNodeId,action,input}={}){
+    if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))throw Object.assign(new Error('Guild capacity session belongs to a different Guild.'),{status:403});
+    const session=this.sessionForHash({tokenHash,requestedNodeId});
+    if(!session?.ok)throw Object.assign(new Error(session?.error||'Guild session is invalid.'),{status:session?.status||401});
+    // Custody and withdrawal only. No browser or resident role claim may become
+    // a purpose resolver or Guildkeeper authorizer for release/dataset actions.
+    return executeGuildTrainingAction(this.ctx.storage,{guildId:this.baseStatus().guildId,nodeId:session.nodeId,userId:session.userId},action,input);
   }
   ensureResidentTables(){
     this.sql.exec('CREATE TABLE IF NOT EXISTS resident_members (node_id TEXT NOT NULL, user_id TEXT NOT NULL, credential_hash TEXT NOT NULL, seat_class TEXT NOT NULL, created_at TEXT NOT NULL, last_seen_at TEXT NOT NULL, PRIMARY KEY(node_id,user_id))');
@@ -116,6 +125,10 @@ async function handleSessionGenerate(request,env){
 export default{
   async fetch(request,env,ctx){
     const questUrl=new URL(request.url);
+    if(questUrl.pathname===GUILD_TRAINING_ROUTE||questUrl.pathname.startsWith(GUILD_TRAINING_ROUTE+'/')){
+      if(request.method==='OPTIONS')return new Response(null,{status:204,headers:GUILD_TRAINING_CORS});
+      try{const route=guildTrainingAction(request),body=request.method==='POST'?await readGuildTrainingInput(request):{},result=await capacityStub(env).guildTrainingAction({tokenHash:await sessionTokenHash(bearer(request)),requestedNodeId:requestedNodeId(request),action:route.action,input:{...body,...route.input}});return guildTrainingJson(result,result.created?201:200)}catch(error){return guildTrainingError(error)}
+    }
     if(questUrl.pathname===GUILD_STARLING_ROUTE||questUrl.pathname.startsWith(GUILD_STARLING_ROUTE+'/')){
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:GUILD_QUEST_CORS});
       try{const action=guildStarlingAction(request),input=request.method==='POST'?await readGuildQuestInput(request):{},result=await capacityStub(env).guildStarlingAction({tokenHash:await sessionTokenHash(bearer(request)),requestedNodeId:requestedNodeId(request),action,input});return guildQuestJson(result,action==='reserve'&&!result.idempotent?201:200)}catch(error){return guildQuestError(error)}

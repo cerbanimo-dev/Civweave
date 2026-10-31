@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.7-map-focus-review';
+const VERSION='1.1.0-authored-quest-import';
 const REVISION='shared-review-surface-v234';
 const STYLE_ID='cw-shared-review-style-v234';
 const SURFACE_ID='cw-shared-review-surface-v234';
@@ -57,6 +57,7 @@ function installStyle(){
 #${SURFACE_ID} [data-guide-outcome]{margin:12px 0}#${SURFACE_ID} .cwsr234-change-request{margin:10px 0;border:1px solid #ffffff24;border-radius:12px;background:#ffffff06;padding:0 10px}#${SURFACE_ID} .cwsr234-change-request>summary{min-height:44px;padding:11px 0;cursor:pointer;font-weight:800}#${SURFACE_ID} [data-review-revision-form]{display:grid;gap:8px;padding:0 0 12px}#${SURFACE_ID} [data-review-revision-form] label{font-weight:800;font-size:12px}#${SURFACE_ID} [data-review-revision-form] textarea{box-sizing:border-box;width:100%;min-height:90px;resize:vertical;border:1px solid #ffffff33;border-radius:10px;padding:9px;background:#07111f;color:inherit;font:inherit}#${SURFACE_ID} [data-review-revision-form] p{margin:0;color:var(--muted,#b8c6df);font-size:11px}#${SURFACE_ID} [data-review-revision-form] button{min-height:44px;border:1px solid #8af5d266;border-radius:10px;background:#8af5d215;color:inherit;font-weight:800;cursor:pointer}#${SURFACE_ID} .cwsr234-change-request>summary:focus-visible,#${SURFACE_ID} [data-review-revision-form] :focus-visible{outline:2px solid #8af5d2;outline-offset:3px}
 #${SURFACE_ID} .cwsr234-actions{position:sticky;bottom:-13px;display:flex;flex-wrap:wrap;gap:8px;margin:13px -13px -13px;padding:11px 13px;background:color-mix(in srgb,var(--panel,#081225) 96%,#000);border-top:1px solid var(--line,#ffffff2b)}#${SURFACE_ID} .cwsr234-actions button{min-height:40px;padding:0 13px;border:1px solid var(--line,#ffffff2b);border-radius:999px;background:#ffffff0d;color:inherit;font-weight:800;cursor:pointer}#${SURFACE_ID} .cwsr234-actions .primary{background:var(--accent,#d8dde7);color:#09111d;border-color:transparent}
 #${PENDING_ID}{border-color:#d8dde755!important}#${PENDING_ID} .cwsr234-pending-list{display:grid}#${PENDING_ID} details{border-top:1px solid #ffffff10}#${PENDING_ID} details:first-child{border-top:0}#${PENDING_ID} summary{list-style:none;cursor:pointer;padding:11px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}#${PENDING_ID} summary::-webkit-details-marker{display:none}#${PENDING_ID} summary strong{display:block;font-size:13px}#${PENDING_ID} summary small{display:block;color:var(--mint,#8af5d2);font-size:9px;font-weight:900;letter-spacing:.09em}#${PENDING_ID} summary b{font-size:10px;color:var(--muted,#9eb0c6);text-transform:uppercase}#${PENDING_ID} .cwsr234-pending-body{padding:0 12px 12px}#${PENDING_ID} .cwsr234-pending-body p{margin:0 0 8px;color:var(--muted,#9eb0c6);font-size:12px}#${PENDING_ID} .cwsr234-path-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}#${PENDING_ID} .cwsr234-path-list span{padding:3px 7px;border-radius:999px;background:#ffffff0b;border:1px solid #ffffff18;font-size:10px}#${PENDING_ID} .cwsr234-review-button{min-height:34px;padding:0 10px;border:1px solid #8af5d255;border-radius:999px;background:#8af5d214;color:inherit;font-weight:800;cursor:pointer}
+#${SURFACE_ID} [data-authored-import-form]{display:grid;gap:10px;padding-top:12px}#${SURFACE_ID} [data-authored-import-form] label{font-weight:800}#${SURFACE_ID} [data-authored-import-form] textarea,#${SURFACE_ID} [data-authored-import-form] select{box-sizing:border-box;width:100%;min-height:44px;border:1px solid #ffffff40;border-radius:9px;padding:9px;background:#07111f;color:#f8fbff;font:inherit}#${SURFACE_ID} [data-authored-import-form] textarea{resize:vertical}#${SURFACE_ID} [data-authored-import-form] button{min-height:44px;border:1px solid #8af5d266;border-radius:10px;padding:8px;background:#8af5d215;color:inherit;font:inherit;cursor:pointer}#${SURFACE_ID} [data-authored-import-form] button:disabled{opacity:.5;cursor:default}#${SURFACE_ID} [data-authored-import-form] :focus-visible{outline:2px solid #8af5d2;outline-offset:3px}#${SURFACE_ID} [data-authored-contract]{overflow-wrap:anywhere}#${SURFACE_ID} [data-authored-contract] pre{white-space:pre-wrap;max-height:260px;overflow:auto;font-size:11px}
 `;
   document.head.append(style);
 }
@@ -87,6 +88,20 @@ function fieldsMarkup(fields={}){
 function listMarkup(label,items){
   const list=Array.isArray(items)?items.map(item=>clean(item,1400)).filter(Boolean):[];
   return list.length?`<section class="cwsr234-block"><small>${esc(label)}</small><ol>${list.map(item=>`<li>${esc(item)}</li>`).join('')}</ol></section>`:'';
+}
+function authoredReceiptFor(plan){
+  const receipt=plan?.authoring?.receipt;
+  if(plan?.authoring?.mode!=='external-authored-json'||plan.authoring.aiGenerated!==false||receipt?.schema!=='civweave.quest-authored-import-receipt.v1'||receipt.planId!==plan.id||receipt.inferenceInvocations!==0)return null;
+  if(typeof globalThis.CivweaveIntentionPlanner?.authoredImportedPlan==='function'&&!globalThis.CivweaveIntentionPlanner.authoredImportedPlan(plan))return null;
+  return receipt;
+}
+function authoredReceiptMarkup(plan,{expanded=false}={}){
+  const receipt=authoredReceiptFor(plan);if(!receipt)return'';const stage=receipt.stageContract||{};
+  return`<section class="cwsr234-block" data-authored-import-receipt><button type="button" class="cwsr234-review-button" data-review-command="toggle-authored-receipt" aria-expanded="${expanded}" aria-controls="cwsr234-authored-receipt-body"><strong>Saved authored import receipt · zero inference</strong></button><div id="cwsr234-authored-receipt-body" data-authored-receipt-body${expanded?'':' hidden'}>${fieldsMarkup({'Receipt ID':receipt.id,'Import operation':receipt.kind,'Declared authorship':plan.authoring.authorship?.kind,'Editorial changes':plan.authoring.authorship?.changeSummary,'Artifact revision':receipt.artifactRevision,'Base revision':receipt.baseRevision,'Source module':stage.sourceModule,'Source revision':stage.revision,'Prompt + schema digest':stage.promptDigest,'Output schema':stage.outputSchema,'Output format':stage.outputFormat,'Validation':receipt.validation?.state,'Producer authorization':receipt.authorization?.state,'Execution':receipt.execution?.state,'Inference invocations':receipt.inferenceInvocations})}<details><summary>Exact saved receipt JSON</summary><pre data-authored-receipt-json style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px">${esc(JSON.stringify(receipt,null,2))}</pre></details><button type="button" class="cwsr234-review-button" data-review-command="export-authored-receipt" data-id="${esc(plan.id)}">Export import receipt</button></div></section>`;
+}
+function exportAuthoredReceipt(id){
+  const receipt=authoredReceiptFor(findPlanItem(id)?.plan);if(!receipt)return reviewFailure('The saved authored import receipt is unavailable.');
+  try{const url=URL.createObjectURL(new Blob([JSON.stringify(receipt,null,2)],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download=`${clean(receipt.id,180).replace(/[^a-zA-Z0-9_.-]/g,'-')}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return{ok:true,receipt}}catch(error){return reviewFailure(`The saved receipt could not be exported: ${clean(error?.message||error,600)}`)}
 }
 function pathSteps(path){return Array.isArray(path?.steps)&&path.steps.length?path.steps:Array.isArray(path?.tasks)?path.tasks:[]}
 function stepTitle(step){return typeof step==='string'?clean(step,500):clean(step?.title||step?.name||step?.label||step?.description,500)}
@@ -191,6 +206,7 @@ function renderPlan(item,source=null){
     <header class="cwsr234-head"><div><small>QUEST REVIEW</small><h2>${esc(plan.title||item.text||'Untitled Quest')}</h2><span class="cwsr234-state">${esc(item.state||plan.state||'review')}</span></div><button class="cwsr234-close" type="button" data-review-command="close" aria-label="Close review">×</button></header>
     ${questPathwayMarkup({...plan,state:item.state||plan.state||'review'})}
     <div class="cwsr234-summary">${plan.wish?`<p><strong>Quest goal:</strong> ${esc(plan.wish)}</p>`:''}${plan.outcome?`<p>${esc(plan.outcome)}</p>`:''}</div>
+    ${authoredReceiptMarkup(plan,{expanded:previous?.dataset.id===plan.id&&previous.querySelector('[data-review-command="toggle-authored-receipt"]')?.getAttribute('aria-expanded')==='true'})}
     ${planReviewScene(item)}
     <details class="cwsr234-change-request"><summary>Request changes to this plan</summary><form data-review-revision-form><label for="cwsr234-revision-note">What needs to change?</label><textarea id="cwsr234-revision-note" name="revisionNote" required maxlength="2000" rows="3">${esc(plan.reviewDecision?.decision==='revision'?clean(plan.reviewDecision.note,2000):'')}</textarea><p>Saving returns this plan to review and keeps its existing work records. Continue with Weaveling when you are ready.</p><button type="button" data-review-command="request-plan-changes" data-id="${esc(item.id||plan.id)}">Save revision request</button></form></details><p class="cwsr234-warning" role="alert" data-review-decision-status hidden></p>
     ${paths.map((path,index)=>`<section class="cwsr234-block" data-review-path="${index}" tabindex="-1"><small>${esc(`${index+1} · ${mapRealm(path).label} · ${path.status||'ready'}`)}</small><h3>${esc(path.title||'Untitled path')}</h3>${path.purpose?`<p>${esc(path.purpose)}</p>`:''}${listMarkup('STEPS',pathSteps(path).map(stepTitle))}${path.completionCriteria?`<p><strong>Completion:</strong> ${esc(path.completionCriteria)}</p>`:''}</section>`).join('')}
@@ -226,6 +242,43 @@ function renderAction(action,source=null){
 }
 function openPlan(id,options={}){const item=findPlanItem(id);if(!item){notify('civweave','That Quest is no longer present on this device.');return false}return renderPlan(item,options.source||null)}
 function openAction(id,options={}){const action=findAction(id);if(!action){notify('civweave','That draft is no longer present on this device.');return false}return renderAction(action,options.source||null)}
+function openAuthoredImport({source=null,text=''}={}){
+  installStyle();removeSurface();const host=chooseHost(source),surface=document.createElement('section');
+  surface.id=SURFACE_ID;surface.dataset.host=host.type;surface.dataset.kind='authored-import';surface.setAttribute('role','dialog');surface.setAttribute('aria-labelledby','cwsr234-authored-title');
+  surface.innerHTML=`<header class="cwsr234-head"><div><small>CIVWEAVE · EXTERNAL AUTHORING</small><h2 id="cwsr234-authored-title">Import authored Quest</h2></div><button type="button" class="cwsr234-close" data-review-command="close-authored-import" aria-label="Close authored Quest import">×</button></header><form data-authored-import-form><p>Bring a plan you already wrote or edited into Civweave. Import validates and saves it for review without running a model. Activation remains a separate choice.</p><label for="cwsr234-authored-intention">Governing intention</label><textarea id="cwsr234-authored-intention" name="intention" rows="3" maxlength="4000" required>${esc(text)}</textarea><label for="cwsr234-authored-format">Canonical output format</label><select id="cwsr234-authored-format" name="outputFormat"><option value="subsystems">Four subsystem decisions and path order</option><option value="native-paths">Compact native path array</option></select><button type="button" data-review-command="prepare-authored-contract">View current stage contract</button><div data-authored-contract hidden></div><label for="cwsr234-authored-json">Authored Quest JSON</label><textarea id="cwsr234-authored-json" name="authoredJson" rows="10" maxlength="100000" spellcheck="false" required></textarea><label for="cwsr234-authored-kind">Declared authorship</label><select id="cwsr234-authored-kind" name="authorshipKind"><option value="external-author">External author · identity unverified</option><option value="editor-agent">Editorial agent</option><option value="human">Human author · self-declared</option></select><label for="cwsr234-authored-summary">Editorial changes (optional)</label><textarea id="cwsr234-authored-summary" name="changeSummary" rows="2" maxlength="1200"></textarea><p role="status" aria-live="polite" data-authored-import-status></p><button type="button" data-review-command="import-authored-plan" disabled>Import authored Quest for review</button></form>`;
+  host.node.append(surface);current={kind:'authored-import',source,contract:null,api:null,busy:false,idempotencyKey:uid('quest-import')};
+  surface.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();const launcher=current?.kind==='authored-import'?current.source:null;removeSurface();launcher?.focus?.()}});
+  surface.querySelector('[name="intention"]')?.focus();return surface;
+}
+function authoredImportValues(surface){const form=surface?.querySelector('[data-authored-import-form]');return{form,text:clean(form?.elements.namedItem('intention')?.value,4000),outputFormat:form?.elements.namedItem('outputFormat')?.value||'subsystems'}}
+async function handleAuthoredImport(command,button){
+  const session=current,surface=button.closest(`#${SURFACE_ID}`),{form,text,outputFormat}=authoredImportValues(surface),status=form?.querySelector('[data-authored-import-status]'),submit=form?.querySelector('[data-review-command="import-authored-plan"]');
+  if(session?.kind!=='authored-import'||!form||session.busy)return false;
+  const say=value=>{if(status)status.textContent=value};
+  if(!text){say('Enter the governing intention before preparing its stage contract.');form.elements.namedItem('intention')?.focus();return false}
+  session.busy=true;button.disabled=true;
+  try{
+    if(command==='prepare-authored-contract'){
+      submit.disabled=true;say('Reading the canonical local authoring contract…');
+      const loader=globalThis.CivweaveFamilyAILoaderV105;
+      const api=typeof loader?.ensureAuthoredQuestImport==='function'?await loader.ensureAuthoredQuestImport():globalThis.CivweaveWeavelingPlanJsonV190;
+      if(!api?.authoredPlanContract||!api?.importAuthoredPlan)throw new Error('The canonical authored Quest import tools are unavailable. Reopen Civweave after the current local package is ready.');
+      const contract=await api.authoredPlanContract({text,outputFormat});
+      if(current!==session)return false;
+      session.api=api;session.contract=contract;session.inputs=JSON.stringify({text,outputFormat});
+      const target=form.querySelector('[data-authored-contract]');target.hidden=false;target.innerHTML=`<p><strong>Stage:</strong> ${esc(contract.stageContract.sourceModule)}<br><strong>Revision:</strong> ${esc(contract.stageContract.revision)}<br><strong>Prompt + schema digest:</strong> ${esc(contract.stageContract.promptDigest)}</p><details><summary>Required output schema and current prompt</summary><pre>${esc(JSON.stringify({schema:contract.schema,messages:contract.messages},null,2))}</pre></details>`;
+      submit.disabled=false;say('Contract ready. Review the supplied JSON, then explicitly import it for review. No model has run.');return true;
+    }
+    if(!session.contract||session.inputs!==JSON.stringify({text,outputFormat})){say('The intention or format changed. Prepare the current stage contract again before importing.');submit.disabled=true;return false}
+    const outputJson=form.elements.namedItem('authoredJson')?.value||'';
+    if(!outputJson.trim()){say('Paste the complete authored Quest JSON before importing.');return false}
+    say('Validating and saving the supplied authored Quest…');
+    const result=await session.api.importAuthoredPlan({text,outputFormat,outputJson,confirmed:true,expectedRevision:session.contract.stageContract.revision,expectedPromptDigest:session.contract.stageContract.promptDigest,idempotencyKey:session.idempotencyKey,authorship:{kind:form.elements.namedItem('authorshipKind')?.value||'external-author',changeSummary:clean(form.elements.namedItem('changeSummary')?.value,1200)}});
+    if(current!==session)return result;
+    if(!result?.ok){say(result?.error||'The authored Quest could not be imported. Your supplied content remains in this form.');return result}
+    mountPendingWeaves();openPlan(result.item?.id||result.plan?.id,{source:session.source});return result;
+  }catch(error){say(clean(error?.message||error,1800));return{ok:false,error:clean(error?.message||error,1800)}}finally{session.busy=false;if(current===session){button.disabled=false;if(command==='prepare-authored-contract'&&!session.contract)submit.disabled=true}}
+}
 
 function buildHandoffs(plan){
   const packets=(Array.isArray(plan.paths)?plan.paths:[]).map(path=>({
@@ -298,6 +351,11 @@ async function approveAction(id){
 async function handleSurfaceClick(event){
   const button=event.target.closest('[data-review-command]');if(!button)return;
   const command=button.dataset.reviewCommand,id=button.dataset.id||current?.id;
+  if(command==='open-authored-import')return openAuthoredImport({source:button});
+  if(command==='close-authored-import'){const source=current?.source;removeSurface();source?.focus?.();return true}
+  if(command==='prepare-authored-contract'||command==='import-authored-plan')return handleAuthoredImport(command,button);
+  if(command==='export-authored-receipt')return exportAuthoredReceipt(id);
+  if(command==='toggle-authored-receipt'){const body=button.closest('[data-authored-import-receipt]')?.querySelector('[data-authored-receipt-body]');if(!body)return false;const expanded=button.getAttribute('aria-expanded')!=='true';button.setAttribute('aria-expanded',String(expanded));body.hidden=!expanded;return true}
   if(command==='close')return removeSurface();
   if(command==='focus-chat')return focusChat();
   if(command==='activate-plan')return activatePlan(id);
@@ -332,13 +390,12 @@ function mountPendingWeaves(){
   const hub=document.getElementById('weaveling-hub-v233');
   if(!hub)return false;
   installStyle();
-  const items=reviewWeaves(),signature=items.map(item=>`${item.id}:${item.updatedAt||item.plan?.updatedAt||''}`).join('|');
+  const items=reviewWeaves(),signature=items.map(item=>`${item.id}:${item.updatedAt||item.plan?.updatedAt||''}`).join('|')+'|authored-import';
   let section=document.getElementById(PENDING_ID);
-  if(!items.length){section?.remove();return true}
   if(section?.dataset.signature===signature)return true;
   if(!section){section=document.createElement('section');section.id=PENDING_ID;section.className='wh233-panel cwsr234-pending';const thread=hub.querySelector('.wh233-thread');thread?.insertAdjacentElement('afterend',section);if(!section.isConnected)hub.prepend(section)}
   section.dataset.signature=signature;
-  section.innerHTML=`<header><div><small>QUESTS UNDER REVIEW</small><h2>Waiting for your call</h2></div><b>${items.length}</b></header><div class="cwsr234-pending-list">${pendingMarkup(items)}</div>`;
+  section.innerHTML=`<header><div><small>QUESTS UNDER REVIEW</small><h2>${items.length?'Waiting for your call':'Bring your own authored Quest'}</h2></div><b>${items.length}</b></header><div class="cwsr234-pending-body"><button type="button" class="cwsr234-review-button" data-review-command="open-authored-import">Import authored Quest</button></div><div class="cwsr234-pending-list">${pendingMarkup(items)}</div>`;
   section.onclick=event=>{const button=event.target.closest('[data-review-hub]');if(button)openPlan(button.dataset.reviewHub,{source:button})};
   return true;
 }
@@ -370,7 +427,7 @@ function start(){
   try{dispatchEvent(new CustomEvent('civweave:shared-review-ready',{detail:{version:VERSION,revision:REVISION,at:now()}}))}catch{}
 }
 
-const api=Object.freeze({version:VERSION,revision:REVISION,openPlan,activatePlan,requestPlanChanges,handleMapAction,openAction,approveAction,close:removeSurface,reviewWeaves,mountPendingWeaves,start});
+const api=Object.freeze({version:VERSION,revision:REVISION,openPlan,activatePlan,requestPlanChanges,handleMapAction,openAction,approveAction,openAuthoredImport,close:removeSurface,reviewWeaves,mountPendingWeaves,start});
 globalThis.CivweaveSharedReviewSurfaceV234=api;
 document.readyState==='loading'?addEventListener('DOMContentLoaded',start,{once:true}):start();
 })();

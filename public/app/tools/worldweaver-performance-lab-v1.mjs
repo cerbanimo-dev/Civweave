@@ -1,7 +1,9 @@
 import {createPerformanceStudio,performanceObservation} from '../shared/worldweaver-performance-studio-v1.mjs';
-import {compileStageScene,compilePerformanceScore} from '../shared/worldweaver-stagecraft-v1.mjs';
+import {compileStageScene,compilePerformanceScore,previewSceneGeometry} from '../shared/worldweaver-stagecraft-v1.mjs?v=threshold-device-review-v2';
 import {proposeScreenplayViaModel,proposeStageViaModel} from '../shared/worldweaver-adaptation-model-v1.mjs';
-import {exportFilmCraftInterchange,exportQwenLoRADataset} from '../shared/worldweaver-filmcraft-interchange-v1.mjs';
+import {exportFilmCraftInterchange,exportQwenLoRADataset,exportArtCraftTrailerPackage} from '../shared/worldweaver-filmcraft-interchange-v1.mjs?v=threshold-device-review-v1';
+import {importTrailerAuthoring,MAX_TRAILER_AUTHORING_BYTES,saveTrailerReviewArtifact,createTrailerDeviceReview} from '../shared/worldweaver-trailer-authoring-v1.mjs?v=threshold-device-review-v3';
+import {mountProductionReview} from '../shared/worldweaver-production-review-v1.mjs?v=threshold-device-review-v3';
 import {createWorldweaver} from '../shared/worldweaver-core-v1.mjs';
 import {createOpenSim3DPreview} from '../shared/worldweaver-3d-preview-v1.mjs';
 import {projectWorld2D,renderWorldMap2D} from '../shared/worldweaver-map-2d-v1.mjs';
@@ -11,8 +13,9 @@ const text=(x,max=220)=>String(x??'').slice(0,max);
 const human={kind:'human',principalId:'lab:producer',verified:true};
 // Synthetic lab identity is not proof of authenticated Guild authority.
 const audience={kind:'audience',principalId:'local:audience:'+crypto.randomUUID(),verified:true};
-const studio=createPerformanceStudio({
+function makeLabStudio(initialState){return createPerformanceStudio({
  id:()=>crypto.randomUUID(),clock:()=>new Date().toISOString(),
+ initialState,
  authorize:({actor,command})=>{
   if(actor.verified!==true)return false;
   if(['create-project','add-source','review-scene','assign-cast','start-rehearsal','finish-rehearsal'].includes(command.type))return actor.kind==='human';
@@ -23,13 +26,15 @@ const studio=createPerformanceStudio({
   if(command.type==='submit-audience')return actor.kind==='audience';
   if(command.type==='withdraw-audience')return ['human','audience'].includes(actor.kind);
   return false;
- }});
+ }});}
+let studio=makeLabStudio();
 const world=createWorldweaver({id:()=>crypto.randomUUID(),authorize:({actor,command})=>
  actor.verified===true&&actor.kind==='human'});
 const room=world.dispatch({type:'create',guide:'moss',title:'Performance Studio · local stage'},human).instance;
 const screen=world.dispatch({type:'create-screen',instanceId:room.id,title:'Stage Weave screen'},human).screen;
 let selected=null,stage=null,viewer=null,score=null,rehearsalId=null,eventIndex=0,activeMoment=null;
 let lastAudience=null,recognizer=null,voiceAllowed=false,modelBusy=false;
+let trailerImportReceipt=null,trailerFileRead=0,deviceReview=null,productionReview=null;
 function status(msg){$('status').textContent=msg;}
 function report(msg){$('cue-status').textContent=msg;}
 function getScene(){return studio.snapshot().proposals.find(s=>s.id===selected)||null;}
@@ -81,28 +86,45 @@ function updateScenes(){
    row.append(b,document.createTextNode(item.dialogue[i].text));$('script-lines').append(row);
   }
  }
+ if(trailerImportReceipt)for(const id of ['add-source','draft-scene','generate-scene','approve-scene','reject-scene','propose-set','approve-set','reject-set','assign-avatar','rehearse','next-cue','finish'])$(id).disabled=true;
 }
-function showStage(){
- if(viewer){viewer.close();viewer=null;}
+function showStage({actorPositions,actorHeights,visibleCharacters,frame,retainView=false}={}){
+ if(viewer&&!retainView){viewer.close();viewer=null;}
  stage=null;score=null;
  const scene=getScene(),state=studio.snapshot();
- if(!scene||scene.status!=='approved'){
-  $('stage-note').textContent='Select and approve a reviewed scene before building a stage. Unreviewed AI output is never applied.';
+ if(!scene||scene.status==='rejected'){
+  $('stage-note').textContent='Select a scene to inspect its proposed set. Real staging and execution still require approval.';
   $('stage-map').replaceChildren();return;
  }
  try{
-  stage=compileStageScene(state,scene.id,{instanceId:room.id}),score=compilePerformanceScore(state,scene.id);
-  viewer=createOpenSim3DPreview({canvas:$('stage-viewer'),getGeometry:()=>stage.geometry,onSelect:hit=>{
+  stage=scene.status==='approved'&&frame==null?compileStageScene(state,scene.id,{instanceId:room.id}):previewSceneGeometry(state,scene.id,{instanceId:room.id,actorPositions:actorPositions||{},actorHeights:actorHeights||{},visibleCharacters});
+  score=scene.status==='approved'?compilePerformanceScore(state,scene.id):null;
+  if(!viewer)viewer=createOpenSim3DPreview({canvas:$('stage-viewer'),getGeometry:()=>stage.geometry,onSelect:hit=>{
    $('stage-note').textContent='Selected '+hit.objectId+' (stage stand-in). Native actor rigging remains pending.';
   }});
   viewer.update();
   const projected=projectWorld2D(world.snapshot(),{worldRef:room.id,layout:{sceneGeometry:stage.geometry}});
   $('stage-map').replaceChildren(renderWorldMap2D(projected,{documentRef:document,onActivate:e=>
    status('Stage map inspected '+e.objectId+'. Real world edits require the trusted renderer.')}));
-  $('stage-note').textContent=stage.region.objects.length+' stage objects · '+stage.geometry.faces.length+
-   ' 3D triangles · 2D map uses the same geometry. Actor bodies are provisional markers, not real rigs.';
+  $('stage-note').textContent=(stage.previewOnly?'DRAFT REVIEW DIAGRAM · ':'APPROVED SCRIPT MOCKUP · ')+(frame==null?'':'frame '+frame+' · ')+stage.region.objects.length+' proposed objects · '+stage.geometry.faces.length+
+   ' 3D triangles · 2D map uses the same geometry. Actor bodies are markers, not validated rigs. No world action executed.';
  }catch(error){status('Unable to stage: '+text(error.message));}
 }
+document.addEventListener('civweave:trailer-preview-frame',event=>{
+ try{
+  const plan=JSON.parse($('trailer-shot-plan').value);exportArtCraftTrailerPackage(studio.snapshot(),plan);
+  const shot=plan.shots.find(row=>row.id===event.detail?.shotId),frame=event.detail?.frame;
+  if(!shot||!Number.isSafeInteger(frame)||frame<shot.inFrame||frame>shot.outFrame)throw new Error('Select a valid shot and review frame.');
+  const positions={};for(const character of new Set((shot.blocking||[]).map(row=>row.character))){
+   const cues=shot.blocking.filter(row=>row.character===character).sort((a,b)=>a.inFrame-b.inFrame);let position=cues[0].from;
+   for(const cue of cues){if(frame<cue.inFrame)break;const t=Math.max(0,Math.min(1,(frame-cue.inFrame)/(cue.outFrame-cue.inFrame)));position=Object.fromEntries(['x','y','z'].map(axis=>[axis,cue.from[axis]+(cue.to[axis]-cue.from[axis])*t]));if(frame<cue.outFrame)break;}
+   positions[character]=position;
+  }
+  const known=new Set(studio.snapshot().proposals.find(row=>row.id===shot.sceneId).dialogue.map(row=>row.character));
+  const heights=Object.fromEntries((plan.rigRequirements||[]).filter(row=>known.has(row.character)&&row.proportions?.heightMeters!==undefined).map(row=>[row.character,row.proportions.heightMeters]));
+  const same=selected===shot.sceneId;selected=shot.sceneId;$('scene-select').value=selected;showStage({actorPositions:positions,actorHeights:heights,visibleCharacters:[...new Set((shot.blocking||[]).map(row=>row.character))],frame,retainView:same});
+ }catch(error){status('Review preview needs repair: '+text(error.message,500));}
+});
 $('create-project').addEventListener('click',()=>{
  try{
   studio.dispatch({type:'create-project',title:$('production-title').value,
@@ -327,5 +349,88 @@ $('export-state').addEventListener('click',()=>{
  download('civweave-private-performance-project.json',JSON.stringify(data,null,2));
  status('Exported the PRIVATE project; it may contain manuscript and optional participant text. Keep the file confidential.');
 });
+$('trailer-authoring-file').addEventListener('change',async()=>{
+ const read=++trailerFileRead,previousText=$('trailer-authoring-json').value;
+ try{
+  const file=$('trailer-authoring-file').files?.[0];if(!file)return;
+  if(file.size>MAX_TRAILER_AUTHORING_BYTES)throw new Error('Use a private authoring JSON file no larger than 2 MiB.');
+  const content=await file.text();if(new TextEncoder().encode(content).byteLength>MAX_TRAILER_AUTHORING_BYTES)throw new Error('The authoring file exceeds its byte limit.');
+  if(read!==trailerFileRead)return;
+  if($('trailer-authoring-json').value!==previousText){$('trailer-import-status').textContent='The form text changed while the file was loading. Your edits were preserved; select the file again to replace them.';return;}
+  $('trailer-authoring-json').value=content;$('trailer-import-consent').checked=false;
+  $('trailer-import-status').textContent='Private file loaded into the form only: '+text(file.name,180)+'. Review and explicitly import it; no model or network request was started.';
+ }catch(error){if(read===trailerFileRead)status('Private file not loaded: '+text(error.message,500));}
+});
+function showTrailerPackage(refreshReview=true){
+ if(!trailerImportReceipt)throw new Error('Import a prepared authoring file first.');
+ const plan=JSON.parse($('trailer-shot-plan').value);
+ if(deviceReview&&JSON.stringify(deviceReview.snapshot().plan)!==JSON.stringify(plan))deviceReview.applyPatch({type:'replace-plan',expectedRevision:deviceReview.snapshot().revision,trailer:plan});
+ const result=exportArtCraftTrailerPackage(studio.snapshot(),plan);
+ result.localImportReceipt=structuredClone(trailerImportReceipt);
+ $('trailer-package-preview').textContent=JSON.stringify(result,null,2);
+ $('trailer-script-preview').textContent=result.shots.map(shot=>[
+  `SHOT ${shot.id} · frames ${shot.inFrame}–${shot.outFrame} · ${shot.seconds}s · ${shot.sceneId}`,
+  ...shot.dialogue.map(cue=>`  [${cue.inFrame}–${cue.outFrame}] ${cue.character}: ${cue.text}${cue.direction?' ('+cue.direction+')':''}`),
+  ...shot.screenCues.map(cue=>`  [${cue.inFrame}–${cue.outFrame}] TITLE: ${cue.text}`)
+ ].join('\n')).join('\n\n');
+ $('trailer-import-status').textContent=`Validated ${result.seconds}s / ${result.totalFrames} frames at ${result.frameRate} fps · ${result.shots.length} shots · ${result.missingMedia.length} missing media jobs. Producer authorization pending; native import and render unverified. In memory only.`;
+ if(deviceReview){const review=deviceReview.snapshot();$('trailer-revision-status').textContent=`Local proposed revision ${review.revision} · ${review.history.length} retained revisions. Save review export for an immutable Creator receipt; download revised private authoring to resume all edits.`;}
+ if(refreshReview)productionReview?.refresh(result);
+ return result;
+}
+$('import-trailer').addEventListener('click',()=>{
+ try{
+  if(modelBusy)throw new Error('Wait for the current model proposal to finish before replacing the local session.');
+  if(!$('trailer-import-consent').checked)throw new Error('Confirm private, rights-cleared local import and replacement of the unsaved lab session.');
+  const imported=importTrailerAuthoring($('trailer-authoring-json').value);
+  // Validation finished before replacing the live lab state. No approval command,
+  // inference request, persistence write or producer-authentication claim occurs.
+  viewer?.close();viewer=null;recognizer?.stop?.();recognizer=null;globalThis.speechSynthesis?.cancel?.();
+  studio=makeLabStudio(imported.state);selected=imported.state.proposals[0]?.id||null;rehearsalId=null;eventIndex=0;activeMoment=null;lastAudience=null;
+  trailerImportReceipt=imported.receipt;
+  deviceReview=createTrailerDeviceReview({state:imported.state,trailer:imported.trailer,receipt:imported.receipt});
+  $('trailer-shot-plan').value=JSON.stringify(imported.trailer,null,2);$('trailer-import-receipt').textContent=JSON.stringify(imported.receipt,null,2);
+  for(const id of ['preview-trailer','export-trailer','export-trailer-captions','export-trailer-authoring'])$(id).disabled=false;
+  $('trailer-import-consent').checked=false;updateScenes();showStage();
+  showTrailerPackage();status('Authored trailer imported with zero inference. All scripts remain review-required; the local lab actor is not an authenticated producer. Download the private review package before closing.');
+ }catch(error){status('Trailer import not applied: '+text(error.message,700));}
+});
+$('preview-trailer').addEventListener('click',()=>{try{showTrailerPackage();status('Exact 30-second shot plan validated. Producer authorization and media execution remain pending.')}catch(error){status('Trailer plan needs repair: '+text(error.message,700));}});
+$('save-trailer-artifact').addEventListener('click',async()=>{
+ const button=$('save-trailer-artifact');button.disabled=true;
+ try{if(!globalThis.CivweaveCreatorStoreV1)await import('/creator-suite/shared/session-store-v1.js');const packageData=showTrailerPackage();const receipt=await saveTrailerReviewArtifact({store:globalThis.CivweaveCreatorStoreV1,runRef:$('trailer-creation-run').value.trim(),packageData,...(deviceReview?{reviewData:deviceReview.snapshot()}:{})});$('trailer-artifact-receipt').textContent=JSON.stringify(receipt,null,2);status('Exact trailer review export and retained proposed revisions saved in the canonical Creator artifact store. Producer authorization and native ArtCraft import remain pending.');}
+ catch(error){status('Review export not saved: '+text(error.message,700));}finally{button.disabled=false;}
+});
+$('export-trailer').addEventListener('click',()=>{
+ try{const result=showTrailerPackage();download('artcraft-trailer-review-package.json',JSON.stringify(result,null,2));status('Portable ArtCraft review package downloaded. This is not a native-import receipt or a rendered trailer.');}
+ catch(error){status('Trailer package export blocked: '+text(error.message,700));}
+});
+$('export-trailer-captions').addEventListener('click',()=>{
+ try{const result=showTrailerPackage();download(result.captions.filename,result.captions.content,'text/vtt');status('Timed trailer captions downloaded. No video, voice track or world action was executed.');}
+ catch(error){status('Trailer captions export blocked: '+text(error.message,700));}
+});
+function currentAuthoring(){
+ if(!deviceReview)throw new Error('Import a resumable authoring file first.');
+ const input=JSON.parse($('trailer-authoring-json').value),plan=JSON.parse($('trailer-shot-plan').value),state=studio.snapshot();
+ const {sourceProvenance,...portablePlan}=plan;if(sourceProvenance)input.sourceProvenance=structuredClone(sourceProvenance);
+ input.trailer={...structuredClone(portablePlan),shots:portablePlan.shots.map(row=>{const scene=state.proposals.find(scene=>scene.id===row.sceneId);if(!scene)throw new Error('The current shot refers to an unavailable scene.');const {sceneId,...shot}=row;return {...structuredClone(shot),sceneKey:scene.slug}})};
+ return input;
+}
+function acceptPlan(next){
+ if(!deviceReview)throw new Error('Import a review plan first.');
+ const review=deviceReview.applyPatch({type:'replace-plan',expectedRevision:deviceReview.snapshot().revision,trailer:next});$('trailer-shot-plan').value=JSON.stringify(review.plan,null,2);
+}
+function reviseScene(patch){
+ const input=currentAuthoring(),scene=studio.snapshot().proposals.find(row=>row.id===patch.sceneId),definition=input.scenes.find(row=>row.key===scene?.slug);if(!definition)throw new Error('The scene no longer matches the imported authoring document.');
+ for(const key of ['title','synopsis','visualDirection'])if(Object.hasOwn(patch,key)){if(key==='visualDirection'&&!patch[key].trim())delete definition[key];else definition[key]=patch[key];}
+ if(patch.line){definition.dialogue[patch.lineIndex]=structuredClone(patch.line);for(const shot of input.trailer.shots.filter(row=>row.sceneKey===definition.key))for(const cue of shot.dialogue||[])if(cue.lineIndex===patch.lineIndex)cue.outFrame=cue.inFrame+patch.line.seconds*(input.trailer.frameRate||30);}
+ if(patch.set){definition.set=structuredClone(patch.set);for(const key of ['light','ambience'])if(definition.set[key]==='')delete definition.set[key];}
+ const review=deviceReview.applyPatch({type:'reimport-authoring',expectedRevision:deviceReview.snapshot().revision,authoring:input});
+ studio=makeLabStudio(deviceReview.productionSnapshot());trailerImportReceipt=deviceReview.importReceipt();selected=studio.snapshot().proposals.find(row=>row.slug===definition.key)?.id||null;
+ $('trailer-authoring-json').value=JSON.stringify(input,null,2);$('trailer-shot-plan').value=JSON.stringify(review.plan,null,2);$('trailer-import-receipt').textContent=JSON.stringify(trailerImportReceipt,null,2);updateScenes();
+}
+$('export-trailer-authoring').addEventListener('click',()=>{try{const input=currentAuthoring();importTrailerAuthoring(input);download('private-trailer-authoring-revised.json',JSON.stringify(input,null,2));status('Resumable private authoring downloaded with current script, set, rig and blocking edits. It contains private source excerpts; no publication or rendering occurred.');}catch(error){status('Revised authoring download blocked: '+text(error.message,700));}});
+productionReview=mountProductionReview({root:$('production-device-review'),document,getState:()=>studio.snapshot(),getPlan:()=>JSON.parse($('trailer-shot-plan').value||'{"shots":[]}'),getPackage:()=>{const result=exportArtCraftTrailerPackage(studio.snapshot(),JSON.parse($('trailer-shot-plan').value));result.localImportReceipt=structuredClone(trailerImportReceipt);return result},getImportReceipt:()=>trailerImportReceipt,getReviewState:()=>deviceReview?.snapshot(),getFiles:()=>deviceReview?.files()||[],downloadFile:id=>{const file=deviceReview?.files().find(row=>row.id===id);if(!file)throw new Error('Review file was not found.');download(file.filename,file.content,file.mimeType)},applyPlan:acceptPlan,applyScenePatch:reviseScene,getRigRequirements:()=>JSON.parse($('trailer-shot-plan').value||'{}').rigRequirements||[],setRigRequirements:rows=>{if(!deviceReview)throw new Error('Import a review first.');const review=deviceReview.applyPatch({type:'set-rig-requirements',expectedRevision:deviceReview.snapshot().revision,rigRequirements:rows});$('trailer-shot-plan').value=JSON.stringify(review.plan,null,2)},onChange:()=>showTrailerPackage(false),onError:error=>status('Production edit not applied: '+text(error.message,700)),onPreviewHost:host=>{const target=host||$('stage-preview-home');if(!target)return;for(const id of ['stage-viewer','stage-map','stage-note']){const node=$(id);if(node&&node.parentElement!==target)target.append(node)}}});
+productionReview.refresh();
 addEventListener('pagehide',()=>{viewer?.close();recognizer?.stop?.();globalThis.speechSynthesis?.cancel?.();},{once:true});
 updateScenes();showStage();
