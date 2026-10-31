@@ -41,7 +41,8 @@ export async function runPersonaChatTurn({
  let activeScene=scene;
  if(stale){
    activeScene=await prepareDirectedScene({pack:p,stage:campaign.stage,scenario:campaign.scenario,
-     branchId:campaign.branchId,participants:[characterId],previousScene:scene,
+     branchId:campaign.branchId,participants:[characterId],
+     previousScene:{...(scene||{}),revision:scene?.revision||0,turn:campaign.turn},
      goals:['The following previous turns are unverified dialogue, not established plot facts.',
        'Respond to the player without overwriting story canon.',...recent],
      invokeModel});
