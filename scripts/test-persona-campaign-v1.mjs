@@ -16,7 +16,7 @@ const model={kind:'model',principalId:'model:jess',modelId:'qwen3.5:0.8b',person
 const runtime={kind:'runtime',principalId:'simulator:one'};
 const allow=({actor})=>Boolean(actor?.principalId);
 const kit=()=>createPersonaCampaign({pack,id:'campaign-01',title:'A different evening',ownerId:'player:alice',
-  branchId:'what-if:arcade',stage:2,scenario:'Jess and Magnus are at an arcade.',cast:['jess','magnus']});
+  branchId:'what-if:arcade',stage:2,scenario:'Jess and Magnus are at an arcade.',cast:['jess','magnus','delia']});
 const event=(state,command,actor=human,authorize=allow)=>applyCampaignEvent(state,command,{actor,authorize,expectedRevision:state.revision});
 
 test('campaign creation requires private what-if branch and referenced cast',()=>{
