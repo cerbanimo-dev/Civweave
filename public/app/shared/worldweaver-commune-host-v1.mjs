@@ -22,7 +22,7 @@ export function createCommuneWorldHost({guildId,mesh,founder,verifyReader,clock=
  if(!validGuild(guildId)||!mesh?.getObject||!mesh?.createObject||!mesh?.validateObject||!mesh?.deviceId||
     typeof founder!=='function'||typeof verifyReader!=='function')
    throw new TypeError('Worldweaver commune requires a Guild, canonical signed mesh, founder and reader policy.');
- let closed=false,revision=-1,packet=null,layoutCache=null,subs=new Set(),meshUnsub=null;
+ let closed=false,revision=-1,packet=null,layoutCache=null,activeRef=null,subs=new Set(),meshUnsub=null;
  const objectId='worldweaver-commune:'+guildId;
  const tell=()=>{for(const callback of [...subs])try{callback()}catch{}};
  async function genesis(){
@@ -60,19 +60,25 @@ export function createCommuneWorldHost({guildId,mesh,founder,verifyReader,clock=
  async function refresh(){
   const founding=await reader();
   const row=await mesh.getObject(objectId);
-  if(!row){packet=null;layoutCache=null;revision=-1;tell();return null}
+  if(!row){packet=null;layoutCache=null;activeRef=null;revision=-1;tell();return null}
   if(!validPacket(row,founding)||(await mesh.validateObject(row))?.ok!==true)
     throw new Error('Worldweaver commune record is invalid or not signed by this Guild founder.');
-  if(row.revision!==revision){revision=row.revision;packet=copy(row.payload);layoutCache=null;tell()}
+  if(row.revision!==revision){revision=row.revision;packet=copy(row.payload);activeRef=packet.worldRef;layoutCache=null;tell()}
   return copy(packet);
  }
  function getSnapshot(){return packet?copy(packet.snapshot):null}
- function worldRef(){return packet?.worldRef||null}
+ function worldRef(){return activeRef||packet?.worldRef||null}
+ function selectRoom(worldId){
+  const match=packet?.snapshot.instances.find(row=>row.id===worldId&&row.guildId===guildId&&row.status==='live'&&row.world?.backend==='local-renderer');
+  if(!match)throw new RangeError('Selected Worldweaver room is unavailable to this Guild.');
+  if(activeRef!==worldId){activeRef=worldId;layoutCache=null;tell()}
+  return match;
+ }
  function getLayout(){
   if(!packet)return {};
   // One immutable revisioned geometry object is consumed by 2D and 3D.
   if(!layoutCache){
-    const scene=createProvisionalOpenSimScene({instanceId:packet.worldRef,revision:packet.snapshot.revision});
+    const scene=createProvisionalOpenSimScene({instanceId:worldRef(),revision:packet.snapshot.revision});
     layoutCache=Object.freeze({sceneGeometry:buildOpenSimGeometry(scene)});
   }
   return layoutCache;
@@ -133,6 +139,6 @@ export function createCommuneWorldHost({guildId,mesh,founder,verifyReader,clock=
   closed=true;subs.clear();if(typeof meshUnsub==='function')meshUnsub();meshUnsub=null;
  }
  connect();
- return Object.freeze({guildId,refresh,provision,getSnapshot,getLayout,worldRef,subscribe,close,
+ return Object.freeze({guildId,refresh,provision,getSnapshot,getLayout,worldRef,selectRoom,subscribe,close,
    get status(){return packet?'live-local':'unprovisioned'}});
 }
