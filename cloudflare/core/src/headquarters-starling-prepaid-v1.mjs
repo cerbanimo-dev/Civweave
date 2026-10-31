@@ -78,6 +78,23 @@ export async function initializePrepaidBaseline(edge, { fetchImpl = globalThis.f
     confirmedCreditMicroUsd: Number(row.confirmed_credit_micro_usd) };
 }
 
+export async function rebasePrepaidBalanceAfterUsage(edge, { fetchImpl = globalThis.fetch } = {}) {
+  const row = await prepaidRow(edge);
+  if (!row) throw fail('Initialize the Cloudflare baseline first.');
+  if (Number(row.reserved_micro_usd) !== 0) throw fail('Cannot refresh while a paid request is reserved.');
+  const current = await fetchVerifiedCloudflareBalance(edge.env, fetchImpl);
+  const previous = Number(row.provider_balance_micro_usd);
+  // Never raise the baseline here: increases must be explicitly confirmed as
+  // purchased credits, with cash and reference verification.
+  if (current > previous) throw fail('Cloudflare balance increased. Confirm a funded credit load; do not rebase an increase.');
+  const now = nowIso();
+  const updated = await edge.db.prepare(
+    'UPDATE headquarters_starling_prepaid_state SET provider_balance_micro_usd=?1,version=version+1,updated_at=?2 WHERE singleton=1 AND version=?3 AND provider_balance_micro_usd=?4 AND reserved_micro_usd=0'
+  ).bind(current,now,Number(row.version),previous).run();
+  if (changes(updated)!==1) throw fail('Prepaid baseline changed concurrently.');
+  return Object.freeze({schema:HQ_STARLING_PREPAID_SCHEMA,providerBalanceMicroUsd:current,lowered:true});
+}
+
 export function gatewayCashCostCents(creditCents) {
   if (!Number.isSafeInteger(creditCents) || creditCents < 1000 || creditCents > 1_000_000) throw fail('Cloudflare credit load must be between $10 and $10,000.');
   return creditCents + Math.ceil(creditCents * 500 / 10000);
@@ -227,6 +244,7 @@ export async function handleHeadquartersPrepaidRequest(request, env, edgeFactory
     let data; try { data = JSON.parse(raw); } catch { return json({ error:'Invalid JSON.' },400); }
     if (path === HQ_STARLING_PREPAID_ROOT + '/baseline') return json(await initializePrepaidBaseline(edge,{fetchImpl}),201);
     if (path === HQ_STARLING_PREPAID_ROOT + '/confirm-load') return json(await reconcilePrepaidCreditLoad(edge,data,{fetchImpl}),201);
+    if (path === HQ_STARLING_PREPAID_ROOT + '/rebase-after-usage') return json(await rebasePrepaidBalanceAfterUsage(edge,{fetchImpl}));
     if (path === HQ_STARLING_PREPAID_ROOT + '/generate') return json(await runBoundedHeadquartersPrepaidInference(edge,data,{fetchImpl}),200);
     return json({ error:'Unknown prepaid operation.' },404);
   } catch (cause) {
