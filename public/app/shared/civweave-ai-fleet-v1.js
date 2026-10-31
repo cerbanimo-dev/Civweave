@@ -2,7 +2,7 @@
 'use strict';
 // One presentation/catalogue owner. Existing inference, download, Settings,
 // privacy/consent and device-fit contracts remain the execution authorities.
-const VERSION='1.3.0-local-guild-fleet-nav';
+const VERSION='1.3.1-local-backend-switch-persistence';
 if(globalThis.CivweaveAIFleetV1?.version===VERSION)return;
 const MEMORY_KEY='civweave.ai.fleet.memory-gb.v1';
 const CHOICE_KEY='civweave.ai.fleet.choices.v1';
@@ -201,8 +201,19 @@ const BACKENDS=Object.freeze({
 });
 const GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install';
 const STYLE_ID='cw-ai-fleet-style-v2';
-function currentBackend(){const value=read(BACKEND_KEY,'browser');return BACKENDS[value]?value:'browser'}
-function setBackend(value){if(!BACKENDS[value])throw Error('Unsupported local backend.');localStorage.setItem(BACKEND_KEY,value);return value}
+function currentBackend(){
+ // Previous releases saved the raw string, while read() parses JSON.
+ // Honor those existing selections without changing any model assignments.
+ const value=read(BACKEND_KEY,null);
+ if(BACKENDS[value])return value;
+ try{const legacy=localStorage.getItem(BACKEND_KEY);if(BACKENDS[legacy])return legacy}catch{}
+ return 'browser';
+}
+function setBackend(value){
+ if(!BACKENDS[value])throw Error('Unsupported local backend.');
+ localStorage.setItem(BACKEND_KEY,JSON.stringify(value));
+ return value;
+}
 function style(){
  if(document.getElementById(STYLE_ID))return;
  const element=document.createElement('style');element.id=STYLE_ID;
@@ -484,7 +495,17 @@ function render(layer){
        return;
      }
      const backendChoice=el.dataset.aiFleetBackend;
-     if(backendChoice){if(activeImport)activeImport.abort();setBackend(backendChoice);render(layer);return}
+     if(backendChoice){
+        try{
+          if(activeImport)activeImport.abort();
+          setBackend(backendChoice);
+          render(layer);
+        }catch(error){
+          const status=panel.querySelector('[data-ai-fleet-message]');
+          if(status)status.textContent='Could not switch inference backend: '+String(error?.message||error);
+        }
+        return;
+      }
      const presetId=el.dataset.aiFleetDownloadPreset;
      if(presetId){
        el.disabled=true;void downloadFleetPreset(layer,panel,presetId)
