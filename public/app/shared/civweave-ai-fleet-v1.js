@@ -382,6 +382,7 @@ async function activateSavedImport(layer,panel,id){
  const gguf=await import(GGUF_MODULE),installed=await gguf.installedImports({verify:true});
  const record=installed.find(item=>item.importId===id&&item.verified);
  if(!record)throw Error('Imported model is missing or its shards could not be verified. Nothing was activated.');
+ if(testHealth(id)?.passed===false)throw Error('This model failed the meaningful-text test. Rerun the test successfully or choose another import before activation.');
  const selected=await gguf.activateImported(id);
  activateSharedRoute(layer,{model:selected.model,endpoint:'http://127.0.0.1:8080/v1'});
  if(status)status.textContent='Activated '+record.label+'; other verified imports remain available for fleet roles.';
