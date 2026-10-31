@@ -48,12 +48,17 @@ test('mobile-owned Guild Cloud authenticates persona room, shared turns and actu
   const seat=await call(alice,'dispatch',{campaignId:id,expectedRevision:0,
     command:{type:'assign-player',playerId:'member:bob',roleId:'delia'}});
   assert.equal(seat.status,200,JSON.stringify(seat.body));
-  // The second registered mobile node gets a separate private partition.
-  assert.equal((await call(bob,'snapshot',{campaignId:id})).status,404);
-  const staged=await call(alice,'draft',{campaignId:id,expectedRevision:1,
+  // Both starter nodes are in one verified Guild, so an invited member on
+  // another node can join without copying any private manuscript source data.
+  const crossNode=await call(bob,'snapshot',{campaignId:id});
+  assert.equal(crossNode.status,200,JSON.stringify(crossNode.body));
+  const cue=await call(bob,'dispatch',{campaignId:id,expectedRevision:1,
+    command:{type:'player-cue',text:'I will stay near the door.'}});
+  assert.equal(cue.status,200,JSON.stringify(cue.body));
+  const staged=await call(alice,'draft',{campaignId:id,expectedRevision:2,
     characterId:'landry',speech:'The outside world is changing.'});
   assert.equal(staged.status,200,JSON.stringify(staged.body));
-  const done=await call(alice,'approve',{campaignId:id,expectedRevision:1,draftId:staged.body.draft.id});
+  const done=await call(alice,'approve',{campaignId:id,expectedRevision:2,draftId:staged.body.draft.id});
   assert.equal(done.status,200,JSON.stringify(done.body));
   assert.match(done.body.worldReceiptId,/^world:/);
   assert.equal(done.body.world.simulatedOnly,true);
