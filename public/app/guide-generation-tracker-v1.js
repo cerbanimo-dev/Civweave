@@ -48,7 +48,7 @@ async function browserGGUFProbe({timeoutMs=480000,onStatus=()=>{}}={}){
   const started=Date.now(),controller=new AbortController();
   let timer=null,firstTokenAt=null,phase='preparing',text='';
   try {
-    const gguf=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v6-moss-timeout-probe');
+    const gguf=await import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install');
     if(gguf.current()?.model!==selected.model)
       return{ok:false,model:selected.model,code:'GGUF_PROBE_PREFERENCE_MISMATCH',message:'The browser GGUF preference changed before the probe. Open Settings and select the cached import.'};
     timer=setTimeout(()=>controller.abort(new DOMException('GGUF inference test exceeded its eight-minute device budget.','TimeoutError')),timeoutMs);
