@@ -81,6 +81,24 @@ test('approved bans block old user IDs and existing device credential reuse, but
   assert.equal(isBanned(f.sql,D,{credentialHash:'other'}),false);
   assert.equal(isBanned(f.sql,C,{now:Date.now()+91*86400000}),false);
 });
+test('active contributor majority can automatically lift a wrongful ban and restore admission eligibility',()=>{
+  const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
+  const ban=proposeGovernance(f.sql,{...f.context,statement:'Evidence suggests a temporary safety restriction.',actorId:A,action:'ban',targetUserId:C});
+  castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ban.id,choice:'yes'});
+  assert.equal(isBanned(f.sql,C),true);
+  const reverse=proposeGovernance(f.sql,{...f.context,statement:'New evidence justifies overturning the original vote.',actorId:A,action:'lift-ban',targetUserId:C});
+  assert.equal(reverse.status,'open');assert.equal(isBanned(f.sql,C),true);
+  const decision=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:reverse.id,choice:'yes'});
+  assert.equal(decision.status,'approved');
+  assert.equal(isBanned(f.sql,C),false);
+  assert.equal(f.db.prepare('SELECT COUNT(*) AS n FROM guild_governance_audit WHERE event=?').get('ban-lifted-by-majority').n,1);
+});
+test('approved nearby reports have a 30-day per-target cooldown to prevent repeated Guild harassment',()=>{
+  const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
+  const first=proposeGovernance(f.sql,{...f.context,statement:'A documented report of problematic conduct was received.',actorId:A,action:'report',targetUserId:C,reasonCode:'harassment'});
+  castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:first.id,choice:'yes'});
+  assert.throws(()=>proposeGovernance(f.sql,{...f.context,statement:'Repeated allegation against the same Guild resident.',actorId:A,action:'report',targetUserId:C,reasonCode:'other'}),/last 30 days/);
+});
 test('approved report is queued without exposing a member ID or enforcing a remote ban; retry idempotent',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
   const ballot=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'report',targetUserId:C,reasonCode:'harassment'});
