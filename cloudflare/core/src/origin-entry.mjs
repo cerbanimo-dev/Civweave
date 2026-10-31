@@ -1,3 +1,4 @@
+import {handleGuildPeerDirectoryRoute} from './guild-peer-reports-v1.mjs';
 import core, { CivweaveCoreIdentity, launchTopology as baseLaunchTopology } from './charterkeeper-entry-v1.mjs';
 import { registerPublicGuildEdge } from './guild-directory.mjs';
 
@@ -50,6 +51,8 @@ export default {
     if (url.pathname === '/api/commerce/host-fee/policy' || url.pathname === '/api/commerce/host-fee/quote') {
       return retiredCommerceHostFee();
     }
+    const guildPeerReport = await handleGuildPeerDirectoryRoute(request, env);
+    if (guildPeerReport) return guildPeerReport;
     const guildDirectory = await publicGuildDirectoryRoute(request, env);
     if (guildDirectory) return guildDirectory;
     return core.fetch(request, env, ctx);
