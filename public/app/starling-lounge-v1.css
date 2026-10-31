@@ -276,3 +276,46 @@
 @media(prefers-reduced-motion:reduce){
  #cw-starling-lounge *,#cw-starling-lounge *:before,#cw-starling-lounge *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+/* Worldweaver live-local projection; one signed manifest feeds 3D and 2D. */
+#cw-starling-lounge .sl-world-host{
+ position:relative;min-height:clamp(450px,53vw,650px);overflow:hidden;
+ border-radius:15px;background:#142833;border:1px solid #a3e2cd73
+}
+#cw-starling-lounge .sl-world-3d{
+ display:block;width:100%;height:clamp(450px,53vw,650px);
+ background:linear-gradient(#1f3540,#263947);touch-action:none;cursor:grab
+}
+#cw-starling-lounge .sl-world-3d:active{cursor:grabbing}
+#cw-starling-lounge .sl-world-2d{height:clamp(450px,53vw,650px);overflow:auto}
+#cw-starling-lounge .sl-world-2d>div{height:100%;min-height:100%}
+#cw-starling-lounge .sl-world-avatars{position:absolute;inset:0;pointer-events:none;z-index:5}
+#cw-starling-lounge .sl-world-avatars .sl-figure{
+ pointer-events:auto;background:#15343ca8;border:1px solid #b3e2d96e;
+ backdrop-filter:blur(3px);width:61px;min-height:65px;
+ transition:left .7s ease-in-out,top .7s ease-in-out,background .2s ease
+}
+#cw-starling-lounge .sl-world-avatars .sl-figure[data-sl-presence=working]{
+ background:#365d4cbb;border-color:#e7ffb4
+}
+#cw-starling-lounge .sl-world-avatars .sl-figure-avatar{width:35px;height:35px}
+#cw-starling-lounge .sl-world-legend{
+ position:absolute;z-index:8;bottom:8px;left:8px;right:8px;
+ border:1px solid #c0e3d78a;background:#132b36e8;color:#d5ece6;
+ padding:8px;border-radius:9px;text-align:center;font-size:10px;margin:0;pointer-events:none
+}
+#cw-starling-lounge .sl-scene-controls button[aria-pressed=true]{
+ background:#537b70;border:1px solid #d1fae2
+}
+@media(max-width:700px){
+ #cw-starling-lounge .sl-world-host{min-height:clamp(430px,65dvh,570px)}
+ #cw-starling-lounge .sl-world-3d,#cw-starling-lounge .sl-world-2d{height:clamp(430px,65dvh,570px)}
+ #cw-starling-lounge .sl-world-avatars .sl-figure{width:46px;min-height:54px}
+ #cw-starling-lounge .sl-world-avatars .sl-figure-avatar{width:29px;height:29px}
+ #cw-starling-lounge .sl-scene-controls{flex-direction:row;flex-wrap:wrap}
+ #cw-starling-lounge .sl-scene-controls span{flex-basis:100%;max-width:none}
+ #cw-starling-lounge .sl-scene-controls button{flex:0 0 auto;min-height:32px;font-size:10px}
+ #cw-starling-lounge .sl-world-legend{font-size:9px;padding:6px}
+}
+@media(prefers-reduced-motion:reduce){
+ #cw-starling-lounge .sl-world-avatars .sl-figure{transition:none!important}
+}
