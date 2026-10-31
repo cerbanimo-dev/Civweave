@@ -18,6 +18,7 @@ let guildFinderPromise=null;
 let discoveryExpanded=true;
 let guildPanelBusy=false;
 let activeGuildStatus=null;
+let lastGuildNotice='';
 
 function installStyle(doc=document){
   if(!doc?.documentElement||doc.getElementById(STYLE_ID))return;
@@ -255,8 +256,8 @@ function currentGuildSession(guild){
   return item?.origin===guild.origin&&(!guild.nodeId||item.nodeId===guild.nodeId)?item:null;
 }
 function guildFeedback(message){
-  const el=document.querySelector('#'+GUILD_OVERLAY_ID+' [data-cw-guild-feedback]');
-  if(el)el.textContent=String(message||'').slice(0,800);
+  lastGuildNotice=String(message||'').slice(0,800);
+  document.querySelectorAll('#'+GUILD_OVERLAY_ID+' [data-cw-guild-feedback],#'+GUILD_OVERLAY_ID+' [data-cw-guild-notice]').forEach(node=>{node.textContent=lastGuildNotice});
 }
 function renderGuildTab(){
   const overlay=document.getElementById(GUILD_OVERLAY_ID);
@@ -283,6 +284,7 @@ function renderGuildTab(){
       const remaining=quota?.includedRemainingNeurons!=null?guildNumber(quota.includedRemainingNeurons):'—';
       const nodeId=guild.nodeId||session?.nodeId||'Unspecified';
       selected.innerHTML=`<div class="cw-guild-selected-head"><div><span class="cw-guild-kicker">Selected Guild · ${guildEsc(seat)}</span><h2>${guildEsc(label)}</h2><p class="cw-guild-subtitle">${guildEsc(health)}</p></div><button type="button" class="cw-guild-manage" data-guild-ui-action="discover">${discoveryExpanded?'Hide discovery':'Change Guild'}</button></div>
+        <p class="cw-guild-help" role="status" aria-live="polite" data-cw-guild-notice>${guildEsc(lastGuildNotice)}</p>
         <div class="cw-guild-statline"><span>Node: <b>${guildEsc(nodeId)}</b></span><span>Remaining included neurons: <b>${remaining}</b></span><span>Daily member allowance: <b>${allowance}</b></span>${capacity?.communitySeatsRemaining!=null?'<span>Open Citizen seats: <b>'+guildNumber(capacity.communitySeatsRemaining)+'</b></span>':''}</div>
         <div class="cw-guild-actions">
           ${session?'<a class="cw-guild-primary" href="/app/civweave-guild-quest-v1.html">Guild Quests</a>':''}
@@ -399,11 +401,14 @@ async function openNearbyGuilds(){
   const overlay=ensureNearbyGuildsOverlay(),mount=overlay.querySelector(`#${GUILD_MOUNT_ID}`);
   overlay.hidden=false;
   if(!mount)return false;
+  discoveryExpanded=!Boolean(currentGuild());
+  lastGuildNotice='';
+  renderGuildTab();
   showGuildFinderState(mount);
   try{
     const api=await ensureGuildFinderRuntime();
     await api.boot?.({mount});
-    api.showSearch?.(true);
+    api.showSearch?.(!Boolean(currentGuild()));
     const lobby=document.getElementById('cw-host-node-lobby');
     if(!lobby)throw new Error('Nearby Guild finder card was not created.');
     if(lobby.parentElement!==mount)mount.append(lobby);
@@ -411,7 +416,9 @@ async function openNearbyGuilds(){
     lobby.dataset.openedFrom='working-campus-guilds-nav';
     lobby.dataset.surface='standalone-guild-search-card';
     overlay.hidden=false;
-    requestAnimationFrame(()=>document.getElementById('cw-host-node-search-run')?.focus?.({preventScroll:true}));
+    renderGuildTab();
+    requestAnimationFrame(()=>{const guild=currentGuild(),focus=guild?overlay.querySelector('[data-guild-ui-action="discover"]'):document.getElementById('cw-host-node-search-run');focus?.focus?.({preventScroll:true})});
+    void refreshGuildAccess();
     try{dispatchEvent(new CustomEvent('civweave:nearby-guilds-opened',{detail:{source:'working-campus-nav',surface:'standalone-guild-search-card'}}))}catch{}
     return true;
   }catch(error){
@@ -486,6 +493,20 @@ function wire(doc=document){
   observer.observe(doc.documentElement,{childList:true,subtree:true,characterData:true});
 }
 
+function syncGuildAccess(event){
+  const overlay=document.getElementById(GUILD_OVERLAY_ID);
+  if(!overlay||overlay.hidden)return;
+  if(event?.type==='civweave:host-node-selected'){
+    discoveryExpanded=!Boolean(event.detail?.origin);
+    activeGuildStatus=null;
+    lastGuildNotice='';
+  }
+  renderGuildTab();
+  if(event?.type==='civweave:host-node-selected'||event?.type==='civweave:host-node-logged-in')
+    void refreshGuildAccess();
+}
+for(const name of ['civweave:host-node-selected','civweave:host-node-logged-in','civweave:capacity-session-ready','civweave:capacity-session-cleared','civweave:host-node-left'])
+  addEventListener(name,syncGuildAccess);
 function start(){wire(document)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
 else start();
