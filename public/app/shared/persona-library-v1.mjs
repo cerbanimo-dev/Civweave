@@ -35,6 +35,9 @@ export function validatePersonaPack(input){
     if(!['established','proposed','disputed'].includes(e.status))throw new TypeError('Unknown canon status.');
     if(!array(e.actors).concat(array(e.witnesses)).every(id=>ids.has(id)))
       throw new TypeError('Event references an unknown character.');
+    if(e.knownFrom!==undefined&&(!e.knownFrom||typeof e.knownFrom!=='object'||
+      Object.entries(e.knownFrom).some(([id,stage])=>!ids.has(id)||!Number.isInteger(stage)||stage<0)))
+      throw new TypeError('Invalid per-character knowledge onset.');
   }
   return p;
 }
@@ -42,8 +45,9 @@ export function validatePersonaPack(input){
 export function availableKnowledge(input,characterId,stage){
   const p=validatePersonaPack(input);member(p,characterId);
   if(!Number.isInteger(stage)||stage<0)throw new TypeError('A numbered story stage is required.');
-  return p.events.filter(e=>e.stage<=stage&&e.status==='established'&&
-    (array(e.witnesses).includes(characterId)||array(e.actors).includes(characterId)))
+  return p.events.filter(e=>e.status==='established'&&
+    (array(e.witnesses).includes(characterId)||array(e.actors).includes(characterId))&&
+    (Number.isInteger(e.knownFrom?.[characterId])?e.knownFrom[characterId]:e.stage)<=stage)
     .map(e=>({id:e.id,stage:e.stage,summary:e.summary,source:e.source}));
 }
 const compactCharacter=c=>({id:c.id,name:c.name,role:c.role,voice:safe(c.voice,1000),
@@ -56,9 +60,10 @@ export function createDirectorRequest({pack,stage,scenario,participants,goals=[]
   const ids=array(participants);
   if(!ids.length||ids.length>24||!unique(ids))throw new TypeError('Choose 1–24 distinct characters.');
   const cast=ids.map(id=>compactCharacter(member(p,id)));
-  const events=p.events.filter(e=>e.stage<=stage&&e.status==='established')
-    .map(e=>({id:e.id,stage:e.stage,summary:e.summary,source:e.source}));
   const awareness=Object.fromEntries(ids.map(id=>[id,availableKnowledge(p,id,stage).map(e=>e.id)]));
+  const awareIds=new Set(Object.values(awareness).flat());
+  const events=p.events.filter(e=>e.status==='established'&&(e.stage<=stage||awareIds.has(e.id)))
+    .map(e=>({id:e.id,stage:e.stage,summary:e.summary,source:e.source}));
   const payload={scenario:safe(scenario,8000),goals:array(goals).map(x=>safe(x,350)).slice(0,20),
     branchId,stage,cast,events,awareness,
     output:{characters:{'[id]':{characterGoal:'string',emotion:'string',instructions:'string',
