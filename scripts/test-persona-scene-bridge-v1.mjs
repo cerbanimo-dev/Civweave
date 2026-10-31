@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createWorldweaver} from '../public/app/shared/worldweaver-core-v1.mjs';
 import {createDirectorRequest,createPrivateDirectorRequest,validatePersonaPack} from '../public/app/shared/persona-library-v1.mjs';
-import {prepareDirectedScene,performPersonaTurn,queuePersonaActionIntents,needsDirectorRefresh} from '../public/app/shared/persona-scene-bridge-v1.mjs';
+import {prepareDirectedScene,performPersonaTurn,queuePersonaActionIntents,needsDirectorRefresh,runSplitMindTurn} from '../public/app/shared/persona-scene-bridge-v1.mjs';
 
 const pack=validatePersonaPack({schema:'civweave.persona-library.v1',id:'test-cast',version:1,
  characters:[
@@ -76,4 +76,33 @@ test('Worldweaver receives model actions only through its trusted owner and stay
 });
 test('no arbitrary action or unbounded model output may be queued',()=>{
  assert.throws(()=>queuePersonaActionIntents({turnResult:{proposedActions:[{tool:'execute-code',args:{script:'bad'}}]}}),/Worldweaver|required/i);
+});
+
+test('two 2B internal voices are moderated by 0.8B unless authorized willpower bypasses it',async()=>{
+ const dualPack=validatePersonaPack({schema:'civweave.persona-library.v1',id:'mirror-test',version:1,characters:[
+  {id:'landry',name:'Landry',role:'protagonist',modelTier:'2b',improvTier:'0.8b',voice:'gentle'},
+  {id:'delia',name:'Delia',role:'protagonist',modelTier:'2b',improvTier:'0.8b',voice:'assertive'}],events:[]});
+ const s={revision:1,turn:0,expireAfterTurn:4,stage:1,scenario:'Between the doors',participants:['landry','delia'],
+ directives:{characters:{
+  landry:{knownEventIds:[],instructions:'Avoid harm',characterGoal:'Understand',emotion:'afraid',escalateWhen:[],improvFreedom:'small'},
+  delia:{knownEventIds:[],instructions:'Protect',characterGoal:'Survive',emotion:'defiant',escalateWhen:[],improvFreedom:'small'}
+ }}};
+ const calls=[];
+ const invokeModel=async q=>{
+  calls.push(q);
+  if(q.purpose==='split-mind-moderation')return jsonReply({speech:'We should go carefully.',emote:'steps back'});
+  return jsonReply({speech:q.characterId==='landry'?'I am afraid.':'I will protect us.',emote:'hesitates'});
+ };
+ const common={pack:dualPack,scene:s,invokeModel,willpower:{points:2,max:2,renewEvery:4,lastRenewedTurn:0}};
+ const normal=await runSplitMindTurn(common);
+ assert.equal(normal.route,'moderator');assert.deepEqual(calls.map(c=>c.modelTier),['2b','2b','0.8b']);
+ assert.equal(normal.speech,'We should go carefully.');assert.equal(normal.willpower.points,2);
+ calls.length=0;
+ const direct=await runSplitMindTurn({...common,directControl:{characterId:'delia',cost:1},authorizeDirectControl:()=>true});
+ assert.equal(direct.route,'direct');assert.equal(direct.speech,'I will protect us.');
+ assert.deepEqual(calls.map(c=>c.modelTier),['2b','2b']);assert.equal(direct.willpower.points,1);
+ assert.equal(direct.directControlReceipt.characterId,'delia');
+ calls.length=0;
+ await assert.rejects(runSplitMindTurn({...common,directControl:{characterId:'delia',cost:1}}),/trusted authorization/i);
+ assert.equal(calls.length,0);
 });
