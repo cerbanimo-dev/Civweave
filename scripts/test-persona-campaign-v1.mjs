@@ -92,3 +92,22 @@ test('import rejects overflow, secret-like custom keys, edits to existing events
   const injected=cloneSnapshot(started);injected.events[0].directorInstructions='DO NOT SHARE';
   assert.throws(()=>importCampaignSnapshot(JSON.stringify(injected),{pack}),/unknown|invalid|field/i);
 });
+
+test('a validated structured 3D movement intent can be saved without admitting arbitrary nested model instructions',()=>{
+ let s=kit();
+ s=event(s,{type:'bind-pilot',characterId:'jess',principalId:'model:jess',modelId:'qwen3.5:0.8b'});
+ const action={tool:'move',args:{from:{x:10,y:13,z:0},to:{x:12,y:13,z:0},expectedSceneRevision:0}};
+ s=event(s,{type:'npc-proposal',characterId:'jess',proposedActions:[action]},model);
+ const last=s.events.at(-1);
+ assert.deepEqual(last.proposedActions,[action]);
+ const restored=importCampaignSnapshot(exportCampaignSnapshot(s),{pack});
+ assert.deepEqual(restored.events.at(-1).proposedActions,[action]);
+ for(const bad of [
+  {tool:'move',args:{from:{x:10,y:13,z:0},to:{x:100,y:13,z:0},expectedSceneRevision:0}},
+  {tool:'move',args:{from:{x:10,y:13,z:0},to:{x:12,y:13,z:0},expectedSceneRevision:0,executeJavascript:'alert(1)'}},
+  {tool:'move',args:{from:{x:10,y:13,z:0},to:{x:12,y:13,z:NaN},expectedSceneRevision:0}}
+ ]){
+   assert.throws(()=>event(s,{type:'npc-proposal',characterId:'jess',proposedActions:[bad]},model),
+     /Invalid|structured|proposed/i);
+ }
+});
