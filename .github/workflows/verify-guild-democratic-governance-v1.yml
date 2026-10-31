@@ -15,6 +15,7 @@ on:
       - 'public/app/guild-symbol-v1.js'
       - 'public/app/working-campus-v440.html'
       - 'scripts/test-guild-democratic-governance-v1.mjs'
+      - 'docs/contracts/guild-democratic-governance-v1.md'
       - '.github/workflows/verify-guild-democratic-governance-v1.yml'
   push:
     branches: [staging,main]
