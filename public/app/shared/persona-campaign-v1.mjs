@@ -49,6 +49,8 @@ export function createPersonaCampaign({pack,id,title,ownerId,branchId,stage=0,sc
     willpower:{points:2,max:2,renewEvery:4,lastRenewedTurn:0}};
 }
 function validateState(s){
+  if(obj(s)&&s.schema===PERSONA_CAMPAIGN_SCHEMA&&s.branchId===CANON)
+    throw new TypeError('Canon branch is read-only. A persona campaign must use a what-if branch.');
   if(!obj(s)||s.schema!==PERSONA_CAMPAIGN_SCHEMA||Object.keys(s).some(k=>!KEYS.includes(k))||
     !validId(s.id)||!validId(s.ownerId)||!validId(s.branchId)||s.branchId===CANON||
     !s.branchId.startsWith('what-if:')||!validId(s.packId)||!Array.isArray(s.cast)||
