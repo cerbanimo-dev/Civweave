@@ -114,6 +114,7 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <p id="persona-willpower" class="compact">Split-mind willpower: 2/2, restores 1 every four accepted rehearsal turns. Author-only demonstration of the mechanic.</p>
 <div class="controls"><button id="persona-prepare" type="button">Prepare scenario with 4B</button></div>
 <label for="persona-player-cue">One player cue / improvised question</label><textarea id="persona-player-cue" maxlength="1500" rows="2" placeholder="What do you say or try?"></textarea>
+<label class="check" for="persona-force-redirect"><input id="persona-force-redirect" type="checkbox"> This player action breaks the planned scene; request fresh 4B direction after this cue</label>
 <div class="controls"><button id="persona-act" type="button">Preview character's next action</button></div>
 <pre id="persona-result" aria-label="Director and character rehearsal output" role="status" aria-live="polite">Import a cast manifest, then prepare a scenario.</pre>
 <p class="compact">This lab issues explicit, sequential calls through Civweave's configured model provider. Model tiers are user-selected, not automatically installed. All proposed world actions remain unexecuted until a trusted renderer separately accepts them. Preview dialogue never rewrites canon.</p>
