@@ -7,7 +7,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 test('Lounge imports the one native Collective owner and existing Guild read client',()=>{
  const src=read('public/app/starling-lounge-v1.mjs');
- assert.equal(CivweaveStarlingLoungeV1.version,'1.2.0');
+ assert.equal(CivweaveStarlingLoungeV1.version,'1.3.0');
  assert.match(src,/starling-collective-v1\.mjs/);
  assert.match(src,/starling-collective-tools-v1\.mjs/);
  assert.match(src,/CivweaveGuildQuestsV1/);
@@ -124,4 +124,20 @@ test('Worldweaver Commune mounts signed world and real 3D/2D providers without d
  assert.doesNotMatch(src,/\.dispatch\(\{type:'queue-actions'/);
  assert.match(styles,/sl-world-avatars/);
  assert.match(styles,/prefers-reduced-motion/);
+});
+
+test('Local/Guild Fleet scopes are first class and canonical local model inventory remains private',()=>{
+ const src=read('public/app/starling-lounge-v1.mjs');
+ const css=read('public/app/starling-lounge-v1.css');
+ const settings=read('public/app/shared/civweave-ai-fleet-v1.js');
+ assert.match(src,/data-sl-fleet="local"/);
+ assert.match(src,/data-sl-fleet="guild"/);
+ assert.match(src,/localFleetProjection/);
+ assert.match(src,/guildFleetProjection/);
+ assert.match(src,/worldObservationPrompt/);
+ assert.match(src,/drawSignedPilots/);
+ assert.match(css,/data-sl-fleet="local"/);
+ assert.match(css,/data-sl-fleet="guild"/);
+ assert.match(settings,/data-ai-fleet-guild/);
+ assert.match(settings,/data-ai-fleet-local/);
 });
