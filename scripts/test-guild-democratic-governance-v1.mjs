@@ -128,7 +128,7 @@ test('directory relay independently fetches source Guild receipt and delivers on
         },
         async run(){
           if(!query.includes('INSERT OR IGNORE INTO guild_peer_report_inbox'))throw new Error('Unknown mutation');
-          delivered.add(this.args[2]);seen.push({recipient:this.args[2],receipt:JSON.parse(this.args[3])});
+          delivered.add(this.args[0]);seen.push({recipient:this.args[2],receipt:JSON.parse(this.args[3])});
           return{meta:{changes:1}};
         }
       };return entry;
