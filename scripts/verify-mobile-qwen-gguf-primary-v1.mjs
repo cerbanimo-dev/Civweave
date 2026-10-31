@@ -18,6 +18,7 @@ execFileSync(process.execPath,['--check','public/app/local-ai/gguf-split-browser
 execFileSync(process.execPath,['scripts/test-gguf-browser-split-v1.mjs'],{stdio:'inherit'});
 execFileSync(process.execPath,['--check','public/app/local-ai/browser-gguf-opfs-v1.js'],{stdio:'inherit'});
 execFileSync(process.execPath,['scripts/test-gguf-opfs-import-v1.mjs'],{stdio:'inherit'});
+execFileSync(process.execPath,['scripts/test-gguf-model-uninstall-v1.mjs'],{stdio:'inherit'});
 execFileSync(process.execPath,['scripts/test-gguf-generation-watch-v1.mjs'],{stdio:'inherit'});
 execFileSync(process.execPath,['--check','public/app/local-ai/native-gguf-server-setup-v1.js'],{stdio:'inherit'});
 execFileSync(process.execPath,['scripts/test-native-gguf-server-setup-v1.mjs'],{stdio:'inherit'});
