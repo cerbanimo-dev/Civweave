@@ -69,6 +69,9 @@ function applyApproved(sql,row,{guildId,origin}){
     sql.exec('DELETE FROM resident_members WHERE user_id=?',target);
     sql.exec('DELETE FROM guild_governance_roles WHERE user_id=?',target);
     recordAudit(sql,row.id,row.action+(member?'-applied':'-already-absent'),target);
+  }else if(row.action==='lift-ban'){
+    sql.exec('DELETE FROM guild_governance_bans WHERE user_id=?',target);
+    recordAudit(sql,row.id,'ban-lifted-by-majority',target);
   }else if(row.action==='transfer-role'){
     if(!rows(sql,'SELECT user_id FROM resident_members WHERE user_id=? LIMIT 1',target)[0])
       throw fail('Cannot grant a Guildkeeper role to a nonresident.');
@@ -108,9 +111,16 @@ function settle(sql,id,{guildId,origin,now=Date.now()}){
 export function proposeGovernance(sql,{guildId,origin,actorId,action,targetUserId,reasonCode='',role='',statement='',now=Date.now()}){
   ensureGovernanceTables(sql);
   const members=rows(sql,'SELECT user_id FROM resident_members');
-  if(!members.some(row=>row.user_id===targetUserId))throw fail('Target member must be currently enrolled.',404);
+  if(action==='lift-ban'){
+    if(!isBanned(sql,targetUserId,{now}))throw fail('A lift-ban vote needs an existing active Guild ban.',409);
+  }else if(!members.some(row=>row.user_id===targetUserId))throw fail('Target member must be currently enrolled.',404);
   const eligible=electorate(sql,{now});
   const spec=ballotSpec({action,targetUserId,initiatorUserId:actorId,eligible,reasonCode,role,statement,now});
+  if(action==='report'){
+    const recentlyApproved=rows(sql,"SELECT id FROM guild_governance_ballots WHERE target_user_id=? AND action='report' AND status='approved' AND resolved_at>=? LIMIT 1",
+      targetUserId,new Date(now-30*86400000).toISOString())[0];
+    if(recentlyApproved)throw fail('An approved report about this member already exists within the last 30 days.',429);
+  }
   const pending=rows(sql,"SELECT id FROM guild_governance_ballots WHERE target_user_id=? AND action=? AND status='open' AND expires_at>? LIMIT 1",
     targetUserId,action,new Date(now).toISOString())[0];
   if(pending)throw fail('An active vote already exists for this member and action.');
