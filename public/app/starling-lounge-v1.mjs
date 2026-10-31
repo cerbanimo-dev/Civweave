@@ -32,8 +32,8 @@ function setup(){
   if(state.root)return state.root;
   const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=fleet-scopes-sim-r4';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
-  root.innerHTML=`<header class="sl-head">
-  <div class="sl-brand"><small>CIVWEAVE · WORLDWEAVER</small><h1 data-sl-main-title>AI Fleets</h1><p data-sl-main-description>Local device and Guild simulation spaces</p></div>
+  root.innerHTML=`<div class="sl-chrome"><header class="sl-head">
+  <div class="sl-brand"><img class="sl-brand-mark" src="/app/logos/civweave-icon-192.png" alt="" width="48" height="48"><div class="sl-brand-copy"><small>CIVWEAVE · WORLDWEAVER</small><h1 data-sl-main-title>AI Fleets</h1><p data-sl-main-description>Local device and Guild simulation spaces</p></div></div>
   <div class="sl-head-right"><span class="sl-live-pill" data-sl-activity-status>Awaiting activity</span><small data-sl-guild></small><button type="button" data-sl-action="refresh" aria-label="Refresh commune information">↻ Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Commune">Close ×</button></div>
 </header>
 <nav class="sl-fleet-switch" aria-label="Choose an AI fleet">
@@ -46,11 +46,11 @@ function setup(){
  <button type="button" data-sl-view="conversation" aria-pressed="false">Dialogue</button>
  <button type="button" data-sl-view="work" aria-pressed="false">Quests</button>
  <button type="button" data-sl-view="operations" aria-pressed="false">Controls</button>
-</nav>
+</nav></div><!-- /chrome -->
 <div class="sl-layout">
  <aside class="sl-card sl-roster" data-sl-panel="agents" aria-label="Commune residents">
   <div class="sl-panel-title"><span class="sl-kicker">01 · RESIDENTS</span><h2>Who is here</h2></div>
-  <p class="sl-label">Starling · fictional collective</p><div class="sl-cast" data-sl-cast></div>
+  <p class="sl-label" data-sl-guild-only>Starling · fictional collective</p><div class="sl-cast" data-sl-cast data-sl-guild-only></div>
   <p class="sl-label sl-guides-title">Civweave · system guides</p><div class="sl-cast sl-guide-list" data-sl-guides></div>
   <p class="sl-status">Agent portraits represent software roles, not human Guild membership or votes. Standby does not mean a model is running.</p>
  </aside>
@@ -58,17 +58,20 @@ function setup(){
   <section class="sl-scene-panel" data-sl-panel="world" aria-label="Virtual commune visualization">
    <div class="sl-scene-heading"><div><span class="sl-kicker">THE LIVING COMMUNE</span><h2>Commune grounds</h2></div><div class="sl-scene-controls"><span data-sl-live-note>Connecting Worldweaver…</span><label class="sl-room-select" data-sl-room-holder hidden>Space <select data-sl-world-room aria-label="Choose a Worldweaver commune space"></select></label><button type="button" data-sl-action="world-provision" hidden>Start local world</button><button type="button" data-sl-action="world-3d" hidden>3D Scene</button><button type="button" data-sl-action="world-2d" hidden>2D Map</button><button type="button" data-sl-action="focus-active">Focus activity</button></div></div>
    <div class="sl-scene-shell">
-    <div class="sl-stage" data-sl-stage role="group" aria-label="Schematic virtual commune and resident avatars">
+    <div class="sl-stage" data-sl-stage role="group" aria-label="Illustrated commune terrain and landmarks">
      <div class="sl-sky" aria-hidden="true"><span class="sl-sun"></span><span class="sl-stars"></span></div>
      <div class="sl-land" aria-hidden="true"></div><div class="sl-path sl-path-a" aria-hidden="true"></div><div class="sl-path sl-path-b" aria-hidden="true"></div>
      <button type="button" class="sl-building sl-building-school" data-sl-station="school"><span class="sl-building-icon">✧</span><b>Living School</b><small>Learning and research</small></button>
      <button type="button" class="sl-building sl-building-forge" data-sl-station="forge"><span class="sl-building-icon">⚒</span><b>Quest Forge</b><small>Creation and review</small></button>
      <button type="button" class="sl-building sl-building-supply" data-sl-station="supply"><span class="sl-building-icon">◇</span><b>FellowFare</b><small>Resources and tools</small></button>
      <button type="button" class="sl-building sl-building-council" data-sl-station="council"><span class="sl-building-icon">✦</span><b>Commons</b><small>Planning and dialogue</small></button>
-     <div class="sl-ensemble" data-sl-ensemble aria-label="Select a commune resident"></div>
-     <div class="sl-scene-caption"><span class="sl-scene-orbit" aria-hidden="true"></span>Avatars idle decoratively; work animation follows actual execution signals</div>
+     <div class="sl-scene-caption"><span class="sl-scene-orbit" aria-hidden="true"></span>Illustrated districts · scenes are schematic until a Worldweaver room is provisioned</div>
     </div>
     <div class="sl-world-host" data-sl-world-host hidden aria-label="Guild Worldweaver 3D scene and accessible 2D map"></div>
+    <section class="sl-stage-dock" data-sl-fallback-dock aria-label="Available AI cast">
+      <div class="sl-dock-heading"><small class="sl-kicker">PRESENCE DECK</small><span>Idle portraits are not running models</span></div>
+      <div class="sl-ensemble" data-sl-ensemble aria-label="Select a commune resident"></div>
+    </section>
    </div>
    <div class="sl-focus-strip" aria-live="polite">
     <img data-sl-focus-avatar class="sl-focus-avatar" alt="">
@@ -76,6 +79,23 @@ function setup(){
     <button type="button" data-sl-action="focus-chat">Address in chat</button>
    </div>
    <p class="sl-scene-disclaimer" data-sl-scene-context>Preview layout; locations are illustrative until an authorized Worldweaver region is connected.</p>
+  </section>
+  <section class="sl-card sl-fleet-panel sl-local-fleet" data-sl-local-fleet aria-label="Device-local AI roles">
+    <div class="sl-panel-title"><div><span class="sl-kicker">DEVICE · PRIVATE COMPUTE</span><h2>My Local Fleet</h2></div><button class="sl-strong" type="button" data-sl-action="fleet-settings">Configure models</button></div>
+    <p class="sl-sub">Saved model roles and installation choices. A configured model is not necessarily running.</p>
+    <div class="sl-local-roles" data-sl-local-roles></div><p class="sl-status" data-sl-local-status role="status">Reading device configuration…</p>
+  </section>
+  <section class="sl-card sl-fleet-panel sl-guild-fleet" data-sl-guild-fleet aria-label="Guild fleet and simulator tools">
+    <div class="sl-panel-title"><div><span class="sl-kicker">GUILD · SHARED SIMULATION</span><h2>Worldweaver Pilots</h2></div><span class="sl-mini-pill" data-sl-guild-count>0 registered NPCs</span></div>
+    <p class="sl-sub">Only signed pilots enter the Guild world. Local model files, settings and private messages remain on your device.</p>
+    <div class="sl-guild-pilots" data-sl-guild-pilots></div>
+    <div class="sl-fleet-actions"><button type="button" class="sl-strong" data-sl-action="pilot-register">Register selected pilot</button><button type="button" data-sl-action="world-observe">Observe room</button></div>
+    <details class="sl-sim-tools"><summary>Simulator workbench <span>Read-only + pending proposals</span></summary>
+      <p class="sl-sub">Preparing a move does not execute it.</p>
+      <div class="sl-coordinate-fields"><label>X coordinate<input type="number" min="0" max="256" step="1" data-sl-move-x value="128"></label><label>Y coordinate<input type="number" min="0" max="256" step="1" data-sl-move-y value="128"></label><button type="button" data-sl-action="world-move-proposal">Prepare move</button></div>
+      <pre class="sl-tool-observation" data-sl-observation aria-label="Read-only observation and prepared actions"></pre>
+    </details>
+    <p class="sl-status" data-sl-simulator-status role="status">Simulator tools require a signed Worldweaver room and registered pilot.</p>
   </section>
   <section class="sl-card sl-conversation" data-sl-panel="conversation" aria-label="Collective dialogue">
    <div class="sl-panel-title"><div><span class="sl-kicker">02 · THE HEARTH</span><h2>Conversation and decisions</h2></div><span class="sl-mini-pill" data-sl-transcript-count>0 signed turns</span></div>
@@ -280,6 +300,8 @@ function renderFleetScopes(){
   const guild=state.guild;
   state.root.dataset.slFleet=state.fleetScope;
   const guildButton=$('[data-sl-fleet=guild]');if(guildButton)guildButton.disabled=!guild;
+  const dock=$('[data-sl-fallback-dock]');if(dock)dock.hidden=fleetIsGuild()&&state.worldLinked;
+  const sceneTab=$('[data-sl-view=world]');if(sceneTab)sceneTab.textContent=fleetIsGuild()?'Commune':'Studio';
   const title=$('[data-sl-main-title]');if(title)title.textContent=fleetIsGuild()?'Guild Fleet':'Local Fleet';
   const sub=$('[data-sl-main-description]');if(sub)sub.textContent=fleetIsGuild()?'Shared Worldweaver pilots and Guild work':'Device-owned models, private AI and my tools';
   for(const b of state.root.querySelectorAll('[data-sl-fleet]'))b.setAttribute('aria-pressed',String(b.dataset.slFleet===state.fleetScope));
@@ -883,7 +905,7 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
     renderPresence();
   };
   drawSignedPilots();
-  const legend=el('p','sl-world-legend','Worldweaver signed NPCs shown in HUD dock · 3D coordinates and movement require trusted simulator receipts');
+  const legend=el('p','sl-world-legend','Registered pilots are docked below the scene. Movement requires trusted simulator receipts.');
   host.append(canvas,map,avatars,legend);
   let viewer=null,view=null;
   try{
