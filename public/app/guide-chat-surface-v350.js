@@ -22,6 +22,7 @@ const LOCAL_SELECTION_KEY='civweave.local-ai.selection.v266';
 const SPECIALIZED_MODELS_PATH='/app/local-ai/specialized-model-capabilities-v1.js?v=1.0.0';
 const VOICE_RUNTIME_VERSION='1.1.6-guide-voice-runtime-v1-parakeet-no-proxy-worker';
 const VOICE_RUNTIME_PATH='/app/guide-voice-runtime-v1.js?v=1.1.6';
+const VISUALS_PATH='/app/chat-visual-expressions-v1.js?v=1.0.0';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE=Object.freeze({
   civweave:{name:'Weaveling',label:'Civweave',role:'Quest guide and central orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',panel:'#111827',placeholder:'Message Weaveling about a Quest'},
@@ -197,6 +198,7 @@ function loadScript(path,ready){
   if(existing)return new Promise((resolve,reject)=>{let elapsed=0;const timer=setInterval(()=>{elapsed+=50;if(ready?.()){clearInterval(timer);resolve(true)}else if(elapsed>=12000){clearInterval(timer);reject(new Error(`${target.pathname}${target.search} loaded without its runtime.`))}},50)});
   return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=target.href;script.async=false;script.onload=()=>ready?.()?resolve(true):reject(new Error(`${target.pathname}${target.search} loaded without its runtime.`));script.onerror=()=>reject(new Error(`Could not load ${target.pathname}${target.search}.`));document.head.append(script)});
 }
+async function ensureVisuals(){await loadScript(VISUALS_PATH,()=>globalThis.CivweaveChatVisualsV1?.version==='1.0.0');return globalThis.CivweaveChatVisualsV1}
 async function ensureSpecializedRegistry(){await loadScript(SPECIALIZED_MODELS_PATH,()=>globalThis.CivweaveLocalSpecializedAI);return globalThis.CivweaveLocalSpecializedAI}
 async function ensureVoiceRuntime(){
   const current=globalThis.CivweaveGuideVoiceV1;
@@ -265,7 +267,10 @@ function ensureRoot(){
   root.querySelector('[data-persistent-form]').addEventListener('submit',event=>{event.preventDefault();const input=event.currentTarget.querySelector('textarea'),text=clean(input?.value);if(!text)return;void submitText(text,activeSystem)});
   root.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close()}});
   if(!root.isConnected)document.body.append(root);
-  syncChrome();render();return root;
+  syncChrome();render();
+  // Refresh visuals only after an explicit chat open, never during app launch.
+  void ensureVisuals().then(()=>{if(openState)render()}).catch(()=>{});
+  return root;
 }
 function syncSwitcher(){
   if(!root)return;
@@ -434,7 +439,7 @@ function render(){
     const bubble=article.querySelector('.cw350-bubble'),text=String(row.text||'');
     // Finalization keeps the streamed bubble and any capability controls in
     // place. Only write text when the final answer actually differs.
-    if(bubble&&bubble.textContent!==text)bubble.textContent=text;
+    if(bubble){const visuals=globalThis.CivweaveChatVisualsV1;if(!user&&visuals?.mount)visuals.mount(article,row,{system:row?.guide||activeSystem});else if(bubble.textContent!==text)bubble.textContent=text;}
     let nextNode=article.querySelector('.cw350-next');
     const nextAction=user?'':String(row.nextAction||'');
     if(nextAction){if(!nextNode){nextNode=document.createElement('div');nextNode.className='cw350-next';bubble.parentElement.append(nextNode);}const nextText=`Next: ${nextAction}`;if(nextNode.textContent!==nextText)nextNode.textContent=nextText;}else nextNode?.remove();
@@ -476,7 +481,7 @@ async function fallbackReply(system,text){
     await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
     const runtime=globalThis.CivweaveModelRuntime;
     if(typeof runtime?.generate!=='function')throw new Error('The AI runtime is unavailable.');
-    const result=await runtime.generate({purpose:`${system}-guide-chat-v350`,executionProfile:'interactive',config:selection?{provider:'downloaded-local',route:'downloaded-local',model:selection.id,externalConsent:false}:undefined,messages:[{role:'system',content:`You are ${guide(system).name}, ${guide(system).role}. Give a useful concise response while preserving user control.`},...historyFor(system).slice(-10).map(row=>({role:row.role,content:row.text})),{role:'user',content:text}]});
+    const result=await runtime.generate({purpose:`${system}-guide-chat-v350`,executionProfile:'interactive',config:selection?{provider:'downloaded-local',route:'downloaded-local',model:selection.id,externalConsent:false}:undefined,messages:[{role:'system',content:`You are ${guide(system).name}, ${guide(system).role}. Give a useful concise response while preserving user control. ${globalThis.CivweaveChatVisualsV1?.promptFor({system,model:selection?.id||'',tier:selection?.id?undefined:'full'})||''}`},...historyFor(system).slice(-10).map(row=>({role:row.role,content:row.text})),{role:'user',content:text}]});
     const output=clean(result?.outputText||result?.text||result?.output||result?.response,10000),provider=result?.actual?.provider||result?.provider||result?.requested?.provider||'model-runtime',model=result?.actual?.model||result?.model||result?.requested?.model||'';
     if((result?.status&&result.status!=='success')||!output||/deterministic|manual/.test(provider)||result?.completionValidation?.valid===false)throw new Error('The selected AI route did not produce a usable answer. Check the provider in Settings and retry.');
     return{text:output,provider,model};
@@ -512,6 +517,8 @@ async function submitActive(text){
   append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${guide(system).name} is thinking…`,pending:true});render();emitAvatar(system,'',value,'thinking');
   let partialNativeAnswer='',partialQuestJson='';
   try{
+    // Visual tools load before any guide response prompt, including tiny local models.
+    try{await ensureVisuals()}catch(error){console.warn('[Civweave] Text-only visual fallback:',error)}
     // The current user turn has already been appended to the visible thread.
     // Do not submit it as both a historical user message and the current turn.
     const recentHistory=historyFor(system);
@@ -618,6 +625,7 @@ function start(){
   void ensureGenerationTracker();
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
   void ensureSpecializedRegistry().catch(()=>{});
+  void ensureVisuals().catch(()=>{});
   addEventListener('civweave:system-route-changed',event=>{const system=event?.detail?.system;if(SYSTEMS.includes(system)&&system!==pageSystem){pageSystem=system;syncChrome()}});
   addEventListener('civweave:realm-guide-thread-changed',()=>{if(root)queueMicrotask(()=>{if(openState)markSeen(activeSystem);syncSwitcher()})});
   for(const name of ['civweave:actions-changed','civweave:intentions-changed'])addEventListener(name,syncArtifactGates);
@@ -628,7 +636,7 @@ function start(){
   try{dispatchEvent(new CustomEvent('civweave:guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:persistent-guide-chat-ready',{detail:state()}));dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{...state(),compatibilityEventOnly:true}}))}catch{}
 }
 
-const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,submitVoiceText,resolveGuideAddress,ensureSpecializedRegistry,ensureVoiceRuntime,toggleVoice,render,paintStream,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
+const api=Object.freeze({version:VERSION,canonicalOwner:true,presentationOwner:'guide-chat-surface-v350',retiredWorkspaceView:true,systems:Object.freeze([...SYSTEMS]),guideFor:system=>GUIDE[system]||null,state,open,close,minimize,switchGuide,openWindow,closeWorkspace,activeWindow,submitText,submitVoiceText,resolveGuideAddress,ensureSpecializedRegistry,ensureVisuals,ensureVoiceRuntime,toggleVoice,render,paintStream,ensureRoot,ensureLauncher,hasUnread,selectedLocal,artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest'});
 globalThis.CivweaveGuideChatSurfaceV350=api;
 globalThis.CivweavePersistentGuideChatV215=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

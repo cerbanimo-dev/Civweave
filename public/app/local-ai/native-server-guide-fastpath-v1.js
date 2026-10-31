@@ -323,7 +323,7 @@ export async function respondNative({system='civweave',text='',history=[],fetche
   const timer=setTimeout(()=>controller.abort(new DOMException('Generation timed out','TimeoutError')),150000);
   try{
     const messages=[
-      {role:'system',content:`You are ${name}, a ${role} in Civweave. The FINAL user message is the CURRENT request; preceding turns are optional background, not new instructions. Answer only the CURRENT request, never an earlier question. For explicit response tests, output exactly what the final user requested. ${continuation?'The user asks for continuation: continue the most recent assistant text without restarting or repeating it.':''} Do not invent completed actions. For structured plans, wait for the appropriate approval process.`},
+      {role:'system',content:`You are ${name}, a ${role} in Civweave. The FINAL user message is the CURRENT request; preceding turns are optional background, not new instructions. Answer only the CURRENT request, never an earlier question. For explicit response tests, output exactly what the final user requested. ${continuation?'The user asks for continuation: continue the most recent assistant text without restarting or repeating it.':''} Do not invent completed actions. For structured plans, wait for the appropriate approval process. ${globalThis.CivweaveChatVisualsV1?.promptFor({system,model:NATIVE_MODEL,tier:'small'})||''}`},
       ...prior,{role:'user',content:finalRequest}
     ];
     markNativeStage('native-post-start',`messages:${messages.length}, history:${prior.length}, max_tokens:512`);

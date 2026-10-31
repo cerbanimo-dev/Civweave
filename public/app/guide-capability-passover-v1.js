@@ -86,19 +86,21 @@ function offerKey(system){return`${STORE_PREFIX}.${system}`}
 function readOffer(system){try{return parse(localStorage.getItem(offerKey(system)),null)}catch{return null}}
 function writeOffer(offer){try{localStorage.setItem(offerKey(offer.sourceSystem),JSON.stringify(offer))}catch{}return offer}
 
-function canonicalPrompt(system,tiny=false){
+function canonicalPrompt(system,tiny=false,model=''){
+  // All guide prompt profiles see the same safe visual tool, scaled to model capacity.
+  const visual=globalThis.CivweaveChatVisualsV1?.promptFor({system,model,tier:tiny?'tiny':undefined})||'';
   const own=canonicalFor(system);
   const vocabulary='Canonical Civweave artifact language: Weaveling creates Quests; Moss creates Learning Journeys; Kamiya creates Endeavors; Rook creates Manifests. A Quest is the cross-realm intention and route. A Learning Journey develops demonstrable capability. An Endeavor is productive work and may serve a Quest, but is not itself a Quest. A Manifest gathers skills, resources, materials, services, needs, and offers. Never call Kamiya a Questwright and never call a Kamiya artifact a Quest. Legacy internal words such as weave, curriculum, quest-draft, resource-manifest, or artifact classes are implementation details and must not redefine or leak into user-facing ownership.';
   const world='Call a person using Civweave a Hero, collaborating Heroes a Party, a host community a Guild, its operator a Guildkeeper, the regional charter role a Charterkeeper, and the map the Guild Map. Rook is the Quartermaster guide, not the Guild operator.';
   const identity=`You are ${own.guide}, ${own.role}. Your canonical artifact is ${own.artifact}.`;
-  if(tiny)return`${identity} ${vocabulary} ${world} Be direct. Do not invent saved state, prices, votes, tool use, or execution. Consequential actions require explicit Hero approval. Return valid JSON with keys answer, choice, assumptions, requiresConsent, confidence, questDraft.`;
-  return`Civweave canonical guide language v1. ${identity}\n\n${vocabulary}\n\n${world}\n\nUse these terms naturally and preserve the selected guide identity. Do not revive Hub, Hub Node, Node Steward, Territory Steward, Guild Steward, Questwright, or user-facing learning-path terminology.`;
+  if(tiny)return`${identity} ${vocabulary} ${world} Be direct. Do not invent saved state, prices, votes, tool use, or execution. Consequential actions require explicit Hero approval. Return valid JSON with keys answer, choice, assumptions, requiresConsent, confidence, questDraft. ${visual} If using a visual marker, place it inside the JSON answer string, never outside the JSON.`;
+  return`Civweave canonical guide language v1. ${identity}\n\n${vocabulary}\n\n${world}\n\nUse these terms naturally and preserve the selected guide identity. Do not revive Hub, Hub Node, Node Steward, Territory Steward, Guild Steward, Questwright, or user-facing learning-path terminology.\n\n${visual}`;
 }
 function canonicalPromptRequest(request={}){
   const purpose=compact(request.purpose,240);if(!/^civweave-guide-response(?:-v141)?/.test(purpose)||request.__civweaveGuideLanguageApplied==='canonical-artifacts-v1')return request;
   const system=systemFor(request),messages=Array.isArray(request.messages)?request.messages.map(row=>({...row})):[],provider=compact(request?.config?.provider||request?.config?.route,80).toLowerCase(),model=compact(request?.config?.model,160),tiny=provider==='downloaded-local'&&TINY_LOCAL_MODELS.has(model);
-  if(tiny){const recent=messages.filter(row=>row?.role!=='system').slice(-3);return{...request,messages:[{role:'system',content:canonicalPrompt(system,true)},...recent],__civweaveGuideLanguageApplied:'canonical-artifacts-v1',guidePromptProfile:'tiny-canonical-artifacts-v1'}}
-  const prompt=canonicalPrompt(system,false),firstSystem=messages.findIndex(row=>row?.role==='system');
+  if(tiny){const recent=messages.filter(row=>row?.role!=='system').slice(-3);return{...request,messages:[{role:'system',content:canonicalPrompt(system,true,model)},...recent],__civweaveGuideLanguageApplied:'canonical-artifacts-v1',guidePromptProfile:'tiny-canonical-artifacts-v1'}}
+  const prompt=canonicalPrompt(system,false,model),firstSystem=messages.findIndex(row=>row?.role==='system');
   if(firstSystem<0)messages.unshift({role:'system',content:prompt});else messages[firstSystem]={...messages[firstSystem],content:`${prompt}\n\n${messages[firstSystem].content||''}`};
   return{...request,messages,__civweaveGuideLanguageApplied:'canonical-artifacts-v1',guidePromptProfile:'canonical-artifacts-v1'};
 }
