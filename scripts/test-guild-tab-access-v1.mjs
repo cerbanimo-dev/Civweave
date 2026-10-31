@@ -112,6 +112,8 @@ test('Guild tab uses existing discovery and membership owners, starts collapsed 
   assert.match(view,/data-cw-guild-invite/);
   assert.match(view,/data-guild-ui-action="founder-manage"/);
   assert.match(view,/CivweaveHumanChatStandaloneV2/);
+  assert.match(view,/sameOriginLocal/);
+  assert.match(view,/guild\.localFederated\?await finder\.loadStatus/);
   assert.match(finder,/inspectOrigin/);
   assert.match(edge,/leaveResident\(/);
   assert.match(edge,/request\.method==='DELETE'/);
