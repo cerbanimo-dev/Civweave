@@ -429,6 +429,8 @@
         "scripts/test-persona-multiplayer-gateway-v1.mjs",
         "scripts/test-guild-persona-transport-v1.mjs",
         "scripts/test-mobile-guild-persona-transport-v1.mjs",
+        "scripts/test-worldweaver-persona-motion-v1.mjs",
+        "scripts/test-worldweaver-opensim-motion-bridge-v1.mjs",
         "scripts/test-guild-persona-client-v1.mjs",
         "scripts/test-persona-worldweaver-receipt-v1.mjs"
       ],
@@ -476,7 +478,9 @@
         "Authenticated room seats grant access to fictional player cues only; models and browsers cannot mark world action execution successful.",
         "Worldweaver proposal success must match a trusted server mapping to completed NPC intents before a campaign can record a world receipt.",
         "Guild actor speech uses the existing Worldweaver queue and verified acknowledgement for bounded logical speech; movement and visual geometry require external trusted renderers and cannot be faked.",
-        "Standalone mobile Guilds scope private rooms by the verified Guild ID across starter nodes; Node Cloud Guild rooms stay node-scoped unless a shared Guild authority is configured."
+        "Standalone mobile Guilds scope private rooms by the verified Guild ID across starter nodes; Node Cloud Guild rooms stay node-scoped unless a shared Guild authority is configured.",
+        "Guild Persona 3D kinematic positions, collisions and geometry revision belong to a trusted Durable Object; browser 3D Canvas and 2D map consume its OpenSim-compatible geometry without becoming a world movement authority.",
+        "A native OpenSimulator movement must be independently attested against genuine region-module snapshots and exact object positions; provisional kinematic simulation may never claim Firestorm/OpenSim avatar locomotion."
       ],
       "helpers": [
         "public/app/shared/worldweaver-avatar-v1.mjs",
@@ -503,7 +507,10 @@
         "public/app/shared/persona-worldweaver-receipt-v1.mjs",
         "cloudflare/mobile-guild-edge/src/guild-persona-campaign-v1.mjs",
         "cloudflare/mobile-guild-edge/src/guild-persona-transport-v1.mjs",
-        "cloudflare/mobile-guild-edge/src/guild-persona-runtime-v1.mjs"
+        "cloudflare/mobile-guild-edge/src/guild-persona-runtime-v1.mjs",
+        "cloudflare/mobile-guild-edge/src/guild-persona-motion-v1.mjs",
+        "public/app/shared/worldweaver-persona-motion-v1.mjs",
+        "public/app/shared/worldweaver-opensim-motion-bridge-v1.mjs"
       ],
       "executableVerifiers": [
         "scripts/test-worldweaver-core-v1.mjs",
