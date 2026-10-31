@@ -7,6 +7,7 @@ import {createWorldweaver,WORLDWEAVER_SCHEMA} from './worldweaver-core-v1.mjs';
 import {createProvisionalOpenSimScene} from './worldweaver-visual-scene-v1.mjs';
 import {buildOpenSimGeometry} from './worldweaver-opensim-geometry-v1.mjs';
 import {projectWorld2D} from './worldweaver-map-2d-v1.mjs';
+import {starlingNpcCommand} from './worldweaver-starling-bridge-v1.mjs';
 
 export const COMMUNE_WORLD_KIND='civweave.worldweaver-commune.v1';
 const validGuild=x=>typeof x==='string'&&/^[A-Za-z0-9:_-]{1,180}$/.test(x);
@@ -22,7 +23,7 @@ export function createCommuneWorldHost({guildId,mesh,founder,verifyReader,clock=
  if(!validGuild(guildId)||!mesh?.getObject||!mesh?.createObject||!mesh?.validateObject||!mesh?.deviceId||
     typeof founder!=='function'||typeof verifyReader!=='function')
    throw new TypeError('Worldweaver commune requires a Guild, canonical signed mesh, founder and reader policy.');
- let closed=false,revision=-1,packet=null,layoutCache=null,activeRef=null,subs=new Set(),meshUnsub=null;
+ let closed=false,revision=-1,packet=null,layoutCache=null,activeRef=null,subs=new Set(),meshUnsub=null,writing=false;
  const objectId='worldweaver-commune:'+guildId;
  const tell=()=>{for(const callback of [...subs])try{callback()}catch{}};
  async function genesis(){
@@ -123,6 +124,46 @@ export function createCommuneWorldHost({guildId,mesh,founder,verifyReader,clock=
      consent:'group',audience:['guild:'+guildId],publish:true,priority:55,payload});
   return refresh();
  }
+ /**
+  * A human founding-device action to register a configured model as an NPC
+  * candidate. The registration does NOT authorize generation or impersonate
+  * an authenticated model principal. Actual tool submission remains blocked
+  * until a trusted model-runtime credential adapter exists.
+  */
+ async function registerPilot({personaId,modelId}={}){
+  if(writing)throw new Error('Worldweaver already has a pending signed change.');
+  writing=true;
+  try{
+   const signer=await foundingWriter();
+   if(!packet)throw new Error('Provision the signed Guild world before registering a pilot.');
+   if(typeof modelId!=='string'||!ref(modelId)||modelId.length>180)
+     throw new TypeError('A selected local model identifier is required.');
+   const current=await mesh.getObject(objectId);
+   if(!current||!validPacket(current,signer)||(await mesh.validateObject(current))?.ok!==true||
+      current.revision!==revision)
+     throw new Error('Worldweaver revision changed; reload before modifying the Guild world.');
+   if(packet.snapshot.npcs.some(row=>row.instanceId===worldRef()&&row.personaRef==='starling:'+personaId))
+     throw new Error('This Starling persona is already registered in the selected world.');
+   if(packet.snapshot.npcs.filter(row=>row.instanceId===worldRef()).length>=24)
+     throw new Error('Worldweaver room has reached its NPC limit.');
+   const owner=Object.freeze({kind:'human',principalId:signer.origin.nodeId});
+   const world=createWorldweaver({initialState:packet.snapshot,id,clock,
+      authorize:({actor,command})=>actor===owner&&command.type==='rig-npc'});
+   const command=starlingNpcCommand({
+     personaId,instanceId:worldRef(),modelId,
+     pilotPrincipalId:'starling-pilot:'+guildId+':'+personaId,
+     capabilities:['observe','inspect','speak','move','demonstrate','present']
+   });
+   const receipt=world.dispatch(command,owner);
+   const updated={...packet,snapshot:world.snapshot(),updatedAt:clock()};
+   await mesh.createObject({id:objectId,revision:current.revision+1,
+     kind:COMMUNE_WORLD_KIND,
+     purpose:'Guild-founder signed Worldweaver NPC pilot registration. No model execution was authorized.',
+     consent:'group',audience:['guild:'+guildId],publish:true,priority:55,payload:updated});
+   await refresh();
+   return receipt.npc;
+  }finally{writing=false}
+ }
  function subscribe(callback){
   if(typeof callback!=='function')throw new TypeError('Callback required');
   subs.add(callback);return()=>subs.delete(callback);
@@ -139,6 +180,6 @@ export function createCommuneWorldHost({guildId,mesh,founder,verifyReader,clock=
   closed=true;subs.clear();if(typeof meshUnsub==='function')meshUnsub();meshUnsub=null;
  }
  connect();
- return Object.freeze({guildId,refresh,provision,getSnapshot,getLayout,worldRef,selectRoom,subscribe,close,
+ return Object.freeze({guildId,refresh,provision,registerPilot,getSnapshot,getLayout,worldRef,selectRoom,subscribe,close,
    get status(){return packet?'live-local':'unprovisioned'}});
 }
