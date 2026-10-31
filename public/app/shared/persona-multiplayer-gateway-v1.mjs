@@ -65,6 +65,8 @@ export function createPersonaMultiplayerGateway({authenticate,load,writeIfRevisi
       if(command.type==='resolve-proposal'&&command.outcome==='succeeded'){
         const proposal=state.events.find(e=>e.id===command.proposalId&&e.type==='npc-proposal');
         if(!proposal)throw new RangeError('Unknown model action proposal.');
+        if(state.events.some(e=>e.type==='resolve-proposal'&&e.worldReceiptId===command.worldReceiptId))
+          throw new Error('Worldweaver receipt already used for another outcome.');
         // A runtime identity alone is not enough to assert a particular
         // simulated action succeeded. Validate the actual Worldweaver receipt.
         if(typeof verifyWorldReceipt!=='function'||await verifyWorldReceipt({
