@@ -5,6 +5,11 @@ const clean=(value,max=2000)=>String(value??'').slice(0,max);
 const esc=value=>clean(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const state=()=>{try{return JSON.parse(localStorage.getItem(STATE_KEY)||'null')}catch{return null}};
 const owner=()=>{const v=state();return v?.cloudAttached&&v?.primaryOrigin&&/^[A-Za-z0-9_-]{40,200}$/.test(v.ownerKey||'')?v:null};
+function ownedGuild(){
+  const v=owner();if(!v)return null;
+  try{return Object.freeze({origin:new URL(v.primaryOrigin).origin,guildId:String(v.guildId||'').slice(0,180),
+    displayName:String(v.displayName||'').slice(0,160)})}catch{return null}
+}
 function ownerAvailableFor(origin){
   const v=owner();if(!v||!origin)return false;
   try{return new URL(v.primaryOrigin).origin===new URL(origin).origin}catch{return false}
@@ -144,5 +149,5 @@ addEventListener('civweave:nearby-guilds-opened',syncNav);
 addEventListener('civweave:host-node-selected',syncNav);
 addEventListener('civweave:mobile-guild-cloud-attached',syncNav);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncNav,{once:true});else syncNav();
-globalThis.CivweaveGuildOwnerManagementV1=Object.freeze({version:VERSION,open,close,refresh,ownerAvailable:()=>Boolean(owner()),ownerAvailableFor});
+globalThis.CivweaveGuildOwnerManagementV1=Object.freeze({version:VERSION,open,close,refresh,ownerAvailable:()=>Boolean(owner()),ownerAvailableFor,ownedGuild});
 })();
