@@ -1,11 +1,11 @@
 (()=>{
 'use strict';
 
-const VERSION='guild-symbol-v1.6-in-shell-guild-search';
+const VERSION='guild-symbol-v1.7-unified-guild-access';
 const SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
 const CHAT_SRC='/app/assets/chat-symbol-v1.png';
-const GUILD_FINDER_SCRIPT='/app/host-node-installer-lobby-v1.js?v=explicit-mount-v3';
+const GUILD_FINDER_SCRIPT='/app/host-node-installer-lobby-v1.js?v=unified-guild-access-v1';
 const STYLE_ID='cw-guild-symbol-v1-style';
 const ICON_CLASS='cw-guild-symbol-icon';
 const MAP_ICON_CLASS='cw-map-symbol-icon';
@@ -15,6 +15,9 @@ const GUILD_CARD_ID='cw-nearby-guilds-card-v1';
 const GUILD_MOUNT_ID='cw-nearby-guilds-mount-v1';
 let queued=false;
 let guildFinderPromise=null;
+let discoveryExpanded=true;
+let guildPanelBusy=false;
+let activeGuildStatus=null;
 
 function installStyle(doc=document){
   if(!doc?.documentElement||doc.getElementById(STYLE_ID))return;
@@ -40,6 +43,35 @@ function installStyle(doc=document){
 #${GUILD_CARD_ID} .cw-nearby-guilds-card-head strong{display:block;font:850 16px/1.15 system-ui,sans-serif}
 #${GUILD_CARD_ID} .cw-nearby-guilds-card-head small{display:block;margin-top:4px;color:#b7d8d1;font:500 12px/1.3 system-ui,sans-serif}
 #${GUILD_OVERLAY_ID} .cw-guild-manage{min-height:44px;padding:7px 12px;border-radius:11px;border:1px solid #87e4c3;background:#16473e;color:#f1fff9;font-weight:800;cursor:pointer}\n#${GUILD_OVERLAY_ID} .cw-nearby-guilds-close{flex:0 0 42px;width:42px;height:42px;border:1px solid #ffffff38;border-radius:999px;background:#07131fee;color:#fff;font:800 24px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 22px #0008}
+
+#${GUILD_OVERLAY_ID} .cw-nearby-guilds-card-head>div{flex:1;min-width:0}
+#${GUILD_OVERLAY_ID} [hidden]{display:none!important}
+#${GUILD_OVERLAY_ID} .cw-guild-selected{padding:16px 18px;background:linear-gradient(145deg,#0d2a2b,#0c1b30);border-bottom:1px solid #6de0ba35}
+#${GUILD_OVERLAY_ID} .cw-guild-selected-head{display:flex;align-items:start;gap:12px;justify-content:space-between;flex-wrap:wrap}
+#${GUILD_OVERLAY_ID} .cw-guild-selected h2{margin:3px 0 5px;font:800 clamp(1.05rem,3vw,1.45rem)/1.2 system-ui;color:#f1fffa;overflow-wrap:anywhere}
+#${GUILD_OVERLAY_ID} .cw-guild-subtitle{margin:0;color:#b8d6d3;font:.8rem/1.5 system-ui;overflow-wrap:anywhere}
+#${GUILD_OVERLAY_ID} .cw-guild-kicker{font:900 .65rem system-ui;letter-spacing:.15em;color:#93e8be;text-transform:uppercase}
+#${GUILD_OVERLAY_ID} .cw-guild-statline{display:flex;gap:12px;flex-wrap:wrap;color:#d0e9e1;font:.77rem system-ui;margin-top:11px}
+#${GUILD_OVERLAY_ID} .cw-guild-statline b{color:#f0fffb;font-variant-numeric:tabular-nums}
+#${GUILD_OVERLAY_ID} .cw-guild-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+#${GUILD_OVERLAY_ID} .cw-guild-actions button,#${GUILD_OVERLAY_ID} .cw-guild-actions a,#${GUILD_OVERLAY_ID} .cw-guild-discovery button,#${GUILD_OVERLAY_ID} .cw-guild-discovery a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 13px;border-radius:10px;border:1px solid #80cbb45e;background:#173c43;color:#f1fff9;text-decoration:none;font:700 .82rem system-ui;cursor:pointer}
+#${GUILD_OVERLAY_ID} .cw-guild-actions .cw-guild-primary{background:#b3ecd4;color:#09232a}
+#${GUILD_OVERLAY_ID} .cw-guild-actions button:disabled{opacity:.5;cursor:wait}
+#${GUILD_OVERLAY_ID} .cw-guild-access{margin-top:11px;border:1px solid #79d2b644;border-radius:12px;background:#071a23}
+#${GUILD_OVERLAY_ID} .cw-guild-access summary{padding:11px 13px;cursor:pointer;font:750 .83rem system-ui}
+#${GUILD_OVERLAY_ID} .cw-guild-access-body{padding:0 13px 13px}
+#${GUILD_OVERLAY_ID} .cw-guild-help{color:#a6c8c4;font:.75rem/1.5 system-ui;margin:8px 0}
+#${GUILD_OVERLAY_ID} .cw-guild-discovery{border-bottom:1px solid #8de5ef2c;padding:16px}
+#${GUILD_OVERLAY_ID} .cw-guild-discovery h2{margin:0 0 6px;font:800 1.1rem system-ui;color:#f3fff9}
+#${GUILD_OVERLAY_ID} .cw-guild-discovery p{margin:7px 0;color:#b6d3d6;font:.8rem/1.5 system-ui}
+#${GUILD_OVERLAY_ID} .cw-guild-manual{display:grid;gap:7px;margin-top:13px}
+#${GUILD_OVERLAY_ID} .cw-guild-manual label{color:#e6fff8;font:750 .8rem system-ui}
+#${GUILD_OVERLAY_ID} .cw-guild-manual-row{display:flex;gap:8px;flex-wrap:wrap}
+#${GUILD_OVERLAY_ID} .cw-guild-manual input{flex:1 1 190px;min-width:0;min-height:42px;border:1px solid #7ac9b655;border-radius:10px;background:#071b26;color:#fff;padding:8px;font:.82rem system-ui}
+#${GUILD_OVERLAY_ID} .cw-guild-saved{display:grid;gap:6px;margin-top:12px}
+#${GUILD_OVERLAY_ID} .cw-guild-saved button{justify-content:space-between;text-align:left;width:100%}
+#${GUILD_OVERLAY_ID} .cw-guild-discovery-error{color:#ffd9ae!important;min-height:1.5em}
+#${GUILD_OVERLAY_ID} .cw-guild-manage{flex:0 0 auto}
 #${GUILD_MOUNT_ID}{position:relative;z-index:2;padding:12px}
 #${GUILD_MOUNT_ID} .cw-host-node-lobby{margin:0!important;max-width:none!important;position:relative!important;inset:auto!important;transform:none!important;z-index:auto!important}
 #${GUILD_MOUNT_ID} #cw-host-node-search{position:relative!important;inset:auto!important;transform:none!important;z-index:auto!important}
@@ -155,7 +187,22 @@ function ensureNearbyGuildsOverlay(){
   overlay.setAttribute('role','dialog');
   overlay.setAttribute('aria-modal','true');
   overlay.setAttribute('aria-label','Find nearby Civweave Guilds');
-  overlay.innerHTML=`<div class="cw-nearby-guilds-shell"><section id="${GUILD_CARD_ID}" aria-label="Nearby Guild search"><header class="cw-nearby-guilds-card-head"><div><strong>Find nearby Guilds</strong><small>Guild search is separate from the Guild Map.</small></div><button class="cw-guild-manage" type="button" data-cw-guild-manage hidden>Manage Guild</button><button class="cw-nearby-guilds-close" type="button" aria-label="Close nearby Guilds">×</button></header><div id="${GUILD_MOUNT_ID}"></div></section></div>`;
+  overlay.innerHTML=`<div class="cw-nearby-guilds-shell"><section id="${GUILD_CARD_ID}" aria-label="Guild discovery and access"><header class="cw-nearby-guilds-card-head"><div><strong>Guilds</strong><small>Find a Guild · Choose your home · Manage access</small></div><button class="cw-guild-manage" type="button" data-cw-guild-manage hidden>Guildkeeper console</button><button class="cw-nearby-guilds-close" type="button" aria-label="Close Guilds">×</button></header>
+  <section data-cw-guild-ui="selected" class="cw-guild-selected" aria-label="Selected Guild" hidden></section>
+  <section data-cw-guild-ui="discovery" class="cw-guild-discovery" aria-label="Discover and choose a Guild">
+    <h2>Discover a Guild</h2>
+    <p>Search nearby Guilds by open Citizen/Patron seats, join with an invitation, or return to a Guild you have already joined.</p>
+    <form class="cw-guild-manual" data-cw-guild-manual>
+      <label for="cw-guild-origin-input">Guild HTTPS address or Civweave invitation link</label>
+      <div class="cw-guild-manual-row"><input id="cw-guild-origin-input" name="guildOrigin" type="url" inputmode="url" autocomplete="url" placeholder="https://your-guild.workers.dev" required><button type="submit">Inspect Guild</button></div>
+    </form>
+    <p class="cw-guild-discovery-error" role="status" aria-live="polite" data-cw-guild-feedback></p>
+    <div class="cw-guild-saved" data-cw-guild-saved></div>
+    <p><a href="/app/index.html#mobile-guild-create">Create or host your own Guild</a></p>
+  </section>
+  <div id="${GUILD_MOUNT_ID}"></div></section></div>`;
+  overlay.addEventListener('click',event=>{const control=event.target.closest?.('[data-guild-ui-action]');if(control){event.preventDefault();void guildAction(control.dataset.guildUiAction,control)}});
+  overlay.addEventListener('submit',event=>{const form=event.target.closest?.('[data-cw-guild-manual]');if(form){event.preventDefault();void inspectGuildInvite(form)}});
   overlay.querySelector('.cw-nearby-guilds-close')?.addEventListener('click',()=>closeNearbyGuilds('button'));
   overlay.addEventListener('click',event=>{if(event.target===overlay)closeNearbyGuilds('backdrop')});
   overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();closeNearbyGuilds('escape')}});
