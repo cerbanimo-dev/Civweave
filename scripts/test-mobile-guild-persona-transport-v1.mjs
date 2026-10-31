@@ -30,7 +30,7 @@ test('mobile-owned Guild Cloud authenticates persona room, shared turns and actu
   const bob=await capacity.joinResident({requestedNodeId:'magic-mobile-b',userId:'bob',
    credentialHash:'bob-persona-test-key',origin:'https://mobile.example.test'});
   const call=async(member,action,input)=>{
-   const path={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve'}[action];
+   const path={create:'',snapshot:'/snapshot',dispatch:'/dispatch',draft:'/draft',approve:'/approve','move-draft':'/move-draft','move-approve':'/move-approve'}[action];
    const url=new URL('https://mobile.example.test/api/node/persona-campaigns'+path);
    url.searchParams.set('nodeId',member.nodeId);
    if(action==='snapshot')url.searchParams.set('campaignId',input.campaignId);
@@ -64,5 +64,15 @@ test('mobile-owned Guild Cloud authenticates persona room, shared turns and actu
   assert.equal(done.body.world.simulatedOnly,true);
   const latest=await call(alice,'snapshot',{campaignId:id});
   assert.equal(latest.body.world.speeches[0].status,'succeeded');
+  const movement=await call(bob,'move-draft',{campaignId:id,expectedRevision:done.body.room.revision,
+    characterId:'delia',to:{x:23,y:13,z:0}});
+  assert.equal(movement.status,200,JSON.stringify(movement.body));
+  const advanced=await call(alice,'move-approve',{campaignId:id,
+    expectedRevision:done.body.room.revision,draftId:movement.body.motionDraft.id});
+  assert.equal(advanced.status,200,JSON.stringify(advanced.body));
+  const fromOtherNode=await call(bob,'snapshot',{campaignId:id});
+  assert.equal(fromOtherNode.body.motion.actors.find(x=>x.characterId==='delia').position.x,23);
+  assert.equal(fromOtherNode.body.motion.revision,1);
+  assert.match(advanced.body.worldReceiptId,/^world:/);
  }finally{db.close();}
 });
