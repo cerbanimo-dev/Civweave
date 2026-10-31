@@ -7,7 +7,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 
 test('Lounge imports the one native Collective owner and existing Guild read client',()=>{
  const src=read('public/app/starling-lounge-v1.mjs');
- assert.equal(CivweaveStarlingLoungeV1.version,'1.1.0');
+ assert.equal(CivweaveStarlingLoungeV1.version,'1.2.0');
  assert.match(src,/starling-collective-v1\.mjs/);
  assert.match(src,/starling-collective-tools-v1\.mjs/);
  assert.match(src,/CivweaveGuildQuestsV1/);
