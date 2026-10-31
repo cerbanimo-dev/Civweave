@@ -399,3 +399,9 @@
 @media(max-width:390px){
  #cw-starling-lounge .sl-local-roles,#cw-starling-lounge .sl-guild-pilots{grid-template-columns:minmax(0,1fr)}
 }
+
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-view="work"],
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-view="operations"],
+#cw-starling-lounge[data-sl-fleet="local"] [data-sl-station]{
+ display:none!important
+}
