@@ -83,6 +83,24 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <label class="check"><input id="speak-lines" type="checkbox"> Speak written dialogue using this device's available text-to-speech voice</label>
 <p id="cue-status" class="compact">No rehearsal active.</p>
 <hr>
+<div class="project" id="persona-rehearsal">
+<h2>5A · Persona director / private improvisation</h2>
+<p class="compact">Import the <strong>persona-pack.json</strong> manifest extracted from a rights-cleared cast archive. Author-only files stay in this page until you explicitly generate with the selected AI. No automatic publication or world action execution. This is a rehearsal cue inside Worldweaver, not a second chat system.</p>
+<label for="persona-manifest-file">Local persona manifest (.json)</label><input id="persona-manifest-file" type="file" accept="application/json,.json">
+<p id="persona-import-status" class="compact">No cast loaded. Importing does not download any models.</p>
+<label for="persona-scenario">Scenario and intended beats</label><textarea id="persona-scenario" rows="3" maxlength="8000" placeholder="Setting, goals, what the players may change, and what should be avoided"></textarea>
+<label for="persona-stage">Story stage (integer from the manifest)</label><input id="persona-stage" type="number" min="0" max="99999" value="11">
+<label for="persona-cast">Scene participants (multiple selection)</label><select id="persona-cast" multiple size="5" aria-describedby="persona-cast-help"></select>
+<p id="persona-cast-help" class="compact">Select one or more characters. The 4B director is called separately for each selected character to protect personal knowledge.</p>
+<label for="persona-speaker">Performing character</label><select id="persona-speaker"></select>
+<label for="persona-director-model">Installed 4B director model ID (Ollama or compatible)</label><input id="persona-director-model" value="qwen3.5:4b" maxlength="100">
+<label for="persona-actor-model">Installed 0.8B improv model ID (Ollama or compatible)</label><input id="persona-actor-model" value="qwen3.5:0.8b" maxlength="100">
+<div class="controls"><button id="persona-prepare" type="button">Prepare scenario with 4B</button></div>
+<label for="persona-player-cue">One player cue / improvised question</label><textarea id="persona-player-cue" maxlength="1500" rows="2" placeholder="What do you say or try?"></textarea>
+<div class="controls"><button id="persona-act" type="button">Preview character's next action</button></div>
+<pre id="persona-result" aria-label="Director and character rehearsal output" role="status" aria-live="polite">Import a cast manifest, then prepare a scenario.</pre>
+<p class="compact">This lab issues explicit, sequential calls through Civweave's configured model provider. Model tiers are user-selected, not automatically installed. All proposed world actions remain unexecuted until a trusted renderer separately accepts them. Preview dialogue never rewrites canon.</p>
+</div>
 <h2>6 · Audience interaction and reflection</h2>
 <p class="compact">Participation is optional. Do not use biometric emotion recognition or covert recordings. Browser voice transcription may use an online service; check the device/browser provider before inviting audience members.</p>
 <label class="check"><input id="audience-consent" type="checkbox"> I voluntarily consent to submit this response for this rehearsal</label>
