@@ -6,7 +6,7 @@ import {prepareDirectedScene,performPersonaTurn,queuePersonaActionIntents,needsD
 
 const pack=validatePersonaPack({schema:'civweave.persona-library.v1',id:'test-cast',version:1,
  characters:[
-  {id:'jess',name:'Jess',role:'supporting',modelTier:'2b',improvTier:'0.8b',voice:'dry and protective',emotes:['arches an eyebrow']},
+  {id:'jess',name:'Jess',role:'supporting',modelTier:'2b',improvTier:'0.8b',voice:'dry and protective',emotes:['FUTURE SPOILER MUST NOT LEAK'],verifiedEmotes:[{stage:1,text:'arches an eyebrow',source:'test-novel-2',verified:true}]},
   {id:'magnus',name:'Magnus',role:'protagonist',modelTier:'4b',improvTier:'0.8b',voice:'genre-aware, thoughtful'}],
  events:[
   {id:'history',stage:0,knownFrom:{jess:0},summary:'Jess knew Raven long before the present scene.',actors:['jess'],witnesses:['jess'],source:'test-novel-1',status:'established'},
@@ -24,6 +24,7 @@ test('personal 4B director prompt can see only the selected character private fa
  assert.match(j.messages[1].content,/Jess knew Raven/);
  assert.doesNotMatch(m.messages[1].content,/Jess knew Raven/);
  assert.match(j.messages[1].content,/arches an eyebrow/);
+ assert.doesNotMatch(j.messages[1].content,/FUTURE SPOILER/);
 });
 test('scene preparation issues isolated 4B calls, validates directives and maintains revision',async()=>{
  const calls=[];
@@ -137,4 +138,16 @@ test('world revision change during director inference prevents stale scene publi
  };
  await assert.rejects(prepareDirectedScene({pack,stage:1,scenario:'Arcade',participants:['jess'],
    world,invokeModel}),/changed during|stale/i);
+});
+
+test('actor prompt ignores unreviewed mannerism snippets and time-gates verified gestures',()=>{
+ const s={revision:1,turn:0,expireAfterTurn:4,stage:0,scenario:'Before the story',participants:['jess'],
+ directives:{characters:{jess:{knownEventIds:['history'],instructions:'Talk',characterGoal:'Observe',
+ emotion:'thoughtful',escalateWhen:[],improvFreedom:'gentle'}}}};
+ let p='';
+ return performPersonaTurn({pack,scene:s,characterId:'jess',invokeModel:async req=>{
+  p=req.messages[0].content;return jsonReply({speech:'Hello',emote:'looks away'});}}).then(()=>{
+  assert.doesNotMatch(p,/FUTURE SPOILER/);
+  assert.doesNotMatch(p,/arches an eyebrow/);
+ });
 });
