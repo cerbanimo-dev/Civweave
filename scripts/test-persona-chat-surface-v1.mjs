@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 test('same canonical chat composer presents opt-in campaign controls without alternate transcript',()=>{
  const s=read('../public/app/guide-chat-surface-v350.js');
- for(const name of ['data-persona-toggle','data-persona-panel','data-persona-pack','data-persona-inspect','data-persona-cast-list','data-persona-stage','data-persona-scenario','data-persona-new','data-persona-save' ,'data-persona-speaker','data-persona-control','data-persona-willpower','data-persona-deviation','data-persona-guild-host','data-persona-guild-join','data-persona-guild-refresh','data-persona-guild-assign','data-persona-guild-seat-user','data-persona-guild-seat-role','data-persona-guild-timeline','data-persona-guild-generate','data-persona-guild-draft','data-persona-guild-draft-text','data-persona-guild-approve','data-persona-guild-approve-both','data-persona-guild-world','data-persona-director-model','data-persona-actor-model']){
+ for(const name of ['data-persona-toggle','data-persona-panel','data-persona-pack','data-persona-inspect','data-persona-cast-list','data-persona-stage','data-persona-scenario','data-persona-new','data-persona-save' ,'data-persona-speaker','data-persona-control','data-persona-willpower','data-persona-deviation','data-persona-guild-host','data-persona-guild-join','data-persona-guild-refresh','data-persona-guild-assign','data-persona-guild-seat-user','data-persona-guild-seat-role','data-persona-guild-timeline','data-persona-guild-generate','data-persona-guild-draft','data-persona-guild-draft-text','data-persona-guild-approve','data-persona-guild-approve-both','data-persona-guild-world','data-persona-guild-3d','data-persona-guild-motion-status','data-persona-guild-move-x','data-persona-guild-move-y','data-persona-guild-move-list','data-persona-guild-move-draft','data-persona-guild-move-approve','data-persona-director-model','data-persona-actor-model']){
    assert.match(s,new RegExp(name));
  }
  assert.match(s,/personaChatAdapter\.respond/);
@@ -49,4 +49,18 @@ test('Persona modules are optional installed-PWA assets, not required boot block
  }
  assert.match(shell,/OPTIONAL_PERSONA/);
  assert.match(shell,/\.\.\.OPTIONAL_PERSONA/);
+});
+
+test('authenticated 3D Cast surface renders the authoritative OpenSim-compatible body geometry and never reports a browser movement as committed',()=>{
+ const ui=read('../public/app/shared/persona-chat-controls-v1.mjs');
+ const client=read('../public/app/shared/guild-persona-client-v1.mjs');
+ assert.match(ui,/createOpenSim3DPreview/);
+ assert.match(ui,/buildOpenSimGeometry\(guildMotion\.region\)/);
+ assert.match(ui,/guildClient\.draftMove/);
+ assert.match(ui,/guildClient\.approveMove/);
+ assert.match(ui,/sceneViewer\?\.close/);
+ assert.match(ui,/guildMotion\.revision/);
+ assert.match(client,/move-draft/);
+ assert.match(client,/move-approve/);
+ assert.doesNotMatch(ui,/world\.dispatch\(/);
 });
