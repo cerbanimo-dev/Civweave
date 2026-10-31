@@ -46,16 +46,22 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
   if(typeof storage?.transaction!=='function')fail('Guild transactional storage is required.',503);
   const nodeId=text(options.nodeId,96);
   const actor=memberActor(member,nodeId);
+  // A mobile-owned Guild capacity DO is shared by all its starter nodes.
+  // Use only the VERIFIED adapter-provided Guild ID for its storage scope.
+  // Node-cloud services without a Guild-scoped shared store stay node-scoped.
+  const scope=options.guildId?text(options.guildId,96):nodeId;
+  if(!bounded(scope)||options.guildId&&scope!==member.guildId)
+    fail('Trusted Guild storage scope mismatch.',403);
   if(!['create','snapshot','dispatch','draft','approve','approve-both'].includes(action))fail('Unsupported private campaign action.',405);
   if(!input||typeof input!=='object'||Array.isArray(input))fail('Campaign JSON object required.');
   const id=text(input.campaignId,96);
   if(action!=='create'&&!bounded(id))fail('Campaign ID required.');
   // Transaction scope covers both authority reads and compare-and-swap writes.
   return storage.transaction(async tx=>{
-    const roomKey=ROOM_PREFIX+nodeId+':'+id;
+    const roomKey=ROOM_PREFIX+scope+':'+id;
     if(action==='create'){
       const pack=minimalPack(input);
-      const ownerKey=COUNTER_PREFIX+nodeId+':'+actor.principalId;
+      const ownerKey=COUNTER_PREFIX+scope+':'+actor.principalId;
       const count=Number(await tx.get(ownerKey)||0);
       if(!Number.isSafeInteger(count)||count<0||count>=20)
         fail('Maximum private campaign rooms per member reached.',409);
@@ -66,7 +72,7 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
       // Ensure roster is an exact visible selection, not an unreviewed archive.
       if(room.cast.some(memberId=>!pack.characters.some(row=>row.id===memberId)))
         fail('Unrecognized private campaign member.');
-      const key=ROOM_PREFIX+nodeId+':'+generated;
+      const key=ROOM_PREFIX+scope+':'+generated;
       await tx.put(key,room);
       await tx.put(ownerKey,count+1);
       return {ok:true,schema:GUILD_PERSONA_SCHEMA,room:JSON.parse(exportCampaignSnapshot(room)),serverAuthoritative:true};
@@ -75,11 +81,11 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
     if(!room)fail('Private campaign not found.',404);
     if(['draft','approve','approve-both'].includes(action)){
       if(action==='draft'){
-        const result=await stageNpcDraft(tx,{nodeId,room,actor,input});
+        const result=await stageNpcDraft(tx,{nodeId:scope,room,actor,input});
         return {ok:true,schema:GUILD_PERSONA_SCHEMA,room,draft:result.draft,serverAuthoritative:true};
       }
       if(action==='approve'){
-        const result=await approveNpcDraft(tx,{nodeId,room,actor,input});
+        const result=await approveNpcDraft(tx,{nodeId:scope,room,actor,input});
         await tx.put(roomKey,result.room);
         return {ok:true,schema:GUILD_PERSONA_SCHEMA,...result,serverAuthoritative:true};
       }
@@ -95,7 +101,7 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
         !Array.isArray(ids)||ids.length!==2||new Set(ids).size!==2)
         fail('Two distinct Landry and Delia speech drafts are required.',400);
       const drafts=await Promise.all(ids.map(draftId=>
-        tx.get('guild-persona:draft:'+nodeId+':'+room.id+':'+draftId)));
+        tx.get('guild-persona:draft:'+scope+':'+room.id+':'+draftId)));
       if(drafts.some(d=>!d||d.status==='approved')||
         new Set(drafts.map(d=>d.characterId)).size!==2||
         !drafts.some(d=>d.characterId==='landry')||
@@ -112,7 +118,7 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
       }
       const outcomes=[];
       for(const d of ordered){
-        const result=await approveNpcDraft(tx,{nodeId,room:current,actor,
+        const result=await approveNpcDraft(tx,{nodeId:scope,room:current,actor,
           input:{draftId:d.id,expectedRevision:current.revision}});
         current=result.room;outcomes.push(result);
       }
@@ -126,9 +132,9 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
     }
     const gateway=createPersonaMultiplayerGateway({
       authenticate:async()=>actor,
-      load:async campaignId=>tx.get(ROOM_PREFIX+nodeId+':'+campaignId),
+      load:async campaignId=>tx.get(ROOM_PREFIX+scope+':'+campaignId),
       writeIfRevision:async(campaignId,expectedRevision,next)=>{
-        const key=ROOM_PREFIX+nodeId+':'+campaignId;
+        const key=ROOM_PREFIX+scope+':'+campaignId;
         const previous=await tx.get(key);
         if(!previous||previous.revision!==expectedRevision)return{ok:false};
         await tx.put(key,next);
@@ -143,8 +149,8 @@ export async function executeGuildPersonaAction(storage,member,action,input={},o
         :await gateway.dispatch({campaignId:id,expectedRevision:input.expectedRevision,
           command:input.command});
       const extra=action==='snapshot'?{
-        pendingDrafts:await pendingNpcDrafts(tx,{nodeId,room:snapshot,actor}),
-        world:await guildPersonaWorldSnapshot(tx,{nodeId,room:snapshot,actor})
+        pendingDrafts:await pendingNpcDrafts(tx,{nodeId:scope,room:snapshot,actor}),
+        world:await guildPersonaWorldSnapshot(tx,{nodeId:scope,room:snapshot,actor})
       }:{};
       return {ok:true,schema:GUILD_PERSONA_SCHEMA,room:snapshot,...extra,serverAuthoritative:true};
     }catch(error){
