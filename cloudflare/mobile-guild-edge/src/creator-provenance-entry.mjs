@@ -57,7 +57,7 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
       throw Object.assign(new Error(session?.error||'Guild member session is invalid.'),{status:session?.status||401});
     return executeGuildPersonaAction(this.ctx.storage,
       {guildId:this.baseStatus().guildId,nodeId:session.nodeId,userId:session.userId},
-      action,input,{nodeId:session.nodeId});
+      action,input,{nodeId:session.nodeId,guildId:this.baseStatus().guildId});
   }
   async guildQuestAction({tokenHash,requestedNodeId,action,input}={}){
     if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))throw Object.assign(new Error('Guild capacity session belongs to a different Guild.'),{status:403});
