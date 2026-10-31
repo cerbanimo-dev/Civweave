@@ -38,7 +38,7 @@ test('majority is strict and cannot be met by an owner alone when multiple membe
     {userId:C,kind:'neuron-use',at:new Date(t-1000).toISOString()},
     {userId:C,kind:'published-quest',at:new Date(t-GUILD_CONTRIBUTION_WINDOW_MS-1000).toISOString()}];
   assert.deepEqual(qualifiedContributors(members,receipts,{now:t}),[A,B]);
-  assert.throws(()=>ballotSpec({action:'remove',targetUserId:A,initiatorUserId:A,eligible:[A],now:t}),/sole member/);
+  assert.throws(()=>ballotSpec({action:'remove',targetUserId:A,initiatorUserId:A,eligible:[A],now:t}),/normal account departure/);
   assert.throws(()=>ballotSpec({action:'ban',targetUserId:A,initiatorUserId:B,eligible:[A],now:t}),/recent verified contribution/);
 });
 test('approved ballots auto-remove and invalidate sessions; a proposer alone cannot act in a two-voter Guild',()=>{
