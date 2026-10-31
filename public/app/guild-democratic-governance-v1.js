@@ -38,7 +38,7 @@ async function request(method='GET',body=null,part=''){
 function render(){
   if(!packet)return;
   const eligible=packet.eligible||[],members=packet.members||[],ballots=packet.ballots||[];
-  root.querySelector('[data-gc-summary]').innerHTML='<p><strong>'+Number(packet.activeCount||0)+' active contributors</strong> · '+Number(packet.majority||1)+' affirmative votes required · your delegated role: '+esc(packet.actorRole||'member')+'</p><p class="gc-muted">Verified Quest publication or physical-node contribution during the previous 30 days makes a member eligible. Neuron consumption and mere logins do not. All eligible members including the target may vote. Voting expires after seven days.</p>';
+  root.querySelector('[data-gc-summary]').innerHTML='<p><strong>'+Number(packet.activeCount||0)+' active contributors</strong> · '+Number(packet.majority||1)+' affirmative votes required · your delegated role: '+esc(packet.actorRole||'member')+'</p><p class="gc-muted">All enrolled members active within 30 days may vote, including a targeted member. Only residents with a server-verified Quest publication or physical-node contribution within 30 days may propose. Neuron consumption or mere login does not qualify anyone to propose. Voting expires after seven days.</p>';
   if(packet.actorEligible){
     const banned=(packet.bans||[]).filter(row=>!members.some(member=>member.userId===row.userId));
     const options=members.map(member=>'<option value="'+esc(member.userId)+'">'+esc(member.userId)+(member.role==='guildkeeper'?' · Guildkeeper':'')+'</option>').join('')+
