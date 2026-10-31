@@ -6,6 +6,9 @@ on:
       - 'public/app/shared/persona-library-v1.mjs'
       - 'scripts/test-persona-library-v1.mjs'
       - 'scripts/test-persona-scene-bridge-v1.mjs'
+      - 'scripts/test-persona-performance-lab-v1.mjs'
+      - 'public/app/tools/worldweaver-performance-lab-v1.mjs'
+      - 'public/app/tools/worldweaver-performance-lab.html'
       - 'public/app/shared/persona-scene-bridge-v1.mjs'
       - '.github/workflows/persona-library-contract.yml'
   push:
@@ -24,4 +27,6 @@ jobs:
         with:
           node-version: '22'
       - name: Verify canon and improv contract
-        run: node --test scripts/test-persona-library-v1.mjs scripts/test-persona-scene-bridge-v1.mjs
+        run: node --test scripts/test-persona-library-v1.mjs scripts/test-persona-scene-bridge-v1.mjs scripts/test-persona-performance-lab-v1.mjs
+      - name: Syntax-check Worldweaver rehearsal module
+        run: node --check public/app/tools/worldweaver-performance-lab-v1.mjs
