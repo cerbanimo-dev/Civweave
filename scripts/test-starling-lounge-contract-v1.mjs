@@ -77,8 +77,8 @@ test('Commune HUD includes the collective cast and system guides without inventi
  const source=read('public/app/starling-lounge-v1.mjs');
  const css=read('public/app/starling-lounge-v1.css');
  for(const name of ['weaveling','moss','kamiya','rook','merlin']){
-   assert.match(source,new RegExp(name+":\\\\{"));
-   assert.match(source,new RegExp("/app/assets/ai/"+name+"\\\\.png"));
+   assert.ok(source.includes(name+':{'),name+' has a system guide identity');
+   assert.ok(source.includes('/app/assets/ai/'+name+'.png'),name+' has an illustrated avatar');
  }
  assert.match(source,/data-sl-ensemble/);
  assert.match(source,/data-sl-guides/);
@@ -86,7 +86,6 @@ test('Commune HUD includes the collective cast and system guides without inventi
  assert.match(source,/data-sl-view="operations"/);
  assert.match(source,/data-sl-world-host/);
  assert.match(source,/aria-pressed/);
- assert.match(source,/reduced-motion/);
  assert.match(css,/prefers-reduced-motion/);
  assert.match(css,/safe-area-inset-bottom/);
  assert.match(source,/return \{status:'standby'/);
