@@ -22,7 +22,7 @@ const EVENT_FIELDS={
  'player-cue':['text','worldChanged'],
  'npc-proposal':['characterId','speech','emote','proposedActions','status','worldChanged'],
  'resolve-proposal':['proposalId','outcome','worldReceiptId','worldChanged'],
- 'rehearsal-preview':['characterId','playerCue','speech','emote','proposedActions','sceneRevision','status','worldChanged'],
+ 'rehearsal-preview':['characterId','playerCue','speech','emote','spokenTurns','proposedActions','sceneRevision','status','worldChanged'],
  'willpower-spend':['characterId','cost','remainingPoints'],
  'stage-set':['stage']
 };
@@ -36,6 +36,24 @@ function assertPack(state,pack){
   return p;
 }
 function requireCharacter(pack,id){if(!pack.characters.some(c=>c.id===id))throw new RangeError('Unknown campaign character.');}
+function sanitizedSpokenTurns(input,cast,characterId){
+  if(input===undefined)return [];
+  if(characterId!=='landry-delia'||!cast.includes('landry')||!cast.includes('delia'))
+    throw new TypeError('Distinct outward speakers are limited to the split-mind persona.');
+  if(!Array.isArray(input)||input.length<1||input.length>2)
+    throw new TypeError('Expected one or two outward spoken turns.');
+  const seen=new Set();
+  return input.map(row=>{
+    if(!obj(row)||!['landry','delia'].includes(row.characterId)||
+       seen.has(row.characterId)||typeof row.speech!=='string'||!row.speech.trim()||
+       Object.keys(row).some(k=>!['characterId','speech','emote'].includes(k)))
+      throw new TypeError('Invalid, repeated, or unrecognized outward speaker.');
+    seen.add(row.characterId);
+    if(row.speech.length>330||String(row.emote||'').length>180)
+      throw new RangeError('Spoken turn exceeds maximum length.');
+    return {characterId:row.characterId,speech:clean(row.speech,330),emote:clean(row.emote,180)};
+  });
+}
 function sanitizedActions(actions){
   if(!Array.isArray(actions)||actions.length>3)throw new TypeError('Expected at most three proposed actions.');
   return actions.map(a=>{
@@ -138,8 +156,10 @@ export function applyCampaignEvent(input,command,{actor,authorize,expectedRevisi
         throw new RangeError('Preview speaker is not in cast.');
       if(c.characterId==='landry-delia'&&!(s.cast.includes('landry')&&s.cast.includes('delia')))
         throw new RangeError('Both split-mind voices must be in the cast.');
+      const spokenTurns=sanitizedSpokenTurns(c.spokenTurns,s.cast,c.characterId);
       record={...record,characterId:c.characterId,playerCue:clean(c.playerCue,1200),
         speech:clean(c.speech,800),emote:clean(c.emote,250),
+        ...(spokenTurns.length?{spokenTurns}:{}),
         proposedActions:sanitizedActions(c.proposedActions||[]),
         sceneRevision:Number.isInteger(c.sceneRevision)?c.sceneRevision:0,
         status:'unexecuted',worldChanged:false};
@@ -183,7 +203,10 @@ export function importCampaignSnapshot(json,{pack}={}){
   const p=assertPack(s,pack);
   if(s.cast.length>12||s.cast.length<1||new Set(s.cast).size!==s.cast.length||
      !s.cast.every(id=>p.characters.some(c=>c.id===id)))throw new TypeError('Invalid campaign cast.');
-  if(s.events.some(e=>JSON.stringify(e).length>2000)||s.events.some(e=>!Number.isInteger(Number(e.id.split('-')[1]))))
+  if(s.events.some(e=>JSON.stringify(e).length>4000)||s.events.some(e=>!Number.isInteger(Number(e.id.split('-')[1])))||
+     s.events.some(e=>e.spokenTurns!==undefined&&(
+       e.type!=='rehearsal-preview'||e.characterId!=='landry-delia'||
+       JSON.stringify(sanitizedSpokenTurns(e.spokenTurns,s.cast,e.characterId))!==JSON.stringify(e.spokenTurns))))
     throw new TypeError('Invalid campaign event details.');
   if(!Number.isInteger(s.willpower.points)||s.willpower.points<0||
     !Number.isInteger(s.willpower.max)||s.willpower.max>20||
