@@ -101,3 +101,26 @@ The future mesh/session owner must verify the player's Passport and seat assignm
 The rehearsal panel now offers a manual **player breaks the planned scene** checkbox. In addition, a structured 0.8B actor response may return `requestDirection:true`. Either trigger expires the current temporary 4B instruction block after accepting that preview turn. The next cue cannot reuse the old brief; the author must explicitly prepare a new 4B pass.
 
 The new director pass receives only the recent player-visible rehearsal exchanges, explicitly marked as *unverified dialogue, not canon*. It may adapt motives, intentions, immediate environment suggestions and likely reactions, but cannot declare player world actions successful. The old story remains immutable; even on a what-if branch, actual world modifications require trusted Worldweaver acknowledgments. The refresh uses the already configured selected model and honors the same remote-inference consent boundary as other requests.
+
+## Canonical chat integration — opt-in Cast mode
+
+`public/app/guide-chat-surface-v350.js` retains **the only** chat composer, input event owner, saved transcript and response lifecycle. Its small **Cast** button lazily attaches `persona-chat-controls-v1.mjs`, which lets an author explicitly import a matching cast manifest and private campaign JSON, select the performer and installed model IDs, activate/deactivate the session, and export a revised save.
+
+- The newly added `persona-chat-turn-v1.mjs` emits Civweave's ordinary assistant-result packet. It never adds its own transcript, message composer, hidden session poller, chat route or inference engine.
+- When Cast is **off**, all five guide themes and native/Ollama fast paths keep their existing behavior. When Cast is **on**, only the **Civweave/Weaveling** theme's user-submitted messages take the persona route; switching to another theme does not trigger persona inference or move private campaign context.
+- The 4B director receives the named performer's personally available memories and a bounded excerpt of previous **public rehearsal dialogue**. It refreshes upon scene expiry or an explicit player-deviation request, without promoting improvised lines to canon. The 0.8B turn becomes a local `rehearsal-preview` ledger event; action intents remain unexecuted.
+- Each role model ID must identify an installed endpoint model. The existing Creator Suite `runCodeInference` and selected Civweave provider remain responsible for inference. No automatic installation, second model runtime, or silent local/cloud fallback is introduced. If the provider leaves the device, the user must opt in *per turn*; consent resets after the request.
+- The private author-only browser preview is **not** a multiplayer identity: its local owner string comes from the explicitly imported save and is used only for user-owned file rehearsal. The single shared guide transcript may retain the character dialogue after the imported source pack is cleared, consistent with ordinary saved chat.
+- Split-mind 2B/2B/0.8B rehearsal remains available in the Performance Studio. The embedded chat currently supports a single selected 0.8B speaking persona at a time, rather than claiming the full split-mind presentation system has been ported to the chat composer.
+
+## Authenticated multiplayer gateway — integration-ready contract, not a live endpoint
+
+`public/app/shared/persona-multiplayer-gateway-v1.mjs` provides `createPersonaMultiplayerGateway({authenticate,load,writeIfRevision,authorize})`.
+
+- The authenticated server/mesh host supplies a **trusted** `authenticate(request)` implementation, authoritative `load(campaignId)`, and atomic `writeIfRevision(id,expectedRevision,nextState)` implementation. Client-supplied `verified`, actor ID, role, and model name are ignored for authorization.
+- Only the authenticated owner or assigned human players can read a session. Unseated clients cannot learn its unpublished dialogue. Nonowners can submit only their own player cues.
+- Models may propose for an explicitly bound pilot identity. Only a trusted runtime principal may resolve a model proposal into an acknowledged world outcome. Campaign changes retain immutable original events and exact revision checks; stale or conflicting updates fail rather than silently overwrite each other.
+- **This is a provider-neutral backend adapter and executable test contract.** It does not open an HTTP route, implement a cryptographic identity provider, connect to an actual shared server, or guarantee persistent cross-device state by itself. Production still requires wiring to Civweave's existing Passport/Guild authentication, mesh persistence, world adapters, and user access controls. Do not expose this module as an unauthenticated API or call browser-local `verified:true` identity proof.
+- Security contracts: `scripts/test-persona-multiplayer-gateway-v1.mjs`, `scripts/test-persona-chat-turn-v1.mjs`, and `scripts/test-persona-chat-surface-v1.mjs`.
+
+All hidden/unpublished book contents remain in local author-only packages rather than the public Civweave repository.
