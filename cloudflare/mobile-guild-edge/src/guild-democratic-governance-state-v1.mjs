@@ -12,7 +12,7 @@ export function ensureGovernanceTables(sql){
   sql.exec("CREATE INDEX IF NOT EXISTS guild_gov_contrib_recent ON guild_governance_contributions(at,user_id)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_ballots(id TEXT PRIMARY KEY, action TEXT NOT NULL, target_user_id TEXT NOT NULL, proposer_id TEXT NOT NULL, role TEXT, reason_code TEXT, statement TEXT NOT NULL, electorate_json TEXT NOT NULL, required_yes INTEGER NOT NULL, status TEXT NOT NULL, created_at TEXT NOT NULL, expires_at TEXT NOT NULL, resolved_at TEXT, execution_error TEXT)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_votes(ballot_id TEXT NOT NULL,user_id TEXT NOT NULL,choice TEXT NOT NULL CHECK(choice IN ('yes','no')),voted_at TEXT NOT NULL,PRIMARY KEY(ballot_id,user_id))");
-  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_reports(ballot_id TEXT PRIMARY KEY,receipt_json TEXT NOT NULL,delivery_state TEXT NOT NULL CHECK(delivery_state IN ('queued','delivered','failed')),attempts INTEGER NOT NULL DEFAULT 0,delivered_at TEXT)");
+  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_reports(ballot_id TEXT PRIMARY KEY,receipt_json TEXT NOT NULL,delivery_state TEXT NOT NULL CHECK(delivery_state IN ('queued','delivered','failed')),attempts INTEGER NOT NULL DEFAULT 0,recipient_count INTEGER NOT NULL DEFAULT 0,delivered_at TEXT)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_audit(id TEXT PRIMARY KEY,ballot_id TEXT NOT NULL,event TEXT NOT NULL,user_id TEXT NOT NULL,at TEXT NOT NULL)");
 }
 export function creditVerifiedContribution(sql,{id,userId,kind,at=nowIso()}){
@@ -149,19 +149,22 @@ export function governanceStatus(sql,{actorId='',now=Date.now()}={}){
     });
   const bans=rows(sql,'SELECT user_id,expires_at FROM guild_governance_bans WHERE expires_at>?',
     new Date(now).toISOString()).map(row=>({userId:row.user_id,expiresAt:row.expires_at}));
+  const outboundReports=rows(sql,'SELECT ballot_id,delivery_state,recipient_count,attempts,delivered_at FROM guild_governance_reports ORDER BY rowid DESC LIMIT 20')
+    .map(row=>({ballotId:row.ballot_id,state:row.delivery_state,recipients:Number(row.recipient_count),attempts:Number(row.attempts),deliveredAt:row.delivered_at}));
   return {schema:GUILD_GOVERNANCE_SCHEMA,eligible,activeCount:eligible.length,majority:Math.floor(eligible.length/2)+1,
     actorEligible:eligible.includes(actorId),actorRole:actorId?delegatedRole(sql,actorId):'member',ballots,
-    bans,reportQueuedCount:rows(sql,"SELECT COUNT(*) AS n FROM guild_governance_reports WHERE delivery_state!='delivered'")[0]?.n||0};
+    bans,outboundReports,reportQueuedCount:outboundReports.filter(row=>row.state!=='delivered').length};
 }
 export function reportQueue(sql){
   ensureGovernanceTables(sql);
   return rows(sql,"SELECT ballot_id,receipt_json,delivery_state,attempts FROM guild_governance_reports WHERE delivery_state!='delivered' ORDER BY rowid LIMIT 5")
     .map(r=>({ballotId:r.ballot_id,receipt:JSON.parse(r.receipt_json),state:r.delivery_state,attempts:r.attempts}));
 }
-export function markReportDelivery(sql,id,delivered){
+export function markReportDelivery(sql,id,delivered,recipients=0){
   ensureGovernanceTables(sql);
-  sql.exec('UPDATE guild_governance_reports SET delivery_state=?,attempts=attempts+1,delivered_at=? WHERE ballot_id=?',
-    delivered?'delivered':'failed',delivered?nowIso():null,id);
+  const count=Number.isSafeInteger(recipients)&&recipients>=0&&recipients<=80?recipients:0;
+  sql.exec('UPDATE guild_governance_reports SET delivery_state=?,attempts=attempts+1,recipient_count=?,delivered_at=? WHERE ballot_id=?',
+    delivered?'delivered':'failed',delivered?count:0,delivered?nowIso():null,id);
 }
 export function reportReceipt(sql,ballotId){
   ensureGovernanceTables(sql);
