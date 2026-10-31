@@ -53,13 +53,58 @@ async function join(origin,{createCredential=true,nodeId=''}={}){const host=norm
 async function status(selector=''){const session=sessionFor(selector);if(!session)throw new Error('This device is not logged in to a Guild.');try{if(session.authMode==='legacy-guildkeeper'){const packet=await jsonRequest(new URL('/api/fabric/capacity',session.origin));dispatchEvent(new CustomEvent('civweave:host-node-health',{detail:{nodeId:session.nodeId,origin:session.origin,member:{nodeId:session.nodeId,userId:session.userId,seatClass:'guildkeeper'},capacity:clone(packet||null),quota:null,authMode:session.authMode,at:new Date().toISOString()}}));return{ok:true,legacy:true,nodeId:session.nodeId,userId:session.userId,capacity:packet,quota:null}}const endpoint=new URL('/api/ai/node/session',session.origin);endpoint.searchParams.set('nodeId',session.nodeId);const packet=await jsonRequest(endpoint,{headers:{authorization:`Bearer ${session.token}`,'x-civweave-node-id':session.nodeId}});const updated=setSession(session,{quota:packet.quota||null,emit:false});dispatchEvent(new CustomEvent('civweave:host-node-health',{detail:{nodeId:updated.nodeId,origin:updated.origin,member:clone(packet.member||null),capacity:clone(packet.capacity||null),quota:clone(packet.quota||null),at:new Date().toISOString()}}));return packet}catch(error){if(error.status===401||error.status===403)clearSession(session.nodeId);throw error}}
 function selectedRecord(){try{const saved=parse(localStorage.getItem(SELECTION_KEY),{}),origin=normalizedOrigin(saved?.origin)||normalizedOrigin(localStorage.getItem(HOST_ENDPOINT_KEY)||'');return{origin,nodeId:clean(saved?.nodeId,180)}}catch{return{origin:'',nodeId:''}}}
 function selectedOrigin(){return selectedRecord().origin}
+function selectSession({origin,nodeId='',displayName=''}={}){
+  const host=normalizedOrigin(origin);
+  if(!host)throw new TypeError('Select a valid HTTPS Guild.');
+  const id=clean(nodeId,180);
+  const session=sessionFor(id||host);
+  if(!session)throw new Error('Log in to this Guild before selecting it.');
+  if(session.origin!==host||(id&&session.nodeId!==id))throw new Error('Selected Guild session does not belong to this Guild.');
+  const selection=Object.freeze({schema:'civweave.host-node-selection.v1',origin:host,nodeId:session.nodeId,
+    displayName:clean(displayName,160)||null,selectedAt:new Date().toISOString(),source:'guild-tab-access-v1'});
+  localStorage.setItem(HOST_SELECTION_KEY,JSON.stringify(selection));
+  localStorage.setItem(HOST_ENDPOINT_KEY,host);
+  dispatchEvent(new CustomEvent('civweave:host-node-selected',{detail:selection}));
+  return selection;
+}
+function deselectGuild(){
+  localStorage.removeItem(SELECTION_KEY);
+  localStorage.removeItem(HOST_ENDPOINT_KEY);
+  dispatchEvent(new CustomEvent('civweave:host-node-selected',{detail:{schema:'civweave.host-node-selection.v1',origin:null,nodeId:null,source:'guild-tab-access-v1',deselected:true}}));
+  void globalThis.CivweaveHostNodeStatusSelectionV1?.clearReleaseSource?.('guild-deselected');
+  return true;
+}
+function signOut(selector=''){
+  const selected=selectedRecord();
+  const target=selector||selected.nodeId||selected.origin;
+  if(!target||!sessionFor(target))throw new Error('No logged-in Guild session is available to sign out.');
+  return clearSession(target);
+}
+async function leaveGuild(selector=''){
+  const selected=selectedRecord(),session=sessionFor(selector||selected.nodeId||selected.origin);
+  if(!session)throw new Error('Log in to a Guild before requesting departure.');
+  if(session.authMode==='legacy-guildkeeper'||session.seatClass==='guildkeeper')
+    throw new Error('Guildkeeper founders cannot relinquish their Guild through resident departure.');
+  const endpoint=new URL('/api/ai/node/session',session.origin);
+  endpoint.searchParams.set('nodeId',session.nodeId);
+  // A remote departure requires server authorization; do not falsely treat a
+  // local logout or network error as releasing an occupied Guild seat.
+  const result=await jsonRequest(endpoint,{method:'DELETE',headers:{authorization:'Bearer '+session.token,'x-civweave-node-id':session.nodeId}});
+  if(result?.left!==true)throw new Error('The Guild did not confirm this resident departure.');
+  clearSession(session.nodeId);
+  forgetCredential(session.origin,session.nodeId);
+  forgetCredential(session.origin);
+  if(selected.origin===session.origin&&(selected.nodeId===session.nodeId||!selected.nodeId))deselectGuild();
+  dispatchEvent(new CustomEvent('civweave:host-node-left',{detail:{nodeId:session.nodeId,origin:session.origin}}));
+  return result;
+}
 async function ensureSelected(){const selected=selectedRecord(),active=sessionFor(selected.nodeId)||sessionFor(selected.origin);if(active){void ensureGuildHostOnboarding(active);return active}if(!selected.origin)return null;const saved=credentialFor(selected.origin,{nodeId:selected.nodeId}),legacy=legacyGuildkeeperCredential(selected.origin,selected.nodeId);if(!saved&&!legacy)return null;const packet=await join(selected.origin,{createCredential:!saved&&Boolean(legacy),nodeId:selected.nodeId});return packet.session}
 function recordUsage({nodeId='',chargedNeurons=0,quota=null}={}){const session=sessionFor(nodeId);if(!session)return null;const all=sessions(),row=all[session.nodeId];if(!row)return null;const charged=Math.max(0,finite(chargedNeurons)||0),priorAverage=Number(row?.telemetry?.averageNeuronsPerTurn)||DEFAULT_NEURONS_PER_CHAT;const turns=Math.max(0,Number(row?.telemetry?.measuredTurns)||0),average=charged>0?(turns?priorAverage*.65+charged*.35:charged):priorAverage;const remaining=finite(quota?.includedRemainingNeurons)??finite(row?.telemetry?.remainingNeurons);const telemetry={chargedNeurons:charged,remainingNeurons:remaining,averageNeuronsPerTurn:Number(average.toFixed(2)),measuredTurns:turns+(charged>0?1:0),approximateTurnsLeft:remaining==null?null:Math.max(0,Math.floor(remaining/Math.max(1,average))),updatedAt:new Date().toISOString()};row.telemetry=telemetry;all[session.nodeId]=row;saveSessions(all);dispatchEvent(new CustomEvent('civweave:ai-neuron-usage',{detail:{nodeId:session.nodeId,origin:session.origin,...clone(telemetry)}}));return clone(telemetry)}
 function forgetCredential(origin,nodeId=''){const host=normalizedOrigin(origin);if(!host)return false;const all=credentials();delete all[nodeId?`${host}#${clean(nodeId,180)}`:host];return saveCredentials(all)}
 function publicStatus(){return{version:VERSION,selectedOrigin:selectedOrigin(),sessions:Object.values(sessions()).map(item=>({nodeId:item.nodeId,userId:item.userId,origin:item.origin,seatClass:item.seatClass||null,authMode:item.authMode||null,expiresAt:item.expiresAt||null,active:!item.expiresAt||Date.parse(item.expiresAt)>Date.now(),telemetry:clone(item.telemetry||null)}))}}
 function loadPaidJoinExtension(){if(typeof document==='undefined'||location.pathname.startsWith('/creator-suite/'))return false;const assets=[['/app/host-node-paid-join-v1.js?v=paid-only-hub-join-v2-citizen-patron','civweavePaidHubJoin','v2'],['/app/host-node-status-selection-v1.js?v=paid-only-hub-join-v1','civweaveHostStatusSelection','v1']];let loaded=false;for(const[src,key,value]of assets){if(document.querySelector(`script[data-${key.replace(/[A-Z]/g,letter=>`-${letter.toLowerCase()}`)}]`))continue;const script=document.createElement('script');script.src=src;script.async=true;script.dataset[key]=value;document.head.append(script);loaded=true}return loaded}
 
-globalThis.CivweaveHostNodeSessionV1=Object.freeze({version:VERSION,sessionKey:SESSION_KEY,credentialKey:CREDENTIAL_KEY,selectionKey:SELECTION_KEY,join,status,ensureSelected,setSession,sessionFor,telemetryFor,recordUsage,clearSession,selectedOrigin,hasCredential:(origin,nodeId='')=>Boolean(credentialFor(origin,{nodeId})||legacyGuildkeeperCredential(origin,nodeId)),forgetCredential,publicStatus,ensureGuildHostOnboarding,legacyGuildkeeperCredential});
+globalThis.CivweaveHostNodeSessionV1=Object.freeze({version:VERSION,sessionKey:SESSION_KEY,credentialKey:CREDENTIAL_KEY,selectionKey:SELECTION_KEY,join,status,ensureSelected,setSession,sessionFor,telemetryFor,recordUsage,clearSession,selectedOrigin,selectSession,deselectGuild,signOut,leaveGuild,hasCredential:(origin,nodeId='')=>Boolean(credentialFor(origin,{nodeId})||legacyGuildkeeperCredential(origin,nodeId)),forgetCredential,publicStatus,ensureGuildHostOnboarding,legacyGuildkeeperCredential});
 dispatchEvent(new CustomEvent('civweave:host-node-session-ready',{detail:{version:VERSION,sessionCount:publicStatus().sessions.length}}));
 loadPaidJoinExtension();
 })();
