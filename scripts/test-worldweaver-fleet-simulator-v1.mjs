@@ -105,7 +105,7 @@ test('Fleet UI never claims unsigned actors are physically in the Worldweaver re
  assert.match(src,/data-sl-action="world-observe"/);
  assert.match(src,/data-sl-action="world-move-proposal"/);
  assert.match(src,/drawSignedPilots/);
- assert.match(src,/registered NPC pilot/);
+ assert.match(src,/signed NPC pilot registration/);
  assert.match(src,/worldObservationPrompt/);
  assert.doesNotMatch(src,/createWorldweaver\(\{authorize:\s*\(\)\s*=>\s*true/);
 });
