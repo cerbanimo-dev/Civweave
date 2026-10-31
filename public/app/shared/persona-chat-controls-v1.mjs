@@ -15,7 +15,9 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
  if(!root?.querySelector)throw new TypeError('The existing guide-chat root is required.');
  const button=el(root,'toggle'),panel=el(root,'panel');
  if(!button||!panel)throw new TypeError('Persona chat controls are not mounted in canonical guide chat.');
- let cast=null,campaign=null,session=null,guildRoom=null,guildDrafts=[],guildWorld=null,enabled=false,loading=false;
+ let cast=null,campaign=null,session=null,guildRoom=null,guildDrafts=[],guildWorld=null,
+   guildMotion=null,guildMoves=[],sceneViewer=null,sceneGeometry=null,sceneRevision=-1,
+   enabled=false,loading=false;
  let syncTimer=null,syncBusy=false;
  const guildClient=createGuildPersonaClient();
  const status=message=>{const x=el(root,'status');if(x)x.textContent=small(message,1000);};
@@ -24,7 +26,8 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    button.textContent=enabled?'Cast: on':'Cast';
    onModeChange(enabled);
  };
- const stop=()=>{session=null;guildRoom=null;guildDrafts=[];guildWorld=null;
+ const stop=()=>{session=null;guildRoom=null;guildDrafts=[];guildWorld=null;guildMotion=null;guildMoves=[];
+   sceneViewer?.close();sceneViewer=null;sceneGeometry=null;sceneRevision=-1;
    if(syncTimer){clearInterval(syncTimer);syncTimer=null;}switchOn(false);};
  const guildStatus=message=>{const x=el(root,'guild-status');if(x)x.textContent=small(message,800);};
  async function acceptFile(input,limit,label){
@@ -55,6 +58,8 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    guildRoom=result.room;campaign=guildRoom;
    if(Array.isArray(result.pendingDrafts))guildDrafts=result.pendingDrafts;
    if(Object.hasOwn(result,'world'))guildWorld=result.world;
+   if(Object.hasOwn(result,'motion'))guildMotion=result.motion;
+   if(Array.isArray(result.pendingMoves))guildMoves=result.pendingMoves;
    showWillpower();showGuildRoom();
  }
  async function refreshGuild({quiet=false}={}){
@@ -64,7 +69,9 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
    if(!guildRoom||guildRoom.id!==id)return;
    const changed=result.room.revision!==guildRoom.revision||
      result.pendingDrafts?.length!==guildDrafts.length||
-     result.world?.revision!==guildWorld?.revision;
+     result.world?.revision!==guildWorld?.revision||
+     result.motion?.revision!==guildMotion?.revision||
+     result.pendingMoves?.length!==guildMoves.length;
    absorbGuild(result);
    if(!quiet||changed)guildStatus('Guild synchronized · revision '+guildRoom.revision+
      ' · '+guildRoom.turn+' player turns · '+guildDrafts.length+' pending drafts.');
@@ -80,6 +87,27 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      catch(error){guildStatus('Sync suspended: '+small(error?.message||error,350)+'. Reconnect or refresh.');stop();}
      finally{syncBusy=false;}
    },4000);
+ }
+ async function drawGuild3D(){
+   const canvas=el(root,'guild-3d');
+   if(!canvas||!guildMotion?.region)return;
+   try{
+     if(sceneRevision!==guildMotion.revision||!sceneGeometry){
+       const {buildOpenSimGeometry}=await import('./worldweaver-opensim-geometry-v1.mjs');
+       sceneGeometry=buildOpenSimGeometry(guildMotion.region);
+       sceneRevision=guildMotion.revision;
+     }
+     if(!sceneViewer){
+       const {createOpenSim3DPreview}=await import('./worldweaver-3d-preview-v1.mjs');
+       sceneViewer=createOpenSim3DPreview({canvas,getGeometry:()=>sceneGeometry,
+         onSelect:hit=>guildStatus('3D object: '+hit.objectId+
+           '. Camera selection does not move or authorize the character.')});
+     }
+     sceneViewer.update();
+   }catch(error){
+     const target=el(root,'guild-motion-status');
+     if(target)target.textContent='3D render failed: '+small(error?.message||error,240);
+   }
  }
  function showGuildRoom(){
    const role=el(root,'guild-seat-role'),prior=role?.value;
@@ -105,6 +133,21 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
       'Worldweaver accepted speech ('+guildWorld.speeches.length+' entries, simulated): '+
       guildWorld.speeches.slice(-3).map(x=>small(x.text,130)).join(' | '):
       'Worldweaver: no approved simulation speech yet.';
+   const motionList=el(root,'guild-move-list'),old=motionList?.value;
+   motionList?.replaceChildren();
+   for(const draft of guildMoves){
+     const option=document.createElement('option');option.value=draft.id;
+     option.textContent=draft.characterId+' · ('+draft.to.x+', '+draft.to.y+', '+draft.to.z+')';
+     motionList?.append(option);
+   }
+   if(guildMoves.some(d=>d.id===old))motionList.value=old;
+   const motionStatus=el(root,'guild-motion-status');
+   if(motionStatus)motionStatus.textContent=guildMotion?
+     'Authoritative '+guildMotion.provider+' · 3D revision '+guildMotion.revision+
+     ' · '+guildMotion.actors.map(a=>a.characterId+' ('+
+       a.position.x+', '+a.position.y+', '+a.position.z+')').join(' · '):
+     'Load a Guild room to view character positions.';
+   if(guildMotion)void drawGuild3D();
    const timeline=el(root,'guild-timeline');
    if(timeline)timeline.textContent=guildRoom?.events?.length?
      guildRoom.events.slice(-20).map(e=>e.id+' · '+e.type+' · '+
@@ -253,7 +296,7 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
        title:campaign.title,stage:campaign.stage,scenario:campaign.scenario,confirmedShare:true});
      stop();guildRoom=result.room;campaign=result.room;session=null;
      if(el(root,'guild-room'))el(root,'guild-room').value=guildRoom.id;
-     speakers();switchOn(true);showWillpower();showGuildRoom();startGuildSync();
+     speakers();switchOn(true);showWillpower();showGuildRoom();startGuildSync();await refreshGuild({quiet:true});
      guildStatus('Hosted on '+result.scope.nodeId+' as '+result.scope.userId+'. Room '+guildRoom.id+
       '. The room is private to authorized seats; assign players before they join.');
      status('Guild campaign active: model NPCs are NOT automatically run by the server. Player turns use authenticated Guild storage.');
@@ -365,6 +408,38 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
        guildRoom.willpower.points+'/'+guildRoom.willpower.max+'.');
      await refreshGuild({quiet:true});
    }catch(error){guildStatus('Dual override rejected: '+small(error?.message||error,450));}
+   finally{loading=false;}
+ });
+ el(root,'guild-move-draft').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     if(!guildRoom||!guildMotion)throw new Error('Join a Guild room and synchronize its 3D stage first.');
+     const characterId=el(root,'speaker')?.value;
+     if(!guildRoom.cast.includes(characterId))
+       throw new Error('Select one playable character for a physical 3D movement step.');
+     const x=Number(el(root,'guild-move-x')?.value),y=Number(el(root,'guild-move-y')?.value);
+     if(!Number.isFinite(x)||!Number.isFinite(y))
+       throw new Error('Enter finite X/Y stage coordinates.');
+     const result=await guildClient.draftMove(guildRoom.id,guildRoom.revision,
+       characterId,{x,y,z:0});
+     guildStatus('3D move '+result.motionDraft?.id+' submitted for review. The actor remains in place until host approval.');
+     await refreshGuild({quiet:true});
+   }catch(error){guildStatus('3D move rejected: '+small(error?.message||error,420));}
+   finally{loading=false;}
+ });
+ el(root,'guild-move-approve').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     if(!guildRoom)throw new Error('Join a Guild room before approving movement.');
+     const draftId=el(root,'guild-move-list')?.value;
+     if(!draftId)throw new Error('Select a pending character movement.');
+     const result=await guildClient.approveMove(guildRoom.id,guildRoom.revision,draftId);
+     absorbGuild(result);
+     guildStatus('Worldweaver moved '+result.movement.characterId+' by '+
+       result.movement.distance+'m in the Guild 3D simulator; authoritative receipt '+
+       result.worldReceiptId+'.');
+     await refreshGuild({quiet:true});
+   }catch(error){guildStatus('Movement approval failed: '+small(error?.message||error,420));}
    finally{loading=false;}
  });
  el(root,'end').addEventListener('click',()=>{stop();showWillpower();
