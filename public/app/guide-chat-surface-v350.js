@@ -267,7 +267,10 @@ function ensureRoot(){
   root.querySelector('[data-persistent-form]').addEventListener('submit',event=>{event.preventDefault();const input=event.currentTarget.querySelector('textarea'),text=clean(input?.value);if(!text)return;void submitText(text,activeSystem)});
   root.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close()}});
   if(!root.isConnected)document.body.append(root);
-  syncChrome();render();return root;
+  syncChrome();render();
+  // Refresh visuals only after an explicit chat open, never during app launch.
+  void ensureVisuals().then(()=>{if(openState)render()}).catch(()=>{});
+  return root;
 }
 function syncSwitcher(){
   if(!root)return;
@@ -622,7 +625,7 @@ function start(){
   void ensureGenerationTracker();
   pageSystem=detectSystem();activeSystem=pageSystem;installStyle();restoreState();ensureLauncher();syncChrome();openState=false;minimized=false;
   void ensureSpecializedRegistry().catch(()=>{});
-  void ensureVisuals().then(()=>{if(root)render()}).catch(()=>{});
+  void ensureVisuals().catch(()=>{});
   addEventListener('civweave:system-route-changed',event=>{const system=event?.detail?.system;if(SYSTEMS.includes(system)&&system!==pageSystem){pageSystem=system;syncChrome()}});
   addEventListener('civweave:realm-guide-thread-changed',()=>{if(root)queueMicrotask(()=>{if(openState)markSeen(activeSystem);syncSwitcher()})});
   for(const name of ['civweave:actions-changed','civweave:intentions-changed'])addEventListener(name,syncArtifactGates);
