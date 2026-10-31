@@ -22,6 +22,9 @@ function responsePacket(character,turn){
       requiresConsent:false},
     context:{guide:{system:'civweave'},capability:'persona-campaign',characterId:character.id},
     persona:{sceneTurn:turn.sceneTurn,proposalCount:turn.proposedActions.length,
+      outwardSpeakers:(turn.spokenTurns||[]).map(x=>x.characterId),
+      overrideSpends:(turn.directControlReceipts||[]).map(x=>({characterId:x.characterId,cost:x.cost})),
+      remainingWillpower:turn.willpower?.points??null,
       actionsExecuted:false,worldChanged:false,needsDirection:turn.needsDirection}};
 }
 export async function runPersonaChatTurn({
@@ -43,7 +46,8 @@ export async function runPersonaChatTurn({
  const recent=campaignPublicTimeline(campaign).filter(e=>e.type==='rehearsal-preview').slice(-3)
    .map(e=>'Player: '+trim(e.playerCue,300)+'; '+e.characterId+': '+trim(e.speech,300));
  const speakers=split?['landry','delia']:[characterId];
- const stale=!scene||!speakers.every(id=>scene.participants?.includes(id))||
+ const stale=!scene||scene.turn!==campaign.turn||
+   !speakers.every(id=>scene.participants?.includes(id))||
    needsDirectorRefresh(scene,{stage:campaign.stage,turn:campaign.turn});
  let activeScene=scene;
  if(stale){
