@@ -115,6 +115,24 @@ Portable documents should have immutable \`templateId\`, \`version\`, \`schema\`
 
 Templates can start with no 3D runtime and use an accessible 2D or static variant; these are real valid deliverables, not mock claims of a live 3D simulation.
 
+## Public "Fund the Collective" top-ups — headquarters only
+
+The canonical Civweave.cc Working Campus presents an optional **Fund Starling** contribution button, visible only when the actual browser origin is exactly \`https://civweave.cc\`. Public visitors may choose $5 / $10 / $25 / $50 or a custom whole-dollar amount from $5–$1,000. No Guild identity, paid membership, or local model is required. The ordinary Guild marketplace, mobile Guild template and FellowFare commerce must not show this option by default.
+
+Unlike a normal node top-up, **100% of the settled service proceeds after the actual Stripe processor fee** are assigned to headquarters Starling inference backing. This is not a normal top-up: it does not pay Host Node Steward, Cerbanimo Global or Territory Stewardship shares, does not create personal spendable credits, and does not grant governance or membership rights. Payment must be clearly described as **a restricted purchase supporting a for-profit platform's hosted compute, not a tax-deductible charitable donation**. It is not a guarantee that a particular template will be produced.
+
+- Canonical client: \`public/app/headquarters-starling-funding-v1.js\`, loaded only as an inert-by-default presenter in \`public/app/working-campus-v440.html\`; backend still owns all authorization and settlement.
+- Canonical public API: \`/api/money-edge/headquarters/starling-funding\`, served by the existing cloud core Money Edge \`cloudflare/core/src/live-entry.mjs\` and its new narrow capability \`cloudflare/core/src/headquarters-starling-funding-v1.mjs\`. Stripe Hosted Checkout is the only payment interface; Civweave never handles card information.
+- Canonical storage: new D1 migration \`cloudflare/core/migrations/0014_headquarters_starling_contributions.sql\`; durable purchase ID, unique idempotency key, actual processing fee, net backing, cumulative refunds/disputes, and Stripe charge. Public totals are aggregate only and display no payer names/emails.
+- Payment verification: existing signed Stripe webhook envelope → \`CloudflareMoneyEdge.handleProviderEvent\` → verify the actual paid Checkout Session, PaymentIntent, Charge and balance transaction. Return from Stripe **does not** count as payment. Repeated checkout and webhooks cannot multiply the backing.
+- Refunds and disputes reduce backing even after settlement. If paid capacity is already spent, a future paid-neuron ledger must record the deficit and suspend new funded inference until backed. Never issue unbacked paid requests.
+- Platform will only offer checkout after an operator enables \`CIVWEAVE_HEADQUARTERS_FUNDING_ENABLED=1\` and \`CIVWEAVE_HEADQUARTERS_PAID_AI_ENABLED=1\`, all existing live-money approval gates pass, the verified Stripe webhook and new migration are installed, and an \`HQ_FUNDING_RATE_LIMITER\` binding exists. These flags are **absent by default**. They are not client-settable. Do not enable payment acceptance simply because the feature has merged.
+- Cloudflare currently quotes Workers AI overage at **$0.011 per 1,000 neurons**, above 10,000 free per day on a Workers Paid account (as of October 2026). The public reserve may show a corresponding *estimate* from net settled funds. This is a backing estimate, not purchased prepaid GPU units or a guarantee that a particular model will run. Paid Workers fees, account limits and model availability are separate constraints; verify tariffs before enabling production.
+- Paid compute integration must come next: the headquarters daemon's canonical **account-level** neuron ledger needs a cash-backed class, per-request ceiling, reconciliation, charges and durable negative adjustments. Nothing in this public top-up slice itself starts inference or authorizes paid overage. Until that integration, funds stay earmarked and checkout must remain disabled.
+- Operational launch blockers: run D1 migration; configure D1, verified Stripe webhook, safety/compliance gates and rate limiting; implement pending/failed webhook reconciliation; test partial refunds, full refunds, disputes, session replay, concurrent purchase attempts and 00:00 UTC inference ceilings on staging; verify finance and customer terms before enabling checkout. This is **code prepared for staging**, not an activated payment campaign.
+
+The on-page label can be "Fund the Collective"; internal protocol must use \`headquarters-starling-funding\` so it cannot be confused with a Guild-host credit or a FellowFare order.
+
 ## Safety and governance
 
 - Only preapproved server tools and explicitly scoped capabilities; no arbitrary HTTP, shell, runtime patching, code execution or automatic source merge/deploy.
