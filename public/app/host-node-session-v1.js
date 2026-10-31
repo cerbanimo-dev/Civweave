@@ -61,11 +61,11 @@ function selectSession({origin,nodeId='',displayName=''}={}){
   if(!host)throw new TypeError('Select a valid HTTPS Guild.');
   const id=clean(nodeId,180);
   const session=sessionFor(id||host);
-  if(!session)throw new Error('Log in to this Guild before selecting it.');
+  if(!session)throw new Error('You must be logged in to this Guild before selecting it.');
   if(session.origin!==host||(id&&session.nodeId!==id))throw new Error('Selected Guild session does not belong to this Guild.');
   const selection=Object.freeze({schema:'civweave.host-node-selection.v1',origin:host,nodeId:session.nodeId,
     displayName:clean(displayName,160)||null,selectedAt:new Date().toISOString(),source:'guild-tab-access-v1'});
-  localStorage.setItem(HOST_SELECTION_KEY,JSON.stringify(selection));
+  localStorage.setItem(SELECTION_KEY,JSON.stringify(selection));
   localStorage.setItem(HOST_ENDPOINT_KEY,host);
   dispatchEvent(new CustomEvent('civweave:host-node-selected',{detail:selection}));
   return selection;
