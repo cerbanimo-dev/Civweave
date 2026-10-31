@@ -30,7 +30,8 @@ function valid(value){
   if(value.type==='chart'&&(!Array.isArray(value.labels)||!Array.isArray(value.values)))return false;
   if(value.type==='table'&&(!Array.isArray(value.headers)||!Array.isArray(value.rows)))return false;
   if(value.type==='quiz'&&(!Array.isArray(value.options)||value.options.length<2))return false;
-  if(['steps','timeline','cards','choices','diagram'].includes(value.type)&&!Array.isArray(value.items||value.nodes))return false;
+  if(['steps','timeline','cards','diagram'].includes(value.type)&&!Array.isArray(value.items||value.nodes))return false;
+  if(value.type==='choices'&&!Array.isArray(value.options||value.items))return false;
   return true;
 }
 function parse(raw){try{const value=JSON.parse(raw);return valid(value)?value:null}catch{return null}}
