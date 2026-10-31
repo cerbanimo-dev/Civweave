@@ -67,7 +67,7 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     return {ok:true,userId:session.userId,role:delegatedRole(this.sql,session.userId)};
   }
   pendingPeerReports(){return reportQueue(this.sql)}
-  markPeerReport({ballotId,delivered}){markReportDelivery(this.sql,ballotId,delivered);return {ok:true}}
+  markPeerReport({ballotId,delivered,recipients=0}){markReportDelivery(this.sql,ballotId,delivered,recipients);return {ok:true}}
   publicPeerReport({ballotId}){return reportReceipt(this.sql,ballotId)}
   async guildStarlingAction({tokenHash,requestedNodeId,action,input}={}){
     if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))throw Object.assign(new Error('Guild session belongs to a different Guild.'),{status:403});
@@ -324,7 +324,10 @@ async function sendApprovedPeerReports(env,stub,origin){
     // reporting Guild's publicly accessible, immutable approved receipt.
     const response=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},
       body:JSON.stringify({guildId:row.receipt.guildId,origin,ballotId:row.ballotId})});
-    await stub.markPeerReport({ballotId:row.ballotId,delivered:response.ok});
+    const confirmation=response.ok?await response.json().catch(()=>null):null;
+    const delivered=response.ok&&confirmation?.ok===true;
+    await stub.markPeerReport({ballotId:row.ballotId,delivered,
+      recipients:delivered?Number(confirmation.deliveredToNearbyGuilds||0):0});
   }
   return {ok:true,attempted:queued.length};
 }
