@@ -23,7 +23,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
+const state={guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -164,11 +164,11 @@ function renderPresence(){
     button.dataset.slPresence=current.status;
     button.setAttribute('aria-pressed',String(id===state.selectedAgent));
     const status=button.querySelector('.sl-presence-label');if(status)status.textContent=current.label;
-    if(button.classList.contains('sl-world-actor')){
+    // A registered NPC's 3D HUD portrait is a dock marker, not locomotion.
+    // Work status changes the signal, never fabricates spatial movement.
+    if(button.classList.contains('sl-world-actor')&&!button.dataset.slWorldPilot){
       const base=STAGE_POSITIONS[id]||[50,70];
-      const activity=({moss:[20,58],kamiya:[42,56],rook:[66,58],merlin:[85,57],weaveling:[50,48]})[id]||[50,70];
-      const coords=current.status==='working'?activity:base;
-      button.style.setProperty('--sl-x',coords[0]+'%');button.style.setProperty('--sl-y',coords[1]+'%');
+      button.style.setProperty('--sl-x',base[0]+'%');button.style.setProperty('--sl-y',base[1]+'%');
     }
     const short=button.querySelector('.sl-figure-presence');if(short)short.textContent=current.status;
     button.title=(STARLING_PERSONAS[id]||SYSTEM_GUIDES[id]).name+' · '+current.label;
@@ -863,11 +863,24 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
   const host=$('[data-sl-world-host]'),canvas=el('canvas','sl-world-3d'),map=el('div','sl-world-2d'),avatars=el('div','sl-world-avatars');
   canvas.setAttribute('aria-label','Worldweaver local 3D perspective. Drag to orbit and scroll to zoom.');
   avatars.setAttribute('aria-label','Illustrative agent activity portraits; not authoritative world coordinates');
-  for(const person of [...PEOPLE,...Object.values(SYSTEM_GUIDES)]){
-    const node=makeFigure(person,{guide:!!SYSTEM_GUIDES[person.id]});
-    node.classList.add('sl-world-actor');avatars.append(node);
-  }
-  const legend=el('p','sl-world-legend','Signed local Worldweaver scene · provisional geometry · portraits show reported inference, not physical NPC movement');
+  const drawSignedPilots=()=>{
+    avatars.replaceChildren();
+    const members=getSnapshot()?.npcs?.filter(npc=>npc.instanceId===worldRef&&
+      typeof npc.personaRef==='string'&&npc.personaRef.startsWith('starling:'))||[];
+    members.slice(0,16).forEach((npc,index)=>{
+      const person=STARLING_PERSONAS[npc.personaRef.slice(9)];
+      if(!person)return;
+      const node=makeFigure(person);
+      node.classList.add('sl-world-actor');node.dataset.slWorldPilot=npc.id;
+      node.style.setProperty('--sl-x',(9+(index%8)*11.7)+'%');
+      node.style.setProperty('--sl-y',(index<8?84:70)+'%');
+      node.title=person.name+' · signed NPC pilot registration · HUD dock, not a world coordinate';
+      avatars.append(node);
+    });
+    renderPresence();
+  };
+  drawSignedPilots();
+  const legend=el('p','sl-world-legend','Worldweaver signed NPCs shown in HUD dock · 3D coordinates and movement require trusted simulator receipts');
   host.append(canvas,map,avatars,legend);
   let viewer=null,view=null;
   try{
@@ -878,6 +891,7 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
     view=mapMod.createWorldMap2DView({getSnapshot,getLayout,worldRef,container:map,subscribe,onActivate});
   }catch(error){viewer?.close();view?.close();host.replaceChildren();throw error}
   state.worldViewer=viewer;state.worldView=view;state.worldLinked=true;
+  if(typeof subscribe==='function')state.worldRosterUnsubscribe=subscribe(drawSignedPilots);
   const holder=$('[data-sl-room-holder]'),select=$('[data-sl-world-room]');
   if(holder&&select){
     select.replaceChildren();
@@ -891,6 +905,7 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
   switchWorldMode('3d');renderPresence();return view;
 }
 function detachWorldSource(){
+  state.worldRosterUnsubscribe?.();state.worldRosterUnsubscribe=null;
   state.worldViewer?.close();state.worldViewer=null;
   state.worldView?.close();state.worldView=null;state.worldLinked=false;
   const holder=$('[data-sl-room-holder]');if(holder)holder.hidden=true;
