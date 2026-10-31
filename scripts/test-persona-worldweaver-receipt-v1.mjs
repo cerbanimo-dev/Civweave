@@ -17,7 +17,7 @@ const make=()=>{
  const actions=[{tool:'speak',args:{text:'I want to go.'}}];
  const queued=world.dispatch({type:'queue-actions',npcId:npc.id,actions},pilot).intents;
  const proposal={type:'npc-proposal',id:'event-1',characterId:'landry',proposedActions:actions};
- const binding={receiptId:'world:receipt-1',intentIds:queued.map(x=>x.id),
+ const binding={receiptId:'world:receipt-1',campaignId:'campaign:one',proposalId:'event-1',intentIds:queued.map(x=>x.id),
   npcId:npc.id,instanceId:instance.id,personaRef:npc.personaRef,
   packId:'source-pack',modelId:npc.modelId,pilotPrincipalId:npc.pilotPrincipalId};
  const verify=createPersonaWorldReceiptVerifier({world,getBinding:async()=>binding});
@@ -47,4 +47,11 @@ test('forged receipts, wrong pilot, mismatched arguments and failed actions neve
  const badBinding={...success.binding,pilotPrincipalId:'pilot:impostor'};
  const verify=createPersonaWorldReceiptVerifier({world:success.world,getBinding:async()=>badBinding});
  assert.equal(await verify(success.query),false);
+});
+
+test('completed actions cannot be used to confirm a different campaign or event',async()=>{
+ const s=make();s.world.dispatch({type:'report-action',intentId:s.queued[0].id,outcome:'succeeded'},
+   {kind:'runtime',principalId:'server:worldweaver',verified:true});
+ assert.equal(await s.verify({...s.query,campaignId:'campaign:two'}),false);
+ assert.equal(await s.verify({...s.query,proposal:{...s.proposal,id:'event-999'}}),false);
 });
