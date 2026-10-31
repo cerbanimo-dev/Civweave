@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 test('same canonical chat composer presents opt-in campaign controls without alternate transcript',()=>{
  const s=read('../public/app/guide-chat-surface-v350.js');
- for(const name of ['data-persona-toggle','data-persona-panel','data-persona-pack','data-persona-save','data-persona-speaker','data-persona-director-model','data-persona-actor-model']){
+ for(const name of ['data-persona-toggle','data-persona-panel','data-persona-pack','data-persona-save' ,'data-persona-speaker','data-persona-control','data-persona-deviation','data-persona-director-model','data-persona-actor-model']){
    assert.match(s,new RegExp(name));
  }
  assert.match(s,/personaChatAdapter\.respond/);
