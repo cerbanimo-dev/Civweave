@@ -27,43 +27,49 @@ function fixture(){
     sql.exec('INSERT INTO resident_sessions(token_hash,node_id,user_id,created_at,expires_at) VALUES(?,?,?,?,?)',
       'token-'+id,'guild-a',id,NOW(),new Date(Date.now()+86400000).toISOString());
   };
-  const contributor=(id,kind='published-quest')=>creditVerifiedContribution(sql,{id:kind+':'+id,userId:id,kind});
+  const contributor=(id,kind='physical-check-in')=>creditVerifiedContribution(sql,{id:kind+':'+id,userId:id,kind});
   const context={guildId:'guild-a',origin:'https://guild-a.workers.dev'};
   return{sql,db,member,contributor,context,memberCount:()=>db.prepare('SELECT COUNT(*) AS n FROM resident_members').get().n};
+}
+function proposeWithNoticedCase(sql,opts){
+  if(!['remove','ban','report'].includes(opts.action))return proposeGovernance(sql,opts);
+  const open=openGovernanceCase(sql,opts);
+  sql.exec('UPDATE guild_governance_cases SET notice_until=? WHERE id=?',new Date(Date.now()-1000).toISOString(),open.id);
+  return proposeGovernance(sql,{...opts,caseId:open.id});
 }
 test('majority is strict and cannot be met by an owner alone when multiple members contributed',()=>{
   assert.deepEqual([1,2,3,4,5].map(majority),[1,2,2,3,3]);
   const members=[{userId:A},{userId:B},{userId:C}],t=Date.now();
-  const receipts=[{userId:A,kind:'published-quest',at:new Date(t-1000).toISOString()},
+  const receipts=[{userId:A,kind:'accepted-work-proof',at:new Date(t-1000).toISOString()},
     {userId:B,kind:'physical-check-in',at:new Date(t-1000).toISOString()},
     {userId:C,kind:'neuron-use',at:new Date(t-1000).toISOString()},
-    {userId:C,kind:'published-quest',at:new Date(t-GUILD_CONTRIBUTION_WINDOW_MS-1000).toISOString()}];
+    {userId:C,kind:'accepted-work-proof',at:new Date(t-GUILD_CONTRIBUTION_WINDOW_MS-1000).toISOString()}];
   assert.deepEqual(qualifiedContributors(members,receipts,{now:t}),[A,B]);
   assert.throws(()=>ballotSpec({action:'remove',targetUserId:A,initiatorUserId:A,eligible:[A],statement:'Verified concerns require a documented member decision.',now:t}),/normal account departure/);
   assert.throws(()=>ballotSpec({action:'ban',targetUserId:A,initiatorUserId:B,eligible:[A],statement:'Verified concerns require a documented member decision.',now:t}),/recent verified contribution/);
 });
 test('all active Guild members can vote, but only recent verified contributors can propose',()=>{
   const now=Date.now(),members=[A,B,C].map(id=>({userId:id,lastSeenAt:new Date(now-1000).toISOString()}));
-  const receipts=[{userId:A,kind:'published-quest',at:new Date(now-1000).toISOString()}];
+  const receipts=[{userId:A,kind:'accepted-work-proof',at:new Date(now-1000).toISOString()}];
   assert.deepEqual(qualifiedContributors(members,receipts,{now}),[A]);
   assert.deepEqual(activeGuildVoters(members,receipts,{now}),[A,B,C]);
   assert.deepEqual(activeGuildVoters([...members,{userId:D,lastSeenAt:new Date(now-31*86400000).toISOString()}],receipts,{now}),[A,B,C]);
   const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);
-  const proposed=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a democratic member decision.',actorId:A,action:'remove',targetUserId:C});
+  const proposed=proposeWithNoticedCase(f.sql,{...f.context,statement:'Verified concerns require a democratic member decision.',actorId:A,action:'remove',targetUserId:C});
   assert.equal(proposed.status,'open');assert.equal(proposed.requiredYes,2);
   assert.equal(f.memberCount(),3);
   assert.equal(castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:proposed.id,choice:'yes'}).status,'approved');
   assert.equal(f.memberCount(),2);
-  assert.throws(()=>proposeGovernance(f.sql,{...f.context,statement:'Resident has not contributed recently; proposal should fail.',actorId:B,action:'transfer-role',targetUserId:A,role:'guildkeeper'}),/recent verified contribution/);
+  assert.throws(()=>proposeWithNoticedCase(f.sql,{...f.context,statement:'Resident has not contributed recently; proposal should fail.',actorId:B,action:'transfer-role',targetUserId:A,role:'guildkeeper'}),/recent verified contribution/);
 });
 test('approved ballots auto-remove and invalidate sessions; a proposer alone cannot act in a multi-voter Guild',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
-  const first=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
+  const first=proposeWithNoticedCase(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
   assert.equal(first.status,'open');assert.equal(first.yes,1);assert.equal(first.requiredYes,2);assert.equal(f.memberCount(),3);
   const declined=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:first.id,choice:'no'});
   assert.equal(declined.status,'open');assert.equal(f.memberCount(),3);
   assert.equal(castGovernanceVote(f.sql,{...f.context,actorId:C,ballotId:first.id,choice:'no'}).status,'rejected');
-  const second=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
+  const second=proposeWithNoticedCase(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
   const final=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:second.id,choice:'yes'});
   assert.equal(final.status,'approved');assert.equal(final.executed,true);assert.equal(f.memberCount(),2);
   assert.equal(f.db.prepare('SELECT COUNT(*) AS n FROM resident_sessions WHERE user_id=?').get(C).n,0);
@@ -72,24 +78,24 @@ test('approved ballots auto-remove and invalidate sessions; a proposer alone can
 });
 test('active productive target stays protected until community majority, even if not the proposer',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));[A,B,C].forEach(id=>f.contributor(id));
-  const ballot=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
+  const ballot=proposeWithNoticedCase(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'remove',targetUserId:C});
   assert.equal(ballot.status,'open');assert.equal(f.memberCount(),3);
   assert.equal(castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes'}).status,'approved');
   assert.equal(f.memberCount(),2);
 });
 test('majority-approved Guildkeeper role transfer and revocation affect effective authority immediately',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
-  const ballot=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'transfer-role',targetUserId:C,role:'guildkeeper'});
+  const ballot=proposeWithNoticedCase(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'transfer-role',targetUserId:C,role:'guildkeeper'});
   assert.equal(delegatedRole(f.sql,C),'member');
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes'});
   assert.equal(delegatedRole(f.sql,C),'guildkeeper');
-  const next=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'transfer-role',targetUserId:C,role:'member'});
+  const next=proposeWithNoticedCase(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'transfer-role',targetUserId:C,role:'member'});
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:next.id,choice:'yes'});
   assert.equal(delegatedRole(f.sql,C),'member');
 });
 test('approved bans block old user IDs and existing device credential reuse, but expire',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
-  const ballot=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'ban',targetUserId:C});
+  const ballot=proposeWithNoticedCase(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'ban',targetUserId:C});
   assert.equal(isBanned(f.sql,C),false);
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes'});
   assert.equal(isBanned(f.sql,C),true);
@@ -99,10 +105,10 @@ test('approved bans block old user IDs and existing device credential reuse, but
 });
 test('active contributor majority can automatically lift a wrongful ban and restore admission eligibility',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
-  const ban=proposeGovernance(f.sql,{...f.context,statement:'Evidence suggests a temporary safety restriction.',actorId:A,action:'ban',targetUserId:C});
+  const ban=proposeWithNoticedCase(f.sql,{...f.context,statement:'Evidence suggests a temporary safety restriction.',actorId:A,action:'ban',targetUserId:C});
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ban.id,choice:'yes'});
   assert.equal(isBanned(f.sql,C),true);
-  const reverse=proposeGovernance(f.sql,{...f.context,statement:'New evidence justifies overturning the original vote.',actorId:A,action:'lift-ban',targetUserId:C});
+  const reverse=proposeWithNoticedCase(f.sql,{...f.context,statement:'New evidence justifies overturning the original vote.',actorId:A,action:'lift-ban',targetUserId:C});
   assert.equal(reverse.status,'open');assert.equal(isBanned(f.sql,C),true);
   const decision=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:reverse.id,choice:'yes'});
   assert.equal(decision.status,'approved');
@@ -111,13 +117,13 @@ test('active contributor majority can automatically lift a wrongful ban and rest
 });
 test('approved nearby reports have a 30-day per-target cooldown to prevent repeated Guild harassment',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
-  const first=proposeGovernance(f.sql,{...f.context,statement:'A documented report of problematic conduct was received.',actorId:A,action:'report',targetUserId:C,reasonCode:'harassment'});
+  const first=proposeWithNoticedCase(f.sql,{...f.context,statement:'A documented report of problematic conduct was received.',actorId:A,action:'report',targetUserId:C,reasonCode:'harassment'});
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:first.id,choice:'yes'});
-  assert.throws(()=>proposeGovernance(f.sql,{...f.context,statement:'Repeated allegation against the same Guild resident.',actorId:A,action:'report',targetUserId:C,reasonCode:'other'}),/last 30 days/);
+  assert.throws(()=>proposeWithNoticedCase(f.sql,{...f.context,statement:'Repeated allegation against the same Guild resident.',actorId:A,action:'report',targetUserId:C,reasonCode:'other'}),/last 30 days/);
 });
 test('approved report is queued without exposing a member ID or enforcing a remote ban; retry idempotent',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);f.contributor(B);
-  const ballot=proposeGovernance(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'report',targetUserId:C,reasonCode:'harassment'});
+  const ballot=proposeWithNoticedCase(f.sql,{...f.context,statement:'Verified concerns require a documented member decision.',actorId:A,action:'report',targetUserId:C,reasonCode:'harassment'});
   assert.equal(reportQueue(f.sql).length,0);
   const done=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes'});
   assert.equal(done.status,'approved');assert.equal(f.memberCount(),3);
@@ -228,7 +234,8 @@ test('disciplinary case provides 24-hour response window before a sanction ballo
 });
 test('a drafted quest publication never grants proposal power without accepted work or physical proof',()=>{
   const f=fixture();[A,B,C].forEach(id=>f.member(id));
-  f.contributor(A,'published-quest');
+  // Publication-only receipts must not grant proposal eligibility.
+  assert.throws(()=>creditVerifiedContribution(f.sql,{id:'quest-only',userId:A,kind:'published-quest'}),/Verified contribution source/);
   assert.throws(()=>openGovernanceCase(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C,
     statement:'Publishing a Quest alone is not proof of productive work.'}),/verified contribution/);
   const proof=submitWorkProof(f.sql,{actorId:A,questId:'guild-quest:'+'a'.repeat(64),
