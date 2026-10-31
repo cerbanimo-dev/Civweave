@@ -87,6 +87,7 @@ function setup(){
   </aside>
   <aside class="sl-card sl-operations" data-sl-panel="operations" aria-label="Compute and execution controls">
    <div class="sl-panel-title"><div><span class="sl-kicker">04 · OPERATIONS</span><h2>Control room</h2></div></div>
+   <p class="sl-sub">Plan, run and review without leaving this shared scene.</p><button type="button" data-sl-action="open-planner">Open legacy planning workbench</button>
    <div class="sl-operation-block"><h3>Browser-local collective</h3><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button></div><p class="sl-status" data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</p></div>
    <section class="sl-host-panel sl-operation-block" aria-label="Local execution host"><h3>Device execution host</h3><p class="sl-sub">Resume approved local drafts after leaving the commune. No task claims or spending.</p><label>Backend <select data-sl-host-kind><option value="termux">Termux companion · port 8767</option><option value="android">Android native bridge · WorkManager</option></select></label><div class="sl-flex"><button type="button" data-sl-action="host-connect">Connect</button><button type="button" data-sl-action="host-submit">Queue local draft</button><button type="button" data-sl-action="host-refresh">Refresh jobs</button></div><div class="sl-flex"><button type="button" data-sl-action="host-enable">Enable host autopilot</button><button type="button" data-sl-action="host-disable">Disable host autopilot</button></div><p class="sl-status" data-sl-host-status role="status">Choose a host and connect.</p><pre data-sl-host-output class="sl-host-output"></pre><button type="button" data-sl-action="host-import">Import completed draft for Guild review</button></section>
    <details class="sl-toolbench sl-operation-block"><summary>Collective toolbench · installed capabilities</summary><div data-sl-toolbench></div></details>
@@ -314,6 +315,7 @@ function click(event){
   if(cmd==='refresh'){void refresh();void refreshTurns();if(state.hostTransport)void refreshHost();state.worldView?.update()}
   if(cmd==='focus-active')focusActivity();
   if(cmd==='focus-chat'){setView('conversation');$('#cw-sl-message')?.focus()}
+  if(cmd==='open-planner'){close();globalThis.CivweaveStarlingCollectiveV1?.open?.()}
   if(cmd==='turn')void runLocalTurn();
   if(cmd==='round')void runLocalRound();
   if(cmd==='worker-toggle')void toggleWorker();
