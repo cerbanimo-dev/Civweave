@@ -21,11 +21,22 @@ export function qualifiedContributors(members,receipts,{now=Date.now(),windowMs=
   }
   return [...verified].sort();
 }
-export function ballotSpec({action,targetUserId,initiatorUserId,eligible,reasonCode='',role='',statement='',now=Date.now()}){
+export function activeGuildVoters(members,receipts,{now=Date.now(),windowMs=GUILD_CONTRIBUTION_WINDOW_MS}={}){
+  const recentlyProductive=new Set(qualifiedContributors(members,receipts,{now,windowMs}));
+  const since=now-windowMs;
+  return [...new Set(members.filter(row=>{
+    const id=row.userId||row.user_id;
+    if(!validGuildUser(id))return false;
+    const lastSeen=Date.parse(row.lastSeenAt||row.last_seen_at||'');
+    return (Number.isFinite(lastSeen)&&lastSeen>=since&&lastSeen<=now)||recentlyProductive.has(id);
+  }).map(row=>row.userId||row.user_id))].sort();
+}
+export function ballotSpec({action,targetUserId,initiatorUserId,eligible,contributors=eligible,reasonCode='',role='',statement='',now=Date.now()}){
   if(!GUILD_GOVERNANCE_ACTIONS.includes(action))throw reject('Invalid Guild governance action.',400);
   if(!validGuildUser(targetUserId)||!validGuildUser(initiatorUserId))throw reject('Guild member identifiers are invalid.',400);
-  if(!eligible.includes(initiatorUserId))throw reject('Only a member with a recent verified contribution may propose moderation.',403);
-  if(eligible.length===0)throw reject('No active verified contributors can form an electorate.');
+  if(!contributors.includes(initiatorUserId))throw reject('Only a member with a recent verified contribution may propose moderation.',403);
+  if(!eligible.includes(initiatorUserId))throw reject('Proposer must be an active Guild member.',403);
+  if(eligible.length===0)throw reject('No active Guild members can form an electorate.');
   if(action==='transfer-role'&&!['guildkeeper','member'].includes(role))throw reject('Choose an approved Guild role.',400);
   if(action==='report'&&!GUILD_REPORT_REASON_CODES.includes(reasonCode))throw reject('Select a bounded report reason.',400);
   if(typeof statement!=='string'||statement.trim().length<20||statement.trim().length>1000)throw reject('Explain the proposed action in 20–1,000 characters for informed voting.',400);
