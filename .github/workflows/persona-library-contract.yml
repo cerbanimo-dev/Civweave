@@ -25,7 +25,7 @@ on:
       - 'cloudflare/node-cloud/src/index.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
       - 'scripts/test-persona-chat-surface-v1.mjs'
-      - 'scripts/test-persona-multiplayer-gateway-v1.mjs scripts/test-guild-persona-transport-v1.mjs'
+      - 'scripts/test-persona-multiplayer-gateway-v1.mjs'
       - 'public/app/tools/worldweaver-performance-lab-v1.mjs'
       - 'public/app/tools/worldweaver-performance-lab.html'
       - 'public/app/shared/persona-scene-bridge-v1.mjs'
@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: '22'
       - name: Verify canon and improv contract
-        run: node --test scripts/test-persona-library-v1.mjs scripts/test-persona-scene-bridge-v1.mjs scripts/test-persona-performance-lab-v1.mjs scripts/test-persona-campaign-v1.mjs scripts/test-persona-chat-turn-v1.mjs scripts/test-persona-dual-override-v1.mjs scripts/test-persona-chat-surface-v1.mjs scripts/test-persona-multiplayer-gateway-v1.mjs
+        run: node --test scripts/test-persona-library-v1.mjs scripts/test-persona-scene-bridge-v1.mjs scripts/test-persona-performance-lab-v1.mjs scripts/test-persona-campaign-v1.mjs scripts/test-persona-chat-turn-v1.mjs scripts/test-persona-dual-override-v1.mjs scripts/test-persona-chat-surface-v1.mjs scripts/test-persona-multiplayer-gateway-v1.mjs scripts/test-guild-persona-transport-v1.mjs scripts/test-guild-persona-client-v1.mjs scripts/test-persona-worldweaver-receipt-v1.mjs
       - name: Syntax-check Worldweaver rehearsal module
         run: |
           node --check public/app/tools/worldweaver-performance-lab-v1.mjs
