@@ -24,7 +24,7 @@ async function refresh(){
   if(pay)pay.disabled=!body.enabled;
   displayTotals();
   if(!body.enabled)message('Contribution checkout is not enabled yet. No payment will be taken.');
-  else message('Secure Stripe checkout. Payment is credited only after verification; no personal AI credits or membership are issued.');
+  else message('Secure Stripe checkout. After verification, net contributions are reserved for a manual prepaid AI Gateway credit purchase; no personal credits or membership are issued.');
 }
 function selectedAmount(){
   const custom=$('cw-starling-fund-custom');
@@ -81,7 +81,7 @@ function init(){
   if(new URLSearchParams(location.search).get('starlingFunding')==='return'){
     // A return URL is not a payment receipt and must never assert success.
     open();
-    message('Returned from checkout. Payment is counted after verification by Stripe. Refresh to see updated backing.');
+    message('Returned from checkout. The contribution appears only after Stripe verifies payment; prepaid AI Gateway credits must still be loaded by the operator.');
   }
 }
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',init,{once:true});else init();
