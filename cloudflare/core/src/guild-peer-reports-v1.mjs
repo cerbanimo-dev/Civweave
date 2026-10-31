@@ -17,7 +17,7 @@ const json=(v,status=200)=>Response.json(v,{status,headers:header});
 function authorizedRelay(request,env){
   const secret=clean(env?.CIVWEAVE_GUILD_REPORT_RELAY_TOKEN,200);
   if(!/^[A-Za-z0-9_-]{40,200}$/.test(secret))throw bad('Guild report relay has not been configured.',503);
-  const candidate=clean((request.headers.get('authorization')||'').replace(/^Bearer\\s+/i,''),200);
+  const candidate=clean((request.headers.get('authorization')||'').replace(/^Bearer\s+/i,''),200);
   if(candidate.length!==secret.length)throw bad('Authenticated Guild relay required.',403);
   let mismatch=0;
   for(let i=0;i<secret.length;i++)mismatch|=secret.charCodeAt(i)^candidate.charCodeAt(i);
