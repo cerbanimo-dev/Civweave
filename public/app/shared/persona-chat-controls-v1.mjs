@@ -90,14 +90,16 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
      role?.append(option);
    }
    if(guildRoom?.cast.includes(prior))role.value=prior;
-   const pending=el(root,'guild-draft-list'),selected=pending?.value;
+   const pending=el(root,'guild-draft-list'),selected=new Set(
+     Array.from(pending?.selectedOptions||[]).map(x=>x.value));
    pending?.replaceChildren();
    for(const draft of guildDrafts){
      const option=document.createElement('option');option.value=draft.id;
      option.textContent=draft.characterId+' · '+small(draft.speech,90);
      pending?.append(option);
    }
-   if(guildDrafts.some(x=>x.id===selected))pending.value=selected;
+   for(const option of pending?.options||[])option.selected=selected.has(option.value);
+   if(pending?.options?.length&&!pending.selectedOptions.length)pending.options[0].selected=true;
    const view=el(root,'guild-world');
    if(view)view.textContent=guildWorld?.speeches?.length?
       'Worldweaver accepted speech ('+guildWorld.speeches.length+' entries, simulated): '+
@@ -346,6 +348,23 @@ export function createPersonaChatControls({root,onModeChange=()=>{}}={}){
        ' · receipt '+result.worldReceiptId+'.');
      await refreshGuild({quiet:true});
    }catch(error){guildStatus('NPC approval failed: '+small(error?.message||error,400));}
+   finally{loading=false;}
+ });
+ el(root,'guild-approve-both').addEventListener('click',async()=>{
+   if(loading)return;loading=true;
+   try{
+     if(!guildRoom)throw new Error('Connect to a Guild room first.');
+     const chosen=Array.from(el(root,'guild-draft-list')?.selectedOptions||[]).map(x=>x.value);
+     const voices=chosen.map(id=>guildDrafts.find(d=>d.id===id)?.characterId);
+     if(chosen.length!==2||!voices.includes('landry')||!voices.includes('delia'))
+       throw new Error('Select one pending Landry line and one pending Delia line.');
+     if(guildRoom.willpower.points<2)throw new Error('Both voices require two shared willpower points.');
+     const result=await guildClient.approveBoth(guildRoom.id,guildRoom.revision,chosen);
+     absorbGuild(result);
+     guildStatus('Both voices spoke. Two separate authoritative Worldweaver receipts recorded; willpower '+
+       guildRoom.willpower.points+'/'+guildRoom.willpower.max+'.');
+     await refreshGuild({quiet:true});
+   }catch(error){guildStatus('Dual override rejected: '+small(error?.message||error,450));}
    finally{loading=false;}
  });
  el(root,'end').addEventListener('click',()=>{stop();showWillpower();
