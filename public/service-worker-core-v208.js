@@ -1,7 +1,7 @@
 'use strict';
 
 const VERSION = '1.0.163';
-const BUILD = 'lightweight-shell-v208-local-fleet-3backends-v2';
+const BUILD = 'lightweight-shell-v208-single-screen-local-fleet-v3';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
 const OFFLINE_CACHE = `civweave-offline-${VERSION}-${BUILD}`;
