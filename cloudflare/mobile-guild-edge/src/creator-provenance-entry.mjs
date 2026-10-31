@@ -2,6 +2,8 @@ import {capacityForStage,progressForStage,GUILD_MILESTONES} from './guild-capaci
 import {CHECK_POLICY,nodeLiveness,locationVerdict,rewardAllowed,proofFresh} from './guild-community-proof-v1.mjs';
 import {GUILD_STARLING_ROUTE,executeGuildStarlingAction} from './guild-starling-collective-v1.mjs';
 import {guildStarlingAction} from './guild-starling-transport-v1.mjs';
+import {GUILD_PERSONA_ROUTE,executeGuildPersonaAction} from './guild-persona-campaign-v1.mjs';
+import {guildPersonaAction} from './guild-persona-transport-v1.mjs';
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
 import {GUILD_QUEST_ROUTE,GUILD_QUEST_CORS,guildQuestAction,readGuildQuestInput,executeGuildQuestAction,guildQuestJson,guildQuestError} from './guild-quest-publications-v1.mjs';
 
@@ -46,6 +48,16 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     const session=this.sessionForHash({tokenHash,requestedNodeId});
     if(!session?.ok)throw Object.assign(new Error(session?.error||'Guild session is invalid.'),{status:session?.status||401});
     return executeGuildStarlingAction(this.ctx.storage,{guildId:this.baseStatus().guildId,nodeId:session.nodeId,userId:session.userId},action,input,{knownMemberCount:this.status().memberCount});
+  }
+  async guildPersonaAction({tokenHash,requestedNodeId,action,input}={}){
+    if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))
+      throw Object.assign(new Error('Persona Guild session belongs to a different Guild.'),{status:403});
+    const session=this.sessionForHash({tokenHash,requestedNodeId});
+    if(!session?.ok)
+      throw Object.assign(new Error(session?.error||'Guild member session is invalid.'),{status:session?.status||401});
+    return executeGuildPersonaAction(this.ctx.storage,
+      {guildId:this.baseStatus().guildId,nodeId:session.nodeId,userId:session.userId},
+      action,input,{nodeId:session.nodeId});
   }
   async guildQuestAction({tokenHash,requestedNodeId,action,input}={}){
     if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))throw Object.assign(new Error('Guild capacity session belongs to a different Guild.'),{status:403});
@@ -283,6 +295,20 @@ export default{
     if(questUrl.pathname===GUILD_STARLING_ROUTE||questUrl.pathname.startsWith(GUILD_STARLING_ROUTE+'/')){
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:GUILD_QUEST_CORS});
       try{const action=guildStarlingAction(request),input=request.method==='POST'?await readGuildQuestInput(request):{},result=await capacityStub(env).guildStarlingAction({tokenHash:await sessionTokenHash(bearer(request)),requestedNodeId:requestedNodeId(request),action,input});return guildQuestJson(result,action==='reserve'&&!result.idempotent?201:200)}catch(error){return guildQuestError(error)}
+    }
+    if(questUrl.pathname===GUILD_PERSONA_ROUTE||questUrl.pathname.startsWith(GUILD_PERSONA_ROUTE+'/')){
+      if(request.method==='OPTIONS')return new Response(null,{status:204,headers:GUILD_QUEST_CORS});
+      try{
+        const action=guildPersonaAction(request);
+        const input=action==='snapshot'?{
+          campaignId:questUrl.searchParams.get('campaignId')
+        }:await readGuildQuestInput(request);
+        const result=await capacityStub(env).guildPersonaAction({
+          tokenHash:await sessionTokenHash(bearer(request)),
+          requestedNodeId:requestedNodeId(request),action,input
+        });
+        return guildQuestJson(result,action==='create'?201:200);
+      }catch(error){return guildQuestError(error)}
     }
     if(questUrl.pathname===GUILD_QUEST_ROUTE||questUrl.pathname.startsWith(GUILD_QUEST_ROUTE+'/')){
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:GUILD_QUEST_CORS});
