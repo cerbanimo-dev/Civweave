@@ -68,7 +68,7 @@ export async function runPersonaChatTurn({
  }
  const next=applyCampaignEvent(updated,{type:'rehearsal-preview',characterId,
    playerCue:input,speech:result.speech,emote:result.emote,sceneRevision:activeScene.revision,
-   proposedActions:result.proposedActions},{actor,authorize,expectedRevision:campaign.revision});
+   proposedActions:result.proposedActions},{actor,authorize,expectedRevision:updated.revision});
  activeScene=advanceSceneTurn(activeScene,{expectedTurn:activeScene.turn});
  if(worldChanged===true||result.needsDirection)activeScene.expireAfterTurn=activeScene.turn;
  return {packet:responsePacket(split?{id:'landry-delia',name:'Landry/Delia'}:
