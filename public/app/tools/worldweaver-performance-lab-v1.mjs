@@ -1,3 +1,6 @@
+import {validatePersonaPack,chooseModelDownloads} from '../shared/persona-library-v1.mjs';
+import {createPersonaCampaign,applyCampaignEvent,exportCampaignSnapshot,importCampaignSnapshot,campaignPublicTimeline} from '../shared/persona-campaign-v1.mjs';
+import {prepareDirectedScene,performPersonaTurn,advanceSceneTurn,needsDirectorRefresh,runSplitMindTurn} from '../shared/persona-scene-bridge-v1.mjs';
 import {createPerformanceStudio,performanceObservation} from '../shared/worldweaver-performance-studio-v1.mjs';
 import {compileStageScene,compilePerformanceScore} from '../shared/worldweaver-stagecraft-v1.mjs';
 import {proposeScreenplayViaModel,proposeStageViaModel} from '../shared/worldweaver-adaptation-model-v1.mjs';
@@ -329,3 +332,238 @@ $('export-state').addEventListener('click',()=>{
 });
 addEventListener('pagehide',()=>{viewer?.close();recognizer?.stop?.();globalThis.speechSynthesis?.cancel?.();},{once:true});
 updateScenes();showStage();
+
+/** One explicit rehearsal-cue surface in the existing Performance Studio.
+ * It is not another chat listener or a standing generative-agent loop.
+ * Imported unpublished cast data stays in memory, never localStorage or cloud
+ * unless the user deliberately initiates inference with remote consent.
+ */
+let personaCast=null,personaScene=null,personaCampaign=null;
+let personaRecent=[],personaGenerating=false;
+let personaWillpower={points:2,max:2,renewEvery:4,lastRenewedTurn:0};
+function showPersonaWillpower(){
+ $('persona-willpower').textContent='Split-mind willpower: '+personaWillpower.points+'/'+personaWillpower.max+
+  ' · restores one point every '+personaWillpower.renewEvery+' accepted rehearsal turns.';
+}
+const personaStatus=s=>$('persona-result').textContent=text(s,2500);
+const personaRoster=()=>Array.from($('persona-cast').selectedOptions).map(o=>o.value);
+const localCampaignAuthorizer=({actor})=>actor?.kind==='human'&&actor.principalId===human.principalId;
+function rebuildPersonaRecent(){
+ personaRecent=(personaCampaign?.events||[]).filter(e=>e.type==='rehearsal-preview')
+  .flatMap(e=>['Player: '+e.playerCue,e.characterId+': '+e.speech]).slice(-6);
+}
+function showCampaign(){
+ if(!personaCampaign){
+  $('persona-campaign-status').textContent='No campaign started. Prepare a scenario to create a what-if branch.';
+  $('persona-campaign-timeline').textContent='No turns recorded.';
+  return;
+ }
+ const s=personaCampaign;
+ $('persona-campaign-status').textContent='Private '+s.branchId+' · turn '+s.turn+
+  ' · revision '+s.revision+' · '+s.cast.length+' cast roles. Save explicitly before leaving.';
+ const visible=campaignPublicTimeline(s).slice(-10);
+ $('persona-campaign-timeline').textContent=visible.length?
+  visible.map(e=>e.type==='rehearsal-preview'?
+   ('Turn '+e.id+' · '+e.characterId+' · '+e.speech+'\n  Player: '+e.playerCue+
+    (e.spokenTurns?.length?'\n  Outward voices: '+e.spokenTurns.map(v=>v.characterId).join(' + '):'')+
+    (e.proposedActions.length?'\n  Proposed actions (not executed): '+e.proposedActions.length:''))
+    :e.id+' · '+e.type+' · '+(e.text||e.characterId||e.outcome||'')).join('\n'):
+  'No turns recorded.';
+}
+function campaignEvent(command){
+ if(!personaCampaign)throw new Error('Prepare a scenario to begin a campaign.');
+ personaCampaign=applyCampaignEvent(personaCampaign,command,{actor:human,
+  authorize:localCampaignAuthorizer,expectedRevision:personaCampaign.revision});
+ showCampaign();
+}
+$('persona-new-campaign').addEventListener('click',()=>{
+ if(personaGenerating)return;
+ personaCampaign=null;personaScene=null;personaRecent=[];
+ personaWillpower={points:2,max:2,renewEvery:4,lastRenewedTurn:0};
+ showPersonaWillpower();showCampaign();
+ personaStatus('Previous local preview cleared from this page. Saved JSON files are unchanged. Prepare a new what-if scenario.');
+});
+$('persona-save-campaign').addEventListener('click',()=>{
+ try{
+  if(!personaCampaign)throw new Error('Prepare a scenario before exporting a campaign.');
+  download('persona-campaign-'+personaCampaign.id+'.json',exportCampaignSnapshot(personaCampaign));
+  personaStatus('Private campaign exported. This save can contain player dialogue; keep it confidential.');
+ }catch(error){personaStatus('Unable to export campaign: '+text(error.message,300));}
+});
+$('persona-session-file').addEventListener('change',async()=>{
+ const file=$('persona-session-file').files?.[0];
+ if(!file)return;
+ try{
+  if(!personaCast)throw new Error('Load the matching persona manifest first.');
+  if(file.size>200000)throw new Error('Campaign save is too large.');
+  const saved=importCampaignSnapshot(await file.text(),{pack:personaCast});
+  personaCampaign=saved;personaScene=null;
+  $('persona-scenario').value=saved.scenario;$('persona-stage').value=String(saved.stage);
+  for(const option of $('persona-cast').options)option.selected=saved.cast.includes(option.value);
+  $('persona-speaker').value=saved.cast[0];
+  personaWillpower=saved.willpower;
+  rebuildPersonaRecent();showPersonaWillpower();showCampaign();
+  personaStatus('Private local session restored as UNTRUSTED rehearsal data. Prepare fresh 4B direction before the next cue; imported results are not authenticated multiplayer outcomes.');
+ }catch(error){personaStatus('Campaign import rejected: '+text(error.message,350));}
+ finally{$('persona-session-file').value='';}
+});
+$('persona-manifest-file').addEventListener('change',async()=>{
+ personaCast=null;personaScene=null;personaCampaign=null;personaRecent=[];
+ showCampaign();
+ personaWillpower={points:2,max:2,renewEvery:4,lastRenewedTurn:0};showPersonaWillpower();
+ $('persona-cast').replaceChildren();$('persona-speaker').replaceChildren();
+ const file=$('persona-manifest-file').files?.[0];
+ if(!file)return;
+ try{
+  if(file.size>1200000)throw new Error('Manifest too large. Import only the JSON manifest, not the manuscript shards or zip archive.');
+  const p=validatePersonaPack(JSON.parse(await file.text()));
+  if(p.characters.length>1000)throw new Error('Cast limit exceeded.');
+  personaCast=p;
+  for(const c of p.characters){
+   for(const id of ['persona-cast','persona-speaker']){
+    const opt=document.createElement('option');opt.value=c.id;opt.textContent=c.name;
+    $(id).append(opt);
+   }
+  }
+  for(const opt of $('persona-cast').options)opt.selected=['jess','magnus'].includes(opt.value);
+  if(!personaRoster().length&&$('persona-cast').options.length)$('persona-cast').options[0].selected=true;
+  $('persona-speaker').value=personaRoster()[0]||p.characters[0]?.id||'';
+  const tiers=chooseModelDownloads(p,personaRoster()).tiers.join(', ');
+  $('persona-import-status').textContent=p.characters.length+' persona/identity entries loaded locally. Model tiers: '+tiers+'.';
+  personaStatus('Cast manifest imported. Next: prepare a scene with the configured 4B director.');
+ }catch(error){
+  $('persona-import-status').textContent='Import rejected: '+text(error.message,280);
+  personaStatus('No persona data imported.');
+ }
+});
+$('persona-cast').addEventListener('change',()=>{
+ personaScene=null;personaRecent=[];
+ const ids=personaRoster();
+ if(personaCampaign&&JSON.stringify(ids)!==JSON.stringify(personaCampaign.cast)){
+  personaStatus('Cast changed. Your existing campaign is still in memory and can be exported. Restore its cast or start a new what-if campaign before preparing.');
+ }
+ if(!ids.includes($('persona-speaker').value))$('persona-speaker').value=ids[0]||'';
+ if(personaCast)$('persona-import-status').textContent=ids.length+' selected actors; required tiers: '+
+   chooseModelDownloads(personaCast,ids).tiers.join(', ')+'. No models downloaded.';
+});
+async function runPersonaSelectedModel({messages,modelTier,purpose,maxOutputTokens}){
+ const runtime=globalThis.CivweaveModelRuntime;
+ const cfg=runtime?.readSharedConfig?.('agentic')||runtime?.readSharedConfig?.('interactive');
+ if(!cfg?.provider||['manual','deterministic'].includes(cfg.provider))
+  throw new Error('Select a real local model in Civweave AI settings before running.');
+ if(!['ollama','openai-compatible','compatible','local-api'].includes(String(cfg.provider).toLowerCase()))
+  throw new Error('Per-role switching in this lab currently requires an Ollama or OpenAI-compatible provider.');
+ if(runtime?.endpointLeavesDevice?.(cfg)&&!$('cloud-consent').checked)
+  throw new Error('Explicit remote-model manuscript consent required.');
+ const target=$(modelTier==='4b'?'persona-director-model':modelTier==='2b'?'persona-inner-model':'persona-actor-model').value.trim();
+ if(!/^[A-Za-z0-9_.:/-]{1,100}$/.test(target))throw new Error('Enter an installed provider model ID.');
+ const {runCodeInference}=await import('/creator-suite/shared/code-inference-route-v1.mjs');
+ const loaders=await import('/creator-suite/shared/creator-inference-loaders-v1.mjs');
+ const response=await runCodeInference({...cfg,model:target},messages,{
+  selection:loaders.currentCreatorLocalSelection(),loadLocal:loaders.loadCreatorLocalRuntime,
+  loadServer:loaders.loadCreatorServerRuntime,sharedRuntime:runtime,
+  purpose,taskTier:'complex',mediaType:'text',maxTokens:Math.min(2048,Math.max(512,maxOutputTokens||650)),
+  requiresTools:false
+ });
+ if(response?.status!=='success'||response?.fallback?.provider==='deterministic')
+  throw new Error('The selected model did not return completed, structured inference.');
+ if(response?.actual?.model&&response.actual.model!==target)
+  throw new Error('Selected-model runtime returned '+text(response.actual.model,100)+' instead of requested '+target+'.');
+ return response;
+}
+async function personaRun(phase){
+ if(personaGenerating||modelBusy)return;
+ personaGenerating=true;modelBusy=true;
+ $('persona-prepare').disabled=true;$('persona-act').disabled=true;
+ try{
+  if(!personaCast)throw new Error('Import a private persona-pack.json first.');
+  const stage=Number($('persona-stage').value);
+  const scenario=$('persona-scenario').value.trim();
+  const participants=personaRoster();
+  if(!Number.isInteger(stage)||stage<0||!scenario||participants.length<1||participants.length>12)
+   throw new Error('Choose a numbered story stage, a scenario, and 1–12 participating characters.');
+  if(phase==='prepare'){
+   if(personaCampaign&&(personaCampaign.stage!==stage||personaCampaign.scenario!==scenario||
+     JSON.stringify(personaCampaign.cast)!==JSON.stringify(participants)))
+    throw new Error('The saved campaign is bound to its starting scenario and cast. Export it, then choose Start a new what-if campaign.');
+   personaStatus('Directing '+participants.length+' character(s) separately with the selected 4B model…');
+   const startingCampaign=personaCampaign||createPersonaCampaign({pack:personaCast,
+    id:'campaign:'+crypto.randomUUID(),ownerId:human.principalId,
+    branchId:'what-if:'+crypto.randomUUID(),title:'Private rehearsal',
+    scenario,stage,cast:participants});
+   const prior=personaScene||{revision:0,turn:startingCampaign.turn};
+   const recentPublic=campaignPublicTimeline(startingCampaign)
+    .filter(e=>e.type==='rehearsal-preview').slice(-3)
+    .map(e=>('Player said/tried: '+text(e.playerCue,350)+'; '+e.characterId+' replied: '+text(e.speech,350)));
+   personaScene=await prepareDirectedScene({pack:personaCast,stage,scenario,participants,
+    goals:['Respect canonical facts and personal knowledge; improvise without silently rewriting historical events.',
+      'Adapt to any player deviation; these past rehearsal lines are UNVERIFIED dialogue, not authoritative facts.',
+      ...recentPublic],
+    branchId:startingCampaign.branchId,
+    previousScene:prior,invokeModel:runPersonaSelectedModel});
+   personaCampaign=startingCampaign;
+   personaWillpower=personaCampaign.willpower;
+   rebuildPersonaRecent();showPersonaWillpower();showCampaign();
+   personaStatus('Director brief revision '+personaScene.revision+' prepared for '+participants.join(', ')+
+    '. The actor may now improvise one cue at a time; new events require approval.');
+  }else{
+   if(!personaScene)throw new Error('Prepare scene direction before improvising.');
+   if(personaScene.stage!==stage||personaScene.scenario!==scenario||
+    JSON.stringify(personaScene.participants)!==JSON.stringify(participants)||
+    needsDirectorRefresh(personaScene))throw new Error('Scenario or cast changed, or instructions expired. Prepare fresh 4B direction.');
+   const id=$('persona-speaker').value;
+   const split=$('persona-split-mode').checked;
+   if(!split&&!participants.includes(id))throw new Error('Select an active participant to perform.');
+   personaStatus(split?'Invoking two 2B voices and an optional 0.8B moderator…':
+     'Invoking 0.8B improv for '+id+'…');
+   if(split&&(!participants.includes('landry')||!participants.includes('delia')))
+    throw new Error('Split-mind rehearsal requires Landry and Delia in the selected cast.');
+   const directChoice=$('persona-direct-control').value;
+   const result=split?await runSplitMindTurn({pack:personaCast,scene:personaScene,
+    playerInput:$('persona-player-cue').value,history:personaRecent,
+    invokeModel:runPersonaSelectedModel,willpower:personaWillpower,
+    ...(directChoice?{directControl:directChoice==='both'?
+       [{characterId:'landry',cost:1},{characterId:'delia',cost:1}]:
+       {characterId:directChoice,cost:1},
+      authorizeDirectControl:()=>true}:{})}):
+    await performPersonaTurn({pack:personaCast,scene:personaScene,characterId:id,
+      playerInput:$('persona-player-cue').value,history:personaRecent,invokeModel:runPersonaSelectedModel});
+   // The local ledger records preview dialogue only. No Worldweaver intent or
+   // canonical event is marked executed by a model response.
+   for(const receipt of split?result.directControlReceipts||[]:[]){
+    campaignEvent({type:'willpower-spend',characterId:receipt.characterId,cost:receipt.cost});
+   }
+   if(split&&personaCampaign.willpower.points!==result.willpower.points)
+    throw new Error('Shared willpower ledger mismatch; rehearsal stopped.');
+   campaignEvent({type:'rehearsal-preview',characterId:split?'landry-delia':id,
+    playerCue:$('persona-player-cue').value,speech:result.speech,emote:result.emote,
+    ...(split&&result.spokenTurns?.length?{spokenTurns:result.spokenTurns}:{}),
+    sceneRevision:personaScene.revision,proposedActions:result.proposedActions||[]});
+   personaWillpower=personaCampaign.willpower;showPersonaWillpower();
+   rebuildPersonaRecent();
+   const redirected=$('persona-force-redirect').checked||result.needsDirection===true;
+   personaScene=advanceSceneTurn(personaScene,{expectedTurn:personaScene.turn});
+   if(redirected){
+    // This expires the scene brief only. Model output never changes canon or
+    // Worldweaver state. A new 4B direction is needed for the next cue.
+    personaScene.expireAfterTurn=personaScene.turn;
+    $('persona-force-redirect').checked=false;
+   }
+   personaStatus(JSON.stringify({character:split?'landry-delia':id,speech:result.speech,emote:result.emote,
+     playerDeviationRequested:redirected,
+     route:split?result.route:'individual',remainingWillpower:split?personaWillpower.points:undefined,
+     directControlReceipts:split?result.directControlReceipts:undefined,
+     outwardSpeakers:split?result.spokenTurns:undefined,
+     proposedActions:result.proposedActions,worldChanged:false,actionsExecuted:false,
+     directorRevision:result.directorRevision,nextSceneTurn:personaScene.turn,
+     refreshRequired:needsDirectorRefresh(personaScene)},null,2));
+  }
+ }catch(error){personaStatus('Persona rehearsal stopped: '+text(error.message,420));}
+ finally{personaGenerating=false;modelBusy=false;$('persona-prepare').disabled=false;
+  $('persona-act').disabled=false;$('cloud-consent').checked=false;}
+}
+$('persona-prepare').addEventListener('click',()=>personaRun('prepare'));
+$('persona-act').addEventListener('click',()=>personaRun('act'));
+
+showPersonaWillpower();
+showCampaign();

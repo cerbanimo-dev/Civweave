@@ -421,9 +421,17 @@
         "scripts/test-worldweaver-labs-hardening-v1.mjs",
         "scripts/test-worldweaver-map-2d-v1.mjs",
         "scripts/test-worldweaver-opensim-geometry-v1.mjs",
-        "scripts/test-worldweaver-performance-studio-v1.mjs"
+        "scripts/test-worldweaver-performance-studio-v1.mjs",
+        "scripts/test-persona-library-v1.mjs",
+        "scripts/test-persona-scene-bridge-v1.mjs",
+        "scripts/test-persona-campaign-v1.mjs",
+        "scripts/test-persona-chat-turn-v1.mjs",
+        "scripts/test-persona-multiplayer-gateway-v1.mjs",
+        "scripts/test-guild-persona-transport-v1.mjs",
+        "scripts/test-guild-persona-client-v1.mjs",
+        "scripts/test-persona-worldweaver-receipt-v1.mjs"
       ],
-      "activeRoute": "none; manifest-only foundation pending authenticated capability integration",
+      "activeRoute": "Worldweaver simulation host remains unconnected; authenticated Guild persona sessions route via /api/node/persona-campaigns on node-cloud v6/v7",
       "delegatedAuthorities": {
         "learning": "Living School existing learning and credential owner",
         "tasks": "Cerbanimo existing Quest/proof owner",
@@ -459,7 +467,13 @@
         "Book-to-screenplay proposals, cast rig bindings, stage blocking, timed cues and rehearsal decisions remain distinct, attributed reviewable production records.",
         "Models can propose 1-3 scenes at a time with a selected runtime; a verified human must approve scenes, cast bindings and rehearsal starts.",
         "Audience transcription and reactions require voluntary opt-in and a separate opt-in for LoRA training; withdrawals clear active text and revoke the corresponding consent.",
-        "FilmCraft interchange and Qwen3.5 LoRA datasets are exports, not rendered footage or model weights; sources need confirmed rights."
+        "FilmCraft interchange and Qwen3.5 LoRA datasets are exports, not rendered footage or model weights; sources need confirmed rights.",
+        "Persona campaign records are explicit what-if branches; local preview turns and model suggestions never mutate novel canon or attest world effects.",
+        "The optional private-campaign chat mode runs only through the one canonical guide composer with explicit file import and provider consent.",
+        "Multiplayer persona sessions require an authenticated service and atomic compare-and-swap revision writer; browser-provided identities cannot act as server authority.",
+        "The Guild persona HTTP adapter reuses verified Guild member sessions and existing node Durable Object storage, without uploading source manuscripts or establishing a parallel Worldweaver runtime.",
+        "Authenticated room seats grant access to fictional player cues only; models and browsers cannot mark world action execution successful.",
+        "Worldweaver proposal success must match a trusted server mapping to completed NPC intents before a campaign can record a world receipt."
       ],
       "helpers": [
         "public/app/shared/worldweaver-avatar-v1.mjs",
@@ -475,7 +489,17 @@
         "public/app/shared/worldweaver-performance-studio-v1.mjs",
         "public/app/shared/worldweaver-stagecraft-v1.mjs",
         "public/app/shared/worldweaver-adaptation-model-v1.mjs",
-        "public/app/shared/worldweaver-filmcraft-interchange-v1.mjs"
+        "public/app/shared/worldweaver-filmcraft-interchange-v1.mjs",
+        "public/app/shared/persona-library-v1.mjs",
+        "public/app/shared/persona-scene-bridge-v1.mjs",
+        "public/app/shared/persona-campaign-v1.mjs",
+        "public/app/shared/persona-chat-turn-v1.mjs",
+        "public/app/shared/persona-chat-controls-v1.mjs",
+        "public/app/shared/persona-multiplayer-gateway-v1.mjs",
+        "public/app/shared/guild-persona-client-v1.mjs",
+        "public/app/shared/persona-worldweaver-receipt-v1.mjs",
+        "cloudflare/mobile-guild-edge/src/guild-persona-campaign-v1.mjs",
+        "cloudflare/mobile-guild-edge/src/guild-persona-transport-v1.mjs"
       ],
       "executableVerifiers": [
         "scripts/test-worldweaver-core-v1.mjs",
@@ -484,7 +508,17 @@
         "scripts/test-worldweaver-labs-hardening-v1.mjs",
         "scripts/test-worldweaver-map-2d-v1.mjs",
         "scripts/test-worldweaver-opensim-geometry-v1.mjs",
-        "scripts/test-worldweaver-performance-studio-v1.mjs"
+        "scripts/test-worldweaver-performance-studio-v1.mjs",
+        "scripts/test-persona-library-v1.mjs",
+        "scripts/test-persona-scene-bridge-v1.mjs",
+        "scripts/test-persona-performance-lab-v1.mjs",
+        "scripts/test-persona-campaign-v1.mjs",
+        "scripts/test-persona-chat-turn-v1.mjs",
+        "scripts/test-persona-chat-surface-v1.mjs",
+        "scripts/test-persona-multiplayer-gateway-v1.mjs",
+        "scripts/test-guild-persona-transport-v1.mjs",
+        "scripts/test-guild-persona-client-v1.mjs",
+        "scripts/test-persona-worldweaver-receipt-v1.mjs"
       ],
       "presentationDemos": [
         "public/app/tools/worldweaver-avatar-lab.html",
