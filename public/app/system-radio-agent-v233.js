@@ -182,6 +182,10 @@ let started=false;
 const savedIds=new Set();
 const busyIds=new Set();
 
+const GUILD_BUNDLES='/downloads/hub-media/open-music/guild-bundles-v1.json';
+let broadcastMode='',broadcastPacket=null,broadcastModule=null,broadcastClock=0,broadcastSource='',broadcastTimer=null,broadcastBusy=false,broadcastPaused=false,broadcastChunk='',broadcastCue='',broadcastMuted=false,broadcastSpeaking=false,broadcastFetched=0,userVolume=0.7;
+
+
 function deepFreeze(value){
   if(value&&typeof value==='object'&&!Object.isFrozen(value)){
     Object.freeze(value);
@@ -266,6 +270,103 @@ async function loadCatalog(){
     render();return catalog;
   })();return catalogPromise;
 }
+
+function guildRadioHost(){
+ try{const saved=JSON.parse(localStorage.getItem('civweave.guild-host-onboarding.v1')||'null'),url=new URL(saved?.primaryOrigin);
+ if(url.protocol==='https:'&&url.username===''&&url.password===''&&/^[a-z0-9][a-z0-9-]{0,119}$/.test(saved.guildId))return{origin:url.origin,guildId:saved.guildId}}catch{}
+ return null;
+}
+function radioVolume(){if(audio)audio.volume=userVolume*(broadcastSpeaking?0.23:1)}
+function cancelDj(){try{globalThis.speechSynthesis?.cancel()}catch{}broadcastSpeaking=false;radioVolume()}
+function cueDj(text){
+ broadcastCue=String(text||'').slice(0,12000);renderBroadcastStatus();cancelDj();
+ if(broadcastMuted||!broadcastMode||!globalThis.speechSynthesis||!globalThis.SpeechSynthesisUtterance)return;
+ const line=new SpeechSynthesisUtterance(broadcastCue);line.rate=1.08;
+ line.onstart=()=>{broadcastSpeaking=true;radioVolume()};
+ line.onend=line.onerror=()=>{broadcastSpeaking=false;radioVolume()};
+ try{speechSynthesis.speak(line)}catch{cancelDj()}
+}
+function leaveGuildBroadcast(){
+ broadcastMode='';broadcastPaused=false;broadcastPacket=null;broadcastChunk='';broadcastCue='';broadcastSource='';
+ if(broadcastTimer){clearInterval(broadcastTimer);broadcastTimer=null}
+ cancelDj();renderBroadcastStatus();
+}
+function renderBroadcastStatus(){
+ if(!panel)return;
+ panel.querySelectorAll('[data-radio-guild-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.radioGuildMode===broadcastMode)));
+ const source=panel.querySelector('[data-radio-guild-source]');if(source)source.textContent=broadcastMode?broadcastSource:'Independent listening';
+ const cue=panel.querySelector('[data-radio-guild-cue]');if(cue){cue.hidden=!broadcastMode;cue.textContent=broadcastCue||'DJ commentary follows each completed bundle.'}
+ const mute=panel.querySelector('[data-radio-guild-mute]');if(mute){mute.hidden=!broadcastMode;mute.textContent=broadcastMuted?'Unmute DJ':'Mute DJ'}
+ for(const selector of ['[data-radio-previous]','[data-radio-next]','[data-radio-seek]','[data-radio-shuffle]']){
+  const button=panel.querySelector(selector);if(button&&broadcastMode)button.disabled=true;
+ }
+}
+async function fetchGuildRadio(){
+ broadcastModule=broadcastModule||await import('/app/shared/guild-radio-schedule-v1.mjs');
+ const host=guildRadioHost(),known=directTracksFor().map(track=>track.id);let packet=null,source='Local preview · not guild-synced',offset=0,reason='';
+ if(host){
+  const started=Date.now();
+  try{
+   const response=await fetch(host.origin+'/api/guild/radio/schedule',{cache:'no-store'});
+   if(!response.ok)throw new Error('Guild HTTP '+response.status);
+   const data=await response.json();
+   if(!broadcastModule.validateGuildRadioSchedule(data,{guildId:host.guildId,trackIds:known}))throw new Error('Guild schedule has invalid or unavailable tracks');
+   const serverTime=Date.parse(data.serverNow);
+   if(!Number.isFinite(serverTime)||Math.abs(serverTime-Date.now())>86400000)throw new Error('Guild clock invalid');
+   offset=serverTime-Math.round((started+Date.now())/2);
+   packet=data;source='LIVE · '+host.guildId;
+  }catch(error){reason=String(error?.message||error).slice(0,100)}
+ }
+ if(!packet){
+  const response=await fetch(GUILD_BUNDLES,{cache:'force-cache'});
+  if(!response.ok)throw new Error('Guild radio bundle library could not load.');
+  const corpus=await response.json(),available=new Set(known);
+  if(corpus.schema!=='civweave.guild-radio-bundles.v1')throw new Error('Unknown radio bundle format.');
+  const bundles=corpus.bundles.filter(group=>group.tracks.every(id=>available.has(id)));
+  if(!bundles.length)throw new Error('No complete licensed broadcast bundle is available.');
+  const id=host?.guildId||'local-preview',now=Date.now();
+  packet=broadcastModule.guildRadioWindow(broadcastModule.buildGuildRadioSchedule({guildId:id,bundles,tracks:corpus.tracks,nowMs:now}),now);
+  if(reason)source+=' · '+reason;
+ }
+ broadcastPacket=packet;broadcastClock=offset;broadcastSource=source;broadcastFetched=Date.now();
+ renderBroadcastStatus();return packet;
+}
+async function syncGuildRadio(force=false){
+ if(!broadcastMode||broadcastPaused||broadcastBusy)return false;
+ broadcastBusy=true;
+ try{
+  if(!broadcastPacket||Date.now()-broadcastFetched>120000||!broadcastModule.locateGuildRadioTrack(broadcastPacket,Date.now()+broadcastClock))await fetchGuildRadio();
+  const current=broadcastModule.locateGuildRadioTrack(broadcastPacket,Date.now()+broadcastClock);
+  if(!current){status('Guild schedule is awaiting its next bundle.');return false}
+  if(current.chunk.id!==broadcastChunk){
+   const index=broadcastPacket.chunks.findIndex(c=>c.id===current.chunk.id),previous=broadcastPacket.chunks[index-1];
+   if(broadcastChunk&&previous)cueDj(broadcastMode==='talk'?previous.discussion:previous.brief);
+   broadcastChunk=current.chunk.id;
+  }
+  if(currentTrack?.id!==current.track.id||force){
+   if(!await playTrack(current.track.id,{live:true,offset:current.offsetSeconds}))return false;
+  }else if(audio&&Math.abs((Number(audio.currentTime)||0)-current.offsetSeconds)>8){
+   try{if(audio.seekable?.length&&current.offsetSeconds<=audio.seekable.end(audio.seekable.length-1))audio.currentTime=current.offsetSeconds}catch{}
+  }
+  const label=panel?.querySelector('[data-radio-guild-now]');if(label)label.textContent='On air: '+current.chunk.title+' · next change '+new Date(current.track.endAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  return true;
+ }catch(error){status('Guild radio sync failed: '+String(error?.message||error).slice(0,125));return false}
+ finally{broadcastBusy=false;renderBroadcastStatus()}
+}
+async function tuneGuildBroadcast(next){
+ if(!['fm','talk'].includes(next))return false;
+ if(safeModeEnabled()){status('S.A.F.E. has no lyric-audited broadcast bundle yet.');return false}
+ await loadCatalog();if(!directTracksFor().length){status('There are no playable radio recordings.');return false}
+ if(mode()!=='direct')setMode('direct');
+ const switched=broadcastMode&&broadcastMode!==next;
+ broadcastMode=next;broadcastPaused=false;if(switched){cancelDj();broadcastCue=''}
+ try{
+  await fetchGuildRadio();
+  if(!broadcastTimer)broadcastTimer=setInterval(()=>{void syncGuildRadio()},3500);
+  return await syncGuildRadio(true);
+ }catch(error){leaveGuildBroadcast();status('Guild broadcast could not start: '+String(error?.message||error).slice(0,135));return false}
+}
+
 function revokeObjectUrl(){if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=''}}
 function status(message){statusText=message;updatePlaybackUi()}
 function cancelSeek(){if(pendingSeek){pendingSeek.controller.abort();pendingSeek=null}}
