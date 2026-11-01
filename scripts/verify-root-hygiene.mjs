@@ -3,7 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const entries=await readdir(root,{withFileTypes:true});
-const allowedRootMarkdown=new Set(['AGENTS.md','README.md','RELEASE-NOTES.md']);
+const allowedRootMarkdown=new Set(['AGENTS.md','README.md','RELEASE-NOTES.md','HARMLESS.md']);
 const failures=[];
 const markdown=entries.filter(e=>e.isFile()&&/\.md$/i.test(e.name)&&!allowedRootMarkdown.has(e.name)).map(e=>e.name);
 if(markdown.length)failures.push('Unexpected root Markdown: '+markdown.sort().join(', '));
