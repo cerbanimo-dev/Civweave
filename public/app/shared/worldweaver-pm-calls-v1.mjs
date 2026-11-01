@@ -25,7 +25,7 @@ export function decodeWorldCall(body){
  }catch{return null}
 }
 function getPM(){const pm=globalThis.CivweavePrivateMessagingV1;if(!pm?.send||!pm?.conversations||!pm?.identity)throw new Error('Civweave encrypted private messaging is not ready.');return pm}
-function verifiedContacts(){const api=globalThis.CivweaveHumanChatNetworkV1;return typeof api?.contacts==='function'?api.contacts().filter(row=>identity(row.username)):[]}
+function verifiedContacts(){const api=globalThis.CivweaveHumanChatNetworkV1;return typeof api?.contacts==='function'?api.contacts().filter(row=>identity(row.username)&&typeof row.fingerprint==='string'&&row.fingerprint.length>0&&['directory-verified','cached'].includes(row.trust)):[]}
 /** Local device sender. PM send may queue offline; "requested" is not a ring receipt. */
 export function createPrivateWorldCallTransport(){
  const expected=new Map(),seen=new Set(),subs=new Set();
