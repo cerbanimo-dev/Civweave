@@ -139,6 +139,7 @@ The API and privacy boundaries are defined in `docs/contracts/guild-quest-public
 ## Radio and review
 
 - Radio owner: `public/app/system-radio-agent-v233.js`
+- Guild broadcast clock: `public/app/shared/guild-radio-schedule-v1.mjs` (pure deterministic bundle scheduling). Paired Guild edge `cloudflare/mobile-guild-edge/src/index.mjs` publishes one read-only timestamp schedule via `GET /api/guild/radio/schedule`; the persistent player fetches the schedule periodically and resolves clock offsets locally. DJ brief and discussion text are attached to the bundle in `public/downloads/hub-media/open-music/guild-bundles-v1.json`. Guild FM and Deep Dive are two presentation modes of the **same** ordered broadcast; they must never create a second music player, shuffle songs individually, or restart audio during route changes. Offline unpaired listening is an explicitly labeled local preview; no claim of network synchronization is made.
 - Track suggestions: `public/app/radio-track-suggestions-v240.js`
 - Review owner: `public/app/shared-review-surface-v234.js`
 
