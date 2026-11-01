@@ -92,18 +92,19 @@ export function installWorldCallReceiver(){
   root.hidden=true;
   const heading=document.createElement('h2'),description=document.createElement('p'),label=document.createElement('label'),
     response=document.createElement('input'),buttons=document.createElement('div'),accept=document.createElement('button'),
-    decline=document.createElement('button'),notice=document.createElement('p');
+    decline=document.createElement('button'),enter=document.createElement('button'),notice=document.createElement('p');
   heading.textContent='Incoming Worldweaver call';
   description.className='cw-world-incoming-description';
   label.textContent='Your decline response';response.type='text';response.maxLength=240;
   response.value=localStorage.getItem('civweave.world-call.decline.v1')||'Sorry, I cannot join right now.';
   label.append(response);buttons.className='cw-world-incoming-buttons';accept.type='button';accept.textContent='Pick up';
-  decline.type='button';decline.textContent='Hang up';
-  buttons.append(accept,decline);notice.className='cw-world-incoming-notice';
+  decline.type='button';decline.textContent='Hang up';enter.type='button';enter.textContent='Open Worldweaver';enter.hidden=true;
+  buttons.append(accept,decline,enter);notice.className='cw-world-incoming-notice';
   notice.setAttribute('role','status');root.append(heading,description,label,buttons,notice);document.body.append(root);
   accept.addEventListener('click',()=>void respond('accepted'));
   decline.addEventListener('click',()=>void respond('declined'));
-  root._parts={description,response,accept,decline,notice};return root;
+  enter.addEventListener('click',()=>{const open=globalThis.CivweaveStarlingIntegrationV1?.open;root.hidden=true;if(typeof open==='function')void open();});
+  root._parts={description,response,accept,decline,enter,notice};return root;
  }
  async function respond(status){
   if(!pending)return;
@@ -117,8 +118,11 @@ export function installWorldCallReceiver(){
    const receipt=await pm.send(call.from,encode({kind:'response',invitationId:call.invitationId,from:self.username,
     to:call.from,status,response}));
    if(!receipt?.id)throw new Error('Could not queue reply.');
-   pending=null;root.hidden=true;
+   pending=null;root.hidden=status!=='accepted';
    if(status==='accepted'){
+    ui.accept.hidden=true;ui.decline.hidden=true;ui.enter.hidden=false;
+    ui.description.textContent='Call answered. Open the Worldweaver Commune to join the shared scene.';
+    ui.notice.textContent='Awaiting an authenticated viewer session; pickup does not teleport you.';
     // Acceptance is NOT a live simulator session. Let the user enter it.
     dispatchEvent(new CustomEvent('civweave:world-call-accepted',{detail:{worldRef:call.worldRef,
       invitationId:call.invitationId,position:call.position}}));
@@ -140,6 +144,7 @@ export function installWorldCallReceiver(){
     const ui=createUI()._parts;
     ui.description.textContent='@'+p.from+' is calling you to join Worldweaver room '+p.worldRef+'.';
     ui.notice.textContent='Picking up sends a reply; you still choose when to enter the world.';
+    ui.accept.hidden=false;ui.decline.hidden=false;ui.enter.hidden=true;
     ui.accept.disabled=false;ui.decline.disabled=false;root.hidden=false;
     await pm.send(p.from,encode({kind:'response',invitationId:p.invitationId,from:self.username,to:p.from,status:'ringing'})).catch(()=>{});
     break;
