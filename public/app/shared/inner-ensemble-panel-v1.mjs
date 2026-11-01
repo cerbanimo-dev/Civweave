@@ -56,6 +56,13 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   persist(engine);
   const status=host.querySelector('[data-inner-status]');
   if(status)status.textContent=row.type+' · '+(row.agentId||'broadcast')+(row.toAgentId?' → '+row.toAgentId:'');
+  const log=host.querySelector('[data-inner-journal]');
+  if(log){
+   const line=document.createElement('p');line.textContent=row.type+' · '+(row.agentId||'all')+
+    (row.toAgentId?' → '+row.toAgentId:'')+(row.text?' · '+row.text.slice(0,240):'')+
+    (row.action?' · action: '+row.action.kind+' / '+row.action.description.slice(0,200):'');
+   log.append(line);while(log.childElementCount>36)log.firstElementChild.remove();
+  }
   if(row.agentId){
    const output=host.querySelector('[data-inner-answer="'+row.agentId+'"]');
    if(output&&['response','front-integration','upstream-action','error','cancelled'].includes(row.type))
@@ -74,6 +81,7 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   '<label>Front-facing agent <select data-inner-front>'+frontChoices+'</select></label></div>'+
   '<label>Premise <textarea data-inner-premise rows="2">'+esc(template.author.premise)+'</textarea></label>'+
   '<label><input type="checkbox" data-inner-cross-talk'+(template.controls.crossTalk?' checked':'')+'> Share other layers’ previous responses as context</label>'+
+  '<label><input type="checkbox" data-inner-autoremember'+(template.controls.autoRemember?' checked':'')+'> Include earlier simulated experiences in the next event’s context</label>'+
   '<div class="cw-fleet-grid">'+IDS.map(id=>agentPanel(id,template.agents[id])).join('')+'</div>'+
   '<div class="cw-fleet-choices"><button type="button" data-inner-save>Save personality templates</button>'+
   '<button type="button" data-inner-export>Export author file and event log</button>'+
@@ -84,7 +92,8 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   '<button type="button" data-inner-pause>Pause</button>'+
   '<button type="button" data-inner-resume>Resume</button>'+
   '<button type="button" data-inner-clear>Clear history</button></div>'+
-  '<output data-inner-status role="status" aria-live="polite">Ready. Nothing runs until requested.</output>'+
+  '<output data-inner-status role="status" aria-live="polite">Ready. Nothing runs until requested.</output>'+ 
+  '<details><summary>Agent journal and action flow</summary><section data-inner-journal class="cw-fleet-card"></section></details>'+
   '</details>';
  function updateForm(){
   const t=engine.getTemplate();
@@ -93,6 +102,7 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   host.querySelector('[data-inner-premise]').value=t.author.premise;
   host.querySelector('[data-inner-front]').value=t.controls.frontAgentId;
   host.querySelector('[data-inner-cross-talk]').checked=t.controls.crossTalk;
+  host.querySelector('[data-inner-autoremember]').checked=t.controls.autoRemember;
   for(const id of IDS){
    const a=t.agents[id];
    host.querySelector('[data-inner-enabled="'+id+'"]').checked=a.enabled;
@@ -111,6 +121,7 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   t.author.premise=host.querySelector('[data-inner-premise]').value;
   t.controls.frontAgentId=host.querySelector('[data-inner-front]').value;
   t.controls.crossTalk=host.querySelector('[data-inner-cross-talk]').checked;
+  t.controls.autoRemember=host.querySelector('[data-inner-autoremember]').checked;
   for(const id of IDS){
    t.agents[id].enabled=host.querySelector('[data-inner-enabled="'+id+'"]').checked;
    t.agents[id].model=host.querySelector('[data-inner-model="'+id+'"]').value.trim();
