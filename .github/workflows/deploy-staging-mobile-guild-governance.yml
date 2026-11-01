@@ -67,13 +67,21 @@ jobs:
       - name: Refuse configured peer-report relay secrets
         run: |
           set -euo pipefail
-          npx wrangler secret list --config wrangler.staging.jsonc --format json > /tmp/civweave-guild-staging-secrets.json
-          node --input-type=module <<'NODE'
+          if npx wrangler secret list --config wrangler.staging.jsonc --format json >/tmp/civweave-guild-staging-secrets.json 2>/tmp/civweave-guild-staging-secret-error.log; then
+            node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const raw=JSON.parse(fs.readFileSync('/tmp/civweave-guild-staging-secrets.json','utf8'));
           const names=(Array.isArray(raw)?raw:raw?.result||[]).map(x=>String(x.name||x.key||''));
-          if(names.some(n=>n==='CIVWEAVE_GUILD_REPORT_RELAY_TOKEN'))throw Error('Peer-report relay secret must not be active in staging sandbox');
+          if(names.some(n=>n==='CIVWEAVE_GUILD_REPORT_RELAY_TOKEN'||n==='CIVWEAVE_GUILD_REPORT_RELAY_URL'))
+            throw Error('Peer-report relay must not be configured on this staging Worker');
           NODE
+          elif grep -Eiq 'worker.*(not found|does not exist)|404|script.*not found' /tmp/civweave-guild-staging-secret-error.log; then
+            echo 'Isolated staging Worker does not exist yet; creating it without peer report secrets.'
+          else
+            cat /tmp/civweave-guild-staging-secret-error.log >&2
+            echo 'Refusing to deploy: cannot verify existing staging Worker secrets.' >&2
+            exit 3
+          fi
       - name: Deploy isolated Guild Council Worker
         run: npx wrangler deploy --config wrangler.staging.jsonc
       - name: Probe deployed staging Guild Council endpoints without credentials
