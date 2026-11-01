@@ -491,7 +491,7 @@ async function send(event){
   const prefill=fleetIsGuild()?(SYSTEM_GUIDES[state.selectedAgent]?'For Civweave guide ':'For the optional Starling Collective, ')+person.name+', in Guild '+(guild?.name||guild?.id)+': '+message:'For local Civweave guide '+person.name+' (private device): '+message;
   try{
     await loader.openChat('civweave',{prefill,contextSystem:'civweave'});
-    status.textContent='Opened an addressed draft in the canonical Civweave chat. This is not a signed Collective turn.';
+    close(); // The canonical chat is underneath this fullscreen Collective overlay.
   }catch(error){status.textContent='Could not open Civweave chat: '+clean(String(error?.message||error),250)}
 }
 function click(event){
