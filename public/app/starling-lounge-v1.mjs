@@ -25,7 +25,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
+const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],dailyPlan:null,dailyPlanError:'',status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -169,7 +169,7 @@ function setup(){
  <div class="sl-side">
   <aside class="sl-card sl-work" data-sl-panel="work" data-sl-guild-only aria-label="Quest work HUD">
    <div class="sl-panel-title"><div><span class="sl-kicker">03 · QUEST WATCH</span><h2>What we are building</h2></div></div>
-   <div class="sl-metric-row" data-sl-metrics></div><h3>Quest beats and outputs</h3><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><p class="sl-status" data-sl-work-status></p>
+   <div class="sl-metric-row" data-sl-metrics></div><h3>Quest beats and outputs</h3><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Daily Guild steward</h3><p class="sl-sub">Read-only draft · no neuron charge or automatic task claim</p><div data-sl-daily-plan></div><p class="sl-status" data-sl-work-status></p>
   </aside>
   <aside class="sl-card sl-operations" data-sl-panel="operations" data-sl-guild-only aria-label="Compute and execution controls">
    <div class="sl-panel-title"><div><span class="sl-kicker">04 · OPERATIONS</span><h2>Control room</h2></div></div>
@@ -383,6 +383,29 @@ function renderWork(){
       offers.append(row);
     }
   }
+  const daily=$('[data-sl-daily-plan]');
+  if(daily){
+    daily.replaceChildren();
+    const packet=state.dailyPlan,plan=packet?.plan;
+    if(!plan)para(daily,state.dailyPlanError||'The authenticated Guild daily draft is not loaded yet.','sl-sub');
+    else{
+      const summary=el('section','sl-output');
+      summary.append(el('b','','Preview for '+plan.date+' · '+packet.chargedNeurons+' neurons'));
+      para(summary,plan.aiTasks.length+' AI draft tasks · '+plan.humanOffers.length+' voluntary human invitations','sl-sub');
+      daily.append(summary);
+      if(!plan.aiTasks.length)para(daily,'No actionable published Quest steps or current Guild proposals.','sl-sub');
+      for(const task of plan.aiTasks.slice(0,8)){
+        const item=el('section','sl-output');item.append(el('b','',task.title));
+        para(item,'AI draft · '+task.source+' · no automatic claim','sl-sub');daily.append(item);
+      }
+      for(const offer of plan.humanOffers.slice(0,5)){
+        const item=el('section','sl-output');item.append(el('b','',offer.taskTitle));
+        para(item,'Voluntary invitation for '+offer.memberUserId+' · acceptance required','sl-sub');daily.append(item);
+      }
+      if(!packet.readiness?.guildChatRequests)para(daily,'Guild chat requests are not yet connected to the planning feed.','sl-sub');
+      if(!packet.readiness?.scheduledInference)para(daily,'Daily hosted model review is not yet scheduled.','sl-sub');
+    }
+  }
   const bench=$('[data-sl-toolbench]');bench.replaceChildren();for(const tool of COLLECTIVE_TOOL_CATALOG){const entry=el('section','sl-output');entry.append(el('b','',tool.name+' · '+tool.kind),el('p','sl-sub',tool.description));entry.append(el('small','',tool.status==='migration-pending'?'Porting existing Starling adapter':'Not installed yet'));bench.append(entry)}
   $('[data-sl-work-status]').textContent=state.loading?'Loading authenticated Guild Quests…':state.error||('Guild board: '+state.status+'. Progress is member-reported, not automatically verified.');
 }
@@ -574,15 +597,22 @@ async function refresh(){
       const entry=memberRows.get(publicationId);
       return guildId===packet.guildId&&Boolean(entry&&entry.authorUserId===userId&&userId);
     }});
+    state.dailyPlan=null;state.dailyPlanError='';
+    try{
+      const preview=await client.dailyPlanPreview(guild);
+      if(preview.plan.guildId!==packet.guildId)throw new Error('Daily plan Guild does not match the Quest board.');
+      if(state.guild?.id!==guild.id)return;
+      state.dailyPlan=preview;
+    }catch(planError){state.dailyPlanError='Daily preview unavailable: '+clean(String(planError?.message||planError),180)}
     state.status=cursor?'partial':'synced';
-  }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
+  }catch(error){state.snapshot=null;state.opportunities=[];state.dailyPlan=null;state.dailyPlanError='Guild Quest board unavailable.';state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
 }
 function close(){if(!state.root)return;state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.summonUI?.close();state.summonUI=null;if(state.autoSummonTransport){state.summonTransport?.close?.();state.summonTransport=null;state.autoSummonTransport=false}state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
-  if(state.guild?.id!==(guild?.id||null)){state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  if(state.guild?.id!==(guild?.id||null)){state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.dailyPlan=null;state.dailyPlanError='';state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
   const share=state.root.querySelector('[data-sl-harmless-share]');if(share)share.checked=false;
   const discover=state.root.querySelector('[data-sl-harmless-discovery]');
   if(discover){try{discover.checked=localStorage.getItem('civweave.harmless.discovery.v1')==='1'}catch{discover.checked=false}}

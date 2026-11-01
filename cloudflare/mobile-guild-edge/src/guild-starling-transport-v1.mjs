@@ -1,10 +1,12 @@
 import { GUILD_STARLING_ROUTE, executeGuildStarlingAction } from './guild-starling-collective-v1.mjs';
+import { readDailyGuildPlanPreview } from './guild-daily-planner-v1.mjs';
 import { GUILD_QUEST_CORS, guildQuestInternalToken, guildQuestJson, guildQuestError, readGuildQuestInput } from './guild-quest-publications-v1.mjs';
 
 const actions = new Set(['reserve','propose','confirm','abandon','complete','passport','passport-revoke','intention-propose']);
 export function guildStarlingAction(request) {
   const tail = new URL(request.url).pathname.slice(GUILD_STARLING_ROUTE.length);
   if (!tail && request.method === 'GET') return 'status';
+  if (tail === '/plan' && request.method === 'GET') return 'plan';
   if (request.method === 'POST' && actions.has(tail.slice(1)) && tail.startsWith('/')) return tail.slice(1);
   throw Object.assign(new Error('Collective route or method is not supported.'), {status:405});
 }
@@ -33,7 +35,9 @@ export async function handleGuildStarlingInternal(request,node) {
       const account=await node.passportAccountService().accountForResident(body.member.userId);
       if(account?.passportIds?.includes(body.input?.passportId))options.accountId=account.accountId;
     }
-    const result=await executeGuildStarlingAction(node.state.storage,body.member,body.action,body.input,options);
+    const result=body.action==='plan'
+      ? await readDailyGuildPlanPreview(node.state.storage,body.member)
+      : await executeGuildStarlingAction(node.state.storage,body.member,body.action,body.input,options);
     return guildQuestJson(result,body.action==='reserve'&&!result.idempotent?201:200);
   }catch(error){return guildQuestError(error);}
 }
