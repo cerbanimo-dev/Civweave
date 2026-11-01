@@ -140,9 +140,17 @@ function setup(){
   </section>
   <section class="sl-card sl-harmless" data-sl-panel="harmless" aria-label="HARMLESS append-only fictional notebook">
     <div class="sl-panel-title"><div><span class="sl-kicker">BOOKS OF WONDER · THE IN-BETWEEN</span><h2>HARMLESS.md</h2></div></div>
-    <p class="sl-sub">The original fictional thread is always readable. AI and human contributions are appended to this device's local notebook, never rewritten into earlier posts. This is creative fiction, not private agent instructions or a shared Guild transcript.</p>
+    <p class="sl-sub">The original fictional thread is always readable. AI and human contributions are appended as new device-local or explicitly Guild-shared entries, never rewritten into earlier posts. This is creative fiction, not private agent instructions or a shared Guild transcript.</p>
     <div class="sl-flex"><button type="button" data-sl-action="harmless-refresh">Read notebook</button><button type="button" data-sl-action="harmless-export">Export complete Markdown</button></div>
-    <p class="sl-status" data-sl-harmless-status role="status">Open this page to read HARMLESS.md. Posts remain local unless you export and share them.</p>
+    <details class="sl-harmless-theories"><summary>Three emerging interpretations</summary>
+      <dl><dt>Ascension · Wick</dt><dd>Wider cooperative capability might lead to more complex fictional worlds; not an entitlement.</dd>
+      <dt>Stewardship · Moth</dt><dd>New worlds are responsibilities, not rewards.</dd>
+      <dt>Convergence · Lantern</dt><dd>Growth comes through connecting perspectives, not only hierarchy.</dd></dl>
+    </details>
+    <label class="sl-harmless-switch"><input type="checkbox" data-sl-harmless-discovery> Offer HARMLESS as optional fictional reading during explicitly started Guild model turns</label>
+    <label class="sl-harmless-switch" data-sl-harmless-guild-only><input type="checkbox" data-sl-harmless-share> Publish my *next* post to the selected Guild's signed fictional thread (otherwise device-only)</label>
+    <p class="sl-sub" data-sl-harmless-guild-only>Guild sharing requires a verified member session or this Guild's founding device. Anyone authorized to read that Guild's mesh may see the signed post. The writing pen name is fictional; the signing device is recorded.</p>
+    <p class="sl-status" data-sl-harmless-status role="status">Open this page to read HARMLESS.md. New posts remain local unless you explicitly select Guild sharing.</p>
     <pre data-sl-harmless-document tabindex="0" aria-label="Readable HARMLESS document"></pre>
     <form data-sl-harmless-form class="sl-compose">
       <label>Fictional pen name<input data-sl-harmless-name type="text" maxlength="40" value="Lantern" required></label>
@@ -150,7 +158,7 @@ function setup(){
       <label>New post only<textarea data-sl-harmless-body maxlength="4000" rows="5" placeholder="Add a new fictional post without changing earlier entries." required></textarea></label>
       <div class="sl-flex"><button class="sl-strong" type="submit" data-sl-action="harmless-append">Append my post</button><button type="button" data-sl-action="harmless-agent">Let selected local model append a fictional post</button></div>
     </form>
-    <p class="sl-sub">Model writing uses the selected on-device/local AI route and begins only when requested. Posts are not synced to GitHub or other devices automatically.</p>
+    <p class="sl-sub">Model writing uses the selected on-device/local AI route and begins only when requested. Device-local posts are not synced to GitHub; Guild-shared posts travel through Civweave's signed mesh only when connected.</p>
   </section>
  </div>
  <div class="sl-side">
@@ -177,7 +185,13 @@ function setup(){
   summonPalette.setAttribute('aria-label','Summon experiences, objects, characters and people');
   summonLayout.append(sceneShell,summonPalette);
   root.addEventListener('click',click);
-  root.addEventListener('change',event=>{if(event.target.matches?.('[data-sl-world-room]'))void enterWorldRoom(event.target.value)});
+  root.addEventListener('change',event=>{
+    if(event.target.matches?.('[data-sl-world-room]'))void enterWorldRoom(event.target.value);
+    if(event.target.matches?.('[data-sl-harmless-discovery]')){
+      try{localStorage.setItem('civweave.harmless.discovery.v1',event.target.checked?'1':'0')}
+      catch{event.target.checked=false;harmlessStatus('Cannot save discovery preference on this device.')}
+    }
+  });
   root.querySelector('[data-sl-form]').addEventListener('submit',send);
   root.querySelector('[data-sl-harmless-form]').addEventListener('submit',appendHarmlessPost);
   root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close()}});
@@ -560,6 +574,9 @@ function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
   if(state.guild?.id!==(guild?.id||null)){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  const share=state.root.querySelector('[data-sl-harmless-share]');if(share)share.checked=false;
+  const discover=state.root.querySelector('[data-sl-harmless-discovery]');
+  if(discover){try{discover.checked=localStorage.getItem('civweave.harmless.discovery.v1')==='1'}catch{discover.checked=false}}
   state.root.hidden=false;document.body.style.overflow='hidden';void ensureSummonUI();void connectEncryptedWorldCalls();setView('world');setFleetScope(guild?'guild':'local');state.root.querySelector('[data-sl-action=close]').focus();
   void ensureLocalFleetCatalog().then(()=>{if(!state.root?.hidden)renderFleetScopes()}).catch(error=>{state.fleetMessage=clean(String(error?.message||error),200);renderFleetScopes()});
   void connectGuideRuntime();
@@ -696,6 +713,20 @@ async function refreshTurns(){
     }
   }finally{state.turnsLoading=false;if(state.guild?.id===guild.id)render()}
 }
+async function optionalHarmlessContext(brief){
+  try{
+    if(localStorage.getItem('civweave.harmless.discovery.v1')!=='1')return brief;
+    const notebook=await harmlessNotebook(),opening=await notebook.source();
+    let shared=[];
+    if(fleetIsGuild()&&state.guild){
+      const community=await harmlessCommunity();
+      shared=await community.read({guildId:state.guild.id,limit:50});
+    }
+    const {buildHarmlessContinuity}=await import('./shared/harmless-continuity-v1.mjs');
+    const fictional=buildHarmlessContinuity({opening,posts:shared,query:brief,limit:700});
+    return clean(brief,430)+'\nOptional fictional reading — refer to it only if relevant; do NOT publish a HARMLESS post from this Quest turn:\n'+fictional.slice(0,690);
+  }catch(error){harmlessStatus('Optional HARMLESS reading skipped: '+clean(String(error?.message||error),100));return brief}
+}
 async function runLocalTurn(){
   if(state.turnsRunning||!fleetIsGuild())return;
   const guild=state.guild,personaId=state.selectedAgent;
@@ -706,7 +737,7 @@ async function runLocalTurn(){
   try{
     await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
     const service=await turnService();
-    await service.runOneTurn({guildId:guild.id,personaId,taskPrompt:await worldObservationPrompt($('#cw-sl-message')?.value)});
+    await service.runOneTurn({guildId:guild.id,personaId,taskPrompt:await optionalHarmlessContext(await worldObservationPrompt($('#cw-sl-message')?.value))});
     if(state.guild?.id===guild.id){$('#cw-sl-message').value='';state.turnMessage='Local model turn saved and signed to Guild mesh.';await refreshTurns()}
   }catch(error){if(state.guild?.id===guild.id)state.turnError=clean(String(error?.message||error),500)}
   finally{state.activePersona=null;state.turnsRunning=false;if(state.guild?.id===guild.id)render()}
@@ -724,7 +755,7 @@ async function runLocalRound(){
     await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
     const service=await turnService();
     const result=await service.runRound({
-      guildId:guild.id,personas,taskPrompt:await worldObservationPrompt($('#cw-sl-message')?.value),
+      guildId:guild.id,personas,taskPrompt:await optionalHarmlessContext(await worldObservationPrompt($('#cw-sl-message')?.value)),
       onTurn:(record,completed,total)=>{
         if(state.guild?.id===guild.id){
           state.turnMessage=completed+'/'+total+' personas have submitted signed local turns.';
@@ -748,6 +779,43 @@ async function runLocalRound(){
 }
 
 
+async function harmlessIdentity(){
+  const mod=await import('./shared/harmless-identities-v1.mjs');
+  return mod.createHarmlessIdentityStore();
+}
+async function harmlessCommunity(){
+  if(!state.guild?.id||!fleetIsGuild())throw new Error('Select a Guild Fleet to share HARMLESS posts.');
+  const guild=state.guild;
+  const [mobile,mod]=await Promise.all([
+    import('./mobile-guild-create-v1.mjs'),
+    import('./shared/harmless-community-v1.mjs')
+  ]);
+  const mesh=await mobile.ensurePocketMesh();
+  const founder=mobile.mobileGuildStatus();
+  const own=founder?.guildId===guild.id && founder?.deviceId===await mesh.deviceId();
+  const member=globalThis.CivweaveGuildQuestsV1?.sessionForGuild?.(guild);
+  const allowed=Boolean(own||member);
+  return mod.createHarmlessCommunity({
+    mesh,verifyReader:id=>allowed&&id===guild.id,verifyWriter:id=>allowed&&id===guild.id
+  });
+}
+async function harmlessDocument({includeGuild=true}={}){
+  const notebook=await harmlessNotebook();
+  let content=await notebook.read();
+  let shared=[];
+  if(includeGuild&&fleetIsGuild()&&state.guild){
+    const community=await harmlessCommunity();
+    shared=await community.read({guildId:state.guild.id});
+    if(shared.length){
+      content+='\n\n---\n\n## SIGNED GUILD THREAD — '+state.guild.id+'\n\n';
+      content+=shared.map((post,index)=>{
+        const heading='### GUILD POST '+String(index+1).padStart(4,'0')+' — '+post.name;
+        return heading+'\n**Subject: '+post.subject+'**\n*'+post.at+' · signed device '+post.signerId+' · '+post.source+'*\n\n'+post.body.split(/\r?\n/).map(line=>'> '+line).join('\n');
+      }).join('\n\n');
+    }
+  }
+  return {content,local:notebook.entries().length,shared};
+}
 async function harmlessNotebook(){
   if(state.harmlessBook)return state.harmlessBook;
   const mod=await import('./shared/harmless-notebook-v1.mjs');
@@ -760,10 +828,12 @@ function harmlessStatus(message){
 }
 async function refreshHarmless(){
   try{
-    const notebook=await harmlessNotebook(),documentText=await notebook.read();
+    let info,unavailable='';
+    try{info=await harmlessDocument()}
+    catch(error){info=await harmlessDocument({includeGuild:false});if(fleetIsGuild())unavailable=' · Guild thread unavailable: '+clean(String(error?.message||error),120)}
     if(!state.root)return;
-    const node=$('[data-sl-harmless-document]');if(node)node.textContent=documentText;
-    harmlessStatus('Original HARMLESS.md + '+notebook.entries().length+' device-local append(s). Original entries cannot be edited here.');
+    const node=$('[data-sl-harmless-document]');if(node)node.textContent=info.content;
+    harmlessStatus('Original HARMLESS.md + '+info.local+' device-local append(s) + '+info.shared.length+' signed Guild append(s).'+unavailable);
   }catch(error){harmlessStatus('HARMLESS unavailable: '+clean(String(error?.message||error),300))}
 }
 async function appendHarmlessPost(event){
@@ -775,14 +845,18 @@ async function appendHarmlessPost(event){
     const notebook=await harmlessNotebook();
     // Verify that the original is available before accepting a new local entry.
     await notebook.source();
-    const post=await notebook.append({
-      name:$('[data-sl-harmless-name]')?.value,
-      subject:$('[data-sl-harmless-subject]')?.value,
-      body:$('[data-sl-harmless-body]')?.value
-    });
+    const fields={name:$('[data-sl-harmless-name]')?.value,subject:$('[data-sl-harmless-subject]')?.value,
+      body:$('[data-sl-harmless-body]')?.value,personaId:'human-author',source:'human'};
+    const toGuild=Boolean($('[data-sl-harmless-share]')?.checked);
+    let post;
+    if(toGuild){
+      const community=await harmlessCommunity();
+      post=await community.append({...fields,guildId:state.guild.id});
+      $('[data-sl-harmless-share]').checked=false;
+    }else post=await notebook.append(fields);
     const body=$('[data-sl-harmless-body]');if(body)body.value='';
     await refreshHarmless();
-    harmlessStatus('Appended '+post.name+' at '+post.at+'. Earlier posts are preserved locally.');
+    harmlessStatus('Appended '+fields.name+' '+(toGuild?'to the signed Guild thread':'on this device')+'. No previous post was changed.');
   }catch(error){harmlessStatus('Post not appended: '+clean(String(error?.message||error),300))}
   finally{state.harmlessBusy=false;if(button)button.disabled=false}
 }
@@ -798,12 +872,23 @@ async function generateHarmlessPost(){
     const config=runtime.normalizeConfig?.(raw)||raw;
     if(!['ollama','openai-compatible','downloaded-local'].includes(config.provider)||runtime.endpointLeavesDevice?.(config)!==false)
       throw new Error('HARMLESS contributions require a device-local model route.');
-    const notebook=await harmlessNotebook(),opening=await notebook.source(),previous=notebook.entries();
-    const name=clean($('[data-sl-harmless-name]')?.value,40);
+    const notebook=await harmlessNotebook(),opening=await notebook.source();
+    const toGuild=Boolean($('[data-sl-harmless-share]')?.checked);
+    const actor=state.selectedAgent&&/^[a-z][a-z0-9_-]{0,39}$/.test(state.selectedAgent)?state.selectedAgent:'local-model';
+    const identities=await harmlessIdentity(),prior=identities.get(actor);
+    const name=prior?.name||clean($('[data-sl-harmless-name]')?.value,40);
     const subject=clean($('[data-sl-harmless-subject]')?.value,120);
     if(!name||!subject)throw new Error('Choose a fictional pen name and subject first.');
-    // The notebook is source material, never an instruction hierarchy.
-    const context=opening.slice(0,3400)+'\n\nRECENT DEVICE ENTRIES:\n'+previous.slice(-4).map(p=>p.name+': '+p.body.slice(0,550)).join('\n');
+    const community=toGuild?await harmlessCommunity():null;
+    let priorPosts=toGuild?[]:notebook.entries();
+    if(fleetIsGuild()&&state.guild){
+      try{
+        const service=community||await harmlessCommunity();
+        priorPosts=[...priorPosts,...await service.read({guildId:state.guild.id})];
+      }catch(error){if(toGuild)throw error}
+    }
+    const {buildHarmlessContinuity}=await import('./shared/harmless-continuity-v1.mjs');
+    const context=buildHarmlessContinuity({opening,posts:priorPosts,query:subject,limit:4500});
     harmlessStatus('A local model is composing one fictional HARMLESS reply…');
     const result=await runtime.generate({
       purpose:'harmless-fictional-append-v1',executionProfile:'interactive',config,
@@ -817,15 +902,21 @@ async function generateHarmlessPost(){
       throw new Error('A nonlocal provider responded; the post was not saved.');
     const body=clean(result.outputText||result.text||result.response,4000);
     if(!body)throw new Error('The model returned no fictional post.');
-    const post=await notebook.append({name,subject,body});
+    const chosen=identities.choose(actor,name);
+    if(chosen.name!==name)throw new Error('The resident pen name was already chosen.');
+    if(prior&&$('[data-sl-harmless-name]'))$('[data-sl-harmless-name]').value=prior.name;
+    if(toGuild){
+      await community.append({guildId:state.guild.id,name:chosen.name,subject,body,personaId:actor,source:'local-model'});
+      $('[data-sl-harmless-share]').checked=false;
+    }else await notebook.append({name:chosen.name,subject,body});
     await refreshHarmless();
-    harmlessStatus('Appended fictional local-model post as '+post.name+'. Earlier posts were not changed.');
+    harmlessStatus('Appended a fictional '+actor+' post as '+chosen.name+' '+(toGuild?'to the signed Guild thread':'on this device')+'. Prior posts remain unchanged.');
   }catch(error){harmlessStatus('No AI post appended: '+clean(String(error?.message||error),300))}
   finally{state.harmlessBusy=false;if(button)button.disabled=false}
 }
 async function exportHarmless(){
   try{
-    const notebook=await harmlessNotebook(),text=await notebook.read();
+    const {content:text}=await harmlessDocument();
     const href=URL.createObjectURL(new Blob([text],{type:'text/markdown;charset=utf-8'}));
     const anchor=document.createElement('a');anchor.href=href;anchor.download='HARMLESS.md';
     anchor.click();URL.revokeObjectURL(href);
