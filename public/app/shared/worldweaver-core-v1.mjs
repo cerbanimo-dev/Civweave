@@ -51,7 +51,7 @@ const appearanceRef=(value)=>{
   if(/^\/app\/assets\/[a-z0-9_-]+(?:\/[a-z0-9_-]+)*\.(?:svg|png|jpg|webp)$/.test(x))return x;
   return ref(x,'Appearance');
 };
-const empty=()=>({schema:WORLDWEAVER_SCHEMA,revision:0,instances:[],stations:[],links:[],npcs:[],avatarProposals:[],screens:[],screenHistory:[],intents:[],debateTurns:[],journal:[]});
+const empty=()=>({schema:WORLDWEAVER_SCHEMA,revision:0,instances:[],stations:[],links:[],npcs:[],avatarProposals:[],screens:[],screenHistory:[],placements:[],intents:[],debateTurns:[],journal:[]});
 
 /**
  * All dispatches are manifest transitions, not external actions.
@@ -71,6 +71,8 @@ export function createWorldweaver({authorize,id=()=>crypto.randomUUID(),clock=()
   if(state.screenHistory===undefined)state.screenHistory=[];
   if(!Array.isArray(state.screens)||!Array.isArray(state.screenHistory))
     throw new TypeError('Invalid screen history or manifests.');
+  if(state.placements===undefined)state.placements=[];
+  if(!Array.isArray(state.placements))throw new TypeError('Invalid summon placement history.');
   const nextId=()=>ref(String(id()),'Generated ID');
   const findInstance=key=>{
     const row=state.instances.find(x=>x.id===key);
@@ -345,6 +347,22 @@ export function createWorldweaver({authorize,id=()=>crypto.randomUUID(),clock=()
         intent.summary=clean(command.summary,500);
         receipt.intent=copy(intent);
         break;
+      }
+      case 'place-entity':{
+        fields(command,['type','instanceId','entityKind','entityRef','position']);
+        if(!instance||instance.status!=='live')throw new Error('A live, signed Worldweaver room is required.');
+        if(!['experience','object','actor','npc'].includes(command.entityKind))
+          throw new TypeError('Unsupported placeable entity kind.');
+        if(!command.position||typeof command.position!=='object'||Array.isArray(command.position)||
+           Object.keys(command.position).some(k=>!['u','v'].includes(k))||
+           !Number.isFinite(command.position.u)||!Number.isFinite(command.position.v)||
+           command.position.u<0||command.position.u>1||command.position.v<0||command.position.v>1)
+          throw new TypeError('Placement requires normalized viewport coordinates.');
+        const placement={id:nextId(),instanceId:instance.id,entityKind:command.entityKind,
+          entityRef:ref(command.entityRef,'Entity'),position:{u:command.position.u,v:command.position.v},
+          status:'pending-simulator',requestedBy:actor.principalId,createdAt:eventTime};
+        if(state.placements.length>=250)throw new Error('Worldweaver placement queue full.');
+        state.placements.push(placement);receipt.placement=copy(placement);break;
       }
       case 'debate-turn':{
         fields(command,['type','instanceId','topic','statement']);
