@@ -28,7 +28,7 @@ export function buildGuildRadioSchedule({guildId,bundles,tracks,nowMs=Date.now()
    cursor=end;
   }
   const id=day+'-'+String(sequence).padStart(3,'0');
-  chunks.push({id,bundleId:bundle.id,title:bundle.title||bundle.id,startAt:stamp(start),endAt:stamp(cursor),brief:bundle.brief.slice(0,1200),discussion:bundle.discussion.slice(0,12000),tracks:entries});
+  chunks.push({id,bundleId:bundle.id,title:bundle.title||bundle.id,dj:String(bundle.dj||'Guild DJ').slice(0,80),startAt:stamp(start),endAt:stamp(cursor),brief:bundle.brief.slice(0,1200),discussion:bundle.discussion.slice(0,12000),tracks:entries});
   lastBundle=bundle.id;sequence++;
  }
  return {schema:GUILD_RADIO_SCHEMA,guildId,epoch:day,issuedAt:stamp(nowMs),expiresAt:stamp(anchor+DAY_MS),chunks};
@@ -60,7 +60,7 @@ export function validateGuildRadioSchedule(packet,{guildId,trackIds}={}){
  const known=trackIds?new Set(trackIds):null;let previousChunkEnd=null;
  for(const chunk of packet.chunks){
   if(!chunk||typeof chunk.id!=='string'||typeof chunk.bundleId!=='string'||!Array.isArray(chunk.tracks)||chunk.tracks.length<1||chunk.tracks.length>12)return false;
-  if(typeof chunk.brief!=='string'||typeof chunk.discussion!=='string'||chunk.brief.length>1200||chunk.discussion.length>12000)return false;
+  if(typeof chunk.dj!=='string'||chunk.dj.length>80||typeof chunk.brief!=='string'||typeof chunk.discussion!=='string'||chunk.brief.length>1200||chunk.discussion.length>12000)return false;
   const start=Date.parse(chunk.startAt),end=Date.parse(chunk.endAt);
   if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start||previousChunkEnd!==null&&previousChunkEnd!==start)return false;
   let last=start;
