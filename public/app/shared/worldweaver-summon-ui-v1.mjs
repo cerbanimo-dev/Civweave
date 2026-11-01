@@ -9,7 +9,7 @@ const safeError=error=>String(error?.message||error||'Action could not be comple
  * simulated remote responses, unverified entity placement or new model loop.
  * World and messaging owners inject their authenticated transport explicitly.
  */
-export function mountWorldweaverSummonUI({palette,scene,getCatalog,getWorldRef,transport=null}={}){
+export function mountWorldweaverSummonUI({palette,scene,getCatalog,getWorldRef,getPlacements=()=>[],transport=null}={}){
  if(!palette||!scene||typeof getCatalog!=='function'||typeof getWorldRef!=='function')
   throw new TypeError('Summon UI requires a palette, scene, catalogue and trusted world reference reader.');
  let active=true,loading=false,selected=null,kind='experience',items=[],drag=null,ghost=null;
@@ -19,8 +19,22 @@ export function mountWorldweaverSummonUI({palette,scene,getCatalog,getWorldRef,t
  palette.replaceChildren(wrap);
  const nav=wrap.querySelector('.sl-summon-kinds'),list=wrap.querySelector('.sl-summon-items');
  const placeButton=wrap.querySelector('.sl-summon-place'),status=wrap.querySelector('.sl-summon-status');
+ const pendingLayer=make('div','sl-summon-pending-layer');scene.append(pendingLayer);
  const callLayer=make('div','sl-summon-call-layer');
  callLayer.setAttribute('aria-live','polite');scene.append(callLayer);
+ const renderPending=()=>{
+  pendingLayer.replaceChildren();
+  const worldRef=getWorldRef(),rows=getPlacements();
+  if(!worldRef||!Array.isArray(rows))return;
+  for(const row of rows.filter(x=>x.instanceId===worldRef&&x.status==='pending-simulator').slice(-35)){
+   if(!Number.isFinite(row.position?.u)||!Number.isFinite(row.position?.v))continue;
+   const pin=make('div','sl-summon-pending','Pending · '+String(row.entityKind||'item').slice(0,20));
+   pin.style.left=Math.max(0,Math.min(100,row.position.u*100))+'%';
+   pin.style.top=Math.max(0,Math.min(100,row.position.v*100))+'%';
+   pin.title='Signed placement request awaiting an authorized simulator; not a live object.';
+   pendingLayer.append(pin);
+  }
+ };
  const setStatus=message=>{status.textContent=message};
  const showCalls=calls=>{
   if(!active)return;
@@ -84,7 +98,7 @@ export function mountWorldweaverSummonUI({palette,scene,getCatalog,getWorldRef,t
    if(!active||token!==revision)return;
    items=(Array.isArray(raw)?raw:[]).slice(0,200).flatMap(item=>{try{return [normalizeSummonItem(item)]}catch{return[]}});
    if(selected&&!items.some(x=>x.id===selected.id&&x.kind===selected.kind))selected=null;
-   renderKinds();renderItems();
+   renderKinds();renderItems();renderPending();
   }catch(error){if(active&&token===revision){items=[];selected=null;renderItems();setStatus('Catalogue unavailable: '+safeError(error))}}
  }
  async function submit(item,position){
@@ -96,7 +110,7 @@ export function mountWorldweaverSummonUI({palette,scene,getCatalog,getWorldRef,t
    const result=await controller.submit({item,worldRef,position});
    if(!active)return;
    if(result.type==='invitation')setStatus('Call acknowledged by the invitation service. Waiting for the recipient.');
-   else setStatus(result.status==='placed'?'Placed in world · '+result.instanceId:'World placement queued; not yet confirmed in the scene.');
+   else {setStatus(result.status==='placed'?'Placed in world · '+result.instanceId:'Signed placement queued; awaiting simulator execution.');renderPending()};
   }catch(error){if(active)setStatus(safeError(error))}
   finally{loading=false;if(active)renderItems()}
  }
@@ -157,7 +171,7 @@ export function mountWorldweaverSummonUI({palette,scene,getCatalog,getWorldRef,t
   close(){
    if(!active)return;active=false;revision++;clearDrag();unsubscribe?.();controller?.close();
    window.removeEventListener('pointermove',onMove);window.removeEventListener('pointerup',onUp);window.removeEventListener('pointercancel',onCancel);
-   callLayer.remove();wrap.remove();
+   callLayer.remove();pendingLayer.remove();wrap.remove();
   }
  });
 }
