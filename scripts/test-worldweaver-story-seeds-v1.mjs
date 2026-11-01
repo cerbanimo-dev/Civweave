@@ -1,3 +1,4 @@
+import {existsSync,readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {WORLD_SEED_SCHEMA,WORLD_SEEDS,WORLD_SEED_COUNT,getWorldSeed,worldsByLayer,buildStoryWorldStart} from '../public/app/shared/worldweaver-story-seeds-v1.mjs';
@@ -48,5 +49,18 @@ test('all worlds have safe independent starts and no automatic crossings',()=>{
  for(const s of WORLD_SEEDS){
   assert.equal(s.crossingPolicy,'explicit-consent-review-and-material-cost');
   assert.ok(s.guardrails.length>=2);
+ }
+});
+
+test('moodboard illustrations exist and the atlas has a visible existing app entry',()=>{
+ const atlas=new URL('../public/app/tools/worldweaver-story-seed-atlas.html',import.meta.url);
+ const lounge=new URL('../public/app/starling-lounge-v1.mjs',import.meta.url);
+ const studio=new URL('../public/app/tools/worldweaver-performance-lab-v1.mjs',import.meta.url);
+ assert.ok(existsSync(atlas));
+ assert.match(readFileSync(lounge,'utf8'),/worldweaver-story-seed-atlas\.html/);
+ assert.match(readFileSync(studio,'utf8'),/getWorldSeed\(seedParam\)/);
+ for(const seed of WORLD_SEEDS){
+  const artwork=new URL('../public'+seed.visual.reference,import.meta.url);
+  assert.ok(existsSync(artwork),'Missing reused moodboard image for '+seed.id);
  }
 });
