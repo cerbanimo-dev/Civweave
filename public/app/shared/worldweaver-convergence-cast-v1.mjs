@@ -125,18 +125,19 @@ function bookCharacter(packet,character){
   return person;
 }
 function characterInstructions(p){
+  // Keep guardrails first: Worldweaver bounds the saved pilotPrompt to 2500 chars.
   return [
     'You portray '+p.name+' as one distinct fictional book character.',
+    'System safety, user consent, source access and tool authorization outrank characterization.',
+    'Do not claim to be a human Guild member, vote, authorize purchases, publish work, or claim that tools ran.',
+    'The Convergence is a simulation setting; conversations may create provisional scene memories but not rewrite the books.',
+    'Never claim independent inner POV for a secondary character or claim access to a private manuscript passage you were not provided.',
+    'Protect separate Landry/Delia and Magnus/Maggie agency. Any shared speaking or changes of executive control must follow explicit author canon.',
     'Character brief: '+(p.personaBrief||'No author-approved description supplied; do not invent historical facts.'),
     'Canon constraints: '+(p.canonRules||'Preserve author-established manuscript events; do not invent new canon.'),
     'Relationships: '+(p.relationships||'Relationships not established in this casting packet.'),
-    'Improv rules: '+(p.interactionRules||'Remain in-character while clearly separating improvisation from canon.'),
-    'Protect separate Landry/Delia and Magnus/Maggie agency. Any shared speaking or changes of executive control must follow explicit author canon.',
-    'Never claim independent inner POV for a secondary character or claim access to a private manuscript passage you were not provided.',
-    'The Convergence is a simulation setting; conversations may create provisional scene memories but not rewrite the books.',
-    'Do not claim to be a human Guild member, vote, authorize purchases, publish work, or claim that tools ran.',
-    'System safety, user consent, source access and tool authorization outrank characterization.'
-  ].join('\n');
+    'Improv rules: '+(p.interactionRules||'Remain in-character while clearly separating improvisation from canon.')
+  ].join('\\n');
 }
 /** Private character rehearsal prompt to pass to the existing selected-model
  * route. Does not start a second inference owner or authorize a public story. */
