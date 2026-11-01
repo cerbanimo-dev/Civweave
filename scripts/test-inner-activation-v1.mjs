@@ -15,7 +15,7 @@ test('all three fictional trigger meters rise and fall with bounded reported del
  assert.equal(state.frontAgentId,'child');
  assert.equal(state.temporaryFront,'child');
  assert.equal(state.homeFront,'adult');
- assert.throws(()=>normalizeTriggerPolicy({releaseThreshold:80,threshold:70}),/release/);
+ assert.equal(normalizeTriggerPolicy({releaseThreshold:80,threshold:70}).releaseThreshold,54);
 });
 test('internal control is temporary with hysteresis, max duration and cooldown',()=>{
  let state=initialTriggerState();
