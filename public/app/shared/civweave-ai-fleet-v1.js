@@ -622,7 +622,17 @@ function render(layer){
  const header='<h3>AI Fleet</h3><div class="cw-fleet-scope-nav" role="group" aria-label="Fleet scope"><button type="button" data-ai-fleet-local aria-pressed="true">Local Fleet · this device</button><button type="button" data-ai-fleet-guild>Guild Fleet · shared Worldweaver</button></div><p>Install models and assign private roles here. Guild Fleet uses signed Guild pilots and authorized Worldweaver rooms; local model files are never automatically shared.</p>'+
   '<div class="cw-fleet-choices" role="group" aria-label="Local inference backend">'+buttons+'</div>';
  let body='';
- if(backend==='browser')body='<p>Install and assign the models on this phone. Keep 2B and 4B as separate imports; they can share the five fleet roles without duplicating weights.</p>'+
+ if(backend==='desktop'){
+  const desktop=desktopFleetState();
+  body='<h4>Desktop fleet · local Ollama</h4>'+
+   '<p>Use models running on this computer, or enter a desktop host on your local network. These models run in Ollama, not in the browser or Android APK. Your browser GGUF imports are retained.</p>'+
+   '<label>Ollama endpoint <input data-ai-fleet-desktop-endpoint type="url" spellcheck="false" value="'+esc(desktop.endpoint)+'" placeholder="'+DEFAULT_DESKTOP_ENDPOINT+'"></label>'+
+   '<p class="cw-fleet-meta">Same computer: '+DEFAULT_DESKTOP_ENDPOINT+'. From a phone, enter the desktop’s reachable LAN host explicitly. An HTTPS site may require an HTTPS bridge for LAN access; Ollama must allow this website in OLLAMA_ORIGINS. Desktop inference sends prompts to the configured host.</p>'+
+   '<label>Usable model-memory budget <select data-ai-fleet-memory>'+memoryOptions+'</select></label>'+
+   '<div class="cw-fleet-choices"><button type="button" data-ai-fleet-desktop-discover>Find installed models</button></div>'+
+   '<output data-ai-fleet-desktop-status role="status">No connection test has run in this session. Refresh to verify saved models.</output>'+
+   '<section data-ai-fleet-desktop-inventory></section>';
+ }else if(backend==='browser')body='<p>Install and assign the models on this phone. Keep 2B and 4B as separate imports; they can share the five fleet roles without duplicating weights.</p>'+
    '<label>Usable model-memory budget <select data-ai-fleet-memory>'+memoryOptions+'</select></label>'+
    '<p class="cw-fleet-meta">Device: '+esc(device.platform)+' · '+esc(device.source)+'. Model files remain in your device browser storage. A complete file import is not a passing inference test.</p>'+
    '<section class="cw-fleet-card" data-ai-fleet-install><h4>1 · Install a model</h4>'+
@@ -658,6 +668,8 @@ function render(layer){
      if(el?.matches?.('[data-ai-fleet-memory]')){
        try{setMemoryBudget(el.value);render(layer)}catch(error){panel.querySelector('[data-ai-fleet-message]').textContent=String(error.message)}return;
      }
+     const desktopRole=el?.dataset?.aiFleetDesktopRole;
+     if(desktopRole){try{assignDesktopRole(panel,desktopRole,el.value)}catch(error){panel.querySelector('[data-ai-fleet-desktop-status]').textContent=String(error?.message||error)}return;}
      const role=el?.dataset?.aiFleetRoleAssign;
      if(role){void (async()=>{
        const gguf=await import(GGUF_MODULE),entries=await gguf.installedImports({verify:true});
@@ -707,6 +719,15 @@ function render(layer){
         }
         return;
       }
+     if(el.hasAttribute('data-ai-fleet-desktop-discover')){
+       el.disabled=true;void refreshDesktopFleet(layer,panel)
+        .catch(error=>{const output=panel.querySelector('[data-ai-fleet-desktop-status]');if(output)output.textContent=String(error?.message||error)})
+        .finally(()=>{el.disabled=false});return;
+     }
+     if(el.hasAttribute('data-ai-fleet-desktop-activate')){
+       try{activateDesktopFleet(layer,panel)}catch(error){const output=panel.querySelector('[data-ai-fleet-desktop-status]');if(output)output.textContent=String(error?.message||error)}
+       return;
+     }
      const presetId=el.dataset.aiFleetDownloadPreset;
      if(presetId){
        el.disabled=true;void downloadFleetPreset(layer,panel,presetId)
@@ -739,9 +760,10 @@ function render(layer){
    });
  }
  target.dataset.aiFleetOwner='v1';
+ if(backend==='desktop')renderDesktopInventory(panel);
  if(backend==='browser')void refreshInventory(layer,panel,++inventorySequence);
  else{inventorySequence++;if(backend==='termux')void mountTermuxInline(layer,panel)}
  return true;
 }
-globalThis.CivweaveAIFleetV1=Object.freeze({version:VERSION,detectDevice,setMemoryBudget,catalogue,roles:ROLES,suites:SUITES,chosen,select,openSetup,matchImportedRoles,render,currentBackend,setBackend,fleetRolesFor,saveBindings});
+globalThis.CivweaveAIFleetV1=Object.freeze({version:VERSION,detectDevice,setMemoryBudget,catalogue,roles:ROLES,suites:SUITES,chosen,select,openSetup,matchImportedRoles,render,currentBackend,setBackend,fleetRolesFor,saveBindings,desktopEndpoint,desktopFleetState,autoAssignDesktop,assignDesktopRole});
 })();
