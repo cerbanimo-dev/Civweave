@@ -1,0 +1,28 @@
+{
+  "schema": "civweave.inner-ensemble.persona-template.v1",
+  "agentId": "child",
+  "layer": "Inner child",
+  "defaultModel": "qwen3.5:0.8b",
+  "personality": {
+    "name": "",
+    "identity": "",
+    "voice": "",
+    "values": "",
+    "motivation": "",
+    "boundaries": ""
+  },
+  "authoredExperiences": [],
+  "challenges": [
+    "Ask for help, share, and name a difficult feeling in a safe fictional scene.",
+    "Explore curiosity through an unfamiliar but harmless puzzle.",
+    "Practice setting and respecting a boundary in a cooperative game."
+  ],
+  "permissions": {
+    "speak": true,
+    "proposeActions": true,
+    "tools": false,
+    "autonomousActions": false,
+    "shareWithGuild": false
+  },
+  "note": "Copy the personality, authoredExperiences and challenges fields into this agent's editable JSON template in Civweave Author Lab. This file intentionally has no predetermined persona."
+}
