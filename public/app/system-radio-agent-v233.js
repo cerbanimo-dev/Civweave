@@ -274,7 +274,7 @@ async function loadCatalog(){
 
 function guildRadioHost(){
  try{const saved=JSON.parse(localStorage.getItem('civweave.guild-host-onboarding.v1')||'null'),url=new URL(saved?.primaryOrigin);
- if(url.protocol==='https:'&&url.username===''&&url.password===''&&/^[a-z0-9][a-z0-9-]{0,119}$/.test(saved.guildId))return{origin:url.origin,guildId:saved.guildId}}catch{}
+ if(url.protocol==='https:'&&url.username===''&&url.password===''&&/^[a-z0-9][a-z0-9-]{0,119}$/.test(String(saved.guildId||'').toLowerCase()))return{origin:url.origin,guildId:String(saved.guildId).toLowerCase()}}catch{}
  return null;
 }
 function radioVolume(){if(audio)audio.volume=userVolume*(broadcastSpeaking?0.23:1)}
@@ -299,7 +299,7 @@ function renderBroadcastStatus(){
  const cue=panel.querySelector('[data-radio-guild-cue]');if(cue){cue.hidden=!broadcastMode;cue.textContent=broadcastCue||'DJ commentary follows each completed bundle.'}
  const mute=panel.querySelector('[data-radio-guild-mute]');if(mute){mute.hidden=!broadcastMode;mute.textContent=broadcastMuted?'Unmute DJ':'Mute DJ'}
  for(const selector of ['[data-radio-previous]','[data-radio-next]','[data-radio-seek]','[data-radio-shuffle]']){
-  const button=panel.querySelector(selector);if(button)button.disabled=Boolean(broadcastMode);
+  const button=panel.querySelector(selector);if(button)button.disabled=Boolean(broadcastMode)||(selector==='[data-radio-seek]'&&(!Number.isFinite(audio?.duration)||audio.duration<=0));
  }
 }
 async function fetchGuildRadio(){
@@ -308,7 +308,7 @@ async function fetchGuildRadio(){
  if(host){
   const started=Date.now();
   try{
-   const response=await fetch(host.origin+'/api/guild/radio/schedule',{cache:'no-store'});
+   const response=await fetch(host.origin+'/api/guild/radio/schedule',{cache:'no-store',signal:globalThis.AbortSignal?.timeout?.(8000)});
    if(!response.ok)throw new Error('Guild HTTP '+response.status);
    const data=await response.json();
    if(!broadcastModule.validateGuildRadioSchedule(data,{guildId:host.guildId,trackIds:known}))throw new Error('Guild schedule has invalid or unavailable tracks');
@@ -341,7 +341,7 @@ async function syncGuildRadio(force=false){
   if(!current){status('Guild schedule is awaiting its next bundle.');return false}
   if(current.chunk.id!==broadcastChunk){
    const index=broadcastPacket.chunks.findIndex(c=>c.id===current.chunk.id),previous=broadcastPacket.chunks[index-1];
-   if(broadcastChunk&&previous)cueDj(broadcastMode==='talk'?previous.discussion:previous.brief);
+   if(broadcastChunk&&previous?.id===broadcastChunk)cueDj(broadcastMode==='talk'?previous.discussion:previous.brief);
    broadcastChunk=current.chunk.id;
   }
   if(currentTrack?.id!==current.track.id||force){
