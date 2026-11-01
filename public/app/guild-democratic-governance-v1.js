@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const ID='cw-guild-democratic-council-v1',VERSION='1.1.0-cases-work-proof';
+const ID='cw-guild-democratic-council-v1',VERSION='1.2.0-notice-inbox-ban-appeals';
 if(globalThis.CivweaveGuildGovernanceV1)return;
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 const esc=value=>clean(value,2000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -17,11 +17,13 @@ function ensure(){
   style.textContent='#'+ID+'[hidden],#'+ID+' [hidden]{display:none!important}#'+ID+'{position:fixed;inset:0;z-index:2147482300;background:#030b13df;display:grid;place-items:center;padding:12px;color:#effff7}#'+ID+' .gc-shell{width:min(760px,100%);max-height:calc(100dvh - 24px);overflow:auto;background:linear-gradient(145deg,#123137,#101a2d);padding:18px;border:1px solid #73cbb95e;border-radius:18px}#'+ID+' header{display:flex;justify-content:space-between;align-items:start;gap:10px}#'+ID+' h2{margin:0;font-size:1.3rem}#'+ID+' h3{margin:18px 0 7px;font-size:1rem}#'+ID+' p{font:.83rem/1.5 system-ui;color:#cce5df}#'+ID+' label{display:block;font:.82rem/1.5 system-ui;margin:10px 0}#'+ID+' input,#'+ID+' select,#'+ID+' textarea{display:block;width:100%;margin-top:5px;padding:9px;background:#081d27;color:white;border:1px solid #80cfb75b;border-radius:8px;min-height:42px}#'+ID+' button{min-height:40px;padding:8px 12px;background:#164b49;color:#effff6;border:1px solid #76d8ae;border-radius:9px;cursor:pointer}#'+ID+' button:disabled{opacity:.5}#'+ID+' .gc-actions{display:flex;flex-wrap:wrap;gap:8px}#'+ID+' .gc-item{padding:12px;margin-top:10px;border:1px solid #80cdb23b;border-radius:11px;background:#081d26}#'+ID+' .gc-muted{color:#afcbc6}#'+ID+' .gc-done{color:#aeffcc;font-weight:800}';
   document.head.append(style);
   root=document.createElement('aside');root.id=ID;root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','gc-title');
-  root.innerHTML='<div class="gc-shell"><header><div><h2 id="gc-title">Guild Council</h2><p>Contributors propose actions. An eligible majority approves them, and a passing vote triggers the action automatically.</p></div><button type="button" data-gc-close>Close</button></header><p data-gc-message role="status" aria-live="polite"></p><div data-gc-summary></div><div data-gc-form-area></div><div data-gc-cases></div><div data-gc-work></div><div data-gc-ballots></div><div data-gc-nearby></div></div>';
+  root.innerHTML='<div class="gc-shell"><header><div><h2 id="gc-title">Guild Council</h2><p>Contributors propose actions. An eligible majority approves them, and a passing vote triggers the action automatically.</p></div><button type="button" data-gc-close>Close</button></header><p data-gc-message role="status" aria-live="polite"></p><div data-gc-summary></div><div data-gc-notices></div><div data-gc-appeals></div><div data-gc-form-area></div><div data-gc-cases></div><div data-gc-work></div><div data-gc-ballots></div><div data-gc-nearby></div></div>';
   root.addEventListener('click',event=>{
     if(event.target.closest('[data-gc-close]')){root.hidden=true;return}
     const vote=event.target.closest('[data-gc-vote]');if(vote)void cast(vote.dataset.gcVote,vote.dataset.ballotId);
     if(event.target.closest('[data-gc-refresh]'))void refresh();
+    const ack=event.target.closest('[data-gc-ack-notice]');if(ack)void acknowledgeNotice(ack.dataset.kind,ack.dataset.refId);
+    const sponsor=event.target.closest('[data-gc-sponsor-appeal]');if(sponsor)void sponsorAppeal(sponsor.dataset.gcSponsorAppeal);
     const start=event.target.closest('[data-gc-start-ballot]');if(start)void startBallot(start.dataset.gcStartBallot);
     const review=event.target.closest('[data-gc-review-work]');if(review)void reviewWork(review.dataset.gcReviewWork,review.dataset.proofId);
   });
@@ -29,6 +31,7 @@ function ensure(){
     if(event.target.matches('[data-gc-form]')){event.preventDefault();void propose(event.target)}
     if(event.target.matches('[data-gc-case-response]')){event.preventDefault();void respondCase(event.target)}
     if(event.target.matches('[data-gc-work-form]')){event.preventDefault();void submitWork(event.target)}
+    if(event.target.matches('[data-gc-appeal-form]')){event.preventDefault();void submitAppeal(event.target)}
   });
   document.body.append(root);return root;
 }
@@ -44,6 +47,15 @@ async function request(method='GET',body=null,part=''){
 function render(){
   if(!packet)return;
   const eligible=packet.eligible||[],members=packet.members||[],ballots=packet.ballots||[];
+  const notices=packet.notices||[],appeals=packet.appeals||[];
+  root.querySelector('[data-gc-notices]').innerHTML='<h3>My Council notices · '+Number(packet.unreadNoticeCount||0)+' unread</h3>'+
+    '<p>Notices are available when you open the Guild Council. Acknowledging a notice records that you viewed it; it never casts a vote or waives your rights. No push delivery is claimed.</p>'+
+    (notices.length?notices.map(n=>'<article class="gc-item"><strong>'+esc(n.label)+'</strong><p class="gc-muted">'+esc(n.createdAt)+' · '+(n.readAt?'Acknowledged '+esc(n.readAt):'Not yet acknowledged')+'</p>'+
+      (!n.readAt?'<button type="button" data-gc-ack-notice data-kind="'+esc(n.kind)+'" data-ref-id="'+esc(n.refId)+'">Acknowledge notice</button>':'')+'</article>').join(''):'<p>No Council notices for this member.</p>');
+  root.querySelector('[data-gc-appeals]').innerHTML='<h3>Ban appeals</h3><p>A banned resident can appeal using their original device credential even after Guild access ends. Eligible Guild contributors may open a democratic reconsideration vote. Filing an appeal does not automatically revoke a sanction.</p>'+
+    (appeals.length?appeals.map(a=>'<article class="gc-item"><strong>Appeal · '+esc(a.status)+'</strong><p>Member '+esc(a.targetUserId)+' · '+esc(a.statement)+'</p><p class="gc-muted">Original sanction: '+esc(a.banBallotId)+'</p>'+
+      (packet.actorEligible&&a.status==='pending'?'<button type="button" data-gc-sponsor-appeal="'+esc(a.id)+'">Open majority reconsideration vote</button>':'')+
+      (a.ballotId?'<p>Reconsideration vote: '+esc(a.ballotId)+'</p>':'')+'</article>').join(''):'<p>No ban appeals filed.</p>');
   root.querySelector('[data-gc-summary]').innerHTML='<p><strong>'+Number(packet.activeCount||0)+' active Guild voters</strong> · '+Number(packet.majority||1)+' affirmative votes required · your delegated role: '+esc(packet.actorRole||'member')+'</p><p class="gc-muted">All enrolled members active within 30 days may vote, including a targeted member. Only residents with independently accepted completed work or a verified physical-node check-in within 30 days may propose. Neuron consumption or mere login does not qualify anyone to propose. Voting expires after seven days.</p>';
   if(packet.actorEligible){
     const banned=(packet.bans||[]).filter(row=>!members.some(member=>member.userId===row.userId));
@@ -83,7 +95,7 @@ async function refresh(){
     try{const member=session();if(member)await globalThis.CivweaveHostNodeSessionV1?.status?.(member.nodeId)}catch{}
     try{const nearby=await request('GET',null,'/nearby');packet.nearbyReports=nearby.reports||[]}catch{packet.nearbyReports=[]}
     render();say('Council records synchronized.');
-  }catch(error){say('Guild Council unavailable: '+clean(error.message))}
+  }catch(error){showAppealFallback();say('Guild Council unavailable: '+clean(error.message)+'. A previously banned member can still file an appeal below.')}
   finally{busy=false}
 }
 async function propose(form){
@@ -127,6 +139,59 @@ async function reviewWork(decision,proofId){
     say(result.proof?.status==='accepted'?'Independent review quorum reached. Verified contribution recorded.':'Your review is recorded.');
   }catch(error){say('Review rejected: '+clean(error.message))}
   finally{busy=false;void refresh()}
+}
+async function acknowledgeNotice(kind,refId){
+  if(busy)return;busy=true;
+  try{await request('POST',{action:'ack-notice',kind,refId});say('Notice acknowledged. Voting and appeal rights are unchanged.')}
+  catch(error){say('Acknowledgment failed: '+clean(error.message))}
+  finally{busy=false;void refresh()}
+}
+async function sponsorAppeal(appealId){
+  if(busy)return;busy=true;
+  try{const result=await request('POST',{action:'sponsor-appeal',appealId});
+    say(result.ballot?.status==='approved'?'Majority reached: the ban was automatically lifted.':'Reconsideration ballot opened for member votes.')}
+  catch(error){say('Appeal sponsorship failed: '+clean(error.message))}
+  finally{busy=false;void refresh()}
+}
+function savedAppealIdentity(){
+  const api=globalThis.CivweaveHostNodeSessionV1,origin=api?.selectedOrigin?.();
+  if(!origin)return null;
+  let selected={},credentials={};
+  try{
+    selected=JSON.parse(localStorage.getItem(api.selectionKey)||'{}')||{};
+    credentials=JSON.parse(localStorage.getItem(api.credentialKey)||'{}')||{};
+  }catch{return null}
+  const identity=credentials[origin+'#'+clean(selected.nodeId,180)]||credentials[origin];
+  return identity?.userId&&identity?.credential?{...identity,origin,nodeId:clean(selected.nodeId,180)}:null;
+}
+function showAppealFallback(){
+  if(!root)return;
+  const area=root.querySelector('[data-gc-appeals]');
+  if(!area)return;
+  root.querySelector('[data-gc-summary]').innerHTML='';
+  root.querySelector('[data-gc-notices]').innerHTML='';
+  root.querySelector('[data-gc-form-area]').innerHTML='';
+  root.querySelector('[data-gc-cases]').innerHTML='';
+  root.querySelector('[data-gc-work]').innerHTML='';
+  root.querySelector('[data-gc-ballots]').innerHTML='';
+  root.querySelector('[data-gc-nearby]').innerHTML='';
+  area.innerHTML='<h3>Appeal a Guild ban</h3><p>When a Guild removes your active session, you can still submit one appeal from the same device, using its saved identity. The appeal is privately presented to the remaining Guild Council. No automatic reinstatement occurs.</p>'+
+    (savedAppealIdentity()?'<form data-gc-appeal-form><label>Your explanation<textarea name="statement" minlength="20" maxlength="2000" required placeholder="Explain why the ban should be reconsidered and what you would like the Guild to review."></textarea></label><button type="submit">Submit a formal ban appeal</button></form>':'<p>Original saved Guild device credentials are unavailable on this device; a ban appeal cannot be authenticated here.</p>');
+}
+async function submitAppeal(form){
+  if(busy)return;busy=true;
+  try{
+    const identity=savedAppealIdentity();
+    if(!identity)throw Error('This device does not retain the original Guild credentials.');
+    const url=new URL('/api/guild/governance/appeal',identity.origin);
+    if(identity.nodeId)url.searchParams.set('nodeId',identity.nodeId);
+    const response=await fetch(url,{method:'POST',cache:'no-store',headers:{'content-type':'application/json'},
+      body:JSON.stringify({userId:identity.userId,credential:identity.credential,statement:new FormData(form).get('statement')})});
+    const answer=await response.json().catch(()=>({}));
+    if(!response.ok||answer.ok===false)throw Error(answer.error||'Appeal request failed.');
+    form.reset();say('Appeal filed. An active Guild contributor can sponsor a reconsideration vote; filing alone does not revoke the ban.');
+  }catch(error){say('Unable to file appeal: '+clean(error.message))}
+  finally{busy=false}
 }
 async function cast(choice,ballotId){
   if(busy)return;busy=true;
