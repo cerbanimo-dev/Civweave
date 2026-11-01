@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - 'public/app/system-radio-agent-v233.js'
+      - 'public/app/shared/guild-radio-schedule-v1.mjs'
+      - 'cloudflare/mobile-guild-edge/src/index.mjs'
+      - 'scripts/test-guild-radio-schedule-v1.mjs'
       - 'public/app/radio-safe-stations-v1.js'
       - 'public/app/radio-track-suggestions-v240.js'
       - 'public/app/radio-track-map-v241.json'
@@ -32,6 +35,9 @@ on:
     branches: [main, staging]
     paths:
       - 'public/app/system-radio-agent-v233.js'
+      - 'public/app/shared/guild-radio-schedule-v1.mjs'
+      - 'cloudflare/mobile-guild-edge/src/index.mjs'
+      - 'scripts/test-guild-radio-schedule-v1.mjs'
       - 'public/app/radio-safe-stations-v1.js'
       - 'public/app/radio-track-suggestions-v240.js'
       - 'public/app/radio-track-map-v241.json'
@@ -75,6 +81,8 @@ jobs:
       - name: Check runtime syntax
         run: |
           node --check public/app/system-radio-agent-v233.js
+          node --check public/app/shared/guild-radio-schedule-v1.mjs
+          node --check cloudflare/mobile-guild-edge/src/index.mjs
           node --check public/app/radio-safe-stations-v1.js
           node --check public/app/radio-track-suggestions-v240.js
           node --check public/app/radio-playlist-governance-v1.js
@@ -86,7 +94,7 @@ jobs:
           node --check scripts/verify-radio-bootstrap-priority-v267.mjs
           node --check scripts/verify-radio-shell-guarantee-v305.mjs
       - name: Verify direct audio, offline playback, licensing, and shared ownership
-        run: node --test scripts/test-radio-direct-audio-v1.mjs scripts/test-radio-core-starter-cache-v1.mjs scripts/test-radio-panel-layout-v1.mjs scripts/test-radio-seek-fallback-v1.mjs
+        run: node --test scripts/test-radio-direct-audio-v1.mjs scripts/test-radio-core-starter-cache-v1.mjs scripts/test-radio-panel-layout-v1.mjs scripts/test-radio-seek-fallback-v1.mjs scripts/test-guild-radio-schedule-v1.mjs
       - name: Verify open-song license gates and community playlist parser
         run: |
           python -m py_compile scripts/harvest-open-music-v1.py scripts/harvest-open-vocal-music-v2.py
