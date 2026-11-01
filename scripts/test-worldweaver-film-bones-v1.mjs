@@ -52,8 +52,9 @@ test('Training requires actual Gemini, applied code patch and human review recei
  rights:'owned',trainingConsent:true,model:{provider:'gemini',name:'gemini-2.5-flash'},
  modelReceipt:{id:'real-inference-1',status:'success'},operatorPatch:{commitSha:'b'.repeat(40),status:'applied'},
  humanReview:{decision:'approved',reviewerRef:'producer-approval-1'},input:'Original safe direction brief',approvedOutput:'Final reviewed shot plan'};
- const exportResult=exportCivweaveFilmTraining([record],{ownerTrainingAuthorization:true});
+ assert.throws(()=>exportCivweaveFilmTraining([record],{ownerTrainingAuthorization:true}),/Trusted receipt/);
+ const exportResult=exportCivweaveFilmTraining([record],{ownerTrainingAuthorization:true,verifyReceipt:r=>r.modelReceipt.id==='real-inference-1'});
  assert.equal(exportResult.count,1);assert.equal(exportResult.containsRawManuscript,false);
  assert.ok(exportResult.training.length+exportResult.validation.length>0);
- assert.throws(()=>exportCivweaveFilmTraining([{...record,modelReceipt:{id:'fake',status:'failed'}}],{ownerTrainingAuthorization:true}),/receipt/);
+ assert.throws(()=>exportCivweaveFilmTraining([{...record,modelReceipt:{id:'fake',status:'failed'}}],{ownerTrainingAuthorization:true,verifyReceipt:()=>true}),/receipt/);
 });
