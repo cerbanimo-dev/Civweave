@@ -32,7 +32,7 @@ pre{max-height:320px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;p
 <button id="codex">Export bounded Codex task</button>
 <label for="records">Verified review and execution records (JSON array)</label><input id="records" type="file" accept=".json,application/json">
 <label><input id="train-consent" type="checkbox" style="width:auto"> I authorize training export of these rights-cleared, actually executed and approved records</label>
-<button id="training">Export training/validation data</button><p id="feedback" role="status" class="status">No Codex request, Gemini call, render or training has been performed by this page.</p></section></main>
+<button id="training">Export candidates for trusted receipt verification</button><p id="feedback" role="status" class="status">No Codex request, Gemini call, render or training has been performed by this page.</p></section></main>
 <script type="module">
 import {makeGeminiShotTask,validateShotBatch,assembleFilmBones,makeCodexFilmTask,exportCivweaveFilmTraining} from '../shared/worldweaver-film-bones-v1.mjs';
 const $=id=>document.getElementById(id);let state=null,batches=[],film=null,trainingRecords=null;
@@ -82,9 +82,9 @@ $('records').addEventListener('change',()=>handle(async()=>{
  $('feedback').textContent=trainingRecords.length+' records imported; eligibility checked on export.';
 }));
 $('training').addEventListener('click',()=>handle(()=>{
- const output=exportCivweaveFilmTraining(trainingRecords,{ownerTrainingAuthorization:$('train-consent').checked});
- download('film-director-training.jsonl',output.training,'application/x-ndjson');
- download('film-director-validation.jsonl',output.validation,'application/x-ndjson');
- $('feedback').textContent=output.count+' approved records exported; no actual fine-tuning was performed.';
+ if(!$('train-consent').checked)throw Error('Source owner must authorize training candidates');
+ if(!Array.isArray(trainingRecords))throw Error('Import records before exporting');
+ save('civweave-film-training-pending-verification.json',{schema:'civweave.film-training-candidates.v1',trainingReady:false,receiptVerification:'required-by-trusted-Civweave-host',records:trainingRecords});
+ $('feedback').textContent=trainingRecords.length+' candidate records exported for trusted host verification; not model-training ready.';
 }));
 </script></body></html>
