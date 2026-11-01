@@ -26,7 +26,7 @@ function validateEntry(entry){
 export function createHarmlessNotebook({
   storage=globalThis.localStorage,
   readSource=async()=>{
-    const response=await fetch(HARMLESS_SOURCE_URL,{cache:'no-cache'});
+    const response=await fetch(HARMLESS_SOURCE_URL);
     if(!response.ok)throw new Error('HARMLESS.md source unavailable ('+response.status+').');
     return response.text();
   },
