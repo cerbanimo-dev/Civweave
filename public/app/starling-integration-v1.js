@@ -5,10 +5,10 @@ let pending=null,scope=null;
 const deps=[
  ['/app/shared/civweave-passport-identity-v1.js?v=1.0.0',()=>globalThis.CivweavePassportIdentityV1],
  ['/app/cw-reward-ledger-v2.js?v=2.1.1',()=>globalThis.CivweaveCanonicalRewardsV2],
- ['/app/host-node-session-v1.js?v=1.0.0',()=>globalThis.CivweaveHostNodeSessionV1],
+ ['/app/host-node-session-v1.js?v=1.0.138-unified-guild-access',()=>globalThis.CivweaveHostNodeSessionV1],
  ['/app/guild-quest-client-v1.js?v=1.0.1-quest-map-dependencies',()=>globalThis.CivweaveGuildQuestsV1],
  ['/app/guild-starling-client-v1.js?v=1.0.0',()=>globalThis.CivweaveGuildStarlingV1],
- ['/app/starling-collective-v1.js?v=1.0.0',()=>globalThis.CivweaveStarlingCollectiveV1]
+ ['/app/starling-collective-v1.js?v=1.1.0',()=>globalThis.CivweaveStarlingCollectiveV1]
 ];
 function load([src,ready]){
  if(ready())return Promise.resolve();
@@ -44,12 +44,28 @@ const transport=Object.freeze({
 async function ready(){
  if(pending)return pending;
  pending=(async()=>{
-  if(!document.querySelector('link[data-cw-starling-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='/app/starling-collective-v1.css?v=1.0.0';link.dataset.cwStarlingStyle='1';document.head.append(link);}
+  if(!document.querySelector('link[data-cw-starling-style]')){const link=document.createElement('link');link.rel='stylesheet';link.href='/app/starling-collective-v1.css?v=1.1.0';link.dataset.cwStarlingStyle='1';document.head.append(link);}
   // Loading capability code is inert: no model, planning, sharing or publication.
   for(const dependency of deps)await load(dependency);
   globalThis.CivweaveStarlingCollectiveV1.configure({guildTransport:transport});
   return globalThis.CivweaveStarlingCollectiveV1;
  })().catch(error=>{pending=null;throw error});return pending;
 }
-globalThis.CivweaveStarlingIntegrationV1=Object.freeze({version:'1.0.0',open:async()=>{const api=await ready();return api.open();}});
+async function openCommuneFirst(){
+ // One visual Fleet entry for every user. No Guild selection is required to
+ // inspect device-local roles, and a missing membership never becomes a Guild.
+ const module=await import('/app/starling-lounge-v1.mjs?v=brand-responsive-fleet-r5');
+ try{
+  const api=await ready();
+  const selectedGuild=await api.connectGuild();
+  const guildId=selectedGuild?.guildId;
+  if(typeof guildId==='string'&&guildId)
+   return module.CivweaveStarlingLoungeV1.open({id:guildId,name:'Selected Guild'});
+ }catch{
+  // No authenticated Guild: local-only Fleet is still available.
+ }
+ return module.CivweaveStarlingLoungeV1.open(null);
+}
+globalThis.CivweaveStarlingIntegrationV1=Object.freeze({version:'1.2.0',open:openCommuneFirst,openPlanner:async()=>{const api=await ready();return api.open()}});
+
 })();

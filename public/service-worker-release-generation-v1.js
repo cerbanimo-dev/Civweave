@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const REVISION='release-generation-boundary-v9-navigation-response-stream';
+const REVISION='release-generation-boundary-v10-bounded-release-storage';
 const CACHE='cw-live-runtime-release-generation-v6-20261021';
 const CACHE_PREFIX='cw-live-runtime-release-generation-';
 const ORIGIN_CACHE_PREFIXES=Object.freeze([CACHE_PREFIX,'civweave-shell-','civweave-runtime-','civweave-offline-']);
@@ -17,6 +17,8 @@ const NETWORK_TIMEOUT_MS=3200;
 const WARM_TIMEOUT_MS=2500;
 const WARM_CONCURRENCY=6;
 const GUILD_CHECK_INTERVAL_MS=10*60*1000;
+const STORAGE_OPEN_TIMEOUT_MS=1200;
+const STORAGE_TRANSACTION_TIMEOUT_MS=1200;
 const TRUST_BUNDLE_SCHEMA='civweave.release-trust-bundle.v1';
 const DELEGATION_SCHEMA='civweave.release-key-delegation.v1';
 const REVOCATION_SCHEMA='civweave.release-key-revocation.v1';
@@ -111,28 +113,50 @@ const sha256=async value=>b64url(await crypto.subtle.digest('SHA-256',typeof val
 const clean=(value,max=4000)=>String(value??'').trim().slice(0,max);
 function openDb(){
   return new Promise((resolve,reject)=>{
-    const request=indexedDB.open(DB_NAME,DB_VERSION);
-    request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE)};
-    request.onsuccess=()=>resolve(request.result);
-    request.onerror=()=>reject(request.error||new Error('Release trust database unavailable.'));
+    let request,settled=false;
+    const finish=(error,db)=>{if(settled){if(db)try{db.close()}catch{}return}settled=true;clearTimeout(timer);if(error)reject(error);else resolve(db)};
+    const timer=setTimeout(()=>finish(releaseStorageError('Release selection storage open timed out; the selected Guild authority is unknown.')),STORAGE_OPEN_TIMEOUT_MS);
+    try{
+      request=indexedDB.open(DB_NAME,DB_VERSION);
+      request.onupgradeneeded=()=>{
+        if(settled){try{request.transaction?.abort()}catch{}try{request.result?.close()}catch{}return}
+        const db=request.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE);
+      };
+      request.onsuccess=()=>{const db=request.result;if(!settled)db.onversionchange=()=>{try{db.close()}catch{}};finish(null,db)};
+      request.onblocked=()=>finish(releaseStorageError('Release selection storage is blocked; close other Civweave windows or use recovery. Selected Guild authority remains unknown.'));
+      request.onerror=()=>finish(releaseStorageError('Release selection storage is unavailable; selected Guild authority remains unknown.',request.error));
+    }catch(error){finish(releaseStorageError('Release selection storage could not open; selected Guild authority remains unknown.',error))}
   });
 }
-async function dbGet(key){
+function releaseStorageError(message,cause){const error=new Error(message);error.code='CIVWEAVE_RELEASE_STORAGE_UNAVAILABLE';if(cause)error.cause=cause;return error}
+async function storageTransaction(mode,operation){
   const db=await openDb();
-  try{return await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get(key);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
-  finally{db.close()}
+  return new Promise((resolve,reject)=>{
+    let tx,settled=false,value;
+    const finish=(error,abort=false)=>{
+      if(settled)return;settled=true;clearTimeout(timer);
+      if(abort)try{tx?.abort()}catch{}
+      try{db.close()}catch{}
+      if(error)reject(error);else resolve(value);
+    };
+    const timer=setTimeout(()=>finish(releaseStorageError('Release selection storage transaction timed out; selected Guild authority is unknown.'),true),STORAGE_TRANSACTION_TIMEOUT_MS);
+    try{
+      tx=db.transaction(STORE,mode);
+      tx.oncomplete=()=>finish(null);
+      tx.onerror=()=>finish(releaseStorageError('Release selection storage transaction failed.',tx.error),true);
+      tx.onabort=()=>finish(releaseStorageError('Release selection storage transaction was aborted.',tx.error));
+      const request=operation(tx.objectStore(STORE));
+      request.onsuccess=()=>{if(!settled)value=request.result};
+      request.onerror=()=>finish(releaseStorageError('Release selection storage request failed.',request.error),true);
+    }catch(error){finish(releaseStorageError('Release selection storage transaction could not start.',error),true)}
+  });
 }
+async function dbGet(key){return storageTransaction('readonly',store=>store.get(key))}
 async function dbPut(key,value){
-  const db=await openDb();
-  try{await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(value,key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
-  finally{db.close()}
+  await storageTransaction('readwrite',store=>store.put(value,key));
   return value;
 }
-async function dbDelete(key){
-  const db=await openDb();
-  try{await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
-  finally{db.close()}
-}
+async function dbDelete(key){await storageTransaction('readwrite',store=>store.delete(key))}
 async function allAnchors(){return Array.isArray(await dbGet('anchors'))?await dbGet('anchors'):[]}
 async function keyIdFor(jwk){return`p256:${(await sha256(canonical(jwk))).slice(0,32)}`}
 async function importVerifyKey(jwk){return crypto.subtle.importKey('jwk',jwk,{name:'ECDSA',namedCurve:'P-256'},false,['verify'])}
@@ -479,7 +503,14 @@ async function activationRepair(){
   await self.clients.claim();
 }
 self.addEventListener('install',event=>event.waitUntil((async()=>{await warm().catch(()=>[]);await self.skipWaiting()})()));
-self.addEventListener('activate',event=>event.waitUntil(activationRepair()));
+self.addEventListener('activate',event=>event.waitUntil(activationRepair().catch(async error=>{
+  if(error?.code!=='CIVWEAVE_RELEASE_STORAGE_UNAVAILABLE')throw error;
+  // Activate only this recovery-capable worker, not an unverified release.
+  // Every runtime request still re-reads authority and fails closed while the
+  // database is unreadable. Do not warm unsigned origin bytes or purge caches.
+  try{console.warn('[Civweave release] Storage unavailable during activation; retaining release data and serving bounded recovery.',error.message)}catch{}
+  await self.clients.claim();
+})));
 self.addEventListener('message',event=>{
   const data=event.data||{};
   if(data.type==='CIVWEAVE_GUILD_RELEASE_CONFIG')event.waitUntil((async()=>{const config=await setGuildConfig(data.selection||data);await checkGuildRelease({force:true}).catch(error=>notifyClients({type:'CIVWEAVE_GUILD_RELEASE_ERROR',error:String(error?.message||error)}));return config})());
@@ -518,5 +549,5 @@ self.addEventListener('fetch',event=>{
     return new Response(body,{status:503,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-civweave-release-generation':REVISION,'x-civweave-navigation-recovery':'worker-failure'}});
   }));
 });
-self.CivweaveReleaseGenerationV1=Object.freeze({revision:REVISION,cache:CACHE,warmPaths:[...WARM_PATHS],networkTimeoutMs:NETWORK_TIMEOUT_MS,warmTimeoutMs:WARM_TIMEOUT_MS,warmConcurrency:WARM_CONCURRENCY,policy:'complete-signed-guild-release-is-exclusive-transport-legacy-or-incomplete-guilds-remain-on-current-origin-release-until-compatible-cutover'});
+self.CivweaveReleaseGenerationV1=Object.freeze({revision:REVISION,cache:CACHE,warmPaths:[...WARM_PATHS],networkTimeoutMs:NETWORK_TIMEOUT_MS,warmTimeoutMs:WARM_TIMEOUT_MS,warmConcurrency:WARM_CONCURRENCY,storageOpenTimeoutMs:STORAGE_OPEN_TIMEOUT_MS,storageTransactionTimeoutMs:STORAGE_TRANSACTION_TIMEOUT_MS,storageFailurePolicy:'unknown-guild-authority-visible-recovery-no-origin-bypass',policy:'complete-signed-guild-release-is-exclusive-transport-legacy-or-incomplete-guilds-remain-on-current-origin-release-until-compatible-cutover'});
 })();

@@ -69,4 +69,28 @@ function sandbox(){
   w.chunk({visible:true});w.stop();
   assert.equal(s.clock.timers.size,0,'Finishing inference must remove all generation watchdogs');
 }
+
+{
+  const s=sandbox(),w=s.watcher();
+  const originalFirst=[...s.clock.timers].find(([,row])=>row.ms===GGUF_FIRST_VISIBLE_MS)?.[0];
+  s.clock.ms=100000;w.prefill({processed:384,total:1697,cached:0});
+  const renewedFirst=[...s.clock.timers].find(([,row])=>row.ms===GGUF_FIRST_VISIBLE_MS)?.[0];
+  assert.notEqual(renewedFirst,originalFirst,'Advancing prefill must renew the no-progress deadline');
+  assert.ok(s.clock.events.some(row=>row.stage==='prefill-progress'&&row.details.processed===384));
+  s.clock.ms=180000;w.prefill({processed:700,total:1697});
+  assert.notEqual([...s.clock.timers].find(([,row])=>row.ms===GGUF_FIRST_VISIBLE_MS)?.[0],renewedFirst);
+  w.chunk({visible:true});
+  assert.equal([...s.clock.timers.values()].some(row=>row.ms===GGUF_FIRST_VISIBLE_MS),false);
+  w.stop();
+}
+{
+  const s=sandbox(),w=s.watcher();
+  const first=[...s.clock.timers].find(([,row])=>row.ms===GGUF_FIRST_VISIBLE_MS)?.[0];
+  w.prefill({processed:0,total:1697});
+  const next=[...s.clock.timers].find(([,row])=>row.ms===GGUF_FIRST_VISIBLE_MS)?.[0];
+  w.prefill({processed:0,total:1697});
+  const unchanged=[...s.clock.timers].find(([,row])=>row.ms===GGUF_FIRST_VISIBLE_MS)?.[0];
+  assert.equal(next,unchanged,'Repeated unchanged prefill must not keep a stalled model alive');
+  w.stop();
+}
 console.log('GGUF visible token watchdog regression passed: hidden-only first token, visible stream, idle, total duration, external abort and timer cleanup.');

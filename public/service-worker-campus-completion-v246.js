@@ -3,6 +3,7 @@
 
 const REVISION='campus-current-completion-v250';
 const INSTALL_BRIDGE='/app/pwa-install-prompt-v250.js';
+const INSTALL_BRIDGE_URL=INSTALL_BRIDGE+'?v=v14-observer-quiescence';
 const previousOfflineStatus=offlineStatus;
 const previousDownloadOfflinePackage=downloadOfflinePackage;
 
@@ -69,7 +70,7 @@ downloadOfflinePackage=function downloadOfflinePackageV246(event){
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
     try{
-      const response=await fetch(INSTALL_BRIDGE,{cache:'no-store'});
+      const response=await fetch(INSTALL_BRIDGE_URL,{cache:'no-store'});
       if(response?.ok)await(await caches.open(RUNTIME_CACHE)).put(cacheKey(INSTALL_BRIDGE),response.clone());
     }catch{}
   })());

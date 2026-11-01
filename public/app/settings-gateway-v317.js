@@ -144,7 +144,7 @@ const EMBEDDED_GGUF_PRESETS=Object.freeze({
   '4b':Object.freeze({id:'qwen35-4b-iq2m-gguf',label:'Qwen 3.5 4B · GGUF IQ2_M',url:'https://huggingface.co/eaddario/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-IQ2_M.gguf'}),
   '2b':Object.freeze({id:'qwen35-2b-q4km-gguf',label:'Qwen 3.5 2B · GGUF Q4_K_M',url:'https://huggingface.co/SoAIHQ/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf'})
 });
-const EMBEDDED_GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v5-opfs-progress';
+const EMBEDDED_GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install';
 function ggufSettingsChoice(form){
   const id=String(byName(form,'embeddedGGUFPreset')?.value||'4b'),preset=EMBEDDED_GGUF_PRESETS[id]||EMBEDDED_GGUF_PRESETS['4b'];
   return{...preset,url:String(byName(form,'embeddedGGUFUrl')?.value||preset.url).trim()};

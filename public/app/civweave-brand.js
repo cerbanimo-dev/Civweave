@@ -2,8 +2,8 @@
 'use strict';
 
 const VERSION='1.0.34-ai-pack-browser-downloads-v1';
-const DAY_LOGO='/app/logos/civweave-day-logo.jpg';
-const NIGHT_LOGO='/app/logos/civweave-night-logo.jpg';
+const DAY_LOGO='/app/logos/civweave-branded-heart-512-v449.png';
+const NIGHT_LOGO='/app/logos/civweave-branded-heart-512-v449.png';
 const CANONICAL_LOGO=DAY_LOGO;
 const FULL_LOGO=CANONICAL_LOGO;
 const SYMBOL_LOGO=CANONICAL_LOGO;

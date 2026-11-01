@@ -55,4 +55,6 @@ This establishes those two failure causes as present in the staging source used 
 
 ## Rollback and privacy
 
+The final integration refresh merges staging `63cffefbd`, including the deployed Desktop installer/startup repair, current Fleet/branding and Guild Council work. The combined shell cache is `v451-threshold-desktop-recovery`, preserving release storage v10 and installer v14. Sequential runs pass69Threshold,135Worldweaver,28Desktop and39Guild training/Council/tab-access tests, plus Creator isolation, nine visual checks, generated-worker parity and52/52 integrity hashes. The initial parallel attempt hit Windows resource limits; the same complete suite lists passed sequentially without weakening assertions. The creation feature remains a staging-targeted review PR; the separate PWA repair is already deployed. Native Desktop installation still awaits the user's retry, and the film's external production/approval gates remain open.
+
 Revert source through normal staging review/deployment. Do not promote production without approval and passing checks. Preserve device revisions and private handoff files. A cloud application's different origin does not receive these local artifacts automatically. Later host withdrawal or rollback cannot erase downstream exports or completed models.

@@ -1,3 +1,4 @@
+import { handleHeadquartersFundingPaymentEvent } from './headquarters-starling-funding-v1.mjs';
 import {
   CloudflareMoneyEdge as BaseMoneyEdge,
   moneyEdgeError,
@@ -138,6 +139,8 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
   }
 
   async handleProviderEvent(event) {
+    const headquartersFunding = await handleHeadquartersFundingPaymentEvent(this, event);
+    if (headquartersFunding.matched) return headquartersFunding;
     const object = event?.data?.object || {};
 
     if (event.type === 'application_fee.created') {

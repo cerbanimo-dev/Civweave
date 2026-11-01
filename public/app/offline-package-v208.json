@@ -217,7 +217,9 @@
     "/app/shared/worldweaver-trailer-authoring-v1.mjs?v=threshold-device-review-v3",
     "/app/shared/worldweaver-production-review-v1.mjs?v=threshold-device-review-v3",
     "/app/shared/worldweaver-stagecraft-v1.mjs?v=threshold-device-review-v2",
-    "/app/shared/worldweaver-filmcraft-interchange-v1.mjs?v=threshold-device-review-v1"
+    "/app/shared/worldweaver-filmcraft-interchange-v1.mjs?v=threshold-device-review-v1",
+    "/app/pwa-install-prompt-v250.js",
+    "/app/pwa-install-prompt-v250.js?v=v14-observer-quiescence"
   ],
   "lazyPacks": [
     {
@@ -318,11 +320,11 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 13250936,
+    "estimatedBytes": 13472276,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 80359800,
-    "candidateAssetCount": 910,
-    "estimatedAssetCount": 910,
+    "requiredFreeBytes": 80581140,
+    "candidateAssetCount": 915,
+    "estimatedAssetCount": 915,
     "conservativeUpperBound": true
   }
 }
