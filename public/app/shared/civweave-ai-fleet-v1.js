@@ -686,7 +686,7 @@ function render(layer){
      '<output data-ai-fleet-apk-status role="status">Native inference is not active until a compatible APK engine and model are installed.</output>';
  }
 
- panel.innerHTML=header+body+'<output data-ai-fleet-message role="status" aria-live="polite">No inference started.</output>';
+ panel.innerHTML=header+body+'<section id="cw-inner-ensemble-v1" aria-label="Author Inner Ensemble"></section><output data-ai-fleet-message role="status" aria-live="polite">No inference started.</output>';
  if(panel.dataset.fleetBound!=='1'){
    panel.dataset.fleetBound='1';
    panel.addEventListener('change',event=>{
@@ -789,6 +789,14 @@ function render(layer){
    });
  }
  target.dataset.aiFleetOwner='v1';
+ void import('/app/shared/inner-ensemble-panel-v1.mjs?v=1').then(module=>{
+  if(panel.isConnected&&panel.querySelector('#cw-inner-ensemble-v1'))
+   module.mountInnerEnsemble(panel.querySelector('#cw-inner-ensemble-v1'),{fleet:globalThis.CivweaveAIFleetV1});
+ }).catch(error=>{
+  const slot=panel.querySelector('#cw-inner-ensemble-v1');
+  if(slot)slot.textContent='Author Lab could not load: '+String(error?.message||error);
+ });
+
  if(backend==='desktop')renderDesktopInventory(panel);
  if(backend==='browser')void refreshInventory(layer,panel,++inventorySequence);
  else{inventorySequence++;if(backend==='termux')void mountTermuxInline(layer,panel)}
