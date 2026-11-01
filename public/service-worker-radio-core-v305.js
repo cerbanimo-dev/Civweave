@@ -11,6 +11,8 @@ const V305_REQUIRED_ASSETS = Object.freeze([
   '/app/canonical-playlists-v1.js',
   '/app/radio-playlist-governance-v1.js',
   '/app/radio-track-map-v241.json',
+  '/app/shared/guild-radio-schedule-v1.mjs',
+  '/downloads/hub-media/open-music/guild-bundles-v1.json',
   '/downloads/hub-media/open-music/starter-catalog.json',
   '/app/radio-directory-v240/civweave.txt',
   '/app/radio-directory-v240/living-school.txt',
