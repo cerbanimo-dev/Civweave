@@ -15,6 +15,7 @@ const fakeMesh=()=>{
    records.push(o);return o;
   },
   async listObjects(){return records},
+  async getObject(id){return records.find(p=>p.id===id)||null},
   async validateObject(o){return {ok:o.valid!==false}},
   async deviceId(){return 'device:founder'}
  };
