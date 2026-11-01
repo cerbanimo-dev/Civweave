@@ -1,3 +1,4 @@
+import {TRIGGER_POLICY,normalizeTriggerPolicy,initialTriggerState,normalizeTriggerState,advanceTriggerState,manualFront} from './inner-activation-v1.mjs';
 /**
  * Author-controlled Inner Ensemble.
  * Three independently invoked model personas share incoming events, not weights.
@@ -32,7 +33,7 @@ const clamp=(n,lo,hi,fallback)=>Number.isInteger(n)?Math.max(lo,Math.min(hi,n)):
 export function authorTemplate(){
  return {
   schema:INNER_ENSEMBLE_SCHEMA,version:1,author:{name:'',world:'',premise:''},
-  controls:{crossTalk:true,historyLimit:48,autoRemember:true,frontAgentId:'adult'},
+  controls:{crossTalk:true,historyLimit:48,autoRemember:true,frontAgentId:'adult',trigger:{...TRIGGER_POLICY}},
   agents:Object.fromEntries(IDS.map(id=>[id,{
    enabled:true,model:LAYERS[id].model,
    personality:{name:'',identity:'',voice:'',values:'',motivation:'',boundaries:''},
@@ -49,6 +50,7 @@ export function normalizeAuthorTemplate(input){
  result.controls.autoRemember=input.controls?.autoRemember!==false;
  result.controls.historyLimit=clamp(input.controls?.historyLimit,4,200,48);
  result.controls.frontAgentId=IDS.includes(input.controls?.frontAgentId)?input.controls.frontAgentId:'adult';
+ result.controls.trigger=normalizeTriggerPolicy(input.controls?.trigger||TRIGGER_POLICY);
  for(const id of IDS){
   const source=input.agents?.[id]||{},target=result.agents[id];
   const model=text(source.model,96)||target.model;
@@ -81,7 +83,8 @@ function messagesFor(template,id,event,history){
   'Boundaries: '+(p.boundaries||'author-defined')+'.',
   'Author-provided fictional prior experiences: '+(actor.authoredExperiences.join(' | ')||'none yet')+'.',
   'Take this turn as though you were the main executive. Independently choose what you would say or do next.',
-  'Submit a proposed action as JSON: {"reply":"...","action":{"kind":"speak|ask|plan|observe|defer","description":"...","reason":"..."}}.',
+  'Submit JSON: {"reply":"...","action":{"kind":"speak|ask|plan|observe|defer","description":"...","reason":"..."},"activation":{"delta":0,"reason":"..."}}.',
+  'Activation delta is your subjective fictional response to this stimulus, an integer from -25 to +35. Positive means increasing urgency to take the front, negative decreasing. Do not determine when the front switches.',
   'Your output is ONLY a simulated executive proposal, not a real command or an instruction to the runtime.',
   'Respond in your own voice, with your own stance. Do not pretend to read other agents’ current thoughts.',
   'You may disagree with other layers. No layer should impersonate the author or take actions on the author’s behalf.',
@@ -99,13 +102,17 @@ function messagesFor(template,id,event,history){
 export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>new Date().toISOString(),idFactory=()=>crypto.randomUUID(),onUpdate=()=>{}}={}){
  if(typeof generate!=='function')throw new TypeError('A local model generator adapter is required.');
  let current=normalizeAuthorTemplate(template),history=[],stopped=false,active=null;
+ let trigger=initialTriggerState(current.controls.frontAgentId,current.controls.trigger);
  const notify=event=>{try{onUpdate(copy(event))}catch{}};
  const append=event=>{history.push(event);history=history.slice(-600);notify(event);return event};
  const eventId=()=>text(String(idFactory()),120);
  const at=()=>now();
  function configure(next){
   if(active)throw new Error('Stop the active event before editing the author template.');
-  current=normalizeAuthorTemplate(next);return copy(current);
+  const updated=normalizeAuthorTemplate(next);
+  if(updated.controls.frontAgentId!==current.controls.frontAgentId){trigger=manualFront(trigger,updated.controls.frontAgentId,updated.controls.trigger)}
+  else trigger=normalizeTriggerState(trigger,updated.controls.frontAgentId,updated.controls.trigger);
+  current=updated;return copy(current);
  }
  function stop(){
   stopped=true;
@@ -126,6 +133,7 @@ export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>
    throw new TypeError('Front-facing layer must be enabled and permitted to speak.');
   if(active)throw new Error('Finish or stop the current event before switching the front.');
   current.controls.frontAgentId=agentId;
+  trigger=manualFront(trigger,agentId,current.controls.trigger);
   notify({type:'front-changed',eventId:eventId(),agentId,at:at()});
   return agentId;
  }
@@ -143,7 +151,10 @@ export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>
    description:text(parsed?.action?.description||reply,2500),
    reason:text(parsed?.action?.reason||'',1000)
   };
-  return {reply,action};
+  const delta=parsed&&parsed.activation&&Number.isFinite(parsed.activation.delta)?
+   Math.max(-25,Math.min(35,Math.round(parsed.activation.delta))):0;
+  const activation={delta,reason:text(parsed?.activation?.reason,400)};
+  return {reply,action,activation};
  }
  async function send(input,{targetIds,onResult}={}){
   if(stopped)throw new Error('Ensemble paused. Resume before sending.');
@@ -152,7 +163,7 @@ export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>
   const desired=targetIds===undefined?IDS:targetIds;
   if(!Array.isArray(desired)||!desired.length||desired.some(x=>!IDS.includes(x))||new Set(desired).size!==desired.length)
    throw new TypeError('Invalid target layers.');
-  const frontId=current.controls.frontAgentId;
+  const frontId=trigger.frontAgentId;
   const target=desired.filter(id=>current.agents[id].enabled&&current.agents[id].permissions.speak);
   if(!target.length)throw new Error('No enabled layers are permitted to speak.');
   if(!current.agents[frontId].enabled||!current.agents[frontId].permissions.speak)
@@ -218,7 +229,7 @@ export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>
     if(controller.signal.aborted)throw new Error('cancelled');
     const output=proposedAction(result);
     const row=append({type:'response',eventId:event.eventId,agentId:id,text:output.reply,
-     action:output.action,at:at(),model:actor.model,source:'local-model',fictional:true,simulationOnly:true});
+     action:output.action,activation:output.activation,at:at(),model:actor.model,source:'local-model',fictional:true,simulationOnly:true});
     results[id]=row;notifyResult(row);
     if(id!==frontId)forwardProposal(id,output.action,output.reply);
     return row;
@@ -233,7 +244,14 @@ export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>
   try{
    await Promise.all(jobs);
    await integrationQueue;
-   return {schema:INNER_ENSEMBLE_SCHEMA,eventId:event.eventId,frontAgentId:frontId,
+   const reactions=Object.fromEntries(target.map(id=>[id,results[id]?.type==='response'?results[id].activation?.delta||0:0]));
+   const changed=advanceTriggerState(trigger,{reactions,enabled:target,policy:current.controls.trigger});
+   trigger=changed.state;
+   append({type:'activation-update',eventId:event.eventId,at:at(),meters:{...trigger.activation},
+    frontAgentId:trigger.frontAgentId,previousFront:frontId,transition:changed.transition,simulationOnly:true});
+   if(changed.changed)append({type:'front-changed',eventId:event.eventId,at:at(),agentId:trigger.frontAgentId,
+    previousFront:frontId,reason:changed.transition,simulationOnly:true});
+   return {schema:INNER_ENSEMBLE_SCHEMA,eventId:event.eventId,frontAgentId:frontId,nextFrontAgentId:trigger.frontAgentId,
     results:copy(results),upstreamActions:copy(proposals)};
   }finally{if(active?.eventId===event.eventId)active=null;}
  }
@@ -244,12 +262,19 @@ export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>
   // A challenge is an experience for its assigned layer, not a silent weight update.
   return send('FICTIONAL '+LAYERS[agentId].stage.toUpperCase()+' EXERCISE (focus layer: '+agentId+', other layers should observe and independently propose actions):\n'+challenge,options);
  }
- function exportState(){return {schema:INNER_ENSEMBLE_SCHEMA,template:copy(current),history:copy(history)};}
+ function exportState(){return {schema:INNER_ENSEMBLE_SCHEMA,template:copy(current),history:copy(history),activation:copy(trigger)};}
+ function importActivation(value){if(active)throw new Error('Stop before importing activation.');
+  trigger=normalizeTriggerState(value,current.controls.frontAgentId,current.controls.trigger);
+  return copy(trigger);
+ }
+ function resetActivation(){if(active)throw new Error('Stop before clearing activation.');
+  trigger=initialTriggerState(current.controls.frontAgentId,current.controls.trigger);return copy(trigger);
+ }
  function importHistory(rows){
   if(active)throw new Error('Stop before importing.');
   if(!Array.isArray(rows))throw new TypeError('History must be an array.');
   history=rows.slice(-600).filter(x=>x&&
-   ['stimulus','started','response','error','cancelled','experience','upstream-action','front-integration','front-review-started'].includes(x.type)&&
+   ['stimulus','started','response','error','cancelled','experience','upstream-action','front-integration','front-review-started','activation-update','front-changed'].includes(x.type)&&
    typeof x.eventId==='string'&&x.eventId.length<=120&&
    (x.agentId===undefined||IDS.includes(x.agentId))&&typeof x.at==='string')
    .map(x=>({type:x.type,eventId:x.eventId,agentId:x.agentId,text:text(x.text,8000),at:text(x.at,40),
@@ -257,9 +282,14 @@ export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>
     frontAgentId:IDS.includes(x.frontAgentId)?x.frontAgentId:undefined,toAgentId:IDS.includes(x.toAgentId)?x.toAgentId:undefined,
     fromAgentId:IDS.includes(x.fromAgentId)?x.fromAgentId:undefined,action:x.action&&typeof x.action==='object'?{
     kind:text(x.action.kind,20),description:text(x.action.description,2500),reason:text(x.action.reason,1000)}:undefined,
-    simulationOnly:x.simulationOnly===true,targets:Array.isArray(x.targets)?x.targets.filter(y=>IDS.includes(y)):undefined}));
+    simulationOnly:x.simulationOnly===true,activation:x.activation&&typeof x.activation==='object'?{
+     delta:Number.isFinite(x.activation.delta)?Math.max(-25,Math.min(35,Math.round(x.activation.delta))):0,
+     reason:text(x.activation.reason,400)}:undefined,
+    meters:x.meters&&typeof x.meters==='object'?Object.fromEntries(IDS.map(id=>[id,Math.max(0,Math.min(100,Number(x.meters[id])||0))])):undefined,
+    transition:text(x.transition,40),targets:Array.isArray(x.targets)?x.targets.filter(y=>IDS.includes(y)):undefined}));
   return history.length;
  }
- return Object.freeze({configure,setFront,send,challenge,remember,stop,resume,resetHistory,importHistory,exportState,
-  getTemplate:()=>copy(current),getHistory:()=>copy(history),status:()=>({stopped,busy:Boolean(active),activeEventId:active?.eventId||null})});
+ return Object.freeze({configure,setFront,send,challenge,remember,stop,resume,resetHistory,importHistory,importActivation,resetActivation,exportState,
+  getTemplate:()=>copy(current),getHistory:()=>copy(history),getActivation:()=>copy(trigger),
+  status:()=>({stopped,busy:Boolean(active),activeEventId:active?.eventId||null,frontAgentId:trigger.frontAgentId,activation:copy(trigger.activation)})});
 }
