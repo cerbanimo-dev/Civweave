@@ -511,8 +511,14 @@ function bind(){if(bound)return;bound=true;installStyle();bus()?.install?.();add
   }
   if(detail.phase!=='gguf-browser-phase')return;
   const stage=clean(detail.stage||'working',80),backend=clean(detail.backend||'',50);
-  state.runtimePhase='GGUF · '+stage+(backend?' · '+backend:'');
-  if(stage==='failed'&&detail.reason)state.errorDetail='GGUF '+clean(detail.reason,400);
+  if(stage==='prefill'||stage==='prefill-progress'){
+    const processed=Math.max(0,Number(detail.processed)||0),total=Math.max(0,Number(detail.total)||0);
+    const percent=total?Math.min(100,Math.round(processed/total*100)):null;
+    state.runtimePhase='GGUF · preparing prompt '+(total?`${processed}/${total} tokens (${percent}%)`:processed+' tokens')+
+      (Number.isFinite(Number(detail.elapsedMs))?' · '+Math.floor(Number(detail.elapsedMs)/1000)+'s':'');
+  }else state.runtimePhase='GGUF · '+stage+(backend?' · '+backend:'');
+  if((stage==='failed'||stage==='watchdog-timeout')&&(detail.reason||detail.code))
+    state.errorDetail='GGUF '+clean(detail.reason||detail.code,400);
   ensurePanel();
 });addEventListener('civweave:moss-learning-plan-progress',event=>applyLearningPlanProgress(event?.detail||{}));if(!bus()){addEventListener('civweave:weaveling-intake-progress',event=>applyIntake(event?.detail||{}));addEventListener('civweave:weave-pipeline',event=>applyPipeline(event?.detail||{}))}addEventListener('civweave:structured-artifact-progress',event=>applyStructuredArtifactProgress(event?.detail||{}));addEventListener('civweave:guide-generation-progress',event=>applyGuideTextProgress(event?.detail||{}));addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('civweave:guide-chat-opened',()=>queueMicrotask(()=>{ensurePanel();replayLifecycle()}));document.addEventListener('click',event=>{const button=event.target?.closest?.(`#${ROOT_ID} [data-weave-expand]`);if(!button)return;const panel=button.closest('.cw-weave-tracker'),details=panel?.querySelector('[data-weave-details]');if(!details)return;details.hidden=!details.hidden;state.expanded=!details.hidden;button.setAttribute('aria-expanded',details.hidden?'false':'true');button.textContent=details.hidden?'Show live process':'Hide live process';if(!details.hidden)for(const pre of details.querySelectorAll('pre'))try{pre.scrollTop=pre.scrollHeight}catch{}});document.addEventListener('click',event=>{
   if(event.target?.closest?.(`#${ROOT_ID} [data-weave-probe]`)){void probeClick();return}
