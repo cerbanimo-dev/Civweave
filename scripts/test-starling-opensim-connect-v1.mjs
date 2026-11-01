@@ -37,4 +37,6 @@ test('Collective page offers reachable controls, real OpenSim geometry display, 
  assert.match(src,/setFleetScope\(guild\?'guild':'local'\)/);
  assert.match(src,/state\.openSimGeometry\?\?/);
  assert.match(src,/CivweaveSettingsV320/);
+ const css=readFileSync(new URL('../public/app/starling-lounge-v1.css',import.meta.url),'utf8');
+ assert.match(css,/#cw-starling-lounge \\[hidden\\]\\{display:none!important\\}/);
 });
