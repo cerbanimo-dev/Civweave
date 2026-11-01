@@ -118,5 +118,6 @@ test('Guild tab uses existing discovery and membership owners, starts collapsed 
   assert.match(edge,/leaveResident\(/);
   assert.match(edge,/request\.method==='DELETE'/);
   assert.match(edge,/sessionTokenHash\(bearer\(request\)\)/);
-  assert.match(edge,/Only the founding Guild owner can manage this Guild/);
+  assert.match(edge,/Only an authorized Guildkeeper can manage this Guild/);
+  assert.match(edge,/action==='remove-member'\)throw/);
 });
