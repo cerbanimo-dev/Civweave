@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.6-settings-local-route-v328-qwen-import-ownership';
+const VERSION='1.1.7-settings-local-route-v329-litert-metadata-warning';
 const ROUTE='downloaded-local';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const DOWNLOADS_KEY='civweave.local-ai.downloads.v266';
@@ -49,7 +49,7 @@ const PACK_CATALOGUE=Object.freeze([
 ]);
 
 const CATALOGUE=Object.freeze([
-  {id:'qwen35-4b-litert-web',label:'Qwen 3.5 4B · LiteRT · phone-first test',tier:'PHONE FIRST',repo:'litert-community/Qwen3.5-4B',estimatedBytes:2754070624,license:'Apache-2.0',contextWindowTokens:262144,workingContextTokens:4096,nativeImport:true,artifact:'Qwen3.5-4B_mixed_int4.litertlm'},
+  {id:'qwen35-4b-litert-web',label:'Qwen 3.5 4B · LiteRT · legacy browser loader',tier:'LEGACY · WEB STREAMING METADATA UNSUPPORTED',repo:'litert-community/Qwen3.5-4B',estimatedBytes:2754070624,license:'Apache-2.0',contextWindowTokens:262144,workingContextTokens:4096,nativeImport:true,artifact:'Qwen3.5-4B_mixed_int4.litertlm'},
   {id:'qwen35-9b-litert-web',label:'Qwen 3.5 9B · LiteRT · optional separate selection',tier:'PHONE MAX · EXPERIMENTAL',repo:'litert-community/Qwen3.5-9B-LiteRT',estimatedBytes:9520000000,license:'Apache-2.0',contextWindowTokens:262144,workingContextTokens:3072,nativeImport:false},
   {id:'llama32-3b-instruct-q4f16',label:'Llama 3.2 3B Instruct · Two-Pass JSON Trial',tier:'PHONE TEST · Llama 3.2 3B',repo:'onnx-community/Llama-3.2-3B-Instruct-ONNX',estimatedBytes:2425000000,license:'llama3.2',contextWindowTokens:131072,workingContextTokens:2048,preferBackground:true},
   {id:'smollm2-135m-instruct-q8-wasm',label:'SmolLM2 135M Instruct',tier:'Phone Tiny',repo:'onnx-community/SmolLM2-135M-Instruct-ONNX',estimatedBytes:140453620,license:'Apache-2.0',contextWindowTokens:8192,workingContextTokens:768,preferBackground:false},
@@ -277,7 +277,37 @@ function renderDock(){
 
 function localPanel(form){return form?.querySelector(`#${PANEL_ID}`)||null}
 
+
+const UNIFIED_FLEET_SRC='/app/shared/civweave-ai-fleet-v1.js?v=1.3.4-desktop-ollama-fleet';
+function showUnifiedFleet(layer=document.getElementById('cw-settings-v320')){
+  const target=layer?.querySelector?.('[data-settings-tab-panel="local-models"]');
+  if(!target||!layer?.isConnected||layer.hidden)return false;
+  const api=globalThis.CivweaveAIFleetV1;
+  if(api?.render){api.render(layer);return true;}
+  // One shared model-selection owner. Legacy pack/model card renderers are
+  // superseded; neither their download buttons nor their listeners are mounted.
+  target.innerHTML='<section class="cw-clean-panel"><h3>AI Fleet</h3><p>Loading compatible AI choices for this device…</p></section>';
+  if(!globalThis.__civweaveFleetLoadV1){
+    globalThis.__civweaveFleetLoadV1=new Promise((resolve,reject)=>{
+      const script=document.createElement('script');
+      script.src=UNIFIED_FLEET_SRC;script.async=false;
+      script.onload=()=>globalThis.CivweaveAIFleetV1?.render?resolve(true):reject(Error('AI Fleet catalog did not initialize.'));
+      script.onerror=()=>reject(Error('AI Fleet catalog failed to load.'));
+      document.head.append(script);
+    }).catch(error=>{
+      const live=document.querySelector('[data-settings-tab-panel="local-models"]');
+      if(live)live.innerHTML='<section class="cw-clean-panel"><h3>AI Fleet unavailable</h3><p>'+String(error?.message||error).replace(/[&<>]/g,'')+'</p></section>';
+      return false;
+    });
+  }
+  void globalThis.__civweaveFleetLoadV1.then(ok=>{if(ok&&layer?.isConnected&&!layer.hidden&&
+    layer.querySelector('[data-settings-tab="local-models"]')?.getAttribute('aria-selected')==='true')
+    globalThis.CivweaveAIFleetV1.render(layer)});
+  return true;
+}
+
 function renderLocalModels(layerOrForm=document.getElementById(SETTINGS_LAYER_ID)){
+  if(showUnifiedFleet())return document.querySelector('[data-settings-tab-panel="local-models"]');
   if(!writable())return null;
   installLocalStyle();
   hideDock();
