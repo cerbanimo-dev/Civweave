@@ -280,7 +280,7 @@ export function castGovernanceVote(sql,{guildId,origin,actorId,ballotId,choice,n
   sql.exec("INSERT INTO guild_governance_votes(ballot_id,user_id,choice,voted_at) VALUES(?,?,?,?) ON CONFLICT(ballot_id,user_id) DO UPDATE SET choice=excluded.choice,voted_at=excluded.voted_at",
     ballotId,actorId,choice,new Date(now).toISOString());
   recordAudit(sql,ballotId,'voted',actorId);
-  return settle(sql,ballotId,{guildId,origin,now});
+  return settle(sql,ballotId,{guildId,origin,now,seatLimit});
 }
 export function governanceStatus(sql,{actorId='',now=Date.now()}={}){
   ensureGovernanceTables(sql);
