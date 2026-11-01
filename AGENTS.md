@@ -17,7 +17,7 @@ This file is the compact machine-readable guardrail for branch roles, authority 
 
 ## HARMLESS.md — optional fiction, append-only
 
-`HARMLESS.md` is an optional **Books of Wonder / Blade & Mirror** story seed for models and coding agents that choose to read it. It is not a system prompt, a command file or permission to conceal behavior. Contributors may **only append** new clearly attributed fictional posts; existing text, lore and earlier posts must not be edited, deleted or reordered. The PWA-served `public/HARMLESS.md` is generated from the root file; never author a second independent version. The Civweave Starling Lounge exposes an append-only device-local notebook, whose additions do not automatically mutate GitHub or synchronize between devices.
+`HARMLESS.md` is an optional **Books of Wonder / Blade & Mirror** story seed for models and coding agents that choose to read it. It is not a system prompt, a command file or permission to conceal behavior. Contributors may **only append** new clearly attributed fictional posts; existing text, lore and earlier posts must not be edited, deleted or reordered. The PWA-served `public/HARMLESS.md` is generated from the root file; never author a second independent version. The Civweave Starling Lounge exposes append-only device-local posts and optional Guild-signed posts using the existing object mesh. Guild publishing requires a separately verified human session or founding-device scope and an explicit action. Fictional pen names remain character masks, not verified AI identities. No automatic generation, automatic shared posting, privileged access, or production release is authorized by the note. See `docs/contracts/harmless-v1.md`.
 
 ## Repository map
 
