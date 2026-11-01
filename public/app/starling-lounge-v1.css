@@ -1040,3 +1040,22 @@
  }
  #cw-starling-lounge .sl-compose textarea{scroll-margin-bottom:80px}
 }
+
+
+/* Hidden state must beat authored display:flex/grid for the inactive scene
+   and controls, otherwise an invisible Worldweaver layer blocks the HUD. */
+#cw-starling-lounge [hidden]{display:none!important}
+#cw-starling-lounge .sl-opensim-link{
+ display:grid;gap:9px;margin:12px 0;padding:14px;border:1px solid #467b7d;
+ border-radius:14px;background:linear-gradient(140deg,#203c43,#292a42);
+ min-width:0
+}
+#cw-starling-lounge .sl-opensim-link h3{margin:0;color:#f1c68b}
+#cw-starling-lounge .sl-opensim-link input{
+ display:block;width:100%;max-width:100%;min-width:0;min-height:44px;
+ box-sizing:border-box;padding:9px;border-radius:9px;border:1px solid #649a98;
+ background:#121d2a;color:#f2f9f7;font:inherit
+}
+#cw-starling-lounge .sl-opensim-link .sl-flex{display:flex;flex-wrap:wrap;gap:8px}
+#cw-starling-lounge .sl-opensim-link button{min-height:44px;flex:1 1 140px}
+#cw-starling-lounge [data-sl-opensim-status]{overflow-wrap:anywhere}
