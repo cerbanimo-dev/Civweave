@@ -25,7 +25,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
+const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -33,6 +33,7 @@ const human=person=>person?.name||'Unknown persona';
 function setup(){
   if(state.root)return state.root;
   const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=brand-responsive-fleet-r7-live-npc';document.head.append(style);
+  const summonStyle=document.createElement('link');summonStyle.rel='stylesheet';summonStyle.href='/app/worldweaver-summon-v1.css?v=1';document.head.append(summonStyle);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
   root.innerHTML=`<div class="sl-chrome"><header class="sl-head">
   <div class="sl-brand"><img class="sl-brand-mark" src="/app/logos/civweave-icon-192.png" alt="" width="48" height="48"><div class="sl-brand-copy"><small>CIVWEAVE · WORLDWEAVER</small><h1 data-sl-main-title>AI Fleets</h1><p data-sl-main-description>Local device and Guild simulation spaces</p></div></div>
@@ -152,6 +153,14 @@ function setup(){
   </aside>
  </div>
 </div>`;
+  // The same viewport receives desktop side and mobile bottom-shelf drops.
+  // Reuse the Guild Worldweaver renderer: never build a parallel world.
+  const sceneShell=root.querySelector('.sl-scene-shell');
+  const summonLayout=el('div','sl-summon-layout');
+  sceneShell.replaceWith(summonLayout);
+  const summonPalette=el('aside','sl-summon-panel');
+  summonPalette.setAttribute('aria-label','Summon experiences, objects, characters and people');
+  summonLayout.append(sceneShell,summonPalette);
   root.addEventListener('click',click);
   root.addEventListener('change',event=>{if(event.target.matches?.('[data-sl-world-room]'))void enterWorldRoom(event.target.value)});
   root.querySelector('[data-sl-form]').addEventListener('submit',send);
@@ -358,7 +367,7 @@ function setFleetScope(scope){
   if(scope==='guild'&&SYSTEM_GUIDES[state.selectedAgent])state.selectedAgent='kami';
   if(state.root)state.root.dataset.slFleet=scope;
   for(const button of state.root?.querySelectorAll('[data-sl-fleet]')||[])button.setAttribute('aria-pressed',String(button.dataset.slFleet===scope));
-  render();
+  render();state.summonUI?.refresh();
   if(scope==='guild'&&state.worldLinked&&state.view==='world')state.worldViewer?.update();
   return true;
 }
@@ -529,12 +538,12 @@ async function refresh(){
   }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
 }
-function close(){if(!state.root)return;state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
+function close(){if(!state.root)return;state.summonUI?.close();state.summonUI=null;state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
   if(state.guild?.id!==(guild?.id||null)){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
-  state.root.hidden=false;document.body.style.overflow='hidden';setView('world');setFleetScope(guild?'guild':'local');state.root.querySelector('[data-sl-action=close]').focus();
+  state.root.hidden=false;document.body.style.overflow='hidden';void ensureSummonUI();setView('world');setFleetScope(guild?'guild':'local');state.root.querySelector('[data-sl-action=close]').focus();
   void ensureLocalFleetCatalog().then(()=>{if(!state.root?.hidden)renderFleetScopes()}).catch(error=>{state.fleetMessage=clean(String(error?.message||error),200);renderFleetScopes()});
   void connectGuideRuntime();
   if(state.guild){void refresh();void refreshTurns();void refreshWorkerStatus();void connectWorld()}
@@ -1134,16 +1143,60 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
   $('[data-sl-scene-context]').textContent=state.openSimGeometry&&state.openSimWorldRef===worldRef
     ?'Live local view of an OpenSim region-module export; source geometry in 3D and 2D. Guild signatures still authorize pilots; avatar movement is not connected.'
     :'Guild-signed Worldweaver local renderer · same manifest in 3D and accessible 2D. Scene geometry is provisional; NPC locomotion is not implemented.';
-  switchWorldMode('3d');renderPresence();return view;
+  switchWorldMode('3d');renderPresence();state.summonUI?.refresh();return view;
 }
 function detachWorldSource(){
   state.worldRosterUnsubscribe?.();state.worldRosterUnsubscribe=null;
   state.worldViewer?.close();state.worldViewer=null;
-  state.worldView?.close();state.worldView=null;state.worldLinked=false;state.worldLayout=null;
+  state.worldView?.close();state.worldView=null;state.worldLinked=false;state.worldLayout=null;state.summonUI?.refresh();
   const holder=$('[data-sl-room-holder]');if(holder)holder.hidden=true;
   if(state.root){const host=$('[data-sl-world-host]');if(host){host.hidden=true;host.replaceChildren()}
     const stage=$('[data-sl-stage]');if(stage)stage.hidden=false;
     const message=$('[data-sl-scene-context]');if(message)message.textContent='Fallback visual scene · awaiting Guild-signed Worldweaver manifest.'}
+}
+/** All display items are references from existing Worldweaver/cast owners.
+ * People come ONLY from an authenticated invitation provider; no guessed roster. */
+async function summonCatalog(){
+ const snapshot=fleetIsGuild()?state.worldHost?.getSnapshot():null;
+ const experiences=(snapshot?.instances||[]).filter(row=>row.status==='live').slice(0,35)
+  .map(row=>({kind:'experience',id:row.id,title:row.title||'Worldweaver room',description:'Guild-signed room'}));
+ const npcs=(snapshot?.npcs||[]).slice(0,35)
+  .map(row=>({kind:'npc',id:row.id,title:row.name||'Registered NPC',description:'Signed Worldweaver pilot'}));
+ const actors=PEOPLE.map(person=>({kind:'actor',id:'starling:'+person.id,
+  title:person.name,description:'Collective character · requires authorized embodiment',
+  avatarAsset:'/app/assets/starling/'+person.id+'.svg'}));
+ const transport=state.summonTransport;
+ const [objects,contacts]=await Promise.all([
+  typeof transport?.listWorldItems==='function'?transport.listWorldItems():[],
+  typeof transport?.listPeople==='function'&&fleetIsGuild()?transport.listPeople():[]
+ ]);
+ const sourced=(entries,kind)=>Array.isArray(entries)?entries.slice(0,50).map(row=>({...row,kind})):[];
+ return [...experiences,...npcs,...actors,...sourced(objects,'object'),...sourced(contacts,'person')];
+}
+async function ensureSummonUI(){
+ if(!state.root||state.root.hidden||state.summonUI||state.summonLoading)return;
+ state.summonLoading=true;
+ try{
+  const {mountWorldweaverSummonUI}=await import('./shared/worldweaver-summon-ui-v1.mjs');
+  if(state.root?.hidden||state.summonUI)return;
+  const palette=$('.sl-summon-panel'),scene=$('.sl-scene-shell');
+  if(!palette||!scene)return;
+  state.summonUI=mountWorldweaverSummonUI({palette,scene,getCatalog:summonCatalog,
+    getWorldRef:()=>fleetIsGuild()&&state.worldLinked?state.worldHost?.worldRef():null,
+    transport:state.summonTransport});
+ }catch(error){
+  const palette=$('.sl-summon-panel');
+  if(palette)palette.textContent='Summon controls unavailable: '+clean(String(error?.message||error),180);
+ }finally{state.summonLoading=false}
+}
+/** Only the existing Guild communication/world owners may provide this adapter.
+ * This view cannot claim that an unverified person has answered a call. */
+function bindSummonTransport(transport){
+ if(transport!=null&&(typeof transport!=='object'||typeof transport.invite!=='function'||typeof transport.place!=='function'))
+  throw new TypeError('Summon transport must implement authenticated invite and place operations.');
+ state.summonTransport=transport;
+ state.summonUI?.setTransport(transport);
+ return true;
 }
 /** Observe the canonical one-chat owner. Events only prompt a re-read; their
  * contents never authorize or assert agent activity. No additional model starts. */
@@ -1217,5 +1270,5 @@ function unbindGuideActivity(){
   state.guideUnsubscribe=null;state.guideActivity=Object.create(null);
   if(state.root)renderSpeaker();
 }
-export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.3.0',open,close,setFleetScope,refresh,connectWorld,provisionWorld,attachWorldSource,detachWorldSource,bindGuideActivity,unbindGuideActivity});
+export const CivweaveStarlingLoungeV1=Object.freeze({version:'1.3.0',open,close,setFleetScope,refresh,connectWorld,provisionWorld,attachWorldSource,detachWorldSource,bindSummonTransport,bindGuideActivity,unbindGuideActivity});
 if(typeof globalThis!=='undefined')globalThis.CivweaveStarlingLoungeV1=CivweaveStarlingLoungeV1;
