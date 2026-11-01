@@ -5,7 +5,8 @@ import {webcrypto} from 'node:crypto';
 import {majority,ballotSpec,ballotOutcome,qualifiedContributors,activeGuildVoters,GUILD_CONTRIBUTION_WINDOW_MS} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-v1.mjs';
 import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,
   delegatedRole,isBanned,governanceStatus,reportQueue,reportReceipt,markReportDelivery,
-  openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,ensureGovernanceTables} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
+  openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,ensureGovernanceTables,
+  acknowledgeGuildNotice,fileBanAppeal,sponsorBanAppeal} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
 import {distanceKm,deliverVerifiedGuildReport,handleGuildPeerDirectoryRoute} from '../cloudflare/core/src/guild-peer-reports-v1.mjs';
 
 if(!globalThis.crypto)globalThis.crypto=webcrypto;
@@ -312,4 +313,61 @@ test('small and larger Guilds apply active-member majority to case-backed sancti
     assert.equal(deciding.status,'approved');
     assert.equal(f.memberCount(),count-1);
   }
+});
+
+test('inbox notices are actor-scoped and read acknowledgments are authenticated, idempotent and non-voting',()=>{
+  const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);
+  const raised=openGovernanceCase(f.sql,{...f.context,actorId:A,action:'ban',targetUserId:C,
+    statement:'The accused member has the right to see this pending case.'});
+  const targeted=governanceStatus(f.sql,{actorId:C});
+  assert.ok(targeted.notices.some(n=>n.kind==='case'&&n.refId===raised.id&&!n.readAt));
+  assert.equal(governanceStatus(f.sql,{actorId:B}).notices.some(n=>n.refId===raised.id),false);
+  assert.throws(()=>acknowledgeGuildNotice(f.sql,{actorId:B,kind:'case',refId:raised.id}),/not addressed/i);
+  const ack=acknowledgeGuildNotice(f.sql,{actorId:C,kind:'case',refId:raised.id});
+  assert.equal(ack.kind,'case');assert.ok(ack.readAt);
+  assert.equal(acknowledgeGuildNotice(f.sql,{actorId:C,kind:'case',refId:raised.id}).readAt,ack.readAt);
+  assert.equal(f.memberCount(),3);
+  assert.equal(f.db.prepare('SELECT COUNT(*) AS n FROM guild_governance_votes').get().n,0);
+  f.sql.exec('UPDATE guild_governance_cases SET notice_until=? WHERE id=?',new Date(Date.now()-1000).toISOString(),raised.id);
+  const ballot=proposeGovernance(f.sql,{...f.context,actorId:A,action:'ban',targetUserId:C,caseId:raised.id,
+    statement:'The accused member has the right to see this pending case.'});
+  assert.ok(governanceStatus(f.sql,{actorId:B}).notices.some(n=>n.kind==='ballot'&&n.refId===ballot.id));
+  assert.equal(governanceStatus(f.sql,{actorId:D}).notices.length,0);
+});
+test('a banned member can submit exactly one credential-authenticated appeal, but never cast votes',()=>{
+  const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);
+  const banned=proposeWithNoticedCase(f.sql,{...f.context,actorId:A,action:'ban',targetUserId:C,
+    statement:'A removal should not permanently silence a community appeal.'});
+  castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:banned.id,choice:'yes'});
+  assert.equal(isBanned(f.sql,C),true);
+  assert.throws(()=>fileBanAppeal(f.sql,{actorId:C,credentialHash:'incorrect',ballotId:banned.id,
+    statement:'I request that the Guild consider correcting its decision.'}),/credential/i);
+  const appeal=fileBanAppeal(f.sql,{actorId:C,credentialHash:'cred-'+C,ballotId:banned.id,
+    statement:'I request that the Guild consider correcting its decision.'});
+  assert.equal(appeal.status,'pending');
+  assert.equal(governanceStatus(f.sql,{actorId:B}).appeals.some(a=>a.id===appeal.id),true);
+  assert.throws(()=>fileBanAppeal(f.sql,{actorId:C,credentialHash:'cred-'+C,ballotId:banned.id,
+    statement:'Try to flood appeals rather than discuss the original decision.'}),/already/i);
+  assert.throws(()=>castGovernanceVote(f.sql,{...f.context,actorId:C,ballotId:banned.id,choice:'yes'}));
+  assert.equal(isBanned(f.sql,C),true);
+  assert.throws(()=>sponsorBanAppeal(f.sql,{...f.context,actorId:B,appealId:appeal.id}),/verified contribution/);
+  const sponsored=sponsorBanAppeal(f.sql,{...f.context,actorId:A,appealId:appeal.id});
+  assert.equal(sponsored.status,'open');
+  assert.equal(isBanned(f.sql,C),true);
+  assert.equal(governanceStatus(f.sql,{actorId:A}).appeals.find(a=>a.id===appeal.id).ballotId,sponsored.id);
+  const approved=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:sponsored.id,choice:'yes'});
+  assert.equal(approved.status,'approved');
+  assert.equal(isBanned(f.sql,C),false);
+  assert.equal(governanceStatus(f.sql,{actorId:A}).appeals.find(a=>a.id===appeal.id).status,'approved');
+});
+test('a different Guild member cannot impersonate a banned appellant, and expired bans cannot be appealed',()=>{
+  const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);
+  const ban=proposeWithNoticedCase(f.sql,{...f.context,actorId:A,action:'ban',targetUserId:C,
+    statement:'Security tests reject unrelated device credentials and forged subject IDs.'});
+  castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ban.id,choice:'yes'});
+  assert.throws(()=>fileBanAppeal(f.sql,{actorId:B,credentialHash:'cred-'+B,ballotId:ban.id,
+    statement:'An unrelated Guild member cannot forge a ban appeal.'}),/credential|subject|ban/i);
+  f.sql.exec('UPDATE guild_governance_bans SET expires_at=? WHERE user_id=?',new Date(Date.now()-1000).toISOString(),C);
+  assert.throws(()=>fileBanAppeal(f.sql,{actorId:C,credentialHash:'cred-'+C,ballotId:ban.id,
+    statement:'This ban has expired and is no longer appealable.'}),/active|expired/i);
 });
