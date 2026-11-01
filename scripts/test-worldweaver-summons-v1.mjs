@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {normalizeSummonItem,normalizeDropPosition,normalizeSummonCommand,createWorldweaverSummons} from '../public/app/shared/worldweaver-summon-v1.mjs';
 import {HAND_SURFACE_ANCHORS,recognizeHandGesture,createHandGestureInterpreter} from '../public/app/shared/worldweaver-hand-gestures-v1.mjs';
+import {createWorldweaver} from '../public/app/shared/worldweaver-core-v1.mjs';
+import {decodeWorldCall,WORLD_CALL_SCHEMA} from '../public/app/shared/worldweaver-pm-calls-v1.mjs';
 
 const person={kind:'person',id:'guild:hero-1',title:'A consenting Guild member'};
 const actor={kind:'actor',id:'starling:kami',title:'Kami'};
@@ -90,4 +92,34 @@ test('telephone sign summons phone into opposite hand only after stable hold',()
  assert.equal(g.update('right',convergence()),null);assert.equal(g.update('right',convergence()),null);
  assert.deepEqual(g.update('right',convergence()),{type:'civweave.menu.toggle',sourceHand:'right'});
  g.reset();
+});
+
+test('signed Worldweaver persists a placement request but never claims a simulator spawn',()=>{
+ let n=0;
+ const founder={kind:'human',principalId:'founder:test'};
+ const runtime={kind:'runtime',principalId:'renderer:test'};
+ const world=createWorldweaver({id:()=>`entity-${++n}`,
+   authorize:({actor})=>actor===founder||actor===runtime});
+ const room=world.dispatch({type:'create',guide:'moss',title:'Test Guild room',guildId:'guild:test',scope:'guild-map'},founder).instance;
+ world.dispatch({type:'request-provision',instanceId:room.id},founder);
+ world.dispatch({type:'provisioned',instanceId:room.id,backend:'local-renderer',worldRef:room.id},runtime);
+ const receipt=world.dispatch({type:'place-entity',instanceId:room.id,entityKind:'actor',
+   entityRef:'starling:kami',position:{u:.25,v:.75}},founder);
+ assert.equal(receipt.placement.status,'pending-simulator');
+ assert.equal(world.snapshot().placements.length,1);
+ assert.equal(world.snapshot().placements[0].entityRef,'starling:kami');
+ assert.throws(()=>world.dispatch({type:'place-entity',instanceId:room.id,
+   entityKind:'person',entityRef:'pm:river',position:drop},founder),/Unsupported/);
+ assert.throws(()=>world.dispatch({type:'place-entity',instanceId:room.id,
+   entityKind:'actor',entityRef:'starling:kami',position:{u:99,v:1}},founder),/normalized/);
+});
+test('encrypted world call decoder distinguishes invite, response and invalid envelopes',()=>{
+ const base={schema:WORLD_CALL_SCHEMA,invitationId:'call:123',from:'hero.one',to:'hero.two'};
+ const invite={...base,kind:'invite',worldRef:'world:commons',
+   position:{u:.5,v:.5},expiresAt:new Date(Date.now()+600000).toISOString()};
+ const response={...base,kind:'response',status:'declined',response:'Busy in a Quest'};
+ assert.equal(decodeWorldCall('cw-world-call1:'+JSON.stringify(invite)).worldRef,'world:commons');
+ assert.equal(decodeWorldCall('cw-world-call1:'+JSON.stringify(response)).status,'declined');
+ assert.equal(decodeWorldCall('cw-world-call1:'+JSON.stringify({...response,status:'joined'})),null);
+ assert.equal(decodeWorldCall('not a call'),null);
 });
