@@ -79,6 +79,9 @@ export function createPrivateWorldCallTransport(){
  * still needs an authenticated viewer/world session after pickup.
  */
 export function installWorldCallReceiver(){
+ if(!document.querySelector('[data-cw-world-call-styles]')){
+  const link=document.createElement('link');link.rel='stylesheet';link.href='/app/worldweaver-summon-v1.css?v=1';link.dataset.cwWorldCallStyles='true';document.head.append(link);
+ }
  const pm=getPM(),seen=new Set();
  let busy=false,closed=false,pending=null,root=null;
  const allowed=name=>verifiedContacts().some(c=>c.username===name);
