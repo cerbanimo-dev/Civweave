@@ -221,6 +221,7 @@ function setMode(next){
   const value=['direct','clean','original'].includes(next)?next:'direct';
   if(value==='original'&&safeModeEnabled())return false;
   try{localStorage.setItem(MODE_KEY,value)}catch{}
+  if(value!=='direct')leaveGuildBroadcast();
   render();
   try{dispatchEvent(new CustomEvent('civweave:radio-station-mode-changed',{detail:{mode:value,system:currentSystem}}))}catch{}
   return true;
@@ -298,7 +299,7 @@ function renderBroadcastStatus(){
  const cue=panel.querySelector('[data-radio-guild-cue]');if(cue){cue.hidden=!broadcastMode;cue.textContent=broadcastCue||'DJ commentary follows each completed bundle.'}
  const mute=panel.querySelector('[data-radio-guild-mute]');if(mute){mute.hidden=!broadcastMode;mute.textContent=broadcastMuted?'Unmute DJ':'Mute DJ'}
  for(const selector of ['[data-radio-previous]','[data-radio-next]','[data-radio-seek]','[data-radio-shuffle]']){
-  const button=panel.querySelector(selector);if(button&&broadcastMode)button.disabled=true;
+  const button=panel.querySelector(selector);if(button)button.disabled=Boolean(broadcastMode);
  }
 }
 async function fetchGuildRadio(){
@@ -371,7 +372,8 @@ function revokeObjectUrl(){if(objectUrl){URL.revokeObjectURL(objectUrl);objectUr
 function status(message){statusText=message;updatePlaybackUi()}
 function cancelSeek(){if(pendingSeek){pendingSeek.controller.abort();pendingSeek=null}}
 function stopTrack(){playbackToken++;cancelSeek();audio?.pause();audio?.removeAttribute('src');audio?.load();revokeObjectUrl();currentTrack=null;isPlaying=false;updatePlaybackUi()}
-async function playTrack(id){
+async function playTrack(id,{live=false,offset=0}={}){
+  if(!live&&broadcastMode)leaveGuildBroadcast();
   if(!audio)ensureSurface();
   const track=directTracksFor().find(row=>row.id===id);if(!track){status('This track is unavailable in the current station.');return false}
   const token=++playbackToken;cancelSeek();audio.pause();revokeObjectUrl();currentTrack=track;recentTrackIds.unshift(track.id);if(recentTrackIds.length>12)recentTrackIds.length=12;status(`Loading ${track.title}…`);updatePlaybackUi();
@@ -379,12 +381,14 @@ async function playTrack(id){
     let source=track.url;
     if(globalThis.caches)try{const cached=await(await caches.open(AUDIO_CACHE)).match(track.url);if(cached){const blob=await cached.blob();if(token!==playbackToken)return false;objectUrl=URL.createObjectURL(blob);source=objectUrl;savedIds.add(track.id)}}catch{}
     if(token!==playbackToken)return false;
-    audio.src=source;audio.load();await audio.play();if(token!==playbackToken)return false;
+    audio.src=source;audio.load();
+     if(live&&offset>1){const applyOffset=()=>{if(token===playbackToken){try{audio.currentTime=offset}catch{}}};audio.addEventListener('loadedmetadata',applyOffset,{once:true});applyOffset()}
+     await audio.play();if(token!==playbackToken)return false;
     isPlaying=true;status(`Playing ${track.title}${savedIds.has(track.id)?' · saved offline':''}.`);renderTrackList();return true;
   }catch(error){if(token===playbackToken){isPlaying=false;status('Playback could not start. Try Play again, or save the track while online.')}return false}
 }
-function nextTrack(direction=1){const rows=directTracksFor();if(!rows.length)return false;const index=rows.findIndex(row=>row.id===currentTrack?.id);if(shuffleEnabled&&direction>0&&rows.length>1){let pool=rows.filter(row=>row.id!==currentTrack?.id&&!recentTrackIds.includes(row.id));if(!pool.length){recentTrackIds.length=0;pool=rows.filter(row=>row.id!==currentTrack?.id)}const picked=pool[Math.floor(Math.random()*pool.length)];return playTrack(picked.id)}return playTrack(rows[index<0?(direction>0?0:rows.length-1):(index+direction+rows.length)%rows.length].id)}
-async function togglePlayback(){if(!currentTrack)return playTrack(directTracksFor()[0]?.id);if(isPlaying){audio.pause();isPlaying=false;status('Paused.');return true}try{await audio.play();isPlaying=true;status(`Playing ${currentTrack.title}.`);return true}catch{status('Playback could not start. Try selecting the track again.');return false}}
+function nextTrack(direction=1){if(broadcastMode)return false;const rows=directTracksFor();if(!rows.length)return false;const index=rows.findIndex(row=>row.id===currentTrack?.id);if(shuffleEnabled&&direction>0&&rows.length>1){let pool=rows.filter(row=>row.id!==currentTrack?.id&&!recentTrackIds.includes(row.id));if(!pool.length){recentTrackIds.length=0;pool=rows.filter(row=>row.id!==currentTrack?.id)}const picked=pool[Math.floor(Math.random()*pool.length)];return playTrack(picked.id)}return playTrack(rows[index<0?(direction>0?0:rows.length-1):(index+direction+rows.length)%rows.length].id)}
+async function togglePlayback(){if(broadcastMode){if(!broadcastPaused&&isPlaying){broadcastPaused=true;audio?.pause();cancelDj();status('Guild radio paused · resume to rejoin live.');return true}broadcastPaused=false;return syncGuildRadio(true)}if(!currentTrack)return playTrack(directTracksFor()[0]?.id);if(isPlaying){audio.pause();isPlaying=false;status('Paused.');return true}try{await audio.play();isPlaying=true;status(`Playing ${currentTrack.title}.`);return true}catch{status('Playback could not start. Try selecting the track again.');return false}}
 async function verifiedAudio(track,signal){
   const response=await fetch(track.url,{cache:'no-store',signal});if(signal.aborted||!response.ok||response.type==='opaque')throw new Error('Audio unavailable.');
   const declared=Number(response.headers.get('content-length'))||0;if(declared>MAX_AUDIO_BYTES)throw new Error('Invalid audio size.');
@@ -462,10 +466,11 @@ function updatePlaybackUi(){
   const duration=Number.isFinite(audio?.duration)?audio.duration:0,position=pendingSeek?.target??(Number(audio?.currentTime)||0);
   const title=panel.querySelector('[data-radio-current]');if(title)title.textContent=currentTrack?`${currentTrack.title} — ${currentTrack.artist}`:'Choose a track';
   const play=panel.querySelector('[data-radio-play]');if(play){play.textContent=pendingSeek?'Preparing…':isPlaying?'Pause':'Play';play.setAttribute('aria-label',pendingSeek?'Preparing track for seeking':isPlaying?'Pause music':'Play music');play.disabled=Boolean(pendingSeek)||!directTracksFor().length&&!currentTrack}
-  const seek=panel.querySelector('[data-radio-seek]');if(seek){seek.max=String(duration||1);seek.value=String(position);seek.disabled=!duration}
+  const seek=panel.querySelector('[data-radio-seek]');if(seek){seek.max=String(duration||1);seek.value=String(position);seek.disabled=!duration||Boolean(broadcastMode)}
   const time=panel.querySelector('[data-radio-time]');if(time)time.textContent=`${timeLabel(position)} / ${timeLabel(duration)}`;
   const message=panel.querySelector('[data-radio-status]');if(message&&message.textContent!==statusText)message.textContent=statusText;
   const credits=panel.querySelector('[data-radio-current-credits]');if(credits&&credits.dataset.track!==(currentTrack?.id||'')){credits.dataset.track=currentTrack?.id||'';credits.innerHTML=currentTrack?`${esc(currentTrack.credits)} · <a href="${esc(currentTrack.source)}" target="_blank" rel="noopener noreferrer external">Source</a> · <a href="${esc(currentTrack.licenseUrl)}" target="_blank" rel="noopener noreferrer external">${esc(currentTrack.license)}</a> · ${esc(currentTrack.changes)}`:''}
+  renderBroadcastStatus();
   launcher?.setAttribute('aria-label',isPlaying?`Radio · playing ${currentTrack?.title||'music'}`:`Open ${station()?.name||'radio'}`);
   launcher?.setAttribute('data-playing',isPlaying?'true':'false');
 }
@@ -508,12 +513,18 @@ html:not([data-radio-embedded="true"]){--cw-radio-dock-space:calc(var(--cw-theme
 @media(max-width:640px){#${LAUNCHER_ID}{left:max(14px,env(safe-area-inset-left));bottom:calc(var(--cw-radio-dock-space) + 14px);width:54px;height:54px;min-width:54px;min-height:54px;border-radius:17px}}
 #${LAUNCHER_ID}[aria-expanded="true"],#${LAUNCHER_ID}[data-playing="true"]{box-shadow:none;color:var(--cw-radio-accent,#cfabed)}
 #${LAUNCHER_ID}:focus-visible{outline:2px solid currentColor;outline-offset:2px}
-#${PANEL_ID}{bottom:calc(var(--cw-radio-dock-space) + 58px);max-height:calc(100dvh - var(--cw-radio-dock-space) - 78px);display:grid;grid-template-rows:auto auto auto minmax(0,1fr);min-height:0;overflow:hidden;background:var(--cw-radio-background,#21152e);border-color:color-mix(in srgb,var(--cw-radio-accent,#cfabed) 45%,transparent);box-shadow:0 12px 34px #0008;overscroll-behavior:contain}
+#${PANEL_ID}{bottom:calc(var(--cw-radio-dock-space) + 58px);max-height:calc(100dvh - var(--cw-radio-dock-space) - 78px);display:grid;grid-template-rows:auto auto auto auto minmax(0,1fr);min-height:0;overflow:hidden;background:var(--cw-radio-background,#21152e);border-color:color-mix(in srgb,var(--cw-radio-accent,#cfabed) 45%,transparent);box-shadow:0 12px 34px #0008;overscroll-behavior:contain}
 #${PANEL_ID}>header{padding:10px 12px;flex:none}#${PANEL_ID}>header strong{font-size:17px}
 #${PANEL_ID} .cw-radio-modebar{padding:8px 12px;max-height:112px;overflow-y:auto;overscroll-behavior:contain}#${PANEL_ID} .cw-radio-modebar>button{min-height:44px}
 #${PANEL_ID} .cw-radio-modebar details{flex:1;min-width:140px}#${PANEL_ID} .cw-radio-modebar summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:12px;color:var(--cw-radio-accent,#cfabed)}
 #${PANEL_ID} .cw-radio-modebar details[open]>div{display:flex;gap:6px;flex-wrap:wrap;padding:4px 0}
 #${PANEL_ID} .cw-radio-modebar button[aria-pressed="true"]{border-color:var(--cw-radio-accent,#cfabed);background:color-mix(in srgb,var(--cw-radio-accent,#cfabed) 15%,transparent)}
+ #${PANEL_ID} .cw-radio-broadcast{display:flex;gap:7px;flex-wrap:wrap;padding:7px 12px;border-bottom:1px solid #ffffff22}
+ #${PANEL_ID} .cw-radio-broadcast button{min-height:42px;border-radius:12px;border:1px solid #ffffff30;background:#ffffff0d;color:#fff;padding:0 11px;font-weight:800}
+ #${PANEL_ID} .cw-radio-broadcast button[aria-pressed="true"]{border-color:var(--cw-radio-accent,#cfabed);background:#ffffff1d}
+ #${PANEL_ID} .cw-radio-broadcast small{width:100%;color:#c7cfde}
+ #${PANEL_ID} [data-radio-guild-cue]{font-size:12px;margin:0;padding:8px 12px;max-height:76px;overflow:auto;color:#e5dceb}
+ #${PANEL_ID} [data-radio-guild-cue][hidden]{display:none}
 #${PANEL_ID} .cw-radio-player{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:6px;padding:10px 12px;border-bottom:1px solid #ffffff20;min-width:0}
 #${PANEL_ID} .cw-radio-player>audio{display:none}#${PANEL_ID} [data-radio-current]{grid-column:1/-1;grid-row:1}
 #${PANEL_ID} .cw-radio-controls{grid-column:1;grid-row:2}#${PANEL_ID} .cw-radio-volume{grid-column:2;grid-row:2;flex-direction:column;justify-content:center;gap:0}
@@ -583,18 +594,20 @@ function ensureSurface(){
   if(!panel?.isConnected){
     panel=document.getElementById(PANEL_ID)||document.createElement('section');
     panel.id=PANEL_ID;panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-label','Civweave radio station');
-    panel.innerHTML=`<header><div><small>Open music</small><strong data-radio-system>Radio</strong></div><button type="button" data-radio-close aria-label="Close station">×</button></header><div class="cw-radio-modebar"><button type="button" data-radio-mode="direct" aria-pressed="true">Listen here</button><button type="button" data-radio-shuffle aria-pressed="false">Shuffle off</button><input type="search" data-radio-search aria-label="Search recordings" placeholder="Search songs or artists"><details><summary>Spotify extension</summary><div><button type="button" data-radio-mode="clean" aria-pressed="false">Clean station</button><button type="button" data-radio-mode="original" aria-pressed="false">Original / uncensored</button><button type="button" data-radio-nominate>Nominate track</button></div></details><span class="cw-radio-safe" data-radio-safe hidden></span></div><section class="cw-radio-player" aria-label="Music player"><audio preload="none" data-radio-audio></audio><strong data-radio-current>Choose a track</strong><div class="cw-radio-controls"><button type="button" data-radio-previous aria-label="Previous track">Previous</button><button type="button" data-radio-play>Play</button><button type="button" data-radio-next aria-label="Next track">Next</button></div><div class="cw-radio-seek"><input type="range" min="0" max="1" value="0" step="1" data-radio-seek aria-label="Seek in track" disabled><span data-radio-time>0:00 / 0:00</span></div><label class="cw-radio-volume">Volume<input type="range" min="0" max="1" step="0.05" value="0.7" data-radio-volume></label><p data-radio-status role="status" aria-live="polite"></p><div data-radio-current-credits></div></section><div class="cw-radio-body" data-radio-body></div>`;
-    audio=panel.querySelector('audio');audio.volume=0.7;
+    panel.innerHTML=`<header><div><small>Open music</small><strong data-radio-system>Radio</strong></div><button type="button" data-radio-close aria-label="Close station">×</button></header><div class="cw-radio-modebar"><button type="button" data-radio-mode="direct" aria-pressed="true">Listen here</button><button type="button" data-radio-shuffle aria-pressed="false">Shuffle off</button><input type="search" data-radio-search aria-label="Search recordings" placeholder="Search songs or artists"><details><summary>Spotify extension</summary><div><button type="button" data-radio-mode="clean" aria-pressed="false">Clean station</button><button type="button" data-radio-mode="original" aria-pressed="false">Original / uncensored</button><button type="button" data-radio-nominate>Nominate track</button></div></details><span class="cw-radio-safe" data-radio-safe hidden></span></div><div class="cw-radio-broadcast" aria-label="Guild radio stations"><button type="button" data-radio-guild-mode="fm" aria-pressed="false">Guild FM · DJ</button><button type="button" data-radio-guild-mode="talk" aria-pressed="false">Guild Deep Dive</button><button type="button" data-radio-guild-mute hidden>Mute DJ</button><small data-radio-guild-source>Independent listening</small><small data-radio-guild-now></small></div><section class="cw-radio-player" aria-label="Music player"><audio preload="none" data-radio-audio></audio><strong data-radio-current>Choose a track</strong><div class="cw-radio-controls"><button type="button" data-radio-previous aria-label="Previous track">Previous</button><button type="button" data-radio-play>Play</button><button type="button" data-radio-next aria-label="Next track">Next</button></div><div class="cw-radio-seek"><input type="range" min="0" max="1" value="0" step="1" data-radio-seek aria-label="Seek in track" disabled><span data-radio-time>0:00 / 0:00</span></div><label class="cw-radio-volume">Volume<input type="range" min="0" max="1" step="0.05" value="0.7" data-radio-volume></label><p data-radio-status role="status" aria-live="polite"></p><p data-radio-guild-cue hidden></p><div data-radio-current-credits></div></section><div class="cw-radio-body" data-radio-body></div>`;
+    audio=panel.querySelector('audio');radioVolume();
     for(const event of ['timeupdate','loadedmetadata','durationchange'])audio.addEventListener(event,updatePlaybackUi);
     audio.addEventListener('play',()=>{isPlaying=true;updatePlaybackUi()});audio.addEventListener('pause',()=>{isPlaying=false;updatePlaybackUi()});
-    audio.addEventListener('ended',()=>{isPlaying=false;status('Track finished. Playing next…');nextTrack(1);updatePlaybackUi()});
+    audio.addEventListener('ended',()=>{isPlaying=false;if(broadcastMode){void syncGuildRadio()}else{status('Track finished. Playing next…');nextTrack(1)}updatePlaybackUi()});
     audio.addEventListener('error',()=>{isPlaying=false;status('This recording could not be played. Try saving it while online, or choose another track.')});
     panel.querySelector('[data-radio-play]').addEventListener('click',togglePlayback);
-    panel.querySelector('[data-radio-shuffle]').addEventListener('click',event=>{shuffleEnabled=!shuffleEnabled;event.currentTarget.textContent=shuffleEnabled?'Shuffle on':'Shuffle off';event.currentTarget.setAttribute('aria-pressed',String(shuffleEnabled))});
+    panel.querySelectorAll('[data-radio-guild-mode]').forEach(button=>button.addEventListener('click',()=>{void tuneGuildBroadcast(button.dataset.radioGuildMode)}));
+     panel.querySelector('[data-radio-guild-mute]').addEventListener('click',()=>{broadcastMuted=!broadcastMuted;if(broadcastMuted)cancelDj();renderBroadcastStatus()});
+     panel.querySelector('[data-radio-shuffle]').addEventListener('click',event=>{shuffleEnabled=!shuffleEnabled;event.currentTarget.textContent=shuffleEnabled?'Shuffle on':'Shuffle off';event.currentTarget.setAttribute('aria-pressed',String(shuffleEnabled))});
     panel.querySelector('[data-radio-search]').addEventListener('input',event=>{searchTerm=event.target.value.trim().toLowerCase().slice(0,120);renderTrackList()});
     panel.querySelector('[data-radio-previous]').addEventListener('click',()=>nextTrack(-1));panel.querySelector('[data-radio-next]').addEventListener('click',()=>nextTrack(1));
     panel.querySelector('[data-radio-seek]').addEventListener('input',event=>{seekTrack(event.target.value)});
-    panel.querySelector('[data-radio-volume]').addEventListener('input',event=>{audio.volume=Math.min(1,Math.max(0,Number(event.target.value)||0))});
+    panel.querySelector('[data-radio-volume]').addEventListener('input',event=>{userVolume=Math.min(1,Math.max(0,Number(event.target.value)||0));radioVolume()});
     panel.querySelector('[data-radio-body]').addEventListener('click',event=>{
       const play=event.target.closest?.('[data-radio-track-play]');if(play){playTrack(play.dataset.radioTrackPlay);return}
       const offline=event.target.closest?.('[data-radio-offline]');if(offline){const id=offline.dataset.radioOffline;savedIds.has(id)?removeOffline(id):saveOffline(id);return}
@@ -617,16 +630,16 @@ function start(){
   if(started)return true;started=true;
   ensureSurface();
   addEventListener('pageshow',refresh);
-  addEventListener('civweave:safe-mode-changed',()=>{if(safeModeEnabled()&&currentTrack&&!currentTrack.safeAudit){stopTrack();status('S.A.F.E. is on. Select a recording with a complete safety audit.')}if(safeModeEnabled()&&mode()==='original')setMode('clean');else refresh()});
+  addEventListener('civweave:safe-mode-changed',()=>{if(safeModeEnabled()&&broadcastMode)leaveGuildBroadcast();if(safeModeEnabled()&&currentTrack&&!currentTrack.safeAudit){stopTrack();status('S.A.F.E. is on. Select a recording with a complete safety audit.')}if(safeModeEnabled()&&mode()==='original')setMode('clean');else refresh()});
   addEventListener('civweave:system-route-changed',refresh);
   addEventListener('keydown',event=>{if(event.key==='Escape'&&openState){close();launcher?.focus()}});
-  addEventListener('pagehide',()=>{playbackToken++;cancelSeek();audio?.pause();revokeObjectUrl()});
+  addEventListener('pagehide',()=>{leaveGuildBroadcast();playbackToken++;cancelSeek();audio?.pause();revokeObjectUrl()});
   addEventListener('civweave:canonical-playlists:changed',refresh);
   addEventListener('civweave:radio-preferences-changed',refresh);
   addEventListener('civweave:radio-station-open-request',open);
   try{dispatchEvent(new CustomEvent('civweave:radio-station-ready',{detail:{version:VERSION,system:currentSystem,cleanDefault:true,trackCount:tracksFor().length}}))}catch{}
 }
-const api=Object.freeze({version:VERSION,directAudio:true,directDefault:true,cleanDefault:true,catalogPath:CATALOG_PATH,streamManifestPath:STREAM_MANIFEST_PATH,audioCache:AUDIO_CACHE,systems:Object.freeze([...SYSTEMS]),stations:STATIONS,detectSystem,radioEnabled,safeModeEnabled,mode,setMode,station,tracksFor,directTracksFor,playTrack,saveOffline,removeOffline,open,close,toggle,refresh,ensureSurface});
+const api=Object.freeze({version:VERSION,directAudio:true,directDefault:true,cleanDefault:true,catalogPath:CATALOG_PATH,streamManifestPath:STREAM_MANIFEST_PATH,audioCache:AUDIO_CACHE,systems:Object.freeze([...SYSTEMS]),stations:STATIONS,detectSystem,radioEnabled,safeModeEnabled,mode,setMode,station,tracksFor,directTracksFor,playTrack,tuneGuildBroadcast,leaveGuildBroadcast,saveOffline,removeOffline,open,close,toggle,refresh,ensureSurface});
 globalThis.CivweaveRadioStationSurfaceV1=api;
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
