@@ -307,7 +307,7 @@ function viewAppeal(sql,row){
 }
 export function fileBanAppeal(sql,{actorId,credentialHash,ballotId,statement,now=Date.now()}){
   ensureGovernanceTables(sql);
-  if(!validGuildUser(actorId)||!/^[a-f0-9]{64}$/.test(credentialHash)&&!/^cred-/.test(String(credentialHash||'')))
+  if(!validGuildUser(actorId)||!/^[a-f0-9]{64}$/.test(String(credentialHash||'')))
     throw fail('Appeal requires valid account and device credential.',403);
   const ban=rows(sql,'SELECT user_id,credential_hash,expires_at,ballot_id FROM guild_governance_bans WHERE user_id=? AND ballot_id=? AND expires_at>? LIMIT 1',
     actorId,ballotId,new Date(now).toISOString())[0];
