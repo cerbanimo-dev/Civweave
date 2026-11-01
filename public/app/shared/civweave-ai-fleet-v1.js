@@ -2,7 +2,7 @@
 'use strict';
 // One presentation/catalogue owner. Existing inference, download, Settings,
 // privacy/consent and device-fit contracts remain the execution authorities.
-const VERSION='1.3.3-gguf-text-test-health';
+const VERSION='1.3.4-desktop-ollama-fleet';
 if(globalThis.CivweaveAIFleetV1?.version===VERSION)return;
 const MEMORY_KEY='civweave.ai.fleet.memory-gb.v1';
 const CHOICE_KEY='civweave.ai.fleet.choices.v1';
@@ -210,11 +210,14 @@ async function connectInstalledGGUF(layer,panel,sequence){
 }
 
 
+const DESKTOP_KEY='civweave.ai.fleet.desktop.v1';
+const DEFAULT_DESKTOP_ENDPOINT='http://127.0.0.1:11434/api/chat';
 const BACKEND_KEY='civweave.ai.fleet.backend.v2';
 const BACKENDS=Object.freeze({
  browser:{label:'In-browser GGUF',detail:'Wllama · WebGPU or WASM · saved GGUF shards'},
  termux:{label:'Termux server',detail:'llama.cpp · localhost 8080 · explicit server test'},
- android:{label:'Android APK backend',detail:'Native Starling bridge · installed wrapper required'}
+ android:{label:'Android APK backend',detail:'Native Starling bridge · installed wrapper required'},
+ desktop:{label:'Desktop / LAN · Ollama',detail:'Ollama on this computer or an explicitly selected LAN host'}
 });
 const GGUF_MODULE='/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install';
 const STYLE_ID='cw-ai-fleet-style-v3';
@@ -224,7 +227,7 @@ function currentBackend(){
  const value=read(BACKEND_KEY,null);
  if(BACKENDS[value])return value;
  try{const legacy=localStorage.getItem(BACKEND_KEY);if(BACKENDS[legacy])return legacy}catch{}
- return 'browser';
+ return detectDevice().platform==='desktop'?'desktop':'browser';
 }
 function setBackend(value){
  if(!BACKENDS[value])throw Error('Unsupported local backend.');
@@ -238,6 +241,126 @@ function style(){
  element.textContent+='#cw-ai-fleet-v1 [data-ai-fleet-uninstall]{border:1px solid #cc898f;background:#3b242e;color:#ffe6e8}#cw-ai-fleet-v1 [data-ai-fleet-uninstall]:focus-visible{outline:3px solid #ffe6e8;outline-offset:2px}';
  document.head?.append(element);
 }
+
+function desktopEndpoint(value){
+ const input=String(value||'').trim()||DEFAULT_DESKTOP_ENDPOINT;
+ let url;try{url=new URL(input)}catch{throw Error('Enter an Ollama URL, such as '+DEFAULT_DESKTOP_ENDPOINT)}
+ if(!['http:','https:'].includes(url.protocol)||url.username||url.password||url.search||url.hash)
+  throw Error('Ollama endpoints must use HTTP(S), without credentials, query strings or fragments.');
+ const path=url.pathname.replace(/\/+$/,'');
+ if(path&&!['/api/chat','/api/generate'].includes(path))
+  throw Error('Use the Ollama origin or /api/chat endpoint (not an OpenAI /v1 address).');
+ return url.origin+'/api/chat';
+}
+function desktopFleetState(){
+ const saved=read(DESKTOP_KEY,{});
+ const endpoint=(()=>{try{return desktopEndpoint(saved.endpoint)}catch{return DEFAULT_DESKTOP_ENDPOINT}})();
+ const models=Array.isArray(saved.models)?saved.models.filter(row=>row&&typeof row.name==='string'&&row.name.length<=200).slice(0,128):[];
+ const allowed=new Set(models.map(row=>row.name));
+ const roles=Object.fromEntries(Object.entries(saved.roles||{}).filter(([role,model])=>ROLES[role]&&allowed.has(model)));
+ return {schema:'civweave.ai.fleet.desktop.v1',endpoint,models,roles,enabled:Boolean(saved.enabled),
+  unassigned:Array.isArray(saved.unassigned)?saved.unassigned.filter(role=>ROLES[role]):[],
+  lastCheckedAt:saved.lastCheckedAt||null};
+}
+function saveDesktopFleet(next){
+ const state={...desktopFleetState(),...next,schema:'civweave.ai.fleet.desktop.v1',updatedAt:new Date().toISOString()};
+ localStorage.setItem(DESKTOP_KEY,JSON.stringify(state));
+ try{globalThis.dispatchEvent?.(new CustomEvent('civweave:ai-fleet-desktop-changed',{detail:{roles:Object.keys(state.roles),enabled:state.enabled}}))}catch{}
+ return state;
+}
+function autoAssignDesktop(models,prior={}){
+ const names=new Set(models.map(row=>row.name));
+ const roles={};
+ for(const role of Object.keys(ROLES)){
+  if((prior.unassigned||[]).includes(role))continue;
+  const previous=prior.roles?.[role];
+  const suggestion=SUITES.desktop.find(row=>row.role===role)?.modelId;
+  const selected=[previous,suggestion,'qwen3.5:4b',models[0]?.name].find(name=>names.has(name));
+  if(selected)roles[role]=selected;
+ }
+ return roles;
+}
+async function discoverDesktopModels(endpoint){
+ const normalized=desktopEndpoint(endpoint);
+ const runtime=globalThis.CivweaveModelRuntime;
+ if(typeof runtime?.discoverOllamaModels==='function')
+  return await runtime.discoverOllamaModels(normalized);
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
+ try{
+  const tags=new URL(normalized);tags.pathname='/api/tags';
+  const response=await fetch(tags.href,{method:'GET',mode:'cors',credentials:'omit',redirect:'error',signal:controller.signal});
+  if(!response.ok)throw Error('Ollama returned HTTP '+response.status);
+  const data=await response.json();
+  if(!Array.isArray(data?.models))throw Error('Ollama did not return an installed-model list.');
+  return data.models.map(row=>({name:String(row?.name||row?.model||'').trim().slice(0,200),size:Number(row?.size)||0})).filter(row=>row.name).slice(0,128);
+ }catch(error){
+  throw Error('Desktop Ollama discovery failed: '+String(error?.message||error)+'. Check that Ollama is running, OLLAMA_ORIGINS permits this Civweave origin, and browser CORS/local-network rules allow access.');
+ }finally{clearTimeout(timeout)}
+}
+function renderDesktopInventory(panel){
+ const holder=panel.querySelector('[data-ai-fleet-desktop-inventory]');if(!holder)return;
+ const state=desktopFleetState(),models=state.models;
+ const active=globalThis.CivweaveSettingsV320?.readState?.()||{};
+ const on=state.enabled&&active.route==='ollama'&&active.endpoint===state.endpoint;
+ if(!models.length){
+  holder.innerHTML='<p>No desktop models have been discovered. Start Ollama on your computer and choose Find installed models. Existing phone imports are untouched.</p>';
+  return;
+ }
+ const roles=Object.entries(ROLES).map(([role,meta])=>{
+  const chosen=state.roles[role]||'';
+  const options='<option value="">Unassigned</option>'+models.map(item=>'<option value="'+esc(item.name)+'"'+(item.name===chosen?' selected':'')+'>'+
+   esc(item.name)+(item.size?' · '+(item.size/1e9).toFixed(2)+' GB on disk':'')+'</option>').join('');
+  return '<label class="cw-fleet-card"><span class="cw-fleet-label">'+esc(meta.label)+' · '+esc(meta.purpose)+'</span>'+
+   '<span class="cw-fleet-meta">'+esc(meta.description)+'</span>'+
+   '<select data-ai-fleet-desktop-role="'+role+'" aria-label="'+esc(meta.label)+' desktop model">'+options+'</select></label>';
+ }).join('');
+ holder.innerHTML='<p class="cw-fleet-meta">'+models.length+' installed model(s) last discovered'+
+  (state.lastCheckedAt?' · '+esc(new Date(state.lastCheckedAt).toLocaleString()):'')+
+  '. Disk size is not an inference-memory measurement. No model is started by discovery.</p>'+
+  '<div class="cw-fleet-grid">'+roles+'</div>'+
+  '<div class="cw-fleet-choices"><button type="button" data-ai-fleet-desktop-activate'+(Object.keys(state.roles).length?'':' disabled')+
+  '>Use this desktop fleet in Civweave</button></div>'+
+  '<p class="cw-fleet-meta">'+(on?'Active: role-based Ollama routing is selected.':'Not active: discovery and assignments alone do not change the main AI route.')+
+  ' Model selection is applied when a role request is generated.</p>';
+}
+async function refreshDesktopFleet(layer,panel){
+ const status=panel.querySelector('[data-ai-fleet-desktop-status]'),input=panel.querySelector('[data-ai-fleet-desktop-endpoint]');
+ const endpoint=desktopEndpoint(input?.value);
+ if(status)status.textContent='Checking the explicitly selected Ollama host…';
+ const models=await discoverDesktopModels(endpoint);
+ if(!panel.isConnected||layer.hidden||currentBackend()!=='desktop')return;
+ const previous=desktopFleetState();
+ const distinct=[...new Map(models.map(item=>[item.name,item])).values()];
+ const roles=autoAssignDesktop(distinct,previous);
+ saveDesktopFleet({endpoint,models:distinct,roles,lastCheckedAt:new Date().toISOString(),
+  enabled:previous.enabled&&previous.endpoint===endpoint});
+ renderDesktopInventory(panel);
+ if(status)status.textContent='Ollama reachable · '+distinct.length+' installed model(s) discovered. Review role assignments, then activate.';
+}
+function assignDesktopRole(panel,role,name){
+ if(!ROLES[role])throw Error('Unknown fleet role.');
+ const state=desktopFleetState();
+ if(name&&!state.models.some(model=>model.name===name))throw Error('Discover this installed Ollama model before assigning it.');
+ const roles={...state.roles};if(name)roles[role]=name;else delete roles[role];
+ const unassigned=state.unassigned.filter(item=>item!==role);
+ if(!name)unassigned.push(role);
+ saveDesktopFleet({roles,unassigned});
+ renderDesktopInventory(panel);
+ const output=panel.querySelector('[data-ai-fleet-desktop-status]');
+ if(output)output.textContent=ROLES[role].label+' desktop assignment saved; no inference started.';
+}
+function activateDesktopFleet(layer,panel){
+ const state=desktopFleetState();
+ const model=state.roles.swift||Object.values(state.roles)[0];
+ if(!model||!state.models.some(item=>item.name===model))
+  throw Error('Find installed Ollama models and assign at least one role first.');
+ activateSharedRoute(layer,{route:'ollama',model,endpoint:state.endpoint});
+ saveDesktopFleet({enabled:true});
+ renderDesktopInventory(panel);
+ const output=panel.querySelector('[data-ai-fleet-desktop-status]');
+ if(output)output.textContent='Desktop Ollama fleet activated · '+model+' is the default, with per-task roles assigned above.';
+}
+
 function canUse(entry,row){
  const required=entry?.family==='4b'?6:entry?.family==='2b'?4:Infinity;
  return Boolean(entry?.verified&&row&&required<=detectDevice().budgetGB);
@@ -313,18 +436,18 @@ async function refreshInventory(layer,panel,sequence){
 }
 // All configuration actions live in this Fleet view. The canonical Settings
 // form remains the sole writer of shared inference configuration.
-function activateSharedRoute(layer,{model,endpoint}){
+function activateSharedRoute(layer,{model,endpoint,route:provider='openai-compatible'}){
  const form=layer?.querySelector?.('[data-cw-settings-form]');
  const route=form?.elements?.namedItem?.('route');
  const modelInput=form?.elements?.namedItem?.('model');
  const endpointInput=form?.elements?.namedItem?.('endpoint');
  if(!route||!modelInput||!endpointInput||typeof form.requestSubmit!=='function')
    throw Error('The shared Settings route cannot be saved from this session.');
- route.value='openai-compatible';modelInput.value=model;endpointInput.value=endpoint;
+ route.value=provider;modelInput.value=model;endpointInput.value=endpoint;
  const consent=form.elements.namedItem('consent');if(consent)consent.checked=false;
  form.requestSubmit();
  const state=globalThis.CivweaveSettingsV320?.readState?.();
- if(state?.model!==model||state?.endpoint!==endpoint||state.route!=='openai-compatible')
+ if(state?.model!==model||state?.endpoint!==endpoint||state.route!==provider)
    throw Error('The canonical AI route was not confirmed. Your installed models are unchanged.');
  return state;
 }
