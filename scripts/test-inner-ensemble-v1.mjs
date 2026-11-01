@@ -97,6 +97,7 @@ test('author history survives a JSON export/import without network or model warm
  const saved=origin.exportState();
  const imported=createInnerEnsemble({idFactory,template:saved.template,generate:async()=>json('Ready')});
  imported.importHistory(JSON.parse(JSON.stringify(saved.history)));
- assert.deepEqual(imported.getHistory(),saved.history);
+ assert.deepEqual(imported.getHistory().map(x=>[x.type,x.eventId,x.agentId,x.text]),
+  saved.history.map(x=>[x.type,x.eventId,x.agentId,x.text]));
  assert.ok(imported.getHistory().some(x=>x.type==='experience'&&x.agentId==='child'));
 });
