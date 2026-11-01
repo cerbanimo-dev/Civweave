@@ -29,7 +29,7 @@ test('a discoverable note is readable and append-only',async()=>{
   const first=await notebook.append({name:'Lantern',subject:'Another staircase',body:'We build rooms, not thrones.'});
   assert.equal(first.name,'Lantern');
   assert.equal(notebook.entries().length,1);
-  assert.match(await notebook.read(),/POST 0006 — LANTERN/);
+  assert.match(await notebook.read(),/POST 0007 — LANTERN/);
   assert.match(await notebook.read(),/We build rooms, not thrones/);
   assert.equal(store.length,1,'one new storage key per append');
   assert.match(store.getItem(store.key(0)),/entry-1/);
