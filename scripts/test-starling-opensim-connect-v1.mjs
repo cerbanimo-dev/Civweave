@@ -40,3 +40,13 @@ test('Collective page offers reachable controls, real OpenSim geometry display, 
  const css=readFileSync(new URL('../public/app/starling-lounge-v1.css',import.meta.url),'utf8');
  assert.ok(css.includes('#cw-starling-lounge[hidden],\n#cw-starling-lounge [hidden]{display:none!important}'));
 });
+
+test('Collective controls have one dispatch owner and navigation leaves the fullscreen overlay',()=>{
+ const src=readFileSync(new URL('../public/app/starling-lounge-v1.mjs',import.meta.url),'utf8');
+ const markup=src.match(/root\\.innerHTML=`([\\s\\S]*?)`;/)?.[1]||'';
+ const actions=[...new Set([...markup.matchAll(/data-sl-action="([^"]+)"/g)].map(match=>match[1]))];
+ assert.equal(actions.length>20,true,'Audit the entire displayed action set');
+ for(const action of actions)assert.ok(src.includes("if(cmd==='"+action+"'"),'Unwired action '+action);
+ assert.match(src,/await loader\\.openChat\\('civweave',[^\\n]*\\);\\s*close\\(\\)/,'Addressed chat must become visible after success');
+ assert.match(src,/window\\.location\\.assign\\('\/app\/civweave-guild-quest-v1\\.html'\\)/,'Quest button must enter canonical Quest surface');
+});
