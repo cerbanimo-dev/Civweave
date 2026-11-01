@@ -1090,3 +1090,14 @@
  #cw-starling-lounge .sl-opensim-link{padding:11px}
  #cw-starling-lounge .sl-opensim-link .sl-coordinate-fields{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
 }
+
+
+/* Convergence roster is a read-only projection of author-reviewed book roles,
+   never a second chat, vote, agent scheduler, or a claimed live character. */
+#cw-starling-lounge .sl-convergence{margin-top:12px;padding:11px;border:1px solid #8caeb452;border-radius:12px;background:#101f2b82;min-width:0}
+#cw-starling-lounge .sl-convergence h3{margin:0 0 8px;font-size:1rem}
+#cw-starling-lounge .sl-convergence .sl-sub{font-size:.84rem;line-height:1.45;margin:6px 0}
+#cw-starling-lounge .sl-book-cast{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,125px),1fr));gap:6px;margin:9px 0}
+#cw-starling-lounge .sl-book-cast p{margin:0;padding:8px;border:1px solid #819fac30;border-radius:9px;background:#1e3441}
+#cw-starling-lounge [data-sl-book-file]{width:100%;min-width:0;font-size:.82rem;margin:5px 0 8px}
+#cw-starling-lounge .sl-convergence a{display:inline-block;padding-top:8px;color:#c9ece6}
