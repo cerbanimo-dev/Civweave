@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Door &amp; Dawn · Worldweaver Seed Atlas</title>
+<style>
+:root{color-scheme:dark;font:15px/1.5 system-ui,sans-serif;background:#0b1424;color:#edf5f7}
+*{box-sizing:border-box}body{max-width:1280px;margin:auto;padding:18px}
+a{color:#b8e6e1}header{margin-bottom:24px}h1{font-size:clamp(1.65rem,4vw,2.65rem);margin:.3rem 0}
+h2{font-size:1.15rem;margin:.2rem 0}p{color:#c5d4d9}small{color:#aabcc7}
+nav{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+header small{text-transform:uppercase;letter-spacing:.14em;color:#9fcfc5}
+main{display:grid;grid-template-columns:minmax(260px,.92fr) minmax(310px,1.35fr);gap:16px;align-items:start}
+section{background:#142338;border:1px solid #456277;border-radius:16px;padding:16px;min-width:0}
+button,input,select{font:inherit}button{border:1px solid #8dbdb8;background:#224658;color:#edf5f7;min-height:43px;border-radius:9px;padding:8px 12px;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #fad7a7;outline-offset:2px}
+input,select{width:100%;background:#101d30;border:1px solid #7894a2;padding:9px;color:inherit;border-radius:9px;margin:5px 0 10px}
+.list{display:grid;gap:8px;margin-top:14px;max-height:67vh;overflow:auto}
+.world{display:block;text-align:left;width:100%;background:#1a3045}
+.world[aria-current=true]{border-color:#efc996;background:#284757}
+.world strong,.world small{display:block}.world small{font-size:.8rem;margin-top:3px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin:15px 0}.actions>a{display:inline-flex;align-items:center;border:1px solid #8dbdb8;border-radius:9px;padding:9px 12px;min-height:43px}
+figure{margin:12px 0}figure img{display:block;width:100%;max-height:290px;object-fit:cover;border-radius:11px;border:1px solid #7894a2}
+figcaption{font-size:.85rem;color:#b8c9d5;margin-top:6px}
+.dl{display:grid;grid-template-columns:minmax(115px,1fr) minmax(0,3fr);gap:8px 12px;margin:14px 0}
+dt{color:#9bd4cd;font-weight:650}dd{margin:0;overflow-wrap:anywhere}
+ol,ul{padding-left:23px}li{margin:6px 0}
+blockquote{margin:12px 0;padding:12px;border-left:3px solid #efc996;background:#1b3547}
+.status{min-height:1.5em;color:#b6dfc7}
+@media(max-width:760px){main{grid-template-columns:1fr}.list{max-height:320px}.dl{grid-template-columns:1fr}dt{margin-top:5px}}
+</style>
+</head>
+<body>
+<header>
+<small>Worldweaver · Part III · Door &amp; Dawn · author-development atlas</small>
+<h1>Sixteen doors, sixteen living histories</h1>
+<p>Nine persistent In-Between story universes and seven parallel physical realities. The original nine story worlds are preserved; seven additional proposals explore inner autonomy, distinct clocks, cognitive boundaries and self-governing commons.</p>
+<nav><a href="./worldweaver-performance-lab.html">Performance Studio</a><a href="./worldweaver-geometry-lab.html">3D/2D Geometry Lab</a></nav>
+</header>
+<main>
+<section aria-label="World seed selection">
+<h2>Explore the seeds</h2>
+<label for="layer">World category</label><select id="layer"><option value="all">All sixteen</option><option value="in-between">Nine In-Between universes</option><option value="physical">Seven physical realities</option></select>
+<label for="search">Search setting, choice or theme</label><input id="search" type="search" placeholder="Search worlds">
+<p id="count" aria-live="polite"></p>
+<div id="worlds" class="list" role="group" aria-label="Choose a world seed"></div>
+</section>
+<section aria-label="Selected world seed" id="detail">
+<h2 id="title">Choose a world</h2><p id="summary"></p>
+<figure><img id="reference" loading="lazy" alt="Existing Civweave illustration used as a visual moodboard, not custom art for this story"><figcaption>Existing Civweave drawing — illustrative moodboard only; world-specific artwork and OpenSimulator regions are not yet built.</figcaption></figure>
+<dl class="dl" id="facts"></dl>
+<h2>Opening scene</h2><blockquote id="opening"></blockquote>
+<h2>Four movement story spine</h2><ol id="arc"></ol>
+<h2>World continuity and guardrails</h2><ul id="rules"></ul>
+<div class="actions"><a id="studio" href="./worldweaver-performance-lab.html">Prepare in Performance Studio</a><button id="export-seed" type="button">Export world seed</button><button id="export-start" type="button">Export unactivated story state</button></div>
+<p class="status" id="status" role="status">Seeds do not automatically create a world, execute AI, contact a simulator, or commit story events.</p>
+</section>
+</main>
+<script type="module">
+import {WORLD_SEEDS,WORLD_LAYERS,getWorldSeed,buildStoryWorldStart} from '../shared/worldweaver-story-seeds-v1.mjs';
+const $=id=>document.getElementById(id),url=new URL(location.href);
+let selected=WORLD_SEEDS.some(s=>s.id===url.searchParams.get('seed'))?url.searchParams.get('seed'):WORLD_SEEDS[0].id;
+const addText=(parent,tag,value)=>{const e=document.createElement(tag);e.textContent=value;parent.append(e);return e};
+const dl=(filename,contents)=>{
+ const objectUrl=URL.createObjectURL(new Blob([JSON.stringify(contents,null,2)],{type:'application/json'}));
+ const a=document.createElement('a');a.href=objectUrl;a.download=filename;document.body.append(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(objectUrl),1500);
+};
+function show(seed){
+ selected=seed.id;
+ const address=new URL(location.href);address.searchParams.set('seed',seed.id);history.replaceState(null,'',address);
+ $('title').textContent=seed.title;
+ $('summary').textContent=seed.premise;
+ $('reference').src=seed.visual.reference;
+ $('reference').alt='Existing Civweave moodboard illustration for '+seed.title+'; not bespoke world art';
+ $('facts').replaceChildren();
+ for(const [name,value] of [
+  ['Layer',WORLD_LAYERS[seed.layer].title],['Provenance',seed.provenance==='recovered'?'Previously named world':'New proposal'],
+  ['Setting law',seed.settingLaw],['Inciting incident',seed.incitingIncident],
+  ['Central choice',seed.centralChoice],['Narrative voices',seed.viewpoints.map(x=>x.replace('-',' / ')).join(' and ')],
+  ['Supporting agents',seed.cast.join(' · ')],['Visual direction',seed.visual.direction],
+  ['World state','Single persistent history; no auto-reset or auto-merge']
+ ]){addText($('facts'),'dt',name);addText($('facts'),'dd',value);}
+ $('opening').textContent=seed.firstScene;
+ $('arc').replaceChildren();for(const line of seed.storyArc)addText($('arc'),'li',line);
+ $('rules').replaceChildren();for(const line of [...seed.continuity,...seed.guardrails])addText($('rules'),'li',line);
+ $('studio').href='./worldweaver-performance-lab.html?seed='+encodeURIComponent(seed.id);
+ for(const node of $('worlds').children)node.setAttribute('aria-current',String(node.dataset.seed===seed.id));
+ $('status').textContent='Not activated — seed data and world starter can be exported for review.';
+}
+function list(){
+ const filter=$('layer').value,q=$('search').value.trim().toLowerCase();
+ const items=WORLD_SEEDS.filter(s=>(filter==='all'||s.layer===filter)&&
+ [s.title,s.premise,s.centralChoice,...s.conflicts].join(' ').toLowerCase().includes(q));
+ $('count').textContent=items.length+' of 16 worlds';
+ $('worlds').replaceChildren();
+ for(const seed of items){
+  const b=document.createElement('button');b.type='button';b.className='world';b.dataset.seed=seed.id;
+  addText(b,'strong',seed.title);addText(b,'small',(seed.layer==='in-between'?'In-Between':'Physical reality')+' · '+(seed.provenance==='recovered'?'existing':'new'));
+  b.addEventListener('click',()=>show(seed));$('worlds').append(b);
+ }
+ if(items.length){show(items.some(s=>s.id===selected)?getWorldSeed(selected):items[0]);}
+ else $('count').textContent='No worlds match this search.';
+}
+$('layer').addEventListener('change',list);$('search').addEventListener('input',list);
+$('export-seed').addEventListener('click',()=>{dl(selected+'-seed.json',getWorldSeed(selected));$('status').textContent='Exported the selected development seed; no activation occurred.'});
+$('export-start').addEventListener('click',()=>{dl(selected+'-unactivated-world.json',buildStoryWorldStart(selected));$('status').textContent='Exported a proposed unactivated world start; canonical history stays empty.'});
+list();
+</script>
+</body>
+</html>
