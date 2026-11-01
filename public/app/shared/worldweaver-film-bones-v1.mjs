@@ -182,8 +182,9 @@ const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h
  * Training examples are fully observed approved work. No private chain of
  * thought, invented model results, raw manuscripts or non-consenting audiences.
  */
-export function exportCivweaveFilmTraining(records,{ownerTrainingAuthorization=false}={}){
+export function exportCivweaveFilmTraining(records,{ownerTrainingAuthorization=false,verifyReceipt}={}){
  if(ownerTrainingAuthorization!==true)throw new Error('Source-owner training opt-in required');
+ if(typeof verifyReceipt!=='function')throw new Error('Trusted receipt verification is required before producing trainable data');
  const examples=arr(records,'reviewed records',10000).map(r=>{
   object(r,'training record',['projectId','sceneId','sourceDigest','rights','trainingConsent',
    'model','modelReceipt','operatorPatch','humanReview','input','approvedOutput']);
@@ -196,6 +197,7 @@ export function exportCivweaveFilmTraining(records,{ownerTrainingAuthorization=f
    throw new Error('Applied Codex patch receipt required');
   if(r.humanReview?.decision!=='approved'||!r.humanReview?.reviewerRef)
    throw new Error('Human producer approval required');
+  if(verifyReceipt(r)!==true)throw new Error('Trusted source, consent, model, patch and producer receipts did not verify');
   return {projectId:ref(r.projectId,'project'),sceneId:ref(r.sceneId,'scene'),
    sourceDigest:r.sourceDigest,task:'film-shot-direction',
    messages:[{role:'system',content:'Plan an original cinematic shot with explicit timing, camera and actor blocking. Preserve approved source and raise ambiguity.'},
