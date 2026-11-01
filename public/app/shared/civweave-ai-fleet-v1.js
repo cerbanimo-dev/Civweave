@@ -248,9 +248,13 @@ function desktopEndpoint(value){
  if(!['http:','https:'].includes(url.protocol)||url.username||url.password||url.search||url.hash)
   throw Error('Ollama endpoints must use HTTP(S), without credentials, query strings or fragments.');
  const host=url.hostname.toLowerCase().replace(/^\[|\]$/g,'');
+ const octets=host.split('.');
+ const ipv4=octets.length===4&&octets.every(part=>/^\d{1,3}$/.test(part)&&Number(part)<=255);
+ const privateIPv4=ipv4&&(Number(octets[0])===127||Number(octets[0])===10||
+   (Number(octets[0])===192&&Number(octets[1])===168)||
+   (Number(octets[0])===172&&Number(octets[1])>=16&&Number(octets[1])<=31));
  const privateHost=host==='localhost'||host==='::1'||host.endsWith('.local')||
-   /^127\./.test(host)||/^10\./.test(host)||/^192\.168\./.test(host)||
-   /^172\.(1[6-9]|2[0-9]|3[01])\./.test(host)||/^f[cd][0-9a-f]*:/.test(host);
+   privateIPv4||/^f[cd][0-9a-f]*:/.test(host);
  if(!privateHost)throw Error('Desktop Fleet only connects to loopback or private LAN hosts. Configure public endpoints separately with explicit consent under AI & safety.');
  const path=url.pathname.replace(/\/+$/,'');
  if(path&&!['/api/chat','/api/generate'].includes(path))
