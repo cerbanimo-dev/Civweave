@@ -241,6 +241,7 @@
  #cw-starling-lounge[data-sl-view=world] [data-sl-panel=world],
  #cw-starling-lounge[data-sl-view=agents] [data-sl-panel=agents],
  #cw-starling-lounge[data-sl-view=conversation] [data-sl-panel=conversation],
+ #cw-starling-lounge[data-sl-view=harmless] [data-sl-panel=harmless],
  #cw-starling-lounge[data-sl-view=work] [data-sl-panel=work],
  #cw-starling-lounge[data-sl-view=operations] [data-sl-panel=operations]{display:block}
  #cw-starling-lounge .sl-card,#cw-starling-lounge .sl-scene-panel{padding:10px;border-radius:14px}
@@ -848,6 +849,7 @@
  #cw-starling-lounge[data-sl-view=world] [data-sl-panel=world],
  #cw-starling-lounge[data-sl-view=agents] [data-sl-panel=agents],
  #cw-starling-lounge[data-sl-view=conversation] [data-sl-panel=conversation],
+ #cw-starling-lounge[data-sl-view=harmless] [data-sl-panel=harmless],
  #cw-starling-lounge[data-sl-view=work] [data-sl-panel=work],
  #cw-starling-lounge[data-sl-view=operations] [data-sl-panel=operations]{
   display:block!important
@@ -1101,3 +1103,19 @@
 #cw-starling-lounge .sl-book-cast p{margin:0;padding:8px;border:1px solid #819fac30;border-radius:9px;background:#1e3441}
 #cw-starling-lounge [data-sl-book-file]{width:100%;min-width:0;font-size:.82rem;margin:5px 0 8px}
 #cw-starling-lounge .sl-convergence a{display:inline-block;padding-top:8px;color:#c9ece6}
+
+/* HARMLESS: readable in-universe text and an append-only creation surface. */
+#cw-starling-lounge .sl-harmless{min-width:0}
+#cw-starling-lounge .sl-harmless [data-sl-harmless-document]{
+  white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;
+  max-height:min(55dvh,650px);padding:14px;border-radius:12px;
+  background:#111b28;border:1px solid #adcfcd35;
+  color:#e4efeb;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace
+}
+#cw-starling-lounge .sl-harmless input,#cw-starling-lounge .sl-harmless textarea{
+  display:block;width:100%;min-width:0;margin-top:6px;padding:10px;
+  border-radius:9px;border:1px solid #accfc47a;background:#111d28;
+  color:var(--sl-fg);font:inherit
+}
+#cw-starling-lounge .sl-harmless form label{display:block;min-width:0;font-size:12px}
+#cw-starling-lounge .sl-harmless [data-sl-action=harmless-agent]{max-width:100%}
