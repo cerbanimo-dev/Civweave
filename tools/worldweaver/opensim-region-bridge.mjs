@@ -127,10 +127,16 @@ export function createOpenSimRegionBridge({file,port=8769,regionId=null,browserT
     }
     if(packet.outcome==='completed'&&cmd.tool==='move'){
      const pos=packet.position;
-     if(!pos||![pos.x,pos.y,pos.z].every(Number.isFinite)){
-      send(res,400,{error:'Reported movement requires measured NPC coordinates'});return;
+     const measured=pos&&{x:Number(pos.x),y:Number(pos.y),z:Number(pos.z)};
+     if(!measured||![measured.x,measured.y,measured.z].every(Number.isFinite)||
+       measured.x<0||measured.x>256||measured.y<0||measured.y>256||measured.z<0||measured.z>4096){
+      send(res,400,{error:'Reported movement requires measured in-region NPC coordinates'});return;
      }
-     cmd.position={x:pos.x,y:pos.y,z:pos.z};
+     const target=cmd.args;
+     if(Math.hypot(measured.x-target.x,measured.y-target.y,measured.z-target.z)>1.75){
+      send(res,400,{error:'Reported NPC coordinates do not match the move destination'});return;
+     }
+     cmd.position=measured;
     }
     cmd.state=packet.outcome;cmd.summary=bounded(packet.summary,300);cmd.resolvedAt=now();
     send(res,200,{schema:'civweave.opensim-action-receipt.v1',requestId:cmd.requestId,state:cmd.state});
