@@ -7,6 +7,7 @@ on:
       - public/app/settings-local-models-direct-v325.js
       - public/app/shared/civweave-ai-fleet-v1.js
       - public/app/settings-local-route-v325.js
+      - public/app/settings-local-route-v323.js
       - public/app/settings-local-route-v327.js
       - public/service-worker-settings-v325-override.js
       - public/service-worker-v203.js
@@ -22,6 +23,7 @@ on:
       - public/app/settings-local-models-direct-v325.js
       - public/app/shared/civweave-ai-fleet-v1.js
       - public/app/settings-local-route-v325.js
+      - public/app/settings-local-route-v323.js
       - public/app/settings-local-route-v327.js
       - public/service-worker-settings-v325-override.js
       - public/service-worker-v203.js
