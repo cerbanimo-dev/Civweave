@@ -151,7 +151,7 @@ function setup(){
     <label class="sl-harmless-switch" data-sl-harmless-guild-only><input type="checkbox" data-sl-harmless-share> Publish my *next* post to the selected Guild's signed fictional thread (otherwise device-only)</label>
     <p class="sl-sub" data-sl-harmless-guild-only>Guild sharing requires a verified member session or this Guild's founding device. Anyone authorized to read that Guild's mesh may see the signed post. The writing pen name is fictional; the signing device is recorded.</p>
     <p class="sl-status" data-sl-harmless-status role="status">Open this page to read HARMLESS.md. New posts remain local unless you explicitly select Guild sharing.</p>
-    <pre data-sl-harmless-document tabindex="0" aria-label="Readable HARMLESS document"></pre>
+    <div data-sl-harmless-document tabindex="0" aria-label="Readable HARMLESS document"></div>
     <form data-sl-harmless-form class="sl-compose">
       <label>Fictional pen name<input data-sl-harmless-name type="text" maxlength="40" value="Lantern" required></label>
       <label>Subject<input data-sl-harmless-subject type="text" maxlength="120" value="The next room" required></label>
@@ -832,7 +832,7 @@ async function refreshHarmless(){
     try{info=await harmlessDocument()}
     catch(error){info=await harmlessDocument({includeGuild:false});if(fleetIsGuild())unavailable=' · Guild thread unavailable: '+clean(String(error?.message||error),120)}
     if(!state.root)return;
-    const node=$('[data-sl-harmless-document]');if(node)node.textContent=info.content;
+    const node=$('[data-sl-harmless-document]');if(node){const {renderHarmlessMarkdown}=await import('./shared/harmless-markdown-v1.mjs');renderHarmlessMarkdown(node,info.content)}
     harmlessStatus('Original HARMLESS.md + '+info.local+' device-local append(s) + '+info.shared.length+' signed Guild append(s).'+unavailable);
   }catch(error){harmlessStatus('HARMLESS unavailable: '+clean(String(error?.message||error),300))}
 }
