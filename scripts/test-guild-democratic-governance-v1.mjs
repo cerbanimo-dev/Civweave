@@ -5,7 +5,7 @@ import {webcrypto} from 'node:crypto';
 import {majority,ballotSpec,ballotOutcome,qualifiedContributors,activeGuildVoters,GUILD_CONTRIBUTION_WINDOW_MS} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-v1.mjs';
 import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,
   delegatedRole,isBanned,governanceStatus,reportQueue,reportReceipt,markReportDelivery,
-  openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,ensureGovernanceTables,
+  openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,ensureGovernanceTables,electorate,fileRemovalAppeal,sponsorRemovalAppeal,
   acknowledgeGuildNotice,fileBanAppeal,sponsorBanAppeal} from '../cloudflare/mobile-guild-edge/src/guild-democratic-governance-state-v1.mjs';
 import {distanceKm,deliverVerifiedGuildReport,handleGuildPeerDirectoryRoute} from '../cloudflare/core/src/guild-peer-reports-v1.mjs';
 
@@ -370,4 +370,53 @@ test('a different Guild member cannot impersonate a banned appellant, and expire
   f.sql.exec('UPDATE guild_governance_bans SET expires_at=? WHERE user_id=?',new Date(Date.now()-1000).toISOString(),C);
   assert.throws(()=>fileBanAppeal(f.sql,{actorId:C,credentialHash:'e'.repeat(64),ballotId:ban.id,
     statement:'This ban has expired and is no longer appealable.'}),/active|expired/i);
+});
+
+test('a shared device credential cannot multiply Guild governance electorate seats in a legacy roster',()=>{
+  const f=fixture();f.member(A,'a'.repeat(64));f.member(B,'a'.repeat(64));f.member(C,'c'.repeat(64));
+  f.contributor(A);f.contributor(B);f.contributor(C);
+  const voters=electorate(f.sql);
+  assert.equal(voters.length,2);
+  assert.equal(voters.includes(A)&&voters.includes(B),false);
+  assert.equal(voters.includes(C),true);
+  const status=governanceStatus(f.sql,{actorId:C});
+  assert.equal(status.activeCount,2);
+  assert.equal(status.majority,2);
+});
+test('removal without ban records a credential-bound appeal and a majority restores membership',()=>{
+  const f=fixture();f.member(A,'a'.repeat(64));f.member(B,'b'.repeat(64));f.member(C,'c'.repeat(64));
+  f.contributor(A);
+  const original=proposeWithNoticedCase(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C,
+    statement:'Membership removal should provide a democratic path to reconsideration.'});
+  castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:original.id,choice:'yes'});
+  assert.equal(f.memberCount(),2);
+  assert.throws(()=>fileRemovalAppeal(f.sql,{actorId:C,credentialHash:'b'.repeat(64),ballotId:original.id,
+    statement:'I want an independent review of the original membership decision.'}),/credential/i);
+  const appeal=fileRemovalAppeal(f.sql,{actorId:C,credentialHash:'c'.repeat(64),ballotId:original.id,
+    statement:'I want an independent review of the original membership decision.'});
+  assert.equal(appeal.status,'pending');
+  assert.throws(()=>fileRemovalAppeal(f.sql,{actorId:C,credentialHash:'c'.repeat(64),ballotId:original.id,
+    statement:'Duplicate claims should not inflate the number of appeals.'}),/already/i);
+  assert.throws(()=>sponsorRemovalAppeal(f.sql,{...f.context,actorId:B,appealId:appeal.id,seatLimit:6}),/verified contribution/i);
+  const ballot=sponsorRemovalAppeal(f.sql,{...f.context,actorId:A,appealId:appeal.id,seatLimit:6});
+  assert.equal(ballot.status,'open');assert.equal(f.memberCount(),2);
+  const outcome=castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes',seatLimit:6});
+  assert.equal(outcome.status,'approved');assert.equal(f.memberCount(),3);
+  assert.equal(f.db.prepare('SELECT credential_hash FROM resident_members WHERE user_id=?').get(C).credential_hash,'c'.repeat(64));
+  assert.equal(f.db.prepare('SELECT COUNT(*) AS n FROM resident_sessions WHERE user_id=?').get(C).n,0);
+  const seen=governanceStatus(f.sql,{actorId:A}).removalAppeals.find(a=>a.id===appeal.id);
+  assert.equal(seen.status,'approved');
+});
+test('approved restoration holds a reserved entitlement when the Guild lacks an open seat',()=>{
+  const f=fixture();f.member(A,'a'.repeat(64));f.member(B,'b'.repeat(64));f.member(C,'c'.repeat(64));f.contributor(A);
+  const original=proposeWithNoticedCase(f.sql,{...f.context,actorId:A,action:'remove',targetUserId:C,
+    statement:'Restoration must respect the number of currently available Guild seats.'});
+  castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:original.id,choice:'yes'});
+  const appeal=fileRemovalAppeal(f.sql,{actorId:C,credentialHash:'c'.repeat(64),ballotId:original.id,
+    statement:'I ask to be readmitted once a community seat becomes available.'});
+  const ballot=sponsorRemovalAppeal(f.sql,{...f.context,actorId:A,appealId:appeal.id,seatLimit:2});
+  castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ballot.id,choice:'yes',seatLimit:2});
+  assert.equal(f.memberCount(),2);
+  const state=governanceStatus(f.sql,{actorId:A}).removalAppeals.find(a=>a.id===appeal.id);
+  assert.equal(state.status,'approved-waiting-seat');
 });

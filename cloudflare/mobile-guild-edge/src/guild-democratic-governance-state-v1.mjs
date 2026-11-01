@@ -23,6 +23,8 @@ export function ensureGovernanceTables(sql){
   sql.exec("CREATE TABLE IF NOT EXISTS guild_work_reviews(proof_id TEXT NOT NULL,reviewer_id TEXT NOT NULL,decision TEXT NOT NULL,at TEXT NOT NULL,PRIMARY KEY(proof_id,reviewer_id))");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_notice_reads(user_id TEXT NOT NULL,kind TEXT NOT NULL,ref_id TEXT NOT NULL,read_at TEXT NOT NULL,PRIMARY KEY(user_id,kind,ref_id))");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_appeals(id TEXT PRIMARY KEY,ban_ballot_id TEXT NOT NULL UNIQUE,target_user_id TEXT NOT NULL,statement TEXT NOT NULL,created_at TEXT NOT NULL,ballot_id TEXT)");
+  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_removals(ballot_id TEXT PRIMARY KEY,user_id TEXT NOT NULL,credential_hash TEXT NOT NULL,node_id TEXT NOT NULL,removed_at TEXT NOT NULL,restoration_approved_at TEXT,restored_at TEXT)");
+  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_removal_appeals(id TEXT PRIMARY KEY,removal_ballot_id TEXT NOT NULL UNIQUE,target_user_id TEXT NOT NULL,statement TEXT NOT NULL,created_at TEXT NOT NULL,ballot_id TEXT)");
 }
 export function creditVerifiedContribution(sql,{id,userId,kind,at=nowIso()}){
   if(!validGuildUser(userId)||!['physical-check-in','accepted-work-proof'].includes(kind)||!id)
@@ -119,7 +121,12 @@ export function reviewWorkProof(sql,{actorId,proofId,decision,now=Date.now()}){
 
 function electorateSnapshot(sql,{now=Date.now()}={}){
   ensureGovernanceTables(sql);
-  const members=rows(sql,'SELECT user_id,last_seen_at FROM resident_members');
+  // Legacy accounts may share a physical device login credential. Count such
+  // credential aliases once, deterministically by their original enrollment.
+  const seenCredentials=new Set();
+  const members=rows(sql,'SELECT user_id,last_seen_at,credential_hash,created_at FROM resident_members ORDER BY created_at,user_id')
+    .filter(row=>{const hash=String(row.credential_hash||'');if(hash&&seenCredentials.has(hash))return false;
+      if(hash)seenCredentials.add(hash);return true});
   const receipts=rows(sql,'SELECT user_id,kind,at FROM guild_governance_contributions WHERE at>=?',
     new Date(now-GUILD_CONTRIBUTION_WINDOW_MS).toISOString()).map(row=>({userId:row.user_id,kind:row.kind,at:row.at}));
   return {voters:activeGuildVoters(members,receipts,{now}),
@@ -150,10 +157,14 @@ function recordAudit(sql,ballotId,event,userId){
   sql.exec('INSERT INTO guild_governance_audit(id,ballot_id,event,user_id,at) VALUES(?,?,?,?,?)',
     crypto.randomUUID(),ballotId,event,userId,nowIso());
 }
-function applyApproved(sql,row,{guildId,origin}){
+function applyApproved(sql,row,{guildId,origin,seatLimit=Number.MAX_SAFE_INTEGER}){
   const ballot=viewBallot(row),now=nowIso(),target=row.target_user_id;
   if(row.action==='remove'||row.action==='ban'){
-    const member=rows(sql,'SELECT user_id FROM resident_members WHERE user_id=? LIMIT 1',target)[0];
+    const member=rows(sql,'SELECT user_id,node_id,credential_hash FROM resident_members WHERE user_id=? LIMIT 1',target)[0];
+    if(row.action==='remove'&&member){
+      sql.exec('INSERT OR IGNORE INTO guild_governance_removals(ballot_id,user_id,credential_hash,node_id,removed_at) VALUES(?,?,?,?,?)',
+        row.id,target,member.credential_hash,member.node_id,now);
+    }
     if(row.action==='ban'){
       const credential=rows(sql,'SELECT credential_hash FROM resident_members WHERE user_id=? LIMIT 1',target)[0]?.credential_hash||null;
       sql.exec('INSERT OR REPLACE INTO guild_governance_bans(user_id,credential_hash,ballot_id,imposed_at,expires_at) VALUES(?,?,?,?,?)',
@@ -166,6 +177,19 @@ function applyApproved(sql,row,{guildId,origin}){
   }else if(row.action==='lift-ban'){
     sql.exec('DELETE FROM guild_governance_bans WHERE user_id=?',target);
     recordAudit(sql,row.id,'ban-lifted-by-majority',target);
+  }else if(row.action==='restore-member'){
+    const prior=rows(sql,"SELECT r.* FROM guild_governance_removals r JOIN guild_governance_removal_appeals a ON a.removal_ballot_id=r.ballot_id WHERE a.ballot_id=? AND r.user_id=? LIMIT 1",row.id,target)[0];
+    if(!prior)throw fail('Restore membership requires a verified removal appeal.',409);
+    if(rows(sql,'SELECT user_id FROM resident_members WHERE user_id=?',target)[0])
+      throw fail('Target already has a Guild membership.',409);
+    const count=Number(rows(sql,'SELECT COUNT(DISTINCT user_id) AS n FROM resident_members')[0]?.n||0);
+    sql.exec('UPDATE guild_governance_removals SET restoration_approved_at=? WHERE ballot_id=?',now,prior.ballot_id);
+    if(count<seatLimit){
+      sql.exec("INSERT INTO resident_members(node_id,user_id,credential_hash,seat_class,created_at,last_seen_at) VALUES(?,?,?,'community',?,?)",
+        prior.node_id,target,prior.credential_hash,now,now);
+      sql.exec('UPDATE guild_governance_removals SET restored_at=? WHERE ballot_id=?',now,prior.ballot_id);
+      recordAudit(sql,row.id,'membership-restored-awaiting-device-login',target);
+    }else recordAudit(sql,row.id,'restoration-approved-waiting-for-seat',target);
   }else if(row.action==='transfer-role'){
     if(!rows(sql,'SELECT user_id FROM resident_members WHERE user_id=? LIMIT 1',target)[0])
       throw fail('Cannot grant a Guildkeeper role to a nonresident.');
@@ -186,7 +210,7 @@ function applyApproved(sql,row,{guildId,origin}){
     recordAudit(sql,row.id,'report-queued-for-nearby-guilds',target);
   }
 }
-function settle(sql,id,{guildId,origin,now=Date.now()}){
+function settle(sql,id,{guildId,origin,now=Date.now(),seatLimit=Number.MAX_SAFE_INTEGER}){
   const row=ballotRow(sql,id);
   if(row.status!=='open')return viewBallot(row);
   const votes=rows(sql,'SELECT user_id,choice FROM guild_governance_votes WHERE ballot_id=?',id)
@@ -196,17 +220,23 @@ function settle(sql,id,{guildId,origin,now=Date.now()}){
   // The Durable Object executes these statements synchronously in one
   // single-threaded turn. An exception prevents an approved status being
   // returned; no caller can mark a vote approved without applying effects.
-  if(outcome.execute)applyApproved(sql,row,{guildId,origin});
+  if(outcome.execute)applyApproved(sql,row,{guildId,origin,seatLimit});
   sql.exec('UPDATE guild_governance_ballots SET status=?,resolved_at=? WHERE id=? AND status=?',
     outcome.status,new Date(now).toISOString(),id,'open');
   recordAudit(sql,id,outcome.status,row.proposer_id);
   return {...viewBallot(ballotRow(sql,id)),yes:outcome.yes,no:outcome.no,executed:outcome.execute};
 }
-export function proposeGovernance(sql,{guildId,origin,actorId,action,targetUserId,reasonCode='',role='',statement='',caseId='',now=Date.now()}){
+export function proposeGovernance(sql,{guildId,origin,actorId,action,targetUserId,reasonCode='',role='',statement='',caseId='',appealId='',now=Date.now(),seatLimit=Number.MAX_SAFE_INTEGER}){
   ensureGovernanceTables(sql);
   const members=rows(sql,'SELECT user_id FROM resident_members');
   if(action==='lift-ban'){
     if(!isBanned(sql,targetUserId,{now}))throw fail('A lift-ban vote needs an existing active Guild ban.',409);
+  }else if(action==='restore-member'){
+    const appeal=rows(sql,'SELECT * FROM guild_governance_removal_appeals WHERE id=? AND target_user_id=? LIMIT 1',appealId,targetUserId)[0];
+    if(!appeal||appeal.ballot_id)throw fail('Restore membership requires a pending verified appeal.',403);
+    if(members.some(row=>row.user_id===targetUserId))throw fail('Appealed member is already enrolled.',409);
+    const removal=rows(sql,'SELECT * FROM guild_governance_removals WHERE ballot_id=? AND user_id=? LIMIT 1',appeal.removal_ballot_id,targetUserId)[0];
+    if(!removal||removal.restoration_approved_at)throw fail('The original removal is no longer eligible for restoration.',409);
   }else if(!members.some(row=>row.user_id===targetUserId))throw fail('Target member must be currently enrolled.',404);
   const {voters:eligible,contributors}=electorateSnapshot(sql,{now});
   if(CASE_ACTIONS.includes(action)){
@@ -231,24 +261,26 @@ export function proposeGovernance(sql,{guildId,origin,actorId,action,targetUserI
     id,action,targetUserId,actorId,role,reasonCode,spec.statement,caseId||null,JSON.stringify(spec.eligible),spec.requiredYes,'open',
     spec.createdAt,spec.expiresAt);
   if(caseId)sql.exec('UPDATE guild_governance_cases SET ballot_id=? WHERE id=?',id,caseId);
+  if(action==='restore-member')
+    sql.exec('UPDATE guild_governance_removal_appeals SET ballot_id=? WHERE id=?',id,appealId);
   recordAudit(sql,id,'proposed',actorId);
   // Sponsoring the proposal is an explicit yes. With a single eligible voter
   // this resolves immediately, unless the sole productive member is targeted.
   sql.exec("INSERT INTO guild_governance_votes(ballot_id,user_id,choice,voted_at) VALUES(?,?,'yes',?)",
     id,actorId,new Date(now).toISOString());
-  return settle(sql,id,{guildId,origin,now});
+  return settle(sql,id,{guildId,origin,now,seatLimit});
 }
-export function castGovernanceVote(sql,{guildId,origin,actorId,ballotId,choice,now=Date.now()}){
+export function castGovernanceVote(sql,{guildId,origin,actorId,ballotId,choice,now=Date.now(),seatLimit=Number.MAX_SAFE_INTEGER}){
   ensureGovernanceTables(sql);
   const row=ballotRow(sql,ballotId),spec=viewBallot(row);
   if(spec.status!=='open')throw fail('Vote has already closed.');
   if(!spec.eligible.includes(actorId))throw fail('Only members in the active Guild electorate at proposal time may vote.',403);
   if(!['yes','no'].includes(choice))throw fail('Vote choice must be yes or no.',400);
-  if(Date.parse(spec.expiresAt)<=now)return settle(sql,ballotId,{guildId,origin,now});
+  if(Date.parse(spec.expiresAt)<=now)return settle(sql,ballotId,{guildId,origin,now,seatLimit});
   sql.exec("INSERT INTO guild_governance_votes(ballot_id,user_id,choice,voted_at) VALUES(?,?,?,?) ON CONFLICT(ballot_id,user_id) DO UPDATE SET choice=excluded.choice,voted_at=excluded.voted_at",
     ballotId,actorId,choice,new Date(now).toISOString());
   recordAudit(sql,ballotId,'voted',actorId);
-  return settle(sql,ballotId,{guildId,origin,now});
+  return settle(sql,ballotId,{guildId,origin,now,seatLimit});
 }
 export function governanceStatus(sql,{actorId='',now=Date.now()}={}){
   ensureGovernanceTables(sql);
@@ -266,11 +298,13 @@ export function governanceStatus(sql,{actorId='',now=Date.now()}={}){
   const workProofs=rows(sql,'SELECT * FROM guild_work_proofs ORDER BY created_at DESC LIMIT 40').map(viewWork);
   const notices=noticeItems(sql,actorId);
   const appeals=rows(sql,'SELECT * FROM guild_governance_appeals ORDER BY created_at DESC LIMIT 40').map(row=>viewAppeal(sql,row));
+  const removalAppeals=rows(sql,'SELECT * FROM guild_governance_removal_appeals ORDER BY created_at DESC LIMIT 40')
+    .map(row=>viewRemovalAppeal(sql,row));
   const outboundReports=rows(sql,'SELECT ballot_id,delivery_state,recipient_count,attempts,delivered_at FROM guild_governance_reports ORDER BY rowid DESC LIMIT 20')
     .map(row=>({ballotId:row.ballot_id,state:row.delivery_state,recipients:Number(row.recipient_count),attempts:Number(row.attempts),deliveredAt:row.delivered_at}));
   return {schema:GUILD_GOVERNANCE_SCHEMA,eligible,activeCount:eligible.length,majority:Math.floor(eligible.length/2)+1,
     actorEligible:contributors.includes(actorId)&&eligible.includes(actorId),actorCanVote:eligible.includes(actorId),actorRole:actorId?delegatedRole(sql,actorId):'member',ballots,
-    bans,cases,workProofs,notices,unreadNoticeCount:notices.filter(n=>!n.readAt).length,appeals,outboundReports,reportQueuedCount:outboundReports.filter(row=>row.state!=='delivered').length};
+    bans,cases,workProofs,notices,unreadNoticeCount:notices.filter(n=>!n.readAt).length,appeals,removalAppeals,outboundReports,reportQueuedCount:outboundReports.filter(row=>row.state!=='delivered').length};
 }
 
 function noticeItems(sql,actorId){
@@ -338,6 +372,46 @@ export function sponsorBanAppeal(sql,{guildId,origin,actorId,appealId,now=Date.n
   const ballot=proposeGovernance(sql,{guildId,origin,actorId,action:'lift-ban',targetUserId:appeal.target_user_id,statement,now});
   sql.exec('UPDATE guild_governance_appeals SET ballot_id=? WHERE id=?',ballot.id,appeal.id);
   return ballot;
+}
+
+
+function viewRemovalAppeal(sql,row){
+  const original=rows(sql,'SELECT restoration_approved_at,restored_at FROM guild_governance_removals WHERE ballot_id=?',row.removal_ballot_id)[0];
+  const ballot=row.ballot_id?rows(sql,'SELECT status FROM guild_governance_ballots WHERE id=?',row.ballot_id)[0]:null;
+  const status=ballot?.status==='approved'?(original?.restored_at?'approved':'approved-waiting-seat'):
+    ballot?.status==='rejected'?'rejected':row.ballot_id?'voting':'pending';
+  return {id:row.id,removalBallotId:row.removal_ballot_id,targetUserId:row.target_user_id,statement:row.statement,
+    createdAt:row.created_at,ballotId:row.ballot_id||null,status};
+}
+export function fileRemovalAppeal(sql,{actorId,credentialHash,ballotId='',statement,now=Date.now()}){
+  ensureGovernanceTables(sql);
+  if(!validGuildUser(actorId)||!/^[a-f0-9]{64}$/.test(String(credentialHash||'')))
+    throw fail('Removal appeal requires original device credential.',403);
+  const removal=ballotId?
+    rows(sql,'SELECT * FROM guild_governance_removals WHERE user_id=? AND ballot_id=? AND credential_hash=? LIMIT 1',
+      actorId,ballotId,credentialHash)[0]:
+    rows(sql,'SELECT * FROM guild_governance_removals WHERE user_id=? AND credential_hash=? ORDER BY removed_at DESC LIMIT 1',
+      actorId,credentialHash)[0];
+  if(!removal||removal.restoration_approved_at)throw fail('No matching eligible removal for this original device credential.',403);
+  if(Date.parse(removal.removed_at)+90*86400000<now)throw fail('Removal appeal window has expired.',410);
+  if(rows(sql,'SELECT user_id FROM resident_members WHERE user_id=?',actorId)[0])
+    throw fail('This member is already enrolled.',409);
+  if(typeof statement!=='string'||statement.trim().length<20||statement.trim().length>2000)
+    throw fail('Explain your appeal in 20–2,000 characters.',400);
+  if(rows(sql,'SELECT id FROM guild_governance_removal_appeals WHERE removal_ballot_id=?',removal.ballot_id)[0])
+    throw fail('An appeal was already filed for this removal.',409);
+  const id='guild-removal-appeal:'+crypto.randomUUID();
+  sql.exec('INSERT INTO guild_governance_removal_appeals(id,removal_ballot_id,target_user_id,statement,created_at) VALUES(?,?,?,?,?)',
+    id,removal.ballot_id,actorId,statement.trim(),new Date(now).toISOString());
+  return viewRemovalAppeal(sql,rows(sql,'SELECT * FROM guild_governance_removal_appeals WHERE id=?',id)[0]);
+}
+export function sponsorRemovalAppeal(sql,{guildId,origin,actorId,appealId,now=Date.now(),seatLimit=Number.MAX_SAFE_INTEGER}){
+  ensureGovernanceTables(sql);
+  const appeal=rows(sql,'SELECT * FROM guild_governance_removal_appeals WHERE id=?',appealId)[0];
+  if(!appeal||appeal.ballot_id)throw fail('Pending removal appeal not found.',409);
+  const statement='Reconsider member removal: '+appeal.statement.slice(0,900);
+  return proposeGovernance(sql,{guildId,origin,actorId,action:'restore-member',targetUserId:appeal.target_user_id,
+    statement,appealId,now,seatLimit});
 }
 
 export function reportQueue(sql){

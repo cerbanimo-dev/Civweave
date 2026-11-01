@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "civweave-guild-governance-staging",
+  "main": "src/creator-provenance-entry.mjs",
+  "compatibility_date": "2026-08-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "ai": { "binding": "AI" },
+  "vars": {
+    "CIVWEAVE_ENVIRONMENT": "staging",
+    "CIVWEAVE_NODE_CLOUD_DOMAIN": "nodes.civweave.invalid"
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "GUILD_STATE", "class_name": "CivweaveGuildEdgeState" },
+      { "name": "CAPACITY", "class_name": "CivweaveGuildCapacityState" },
+      { "name": "NODES", "class_name": "CivweaveGuildNodeState" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["CivweaveGuildEdgeState"] },
+    { "tag": "v2", "new_sqlite_classes": ["CivweaveGuildCapacityState", "CivweaveGuildNodeState"] }
+  ],
+  "observability": { "enabled": true }
+}
