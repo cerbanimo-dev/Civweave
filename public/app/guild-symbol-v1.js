@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='guild-symbol-v1.7-unified-guild-access';
+const VERSION='guild-symbol-v1.8-council-notice-badge';
 const SRC='/app/assets/guild-symbol.png';
 const MAP_SRC='/app/assets/map-symbol-v1.png';
 const CHAT_SRC='/app/assets/chat-symbol-v1.png';
@@ -19,6 +19,7 @@ let discoveryExpanded=true;
 let guildPanelBusy=false;
 let activeGuildStatus=null;
 let lastGuildNotice='';
+let councilUnreadCount=0;
 
 function installStyle(doc=document){
   if(!doc?.documentElement||doc.getElementById(STYLE_ID))return;
@@ -288,7 +289,7 @@ function renderGuildTab(){
         <div class="cw-guild-statline"><span>Node: <b>${guildEsc(nodeId)}</b></span><span>Remaining included neurons: <b>${remaining}</b></span><span>Daily member allowance: <b>${allowance}</b></span>${capacity?.communitySeatsRemaining!=null?'<span>Open Citizen seats: <b>'+guildNumber(capacity.communitySeatsRemaining)+'</b></span>':''}</div>
         <div class="cw-guild-actions">
           ${session?'<a class="cw-guild-primary" href="/app/civweave-guild-quest-v1.html">Guild Quests</a><button type="button" data-guild-ui-action="chat">Guild chat</button>':''}
-          ${session?'<button type="button" data-guild-ui-action="council">Guild Council &amp; votes</button>':''}
+          ${session?'<button type="button" data-guild-ui-action="council">Guild Council &amp; votes'+(councilUnreadCount>0?' · '+guildNumber(councilUnreadCount)+' unread':'')+'</button>':''}
           <button type="button" data-guild-ui-action="invite" data-cw-guild-invite>Copy invitation</button>
           ${session?'<button type="button" data-guild-ui-action="verify">Verify local server</button>':''}
           ${!session?'<button type="button" class="cw-guild-primary" data-guild-ui-action="'+(api?.hasCredential?.(guild.origin,guild.nodeId)?'relogin':'join')+'">'+(api?.hasCredential?.(guild.origin,guild.nodeId)?'Log back in':'Join as a Hero')+'</button>':''}
@@ -330,6 +331,7 @@ async function refreshGuildAccess(){
     if(currentGuild()?.origin===origin)activeGuildStatus={origin,error:String(error?.message||error)};
   }
   renderGuildTab();
+  void globalThis.CivweaveGuildGovernanceV1?.refreshNoticeCount?.();
 }
 async function inspectGuildInvite(form){
   if(guildPanelBusy)return;
@@ -529,6 +531,10 @@ function syncGuildAccess(event){
   if(event?.type==='civweave:host-node-selected'||event?.type==='civweave:host-node-logged-in')
     void refreshGuildAccess();
 }
+addEventListener('civweave:guild-council-notices',event=>{
+  councilUnreadCount=Math.max(0,Math.floor(Number(event.detail?.unreadCount)||0));
+  renderGuildTab();
+});
 for(const name of ['civweave:host-node-selected','civweave:host-node-logged-in','civweave:capacity-session-ready','civweave:capacity-session-cleared','civweave:host-node-left'])
   addEventListener(name,syncGuildAccess);
 function start(){wire(document)}
