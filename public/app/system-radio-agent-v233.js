@@ -357,7 +357,7 @@ async function syncGuildRadio(force=false){
   if(!current){status('Guild schedule is awaiting its next bundle.');return false}
   if(current.chunk.id!==broadcastChunk){
    const index=broadcastPacket.chunks.findIndex(c=>c.id===current.chunk.id),previous=broadcastPacket.chunks[index-1];
-   if(broadcastChunk&&previous?.id===broadcastChunk)cueDj(broadcastMode==='talk'?previous.discussion:previous.brief);
+   if(previous?.id===broadcastChunk||!broadcastChunk&&previous)cueDj(broadcastMode==='talk'?previous.discussion:previous.brief);
    broadcastChunk=current.chunk.id;
   }
   if(currentTrack?.id!==current.track.id||force){
@@ -375,12 +375,12 @@ async function tuneGuildBroadcast(next){
  if(safeModeEnabled()){status('S.A.F.E. has no lyric-audited broadcast bundle yet.');return false}
  await loadCatalog();if(!directTracksFor().length){status('There are no playable radio recordings.');return false}
  if(mode()!=='direct')setMode('direct');
- const switched=broadcastMode&&broadcastMode!==next;
+ const previousMode=broadcastMode,switched=previousMode&&previousMode!==next;
  broadcastMode=next;broadcastPaused=false;if(switched){cancelDj();broadcastCue=''}
  try{
   await fetchGuildRadio();
   if(!broadcastTimer)broadcastTimer=setInterval(()=>{void syncGuildRadio()},3500);
-  return await syncGuildRadio(true);
+  return await syncGuildRadio(!previousMode);
  }catch(error){leaveGuildBroadcast();status('Guild broadcast could not start: '+String(error?.message||error).slice(0,135));return false}
 }
 
