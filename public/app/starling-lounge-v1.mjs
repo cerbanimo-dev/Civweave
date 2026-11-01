@@ -1162,7 +1162,21 @@ async function connectEncryptedWorldCalls(){
  try{
   const {createPrivateWorldCallTransport}=await import('./shared/worldweaver-pm-calls-v1.mjs');
   if(state.root?.hidden||state.summonTransport)return false;
-  const transport=createPrivateWorldCallTransport();
+  const encrypted=createPrivateWorldCallTransport();
+  const transport=Object.freeze({
+    invite:encrypted.invite,
+    subscribeInvitations:encrypted.subscribeInvitations,
+    listPeople:encrypted.listPeople,
+    listWorldItems:encrypted.listWorldItems,
+    close:encrypted.close,
+    place:async command=>{
+      if(!fleetIsGuild()||!state.worldLinked||!state.worldHost?.placeEntity)
+        throw new Error('Connect a signed Guild Worldweaver room before placing.');
+      return state.worldHost.placeEntity({
+        kind:command.kind,entityRef:command.entityRef,
+        worldRef:command.worldRef,position:command.position});
+    }
+  });
   state.summonTransport=transport;state.autoSummonTransport=true;
   state.summonUI?.setTransport(transport);return true;
  }catch{return false}
