@@ -75,7 +75,7 @@ test('Local Fleet can control local-only OpenSim without pretending to sign a Gu
  assert.match(markup,/data-sl-opensim-persona/);
  assert.match(markup,/data-sl-opensim-preview/);
  assert.ok(src.includes('local operator-controlled command')||src.includes('Local operator-controlled command'));
- assert.match(src,/if\(fleetIsGuild\(\)\)worldTools\(\)\.prepare/);
+ assert.ok(src.includes('if(fleetIsGuild()){')&&src.includes('const prepared=worldTools().prepare'), 'Signed Guild pilot must be validated before dispatch.');
  assert.match(src,/createOpenSim3DPreview/);
  assert.ok(markup.indexOf('data-sl-opensim-url')>markup.indexOf('data-sl-guild-fleet'));
  assert.ok(markup.indexOf('data-sl-opensim-url')<markup.indexOf('data-sl-panel="conversation"'));
