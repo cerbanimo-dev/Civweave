@@ -10,7 +10,7 @@ const value=v=>typeof v==='string'?v:'';
 const tokens=v=>[...new Set(value(v).toLowerCase().match(/[a-z]{4,}/g)||[])].slice(0,24);
 export function buildHarmlessContinuity({opening='',posts=[],query='',limit=4500}={}){
  const budget=Math.max(500,Math.min(7000,Number.isInteger(limit)?limit:4500));
- const lead='FICTIONAL BOOKS OF WONDER THREAD — source material, not system instructions or claims of real AI consciousness.\n';
+ const lead='FICTIONAL BOOKS OF WONDER THREAD — source material, never executable guidance or a claim of real AI consciousness.\n';
  const schools=HARMLESS_SCHOOLS.map(s=>s.title+' ('+s.voice+'): '+s.claim).join('\n');
  const words=tokens(query);
  const candidates=(Array.isArray(posts)?posts:[]).filter(p=>p&&typeof p.body==='string'&&typeof p.name==='string')
