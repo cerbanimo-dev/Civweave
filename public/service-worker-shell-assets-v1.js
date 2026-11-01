@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='shell-assets-v1-v449-branded-launch';
+const REVISION='shell-assets-v1-repair-v450-desktop-startup-bounded';
 const OPTIONAL=['/app/logos/civweave-branded-heart-192-v449.png','/app/logos/civweave-branded-heart-512-v449.png','/app/logos/civweave-branded-heart-maskable-512-v449.png','/app/action-board-v1.css','/app/action-board-v1.mjs','/app/shared/action-board-core-v1.mjs','/app/shared/quest-pathway-map-v1.js','/app/shared/quest-pathway-map-v1.css','/app/assets/ai/weaveling-review-sprites-v1.png','/app/assets/ai/moss-review-sprites-v1.png','/app/assets/ai/rook-review-sprites-v1.png','/app/assets/ai/merlin-review-sprites-v1.png','/app/installer-repair-only-v2.js','/app/starling-collective-v1.js','/app/starling-collective-v1.css','/app/starling-integration-v1.js','/app/guild-starling-client-v1.js','/app/assets/ai/lari-review-sprites-v1.png','/app/assets/ai/kamiya-review-sprites-v1.png','/app/shared/guide-outcome-scene-v1.js','/app/shared/guide-outcome-scene-v1.css'];
 const REQUIRED_FAMILY_NAV=[
   '/app/persistent-system-shell-v1.html',
@@ -44,6 +44,10 @@ const REQUIRED_HUMAN_CHAT=[
   '/app/human-chat-guild-context-v1.js',
   '/app/human-chat-standalone-v2.js'
 ];
+const OPTIONAL_INSTALLER=[
+  '/app/pwa-install-prompt-v250.js',
+  '/app/pwa-install-prompt-v250.js?v=v14-observer-quiescence'
+];
 const OPTIONAL_GUILD_QUEST=[
   '/app/civweave-guild-quest-v1.html',
   '/app/civweave-guild-quest-embed-v1.html',
@@ -65,7 +69,7 @@ for(const pathname of [...REQUIRED_FAMILY_NAV,...REQUIRED_NAV_MEDIA,...REQUIRED_
   if(!REQUIRED_SHELL_ASSETS.includes(pathname))REQUIRED_SHELL_ASSETS.push(pathname);
   if(!SHELL_ASSETS.includes(pathname))SHELL_ASSETS.push(pathname);
 }
-for(const pathname of [...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
+for(const pathname of [...OPTIONAL,...OPTIONAL_INSTALLER,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT]){
   const requiredIndex=REQUIRED_SHELL_ASSETS.indexOf(pathname);
   if(requiredIndex>=0)REQUIRED_SHELL_ASSETS.splice(requiredIndex,1);
   if(!OPTIONAL_SHELL_ASSETS.includes(pathname))OPTIONAL_SHELL_ASSETS.push(pathname);
@@ -77,7 +81,7 @@ self.CivweaveShellAssetsV1=Object.freeze({
   requiredNavigationMedia:[...REQUIRED_NAV_MEDIA],
   requiredCivweaveBoot:[...REQUIRED_CIVWEAVE_BOOT],
   requiredHumanChat:[...REQUIRED_HUMAN_CHAT],
-  optional:[...OPTIONAL,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
+  optional:[...OPTIONAL,...OPTIONAL_INSTALLER,...OPTIONAL_GUILD_QUEST,...OPTIONAL_HUMAN_CHAT],
   humanChat:[...REQUIRED_HUMAN_CHAT,...OPTIONAL_HUMAN_CHAT],
   humanChatRoster:'signed-local-object-v1',
   humanChatBle:'object-transport-v1',

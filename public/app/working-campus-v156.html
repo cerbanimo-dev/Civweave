@@ -75,9 +75,11 @@ async function buildPlan(){
   const submit=new Event('submit',{bubbles:true,cancelable:true}),cancelled=!form.dispatchEvent(submit);if(!cancelled)throw new Error('The Weaveling AI authoring runtime is still loading. Try again in a moment.');
   return true;
 }
-function syncButton(){const button=document.querySelector('#build-plan');if(button){button.textContent='Generate Quest with AI';button.dataset.questAuthoring='ai-required'}}
+function syncButton(){const button=document.querySelector('#build-plan');if(button){if(button.textContent!=='Generate Quest with AI')button.textContent='Generate Quest with AI';if(button.dataset.questAuthoring!=='ai-required')button.dataset.questAuthoring='ai-required'}}
 document.addEventListener('click',event=>{const button=event.target.closest?.('#build-plan');if(!button)return;event.preventDefault();event.stopImmediatePropagation();void buildPlan().catch(error=>{showError(error);setStatus('No Quest was created. AI generation is required.')})},true);
-addEventListener('civweave:guide-workspace-ready',syncButton);addEventListener('pageshow',syncButton);new MutationObserver(syncButton).observe(document.documentElement,{subtree:true,childList:true});syncButton();
+const buttonObserver=new MutationObserver(syncButton);
+function observeButton(){const workspace=document.querySelector('#workspace');if(workspace)buttonObserver.observe(workspace,{subtree:true,childList:true})}
+addEventListener('civweave:guide-workspace-ready',syncButton);addEventListener('pageshow',()=>{observeButton();syncButton()});addEventListener('pagehide',()=>buttonObserver.disconnect());observeButton();syncButton();
 globalThis.CivweaveWorkingCampusPlannerV199=Object.freeze({version:VERSION,buildPlan,aiQuestOnly:true,deterministicQuestCreation:false,persistenceAuthority:false});
 try{dispatchEvent(new CustomEvent('civweave:working-campus-planner-ready',{detail:{version:VERSION,aiQuestOnly:true,deterministicQuestCreation:false}}))}catch{}
 })();
