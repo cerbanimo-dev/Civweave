@@ -100,6 +100,7 @@ function setup(){
   </section>
     <section class="sl-card sl-opensim-link" data-sl-panel="world" aria-label="OpenSim region integration">
       <h3>OpenSimulator · live NPC bridge</h3>
+      <p class="sl-sub"><a href="/app/tools/worldweaver-story-seed-atlas.html" target="_blank" rel="noopener noreferrer">Browse Door &amp; Dawn · 16 world seeds</a> — nine In-Between universes, seven physical realities. Opens a read-only illustrated catalogue; it does not provision an OpenSimulator region.</p>
       <p class="sl-sub">Runs locally on this computer. An OpenSim owner-controlled in-world script performs movement and speech. If a region-module export is available, the 2D/3D scene also shows actual geometry.</p>
       <label for="cw-sl-opensim-url">Local OpenSim bridge endpoint</label>
       <input id="cw-sl-opensim-url" data-sl-opensim-url inputmode="url" autocomplete="off" spellcheck="false" value="http://127.0.0.1:8769/region" maxlength="300">
