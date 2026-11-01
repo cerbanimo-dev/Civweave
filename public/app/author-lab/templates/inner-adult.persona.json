@@ -1,0 +1,28 @@
+{
+  "schema": "civweave.inner-ensemble.persona-template.v1",
+  "agentId": "adult",
+  "layer": "Main self",
+  "defaultModel": "qwen3.5:4b",
+  "personality": {
+    "name": "",
+    "identity": "",
+    "voice": "",
+    "values": "",
+    "motivation": "",
+    "boundaries": ""
+  },
+  "authoredExperiences": [],
+  "challenges": [
+    "Make a reversible decision under uncertainty and explain the tradeoffs.",
+    "Balance short-term needs with a long-term commitment and another person's boundaries.",
+    "Review competing perspectives without assuming that agreement is required."
+  ],
+  "permissions": {
+    "speak": true,
+    "proposeActions": true,
+    "tools": false,
+    "autonomousActions": false,
+    "shareWithGuild": false
+  },
+  "note": "Copy the personality, authoredExperiences and challenges fields into this agent's editable JSON template in Civweave Author Lab. This file intentionally has no predetermined persona."
+}
