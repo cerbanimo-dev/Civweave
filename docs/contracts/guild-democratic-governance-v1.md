@@ -51,3 +51,21 @@ Important: this v1 applies to the **Cloudflare mobile-Guild Capacity Durable Obj
 - Independent work reviews prevent self-awarding but do not defeat sybil identities, collusion, or forged real-world evidence. Reviewers attest completion; no automatic model judgment establishes truth.
 - A case response does not itself constitute an appeal after an executed sanction. Banned residents can now file a credential-verified formal appeal and ask a contributor to sponsor a majority-approved `lift-ban` ballot. Restoring removed membership, reversing delivered reports/corrections, independent appeals with evidence review, and recovery for lost device credentials still need further design and testing before production rollout.
 - Real-world sanctions and peer reports remain operator-gated in production, and Cloudflare staging deployment/physical node parity require separate checks.
+
+## Limited same-device anti-sybil protection
+
+A new Guild capacity login refuses creating another enrolled account with the *same canonical SHA-256 device credential hash* and a different resident ID. The active electorate also de-duplicates legacy resident rows that share a credential, deterministically preferring the earliest account. An account still retains its own authenticated token and user ID; this is a defense against accidental duplicate votes and reused credentials, **not personhood verification**. An actor can create a new independent device credential, so no proof of one human/one vote is implied. Do not make automated high-stakes claims of identity uniqueness without a separate privacy-reviewed identity protocol.
+
+## Appeals after ordinary removal
+
+Community-approved removal now keeps a limited Guild-only record of the removed resident's original device credential hash, node ID and decision reference. A removed resident may submit one credential-authenticated appeal against that removal within 90 days, even without an active Guild session; mismatched credentials are rejected. No private credential is returned to the Council.
+
+A recent verified contributor may sponsor the appeal into a frozen-electorate `restore-member` majority vote. The deciding vote automatically approves restoration and re-enrolls the original Guild identity **when a community seat is available**, without fabricating a login session, bypassing capacity, or restoring old elevated roles. The device must explicitly sign in again. If all seats are taken when approval occurs, the vote marks a restoration approved but waiting for a seat; an ordinary future login can use available capacity. Thus approval is not represented as completed restoration when the Guild is full. A removed resident using an entirely new device/identity remains outside the scope of cryptographic proof.
+
+## In-app notice outside Guild Council
+
+Unread Council notice count is projected through a single existing Guild access surface. The canonical Council module queries only on selected-Guild/session/visibility transitions and after a Council interaction, then emits a narrow `civweave:guild-council-notices` event. The Guild access view shows the count beside its existing Council button. This is an **event-driven in-app badge, not Web Push, email or OS push**, and does not guarantee a notice has reached the device.
+
+## Isolated staging Worker deployment
+
+The `deploy-staging-mobile-guild-governance.yml` workflow deploys the canonical Guild Capacity implementation to distinct Cloudflare Worker `civweave-guild-governance-staging`, with isolated Durable Object namespace and `CIVWEAVE_ENVIRONMENT=staging`. Its config never points at `civweave-guild-cloud` or the production Guild Worker. The workflow fails if an inter-Guild report relay secret is already configured and checks unauthenticated access is rejected. It is intended for staging-test Guilds only; it does not rewrite existing production Guilds' server selection. Cloudflare Pages staging is separately deployed by `deploy-civweave-staging.yml` on a staging merge. Check both workflows and the staging artifact marker before claiming live deployment.
