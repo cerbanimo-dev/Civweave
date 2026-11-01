@@ -7,7 +7,7 @@ const source=fs.readFileSync(new URL('../public/app/shared/civweave-ai-fleet-v1.
 function boot(userAgent,deviceMemory=undefined,webgpu=/iPhone|iPad/.test(userAgent)){
  const data=new Map();
  const storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,String(v))};
- const context={globalThis:null,navigator:{userAgent,deviceMemory,...(webgpu?{gpu:{requestAdapter(){throw Error('GPU probed on display')}}}:{})},localStorage:storage};
+ const context={globalThis:null,URL,navigator:{userAgent,deviceMemory,...(webgpu?{gpu:{requestAdapter(){throw Error('GPU probed on display')}}}:{})},localStorage:storage};
  context.globalThis=context;
  vm.runInNewContext(source,context,{filename:'civweave-ai-fleet-v1.js'});
  return{fleet:context.CivweaveAIFleetV1,data};
@@ -99,14 +99,18 @@ test('Fleet browser runtime keeps role selections transient and blocks unintende
  assert.match(gguf,/importId\?selectionForImported\(importId\):current\(\)/);
 });
 
-test('Only the three proven local configuration paths are rendered by the fleet',()=>{
+test('Desktop Ollama joins the three original local configuration paths in Settings',()=>{
  assert.match(source,/const BACKENDS=Object\.freeze\(\{/);
- for(const key of ['browser','termux','android'])assert.match(source,new RegExp(key+':\\{label:'));
+ for(const key of ['browser','termux','android','desktop'])assert.match(source,new RegExp(key+':\\{label:'));
  assert.match(source,/data-ai-fleet-backend/);
  assert.match(source,/data-ai-fleet-inventory/);
  assert.match(source,/data-ai-fleet-role-assign/);
  assert.match(source,/data-ai-fleet-termux-mount/);
  assert.match(source,/data-ai-fleet-apk-connect/);
+ assert.match(source,/data-ai-fleet-desktop-inventory/);
+ assert.match(source,/data-ai-fleet-desktop-discover/);
+ assert.match(source,/data-ai-fleet-desktop-activate/);
+ assert.match(source,/data-ai-fleet-desktop-role/);
  assert.match(source,/data-ai-fleet-gguf-files/);
  assert.match(source,/data-ai-fleet-import/);
  assert.match(source,/data-ai-fleet-download-preset/);
@@ -173,4 +177,55 @@ test('Direct browser preset installs create normal fleet imports, without duplic
  assert.match(gguf,/response\.body\.getReader\(\)/);
  assert.match(gguf,/store\.readGGUFShards\(record\)/);
  assert.doesNotMatch(gguf.slice(gguf.indexOf('export async function installPresetIntoImports'),gguf.indexOf('export async function installedImports')),/response\.blob\(\)|cache\.put\(/);
+});
+
+test('Desktop selects local Ollama by default but existing Android setup remains GGUF',()=>{
+ const win=boot('Mozilla/5.0 (Windows NT 10.0; Win64; x64)',8);
+ const android=boot('Mozilla/5.0 (Linux; Android 16; A069P)',8);
+ assert.equal(win.fleet.currentBackend(),'desktop');
+ assert.equal(android.fleet.currentBackend(),'browser');
+ win.fleet.setBackend('browser');assert.equal(win.fleet.currentBackend(),'browser');
+ android.fleet.setBackend('desktop');assert.equal(android.fleet.currentBackend(),'desktop');
+});
+test('Desktop endpoint accepts only private Ollama hosts, no credentials or OpenAI /v1 route',()=>{
+ const {fleet}=boot('Mozilla/5.0 (Windows NT 10.0; Win64; x64)',16);
+ assert.equal(fleet.desktopEndpoint(''),'http://127.0.0.1:11434/api/chat');
+ assert.equal(fleet.desktopEndpoint('http://192.168.1.15:11434/'),'http://192.168.1.15:11434/api/chat');
+ assert.equal(fleet.desktopEndpoint('http://localhost:11434/api/generate'),'http://localhost:11434/api/chat');
+ assert.throws(()=>fleet.desktopEndpoint('https://example.com/api/chat'),/private LAN/);
+ assert.throws(()=>fleet.desktopEndpoint('http://user:password@127.0.0.1:11434'),/credentials/);
+ assert.throws(()=>fleet.desktopEndpoint('http://127.0.0.1:11434/v1'),/Ollama origin/);
+});
+test('Discovered desktop models fill all five roles without extra downloads',()=>{
+ const {fleet}=boot('Mozilla/5.0 (Windows NT 10.0; Win64; x64)',16);
+ const models=[{name:'qwen3.5:4b',size:2700000000},{name:'qwen3.5:9b',size:5600000000}];
+ const roles=fleet.autoAssignDesktop(models);
+ assert.equal(roles.swift,'qwen3.5:4b');
+ assert.equal(roles.archive,'qwen3.5:9b');
+ assert.equal(roles.quill,'qwen3.5:9b');
+ assert.equal(roles.forge,'qwen3.5:4b');
+ assert.equal(roles.atlas,'qwen3.5:4b');
+ assert.equal(new Set(Object.values(roles)).size,2);
+});
+test('Desktop assignments persist and explicit unassignment stays unassigned',()=>{
+ const {fleet,data}=boot('Mozilla/5.0 (Windows NT 10.0; Win64; x64)',16);
+ data.set('civweave.ai.fleet.desktop.v1',JSON.stringify({schema:'civweave.ai.fleet.desktop.v1',
+  endpoint:'http://127.0.0.1:11434/api/chat',
+  models:[{name:'qwen3.5:4b',size:2000000000},{name:'qwen3.5:9b',size:6000000000}],
+  roles:{swift:'qwen3.5:4b',quill:'qwen3.5:9b'},enabled:true}));
+ fleet.assignDesktopRole({querySelector:()=>null},'atlas','qwen3.5:9b');
+ assert.equal(fleet.desktopFleetState().roles.atlas,'qwen3.5:9b');
+ fleet.assignDesktopRole({querySelector:()=>null},'quill','');
+ const chosen=fleet.autoAssignDesktop(fleet.desktopFleetState().models,fleet.desktopFleetState());
+ assert.equal(chosen.quill,undefined);
+ assert.equal(fleet.desktopFleetState().enabled,true);
+});
+test('Ollama role routing only applies to activated matching desktop endpoint',()=>{
+ const runtime=fs.readFileSync(new URL('../public/app/shared/civweave-model-runtime.js',import.meta.url),'utf8');
+ assert.match(runtime,/function desktopFleetBindingFor\(request,config\)/);
+ assert.match(runtime,/config\.provider!=='ollama'/);
+ assert.match(runtime,/saved\.endpoint!==config\.endpoint/);
+ assert.match(runtime,/saved\.enabled!==true/);
+ assert.match(runtime,/if\(desktopFleetBinding\)config\.model=desktopFleetBinding\.model/);
+ assert.match(runtime,/config\.ggufImportId=fleetBinding\.importId/);
 });
