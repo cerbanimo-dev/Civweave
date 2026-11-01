@@ -31,7 +31,7 @@ const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);retu
 const human=person=>person?.name||'Unknown persona';
 function setup(){
   if(state.root)return state.root;
-  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=brand-responsive-fleet-r6-opensim';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=brand-responsive-fleet-r7-live-npc';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
   root.innerHTML=`<div class="sl-chrome"><header class="sl-head">
   <div class="sl-brand"><img class="sl-brand-mark" src="/app/logos/civweave-icon-192.png" alt="" width="48" height="48"><div class="sl-brand-copy"><small>CIVWEAVE · WORLDWEAVER</small><h1 data-sl-main-title>AI Fleets</h1><p data-sl-main-description>Local device and Guild simulation spaces</p></div></div>
