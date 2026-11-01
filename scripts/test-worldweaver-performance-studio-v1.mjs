@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createPerformanceStudio,performanceObservation,PERFORMANCE_SCHEMA} from '../public/app/shared/worldweaver-performance-studio-v1.mjs';
-import {compileStageScene,compilePerformanceScore} from '../public/app/shared/worldweaver-stagecraft-v1.mjs';
+import {compileStageScene,compilePerformanceScore,previewSceneGeometry} from '../public/app/shared/worldweaver-stagecraft-v1.mjs';
 import {productionPrompt,proposeScreenplayViaModel,proposeStageViaModel} from '../public/app/shared/worldweaver-adaptation-model-v1.mjs';
 import {screenplayToVTT,exportFilmCraftInterchange,exportQwenLoRADataset} from '../public/app/shared/worldweaver-filmcraft-interchange-v1.mjs';
 import {projectOpenSimPolygons3Dto2D} from '../public/app/shared/worldweaver-opensim-geometry-v1.mjs';
@@ -103,6 +103,21 @@ test('approved scenes create deterministic stage prims, geometry and 2D polygon 
  assert.ok(view.polygons.length>0);
  assert.ok(view.buildingPolygons.some(x=>x.id==='actor:'+id+':hero'));
  assert.equal(view.geometryStatus,'opensim-world-geometry');
+});
+test('draft set and blocking can be inspected in the same geometry without granting staging or changing production state',()=>{
+ const s=setup(),id=propose(s),before=s.studio.snapshot();
+ const preview=previewSceneGeometry(before,id,{instanceId:'review:1',actorPositions:{hero:{x:130,y:135,z:0}},actorHeights:{hero:1.6}});
+ assert.equal(preview.previewOnly,true);assert.equal(preview.authorization,'pending');assert.equal(preview.worldExecution,false);
+ assert.deepEqual(preview.region.objects.find(row=>row.id==='actor:'+id+':hero').position,{x:130,y:135,z:0});
+ assert.equal(preview.region.objects.find(row=>row.id==='actor:'+id+':hero').parts[0].scale.z,1.6*.7);
+ assert.ok(projectOpenSimPolygons3Dto2D(preview.geometry).projectedFaces.length>0);assert.deepEqual(s.studio.snapshot(),before);
+ assert.throws(()=>compileStageScene(before,id),/approved/);assert.throws(()=>compilePerformanceScore(before,id),/approved/);
+ assert.throws(()=>previewSceneGeometry(before,id,{actorPositions:{unknown:{x:1,y:1,z:0}}}),/character/);
+ assert.throws(()=>previewSceneGeometry(before,id,{actorPositions:{hero:{x:999,y:1,z:0}}}),/position/);
+ assert.throws(()=>previewSceneGeometry(before,id,{actorHeights:{hero:100}}),/height/);
+ assert.equal(previewSceneGeometry(before,id,{visibleCharacters:[]}).region.objects.filter(row=>row.kind==='actor-marker').length,0,'a graphic or voice-only shot should not invent visible actors');
+ s.studio.dispatch({type:'review-scene',sceneId:id,decision:'rejected',notes:'Rejected for source mismatch'},human);
+ assert.throws(()=>previewSceneGeometry(s.studio.snapshot(),id),/rejected/);
 });
 test('cue score has timed dialogue and audience invitation without running audio/network',()=>{
  const s=setup(),id=propose(s);approve(s,id);

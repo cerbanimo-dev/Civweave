@@ -15,11 +15,22 @@ const entry=(scene,x,cast)=>({character:x,avatarRef:cast?.avatarRef??null,
  pilotPrincipalId:cast?.pilotPrincipalId??null,voiceRef:cast?.voiceRef??null,
  stageType:cast?'avatar-cue-target':'unassigned'});
 const colors=['#b780aa','#66a5a0','#ddaf62','#8b9eb8','#c77d76','#9ba978'];
-export function compileStageScene(state,sceneId,{regionId='stage:local',revision=1,instanceId}={}){
+export function compileStageScene(state,sceneId,options={}){
+ const scene=state?.proposals?.find(row=>row.id===sceneId);
+ if(!scene||scene.status!=='approved')throw new Error('Scene must be human-approved before staging');
+ return projectSceneGeometry(state,sceneId,options);
+}
+/** Read-only proposal inspection. This never compiles a performance score,
+ * approves a scene, binds a rig, or emits a trusted world action. */
+export function previewSceneGeometry(state,sceneId,options={}){
+ const scene=state?.proposals?.find(row=>row.id===sceneId);
+ if(!scene||!['approved','review-required'].includes(scene.status))throw new Error('Unknown or rejected scene cannot be previewed');
+ return {...projectSceneGeometry(state,sceneId,{...options,regionId:options.regionId||'preview:local'}),previewOnly:true,authorization:scene.status==='approved'?'approved-script-only':'pending',worldExecution:false,source:'proposed set/blocking review diagram; not a staged world or validated rig'};
+}
+function projectSceneGeometry(state,sceneId,{regionId='stage:local',revision=1,instanceId,actorPositions={},actorHeights={},visibleCharacters}={}){
  if(state?.schema!==PERFORMANCE_SCHEMA)throw new TypeError('Production state required');
  const scene=state.proposals.find(x=>x.id===sceneId);
  if(!scene)throw new RangeError('Unknown screenplay scene');
- if(scene.status!=='approved')throw new Error('Scene must be human-approved before staging');
  const approvedSet=state.stagePlans?.filter(p=>p.sceneId===scene.id&&p.status==='approved').at(-1);
  const set=approvedSet?.set??scene.set;
  const cast=[...new Set(scene.dialogue.map(l=>l.character))].map((character,i)=>{
@@ -28,6 +39,10 @@ export function compileStageScene(state,sceneId,{regionId='stage:local',revision
    x:115+i*bound(12/Math.max(1,Math.min(10,scene.dialogue.length)),1,6),
    y:122+i%2*7,z:1.6,mark:colors[i%colors.length]};
  });
+ if(!actorPositions||typeof actorPositions!=='object'||Array.isArray(actorPositions)||Object.keys(actorPositions).some(character=>!cast.some(actor=>actor.character===character)))throw new TypeError('Unknown character in preview position');
+ for(const position of Object.values(actorPositions))if(!position||Object.keys(position).some(key=>!['x','y','z'].includes(key))||!['x','y','z'].every(key=>Number.isFinite(position[key])&&position[key]>=0&&position[key]<=(key==='z'?64:256)))throw new TypeError('Invalid preview actor position');
+ if(!actorHeights||typeof actorHeights!=='object'||Array.isArray(actorHeights)||Object.entries(actorHeights).some(([character,height])=>!cast.some(actor=>actor.character===character)||!Number.isFinite(height)||height<.05||height>20))throw new TypeError('Invalid preview actor height');
+ if(visibleCharacters!==undefined&&(!Array.isArray(visibleCharacters)||visibleCharacters.length>20||new Set(visibleCharacters).size!==visibleCharacters.length||visibleCharacters.some(character=>!cast.some(actor=>actor.character===character))))throw new TypeError('Invalid visible preview characters');
  instanceId=instanceId??'stage:'+scene.id;
  const objects=[{
   id:'set:'+scene.id,name:set.location,kind:'stage',instanceId,
@@ -46,12 +61,16 @@ export function compileStageScene(state,sceneId,{regionId='stage:local',revision
      prop.width,prop.depth,prop.height,prop.color)]});
  }
  for(const actor of cast){
+  if(visibleCharacters&&!visibleCharacters.includes(actor.character))continue;
+  const height=actorHeights[actor.character];
+  const body=height===undefined?{z:1.1,width:.8,height:2.2}:{z:height*.35,width:height*.22,height:height*.7};
+  const head=height===undefined?{z:2.5,width:.65}:{z:height*.9,width:height*.2};
   objects.push({
    id:'actor:'+scene.id+':'+actor.character,name:actor.character,kind:'actor-marker',instanceId,
-   position:{x:actor.x,y:actor.y,z:0},rotation:q,
+   position:actorPositions[actor.character]??{x:actor.x,y:actor.y,z:0},rotation:q,
    parts:[
-    box('marker-body:'+actor.character,'Rehearsal stand-in','cylinder',0,0,1.1,.8,.8,2.2,actor.mark),
-    box('marker-head:'+actor.character,'Head marker','cylinder',0,0,2.5,.65,.65,.65,'#d4c8af')]
+    box('marker-body:'+actor.character,'Rehearsal stand-in','cylinder',0,0,body.z,body.width,body.width,body.height,actor.mark),
+    box('marker-head:'+actor.character,'Head marker','cylinder',0,0,head.z,head.width,head.width,head.width,'#d4c8af')]
   });
  }
  const region={schema:OPENSIM_GEOMETRY_SCHEMA,regionId,size:{x:256,y:256},

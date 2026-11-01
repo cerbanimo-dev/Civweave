@@ -9,7 +9,7 @@ const PREREQUISITES=[
   ['/app/shared/civweave-parity-runtime.js?v=1.0.4',()=>globalThis.CivweaveParity],
   ['/app/shared/civweave-model-runtime.js?v=1.0.17-termux-durable-jobs',()=>globalThis.CivweaveModelRuntime],
   ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryV191],
-  ['/app/intention-planner-v141.js?v=1.1.1-collective-line-identity',()=>globalThis.CivweaveIntentionPlanner],
+  ['/app/intention-planner-v141.js?v=1.2.0-authored-import',()=>globalThis.CivweaveIntentionPlanner],
   ['/app/guide-contracts-v141.js?v=1.0.6-manifest-revision',()=>globalThis.CivweaveGuideContractsV141]
 ];
 const VALUE_CORE=[
@@ -41,7 +41,7 @@ const GUIDE_CAPABILITIES=[
   ['/app/unified-chat-system-v1.js?v=1.2.20-moss-multi-plan-library',()=>globalThis.CivweaveUnifiedChatSystemV1?.version==='1.2.20-moss-multi-plan-library'],
   ['/app/cerbanimo-chat-quest-capability-v2.js?v=2.2.1-ollama-schema-lifecycle',()=>globalThis.CivweaveCerbanimoChatQuestCapabilityV2],
   ['/app/action-followthrough-v165.js?v=1.0.5-material-revisions',()=>globalThis.CivweaveActionFollowthroughV165],
-  ['/app/guide-capability-passover-v1.js?v=1.1.4-explicit-change-requests',()=>globalThis.CivweaveGuideCapabilityPassoverV1]
+  ['/app/guide-capability-passover-v1.js?v=1.2.0-artifact-references',()=>globalThis.CivweaveGuideCapabilityPassoverV1]
 ];
 const LABEL={civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'};
 const GUIDE={civweave:{name:'Weaveling',role:'Central mirror and project-memory assistant'},'living-school':{name:'Moss',role:'Learning guide'},cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide'},fellowfare:{name:'Rook',role:'Quartermaster and exchange guide'},anarchadia:{name:'Merlin',role:'Civic, feature-request, and automation guide'}};
@@ -150,6 +150,15 @@ async function warmLocalAIOptional(timeoutMs=900){if(!localRequested())return fa
 function reset(reason='manual reset'){generation++;promise=null;optionalPromise=null;valueModelPromise=null;localBootstrapPromise=null;structuredFallbackRuntime=null;try{dispatchEvent(new CustomEvent('civweave:guide-loader-reset',{detail:{reason,at:new Date().toISOString()}}))}catch{}}
 function loadOptional(){if(optionalPromise)return optionalPromise;optionalPromise=Promise.allSettled(OPTIONAL.map(([src,ready])=>loadScript(src,ready))).then(()=>true);return optionalPromise}
 function emitAssistantReady(){try{dispatchEvent(new CustomEvent('civweave:assistant-runtime-ready',{detail:{version:VERSION,system:detect(),at:new Date().toISOString(),localModelRequested:localRequested(),localModelReady:globalThis.CivweaveLocalAIBootstrapV266?.readyState==='ready',localModelError:lastLocalError||null,responseRouterReady:Boolean(globalThis.CivweaveResponseRouterV347),structuredFallbackGuard:Boolean(globalThis.CivweaveModelRuntime?.__civweaveStructuredFallbackGuardV352)}}))}catch{}}
+async function ensureAuthoredQuestImport(){
+  // Manual authoring loads validation and saved-review owners only. It does not
+  // start the assistant, selected provider, local inference or a generation.
+  await loadScript('/app/shared/civweave-model-runtime.js?v=1.0.18-native-quest-extended-budget',()=>typeof globalThis.CivweaveModelRuntime?.validateSchema==='function');
+  await loadScript('/app/intention-planner-v141.js?v=1.2.0-authored-import',()=>typeof globalThis.CivweaveIntentionPlanner?.authoredImportedPlan==='function');
+  await loadScript('/app/weaveling-plan-materialization-v265.js?v=1.2.0-authored-import',()=>typeof globalThis.CivweaveWeavelingPlanMaterializationV265?.authoredImportedPlan==='function');
+  await loadScript('/extensions/civweave-weaveling-plan-json-v190.js?v=1.3.0-authored-import',()=>globalThis.CivweaveWeavelingPlanJsonV190?.version==='1.3.0-weaveling-plan-json-v190-authored-import'&&typeof globalThis.CivweaveWeavelingPlanJsonV190?.importAuthoredPlan==='function');
+  globalThis.CivweaveWeavelingPlanMaterializationV265.patchPlanner();return globalThis.CivweaveWeavelingPlanJsonV190;
+}
 async function ensure(){
   if(globalThis.CivweaveAssistantV141&&globalThis.CivweaveDeterministicModeV175&&globalThis.CivweaveWeavelingMemoryBridgeV191&&globalThis.CivweaveKnowledgeEncyclopediaBridgeV271){
     await loadValueCore();await loadValueModel();await loadScript(...FAST_RUNTIME);await loadScript(...SERVER_AI_ROUTER);await loadScript(...RESPONSE_ROUTER);installStructuredFallbackGuard();globalThis.CivweaveWeavelingMemoryBridgeV191.install?.();await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271.install?.();loadOptional();emitAssistantReady();return true;
@@ -178,5 +187,5 @@ async function openSettings(launcher){const gateway=globalThis.CivweaveSettingsG
 function warm(){return ensure()}
 function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civweave economic value core]',error.message));installStructuredFallbackGuard()}
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();addEventListener('pageshow',boot);addEventListener('civweave:guide-workspace-ready',patchHeader);for(const name of ['civweave:response-router-installed','civweave:model-runtime-ready','civweave:local-model-runtime-ready','civweave:local-model-bridge-installed'])addEventListener(name,()=>queueMicrotask(installStructuredFallbackGuard));
-globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,configuredOllama,respondOllama,ensureLocalAI,tryEnsureLocalAI,warmLocalAIOptional,installStructuredFallbackGuard,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v352-structured-fallback-network-gate',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:false,structuredFallbackPolicy:'network-only-for-structured-artifacts',knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-explicit-identified-subjects-only',aiAllowed:()=>true,standardAIOnly:true,eagerWarm:false};
+globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,ensureAuthoredQuestImport,warm,configuredOllama,respondOllama,ensureLocalAI,tryEnsureLocalAI,warmLocalAIOptional,installStructuredFallbackGuard,localRequested,openChat,openSettings,reset,workspaceSnapshot,requestEconomicReview,settingsOwner:'settings-gateway-v317',settingsInputOwnership:false,defaultProvider:'configured-route',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v352-structured-fallback-network-gate',localModelPathway:'selected-model-on-demand-v316',localAIOptionalSideEffects:false,structuredFallbackPolicy:'network-only-for-structured-artifacts',knowledgeRevision:'v271-local-encyclopedia',canonicalChatOwner:'guide-chat-surface-v350',validationCloudOptIn:'v1',economicValueRevision:'v1-explicit-identified-subjects-only',aiAllowed:()=>true,standardAIOnly:true,eagerWarm:false};
 })();

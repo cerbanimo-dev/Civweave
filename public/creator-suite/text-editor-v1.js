@@ -70,10 +70,11 @@ function sealSession(next){
     session=structuredClone(next);nameStatus('Finalized document names are locked.');notify();return session;
   });
 }
-async function commit(next,nextDoc,content,expected){
+async function commit(next,nextDoc,content,expected,receipt){
   const contentDigest='sha256:'+await digest(content);changed(expected);
-  await store().commitDocumentChange({session:next,document:nextDoc,content,contentDigest});changed(expected);
+  const committed=await store().commitDocumentChange({session:next,document:nextDoc,content,contentDigest,expectedRevision:doc.revision,receipt});changed(expected);
   session=next;doc=nextDoc;lastText=content;if(editor()?.innerText!==content)editor().innerText=content;notify();
+  return committed;
 }
 async function snapshot(type,expected){
   const text=editor()?.innerText||'';
@@ -143,8 +144,9 @@ function execute(action,args={},actor){
       contentLength:body.length,contentDigest:'sha256:'+hash
     }});changed(expected);
     if(nextDoc.title!==session.title)next.title=nextDoc.title;
-    await commit(next,nextDoc,body,expected);
-    return{sessionId:session.id,duplicate:false,applied:update.applied,status:builder().status(doc)};
+    const receipt={id:'creator-tool:'+crypto.randomUUID(),schema:'civweave.creator-edit-receipt.v1',action,baseRevision:doc.revision,actor:structuredClone(actor),edits:structuredClone(edits),createdAt:new Date().toISOString()};
+    const saved=await commit(next,nextDoc,body,expected,receipt);
+    return{sessionId:session.id,duplicate:false,applied:update.applied,receiptId:saved?.receiptId||null,status:builder().status(doc)};
   });
 }
 function flush(){

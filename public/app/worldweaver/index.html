@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en" data-civweave-system="civweave">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+  <meta name="theme-color" content="#193d3c">
+  <meta name="description" content="Design local Worldweaver spaces around your learning, work, creations, and community.">
+  <title>Worldweaver · Civweave</title>
+  <link rel="stylesheet" href="/app/worldweaver/workspace.css">
+  <style>body{margin:0;background:#f5f2e9}</style>
+  <script defer src="/app/system-routes-v227.js?v=worldweaver-workspace-v1"></script>
+  <script defer src="/app/themed-system-nav-v178.js?v=worldweaver-workspace-v1"></script>
+  <script defer src="/app/persistent-shell-actions-v1.js?v=1.2.0-worldweaver-workspace"></script>
+</head>
+<body>
+<main class="ww-app" id="ww-workspace">
+  <header class="ww-header">
+    <div class="ww-brand"><span class="ww-mark" aria-hidden="true">W</span><div><span class="ww-eyebrow">Civweave / Worldbuilding studio</span><h1>Worldweaver</h1><p>Give your ideas a place to take shape.</p></div></div>
+    <div class="ww-header-actions"><span class="ww-badge">Device drafts</span><a class="ww-button is-quiet" href="/app/working-campus-v440.html?installed=1">Back to Civweave</a></div>
+  </header>
+  <p id="ww-message" class="ww-notice" role="status" aria-live="polite" hidden></p>
+  <div class="ww-layout">
+    <aside class="ww-library" aria-label="Space library">
+      <button class="ww-button is-primary" type="button" id="ww-new-space">＋ New space</button>
+      <div class="ww-section-heading"><h2>Your spaces</h2><span id="ww-space-count" class="ww-badge">0</span></div>
+      <label class="ww-sr-only" for="ww-search">Find a saved space</label><input id="ww-search" type="search" placeholder="Find a space…" maxlength="120">
+      <div class="ww-space-list" id="ww-spaces"></div>
+      <div class="ww-panel"><span class="ww-eyebrow">One connected practice</span><p>Learn it. Rehearse it. Make it. Bring people together.</p><small>Spaces reference your existing work. Its tools still own progress, purchases, and decisions.</small></div>
+      <button type="button" class="ww-button is-quiet" id="ww-reload">Reload device drafts</button>
+    </aside>
+    <section class="ww-main" aria-label="Space canvas">
+      <section id="ww-create" class="ww-panel">
+        <span class="ww-eyebrow">Start with a purpose</span><h2>What will you build here?</h2>
+        <p>Choose a starting point. Shape a small experience around the work you already do.</p>
+        <div class="ww-template-grid" id="ww-templates" role="group" aria-label="Space purpose"></div>
+        <form id="ww-create-form" class="ww-form">
+          <div class="ww-field"><label for="space-title">Name your space</label><input id="space-title" name="title" maxlength="120" required placeholder="e.g. The repair workshop" autocomplete="off"></div>
+          <div class="ww-field"><label for="space-description">What happens here? <small>Optional</small></label><textarea id="space-description" name="description" maxlength="1800" rows="2" placeholder="A place to practice, make, explain, or exchange ideas."></textarea></div>
+          <div class="ww-inline"><button type="submit" class="ww-button is-primary">Create device draft</button><span class="ww-eyebrow">Private to this browser · No model needed</span></div>
+        </form>
+      </section>
+      <section id="ww-selected" hidden>
+        <div class="ww-toolbar"><div><span id="ww-space-kind" class="ww-eyebrow"></span><h2 id="ww-space-title"></h2><p id="ww-space-description"></p></div><span id="ww-space-status" class="ww-badge">Device draft</span></div>
+        <div class="ww-stats" id="ww-stats" aria-label="Space contents"></div>
+        <div class="ww-stage" id="ww-stage"><span class="ww-eyebrow">Station plan / Local preview</span><div class="ww-floor" id="ww-floor"></div><div class="ww-stage-caption">Select a station to read its instructions. This plan is separate from a running 3D world.</div></div>
+        <section class="ww-panel" id="ww-station-detail" aria-label="Selected station" hidden></section>
+      </section>
+      <section class="ww-panel ww-connection" aria-label="World connection">
+        <div class="ww-section-heading"><h2>World connection</h2><span class="ww-badge is-pending">Not connected</span></div>
+        <h3>Prepare here. Bring it into your world.</h3><p>OpenSimulator integration is in development. Your stations and character instructions can be prepared now and exported for review.</p>
+        <div class="ww-inline"><button class="ww-button" id="ww-export" type="button" disabled>Export selected space</button><small>JSON includes this space’s notes, references, and character prompts. Review before sharing.</small></div>
+        <details><summary>What becomes available when connected?</summary><p>A trusted world adapter will handle provisioning, placement, and confirmed NPC actions. Guild Map publication, model execution, and a live viewer are not connected to this workspace yet.</p></details>
+      </section>
+    </section>
+    <aside class="ww-inspector" aria-label="Space tools">
+      <section class="ww-panel" id="ww-welcome"><span class="ww-eyebrow">A small world, a real purpose</span><h2>From idea to experience</h2><ol><li>Choose a space and give it a purpose.</li><li>Add stations people can explore.</li><li>Link the work behind the experience.</li><li>Prepare a character to guide visitors.</li></ol><p><small>Everything starts as a local draft. Creating a space does not start a server or publish it.</small></p></section>
+      <section class="ww-panel" id="ww-tools" hidden>
+        <div class="ww-tabs" role="tablist" aria-label="Space tools">
+          <button type="button" role="tab" id="ww-tab-button-plan" aria-selected="true" aria-controls="ww-tab-plan" data-tab="plan">Stations</button>
+          <button type="button" role="tab" id="ww-tab-button-connections" aria-selected="false" aria-controls="ww-tab-connections" tabindex="-1" data-tab="connections">Links</button>
+          <button type="button" role="tab" id="ww-tab-button-characters" aria-selected="false" aria-controls="ww-tab-characters" tabindex="-1" data-tab="characters">Characters</button>
+        </div>
+        <section id="ww-tab-plan" role="tabpanel" aria-labelledby="ww-tab-button-plan">
+          <h3>Add a station</h3><p><small>Stations are places to explain, practice, demonstrate, or gather. Instructions are saved as text.</small></p>
+          <form id="ww-station-form" class="ww-form">
+            <div class="ww-field"><label for="station-type">Station type</label><select id="station-type" name="stationType"></select></div>
+            <div class="ww-field"><label for="station-title">Station name</label><input id="station-title" name="title" maxlength="120" required placeholder="e.g. Try it yourself"></div>
+            <div class="ww-field"><label for="station-instructions">Visitor instructions</label><textarea id="station-instructions" name="instructions" maxlength="3000" rows="4" required placeholder="What can someone do or discover here?"></textarea></div>
+            <button class="ww-button is-primary" type="submit">Add station</button>
+          </form>
+        </section>
+        <section id="ww-tab-connections" role="tabpanel" aria-labelledby="ww-tab-button-connections" hidden>
+          <h3 id="ww-link-heading">Connect existing work</h3><p><small>Save an existing record ID as a reference. Its existence and access are checked in the original tool.</small></p>
+          <div class="ww-record-list" id="ww-links"></div>
+          <form id="ww-link-form" class="ww-form"><div class="ww-field"><label for="reference-id" id="ww-reference-label">Existing record ID</label><input id="reference-id" name="refId" maxlength="180" pattern="[A-Za-z0-9][A-Za-z0-9:_./\-]{0,179}" required autocomplete="off" placeholder="Paste the existing record ID"></div><button class="ww-button" type="submit">Save reference</button></form>
+          <p><small>Saving a reference does not complete work, verify a credential, buy an item, or cast a vote.</small></p>
+        </section>
+        <section id="ww-tab-characters" role="tabpanel" aria-labelledby="ww-tab-button-characters" hidden>
+          <h3>Character drafts</h3><p><small>Prepare a role and suggested tools. A trusted adapter must bind a real model identity and approve permissions before it can act.</small></p>
+          <div class="ww-record-list" id="ww-npcs"></div>
+          <form id="ww-npc-form" class="ww-form">
+            <div class="ww-field"><label for="npc-name">Character name</label><input id="npc-name" name="name" maxlength="100" required placeholder="e.g. The workshop host"></div>
+            <div class="ww-field"><label for="npc-model">Intended model ID</label><input id="npc-model" name="modelId" maxlength="180" required placeholder="e.g. qwen3.5:4b" autocomplete="off"></div>
+            <div class="ww-field"><label for="npc-prompt">Character instructions</label><textarea id="npc-prompt" name="pilotPrompt" maxlength="5000" rows="4" required placeholder="Describe their role, tone, and how they help visitors."></textarea></div>
+            <fieldset><legend>Suggested tools</legend><div id="ww-npc-tools"></div></fieldset>
+            <p><small>These instructions remain below platform policy, tool permissions, and user commands. Saving does not start inference.</small></p>
+            <button class="ww-button" type="submit">Save character draft</button>
+          </form>
+        </section>
+      </section>
+      <section class="ww-panel" id="ww-source-tools" hidden><span class="ww-eyebrow">Continue the real work</span><h3 id="ww-tool-label"></h3><p><small id="ww-tool-description"></small></p><div class="ww-form"><a class="ww-button is-primary" id="ww-open-tool" href="/app/working-campus-v440.html">Open original tool ↗</a><a class="ww-button is-quiet" id="ww-open-guide" href="/app/working-campus-v440.html">Talk to your guide ↗</a></div><small>Opens the existing tool. References are for your review; no private conversation is transferred.</small></section>
+    </aside>
+  </div>
+  <noscript><p class="ww-notice">Enable JavaScript to create and preview device drafts. <a href="/app/working-campus-v440.html">Return to Civweave</a>.</p></noscript>
+</main>
+<script type="module" src="/app/worldweaver/workspace.mjs"></script>
+</body>
+</html>

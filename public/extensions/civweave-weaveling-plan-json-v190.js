@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.2.13-weaveling-plan-json-v190-explicit-dependency-order';
+const VERSION='1.3.0-weaveling-plan-json-v190-authored-import';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const CAMPUS_KEY='civweave.working-campus.v1';
 const HANDOFF_KEY='civweave.realm-inbox.v1';
@@ -139,6 +139,80 @@ After writing the subsystem paths, author pathOrder from their actual prerequisi
 Each path's steps, completion criteria, and evidence must be specific to this user's request. The steps must produce the criteria, and evidence must check them against the agreed target with observable, practical checks. Include only requested consent in the optional governance layer. If included, give it title, purpose, agreements, and a concrete reviewQuestion; if excluded, use included false and empty content. The Quest remains in REVIEW pending explicit activation. Return only schema-matching JSON.`},{role:'user',content:`Working context:\n${JSON.stringify(working)}\nPlan all necessary future work for the complete goal; do not execute any work now. Return the reviewable Quest JSON.`}];
 }
 
+const AUTHORING_SOURCE='/extensions/civweave-weaveling-plan-json-v190.js';
+const AUTHORED_IMPORT_SCHEMA='civweave.quest-authored-import-receipt.v1';
+let authoredImportTail=Promise.resolve();
+function importError(code,message,issues=[]){const error=new Error(message);error.code=code;error.issues=issues;return error}
+async function digest(value){
+  if(!globalThis.crypto?.subtle||typeof TextEncoder!=='function')throw importError('QUEST_IMPORT_DIGEST_UNAVAILABLE','A secure local digest is required to record the authoring contract.');
+  const bytes=new TextEncoder().encode(JSON.stringify(value)),hash=await crypto.subtle.digest('SHA-256',bytes);
+  return'sha256:'+Array.from(new Uint8Array(hash),byte=>byte.toString(16).padStart(2,'0')).join('');
+}
+async function authoredPlanContract({text,history=[],outputFormat='subsystems'}={}){
+  if(!clean(text,8000))throw importError('QUEST_IMPORT_REQUEST_REQUIRED','Supply the governing intention before importing a Quest.');
+  if(!['subsystems','native-paths'].includes(outputFormat))throw importError('QUEST_IMPORT_VALIDATION_FAILED','Choose the canonical subsystem or native-paths output schema.');
+  const mem=memory(Array.isArray(history)?history.slice(-24):[],text),messages=outputFormat==='native-paths'?nativeQuestPrompt(mem):prompt(mem),schema=outputFormat==='native-paths'?nativeQuestSchema(mem.structuralConstraints):planSchemaFor(mem.structuralConstraints);
+  return{messages,schema,memory:mem,stageContract:{sourceModule:AUTHORING_SOURCE,revision:VERSION,promptDigest:await digest({messages,schema}),outputSchema:'civweave.weaveling-quest-json.v190',outputFormat}};
+}
+function strictSchemaIssues(value,schema,path='$',issues=[]){
+  if(schema?.type==='object'&&value&&typeof value==='object'&&!Array.isArray(value)){
+    if(schema.additionalProperties===false)for(const key of Object.keys(value))if(!Object.hasOwn(schema.properties||{},key))issues.push(`${path}.${key} is not in the canonical output schema.`);
+    for(const[key,child]of Object.entries(schema.properties||{}))if(Object.hasOwn(value,key))strictSchemaIssues(value[key],child,`${path}.${key}`,issues);
+  }else if(schema?.type==='array'&&Array.isArray(value)){
+    if(schema.uniqueItems&&new Set(value.map(item=>JSON.stringify(item))).size!==value.length)issues.push(`${path} must contain unique items.`);
+    for(let i=0;i<Math.min(value.length,64);i++)strictSchemaIssues(value[i],schema.items,`${path}[${i}]`,issues);
+  }else if(schema?.type==='string'&&typeof value==='string'){
+    if(Number.isFinite(schema.minLength)&&value.trim().length<schema.minLength)issues.push(`${path} is too short.`);
+    if(Number.isFinite(schema.maxLength)&&value.length>schema.maxLength)issues.push(`${path} is too long.`);
+  }
+  return issues;
+}
+async function importAuthoredPlanInternal(args={}){
+  let savedItem=null;
+  try{
+    if(args.confirmed!==true)throw importError('QUEST_IMPORT_CONSENT_REQUIRED','Select the explicit Import authored Quest control to save this supplied content. Import does not activate the Quest.');
+    if(args.expectedRevision!=null&&args.expectedRevision!==VERSION)throw importError('QUEST_IMPORT_REVISION_CONFLICT','The authoring stage changed. Read the current contract and review the supplied content again.');
+    const planner=globalThis.CivweaveIntentionPlanner,materializer=globalThis.CivweaveWeavelingPlanMaterializationV265,validator=globalThis.CivweaveModelRuntime?.validateSchema;
+    if(!planner?.persist||!planner?.authoredImportedPlan||!materializer?.materialize||typeof validator!=='function')throw importError('QUEST_IMPORT_RUNTIME_UNAVAILABLE','The canonical Quest validator, planner and review materializer must be ready.');
+    const serialized=typeof args.outputJson==='string'?args.outputJson:JSON.stringify(args.outputJson);
+    if(!serialized||serialized.length>100000)throw importError('QUEST_IMPORT_VALIDATION_FAILED','The authored Quest must be valid JSON of at most 100,000 characters.');
+    let raw;try{raw=JSON.parse(serialized)}catch{throw importError('QUEST_IMPORT_VALIDATION_FAILED','The authored Quest is not valid JSON. Paste a complete canonical output object.');}
+    const history=Array.isArray(args.history)?args.history.slice(-24):[],contract=await authoredPlanContract({...args,history});
+    if(args.expectedPromptDigest!=null&&args.expectedPromptDigest!==contract.stageContract.promptDigest)throw importError('QUEST_IMPORT_REVISION_CONFLICT','The effective prompt context changed. Read the current stage contract and review the authored content again.');
+    const issues=[...validator(raw,contract.schema),...strictSchemaIssues(raw,contract.schema)];
+    if(issues.length)throw importError('QUEST_IMPORT_VALIDATION_FAILED',issues.slice(0,12).join('\n'),issues.slice(0,50));
+    const inputDigest=await digest({raw,text:contract.memory.currentWish,outputFormat:contract.stageContract.outputFormat}),key=clean(args.idempotencyKey,180),items=parse(localStorage.getItem(INTENTIONS_KEY),[]);
+    if(!Array.isArray(items))throw importError('QUEST_IMPORT_STORAGE_INVALID','The saved Quest ledger could not be read.');
+    const sameKey=key&&items.map(item=>({item,receipt:item?.plan?.authoring?.receipt?.idempotencyKey===key?item.plan.authoring.receipt:(item?.plan?.authoring?.importHistory||[]).find(entry=>entry?.receipt?.idempotencyKey===key)?.receipt})).find(match=>match.receipt);
+    if(sameKey){
+      if(sameKey.receipt.inputDigest!==inputDigest)throw importError('QUEST_IMPORT_IDEMPOTENCY_CONFLICT','This import key already belongs to different authored content.');
+      const current=sameKey.item,historical=current.plan?.authoring?.receipt?.id!==sameKey.receipt.id;
+      if(!planner.authoredImportedPlan(current.plan)&&!planner.aiAuthoredPlan(current.plan))throw importError('QUEST_IMPORT_VALIDATION_FAILED','The earlier import receipt or saved Quest is invalid.');
+      savedItem=current;
+      if(!historical&&current.plan.state==='review')materializer.materialize(current.plan,{source:'weaveling-authored-import-v190'});
+      return{ok:true,unchanged:true,historical,saved:true,item:current,plan:current.plan,receipt:sameKey.receipt,stageContract:sameKey.receipt.stageContract,inferenceInvocations:0};
+    }
+    let plan;try{plan=normalizePlan(raw,{text:args.text,history,requestedWish:contract.memory.currentWish,structuralConstraints:contract.memory.structuralConstraints})}catch(error){throw importError('QUEST_IMPORT_VALIDATION_FAILED',clean(error?.message||error,1600).replace(/AI Quest/g,'Authored Quest'));}
+    const fingerprint=`${plan.title}|${plan.wish}`.trim().toLowerCase().slice(0,500),existing=args.planId?items.find(item=>item?.id===args.planId||item?.plan?.id===args.planId):items.find(item=>item?.kind==='weave-plan'&&!item?.plan?.collective&&item.fingerprint===fingerprint&&!['completed','abandoned','archived','cancelled','canceled'].includes(item.state));
+    if(args.planId&&!existing)throw importError('QUEST_IMPORT_REVISION_CONFLICT','The Quest being revised no longer exists.');
+    if(existing&&String(existing.plan?.state||existing.state)!=='review')throw importError('QUEST_IMPORT_REVISION_CONFLICT','Only a Quest still in REVIEW can receive an authored revision. Accepted work is preserved.');
+    const priorRevision=Math.max(Number(existing?.plan?.authoring?.receipt?.artifactRevision)||0,...(existing?.plan?.authoring?.importHistory||[]).map(entry=>Number(entry?.receipt?.artifactRevision)||0));
+    if(args.expectedPlanRevision!=null&&Number(args.expectedPlanRevision)!==priorRevision)throw importError('QUEST_IMPORT_REVISION_CONFLICT','The saved Quest revision changed. Reload and review the current draft before importing.');
+    if(existing){plan.id=existing.id;plan.createdAt=existing.createdAt||existing.plan.createdAt;}
+    const declared=args.authorship||{},kind=declared.kind||'external-author',allowedKinds=['human','editor-agent','external-author'];
+    if(!allowedKinds.includes(kind))throw importError('QUEST_IMPORT_VALIDATION_FAILED','Authorship must be attributed as human, editor-agent, or external-author.');
+    const receipt={schema:AUTHORED_IMPORT_SCHEMA,id:uid('authored-import'),kind:'manual-plan-insert',planId:plan.id,at:now(),artifactRevision:priorRevision+1,baseRevision:priorRevision,idempotencyKey:key,inputDigest,stageContract:contract.stageContract,validation:{state:'valid',issues:[]},authorization:{state:'pending',authorizedBy:null},execution:{state:'not-started',receipts:[]},inferenceInvocations:0};
+    plan.signals={aiGenerated:false,externallyAuthored:true};plan.authoring={mode:'external-authored-json',aiGenerated:false,externallyAuthored:true,revision:VERSION,authorship:{kind,principalId:clean(declared.principalId,180),changeSummary:clean(declared.changeSummary,1200),attribution:'declared-external-authorship'},receipt};
+    if(plan.dependencyOrder)plan.dependencyOrder.source='authored-path-order';
+    if(!planner.authoredImportedPlan(plan))throw importError('QUEST_IMPORT_VALIDATION_FAILED','The normalized authored Quest failed its canonical persistence contract.');
+    savedItem=planner.persist(plan);
+    if(!savedItem?.plan||savedItem.plan.authoring?.receipt?.id!==receipt.id)throw importError('QUEST_IMPORT_SAVE_FAILED','The canonical planner did not acknowledge this authored revision.');
+    materializer.materialize(savedItem.plan,{source:'weaveling-authored-import-v190'});
+    return{ok:true,saved:true,item:savedItem,plan:savedItem.plan,receipt:savedItem.plan.authoring.receipt,stageContract:contract.stageContract,questAuthoring:{aiGenerated:false,externallyAuthored:true,revision:VERSION},inferenceInvocations:0};
+  }catch(error){return{ok:false,saved:Boolean(savedItem),...(savedItem?{item:savedItem,plan:savedItem.plan,receipt:savedItem.plan.authoring?.receipt}:{}),code:error?.code||'QUEST_IMPORT_SAVE_FAILED',error:clean(error?.message||error,2000),issues:error?.issues||[],inferenceInvocations:0};}
+}
+function createAuthoredPlan(args={}){const pending=authoredImportTail.then(()=>importAuthoredPlanInternal(args));authoredImportTail=pending.catch(()=>{});return pending}
+
 function nativeQuestSchema(scope={}){
   // Compact model-authored path array for low-power Android. Validation below
   // still rejects missing required realm paths or invalid completion proofs.
@@ -233,6 +307,6 @@ async function createModelPlan(args,api){
 function install(){installLocalStructuredPlanBridge();const api=globalThis.CivweaveAssistantV141;if(!api?.respond)return false;if(hasResponseLayer(api.respond,'__weavelingPlanJsonV190'))return true;const priorFn=api.respond,prior=priorFn.bind(api),wrapped=async args=>{const text=clean(args?.text),system=args?.systemId||'civweave';if(system==='civweave'){const action=control(text);if(action){const handled=controlResponse(action);if(handled)return handled}const history=args?.history||[];if(!questRevisionIntent(text)&&learningJourneyIntent(text)&&!combinedLearningProductionIntent(text)){try{return await runLearningJourney(args)}catch(error){return{response:{answer:`Moss could not start the Learning Journey plan: ${clean(error?.message||error,1000)} No learning content was generated or queued.`,choice:{mode:'Learn',system:'living-school',room:'',nextAction:'Retry after the Learning Journey runtime is ready.'},assumptions:[],requiresConsent:false,confidence:1},provider:'living-school-learning-plan-unavailable',model:TASK_DEEP_MODEL,plan:null}}}let pending=readPendingProject();if(pending&&!pendingMatchesHistory(pending,history)){clearPendingProject();pending=null}if(pending&&PENDING_CANCEL.test(text)){clearPendingProject();return prior(args)}if(pending&&substantiveQualifierReply(text)){const cfg=api.selectedConfig?.()||globalThis.CivweaveModelRuntime?.readSharedConfig?.('interactive')||{},combined=combinedPendingText(pending,text);try{const result=await createModelPlan({...args,text:combined,latestRequest:text},api);clearPendingProject();return result}catch(error){return generationFailure(error,{...cfg,model:clean(cfg.model||TASK_DEEP_MODEL,240)})}}const pre=await(api.context?.(text,system,history)||Promise.resolve({currentContext:{systemId:system},routingAnswer:{room:'civweave.quad'}}));if(shouldQualifyProject(text)){savePendingProject(text);return prior(args)}if(planIntent(text,history,pre)){const cfg=api.selectedConfig?.()||globalThis.CivweaveModelRuntime?.readSharedConfig?.('interactive')||{};try{return await createModelPlan({...args,latestRequest:text},api)}catch(error){return generationFailure(error,cfg)}}}return prior(args)};wrapped.__weavelingPlanJsonV190=true;wrapped.__weavelingAIQuestRequiredV1=true;wrapped.__cwMossLearningGoalPlannerV1=true;wrapped.__prior=priorFn;for(const key of ['__cwUnifiedChatSystemV1','__guideIdentityIntegrityV216','__deterministicModeV175'])if(priorFn[key])wrapped[key]=priorFn[key];api.respond=wrapped;api.weavelingPlanSchema=PLAN_SCHEMA;api.weavelingPlanRevision=VERSION;api.weavelingQuestAIRequired=true;return true}
 function reassert(){installLocalStructuredPlanBridge();install()}
 if(typeof addEventListener==='function')for(const name of ['civweave:assistant-runtime-ready','civweave:guide-loader-reset','civweave:local-model-runtime-ready','civweave:gemma4-litert-fast-runtime-ready','civweave:guide-chat-opened','pageshow'])addEventListener(name,()=>queueMicrotask(reassert));
-globalThis.CivweaveWeavelingPlanJsonV190={version:VERSION,install,schema:PLAN_SCHEMA,memory,prompt,normalizePlan,control,latestItem,stripGreeting,learningJourneyIntent,combinedLearningProductionIntent,runLearningJourney,explicitProjectIntent,planIntent,contextualPlanIntent,resolvedPlanningText,selectedLocal,readPendingProject,savePendingProject,clearPendingProject,shouldQualifyProject,substantiveQualifierReply,preferredTaskModel,taskDeepModel:TASK_DEEP_MODEL,localStructuredTransport,installLocalStructuredPlanBridge,createModelPlan,isAIProvider,aiQuestAuthoringRequired:true,supportsClippedDraftV1:true,deterministicQuestFallback:false,localStructuredResponseRouterBypass:true,localLearningPlanBridge:true,learningIntentPassover:true,qualificationHandoff:true,taskGenerationModelPolicy:'prefer-gemma4-e4b-when-installed',structuredTaskTimeoutMs:600000};
+globalThis.CivweaveWeavelingPlanJsonV190={version:VERSION,install,schema:PLAN_SCHEMA,memory,prompt,normalizePlan,control,latestItem,stripGreeting,learningJourneyIntent,combinedLearningProductionIntent,runLearningJourney,explicitProjectIntent,planIntent,contextualPlanIntent,resolvedPlanningText,selectedLocal,readPendingProject,savePendingProject,clearPendingProject,shouldQualifyProject,substantiveQualifierReply,preferredTaskModel,taskDeepModel:TASK_DEEP_MODEL,localStructuredTransport,installLocalStructuredPlanBridge,createModelPlan,createAuthoredPlan,importAuthoredPlan:createAuthoredPlan,authoredPlanContract,isAIProvider,aiQuestAuthoringRequired:true,supportsClippedDraftV1:true,deterministicQuestFallback:false,localStructuredResponseRouterBypass:true,localLearningPlanBridge:true,learningIntentPassover:true,qualificationHandoff:true,taskGenerationModelPolicy:'prefer-gemma4-e4b-when-installed',structuredTaskTimeoutMs:600000};
 reassert();
 })();

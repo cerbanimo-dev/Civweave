@@ -17,7 +17,7 @@ const [wrapper,assets,generator,release,installer,completion,recovery,rootBridge
   read('package.json'),read('VERSION')
 ]);
 
-const shellRevision='shell-assets-v1-repair-v450-desktop-startup-bounded';
+const shellRevision='shell-assets-v1-repair-v451-threshold-desktop-recovery';
 const releaseRevision='release-generation-boundary-v10-bounded-release-storage';
 const installerRevision='v14-observer-quiescence';
 const output=generator.match(/const output=(`[^]*?`);\s*if\(process\.argv/);

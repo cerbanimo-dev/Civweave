@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.4-guide-capability-passover-v1-explicit-change-requests';
+const VERSION='1.2.0-guide-capability-passover-v1-artifact-references';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 
@@ -85,6 +85,57 @@ function candidateArtifact(text){return candidateDetails(text).artifact}
 function offerKey(system){return`${STORE_PREFIX}.${system}`}
 function readOffer(system){try{return parse(localStorage.getItem(offerKey(system)),null)}catch{return null}}
 function writeOffer(offer){try{localStorage.setItem(offerKey(offer.sourceSystem),JSON.stringify(offer))}catch{}return offer}
+const referenceAccepting=new Set();
+function referenceFailure(code,error){return{ok:false,code,error,inferenceInvocations:0}}
+function referenceKey(system){return`${STORE_PREFIX}.reference.${system}`}
+function referenceSnapshot(value){if(!value||typeof value!=='object')return null;const out={};for(const key of ['schema','id','kind','state','sourceSystem','targetSystem','ownerSystem','artifactClass','targetArtifactClass','artifactRef','artifactRevision','createdAt','acceptedAt','resubmit','materialized','destinationValidation'])if(Object.hasOwn(value,key))out[key]=value[key];out.consent={declared:value.consent?.declared===true,scope:'artifact-reference-only'};return out}
+function readArtifactReferenceOffer(sourceSystem){if(!SYSTEMS.includes(sourceSystem))return null;try{const raw=localStorage.getItem(referenceKey(sourceSystem));return raw&&raw.length<=6000?referenceSnapshot(parse(raw,null)):null}catch{return null}}
+function validateArtifactReference(input){
+  if(!SYSTEMS.includes(input?.sourceSystem)||!SYSTEMS.includes(input?.targetSystem)||input.sourceSystem===input.targetSystem)return referenceFailure('PASSOVER_REFERENCE_TARGET_INVALID','Choose distinct canonical source and destination guides.');
+  // This source adapter is intentionally narrow. Other owners must supply their
+  // own saved-record/revision contract; a guide ID is never proof of ownership.
+  if(input.sourceSystem!=='civweave'||input.ownerSystem!=='civweave'||input.artifactClass!=='weave')return referenceFailure('PASSOVER_REFERENCE_SOURCE_UNSUPPORTED','Only saved Weaveling Quest references have an implemented source adapter.');
+  const targetClass=input.targetArtifactClass||artifactForSystem(input.targetSystem);
+  if(ownerFor(targetClass)!==input.targetSystem)return referenceFailure('PASSOVER_REFERENCE_TARGET_INVALID','The destination artifact class must belong to its canonical guide.');
+  if(typeof input.artifactRef!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,179}$/.test(input.artifactRef))return referenceFailure('PASSOVER_REFERENCE_INVALID','Supply an exact saved Quest identifier.');
+  const revision=input.artifactRevision;if(!(Number.isInteger(revision)&&revision>0||typeof revision==='string'&&revision.length>0&&revision.length<=120))return referenceFailure('PASSOVER_REFERENCE_REVISION_INVALID','Supply the exact saved artifact revision.');
+  let rows;try{rows=parse(localStorage.getItem('civweave.intentions.v127'),[])}catch{return referenceFailure('PASSOVER_REFERENCE_READ_FAILED','The canonical Quest ledger could not be read.');}
+  const row=Array.isArray(rows)&&rows.find(item=>item?.kind==='weave-plan'&&(item.id===input.artifactRef||item.plan?.id===input.artifactRef)),plan=row?.plan;
+  if(!plan||plan.id!==input.artifactRef||plan.schema!=='civweave.intention-weave.v1')return referenceFailure('PASSOVER_REFERENCE_NOT_FOUND','The saved Quest reference no longer exists.');
+  const actualRevision=plan.authoring?.receipt?.artifactRevision||plan.updatedAt||row.updatedAt;
+  if(actualRevision!==revision)return referenceFailure('PASSOVER_REFERENCE_REVISION_CONFLICT','The saved Quest revision changed. Offer its current reference explicitly.');
+  return{ok:true,targetArtifactClass:targetClass};
+}
+function offerArtifactReference(input={}){
+  if(input.consent?.declared!==true)return referenceFailure('PASSOVER_REFERENCE_CONSENT_REQUIRED','Explicit consent is required to offer this saved artifact reference.');
+  const validation=validateArtifactReference(input);if(!validation.ok)return validation;
+  const offer={schema:'civweave.guide-capability-passover.v1',id:uid(),kind:'artifact-reference',state:'offered',sourceSystem:input.sourceSystem,targetSystem:input.targetSystem,ownerSystem:input.ownerSystem,artifactClass:input.artifactClass,targetArtifactClass:validation.targetArtifactClass,artifactRef:input.artifactRef,artifactRevision:input.artifactRevision,consent:{declared:true,scope:'artifact-reference-only'},createdAt:now(),acceptedAt:null,resubmit:false,materialized:false,destinationValidation:'required'};
+  try{localStorage.setItem(referenceKey(offer.sourceSystem),JSON.stringify(offer))}catch{return referenceFailure('PASSOVER_REFERENCE_SAVE_FAILED','The reference offer could not be saved on this device.');}
+  try{dispatchEvent(new CustomEvent('civweave:guide-artifact-reference-offered',{detail:{...offer}}))}catch{}
+  return{ok:true,offer,inferenceInvocations:0};
+}
+async function acceptArtifactReference(input={}){
+  if(input.confirmed!==true)return referenceFailure('PASSOVER_REFERENCE_CONSENT_REQUIRED','Explicitly accept the saved reference before opening another guide.');
+  const offer=readArtifactReferenceOffer(input.sourceSystem);
+  if(!offer||offer.kind!=='artifact-reference'||offer.id!==input.id||offer.sourceSystem!==input.sourceSystem||offer.targetSystem!==input.targetSystem||offer.artifactRef!==input.artifactRef||offer.artifactRevision!==input.artifactRevision||offer.consent?.declared!==true)return referenceFailure('PASSOVER_REFERENCE_OFFER_CONFLICT','Accept the exact current source, destination, saved artifact reference and revision.');
+  const validation=validateArtifactReference(offer);if(!validation.ok)return validation;
+  if(offer.state==='transferred-reference')return{ok:true,unchanged:true,offer,inferenceInvocations:0};
+  if(offer.state!=='offered'||referenceAccepting.has(offer.id))return referenceFailure('PASSOVER_REFERENCE_BUSY','This reference transfer is already in progress.');
+  const surface=globalThis.CivweaveGuideChatSurfaceV350||globalThis.CivweavePersistentGuideChatV215;
+  if(typeof surface?.open!=='function'&&typeof surface?.switchGuide!=='function')return referenceFailure('PASSOVER_REFERENCE_DESTINATION_UNAVAILABLE','The shared destination guide cannot open yet.');
+  referenceAccepting.add(offer.id);
+  try{
+    const opened=typeof surface.open==='function'?await surface.open({guide:offer.targetSystem,focus:true}):await surface.switchGuide(offer.targetSystem,{open:true,focus:true});
+    if(opened===false)return referenceFailure('PASSOVER_REFERENCE_DESTINATION_UNAVAILABLE','The shared destination guide did not open.');
+    const currentOffer=readArtifactReferenceOffer(offer.sourceSystem),currentValidation=validateArtifactReference(offer);
+    if(currentOffer?.id!==offer.id)return referenceFailure('PASSOVER_REFERENCE_OFFER_CONFLICT','The current offer changed while the destination was opening.');
+    if(!currentValidation.ok)return currentValidation;
+    const next={...offer,state:'transferred-reference',acceptedAt:now(),materialized:false,destinationValidation:'required'};
+    try{localStorage.setItem(referenceKey(offer.sourceSystem),JSON.stringify(next))}catch{return referenceFailure('PASSOVER_REFERENCE_SAVE_FAILED','The guide opened, but the reference transfer receipt could not be saved.');}
+    try{dispatchEvent(new CustomEvent('civweave:guide-artifact-reference-transferred',{detail:{...next}}))}catch{}
+    return{ok:true,offer:next,inferenceInvocations:0};
+  }catch(error){return referenceFailure('PASSOVER_REFERENCE_DESTINATION_UNAVAILABLE',compact(error?.message||error,900));}finally{referenceAccepting.delete(offer.id)}
+}
 
 function canonicalPrompt(system,tiny=false){
   const own=canonicalFor(system);
@@ -235,7 +286,7 @@ function start(){
   for(const name of ['civweave:assistant-runtime-ready','civweave:response-router-installed','civweave:runtime-spine-ready','civweave:unified-chat-system-ready','civweave:guide-chat-ready','civweave:guide-chat-opened','civweave:guide-chat-state','civweave:realm-guide-thread-changed','pageshow'])addEventListener(name,()=>queueMicrotask(synchronize));
 }
 
-const api=Object.freeze({version:VERSION,owners:OWNER,systems:SYSTEMS,canonicalLanguage:CANONICAL,canonicalFor,artifactForSystem,candidateArtifact,candidateDetails,explicitCanonicalArtifact,directCanonicalArtifact,mentionedCanonicalArtifact,canonicalPrompt,canonicalPromptRequest,registerPromptMiddleware,ownerFor,maybePassover,prepareOwnedRequest,acceptOffer,decorate,synchronize,preservesLivingSchoolGenerator:true,passoverResubmitsOriginal:true,canonicalUserFacingTerms:true,canonicalPromptBeforeMiniLM:true});
+const api=Object.freeze({version:VERSION,owners:OWNER,systems:SYSTEMS,canonicalLanguage:CANONICAL,canonicalFor,artifactForSystem,candidateArtifact,candidateDetails,explicitCanonicalArtifact,directCanonicalArtifact,mentionedCanonicalArtifact,canonicalPrompt,canonicalPromptRequest,registerPromptMiddleware,ownerFor,maybePassover,prepareOwnedRequest,acceptOffer,offerArtifactReference,acceptArtifactReference,readArtifactReferenceOffer,decorate,synchronize,preservesLivingSchoolGenerator:true,passoverResubmitsOriginal:true,artifactReferenceResubmits:false,canonicalUserFacingTerms:true,canonicalPromptBeforeMiniLM:true});
 globalThis.CivweaveGuideCapabilityPassoverV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.1.1-intention-planner-v141-collective-line-identity';
+const VERSION='1.2.0-intention-planner-v141-authored-import';
 const INTENTIONS_KEY='civweave.intentions.v127';
 const PLAN_SCHEMA='civweave.intention-weave.v1';
 const EXPLICIT_PLAN_TRIGGER=/\b(plan|roadmap|routine|program|curriculum|pathway|steps|practice schedule|daily practice|weekly practice|reviewable quest|reviewable weave|set (?:an )?intention)\b|\bteach me\b|\bhelp me learn\b|\bcreate (?:me )?(?:a )?plan\b/i;
@@ -57,7 +57,34 @@ function aiAuthoredPlan(plan){
   const authoring=plan?.authoring,provider=clean(authoring?.provider).toLowerCase();
   return Boolean(plan?.id&&plan?.schema===PLAN_SCHEMA&&authoring?.aiGenerated===true&&authoring?.mode==='model-structured-json'&&provider&&!NON_AI_PROVIDER_RE.test(provider));
 }
+function authoredImportedPlan(plan){
+  const authoring=plan?.authoring,receipt=authoring?.receipt,contract=receipt?.stageContract;
+  const text=(value,max)=>typeof value==='string'&&value.trim().length>0&&value.length<=max;
+  const texts=(value,maxItems,maxLength)=>Array.isArray(value)&&value.length>0&&value.length<=maxItems&&value.every(item=>text(item,maxLength));
+  const digest=value=>typeof value==='string'&&/^sha256:[a-f0-9]{64}$/.test(value);
+  if(!plan?.id||plan.schema!==PLAN_SCHEMA||plan.requiresExplicitActivation!==true||authoring?.mode!=='external-authored-json'||authoring.aiGenerated!==false||authoring.externallyAuthored!==true||authoring.provider!=null||!['human','editor-agent','external-author'].includes(authoring.authorship?.kind))return false;
+  if(receipt?.schema!=='civweave.quest-authored-import-receipt.v1'||receipt.kind!=='manual-plan-insert'||receipt.planId!==plan.id||receipt.inferenceInvocations!==0||receipt.validation?.state!=='valid'||receipt.authorization?.state!=='pending'||receipt.execution?.state!=='not-started'||!Number.isInteger(receipt.artifactRevision)||receipt.artifactRevision<1||!digest(receipt.inputDigest)||!digest(contract?.promptDigest)||contract?.sourceModule!=='/extensions/civweave-weaveling-plan-json-v190.js'||contract.revision!==authoring.revision||contract.outputSchema!=='civweave.weaveling-quest-json.v190'||!['subsystems','native-paths'].includes(contract.outputFormat))return false;
+  if(!text(plan.title,240)||!text(plan.wish,4000)||!text(plan.outcome,2400)||!texts(plan.assumptions,8,700)||!Array.isArray(plan.paths)||!plan.paths.length||plan.paths.length>4)return false;
+  const realmTypes={'living-school':'learning',cerbanimo:'skilled-labor',fellowfare:'material-acquirement',anarchadia:'civic-governance'},realms=new Set(),ids=new Set();
+  for(const path of plan.paths){
+    if(!text(path.id,120)||ids.has(path.id)||realms.has(path.realm)||realmTypes[path.realm]!==path.type||!text(path.title,240)||!text(path.purpose,1200)||!texts(path.steps,8,700)||!text(path.completionCriteria,1200)||!texts(path.evidence,8,500))return false;
+    ids.add(path.id);realms.add(path.realm);
+  }
+  for(const path of plan.paths)if(path.dependsOn&&(!Array.isArray(path.dependsOn)||path.dependsOn.some(id=>!ids.has(id)||id===path.id)))return false;
+  if(plan.governance&&(!text(plan.governance.title,240)||!text(plan.governance.purpose,1200)||!text(plan.governance.reviewQuestion,700)||!Array.isArray(plan.governance.agreements)||plan.governance.agreements.length>8||plan.governance.agreements.some(item=>!text(item,500))))return false;
+  return true;
+}
 function savedItems(){const value=parse(localStorage.getItem(INTENTIONS_KEY),[]);return Array.isArray(value)?value:[]}
+function preserveAuthoringHistory(prior,next){
+  if(!prior)return;
+  const history=prior.authoring?.importHistory;
+  if(history!=null&&!Array.isArray(history)){const error=new Error('The saved authored revision history is invalid.');error.code='QUEST_IMPORT_HISTORY_INVALID';throw error}
+  if(!prior.authoring?.receipt&&!next.authoring?.receipt&&!history?.length)return;
+  const snapshot=structuredClone(prior);if(snapshot.authoring)delete snapshot.authoring.importHistory;
+  const revisions=[...(history||[]),{receipt:snapshot.authoring?.receipt||null,plan:snapshot}];
+  if(revisions.length>8||JSON.stringify(revisions).length>250000){const error=new Error('The Quest has reached its local authored revision-history limit. Export its saved history before starting a new Quest; no revision was replaced.');error.code='QUEST_IMPORT_HISTORY_LIMIT';throw error}
+  next.authoring={...next.authoring,importHistory:revisions};
+}
 function collectiveLine(plan){return plan?.collective?.id==='starling'?clean(plan.collective.lineId):''}
 function existingCollective(items,plan){
   const line=collectiveLine(plan),sameId=items.find(item=>item?.id===plan.id||item?.plan?.id===plan.id);
@@ -67,22 +94,23 @@ function existingCollective(items,plan){
   return line?items.find(item=>collectiveLine(item?.plan)===line)||null:null;
 }
 function persist(plan){
-  if(!aiAuthoredPlan(plan)){
+  if(!aiAuthoredPlan(plan)&&!authoredImportedPlan(plan)){
     const error=new Error('Quest persistence requires validated AI-authored structured output.');error.code='QUEST_AI_AUTHORING_REQUIRED';emit('civweave:quest-ai-authority-rejected',{surface:'intention-planner.persist',planId:clean(plan?.id),title:clean(plan?.title)});throw error;
   }
-  const items=savedItems(),line=collectiveLine(plan),existing=existingCollective(items,plan),fingerprint=lower(`${plan.title}|${plan.wish}`).slice(0,500),duplicate=existing||(!line&&items.find(item=>item?.kind==='weave-plan'&&!collectiveLine(item.plan)&&item?.fingerprint===fingerprint&&!['completed','abandoned','archived','cancelled','canceled'].includes(item?.state))),at=new Date().toISOString();
+  const items=savedItems(),line=collectiveLine(plan),existing=existingCollective(items,plan),fingerprint=lower(`${plan.title}|${plan.wish}`).slice(0,500),duplicate=existing||(authoredImportedPlan(plan)&&items.find(item=>item?.id===plan.id))||(!line&&items.find(item=>item?.kind==='weave-plan'&&!collectiveLine(item.plan)&&item?.fingerprint===fingerprint&&!['completed','abandoned','archived','cancelled','canceled'].includes(item?.state))),at=new Date().toISOString();
+  if(authoredImportedPlan(plan)&&duplicate&&String(duplicate.plan?.state||duplicate.state)!=='review'){const error=new Error('An authored import may revise only a Quest still in REVIEW.');error.code='QUEST_IMPORT_REVISION_CONFLICT';throw error}
   // Re-importing a Collective line must never reset its accepted work, path IDs,
   // or terminal decision. Revisions are editable only while the Quest is REVIEW.
   if(existing&&String(existing.plan?.state||existing.state)!=='review')return existing;
   if(duplicate){
-    plan.id=duplicate.id;plan.createdAt=duplicate.plan?.createdAt||duplicate.createdAt||plan.createdAt;plan.updatedAt=at;duplicate.plan=plan;duplicate.text=plan.title;duplicate.state='review';duplicate.done=false;duplicate.updatedAt=at;
+    plan.id=duplicate.id;plan.createdAt=duplicate.plan?.createdAt||duplicate.createdAt||plan.createdAt;plan.updatedAt=at;preserveAuthoringHistory(duplicate.plan,plan);duplicate.plan=plan;duplicate.text=plan.title;duplicate.state='review';duplicate.done=false;duplicate.updatedAt=at;
     localStorage.setItem(INTENTIONS_KEY,JSON.stringify(items.slice(0,100)));dispatchChanged(items);return duplicate;
   }
   const item={id:plan.id,kind:'weave-plan',fingerprint,text:plan.title,state:'review',done:false,createdAt:plan.createdAt||at,updatedAt:plan.updatedAt||at,plan};items.unshift(item);localStorage.setItem(INTENTIONS_KEY,JSON.stringify(items.slice(0,100)));dispatchChanged(items);return item;
 }
 function restore(plan){
   if(!plan?.id)return null;const items=savedItems(),existing=existingCollective(items,plan)||items.find(item=>item?.id===plan.id||item?.plan?.id===plan.id);if(existing)return existing;
-  if(!aiAuthoredPlan(plan)){emit('civweave:quest-ai-authority-rejected',{surface:'intention-planner.restore',planId:clean(plan?.id),title:clean(plan?.title)});return null}
+  if(!aiAuthoredPlan(plan)&&!authoredImportedPlan(plan)){emit('civweave:quest-ai-authority-rejected',{surface:'intention-planner.restore',planId:clean(plan?.id),title:clean(plan?.title)});return null}
   const restored=structuredClone(plan);restored.state=restored.state||'review';const at=new Date().toISOString(),item={id:restored.id,kind:'weave-plan',fingerprint:lower(`${restored.title}|${restored.wish}`).slice(0,500),text:restored.title||'Restored Quest',state:restored.state,done:false,createdAt:restored.createdAt||at,updatedAt:at,plan:restored};items.unshift(item);localStorage.setItem(INTENTIONS_KEY,JSON.stringify(items.slice(0,100)));dispatchChanged(items);return item;
 }
 function abandon(planId,{collectiveLineId,reason=''}={}){
@@ -101,7 +129,7 @@ function abandon(planId,{collectiveLineId,reason=''}={}){
 }
 function format(plan){
   if(!plan)return'';const paths=(plan.paths||[]).map((path,index)=>[`${index+1}. ${clean(path.title)} · ${clean(path.realm)}`,clean(path.purpose),`First step: ${clean(path.steps?.[0])||'Review the AI-generated first checkpoint.'}`,`Completion: ${clean(path.completionCriteria)||'Review the AI-generated completion criterion.'}`].join('\n')).join('\n\n'),governance=plan.governance?`\n\nConsent layer · ${clean(plan.governance.realm||'anarchadia')}\n${clean(plan.governance.purpose)}`:'';
-  return[`I generated and saved a reviewable Quest for “${clean(plan.title)}.”`,'','Governing outcome',clean(plan.outcome),'',paths,governance,'','The Quest is in REVIEW. Inspect, revise, or explicitly activate it with the controls below.'].join('\n').trim();
+  return[authoredImportedPlan(plan)?`Imported and saved an externally authored Quest for “${clean(plan.title)}.”`:`I generated and saved a reviewable Quest for “${clean(plan.title)}.”`,'','Governing outcome',clean(plan.outcome),'',paths,governance,'','The Quest is in REVIEW. Inspect, revise, or explicitly activate it with the controls below.'].join('\n').trim();
 }
 function buildPlan(options={}){
   emit('civweave:quest-ai-generation-required',{surface:'intention-planner.buildPlan',text:clean(options?.text)});const error=new Error('Deterministic Quest construction is retired. Generate the Quest with the selected AI model.');error.code='QUEST_AI_AUTHORING_REQUIRED';throw error;
@@ -110,6 +138,6 @@ function maybeCreate(options={}){
   if(shouldCreate(options))emit('civweave:quest-ai-generation-required',{surface:'intention-planner.maybeCreate',text:clean(options?.text)});return null;
 }
 
-globalThis.CivweaveIntentionPlanner={version:VERSION,schema:PLAN_SCHEMA,triggers:{explicit:EXPLICIT_PLAN_TRIGGER,wish:WISH_TRIGGER,direct:DIRECT_INTENTION_TRIGGER,retry:RETRY_TRIGGER,correction:CORRECTION_TRIGGER},stripGreeting,projectIntent,shouldCreate,activeIntentionTurns,aiAuthoredPlan,buildPlan,maybeCreate,persist,restore,abandon,format,deterministicQuestCreation:false,aiQuestOnly:true};
+globalThis.CivweaveIntentionPlanner={version:VERSION,schema:PLAN_SCHEMA,triggers:{explicit:EXPLICIT_PLAN_TRIGGER,wish:WISH_TRIGGER,direct:DIRECT_INTENTION_TRIGGER,retry:RETRY_TRIGGER,correction:CORRECTION_TRIGGER},stripGreeting,projectIntent,shouldCreate,activeIntentionTurns,aiAuthoredPlan,authoredImportedPlan,buildPlan,maybeCreate,persist,restore,abandon,format,deterministicQuestCreation:false,aiQuestOnly:true};
 emit('civweave:intention-planner-ready',{aiQuestOnly:true,deterministicQuestCreation:false});
 })();

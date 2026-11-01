@@ -9,7 +9,7 @@ const SHELL_PATH='/app/working-campus-v440.html';
 const FRESH_SHELL_PATH=SHELL_PATH;
 const DIRECT_NAV_SRC='/app/five-system-direct-navigation-v1.js?v=1.0.2-five-system-direct-navigation-v440-home-rapid-tap-guard';
 const SERVER_AI_OUTPUT_NORMALIZER_SRC='/app/server-ai-output-normalizer-v1.js?v=1.0.0';
-const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.0.6-direct-routes-bounded-nav-observer';
+const PERSISTENT_ACTIONS_SRC='/app/persistent-shell-actions-v1.js?v=1.2.0-worldweaver-workspace';
 const PERSISTENT_CONTEXT_SRC='/app/persistent-system-context-v1.js?v=1.0.3-direct-routes';
 const GUILD_USAGE_SRC='/app/guild-chat-usage-v1.js?v=1.0.2-mobile-session-upgrade';
 const GUILD_USAGE_VERSION='1.0.2-';
