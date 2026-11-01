@@ -137,7 +137,7 @@ try{dispatchEvent(new CustomEvent('civweave:radio-agent-ready',{detail:{version:
 (()=>{
 'use strict';
 
-const VERSION='1.2.1-mobile-music-launcher-v1';
+const VERSION='1.3.0-guild-radio-broadcast-v1';
 const LAUNCHER_ID='cw-radio-station-launcher-v1';
 const PANEL_ID='cw-radio-station-panel-v1';
 const STYLE_ID='cw-radio-station-surface-v1-style';
