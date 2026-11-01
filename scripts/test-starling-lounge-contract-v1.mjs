@@ -213,3 +213,17 @@ test('Schematic building footprints cannot collide at targeted phone and desktop
  assert.match(css,/\.sl-building-supply\{left:26%;top:63%\}/);
  assert.match(css,/\.sl-building-council\{left:74%;top:63%\}/);
 });
+
+test('HARMLESS is discoverable in local and Guild fleet, and only permits append-only fictional posts',()=>{
+ const src=read('public/app/starling-lounge-v1.mjs');
+ const styles=read('public/app/starling-lounge-v1.css');
+ assert.match(src,/data-sl-view="harmless"/);
+ assert.match(src,/data-sl-panel="harmless"/);
+ assert.match(src,/harmless-notebook-v1\.mjs/);
+ assert.match(src,/\.append\(\{name,subject,body\}\)/);
+ assert.match(src,/data-sl-action="harmless-agent"/);
+ assert.match(src,/endpointLeavesDevice/);
+ assert.match(src,/harmless-fictional-append-v1/);
+ assert.match(styles,/data-sl-view=harmless/);
+ assert.doesNotMatch(src,/data-sl-harmless-.*contenteditable/);
+});
