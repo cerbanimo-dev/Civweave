@@ -227,3 +227,18 @@ test('radio refuses unsafe, unlicensed, non-CC and non-audio remote manifest ent
   assert.ok(!x.api.directTracksFor().some(row=>row.id==='bad-license'));
   assert.equal(await x.api.playTrack('bad-unsafe'),false);
 });
+
+
+test('guild FM and Deep Dive are explicit controls of the one persistent player and respect S.A.F.E.',async t=>{
+  const x=await setup({safe:true});t.after(()=>x.dom.window.close());
+  x.api.open();await x.settle();
+  const radio=x.w.document.querySelector('#cw-radio-station-panel-v1');
+  assert.equal(radio.querySelectorAll('audio').length,1);
+  assert.ok(radio.querySelector('[data-radio-guild-mode="fm"]'));
+  assert.ok(radio.querySelector('[data-radio-guild-mode="talk"]'));
+  assert.ok(radio.querySelector('[data-radio-guild-mute]'));
+  assert.equal(await x.api.tuneGuildBroadcast('fm'),false);
+  assert.match(radio.querySelector('[data-radio-status]').textContent,/S\.A\.F\.E\./);
+  assert.equal(x.plays,0);
+  assert.equal(radio.querySelectorAll('audio').length,1);
+});
