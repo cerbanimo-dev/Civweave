@@ -74,7 +74,7 @@ export function createHarmlessNotebook({
     const posts=entries();
     if(!posts.length)return opening;
     const rendered=posts.map((entry,index)=>{
-      const number=String(index+6).padStart(4,'0');
+      const number=String(index+7).padStart(4,'0');
       const heading='### POST '+number+' — '+entry.name.toUpperCase();
       // Indent each line into a Markdown blockquote so a model-generated
       // post cannot masquerade as a replacement header or earlier entry.
