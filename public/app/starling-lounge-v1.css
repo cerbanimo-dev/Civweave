@@ -1060,3 +1060,33 @@
 #cw-starling-lounge .sl-opensim-link .sl-flex{display:flex;flex-wrap:wrap;gap:8px}
 #cw-starling-lounge .sl-opensim-link button{min-height:44px;flex:1 1 140px}
 #cw-starling-lounge [data-sl-opensim-status]{overflow-wrap:anywhere}
+
+
+/* Local-only or Guild-authorized OpenSimulator operator panel. The control
+   panel never sits on top of the canvas and cannot swallow scene clicks. */
+#cw-starling-lounge .sl-opensim-link{min-width:0;overflow:hidden;align-content:start}
+#cw-starling-lounge .sl-opensim-link select{
+ min-width:0;max-width:100%;width:100%;min-height:44px;
+ padding:9px;border-radius:9px;border:1px solid #649a98;
+ color:#f2f9f7;background:#121d2a;font:inherit
+}
+#cw-starling-lounge .sl-opensim-preview{
+ display:grid;gap:8px;min-width:0;max-width:100%;overflow:hidden
+}
+#cw-starling-lounge .sl-opensim-preview canvas{
+ width:100%;height:auto;max-height:420px;border-radius:10px
+}
+#cw-starling-lounge .sl-opensim-link .sl-coordinate-fields{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+ gap:8px;min-width:0
+}
+#cw-starling-lounge .sl-opensim-link .sl-coordinate-fields label{
+ display:grid;gap:5px;min-width:0
+}
+#cw-starling-lounge .sl-opensim-link .sl-coordinate-fields button{
+ min-width:0;min-height:44px;white-space:normal
+}
+@media(max-width:700px){
+ #cw-starling-lounge .sl-opensim-link{padding:11px}
+ #cw-starling-lounge .sl-opensim-link .sl-coordinate-fields{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+}
