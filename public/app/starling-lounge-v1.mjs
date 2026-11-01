@@ -926,7 +926,7 @@ async function connectOpenSim(){
     const live=await getOpenSimLiveStatus(url);
     let geometry=null;
     try{geometry=await connectOpenSimRegion(url)}catch{/* No approved export: allow actual simulator controls with schematic display. */}
-    if(state.root?.hidden||state.guild?.id!==guildId||(guildMode&&state.worldHost?.worldRef()!==room))return;
+    if(state.root?.hidden||(state.guild?.id||null)!==guildId||(guildMode&&state.worldHost?.worldRef()!==room))return;
     state.openSimGeometry=geometry;state.openSimWorldRef=room;state.openSimUrl=url;
     state.openSimLive=live.commandsEnabled===true&&live.controllerConnected===true;
     state.openSimRegionId=clean(live.regionId,90);
