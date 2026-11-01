@@ -27,6 +27,8 @@ Focused executable evidence lives in `test-installer-observer-quiescence-v1.mjs`
 
 Final local evidence:28/28 focused tests pass, the generated worker matches its template, and52/52 required asset hashes match source. The syntax scan passes1,546files with zero syntax failures; its later ownership postcheck still fails the pre-existing Settings query assertion (verifier and v440 target are identical to the staging base). The local Pages build reaches the browser-engine staging helpers, then fails on Windows `spawnSync npm.cmd EINVAL`; a Linux cloud build is required to verify the final Pages artifact. Those failures are reported, not hidden or labeled passed.
 
+Concurrent staging Guild Council updates through `ce03bf8e4` were merged without conflicts. After that merge,28desktop tests and24Guild governance/tab-access tests pass; generated metadata was refreshed again. The1,546-file syntax count describes the earlier repair snapshot. CI and the preview build must be assessed on the published head.
+
 ## Delivery and rollback
 
 Deliver through a staging-targeted review branch and verify the resulting preview. Do not promote production. Roll back the reviewed source commit through the normal deployment path; retain user state and existing signed-release data. Native Desktop install/relaunch and actual offline-device checks must be reported separately from source tests and browser emulation.
