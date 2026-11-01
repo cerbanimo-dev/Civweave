@@ -438,7 +438,7 @@ async function generateInternal({model,importId,messages,temperature=.6,maxToken
     if(activeGeneration===generation)activeGeneration=null;
     throw err('GGUF_ABORTED','Browser GGUF request was stopped. The model files remain installed.');
   }
-  const watchdogModule=await import('/app/local-ai/gguf-generation-watch-v1.js?v=gguf-generation-watch-v2-prefill');
+  const watchdogModule=await import('/app/local-ai/gguf-generation-watch-v1.js?v=gguf-generation-watch-v3-bounded-prefill');
   const watchdog=watchdogModule.createGGUFGenerationWatch({
     signal,onProgress:(stage,details)=>updatePhase(stage,details)
   });
