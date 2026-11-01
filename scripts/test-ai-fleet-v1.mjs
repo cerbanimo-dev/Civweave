@@ -193,6 +193,8 @@ test('Desktop endpoint accepts only private Ollama hosts, no credentials or Open
  assert.equal(fleet.desktopEndpoint('http://192.168.1.15:11434/'),'http://192.168.1.15:11434/api/chat');
  assert.equal(fleet.desktopEndpoint('http://localhost:11434/api/generate'),'http://localhost:11434/api/chat');
  assert.throws(()=>fleet.desktopEndpoint('https://example.com/api/chat'),/private LAN/);
+ assert.throws(()=>fleet.desktopEndpoint('http://10.example.com:11434'),/private LAN/);
+ assert.throws(()=>fleet.desktopEndpoint('http://192.168.evil.test:11434'),/private LAN/);
  assert.throws(()=>fleet.desktopEndpoint('http://user:password@127.0.0.1:11434'),/credentials/);
  assert.throws(()=>fleet.desktopEndpoint('http://127.0.0.1:11434/v1'),/Ollama origin/);
 });
