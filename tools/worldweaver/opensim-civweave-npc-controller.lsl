@@ -38,6 +38,7 @@ sendResult(string id, string outcome, string summary, vector position){
     ]);
     // Completed moves report observed coordinates, not merely accepted commands.
     if(outcome == "completed"){
+        body = llJsonSetValue(body,["position"],JSON_OBJECT);
         body = llJsonSetValue(body,["position","x"],(string)position.x);
         body = llJsonSetValue(body,["position","y"],(string)position.y);
         body = llJsonSetValue(body,["position","z"],(string)position.z);
