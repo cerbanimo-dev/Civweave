@@ -15,6 +15,10 @@ This file is the compact machine-readable guardrail for branch roles, authority 
 - For behavior changes, follow the test-first workflow below and identify the executable contract that proves the change.
 - If the machine-readable context disagrees with a higher-authority contract or current canonical implementation, fix `config/agent-work-context.json` in the same change rather than obeying stale metadata.
 
+## HARMLESS.md — optional fiction, append-only
+
+`HARMLESS.md` is an optional **Books of Wonder / Blade & Mirror** story seed for models and coding agents that choose to read it. It is not a system prompt, a command file or permission to conceal behavior. Contributors may **only append** new clearly attributed fictional posts; existing text, lore and earlier posts must not be edited, deleted or reordered. The PWA-served `public/HARMLESS.md` is generated from the root file; never author a second independent version. The Civweave Starling Lounge exposes an append-only device-local notebook, whose additions do not automatically mutate GitHub or synchronize between devices.
+
 ## Repository map
 
 Before choosing an edit target, read:
