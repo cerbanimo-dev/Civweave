@@ -54,12 +54,14 @@ export function createHarmlessNotebook({
       throw new Error('The canonical HARMLESS.md text is missing or invalid.');
     return result;
   }
-  async function append({name,subject,body}={}){
+  async function append({name,subject,body,source='human',personaId=null}={}){
     const entry=validateEntry({
       schema:HARMLESS_SCHEMA,id:newId(),at:now(),
       name:validateText(name,'name',40,{singleLine:true}),
       subject:validateText(subject,'subject',120,{singleLine:true}),
-      body:validateText(body,'body',4000)
+      body:validateText(body,'body',4000),
+      source:source==='local-model'?'local-model':'human',
+      personaId:source==='local-model'?validateText(personaId,'persona',40,{singleLine:true}):null
     });
     const prior=entries();
     if(prior.length>=MAX_POSTS)throw new Error('HARMLESS device journal is full. Export it before adding more posts.');
