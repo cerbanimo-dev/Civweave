@@ -122,6 +122,6 @@ assert.equal(layer.dataset.settingsVisibleVersion,'v325');
 assert.match(target.innerHTML,/AI Downloads/);
 assert.match(target.innerHTML,/Saved local state loaded/);
 assert.doesNotMatch(target.innerHTML,/Reading saved local model choices/);
-assert.ok(appended.some(node=>String(node.src||'').includes('/app/settings-local-models-direct-v325.js?v=1.2.3-qwen-import-owner')),'The parent bridge must request the cache-distinct current direct renderer without waiting for a worker update.');
+assert.ok(appended.some(node=>String(node.src||'').includes('/app/settings-local-models-direct-v325.js?v=1.2.5-ios-webgpu-qwen')),'The parent bridge must request the cache-distinct current direct renderer without waiting for a worker update.');
 
 console.log(JSON.stringify({ok:true,revision:'settings-v325-parent-source-recovery-v4-local-selection-authority',managerReads,visibleVersion:'v325',fallbackPainted:true,directRendererRequested:true,stableInPlaceActions:true,directCardProgress:true,canonicalLocalPersistence:true,validatedAliasesPreserved:true},null,2));
