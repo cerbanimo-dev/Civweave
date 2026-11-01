@@ -70,7 +70,7 @@
     "test:starling-tools": "node --test scripts/test-starling-collective-tools-v1.mjs",
     "test:starling-aider": "node --test scripts/test-starling-aider-adapter-v1.mjs",
     "test:starling-lounge": "node --test scripts/test-starling-lounge-contract-v1.mjs",
-    "test:harmless": "node --test scripts/test-harmless-notebook-v1.mjs scripts/test-harmless-community-v1.mjs scripts/test-harmless-markdown-v1.mjs",
+    "test:harmless": "node --test scripts/test-harmless-notebook-v1.mjs scripts/test-harmless-community-v1.mjs scripts/test-harmless-markdown-v1.mjs scripts/test-harmless-participation-v1.mjs",
     "test:starling-turns": "node --test scripts/test-starling-collective-turns-v1.mjs",
     "test:starling-worker": "node --test scripts/test-starling-collective-worker-v1.mjs",
     "test:ai-fleet": "node --test scripts/test-ai-fleet-v1.mjs",
