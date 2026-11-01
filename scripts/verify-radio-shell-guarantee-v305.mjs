@@ -23,6 +23,8 @@ const requiredRadioAssets = [
   '/app/radio-directory-v240/cerbanimo.txt',
   '/app/radio-directory-v240/fellowfare.txt',
   '/app/radio-directory-v240/anarchadia.txt',
+  '/app/shared/guild-radio-schedule-v1.mjs',
+  '/downloads/hub-media/open-music/guild-bundles-v1.json',
   starterManifest
 ];
 
