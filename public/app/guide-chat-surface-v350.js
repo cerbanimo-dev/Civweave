@@ -89,6 +89,15 @@ function configuredRoute(){
     return String(raw?.route||raw?.provider||'').toLowerCase();
   }catch{return''}
 }
+function browserGGUFRequested(){
+  try{
+    const gguf=parse(localStorage.getItem('civweave.mobile.gguf-primary.v2'),null);
+    const profiles=parse(localStorage.getItem('civweave-model-profiles-v1'),{});
+    const raw=profiles.interactive||parse(localStorage.getItem('civweave.universal-ai.v127'),{});
+    return Boolean(gguf?.enabled&&gguf.engine==='wllama'&&gguf.model===raw?.model&&
+      (raw?.provider==='openai-compatible'||raw?.route==='openai-compatible'));
+  }catch{return false}
+}
 function selectedLocal(){
   try{
     // A saved downloaded-model ID is NOT authorization to run it if the
@@ -259,7 +268,14 @@ function ensureRoot(){
   root=document.getElementById(ROOT_ID)||document.createElement('section');root.id=ROOT_ID;root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Civweave guide chat');
   root.innerHTML=`<header><img data-guide-avatar alt=""><div><strong data-guide-name></strong><span data-guide-role></span></div><button data-close type="button" aria-label="Close chat">×</button></header><nav class="cw242-window-switcher" aria-label="Guide chats">${switcherMarkup()}</nav><div class="cw350-context" data-context></div><div data-log role="log" aria-live="polite"></div><form data-persistent-form><textarea rows="2" maxlength="12000" required></textarea><button data-voice type="button" aria-label="Start offline voice" title="Start offline voice">◉</button><button data-send type="submit">Send</button></form>`;
   root.querySelector('[data-close]').addEventListener('click',close);
-  root.querySelector('[data-send]').addEventListener('click',()=>{if(busy&&nativeAbortController){nativeAbortController.abort();const control=root.querySelector('[data-send]');if(control){control.textContent='Stopping…';control.disabled=true;}}});
+  root.querySelector('[data-send]').addEventListener('click',()=>{
+    if(!busy||!nativeAbortController)return;
+    nativeAbortController.abort();
+    if(browserGGUFRequested())void import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install')
+      .then(gguf=>gguf.stopActiveGeneration?.()).catch(error=>console.warn('[Civweave] GGUF stop request:',error));
+    const control=root.querySelector('[data-send]');
+    if(control){control.textContent='Stopping…';control.disabled=true;}
+  });
   root.querySelector('.cw242-window-switcher').addEventListener('click',event=>{const button=event.target.closest?.('[data-cw242-window]');if(button)switchGuide(button.dataset.cw242Window,{open:true,focus:true})});
   root.querySelector('[data-voice]').addEventListener('click',()=>{void toggleVoice()});
   root.querySelector('[data-persistent-form]').addEventListener('submit',event=>{event.preventDefault();const input=event.currentTarget.querySelector('textarea'),text=clean(input?.value);if(!text)return;void submitText(text,activeSystem)});
@@ -505,9 +521,9 @@ function explicitHandoffTarget(result,system){
 async function submitActive(text){
   const value=clean(text),system=activeSystem;if(!value||busy||!SYSTEMS.includes(system))return false;
   busy=true;ensureRoot();const button=root.querySelector('[data-send]'),input=root.querySelector('textarea');
-  const nativeRequested=activeNativePhoneServer(),ollamaRequested=configuredRoute()==='ollama',requestAbort=(nativeRequested||ollamaRequested)?new AbortController():null;
+  const nativeRequested=activeNativePhoneServer(),ollamaRequested=configuredRoute()==='ollama',ggufRequested=browserGGUFRequested(),requestAbort=(nativeRequested||ollamaRequested||ggufRequested)?new AbortController():null;
   nativeAbortController=requestAbort;
-  if(button){button.disabled=!(nativeRequested||ollamaRequested);button.type=(nativeRequested||ollamaRequested)?'button':'submit';button.textContent=(nativeRequested||ollamaRequested)?'Stop':'Send';}
+  if(button){button.disabled=!(nativeRequested||ollamaRequested||ggufRequested);button.type=(nativeRequested||ollamaRequested||ggufRequested)?'button':'submit';button.textContent=(nativeRequested||ollamaRequested||ggufRequested)?'Stop':'Send';}
   if(input)input.value='';
   append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${guide(system).name} is thinking…`,pending:true});render();emitAvatar(system,'',value,'thinking');
   let partialNativeAnswer='',partialQuestJson='';
@@ -573,7 +589,7 @@ async function submitActive(text){
       result=await direct.respondNative({text:value,system,history:pastHistory,onToken,signal:requestAbort?.signal});
     }else{
       await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)throw new Error('Shared assistant runtime is not ready.');
-      result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:pastHistory});
+      result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:pastHistory,signal:requestAbort?.signal});
     }
     }finally{if(paintTimer){clearTimeout(paintTimer);paint();}}
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),respondingSystem=SYSTEMS.includes(result?.context?.guide?.system)?result.context.guide.system:system,replacement={id:pendingId,at:thread.messages?.[index]?.at||now(),role:'assistant',guide:respondingSystem,responderSystem:respondingSystem,text:clean(result?.response?.answer,10000),nextAction:next,provider:result?.provider,model:actualPlanningModel(result),chargedNeurons:Number(result?.usage?.chargedNeurons)||0,remainingNeurons:Number.isFinite(Number(result?.usage?.remainingNeurons))?Number(result.usage.remainingNeurons):null,approximateTurnsLeft:Number.isFinite(Number(result?.usage?.approximateTurnsLeft))?Number(result.usage.approximateTurnsLeft):null,responseRouting:result?.responseRouting||null,semanticRoute:result?.context?.routingAnswer||null,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};
@@ -581,8 +597,10 @@ async function submitActive(text){
   }catch(error){
     // Stop and local HTTP failures end this request. A retry needs a new
     // user action and must never awaken a stale downloaded-model runtime.
-    const fallback=(requestAbort?.signal.aborted||ollamaRequested||nativeApiRoute())
-      ? {text:requestAbort?.signal.aborted?'Generation stopped.':`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
+    const fallback=(requestAbort?.signal.aborted||ollamaRequested||nativeApiRoute()||ggufRequested)
+      ? {text:requestAbort?.signal.aborted?'Generation stopped. Installed models were preserved.':ggufRequested
+        ?`${guide(system).name} could not finish browser GGUF inference: ${clean(error?.message||error,900)}. No second model was started; the installed GGUF was preserved. Try a shorter request or switch to the Termux model explicitly.`
+        :`${guide(system).name} could not complete the selected local-server request: ${clean(error?.message||error,900)}. No second model was started. Check the native server and retry explicitly.`,provider:'model-error',model:'',error:clean(error?.message||error,900)}
       : await fallbackReply(system,value);
     const retained=system==='civweave'&&nativeApiRoute()&&partialNativeAnswer.length>=40?
       partialNativeAnswer+'\n\n[Partial native generation saved after interruption. Use Capture as structured Quest to convert it for review.]':null;
