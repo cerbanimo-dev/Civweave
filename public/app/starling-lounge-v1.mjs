@@ -25,7 +25,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null};
+const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -538,12 +538,12 @@ async function refresh(){
   }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
 }
-function close(){if(!state.root)return;state.summonUI?.close();state.summonUI=null;state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
+function close(){if(!state.root)return;state.summonUI?.close();state.summonUI=null;if(state.autoSummonTransport){state.summonTransport?.close?.();state.summonTransport=null;state.autoSummonTransport=false}state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
   if(state.guild?.id!==(guild?.id||null)){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
-  state.root.hidden=false;document.body.style.overflow='hidden';void ensureSummonUI();setView('world');setFleetScope(guild?'guild':'local');state.root.querySelector('[data-sl-action=close]').focus();
+  state.root.hidden=false;document.body.style.overflow='hidden';void ensureSummonUI();void connectEncryptedWorldCalls();setView('world');setFleetScope(guild?'guild':'local');state.root.querySelector('[data-sl-action=close]').focus();
   void ensureLocalFleetCatalog().then(()=>{if(!state.root?.hidden)renderFleetScopes()}).catch(error=>{state.fleetMessage=clean(String(error?.message||error),200);renderFleetScopes()});
   void connectGuideRuntime();
   if(state.guild){void refresh();void refreshTurns();void refreshWorkerStatus();void connectWorld()}
@@ -1154,6 +1154,19 @@ function detachWorldSource(){
     const stage=$('[data-sl-stage]');if(stage)stage.hidden=false;
     const message=$('[data-sl-scene-context]');if(message)message.textContent='Fallback visual scene · awaiting Guild-signed Worldweaver manifest.'}
 }
+/** Reuse the existing encrypted human-chat identity and saved contacts.
+ * This adapter sends REAL encrypted invitations but never fakes a DreamGrid join.
+ * A signed world-placement adapter can replace it with bindSummonTransport(). */
+async function connectEncryptedWorldCalls(){
+ if(state.summonTransport||!globalThis.CivweavePrivateMessagingV1||!globalThis.CivweaveHumanChatNetworkV1)return false;
+ try{
+  const {createPrivateWorldCallTransport}=await import('./shared/worldweaver-pm-calls-v1.mjs');
+  if(state.root?.hidden||state.summonTransport)return false;
+  const transport=createPrivateWorldCallTransport();
+  state.summonTransport=transport;state.autoSummonTransport=true;
+  state.summonUI?.setTransport(transport);return true;
+ }catch{return false}
+}
 /** All display items are references from existing Worldweaver/cast owners.
  * People come ONLY from an authenticated invitation provider; no guessed roster. */
 async function summonCatalog(){
@@ -1194,7 +1207,8 @@ async function ensureSummonUI(){
 function bindSummonTransport(transport){
  if(transport!=null&&(typeof transport!=='object'||typeof transport.invite!=='function'||typeof transport.place!=='function'))
   throw new TypeError('Summon transport must implement authenticated invite and place operations.');
- state.summonTransport=transport;
+ if(state.autoSummonTransport)state.summonTransport?.close?.();
+ state.autoSummonTransport=false;state.summonTransport=transport;
  state.summonUI?.setTransport(transport);
  return true;
 }
