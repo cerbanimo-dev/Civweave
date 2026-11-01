@@ -30,7 +30,7 @@ for(const [width,height]of [[390,667],[390,600],[1166,884]])test(`radio keeps he
   const x=fixture(width,height);
   try{
     const panel=x.w.getComputedStyle(x.panel),body=x.css('[data-radio-body]');
-    assert.equal(panel.display,'grid');assert.match(panel.gridTemplateRows,/^auto auto auto minmax\(0(?:px)?,\s*1fr\)$/);
+    assert.equal(panel.display,'grid');assert.match(panel.gridTemplateRows,/^auto auto auto auto minmax\(0(?:px)?,\s*1fr\)$/);
     assert.equal(panel.overflow,'hidden','Outer panel must not scroll Close and player controls offscreen');
     assert.equal(body.overflow,'auto');assert.equal(body.minHeight,'0','The tracklist must shrink inside the fixed panel');
     assert.equal(x.css('.cw-radio-player').display,'grid');assert.equal(x.css('[data-radio-play]').minHeight,'44px');
