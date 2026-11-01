@@ -228,6 +228,8 @@ test('HARMLESS is discoverable in local and Guild fleet, and only permits append
  assert.match(src,/harmless-markdown-v1\\.mjs/);
  assert.match(src,/data-sl-harmless-share/);
  assert.match(src,/data-sl-harmless-discovery/);
+ assert.match(src,/data-sl-harmless-daily-limit/);
+ assert.match(src,/ensureHarmlessModelBudget/);
  assert.match(src,/optionalHarmlessContext/);
  assert.match(src,/verifyReader:id=>allowed/);
  assert.match(src,/verifyWriter:id=>allowed/);
