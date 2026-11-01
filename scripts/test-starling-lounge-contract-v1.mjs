@@ -190,7 +190,7 @@ test('Civweave brand chrome and avatar decks use flow-based collision-safe layou
  assert.match(src,/if\(avatars\)avatars.hidden=false/);
  assert.match(css,/\[data-sl-fleet=local\] \.sl-side\{display:none!important\}/);
  assert.match(css,/data-sl-view=world\] \[data-sl-panel=world\]/);
- assert.match(src,/style\.href='\/app\/starling-lounge-v1\.css\?v=brand-responsive-fleet-r5'/);
+ assert.match(src,/style\.href='\/app\/starling-lounge-v1\.css\?v=brand-responsive-fleet-r6-opensim'/);
 });
 test('Schematic building footprints cannot collide at targeted phone and desktop widths',()=>{
  const intersects=(a,b)=>a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom;
