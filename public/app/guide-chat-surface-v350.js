@@ -12,7 +12,7 @@ try{
   }
 }catch{}
 
-const VERSION='1.0.200-interwoven-quest-map';
+const VERSION='1.0.201-gguf-stall-recovery';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-guide-chat-surface-v350-style';
@@ -120,7 +120,7 @@ function ensureGenerationTracker(){
   }
   if(generationTrackerPromise)return generationTrackerPromise;
   generationTrackerPromise=new Promise((resolve,reject)=>{
-    const src='/app/guide-generation-tracker-v1.js?v=1.2.23-universal-artifact-rail';
+    const src='/app/guide-generation-tracker-v1.js?v=1.2.23-gguf-prefill-progress';
     const existing=[...document.scripts].find(node=>node.src?.includes(src));
     if(existing?.dataset?.loaded==='true'){resolve(true);return}
     const script=existing||document.createElement('script');
@@ -271,7 +271,7 @@ function ensureRoot(){
   root.querySelector('[data-send]').addEventListener('click',()=>{
     if(!busy||!nativeAbortController)return;
     nativeAbortController.abort();
-    if(browserGGUFRequested())void import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v9-direct-fleet-install')
+    if(browserGGUFRequested())void import('/app/local-ai/browser-gguf-v1.js?v=embedded-gguf-v10-stall-recovery')
       .then(gguf=>gguf.stopActiveGeneration?.()).catch(error=>console.warn('[Civweave] GGUF stop request:',error));
     const control=root.querySelector('[data-send]');
     if(control){control.textContent='Stopping…';control.disabled=true;}
