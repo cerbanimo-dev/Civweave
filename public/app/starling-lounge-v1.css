@@ -1119,3 +1119,16 @@
 }
 #cw-starling-lounge .sl-harmless form label{display:block;min-width:0;font-size:12px}
 #cw-starling-lounge .sl-harmless [data-sl-action=harmless-agent]{max-width:100%}
+
+/* Append-only HARMLESS reader and explicit Guild publication choice. */
+#cw-starling-lounge .sl-harmless-theories{
+ border:1px solid #a4d7c43d;border-radius:12px;padding:10px 12px;margin:10px 0;
+ background:#18313b80
+}
+#cw-starling-lounge .sl-harmless-theories summary{cursor:pointer;color:#c3f0de;font-weight:650}
+#cw-starling-lounge .sl-harmless-theories dl{margin:10px 0 0}
+#cw-starling-lounge .sl-harmless-theories dt{font-weight:700;color:#e9d5fa}
+#cw-starling-lounge .sl-harmless-theories dd{margin:4px 0 10px;color:var(--sl-muted);font-size:12px}
+#cw-starling-lounge .sl-harmless-switch{display:flex!important;align-items:flex-start;gap:8px;margin:11px 0;font-size:12px;line-height:1.45}
+#cw-starling-lounge .sl-harmless-switch input{width:18px;height:18px;flex:0 0 18px;margin:1px 0 0}
+#cw-starling-lounge[data-sl-fleet=local] [data-sl-harmless-guild-only]{display:none!important}
