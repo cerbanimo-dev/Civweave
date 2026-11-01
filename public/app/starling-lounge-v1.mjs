@@ -25,7 +25,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.'};
+const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -569,11 +569,11 @@ async function refresh(){
   }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
 }
-function close(){if(!state.root)return;state.summonUI?.close();state.summonUI=null;if(state.autoSummonTransport){state.summonTransport?.close?.();state.summonTransport=null;state.autoSummonTransport=false}state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
+function close(){if(!state.root)return;state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.summonUI?.close();state.summonUI=null;if(state.autoSummonTransport){state.summonTransport?.close?.();state.summonTransport=null;state.autoSummonTransport=false}state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
-  if(state.guild?.id!==(guild?.id||null)){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  if(state.guild?.id!==(guild?.id||null)){state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
   const share=state.root.querySelector('[data-sl-harmless-share]');if(share)share.checked=false;
   const discover=state.root.querySelector('[data-sl-harmless-discovery]');
   if(discover){try{discover.checked=localStorage.getItem('civweave.harmless.discovery.v1')==='1'}catch{discover.checked=false}}
@@ -795,6 +795,14 @@ async function harmlessCommunity(){
   const own=founder?.guildId===guild.id && founder?.deviceId===await mesh.deviceId();
   const member=globalThis.CivweaveGuildQuestsV1?.sessionForGuild?.(guild);
   const allowed=Boolean(own||member);
+  if(allowed&&typeof mesh.subscribe==='function'&&!state.harmlessSubscribe){
+    state.harmlessGuildId=guild.id;
+    state.harmlessSubscribe=mesh.subscribe(event=>{
+      if(state.root?.hidden||state.view!=='harmless'||state.guild?.id!==guild.id)return;
+      if(['object-created','object-received'].includes(event?.type)&&event.detail?.kind==='civweave.harmless-post.v1')
+        void refreshHarmless();
+    });
+  }
   return mod.createHarmlessCommunity({
     mesh,verifyReader:id=>allowed&&id===guild.id,verifyWriter:id=>allowed&&id===guild.id
   });
