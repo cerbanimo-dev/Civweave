@@ -285,7 +285,7 @@ function cueDj(text){
  if(broadcastMuted||!broadcastMode||!globalThis.speechSynthesis||!globalThis.SpeechSynthesisUtterance)return;
  // Android speech engines can silently truncate long utterances. Speak short
  // sentences sequentially without creating a separate audio/music owner.
- const sentences=broadcastCue.split(/(?<=[.!?])\\s+|\\n+/).map(value=>value.trim()).filter(Boolean),segments=[];
+ const sentences=broadcastCue.split(/(?<=[.!?])\s+|\n+/).map(value=>value.trim()).filter(Boolean),segments=[];
  for(const sentence of sentences){
   let rest=sentence;
   while(rest.length>210){let cut=rest.lastIndexOf(' ',210);if(cut<100)cut=210;segments.push(rest.slice(0,cut));rest=rest.slice(cut).trim()}
