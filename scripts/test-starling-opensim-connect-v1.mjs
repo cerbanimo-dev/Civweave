@@ -38,5 +38,5 @@ test('Collective page offers reachable controls, real OpenSim geometry display, 
  assert.match(src,/state\.openSimWorldRef===room\?state\.openSimGeometry:null/);
  assert.match(src,/CivweaveSettingsV320/);
  const css=readFileSync(new URL('../public/app/starling-lounge-v1.css',import.meta.url),'utf8');
- assert.ok(css.includes('#cw-starling-lounge [hidden]{display:none!important}'));
+ assert.ok(css.includes('#cw-starling-lounge[hidden],\n#cw-starling-lounge [hidden]{display:none!important}'));
 });
