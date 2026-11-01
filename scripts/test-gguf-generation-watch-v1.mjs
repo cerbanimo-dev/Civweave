@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createGGUFGenerationWatch,GGUF_FIRST_VISIBLE_MS,GGUF_OUTPUT_IDLE_MS,GGUF_MAX_GENERATE_MS} from '../public/app/local-ai/gguf-generation-watch-v1.js';
+import {createGGUFGenerationWatch,GGUF_FIRST_VISIBLE_MS,GGUF_MAX_PREFILL_MS,GGUF_OUTPUT_IDLE_MS,GGUF_MAX_GENERATE_MS} from '../public/app/local-ai/gguf-generation-watch-v1.js';
 function sandbox(){
   const clock={ms:0,nextId:1,timers:new Map(),events:[]};
   const watcher=(overrides={})=>createGGUFGenerationWatch({
@@ -91,6 +91,33 @@ function sandbox(){
   w.prefill({processed:0,total:1697});
   const unchanged=[...s.clock.timers].find(([,row])=>row.ms===GGUF_FIRST_VISIBLE_MS)?.[0];
   assert.equal(next,unchanged,'Repeated unchanged prefill must not keep a stalled model alive');
+  w.stop();
+}
+{
+  // Advancing prefill must not allow an endless five-plus-minute spinner.
+  const s=sandbox(),w=s.watcher();
+  s.clock.ms=90000;w.prefill({processed:384,total:1697});
+  s.clock.ms=180000;w.prefill({processed:768,total:1697});
+  s.fire(GGUF_MAX_PREFILL_MS);
+  await assert.rejects(w.cancelled,{code:'GGUF_PREFILL_TIME_LIMIT'});
+  assert.equal(w.snapshot().prefill.processed,768);
+  w.stop();
+}
+{
+  // A visible token must cancel the absolute prefill timer.
+  const s=sandbox(),w=s.watcher();
+  w.prefill({processed:100,total:100});
+  w.chunk({visible:true});
+  assert.equal([...s.clock.timers.values()].some(row=>row.ms===GGUF_MAX_PREFILL_MS),false);
+  w.stop();
+}
+{
+  // User-requested Stop must reject immediately and preserve weights.
+  const s=sandbox(),w=s.watcher();
+  assert.equal(w.cancel(),true);
+  await assert.rejects(w.cancelled,{code:'GGUF_ABORTED'});
+  assert.equal(s.clock.timers.size,0);
+  assert.equal(w.cancel(),false);
   w.stop();
 }
 console.log('GGUF visible token watchdog regression passed: hidden-only first token, visible stream, idle, total duration, external abort and timer cleanup.');
