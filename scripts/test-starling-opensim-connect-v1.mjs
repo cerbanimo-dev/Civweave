@@ -31,7 +31,7 @@ test('OpenSim connector checks response limit and keeps failures explicit',async
 });
 test('Collective page offers reachable controls, real OpenSim geometry display, and explicit external-state labels',()=>{
  const src=readFileSync(new URL('../public/app/starling-lounge-v1.mjs',import.meta.url),'utf8');
- for(const token of ['data-sl-action="world-connect"','data-sl-action="opensim-connect"','data-sl-action="opensim-disconnect"','data-sl-opensim-url','connectOpenSimRegion','OpenSim region export']){
+ for(const token of ['data-sl-action="world-connect"','data-sl-action="opensim-connect"','data-sl-action="opensim-disconnect"','data-sl-opensim-url','connectOpenSimRegion','OpenSimulator · live NPC bridge']){
    assert.ok(src.includes(token),token);
  }
  assert.match(src,/setFleetScope\(guild\?'guild':'local'\)/);
