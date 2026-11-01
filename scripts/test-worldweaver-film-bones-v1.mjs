@@ -37,6 +37,9 @@ test('Feature-length assembly preserves explicit frame timing and reports covera
  assert.equal(result.status,'incomplete-movie-bones');
  assert.equal(result.soundPolicy.useReferenceAudioInFinalMix,false);
  assert.equal(result.shots[0].renderStatus,'not-rendered');
+ assert.deepEqual(result.uncoveredDialogueByScene['scene-1'],[0]);
+ assert.deepEqual(result.continuityFlags,[]);
+ assert.throws(()=>validateShotBatch(state,{...batch,shots:[{...shot,dialogueLineIndices:[99]}]}),/unknown dialogue/);
  assert.throws(()=>assembleFilmBones(state,[batch,batch]),/Duplicate global shot/);
 });
 test('Codex is an implementation operator, not a fake authenticated producer',()=>{
@@ -70,4 +73,11 @@ test('machine-readable curriculum is explicitly instructional, not fabricated ex
  assert.ok(curriculum.tasks.some(t=>t.id==='shot-blocking'));
  assert.ok(curriculum.tasks.some(t=>t.id==='human-sound-replacement'));
  assert.ok(curriculum.rubric.hardGates.includes('no-fabricated-render-receipts'));
+});
+
+test('A coverage-complete spoken line is explicitly tracked, not inferred',()=>{
+ const b={...batch,shots:[{...shot,dialogueLineIndices:[0]}]};
+ const result=assembleFilmBones(state,[b],{targetMinutes:1});
+ assert.deepEqual(result.uncoveredDialogueByScene,{});
+ assert.equal(result.shots[0].dialogueLineIndices[0],0);
 });
