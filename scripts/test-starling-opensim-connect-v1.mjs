@@ -54,8 +54,8 @@ test('Collective controls have one dispatch owner and navigation leaves the full
 test('Guild entry cache-busts Collective module alongside its stylesheet',()=>{
  const launcher=readFileSync(new URL('../public/app/cerbanimo-intention-landscape-v1.js',import.meta.url),'utf8');
  const lounge=readFileSync(new URL('../public/app/starling-lounge-v1.mjs',import.meta.url),'utf8');
- assert.ok(launcher.includes("starling-lounge-v1.mjs?v=brand-responsive-fleet-r6-opensim"));
- assert.ok(lounge.includes("starling-lounge-v1.css?v=brand-responsive-fleet-r6-opensim"));
+ assert.ok(launcher.includes("starling-lounge-v1.mjs?v=brand-responsive-fleet-r7-live-npc"));
+ assert.ok(lounge.includes("starling-lounge-v1.css?v=brand-responsive-fleet-r7-live-npc"));
 });
 
 test('OpenSim controls can issue actual human-authorized NPC commands and display results',()=>{
