@@ -137,7 +137,7 @@ function characterInstructions(p){
     'Canon constraints: '+(p.canonRules||'Preserve author-established manuscript events; do not invent new canon.'),
     'Relationships: '+(p.relationships||'Relationships not established in this casting packet.'),
     'Improv rules: '+(p.interactionRules||'Remain in-character while clearly separating improvisation from canon.')
-  ].join('\\n');
+  ].join('\n');
 }
 /** Private character rehearsal prompt to pass to the existing selected-model
  * route. Does not start a second inference owner or authorize a public story. */
