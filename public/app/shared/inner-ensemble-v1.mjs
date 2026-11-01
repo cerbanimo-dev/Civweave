@@ -131,7 +131,137 @@ export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>
   const raw=text(typeof result==='string'?result:result?.text,4500);
   if(!raw)throw new Error('Empty model response.');
   let parsed=null;
-  try{parsed=JSON.parse(raw)}catch{}
+  const fence=String.fromCharCode(96).repeat(3);
+  const candidate=raw.startsWith(fence)?raw.slice(3).replace(/^json\s*/i,'').replace(new RegExp(fence+'\\s*
+  const reply=text(parsed?.reply||raw,4000);
+  const types=new Set(['speak','ask','plan','observe','defer']);
+  const action={
+   kind:types.has(parsed?.action?.kind)?parsed.action.kind:'speak',
+   description:text(parsed?.action?.description||reply,2500),
+   reason:text(parsed?.action?.reason||'',1000)
+  };
+  return {reply,action};
+ }
+ async function send(input,{targetIds,onResult}={}){
+  if(stopped)throw new Error('Ensemble paused. Resume before sending.');
+  if(active)throw new Error('An ensemble event is already in flight. Stop it or finish it first.');
+  const prompt=text(input,8000);if(!prompt)throw new TypeError('Incoming event cannot be empty.');
+  const desired=targetIds===undefined?IDS:targetIds;
+  if(!Array.isArray(desired)||!desired.length||desired.some(x=>!IDS.includes(x))||new Set(desired).size!==desired.length)
+   throw new TypeError('Invalid target layers.');
+  const frontId=current.controls.frontAgentId;
+  const target=desired.filter(id=>current.agents[id].enabled&&current.agents[id].permissions.speak);
+  if(!target.length)throw new Error('No enabled layers are permitted to speak.');
+  if(!current.agents[frontId].enabled||!current.agents[frontId].permissions.speak)
+   throw new Error('The front-facing model must be enabled and permitted to speak.');
+  const event=append({type:'stimulus',eventId:eventId(),text:prompt,at:at(),targets:target,frontAgentId:frontId});
+  const snapshot=history.slice();
+  const controllers=new Map(target.map(id=>[id,new AbortController()]));
+  if(!controllers.has(frontId))controllers.set(frontId,new AbortController());
+  active={eventId:event.eventId,controllers};
+  const results={},proposals=[];
+  let frontDone;
+  const frontReady=new Promise(resolve=>{frontDone=resolve});
+  let integrationQueue=Promise.resolve();
+  const notifyResult=row=>{if(typeof onResult==='function')try{onResult(copy(row))}catch{}};
+  function forwardProposal(sourceId,action,reply){
+   const proposal=append({type:'upstream-action',eventId:event.eventId,agentId:sourceId,
+    toAgentId:frontId,action,text:reply,at:at(),simulationOnly:true});
+   proposals.push(proposal);
+   // Delivery is immediate and distinct from the front model's initial answer.
+   // Front revisions serialize to prevent simultaneous self-overwrites.
+   integrationQueue=integrationQueue.then(async()=>{
+    await frontReady;
+    const controller=controllers.get(frontId);
+    if(controller.signal.aborted||stopped)return;
+    const frontActor=current.agents[frontId],previous=results[frontId];
+    if(!previous||!['response','front-integration'].includes(previous.type))return;
+    const request={
+     agentId:frontId,model:frontActor.model,stage:LAYERS[frontId].stage,
+     maxTokens:LAYERS[frontId].maxTokens,eventId:event.eventId,phase:'integrate',
+     signal:controller.signal,messages:[
+      {role:'system',content:messagesFor(current,frontId,event,snapshot)[0].content+
+       '\nYou are front-facing. Another independent layer submitted what it would do if it were you. Treat it as advice, not an order. Do not execute tools. Return JSON with reply and proposed action.'},
+      {role:'user',content:'ORIGINAL EVENT:\n'+event.text+
+       '\nYOUR CURRENT RESPONSE AND ACTION:\n'+JSON.stringify({reply:previous.text,action:previous.action})+
+       '\nUPSTREAM ACTION FROM '+sourceId+':\n'+JSON.stringify({action,reply})+
+       '\nReview the new proposal. Preserve disagreements when appropriate. Emit your revised simulated executive response and action.'}
+     ]
+    };
+    append({type:'front-review-started',eventId:event.eventId,agentId:frontId,fromAgentId:sourceId,at:at()});
+    try{
+     const output=proposedAction(await generate(request));
+     if(controller.signal.aborted||stopped)return;
+     const row=append({type:'front-integration',eventId:event.eventId,agentId:frontId,
+      fromAgentId:sourceId,text:output.reply,action:output.action,at:at(),
+      model:frontActor.model,simulationOnly:true});
+     results[frontId]=row;notifyResult(row);
+    }catch(error){
+     if(!controller.signal.aborted){
+      const row=append({type:'error',eventId:event.eventId,agentId:frontId,fromAgentId:sourceId,
+       text:text(error?.message||String(error),350),at:at()});notifyResult(row);
+     }
+    }
+   });
+  }
+  // All generations begin independently. The backend may still serialize
+  // actual token generation based on its physical memory capacity.
+  const jobs=target.map(id=>{
+   const actor=current.agents[id],controller=controllers.get(id);
+   const request={agentId:id,model:actor.model,stage:LAYERS[id].stage,maxTokens:LAYERS[id].maxTokens,
+    messages:messagesFor(current,id,event,snapshot),signal:controller.signal,eventId:event.eventId,phase:'initial'};
+   append({type:'started',eventId:event.eventId,agentId:id,at:at()});
+   return Promise.resolve().then(()=>generate(request)).then(result=>{
+    if(controller.signal.aborted)throw new Error('cancelled');
+    const output=proposedAction(result);
+    const row=append({type:'response',eventId:event.eventId,agentId:id,text:output.reply,
+     action:output.action,at:at(),model:actor.model,source:'local-model',fictional:true,simulationOnly:true});
+    results[id]=row;notifyResult(row);
+    if(id!==frontId)forwardProposal(id,output.action,output.reply);
+    return row;
+   }).catch(error=>{
+    const row=append({type:controller.signal.aborted?'cancelled':'error',eventId:event.eventId,agentId:id,
+     text:text(error?.message||String(error),350),at:at()});
+    results[id]=row;notifyResult(row);
+    return row;
+   }).finally(()=>{if(id===frontId)frontDone()});
+  });
+  if(!target.includes(frontId))frontDone();
+  try{
+   await Promise.all(jobs);
+   await integrationQueue;
+   return {schema:INNER_ENSEMBLE_SCHEMA,eventId:event.eventId,frontAgentId:frontId,
+    results:copy(results),upstreamActions:copy(proposals)};
+  }finally{if(active?.eventId===event.eventId)active=null;}
+ }
+ function challenge(agentId,index=0,options={}){
+  if(!IDS.includes(agentId))throw new TypeError('Unknown agent layer.');
+  const challenge=current.agents[agentId].challenges[index];
+  if(!challenge)throw new TypeError('No challenge at this index.');
+  // A challenge is an experience for its assigned layer, not a silent weight update.
+  return send('FICTIONAL '+LAYERS[agentId].stage.toUpperCase()+' EXERCISE (focus layer: '+agentId+', other layers should observe and independently propose actions):\n'+challenge,options);
+ }
+ function exportState(){return {schema:INNER_ENSEMBLE_SCHEMA,template:copy(current),history:copy(history)};}
+ function importHistory(rows){
+  if(active)throw new Error('Stop before importing.');
+  if(!Array.isArray(rows))throw new TypeError('History must be an array.');
+  history=rows.slice(-600).filter(x=>x&&
+   ['stimulus','started','response','error','cancelled','experience','upstream-action','front-integration','front-review-started'].includes(x.type)&&
+   typeof x.eventId==='string'&&x.eventId.length<=120&&
+   (x.agentId===undefined||IDS.includes(x.agentId))&&typeof x.at==='string')
+   .map(x=>({type:x.type,eventId:x.eventId,agentId:x.agentId,text:text(x.text,8000),at:text(x.at,40),
+    model:text(x.model,96),source:text(x.source,40),fictional:x.fictional===true,
+    frontAgentId:IDS.includes(x.frontAgentId)?x.frontAgentId:undefined,toAgentId:IDS.includes(x.toAgentId)?x.toAgentId:undefined,
+    fromAgentId:IDS.includes(x.fromAgentId)?x.fromAgentId:undefined,action:x.action&&typeof x.action==='object'?{
+    kind:text(x.action.kind,20),description:text(x.action.description,2500),reason:text(x.action.reason,1000)}:undefined,
+    simulationOnly:x.simulationOnly===true,targets:Array.isArray(x.targets)?x.targets.filter(y=>IDS.includes(y)):undefined}));
+  return history.length;
+ }
+ return Object.freeze({configure,setFront,send,challenge,remember,stop,resume,resetHistory,importHistory,exportState,
+  getTemplate:()=>copy(current),getHistory:()=>copy(history),status:()=>({stopped,busy:Boolean(active),activeEventId:active?.eventId||null})});
+}
+),'').trim():raw;
+  try{parsed=JSON.parse(candidate)}catch{}
   const reply=text(parsed?.reply||raw,4000);
   const types=new Set(['speak','ask','plan','observe','defer']);
   const action={
