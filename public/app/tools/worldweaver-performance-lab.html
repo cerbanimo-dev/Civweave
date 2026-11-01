@@ -73,7 +73,21 @@ pre{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;overflow:auto;ove
 <label for="cast-character">Role to bind</label><select id="cast-character"></select>
 <label for="cast-avatar">Avatar / approved rig reference</label><input id="cast-avatar" value="starling:kami" maxlength="180">
 <label for="cast-pilot">Model pilot principal</label><input id="cast-pilot" value="pilot:starling:kami" maxlength="180">
-<div class="controls"><button id="assign-avatar" type="button">Approve role casting</button></div>
+<label for="cast-display-name">Character's author-approved display name</label><input id="cast-display-name" maxlength="100" placeholder="e.g. Maggie">
+<label for="cast-persona">Personality and voice, author-approved</label><textarea id="cast-persona" maxlength="1500" rows="3" placeholder="How this specific character thinks, speaks, and reacts."></textarea>
+<label for="cast-canon">Non-negotiable canon and perspective constraints</label><textarea id="cast-canon" maxlength="2000" rows="3" placeholder="What the character knows, continuity restrictions, viewpoint lock, distinct agency."></textarea>
+<label for="cast-relationships">Relationships and shared history</label><textarea id="cast-relationships" maxlength="1200" rows="2" placeholder="Known connections only; avoid author-unapproved invention."></textarea>
+<label for="cast-improv">Rules for improvised Convergence scenes</label><textarea id="cast-improv" maxlength="1200" rows="2" placeholder="How the character adapts while preserving manuscript canon."></textarea>
+<div class="controls"><button id="assign-avatar" type="button">Approve role casting and character guidance</button></div>
+<div class="project" aria-labelledby="convergence-heading">
+<h3 id="convergence-heading">The Convergence · book cast</h3>
+<p class="compact">First the book characters encounter Team Cerbanimo; next, Starling Collective; finally the public. This development lab never marks those events as having occurred. Only author-reviewed speaking roles may be projected. Export contains no manuscript excerpts or audience submissions.</p>
+<div class="controls"><button type="button" id="export-convergence">Export reviewed cast packet</button><button type="button" id="rig-book">Register local book NPC preview</button></div>
+<label for="convergence-setup">Optional private encounter setup</label><input id="convergence-setup" maxlength="1000" placeholder="What is happening when this character meets Team Cerbanimo?">
+<div class="controls"><button type="button" id="rehearse-convergence">Rehearse character with selected AI</button></div>
+<p class="compact">Model generation uses existing Civweave settings and the request-scoped remote consent above. A pilot registration is a manifest, not a running model or a live OpenSimulator avatar.</p>
+<pre id="convergence-preview" aria-label="Character preview and private AI rehearsal" role="status">No Convergence cast exported or rehearsed.</pre>
+</div>
 <canvas id="stage-viewer" width="660" height="290" aria-label="Procedural 3D stage and character stand-ins"></canvas>
 <div id="stage-map" aria-label="Same-stage 2D footprints"></div>
 <p id="stage-note" class="compact">Review a screenplay scene to build its provisional stage set. These are geometry stand-ins, not rigged OpenSimulator avatars.</p>
