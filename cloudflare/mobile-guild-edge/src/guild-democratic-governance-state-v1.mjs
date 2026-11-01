@@ -309,19 +309,21 @@ export function fileBanAppeal(sql,{actorId,credentialHash,ballotId,statement,now
   ensureGovernanceTables(sql);
   if(!validGuildUser(actorId)||!/^[a-f0-9]{64}$/.test(String(credentialHash||'')))
     throw fail('Appeal requires valid account and device credential.',403);
-  const ban=rows(sql,'SELECT user_id,credential_hash,expires_at,ballot_id FROM guild_governance_bans WHERE user_id=? AND ballot_id=? AND expires_at>? LIMIT 1',
-    actorId,ballotId,new Date(now).toISOString())[0];
+  const ban=ballotId?rows(sql,'SELECT user_id,credential_hash,expires_at,ballot_id FROM guild_governance_bans WHERE user_id=? AND ballot_id=? AND expires_at>? LIMIT 1',
+    actorId,ballotId,new Date(now).toISOString())[0]:
+    rows(sql,'SELECT user_id,credential_hash,expires_at,ballot_id FROM guild_governance_bans WHERE user_id=? AND credential_hash=? AND expires_at>? ORDER BY imposed_at DESC LIMIT 1',
+      actorId,credentialHash,new Date(now).toISOString())[0];
   if(!ban||!ban.credential_hash||ban.credential_hash!==credentialHash)throw fail('No matching active ban with this device credential.',403);
-  const original=rows(sql,'SELECT action,status,target_user_id FROM guild_governance_ballots WHERE id=? LIMIT 1',ballotId)[0];
+  const original=rows(sql,'SELECT action,status,target_user_id FROM guild_governance_ballots WHERE id=? LIMIT 1',ban.ballot_id)[0];
   if(!original||original.action!=='ban'||original.status!=='approved'||original.target_user_id!==actorId)
     throw fail('Appeal can only be filed against an approved active ban.',409);
   if(typeof statement!=='string'||statement.trim().length<20||statement.trim().length>2000)
     throw fail('Explain the appeal in 20–2,000 characters.',400);
-  if(rows(sql,'SELECT id FROM guild_governance_appeals WHERE ban_ballot_id=? LIMIT 1',ballotId)[0])
+  if(rows(sql,'SELECT id FROM guild_governance_appeals WHERE ban_ballot_id=? LIMIT 1',ban.ballot_id)[0])
     throw fail('An appeal was already filed for this ban.',409);
   const id='guild-appeal:'+crypto.randomUUID();
   sql.exec('INSERT INTO guild_governance_appeals(id,ban_ballot_id,target_user_id,statement,created_at) VALUES(?,?,?,?,?)',
-    id,ballotId,actorId,statement.trim(),new Date(now).toISOString());
+    id,ban.ballot_id,actorId,statement.trim(),new Date(now).toISOString());
   return viewAppeal(sql,rows(sql,'SELECT * FROM guild_governance_appeals WHERE id=?',id)[0]);
 }
 export function sponsorBanAppeal(sql,{guildId,origin,actorId,appealId,now=Date.now()}){
