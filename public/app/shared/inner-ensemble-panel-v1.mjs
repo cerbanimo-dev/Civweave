@@ -1,5 +1,7 @@
 import {authorTemplate,normalizeAuthorTemplate,createInnerEnsemble,LAYERS,INNER_ENSEMBLE_STORAGE,INNER_ENSEMBLE_SCHEMA} from './inner-ensemble-v1.mjs';
+import {nextUtcRollover} from './daily-sleep-cycle-v1.mjs';
 const IDS=Object.keys(LAYERS);
+const LOCAL_SLEEP_PREF='civweave.inner-ensemble.sleep-opt-in.v1';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const read=()=>{try{return JSON.parse(localStorage.getItem(INNER_ENSEMBLE_STORAGE)||'null')}catch{return null}};
 const persist=engine=>{try{localStorage.setItem(INNER_ENSEMBLE_STORAGE,JSON.stringify(engine.exportState()));return true}catch{return false}};
@@ -23,6 +25,23 @@ async function localGenerate(request,fleet){
  if(result?.status!=='success'||result.actual?.provider!=='ollama'||result.actual?.model!==request.model)
   throw Error(result?.error?.message||'Local Ollama inference failed its model verification.');
  return {text:result.outputText};
+}
+async function unloadOwnModels(fleet,models){
+ const state=fleet?.desktopFleetState?.();
+ if(!state?.enabled)throw Error('The Desktop Ollama fleet is not active.');
+ const origin=new URL(state.endpoint);
+ if(!['127.0.0.1','localhost','[::1]','::1'].includes(origin.hostname.toLowerCase()))
+  throw Error('Only the selected loopback Ollama host may be unloaded.');
+ const url=origin.origin+'/api/generate',done=[];
+ for(const model of [...new Set(models)]){
+  if(!state.models.some(x=>x.name===model))continue;
+  const response=await fetch(url,{method:'POST',mode:'cors',credentials:'omit',redirect:'error',
+   headers:{'content-type':'application/json'},
+   body:JSON.stringify({model,keep_alive:0,stream:false})});
+  if(!response.ok)throw Error('Ollama could not unload '+model+' (HTTP '+response.status+').');
+  done.push(model);
+ }
+ return done;
 }
 function exportJson(name,value){
  const blob=new Blob([JSON.stringify(value,null,2)],{type:'application/json'});
@@ -63,6 +82,7 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
     (row.action?' · action: '+row.action.kind+' / '+row.action.description.slice(0,200):'');
    log.append(line);while(log.childElementCount>36)log.firstElementChild.remove();
   }
+  if(row.type==='activation-update'||row.type==='front-changed')updateMeters();
   if(row.agentId){
    const output=host.querySelector('[data-inner-answer="'+row.agentId+'"]');
    if(output&&['response','front-integration','upstream-action','error','cancelled'].includes(row.type))
@@ -71,7 +91,10 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   }
  }});
  if(previous?.history)try{engine.importHistory(previous.history)}catch{}
+ if(previous?.activation)try{engine.importActivation(previous.activation)}catch{}
  const status=message=>{const output=host.querySelector('[data-inner-status]');if(output)output.textContent=message};
+ let sleepTimer=null;
+ const sleepEnabled=(()=>{try{return localStorage.getItem(LOCAL_SLEEP_PREF)==='on'}catch{return false}})();
  const frontChoices=IDS.map(id=>'<option value="'+id+'"'+(id===template.controls.frontAgentId?' selected':'')+'>'+esc(LAYERS[id].label)+'</option>').join('');
  host.innerHTML='<details><summary><strong>Author Lab · Inner Ensemble (0.8B / 2B / 4B)</strong></summary>'+
   '<p>Self-insert as the author of three independent fictional developmental agents. Their personalities start blank. On each shared event, all three propose what they would do as the executive. Internal action proposals flow to the selected front-facing model.</p>'+
@@ -82,6 +105,12 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   '<label>Premise <textarea data-inner-premise rows="2">'+esc(template.author.premise)+'</textarea></label>'+
   '<label><input type="checkbox" data-inner-cross-talk'+(template.controls.crossTalk?' checked':'')+'> Share other layers’ previous responses as context</label>'+
   '<label><input type="checkbox" data-inner-autoremember'+(template.controls.autoRemember?' checked':'')+'> Include earlier simulated experiences in the next event’s context</label>'+
+  '<fieldset class="cw-fleet-card"><legend>Trigger meter · fictional executive control</legend>'+
+  '<label><input type="checkbox" data-inner-trigger-enabled'+(template.controls.trigger.enabled?' checked':'')+'> Allow temporary internal front takeover</label>'+
+  '<div class="cw-fleet-grid"><label>Activation threshold <input data-inner-trigger-threshold type="number" min="55" max="95" value="'+template.controls.trigger.threshold+'"></label>'+
+  '<label>Release threshold <input data-inner-trigger-release type="number" min="0" max="54" value="'+template.controls.trigger.releaseThreshold+'"></label></div>'+
+  '<p class="cw-fleet-meta">Each model proposes its own activation change. The system clamps changes, decays meters after each turn, limits takeover duration, and applies cooldown. A temporary switch affects the next turn, never tool permissions.</p>'+
+  '<div data-inner-meter-group></div><button type="button" data-inner-reset-meter>Reset trigger meters</button></fieldset>'+
   '<div class="cw-fleet-grid">'+IDS.map(id=>agentPanel(id,template.agents[id])).join('')+'</div>'+
   '<div class="cw-fleet-choices"><button type="button" data-inner-save>Save personality templates</button>'+
   '<button type="button" data-inner-export>Export author file and event log</button>'+
@@ -93,8 +122,47 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   '<button type="button" data-inner-resume>Resume</button>'+
   '<button type="button" data-inner-clear>Clear history</button></div>'+
   '<output data-inner-status role="status" aria-live="polite">Ready. Nothing runs until requested.</output>'+ 
+  '<section class="cw-fleet-card"><h4>Nightly sleep · local host</h4>'+
+  '<label><input type="checkbox" data-inner-sleep-auto'+(sleepEnabled?' checked':'')+'> Unload these Ollama models after the UTC rollover (while this page remains open)</label>'+
+  '<p class="cw-fleet-meta">Cloudflare included-neuron accounting resets at 00:00 UTC. This page cannot run Cloudflare jobs, train LoRA, or wake from a closed browser. Server-side scheduling and a local trainer must be connected separately.</p>'+
+  '<div class="cw-fleet-choices"><button type="button" data-inner-sleep-now>Sleep and unload these models now</button></div>'+
+  '<output data-inner-sleep-status role="status">No automatic training host is configured.</output></section>'+
   '<details><summary>Agent journal and action flow</summary><section data-inner-journal class="cw-fleet-card"></section></details>'+
   '</details>';
+
+ function updateMeters(){
+  const activation=engine.getActivation(),holder=host.querySelector('[data-inner-meter-group]');
+  if(!holder)return;
+  holder.replaceChildren();
+  for(const id of IDS){
+   const line=document.createElement('div');line.className='cw-fleet-meta';
+   const meter=document.createElement('progress');meter.value=activation.activation[id];meter.max=100;
+   meter.style.width='100%';
+   const label=document.createElement('span');
+   label.textContent=LAYERS[id].label+' · '+activation.activation[id]+'/100'+(activation.frontAgentId===id?' · front-facing':'');
+   line.append(label,meter);holder.append(line);
+  }
+ }
+ async function goToSleep(){
+  engine.stop();
+  const output=host.querySelector('[data-inner-sleep-status]');
+  if(output)output.textContent='Stopping generations and unloading selected model weights…';
+  const models=Object.values(engine.getTemplate().agents).filter(a=>a.enabled).map(a=>a.model);
+  try{
+   const unloaded=await unloadOwnModels(fleet,models);
+   if(output)output.textContent='Sleeping. '+unloaded.length+' model(s) unloaded. No LoRA training attempted.';
+  }catch(error){if(output)output.textContent='Sleep paused generation, but model unload was incomplete: '+String(error?.message||error)}
+  persist(engine);
+ }
+ function scheduleSleep(){
+  if(sleepTimer!==null){clearTimeout(sleepTimer);sleepTimer=null;}
+  const input=host.querySelector('[data-inner-sleep-auto]');
+  if(!input?.checked)return;
+  const delay=nextUtcRollover(Date.now())-Date.now();
+  sleepTimer=setTimeout(()=>{sleepTimer=null;
+   if(host.isConnected)void goToSleep();
+  },Math.min(delay,2147483647));
+ }
  function updateForm(){
   const t=engine.getTemplate();
   host.querySelector('[data-inner-author-name]').value=t.author.name;
@@ -103,6 +171,10 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   host.querySelector('[data-inner-front]').value=t.controls.frontAgentId;
   host.querySelector('[data-inner-cross-talk]').checked=t.controls.crossTalk;
   host.querySelector('[data-inner-autoremember]').checked=t.controls.autoRemember;
+  host.querySelector('[data-inner-trigger-enabled]').checked=t.controls.trigger.enabled;
+  host.querySelector('[data-inner-trigger-threshold]').value=t.controls.trigger.threshold;
+  host.querySelector('[data-inner-trigger-release]').value=t.controls.trigger.releaseThreshold;
+  updateMeters();
   for(const id of IDS){
    const a=t.agents[id];
    host.querySelector('[data-inner-enabled="'+id+'"]').checked=a.enabled;
@@ -122,6 +194,9 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   t.controls.frontAgentId=host.querySelector('[data-inner-front]').value;
   t.controls.crossTalk=host.querySelector('[data-inner-cross-talk]').checked;
   t.controls.autoRemember=host.querySelector('[data-inner-autoremember]').checked;
+  t.controls.trigger.enabled=host.querySelector('[data-inner-trigger-enabled]').checked;
+  t.controls.trigger.threshold=Number(host.querySelector('[data-inner-trigger-threshold]').value);
+  t.controls.trigger.releaseThreshold=Number(host.querySelector('[data-inner-trigger-release]').value);
   for(const id of IDS){
    t.agents[id].enabled=host.querySelector('[data-inner-enabled="'+id+'"]').checked;
    t.agents[id].model=host.querySelector('[data-inner-model="'+id+'"]').value.trim();
@@ -148,6 +223,8 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   const b=event.target.closest?.('button');if(!b)return;
   try{
    if(b.matches('[data-inner-save]'))return save();
+   if(b.matches('[data-inner-reset-meter]')){engine.resetActivation();persist(engine);updateMeters();return status('Trigger meters reset.')}
+   if(b.matches('[data-inner-sleep-now]'))return void goToSleep();
    if(b.matches('[data-inner-export]')){save();return exportJson('civweave-inner-ensemble-author.json',engine.exportState())}
    if(b.matches('[data-inner-stop]')){engine.stop();return status('Active generations cancelled. Resume to continue.')}
    if(b.matches('[data-inner-pause]')){engine.stop();return status('Paused.')}
@@ -169,14 +246,20 @@ export function mountInnerEnsemble(host,{fleet=globalThis.CivweaveAIFleetV1}={})
   }catch(error){status(String(error?.message||error))}
  });
  host.addEventListener('change',event=>{
+  if(event.target.matches('[data-inner-sleep-auto]')){
+   try{localStorage.setItem(LOCAL_SLEEP_PREF,event.target.checked?'on':'off');scheduleSleep()}catch{}
+   return;
+  }
   if(!event.target.matches('[data-inner-import]'))return;
   const file=event.target.files?.[0];if(!file)return;
   void file.text().then(raw=>{
    const data=JSON.parse(raw),t=normalizeAuthorTemplate(data?.template||data);
    engine.configure(t);
    if(data?.schema===INNER_ENSEMBLE_SCHEMA&&Array.isArray(data.history))engine.importHistory(data.history);
+   if(data?.activation)engine.importActivation(data.activation);
    updateForm();persist(engine);status('Imported author file and local history. No model started.');
   }).catch(error=>status('Import rejected: '+String(error?.message||error)));
  });
+ updateMeters();scheduleSleep();
  return engine;
 }
