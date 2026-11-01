@@ -238,7 +238,7 @@ export function createInnerEnsemble({template=authorTemplate(),generate,now=()=>
   const challenge=current.agents[agentId].challenges[index];
   if(!challenge)throw new TypeError('No challenge at this index.');
   // A challenge is an experience for its assigned layer, not a silent weight update.
-  return send('FICTIONAL '+LAYERS[agentId].stage.toUpperCase()+' EXERCISE:\n'+challenge,{...options,targetIds:[agentId]});
+  return send('FICTIONAL '+LAYERS[agentId].stage.toUpperCase()+' EXERCISE (focus layer: '+agentId+', other layers should observe and independently propose actions):\n'+challenge,options);
  }
  function exportState(){return {schema:INNER_ENSEMBLE_SCHEMA,template:copy(current),history:copy(history)};}
  function importHistory(rows){
