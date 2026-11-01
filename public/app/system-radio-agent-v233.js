@@ -376,7 +376,7 @@ async function tuneGuildBroadcast(next){
  await loadCatalog();if(!directTracksFor().length){status('There are no playable radio recordings.');return false}
  if(mode()!=='direct')setMode('direct');
  const previousMode=broadcastMode,switched=previousMode&&previousMode!==next;
- broadcastMode=next;broadcastPaused=false;if(switched){cancelDj();broadcastCue=''}
+ broadcastMode=next;broadcastPaused=false;if(switched){cancelDj();broadcastCue='';broadcastChunk=''}
  try{
   await fetchGuildRadio();
   if(!broadcastTimer)broadcastTimer=setInterval(()=>{void syncGuildRadio()},3500);
