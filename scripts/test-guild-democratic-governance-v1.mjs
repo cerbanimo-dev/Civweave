@@ -335,18 +335,18 @@ test('inbox notices are actor-scoped and read acknowledgments are authenticated,
   assert.equal(governanceStatus(f.sql,{actorId:D}).notices.length,0);
 });
 test('a banned member can submit exactly one credential-authenticated appeal, but never cast votes',()=>{
-  const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);
+  const f=fixture();[A,B].forEach(id=>f.member(id));f.member(C,'e'.repeat(64));f.contributor(A);
   const banned=proposeWithNoticedCase(f.sql,{...f.context,actorId:A,action:'ban',targetUserId:C,
     statement:'A removal should not permanently silence a community appeal.'});
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:banned.id,choice:'yes'});
   assert.equal(isBanned(f.sql,C),true);
   assert.throws(()=>fileBanAppeal(f.sql,{actorId:C,credentialHash:'incorrect',ballotId:banned.id,
     statement:'I request that the Guild consider correcting its decision.'}),/credential/i);
-  const appeal=fileBanAppeal(f.sql,{actorId:C,credentialHash:'cred-'+C,ballotId:banned.id,
+  const appeal=fileBanAppeal(f.sql,{actorId:C,credentialHash:'e'.repeat(64),ballotId:banned.id,
     statement:'I request that the Guild consider correcting its decision.'});
   assert.equal(appeal.status,'pending');
   assert.equal(governanceStatus(f.sql,{actorId:B}).appeals.some(a=>a.id===appeal.id),true);
-  assert.throws(()=>fileBanAppeal(f.sql,{actorId:C,credentialHash:'cred-'+C,ballotId:banned.id,
+  assert.throws(()=>fileBanAppeal(f.sql,{actorId:C,credentialHash:'e'.repeat(64),ballotId:banned.id,
     statement:'Try to flood appeals rather than discuss the original decision.'}),/already/i);
   assert.throws(()=>castGovernanceVote(f.sql,{...f.context,actorId:C,ballotId:banned.id,choice:'yes'}));
   assert.equal(isBanned(f.sql,C),true);
@@ -361,13 +361,13 @@ test('a banned member can submit exactly one credential-authenticated appeal, bu
   assert.equal(governanceStatus(f.sql,{actorId:A}).appeals.find(a=>a.id===appeal.id).status,'approved');
 });
 test('a different Guild member cannot impersonate a banned appellant, and expired bans cannot be appealed',()=>{
-  const f=fixture();[A,B,C].forEach(id=>f.member(id));f.contributor(A);
+  const f=fixture();[A,B].forEach(id=>f.member(id));f.member(C,'e'.repeat(64));f.contributor(A);
   const ban=proposeWithNoticedCase(f.sql,{...f.context,actorId:A,action:'ban',targetUserId:C,
     statement:'Security tests reject unrelated device credentials and forged subject IDs.'});
   castGovernanceVote(f.sql,{...f.context,actorId:B,ballotId:ban.id,choice:'yes'});
   assert.throws(()=>fileBanAppeal(f.sql,{actorId:B,credentialHash:'cred-'+B,ballotId:ban.id,
     statement:'An unrelated Guild member cannot forge a ban appeal.'}),/credential|subject|ban/i);
   f.sql.exec('UPDATE guild_governance_bans SET expires_at=? WHERE user_id=?',new Date(Date.now()-1000).toISOString(),C);
-  assert.throws(()=>fileBanAppeal(f.sql,{actorId:C,credentialHash:'cred-'+C,ballotId:ban.id,
+  assert.throws(()=>fileBanAppeal(f.sql,{actorId:C,credentialHash:'e'.repeat(64),ballotId:ban.id,
     statement:'This ban has expired and is no longer appealable.'}),/active|expired/i);
 });
