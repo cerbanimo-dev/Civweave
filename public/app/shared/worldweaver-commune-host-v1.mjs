@@ -164,6 +164,35 @@ export function createCommuneWorldHost({guildId,mesh,founder,verifyReader,clock=
    return receipt.npc;
   }finally{writing=false}
  }
+ /**
+  * Founder-signed, revision-checked placement REQUEST. DreamGrid/OpenSimulator
+  * execution and physical coordinates still require an authorized simulator
+  * adapter; a signed pending placement is not an in-world object.
+  */
+ async function placeEntity({kind,entityRef,worldRef:targetRef,position}={}){
+  if(writing)throw new Error('Worldweaver already has a pending signed change.');
+  writing=true;
+  try{
+   const signer=await foundingWriter();
+   if(!packet||!targetRef||worldRef()!==targetRef)
+    throw new Error('Choose the current signed Worldweaver room before placing.');
+   const current=await mesh.getObject(objectId);
+   if(!current||!validPacket(current,signer)||(await mesh.validateObject(current))?.ok!==true||
+      current.revision!==revision)
+    throw new Error('Worldweaver revision changed; refresh before placing.');
+   const owner=Object.freeze({kind:'human',principalId:signer.origin.nodeId});
+   const world=createWorldweaver({initialState:packet.snapshot,id,clock,
+     authorize:({actor,command})=>actor===owner&&command.type==='place-entity'});
+   const receipt=world.dispatch({type:'place-entity',instanceId:targetRef,
+     entityKind:kind,entityRef,position},owner);
+   const updated={...packet,snapshot:world.snapshot(),updatedAt:clock()};
+   await mesh.createObject({id:objectId,revision:current.revision+1,kind:COMMUNE_WORLD_KIND,
+     purpose:'Guild-founder signed pending entity placement, not an executed OpenSimulator command.',
+     consent:'group',audience:['guild:'+guildId],publish:true,priority:55,payload:updated});
+   await refresh();
+   return {status:'queued',instanceId:receipt.placement.id,revision:receipt.revision};
+  }finally{writing=false}
+ }
  function subscribe(callback){
   if(typeof callback!=='function')throw new TypeError('Callback required');
   subs.add(callback);return()=>subs.delete(callback);
@@ -180,6 +209,6 @@ export function createCommuneWorldHost({guildId,mesh,founder,verifyReader,clock=
   closed=true;subs.clear();if(typeof meshUnsub==='function')meshUnsub();meshUnsub=null;
  }
  connect();
- return Object.freeze({guildId,refresh,provision,registerPilot,getSnapshot,getLayout,worldRef,selectRoom,subscribe,close,
+ return Object.freeze({guildId,refresh,provision,registerPilot,placeEntity,getSnapshot,getLayout,worldRef,selectRoom,subscribe,close,
    get status(){return packet?'live-local':'unprovisioned'}});
 }
