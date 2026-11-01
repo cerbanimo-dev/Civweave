@@ -7,6 +7,16 @@ export const GGUF_PRESETS=Object.freeze([
   Object.freeze({id:'qwen35-2b-q4km-gguf',label:'Qwen 3.5 2B · GGUF Q4_K_M',url:'https://huggingface.co/SoAIHQ/Qwen3.5-2B-GGUF/resolve/main/Qwen3.5-2B-Q4_K_M.gguf',sizeHint:'~1.3 GB',primary:false,note:'Optional smaller GGUF; only one model is kept loaded at a time.'})
 ]);
 let instance=null,loadedUrl='',loading=null,downloading=false,importing=false,uninstalling=false,pendingGenerations=0;
+let activeGeneration=null;
+// Cancel the current browser inference without deleting OPFS weights or
+// accidentally launching another provider. Loading is allowed to settle safely.
+export function stopActiveGeneration(){
+  const active=activeGeneration;
+  if(!active)return false;
+  active.stopRequested=true;
+  active.watchdog?.cancel?.();
+  return true;
+}
 const OPFS='/app/local-ai/browser-gguf-opfs-v1.js?v=gguf-opfs-v1';
 const clean=value=>String(value??'').trim();
 function err(code,message){return Object.assign(new Error(message),{code})}
@@ -385,9 +395,13 @@ async function start(selected,onPhase=()=>{}){
     const create=async gpuLayers=>{
       const current=await engine();
       onPhase('loading',{backend:gpuLayers?'webgpu':'wasm-cpu',gpuLayers,bytes:selected.bytes});
-      await current.loadModel(source,{n_ctx:2048,n_parallel:1,n_threads:1,n_batch:64,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
+      // Do not force a single CPU core on isolated Android browsers that
+      // support WASM pthreads; retain a one-thread fallback where unavailable.
+      const threads=globalThis.crossOriginIsolated&&typeof SharedArrayBuffer!=='undefined'
+        ?Math.min(4,Math.max(2,Math.floor(Number(globalThis.navigator?.hardwareConcurrency||4)/2))):1;
+      await current.loadModel(source,{n_ctx:2048,n_parallel:1,n_threads:threads,n_batch:64,n_ubatch:64,n_gpu_layers:gpuLayers,jinja:true,default_template_kwargs:{enable_thinking:false},reasoning:false});
       loadedUrl=selected.url;
-      onPhase('ready',{backend:gpuLayers?'webgpu':'wasm-cpu',gpuLayers,n_ctx:2048,n_parallel:1});
+      onPhase('ready',{backend:gpuLayers?'webgpu':'wasm-cpu',gpuLayers,n_ctx:2048,n_parallel:1,threads});
       return current;
     };
     try{
@@ -409,18 +423,27 @@ async function generateInternal({model,importId,messages,temperature=.6,maxToken
   const selected=importId?selectionForImported(importId):current();
   if(!selected||selected.model!==model)throw err('GGUF_SELECTION_MISMATCH','Browser GGUF is not selected, or another model replaced the selected ID.');
   if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled before model loading.');
+  const generation={stopRequested:false,watchdog:null};
+  activeGeneration=generation;
   let phase='model-loading';
   const updatePhase=(name,details={})=>{phase=name;try{onPhase?.(name,details)}catch{}};
   let api;
   try{api=await start(selected,updatePhase)}catch(error){
+    if(activeGeneration===generation)activeGeneration=null;
+    if(generation.stopRequested||signal?.aborted)throw err('GGUF_ABORTED','Browser GGUF request was stopped while loading. The model files remain installed.');
     if(error?.code)throw error;
     throw err('GGUF_LOAD_FAILED','Browser GGUF model load failed: '+clean(error?.message).slice(0,700));
   }
-  if(signal?.aborted)throw err('GGUF_ABORTED','GGUF generation cancelled.');
+  if(signal?.aborted||generation.stopRequested){
+    if(activeGeneration===generation)activeGeneration=null;
+    throw err('GGUF_ABORTED','Browser GGUF request was stopped. The model files remain installed.');
+  }
   const watchdogModule=await import('/app/local-ai/gguf-generation-watch-v1.js?v=gguf-generation-watch-v2-prefill');
   const watchdog=watchdogModule.createGGUFGenerationWatch({
     signal,onProgress:(stage,details)=>updatePhase(stage,details)
   });
+  generation.watchdog=watchdog;
+  if(generation.stopRequested)watchdog.cancel();
   let output='',chunks=0,finishReason=null,prefill=null,firstStreamAt=null,streamEvents=0;
   const params={
     model:selected.model,
@@ -433,7 +456,7 @@ async function generateInternal({model,importId,messages,temperature=.6,maxToken
   };
   notify('generating',{model:selected.model,maxTokens:params.max_tokens,structured});
   updatePhase('waiting-first-token',{backend:'wllama',maxTokens:params.max_tokens,
-    timeoutMs:watchdogModule.GGUF_FIRST_VISIBLE_MS,structured});
+    timeoutMs:watchdogModule.GGUF_MAX_PREFILL_MS,structured});
   try{
     // Race each iterator read with the abort promise; even if a wasm/worker
     // iterator ignores AbortSignal, a stalled UI can terminate the request.
@@ -490,7 +513,10 @@ async function generateInternal({model,importId,messages,temperature=.6,maxToken
         ', first stream event='+(firstStreamAt===null?'none':'observed')+'.');
     }
     throw err(error?.code||'GGUF_INFERENCE_FAILED','Browser GGUF '+phase+' failed: '+reason+'. Imported Q4 weights were not removed.');
-  }finally{watchdog.stop()}
+  }finally{
+    watchdog.stop();
+    if(activeGeneration===generation)activeGeneration=null;
+  }
 }
 // Wllama keeps one active model. Serializing complete generations prevents a
 // 2B request from reusing an in-progress 4B load or unloading live inference.
