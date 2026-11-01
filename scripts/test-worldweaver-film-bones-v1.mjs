@@ -58,3 +58,16 @@ test('Training requires actual Gemini, applied code patch and human review recei
  assert.ok(exportResult.training.length+exportResult.validation.length>0);
  assert.throws(()=>exportCivweaveFilmTraining([{...record,modelReceipt:{id:'fake',status:'failed'}}],{ownerTrainingAuthorization:true,verifyReceipt:()=>true}),/receipt/);
 });
+
+test('machine-readable curriculum is explicitly instructional, not fabricated execution data',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const curriculum=JSON.parse(readFileSync(new URL('../examples/worldweaver-book-to-film-curriculum-v1.json',import.meta.url),'utf8'));
+ assert.equal(curriculum.schema,'civweave.film-training-curriculum.v1');
+ assert.equal(curriculum.provenance,'instructional-plan-not-observed-training');
+ assert.equal(curriculum.executedFilmJobs,0);
+ assert.equal(curriculum.trainingConsentGranted,false);
+ assert.equal(curriculum.gates.length,7);
+ assert.ok(curriculum.tasks.some(t=>t.id==='shot-blocking'));
+ assert.ok(curriculum.tasks.some(t=>t.id==='human-sound-replacement'));
+ assert.ok(curriculum.rubric.hardGates.includes('no-fabricated-render-receipts'));
+});
