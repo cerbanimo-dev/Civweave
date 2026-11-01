@@ -193,7 +193,9 @@
     "/app/federation-finder-data/atlas-v274/edges-30.json",
     "/app/federation-finder-data/atlas-v274/edges-31.json",
     "/app/federation-finder-data/atlas-v274/search-index.json",
-    "/app/federation-finder-data/atlas-v274/relationships.csv"
+    "/app/federation-finder-data/atlas-v274/relationships.csv",
+    "/app/pwa-install-prompt-v250.js",
+    "/app/pwa-install-prompt-v250.js?v=v14-observer-quiescence"
   ],
   "lazyPacks": [
     {
@@ -294,11 +296,11 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 12679727,
+    "estimatedBytes": 14057198,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 79788591,
-    "candidateAssetCount": 875,
-    "estimatedAssetCount": 875,
+    "requiredFreeBytes": 81166062,
+    "candidateAssetCount": 909,
+    "estimatedAssetCount": 909,
     "conservativeUpperBound": true
   }
 }
