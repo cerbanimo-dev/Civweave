@@ -43,7 +43,7 @@ export function validateShotBatch(state,batch){
  if(batch.schema!==SHOT_BATCH_SCHEMA)throw new TypeError('Invalid shot batch schema');
  const scene=reviewedScene(state,ref(batch.sceneId,'scene ID'));
  if(!Number.isSafeInteger(batch.productionRevision)||batch.productionRevision<1||
-  batch.productionRevision>state.revision)throw new Error('Invalid production revision');
+  batch.productionRevision!==state.revision)throw new Error('Invalid or stale production revision');
  const cast=new Set(scene.dialogue.map(l=>l.character)),allowedSources=new Set(scene.sourceIds),seen=new Set();
  const shots=arr(batch.shots,'shots',24,1).map((shot,i)=>{
   object(shot,'shot',['id','durationFrames','storyBeat','action','camera','blocking','continuity','soundReference','sourceIds','authorInsightIds']);
