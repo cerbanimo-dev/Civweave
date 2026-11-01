@@ -46,7 +46,7 @@ export function validateShotBatch(state,batch){
   batch.productionRevision!==state.revision)throw new Error('Invalid or stale production revision');
  const cast=new Set(scene.dialogue.map(l=>l.character)),allowedSources=new Set(scene.sourceIds),seen=new Set();
  const shots=arr(batch.shots,'shots',24,1).map((shot,i)=>{
-  object(shot,'shot',['id','durationFrames','storyBeat','action','camera','blocking','continuity','soundReference','sourceIds','authorInsightIds']);
+  object(shot,'shot',['id','durationFrames','storyBeat','action','camera','blocking','continuity','soundReference','sourceIds','authorInsightIds','dialogueLineIndices']);
   const id=ref(shot.id,'shot ID');
   if(seen.has(id))throw new Error('Duplicate shot ID');seen.add(id);
   if(!Number.isInteger(shot.durationFrames)||shot.durationFrames<48||shot.durationFrames>360)
@@ -69,6 +69,10 @@ export function validateShotBatch(state,batch){
   const sources=arr(shot.sourceIds,'shot source references',3,1).map(x=>ref(x,'source ID'));
   if(sources.some(x=>!allowedSources.has(x)))throw new Error('Shot cites excerpt absent from approved scene');
   const authorInsightIds=arr(shot.authorInsightIds??[],'insight references',32).map(x=>ref(x,'insight ID'));
+  const dialogueLineIndices=arr(shot.dialogueLineIndices??[],'dialogue indices',80).map(i=>{
+   if(!Number.isInteger(i)||i<0||i>=scene.dialogue.length)throw new Error('Shot refers to unknown dialogue line');return i;
+  });
+  if(new Set(dialogueLineIndices).size!==dialogueLineIndices.length)throw new Error('Duplicate dialogue line in shot');
   return {id,sceneId:scene.id,order:i,durationFrames:shot.durationFrames,
    storyBeat:str(shot.storyBeat,'story beat',240),action:str(shot.action,'action',1000),
    camera:{size:c.size,move:c.move,lensMm:c.lensMm,start:point(c.start,'camera start'),
@@ -80,7 +84,7 @@ export function validateShotBatch(state,batch){
     foley:optional(s.foley,'foley',300),music:optional(s.music,'music',300),
     dialogue:optional(s.dialogue,'dialogue',300),status:'temporary-reference-only',
     finalAudioAuthority:'human-directed-replacement'},
-   sourceIds:sources,authorInsightIds,assetRef:null,renderStatus:'not-rendered'};
+   sourceIds:sources,authorInsightIds,dialogueLineIndices,assetRef:null,renderStatus:'not-rendered'};
  });
  return {schema:SHOT_BATCH_SCHEMA,sceneId:scene.id,productionRevision:batch.productionRevision,
   draftProvider:batch.draftProvider?str(batch.draftProvider,'draft provider',80):'unverified-manual',
@@ -108,7 +112,7 @@ export function makeGeminiShotTask(state,sceneId,{insights=[],selectedModel,remo
    to:{x:1,y:0,z:0},gesture:'turn',purpose:'answer the invitation'}],
   continuity:{incoming:'Start state',outgoing:'End state',props:[],light:'Window light'},
   soundReference:{ambience:'Room tone',foley:'Footsteps',music:'Temp mood reference',dialogue:'Temp delivery'},
-  sourceIds:scene.sourceIds.slice(0,1),authorInsightIds:notes.map(n=>n.id).slice(0,1)};
+  sourceIds:scene.sourceIds.slice(0,1),authorInsightIds:notes.map(n=>n.id).slice(0,1),dialogueLineIndices:[0]};
  return {schema:'civweave.film-gemini-shot-task.v1',provider:'gemini',model,
   purpose:'worldweaver-film-shot-proposals',productionRevision:state.revision,sceneId,
   format:'json',maxShots:24,messages:[
@@ -120,7 +124,7 @@ export function makeGeminiShotTask(state,sceneId,{insights=[],selectedModel,remo
     rules:['Return schema, sceneId, productionRevision and 1–24 shots','24fps; 48–360 frames per shot',
      'One principal action and camera move per shot','Show objective actor positions and eye-lines',
      'No invented source or unauthorized inner thoughts','Preserve screen direction, props and lighting',
-     'Keep references limited to provided source/insight IDs']})}
+     'Keep references limited to provided source/insight IDs','Attach dialogueLineIndices (0-based) to shots where approved lines are performed']})}
   ],notes:'Record actual Gemini request, stream, completion and provider receipt separately.'};
 }
 export function assembleFilmBones(state,batches,{targetMinutes=90}={}){
@@ -149,12 +153,27 @@ export function assembleFilmBones(state,batches,{targetMinutes=90}={}){
  }
  const targetFrames=Math.round(targetMinutes*60*SHOT_FPS),
   missingScenes=approved.filter(s=>!covered.has(s.id)).map(s=>s.id);
+ const uncoveredDialogueByScene={};
+ for(const scene of approved){
+  const performed=new Set(shots.filter(s=>s.sceneId===scene.id).flatMap(s=>s.dialogueLineIndices));
+  const missing=scene.dialogue.map((_,i)=>i).filter(i=>!performed.has(i));
+  if(missing.length)uncoveredDialogueByScene[scene.id]=missing;
+ }
+ const continuityFlags=[];
+ for(let i=1;i<shots.length;i++){
+  const a=shots[i-1],b=shots[i];if(a.sceneId!==b.sceneId)continue;
+  for(const prev of a.blocking){const next=b.blocking.find(p=>p.character===prev.character);if(!next)continue;
+   const dx=prev.to.x-next.from.x,dy=prev.to.y-next.from.y,dz=prev.to.z-next.from.z;
+   if(Math.hypot(dx,dy,dz)>0.75)continuityFlags.push({previousShot:a.id,nextShot:b.id,actor:prev.character,issue:'position discontinuity for director review'});
+  }
+ }
  return {schema:FILM_BONES_SCHEMA,projectId:state.project.id,title:state.project.title,
   sourceRevision:state.revision,sourceRights:state.project.rights,
   editorTarget:'ArtCraft shot-direction handoff (not native project import)',fps:SHOT_FPS,
   estimatedSeconds:atFrame/SHOT_FPS,targetSeconds:targetFrames/SHOT_FPS,
   missingSeconds:Math.max(0,targetFrames-atFrame)/SHOT_FPS,approvedSceneCount:approved.length,
-  coveredSceneCount:covered.size,missingScenes,status:missingScenes.length||atFrame<targetFrames?
+  coveredSceneCount:covered.size,missingScenes,uncoveredDialogueByScene,continuityFlags,
+  status:missingScenes.length||Object.keys(uncoveredDialogueByScene).length||continuityFlags.length||atFrame<targetFrames?
    'incomplete-movie-bones':'full-runtime-bones-awaiting-direction-review',
   soundPolicy:{generatedSound:'best-effort-temporary-reference',
    finalSound:'human-directed-separate-dialogue-foley-ambience-music',
