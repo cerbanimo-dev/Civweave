@@ -3,7 +3,7 @@ import {CHECK_POLICY,nodeLiveness,locationVerdict,rewardAllowed,proofFresh} from
 import {GUILD_STARLING_ROUTE,executeGuildStarlingAction} from './guild-starling-collective-v1.mjs';
 import {guildStarlingAction} from './guild-starling-transport-v1.mjs';
 import {buildGuildNeuronFlow} from './guild-neuron-flow-v1.mjs';
-import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,acknowledgeGuildNotice,fileBanAppeal,sponsorBanAppeal,governanceStatus,reportQueue,markReportDelivery,reportReceipt,delegatedRole,isBanned} from './guild-democratic-governance-state-v1.mjs';
+import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,acknowledgeGuildNotice,fileBanAppeal,sponsorBanAppeal,fileRemovalAppeal,sponsorRemovalAppeal,governanceStatus,reportQueue,markReportDelivery,reportReceipt,delegatedRole,isBanned} from './guild-democratic-governance-state-v1.mjs';
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
 import {GUILD_QUEST_ROUTE,GUILD_QUEST_CORS,guildQuestAction,readGuildQuestInput,executeGuildQuestAction,guildQuestJson,guildQuestError} from './guild-quest-publications-v1.mjs';
 
@@ -60,19 +60,22 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     if(input?.action==='respond-case')return this.ctx.storage.transactionSync(()=>({ok:true,case:respondToGovernanceCase(this.sql,{
       actorId:session.userId,caseId:clean(input.caseId,140),response:input.response})}));
     if(input?.action==='propose')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:proposeGovernance(this.sql,{guildId,origin,
-      actorId:session.userId,action:input.kind,targetUserId:input.targetUserId,role:input.role,reasonCode:input.reasonCode,statement:input.statement,caseId:input.caseId})}));
+      actorId:session.userId,action:input.kind,targetUserId:input.targetUserId,role:input.role,reasonCode:input.reasonCode,statement:input.statement,caseId:input.caseId,seatLimit:this.status().communitySeatLimit})}));
     if(input?.action==='vote')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:castGovernanceVote(this.sql,{guildId,origin,
-      actorId:session.userId,ballotId:clean(input.ballotId,200),choice:input.choice})}));
+      actorId:session.userId,ballotId:clean(input.ballotId,200),choice:input.choice,seatLimit:this.status().communitySeatLimit})}));
     if(input?.action==='review-work')return this.ctx.storage.transactionSync(()=>({ok:true,proof:reviewWorkProof(this.sql,{
       actorId:session.userId,proofId:clean(input.proofId,140),decision:clean(input.decision,30)})}));
     if(input?.action==='ack-notice')return this.ctx.storage.transactionSync(()=>({ok:true,notice:acknowledgeGuildNotice(this.sql,{
       actorId:session.userId,kind:clean(input.kind,20),refId:clean(input.refId,160)})}));
     if(input?.action==='sponsor-appeal')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:sponsorBanAppeal(this.sql,{
       guildId,origin,actorId:session.userId,appealId:clean(input.appealId,160)})}));
+    if(input?.action==='sponsor-removal-appeal')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:sponsorRemovalAppeal(this.sql,{
+      guildId,origin,actorId:session.userId,appealId:clean(input.appealId,160),seatLimit:this.status().communitySeatLimit})}));
     throw Object.assign(new Error('Unknown Guild vote action.'),{status:400});
   }
-  submitBanAppeal({userId,credentialHash,ballotId='',statement}={}){
-    return this.ctx.storage.transactionSync(()=>({ok:true,appeal:fileBanAppeal(this.sql,{
+  submitBanAppeal({userId,credentialHash,ballotId='',statement,kind='ban'}={}){
+    if(!['ban','remove'].includes(kind))throw Object.assign(new Error('Unsupported appeal kind.'),{status:400});
+    return this.ctx.storage.transactionSync(()=>({ok:true,appeal:(kind==='remove'?fileRemovalAppeal:fileBanAppeal)(this.sql,{
       actorId:userId,credentialHash,ballotId,statement})}));
   }
   async submitGovernanceWork({tokenHash,requestedNodeId,input}={}){
@@ -310,6 +313,10 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     this.ensureResidentTables();
     let nodeId=this.resolveResidentNode(requestedNodeId);if(!nodeId)return{ok:false,status:404,error:'Guild starter node not found.'};
     if(isBanned(this.sql,userId,{credentialHash}))return{ok:false,status:403,error:'This Guild has an active community-approved temporary ban for this resident.'};
+    // One enrollment per canonical device credential. New credentials are not
+    // universal human identity proof; this prevents only credential reuse.
+    const alias=[...this.sql.exec('SELECT user_id FROM resident_members WHERE credential_hash=? AND user_id<>? LIMIT 1',credentialHash,userId)][0];
+    if(alias)return{ok:false,status:409,error:'This Guild device credential already belongs to a resident.'};
     const existingAny=this.memberByUser(userId);let idempotent=false;
     if(existingAny){if(existingAny.credential_hash!==credentialHash)return{ok:false,status:403,error:'This Guild login belongs to a different device credential.'};nodeId=existingAny.node_id;idempotent=true}
     else{
@@ -417,7 +424,7 @@ export default{
           const input=JSON.parse(raw);
           const result=await stub.submitBanAppeal({userId:loginUserId(input.userId),
             credentialHash:await loginCredentialHash(input.credential),
-            ballotId:clean(input.ballotId,200),statement:input.statement});
+            ballotId:clean(input.ballotId,200),statement:input.statement,kind:clean(input.kind||'ban',20)});
           return json(result,201);
         }catch(error){return errorResponse(error)}
       }
