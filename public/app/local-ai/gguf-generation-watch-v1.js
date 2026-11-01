@@ -1,12 +1,15 @@
 // Bounded on-device GGUF generation watchdog. This supervises generation
 // AFTER Wllama has loaded the GGUF, without touching OPFS weights.
 export const GGUF_FIRST_VISIBLE_MS=120000;
+// Prompt progress can advance for many minutes on mobile; it must not reset
+// the absolute deadline for the first answer indefinitely.
+export const GGUF_MAX_PREFILL_MS=240000;
 export const GGUF_OUTPUT_IDLE_MS=75000;
 export const GGUF_MAX_GENERATE_MS=720000;
 
 export function createGGUFGenerationWatch({
   signal,onProgress=()=>{},firstVisibleMs=GGUF_FIRST_VISIBLE_MS,
-  idleMs=GGUF_OUTPUT_IDLE_MS,maxMs=GGUF_MAX_GENERATE_MS,
+  prefillCapMs=GGUF_MAX_PREFILL_MS,idleMs=GGUF_OUTPUT_IDLE_MS,maxMs=GGUF_MAX_GENERATE_MS,
   timerSet=setTimeout,timerClear=clearTimeout,now=Date.now
 }={}){
   const own=new AbortController(),started=now();
@@ -40,6 +43,11 @@ export function createGGUFGenerationWatch({
       '. The current GGUF remains installed.'));
   };
   armFirst();
+  const absolutePrefillTimer=schedule(prefillCapMs,()=>abort('GGUF_PREFILL_TIME_LIMIT',
+    'Wllama did not produce its first visible token within '+Math.ceil(prefillCapMs/1000)+
+    ' seconds, even though prompt prefill may have advanced. Last prefill: '+
+    (lastPrefill?lastPrefill.processed+'/'+lastPrefill.total:'not reported')+
+    '. Try a shorter prompt or a native Termux/Ollama model. The GGUF remains installed.'));
   schedule(maxMs,()=>abort('GGUF_GENERATION_TIME_LIMIT',
     'Wllama generation exceeded '+Math.ceil(maxMs/1000)+' seconds. The current GGUF remains installed.'));
   let idleTimer=null;
@@ -76,6 +84,7 @@ export function createGGUFGenerationWatch({
       if(own.signal.aborted)throw reason;
       if(visible){
         visibleChunks++;if(firstVisibleAt===null){firstVisibleAt=now();timerClear(firstTimer);timers.delete(firstTimer);
+          timerClear(absolutePrefillTimer);timers.delete(absolutePrefillTimer);
           progress('first-token',{firstTokenMs:firstVisibleAt-started,visibleChunks});}
         lastVisibleAt=now();resetIdle();
         if(visibleChunks===1||visibleChunks%24===0)
@@ -84,6 +93,12 @@ export function createGGUFGenerationWatch({
         hiddenChunks++;if(hiddenChunks===1||hiddenChunks%24===0)
           progress('hidden-progress',{hiddenChunks,elapsedMs:now()-started,visibleChunks});
       }
+    },
+    cancel(){
+      if(own.signal.aborted)return false;
+      reason=error('GGUF_ABORTED','Browser GGUF generation stopped by the user. Imported weights remain installed.');
+      clear();progress('cancelled',{code:reason.code,elapsedMs:now()-started});own.abort(reason);
+      return true;
     },
     snapshot(){return{visibleChunks,hiddenChunks,prefillEvents,prefill:lastPrefill,firstTokenMs:firstVisibleAt===null?null:firstVisibleAt-started,
       idleMs:lastVisibleAt===null?null:now()-lastVisibleAt,elapsedMs:now()-started,
