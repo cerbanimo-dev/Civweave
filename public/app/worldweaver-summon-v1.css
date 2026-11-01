@@ -55,3 +55,16 @@
  #cw-starling-lounge .sl-summon-call,#cw-starling-lounge .sl-summon-call-figure{animation:none!important}
  #cw-starling-lounge .sl-summon-call-exit{opacity:.15}
 }
+
+/* Real user answers on their own Civweave device; safe even outside the lounge. */
+body>.cw-world-incoming-call{position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:2147480000;width:min(350px,calc(100vw - 28px));box-sizing:border-box;padding:17px;border-radius:18px;border:2px solid #a4ceb8;background:#18362f;color:#f6f5ed;box-shadow:0 14px 50px #000b;font:14px/1.45 system-ui}
+body>.cw-world-incoming-call[hidden]{display:none!important}
+body>.cw-world-incoming-call h2{font-size:1.08rem;margin:0 0 10px;color:#f0c995}
+body>.cw-world-incoming-call p{margin:7px 0;overflow-wrap:anywhere}
+body>.cw-world-incoming-call label{display:grid;gap:5px;margin-top:11px;font-weight:600}
+body>.cw-world-incoming-call input{width:100%;box-sizing:border-box;border:1px solid #8bb8aa;border-radius:9px;background:#102c2d;color:#fff;padding:11px;font:inherit;min-height:44px}
+body>.cw-world-incoming-call .cw-world-incoming-buttons{display:flex;gap:9px;margin-top:13px}
+body>.cw-world-incoming-call button{flex:1;min-height:44px;border-radius:10px;border:1px solid #a0c5bb;background:#356a55;color:#fff;font:inherit;font-weight:700}
+body>.cw-world-incoming-call button:last-child{background:#5c353b;border-color:#e2a6ad}
+body>.cw-world-incoming-call button:disabled{opacity:.5}
+body>.cw-world-incoming-call :focus-visible{outline:3px solid #f1cb99;outline-offset:2px}
