@@ -5,6 +5,8 @@
   "description": "Compact Civweave offline core with canonical realm surfaces, deterministic local work, and lazy core O*NET/ESCO labor intelligence. Large media, full federation discovery, decorative visuals, and device-AI model payloads remain optional.",
   "seeds": [
     "/app/installed-entry-v146.html",
+    "/HARMLESS.md",
+    "/app/shared/harmless-notebook-v1.mjs",
     "/app/civweave-ledger-contract-v1.js",
     "/app/cw-reward-ledger-v2.js",
     "/app/civweave-fulfillment-ledger-v1.js",
