@@ -132,4 +132,21 @@ assert.throws(()=>validateContext.orderedFiles([
   small('Qwen3.5-2B-Q4_K_M-00002-of-00002.gguf')
 ]),/same original model basename/);
 
+// Mobile regression: a slow browser prefill must remain interruptible and
+// must not quietly repeat the GGUF request through the generic fallback.
+const guideChat=await read('public/app/guide-chat-surface-v350.js');
+const generationWatch=await read('public/app/local-ai/gguf-generation-watch-v1.js');
+const guideTracker=await read('public/app/guide-generation-tracker-v1.js');
+assert.match(gguf,/function stopActiveGeneration\(\)/);
+assert.match(gguf,/crossOriginIsolated/);
+assert.match(gguf,/n_threads:threads/);
+assert.match(gguf,/gguf-generation-watch-v3-bounded-prefill/);
+assert.match(runtime,/embedded-gguf-v10-stall-recovery/);
+assert.match(guideChat,/function browserGGUFRequested\(\)/);
+assert.match(guideChat,/gguf\.stopActiveGeneration\?\.\(\)/);
+assert.match(guideChat,/\|\|ggufRequested\)/);
+assert.match(guideChat,/embedded-gguf-v10-stall-recovery/);
+assert.match(generationWatch,/GGUF_MAX_PREFILL_MS=240000/);
+assert.match(generationWatch,/GGUF_PREFILL_TIME_LIMIT/);
+assert.match(guideTracker,/preparing prompt /);
 console.log('Browser-only GGUF contracts: settings, verified cache, native worker runtime, no HTTP inference, and pinned asset stage passed.');
