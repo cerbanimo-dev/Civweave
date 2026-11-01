@@ -2,7 +2,7 @@ import {STARLING_PERSONAS,guildQuestBeatSnapshot,discoverGuildOpportunities} fro
 import {COLLECTIVE_TOOL_CATALOG} from './shared/starling-collective-tools-v1.mjs';
 import {localFleetProjection,guildFleetProjection} from './shared/civweave-fleet-scopes-v1.mjs';
 import {createSimulatorToolBridge} from './shared/worldweaver-simulator-tools-v1.mjs';
-import {connectOpenSimRegion,normalizeOpenSimBridgeUrl} from './shared/worldweaver-opensim-source-v1.mjs';
+import {connectOpenSimRegion,normalizeOpenSimBridgeUrl,getOpenSimLiveStatus,submitOpenSimCommand,getOpenSimActionReceipt} from './shared/worldweaver-opensim-source-v1.mjs';
 
 const ID='cw-starling-lounge';
 const PEOPLE=Object.values(STARLING_PERSONAS);
@@ -24,7 +24,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim region export connected.',openSimBusy:false,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
+const state={guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -93,16 +93,19 @@ function setup(){
     <div class="sl-fleet-actions"><button type="button" class="sl-strong" data-sl-action="pilot-register">Register selected pilot</button><button type="button" data-sl-action="world-observe">Observe room</button></div>
     <details class="sl-sim-tools"><summary>Simulator workbench <span>Read-only + pending proposals</span></summary>
       <p class="sl-sub">Preparing a move does not execute it.</p>
-      <div class="sl-coordinate-fields"><label>X coordinate<input type="number" min="0" max="256" step="1" data-sl-move-x value="128"></label><label>Y coordinate<input type="number" min="0" max="256" step="1" data-sl-move-y value="128"></label><button type="button" data-sl-action="world-move-proposal">Prepare move</button></div>
+      <div class="sl-coordinate-fields"><label>X coordinate<input type="number" min="0" max="256" step="1" data-sl-move-x value="128"></label><label>Y coordinate<input type="number" min="0" max="256" step="1" data-sl-move-y value="128"></label><label>Z coordinate<input type="number" min="0" max="4096" step="1" data-sl-move-z value="28"></label><button type="button" data-sl-action="world-move-proposal">Prepare move</button></div>
       <pre class="sl-tool-observation" data-sl-observation aria-label="Read-only observation and prepared actions"></pre>
     </details>
     <section class="sl-opensim-link" data-sl-guild-only aria-label="OpenSim region integration">
-      <h3>OpenSim region export</h3>
-      <p class="sl-sub">Read actual region geometry through an operator-approved loopback exporter. The 2D map and 3D preview share the same geometry. This does not connect an OpenSim avatar or enable NPC movement.</p>
-      <label for="cw-sl-opensim-url">Local region-export endpoint</label>
-      <input id="cw-sl-opensim-url" data-sl-opensim-url inputmode="url" autocomplete="off" spellcheck="false" placeholder="http://127.0.0.1:8769/region" maxlength="300">
-      <div class="sl-flex"><button type="button" data-sl-action="opensim-connect">Connect / refresh region</button><button type="button" data-sl-action="opensim-disconnect">Disconnect region</button></div>
-      <p class="sl-status" role="status" data-sl-opensim-status>No OpenSim region export connected.</p>
+      <h3>OpenSimulator · live NPC bridge</h3>
+      <p class="sl-sub">Runs locally on this computer. An OpenSim owner-controlled in-world script performs movement and speech. If a region-module export is available, the 2D/3D scene also shows actual geometry.</p>
+      <label for="cw-sl-opensim-url">Local OpenSim bridge endpoint</label>
+      <input id="cw-sl-opensim-url" data-sl-opensim-url inputmode="url" autocomplete="off" spellcheck="false" value="http://127.0.0.1:8769/region" maxlength="300">
+      <label for="cw-sl-opensim-token">Browser control token · remains in this view only</label>
+      <input id="cw-sl-opensim-token" data-sl-opensim-token type="password" autocomplete="off" spellcheck="false" placeholder="Paste browser token from Node bridge" maxlength="80">
+      <div class="sl-flex"><button type="button" data-sl-action="opensim-connect">Connect / refresh OpenSim</button><button type="button" data-sl-action="opensim-disconnect">Disconnect</button></div>
+      <div class="sl-coordinate-fields"><button type="button" class="sl-strong" data-sl-action="opensim-move">Move selected NPC to XYZ</button><label>NPC dialogue<input type="text" data-sl-opensim-speech maxlength="300" placeholder="Words for the selected NPC"></label><button type="button" data-sl-action="opensim-speak">NPC speak</button><button type="button" data-sl-action="opensim-receipt">Check last result</button></div>
+      <p class="sl-status" role="status" data-sl-opensim-status>No OpenSim controller connected. Only a human action submits commands.</p>
     </section>
     <p class="sl-status" data-sl-simulator-status role="status">Simulator tools require a signed Worldweaver room and registered pilot.</p>
   </section>
@@ -360,7 +363,13 @@ function renderFleetScopes(){
   const register=$('[data-sl-action=pilot-register]');
   if(register)register.disabled=!fleetIsGuild()||!state.worldLinked||!STARLING_PERSONAS[state.selectedAgent]||state.worldOpening;
   const link=$('[data-sl-action=opensim-connect]');if(link)link.disabled=!fleetIsGuild()||!state.worldLinked||state.openSimBusy;
-  const unlink=$('[data-sl-action=opensim-disconnect]');if(unlink)unlink.disabled=!state.openSimGeometry||state.openSimBusy;
+  const unlink=$('[data-sl-action=opensim-disconnect]');if(unlink)unlink.disabled=!state.openSimUrl||state.openSimBusy;
+  for(const action of ['opensim-move','opensim-speak']){
+    const btn=$('[data-sl-action='+action+']');
+    if(btn)btn.disabled=!state.openSimLive||state.openSimBusy||!fleetIsGuild()||!STARLING_PERSONAS[state.selectedAgent];
+  }
+  const receiptButton=$('[data-sl-action=opensim-receipt]');
+  if(receiptButton)receiptButton.disabled=!state.openSimCommandId||state.openSimBusy;
   const simStatusLabel=$('[data-sl-opensim-status]');if(simStatusLabel)simStatusLabel.textContent=state.openSimStatus;
   const observation=$('[data-sl-action=world-observe]');
   if(observation)observation.disabled=!fleetIsGuild()||!state.worldLinked;
@@ -372,7 +381,7 @@ function renderFleetScopes(){
 function worldTools(){
   const host=state.worldHost;
   if(!host?.getSnapshot()||!host.worldRef())throw new Error('Select a signed Worldweaver room first.');
-  return createSimulatorToolBridge({getSnapshot:host.getSnapshot,getLayout:host.getLayout,getWorldRef:host.worldRef});
+  return createSimulatorToolBridge({getSnapshot:host.getSnapshot,getLayout:state.worldLayout||host.getLayout,getWorldRef:host.worldRef});
 }
 function showObservation(data,message){
   const output=$('[data-sl-observation]');if(output)output.textContent=JSON.stringify(data,null,2).slice(0,9500);
@@ -386,8 +395,8 @@ function observeWorld(){
 }
 function prepareMove(){
   try{
-    const x=Number($('[data-sl-move-x]').value),y=Number($('[data-sl-move-y]').value);
-    const result=worldTools().prepare({personaId:state.selectedAgent,tool:'move',args:{x,y,z:0}});
+    const x=Number($('[data-sl-move-x]').value),y=Number($('[data-sl-move-y]').value),z=Number($('[data-sl-move-z]').value);
+    const result=worldTools().prepare({personaId:state.selectedAgent,tool:'move',args:{x,y,z}});
     showObservation(result,'Move proposal prepared for runtime authorization; no movement executed or reported.');
   }catch(error){state.simMessage='Move proposal blocked: '+clean(String(error?.message||error),260);renderFleetScopes()}
 }
@@ -474,7 +483,7 @@ function close(){if(!state.root)return;state.root.hidden=true;state.worldEpoch++
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
-  if(state.guild?.id!==(guild?.id||null)){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim region export connected.';state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  if(state.guild?.id!==(guild?.id||null)){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
   state.root.hidden=false;document.body.style.overflow='hidden';setView('world');setFleetScope(guild?'guild':'local');state.root.querySelector('[data-sl-action=close]').focus();
   void ensureLocalFleetCatalog().then(()=>{if(!state.root?.hidden)renderFleetScopes()}).catch(error=>{state.fleetMessage=clean(String(error?.message||error),200);renderFleetScopes()});
   void connectGuideRuntime();
@@ -534,6 +543,9 @@ function click(event){
   if(cmd==='world-provision'&&fleetIsGuild())void provisionWorld();
   if(cmd==='opensim-connect'&&fleetIsGuild())void connectOpenSim();
   if(cmd==='opensim-disconnect'&&fleetIsGuild())disconnectOpenSim();
+  if(cmd==='opensim-move'&&fleetIsGuild())void executeOpenSim('move');
+  if(cmd==='opensim-speak'&&fleetIsGuild())void executeOpenSim('speak');
+  if(cmd==='opensim-receipt'&&fleetIsGuild())void checkOpenSimReceipt();
   if(cmd==='world-3d'&&fleetIsGuild())switchWorldMode('3d');
   if(cmd==='world-2d'&&fleetIsGuild())switchWorldMode('2d');
   if(cmd==='focus-chat'){setView('conversation');$('#cw-sl-message')?.focus()}
@@ -886,22 +898,70 @@ async function provisionWorld(){
 async function connectOpenSim(){
   if(state.openSimBusy||!fleetIsGuild()||!state.worldHost||!state.worldLinked)return;
   const guildId=state.guild.id,room=state.worldHost.worldRef(),endpoint=$('[data-sl-opensim-url]')?.value;
-  state.openSimBusy=true;state.openSimStatus='Connecting to the local OpenSim region export…';render();
+  state.openSimBusy=true;state.openSimStatus='Checking the local OpenSimulator bridge and in-world controller…';render();
   try{
     const url=normalizeOpenSimBridgeUrl(endpoint);
-    const geometry=await connectOpenSimRegion(url);
+    const live=await getOpenSimLiveStatus(url);
+    let geometry=null;
+    try{geometry=await connectOpenSimRegion(url)}catch{/* No approved export: allow actual simulator controls with schematic display. */}
     if(state.root?.hidden||state.guild?.id!==guildId||state.worldHost?.worldRef()!==room)return;
     state.openSimGeometry=geometry;state.openSimWorldRef=room;state.openSimUrl=url;
-    state.openSimStatus='Connected · region '+geometry.regionId+' · revision '+geometry.revision+' · '+geometry.faces.length+' faces. Read-only export; no avatar controller.';
+    state.openSimLive=live.commandsEnabled===true&&live.controllerConnected===true;
+    state.openSimRegionId=clean(live.regionId,90);
+    state.openSimStatus=(state.openSimLive?'In-world controller connected':'Bridge found · in-world controller offline')+
+      ' · '+(geometry?'OpenSim region geometry '+geometry.regionId+' revision '+geometry.revision:
+      'no region geometry export; Worldweaver scene is schematic')+
+      ' · NPC actions require an explicitly registered Guild pilot and human click.';
     await mountCurrentRoom(state.worldHost);
-  }catch(error){state.openSimStatus='OpenSim connection failed: '+clean(String(error?.message||error),280)+'. Check exporter permissions, browser CORS and loopback address.'}
-  finally{state.openSimBusy=false;render()}
+  }catch(error){
+    state.openSimLive=false;state.openSimStatus='OpenSim connection failed: '+clean(String(error?.message||error),280)+
+      '. Start the bridge and owner-only in-world script, and verify browser local-network permission.';
+  }finally{state.openSimBusy=false;render()}
 }
 function disconnectOpenSim(){
-  state.openSimGeometry=null;state.openSimWorldRef=null;
-  state.openSimStatus='OpenSim export disconnected. Worldweaver provisional geometry remains available.';
-  if(state.worldHost?.getSnapshot())void mountCurrentRoom(state.worldHost).catch(error=>{state.worldError=clean(String(error?.message||error),250);render()});
+  state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimUrl='';
+  state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;
+  const token=$('[data-sl-opensim-token]');if(token)token.value='';
+  state.openSimStatus='OpenSimulator bridge disconnected; token cleared. Worldweaver schematic remains.';
+  if(state.worldHost?.getSnapshot())void mountCurrentRoom(state.worldHost).catch(error=>{
+    state.worldError=clean(String(error?.message||error),250);render()
+  });
   render();
+}
+async function executeOpenSim(tool){
+  if(state.openSimBusy||!state.openSimLive||!fleetIsGuild())return;
+  state.openSimBusy=true;state.openSimStatus='Checking the registered pilot and preparing '+tool+'…';render();
+  try{
+    const id=state.selectedAgent;
+    if(!STARLING_PERSONAS[id])throw new Error('Select a Starling persona before using OpenSimulator.');
+    const args=tool==='move'
+      ?{x:Number($('[data-sl-move-x]').value),y:Number($('[data-sl-move-y]').value),z:Number($('[data-sl-move-z]').value)}
+      :{text:clean($('[data-sl-opensim-speech]').value,300)};
+    const prepared=worldTools().prepare({personaId:id,tool,args});
+    if(prepared.status!=='pending-verified-model-pilot')
+      throw new Error('The selected Worldweaver pilot is not authorized.');
+    const token=$('[data-sl-opensim-token]')?.value||'';
+    const requestId=crypto.randomUUID().replaceAll('-','');
+    const receipt=await submitOpenSimCommand(state.openSimUrl,{token,requestId,
+      regionId:state.openSimRegionId,personaId:id,tool,args});
+    state.openSimCommandId=receipt.requestId;
+    state.openSimStatus='OpenSim '+tool+' command '+receipt.requestId+' is '+receipt.state+
+      '. Check last result to confirm the in-world controller outcome; queued is not completed.';
+    showObservation(receipt,'OpenSim operator-authorized command was queued; use Check last result for NPC receipt.');
+  }catch(error){state.openSimStatus='OpenSim action rejected: '+clean(String(error?.message||error),300)}
+  finally{state.openSimBusy=false;render()}
+}
+async function checkOpenSimReceipt(){
+  if(state.openSimBusy||!state.openSimCommandId||!state.openSimUrl)return;
+  state.openSimBusy=true;render();
+  try{
+    const receipt=await getOpenSimActionReceipt(state.openSimUrl,state.openSimCommandId,
+      $('[data-sl-opensim-token]')?.value||'');
+    state.openSimStatus='OpenSim controller result: '+receipt.state+
+      (receipt.summary?' · '+clean(receipt.summary,200):' · no completed action confirmed');
+    showObservation(receipt,'Controller-reported result, not a Guild Quest completion receipt.');
+  }catch(error){state.openSimStatus='OpenSim result unavailable: '+clean(String(error?.message||error),300)}
+  finally{state.openSimBusy=false;render()}
 }
 async function mountCurrentRoom(host){
   const room=host.worldRef();
@@ -912,6 +972,7 @@ async function mountCurrentRoom(host){
     objects:geometry.objects.map(x=>({...x,instanceId:room})),
     footprints:geometry.footprints.map(x=>({...x,instanceId:room})),
     faces:geometry.faces.map(x=>({...x,instanceId:room}))}}):null;
+  state.worldLayout=layout?()=>layout:null;
   return attachWorldSource({getSnapshot:host.getSnapshot,getLayout:layout?()=>layout:host.getLayout,
     worldRef:room,subscribe:host.subscribe,
     onActivate:selection=>{
@@ -928,7 +989,7 @@ async function enterWorldRoom(worldRef){
   if(!host||!state.worldLinked)return;
   try{
     const selected=host.selectRoom(worldRef);
-    if(state.openSimWorldRef&&state.openSimWorldRef!==worldRef){state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='OpenSim export detached on room change. Connect an export for this room.'}
+    if(state.openSimWorldRef&&state.openSimWorldRef!==worldRef){state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimLive=false;state.openSimUrl='';state.openSimCommandId=null;state.openSimStatus='OpenSim detached on room change. Connect this room explicitly.'}
     await mountCurrentRoom(host);
     $('[data-sl-scene-context]').textContent=selected.title+
       ' · actual signed Worldweaver space, rendered with provisional local geometry.';
@@ -1006,7 +1067,7 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
 function detachWorldSource(){
   state.worldRosterUnsubscribe?.();state.worldRosterUnsubscribe=null;
   state.worldViewer?.close();state.worldViewer=null;
-  state.worldView?.close();state.worldView=null;state.worldLinked=false;
+  state.worldView?.close();state.worldView=null;state.worldLinked=false;state.worldLayout=null;
   const holder=$('[data-sl-room-holder]');if(holder)holder.hidden=true;
   if(state.root){const host=$('[data-sl-world-host]');if(host){host.hidden=true;host.replaceChildren()}
     const stage=$('[data-sl-stage]');if(stage)stage.hidden=false;
