@@ -47,7 +47,7 @@ A **source record** includes edition ID, source passage ID, cryptographic digest
 - `makeGeminiShotTask(state,sceneId,options)`: consented invocation packet that contains approved scene and only explicitly model-approved insight notes. This does **not** call Gemini.
 - `assembleFilmBones(state,batches,{targetMinutes})`: deterministic global frame positions, scene coverage and runtime gaps, per-shot ArtCraft-direction text and explicit reference-vs-final sound controls. This does **not** render clips.
 - `makeCodexFilmTask(...)`: unassigned request with goal, branch, real base SHA, acceptance tests, patch/ack requirements and author-approval firewall.
-- `exportCivweaveFilmTraining(records,{ownerTrainingAuthorization})`: JSONL SFT/validation examples only from genuine successful Gemini receipts, actual applied Codex commits, human approval, rights and training permission. No private manuscript body, hidden reasoning or audience data.
+- `exportCivweaveFilmTraining(records,{ownerTrainingAuthorization})`: JSONL SFT/validation examples only when an injected trusted host verifier validates the genuine Gemini receipt, actual applied Codex commit, human approval, rights and training permission. Browser-only JSON is quarantined as unverified candidates. No private manuscript body, hidden reasoning or audience data.
 - `worldweaver-film-bones-lab.html`: private local JSON import/export, responsive shot validation and assembly, bounded Gemini/Codex request packages, verified-receipt training export. Its buttons make no hidden API requests.
 
 ## Codex implementation queue (not yet executed by Codex)
