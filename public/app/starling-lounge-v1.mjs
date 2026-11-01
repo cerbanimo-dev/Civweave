@@ -93,7 +93,7 @@ function setup(){
     <div class="sl-fleet-actions"><button type="button" class="sl-strong" data-sl-action="pilot-register">Register selected pilot</button><button type="button" data-sl-action="world-observe">Observe room</button></div>
     <details class="sl-sim-tools"><summary>Simulator workbench <span>Read-only + pending proposals</span></summary>
       <p class="sl-sub">Preparing a move does not execute it.</p>
-      <div class="sl-coordinate-fields"><label>X coordinate<input type="number" min="0" max="256" step="1" data-sl-move-x value="128"></label><label>Y coordinate<input type="number" min="0" max="256" step="1" data-sl-move-y value="128"></label><label>Z coordinate<input type="number" min="0" max="4096" step="1" data-sl-move-z value="28"></label><button type="button" data-sl-action="world-move-proposal">Prepare move</button></div>
+      <div class="sl-flex"><button type="button" data-sl-action="world-move-proposal">Prepare move using OpenSim XYZ controls</button></div>
       <pre class="sl-tool-observation" data-sl-observation aria-label="Read-only observation and prepared actions"></pre>
     </details>
     <p class="sl-status" data-sl-simulator-status role="status">Simulator tools require a signed Worldweaver room and registered pilot.</p>
@@ -108,7 +108,11 @@ function setup(){
       <label for="cw-sl-opensim-token">Browser control token · remains in this view only</label>
       <input id="cw-sl-opensim-token" data-sl-opensim-token type="password" autocomplete="off" spellcheck="false" placeholder="Paste browser token from Node bridge" maxlength="80">
       <div class="sl-flex"><button type="button" data-sl-action="opensim-connect">Connect / refresh OpenSim</button><button type="button" data-sl-action="opensim-disconnect">Disconnect</button></div>
-      <div class="sl-coordinate-fields"><button type="button" class="sl-strong" data-sl-action="opensim-move">Move selected NPC to XYZ</button><label>NPC dialogue<input type="text" data-sl-opensim-speech maxlength="300" placeholder="Words for the selected NPC"></label><button type="button" data-sl-action="opensim-speak">NPC speak</button><button type="button" data-sl-action="opensim-receipt">Check last result</button></div>
+      <div class="sl-coordinate-fields">
+        <label>X coordinate<input type="number" min="0" max="256" step="1" data-sl-move-x value="128"></label>
+        <label>Y coordinate<input type="number" min="0" max="256" step="1" data-sl-move-y value="128"></label>
+        <label>Z coordinate<input type="number" min="0" max="4096" step="1" data-sl-move-z value="28"></label>
+        <button type="button" class="sl-strong" data-sl-action="opensim-move">Move selected NPC to XYZ</button><label>NPC dialogue<input type="text" data-sl-opensim-speech maxlength="300" placeholder="Words for the selected NPC"></label><button type="button" data-sl-action="opensim-speak">NPC speak</button><button type="button" data-sl-action="opensim-receipt">Check last result</button></div>
       <div class="sl-opensim-preview" data-sl-opensim-preview aria-label="OpenSimulator region geometry preview"></div>
       <p class="sl-status" role="status" data-sl-opensim-status>No OpenSim controller connected. Only a human action submits commands.</p>
     </section>
