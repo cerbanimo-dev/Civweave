@@ -44,6 +44,7 @@ on:
   push:
     branches: [staging]
     paths:
+      - '.github/workflows/verify-worldweaver-core.yml'
       - 'public/app/shared/worldweaver-core-v1.mjs'
       - 'scripts/test-worldweaver-core-v1.mjs'
       - 'public/app/shared/worldweaver-story-seeds-v1.mjs'
