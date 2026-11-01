@@ -1132,3 +1132,29 @@
 #cw-starling-lounge .sl-harmless-switch{display:flex!important;align-items:flex-start;gap:8px;margin:11px 0;font-size:12px;line-height:1.45}
 #cw-starling-lounge .sl-harmless-switch input{width:18px;height:18px;flex:0 0 18px;margin:1px 0 0}
 #cw-starling-lounge[data-sl-fleet=local] [data-sl-harmless-guild-only]{display:none!important}
+
+/* Semantic Markdown for the HARMLESS story; never render user HTML. */
+#cw-starling-lounge .sl-harmless [data-sl-harmless-document]{
+ font:clamp(13px,1vw,15px)/1.68 Georgia,Charter,serif;letter-spacing:.008em;
+ overflow-wrap:anywhere;padding:16px clamp(12px,2vw,24px)
+}
+#cw-starling-lounge .sl-harmless [data-sl-harmless-document] h2{
+ font:700 23px/1.25 system-ui,sans-serif;color:#e4faee;margin:12px 0 16px
+}
+#cw-starling-lounge .sl-harmless [data-sl-harmless-document] h3{
+ font:650 18px/1.35 system-ui,sans-serif;color:#e4d3ff;margin:20px 0 10px
+}
+#cw-starling-lounge .sl-harmless [data-sl-harmless-document] h4{
+ font:600 15px/1.35 system-ui,sans-serif;color:#d9e9ff;margin:18px 0 8px
+}
+#cw-starling-lounge .sl-harmless [data-sl-harmless-document] p{margin:0 0 11px}
+#cw-starling-lounge .sl-harmless [data-sl-harmless-document] blockquote{
+ border-left:3px solid #9cceb0;margin:12px 0 16px;padding:4px 12px;color:#d5e5e4;
+ background:#2e454d50
+}
+#cw-starling-lounge .sl-harmless [data-sl-harmless-document] hr{
+ border:0;border-top:1px solid #a6ded54d;margin:22px 0
+}
+#cw-starling-lounge .sl-harmless [data-sl-harmless-document] code{
+ font:90% ui-monospace,Consolas,monospace;background:#39455c;padding:1px 4px;border-radius:4px
+}
