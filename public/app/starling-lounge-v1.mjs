@@ -3,6 +3,7 @@ import {COLLECTIVE_TOOL_CATALOG} from './shared/starling-collective-tools-v1.mjs
 import {localFleetProjection,guildFleetProjection} from './shared/civweave-fleet-scopes-v1.mjs';
 import {createSimulatorToolBridge} from './shared/worldweaver-simulator-tools-v1.mjs';
 import {connectOpenSimRegion,normalizeOpenSimBridgeUrl,getOpenSimLiveStatus,submitOpenSimCommand,getOpenSimActionReceipt} from './shared/worldweaver-opensim-source-v1.mjs';
+import {verifyBookCastPacket,convergenceRoster,convergenceTimeline} from './shared/worldweaver-convergence-cast-v1.mjs';
 
 const ID='cw-starling-lounge';
 const PEOPLE=Object.values(STARLING_PERSONAS);
@@ -24,7 +25,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
+const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -53,6 +54,16 @@ function setup(){
   <div class="sl-panel-title"><span class="sl-kicker">01 · RESIDENTS</span><h2>Who is here</h2></div>
   <p class="sl-label" data-sl-guild-only>Starling · fictional collective</p><div class="sl-cast" data-sl-cast data-sl-guild-only></div>
   <p class="sl-label sl-guides-title">Civweave · system guides</p><div class="sl-cast sl-guide-list" data-sl-guides></div>
+  <section class="sl-convergence" aria-label="The Convergence · author-approved book cast preview">
+    <h3>The Convergence · book cast</h3>
+    <p class="sl-sub" data-sl-book-status>Characters arrive from author-reviewed Performance Studio castings. No book characters are running yet.</p>
+    <div data-sl-book-cast class="sl-book-cast" aria-live="polite"></div>
+    <label class="sl-sub" for="cw-sl-book-file">Private cast packet (JSON from Performance Studio)</label>
+    <input id="cw-sl-book-file" data-sl-book-file type="file" accept=".json,application/json">
+    <button type="button" data-sl-action="book-import">Preview reviewed book cast</button>
+    <p class="sl-sub" data-sl-convergence-phase>Story chronology: Cerbanimo → Collective → public opening. No verified release milestone.</p>
+    <a href="/app/tools/worldweaver-performance-lab.html" target="_blank" rel="noopener noreferrer">Open author Performance Studio</a>
+  </section>
   <p class="sl-status">Agent portraits represent software roles, not human Guild membership or votes. Standby does not mean a model is running.</p>
  </aside>
  <div class="sl-center">
@@ -194,7 +205,38 @@ function renderCast(){
   cast.replaceChildren();guides.replaceChildren();stage.replaceChildren();
   for(const person of PEOPLE){cast.append(makeResident(person));stage.append(makeFigure(person))}
   for(const person of Object.values(SYSTEM_GUIDES)){guides.append(makeResident(person,{guide:true}));stage.append(makeFigure(person,{guide:true}))}
+  renderBookCast();
   renderPresence();
+}
+function renderBookCast(){
+  const host=$('[data-sl-book-cast]'),status=$('[data-sl-book-status]'),phase=$('[data-sl-convergence-phase]');
+  if(!host||!status||!phase)return;
+  host.replaceChildren();
+  const timeline=convergenceTimeline();
+  phase.textContent='Convergence arc: Team Cerbanimo → Starling Collective → public participants. Current public authorization: '+timeline.phase+'.';
+  const packet=state.bookPacket;
+  if(!packet){
+    status.textContent='Landry, Delia, Magnus, Maggie and other book characters require an author-reviewed cast packet. No book pilots are running.';
+    return;
+  }
+  const rows=convergenceRoster({bookPacket:packet}).filter(p=>p.team==='book');
+  for(const row of rows){
+    const item=el('p','sl-sub');
+    item.append(el('b','',row.name),document.createTextNode(' · private author-review preview · offline'));
+    host.append(item);
+  }
+  status.textContent=rows.length+' reviewed fictional characters loaded for this session. No book dialogue, model execution, Guild presence or canon publication is implied.';
+}
+async function importBookCast(){
+  const status=$('[data-sl-book-status]'),file=$('[data-sl-book-file]')?.files?.[0];
+  if(!file){status.textContent='Choose the private JSON cast packet exported from Performance Studio.';return}
+  try{
+    if(file.size>100000)throw new Error('Cast packet exceeds the 100 KB private preview limit.');
+    const packet=verifyBookCastPacket(JSON.parse(await file.text()));
+    state.bookPacket=structuredClone(packet);
+    renderBookCast();
+  }catch(error){status.textContent='Book cast preview rejected: '+clean(String(error?.message||error),200)}
+  finally{const input=$('[data-sl-book-file]');if(input)input.value=''}
 }
 function renderPresence(){
   if(!state.root)return;
@@ -487,7 +529,7 @@ async function refresh(){
   }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
 }
-function close(){if(!state.root)return;state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
+function close(){if(!state.root)return;state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
@@ -529,6 +571,7 @@ function click(event){
     if(typeof settings?.open==='function'){close();void settings.open()}
     else{state.fleetMessage='AI Settings is unavailable in this shell. Open the main Settings menu to configure local models.';renderFleetScopes()}
   }
+  if(cmd==='book-import')void importBookCast();
   if(cmd==='pilot-register')void registerSelectedPilot();
   if(cmd==='world-observe'&&fleetIsGuild())observeWorld();
   if(cmd==='world-move-proposal'&&fleetIsGuild())prepareMove();
