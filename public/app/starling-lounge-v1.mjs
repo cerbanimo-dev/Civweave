@@ -2,6 +2,7 @@ import {STARLING_PERSONAS,guildQuestBeatSnapshot,discoverGuildOpportunities} fro
 import {COLLECTIVE_TOOL_CATALOG} from './shared/starling-collective-tools-v1.mjs';
 import {localFleetProjection,guildFleetProjection} from './shared/civweave-fleet-scopes-v1.mjs';
 import {createSimulatorToolBridge} from './shared/worldweaver-simulator-tools-v1.mjs';
+import {connectOpenSimRegion,normalizeOpenSimBridgeUrl} from './shared/worldweaver-opensim-source-v1.mjs';
 
 const ID='cw-starling-lounge';
 const PEOPLE=Object.values(STARLING_PERSONAS);
@@ -23,7 +24,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
+const state={guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim region export connected.',openSimBusy:false,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -56,7 +57,7 @@ function setup(){
  </aside>
  <div class="sl-center">
   <section class="sl-scene-panel" data-sl-panel="world" aria-label="Virtual commune visualization">
-   <div class="sl-scene-heading"><div><span class="sl-kicker">THE LIVING COMMUNE</span><h2>Commune grounds</h2></div><div class="sl-scene-controls"><span data-sl-live-note>Connecting Worldweaver…</span><label class="sl-room-select" data-sl-room-holder hidden>Space <select data-sl-world-room aria-label="Choose a Worldweaver commune space"></select></label><button type="button" data-sl-action="world-provision" hidden>Start local world</button><button type="button" data-sl-action="world-3d" hidden>3D Scene</button><button type="button" data-sl-action="world-2d" hidden>2D Map</button><button type="button" data-sl-action="focus-active">Focus activity</button></div></div>
+   <div class="sl-scene-heading"><div><span class="sl-kicker">THE LIVING COMMUNE</span><h2>Commune grounds</h2></div><div class="sl-scene-controls"><span data-sl-live-note>Connecting Worldweaver…</span><label class="sl-room-select" data-sl-room-holder hidden>Space <select data-sl-world-room aria-label="Choose a Worldweaver commune space"></select></label><button type="button" data-sl-action="world-connect">Connect Worldweaver</button><button type="button" data-sl-action="world-provision" hidden>Start local world</button><button type="button" data-sl-action="world-3d" hidden>3D Scene</button><button type="button" data-sl-action="world-2d" hidden>2D Map</button><button type="button" data-sl-action="focus-active">Focus activity</button></div></div>
    <div class="sl-scene-shell">
     <div class="sl-stage" data-sl-stage role="group" aria-label="Illustrated commune terrain and landmarks">
      <div class="sl-sky" aria-hidden="true"><span class="sl-sun"></span><span class="sl-stars"></span></div>
@@ -95,6 +96,14 @@ function setup(){
       <div class="sl-coordinate-fields"><label>X coordinate<input type="number" min="0" max="256" step="1" data-sl-move-x value="128"></label><label>Y coordinate<input type="number" min="0" max="256" step="1" data-sl-move-y value="128"></label><button type="button" data-sl-action="world-move-proposal">Prepare move</button></div>
       <pre class="sl-tool-observation" data-sl-observation aria-label="Read-only observation and prepared actions"></pre>
     </details>
+    <section class="sl-opensim-link" data-sl-guild-only aria-label="OpenSim region integration">
+      <h3>OpenSim region export</h3>
+      <p class="sl-sub">Read actual region geometry through an operator-approved loopback exporter. The 2D map and 3D preview share the same geometry. This does not connect an OpenSim avatar or enable NPC movement.</p>
+      <label for="cw-sl-opensim-url">Local region-export endpoint</label>
+      <input id="cw-sl-opensim-url" data-sl-opensim-url inputmode="url" autocomplete="off" spellcheck="false" placeholder="http://127.0.0.1:8769/region" maxlength="300">
+      <div class="sl-flex"><button type="button" data-sl-action="opensim-connect">Connect / refresh region</button><button type="button" data-sl-action="opensim-disconnect">Disconnect region</button></div>
+      <p class="sl-status" role="status" data-sl-opensim-status>No OpenSim region export connected.</p>
+    </section>
     <p class="sl-status" data-sl-simulator-status role="status">Simulator tools require a signed Worldweaver room and registered pilot.</p>
   </section>
   <section class="sl-card sl-conversation" data-sl-panel="conversation" aria-label="Collective dialogue">
@@ -350,6 +359,9 @@ function renderFleetScopes(){
   }
   const register=$('[data-sl-action=pilot-register]');
   if(register)register.disabled=!fleetIsGuild()||!state.worldLinked||!STARLING_PERSONAS[state.selectedAgent]||state.worldOpening;
+  const link=$('[data-sl-action=opensim-connect]');if(link)link.disabled=!fleetIsGuild()||!state.worldLinked||state.openSimBusy;
+  const unlink=$('[data-sl-action=opensim-disconnect]');if(unlink)unlink.disabled=!state.openSimGeometry||state.openSimBusy;
+  const simStatusLabel=$('[data-sl-opensim-status]');if(simStatusLabel)simStatusLabel.textContent=state.openSimStatus;
   const observation=$('[data-sl-action=world-observe]');
   if(observation)observation.disabled=!fleetIsGuild()||!state.worldLinked;
   const move=$('[data-sl-action=world-move-proposal]');
@@ -425,6 +437,7 @@ function render(){
   renderPresence();
   const submit=$('[data-sl-action=host-submit]');if(submit&&!!SYSTEM_GUIDES[state.selectedAgent])submit.disabled=true;
   const note=$('[data-sl-live-note]');if(note)note.textContent=fleetIsGuild()?(state.worldLinked?'Worldweaver · signed Guild scene':state.worldError||'Guild world not connected'):'Private device view · no Guild scene published';
+  const connect=$('[data-sl-action=world-connect]');if(connect){connect.hidden=!fleetIsGuild();connect.disabled=state.worldOpening;connect.textContent=state.worldOpening?'Connecting…':state.worldHost?'Reconnect Worldweaver':'Connect Worldweaver'}
   const provision=$('[data-sl-action=world-provision]');if(provision){provision.hidden=state.worldLinked;provision.disabled=state.worldOpening||!state.worldHost;provision.textContent=state.worldOpening?'Connecting…':'Start local world'}
   for(const type of ['3d','2d']){const btn=$('[data-sl-action=world-'+type+']');if(btn){btn.hidden=!state.worldLinked;btn.setAttribute('aria-pressed',String(state.worldMode===type))}}
 }
@@ -461,8 +474,8 @@ function close(){if(!state.root)return;state.root.hidden=true;state.worldEpoch++
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
-  if(state.guild?.id!==(guild?.id||null)){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
-  state.root.hidden=false;document.body.style.overflow='hidden';setView('world');setFleetScope('local');state.root.querySelector('[data-sl-action=close]').focus();
+  if(state.guild?.id!==(guild?.id||null)){state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim region export connected.';state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  state.root.hidden=false;document.body.style.overflow='hidden';setView('world');setFleetScope(guild?'guild':'local');state.root.querySelector('[data-sl-action=close]').focus();
   void ensureLocalFleetCatalog().then(()=>{if(!state.root?.hidden)renderFleetScopes()}).catch(error=>{state.fleetMessage=clean(String(error?.message||error),200);renderFleetScopes()});
   void connectGuideRuntime();
   if(state.guild){void refresh();void refreshTurns();void refreshWorkerStatus();void connectWorld()}
@@ -496,15 +509,18 @@ function click(event){
   if(cmd==='close')close();
   if(cmd==='fleet-settings'){
     const settings=globalThis.CivweaveSettingsV320;
-    if(typeof settings?.open==='function'){close();settings.open()}
-    else{state.fleetMessage='AI Settings is not loaded in this shell. Open Civweave Settings → AI & safety to install or configure models.';renderFleetScopes()}
+    if(typeof settings?.open==='function'){close();void settings.open()}
+    else{state.fleetMessage='AI Settings is unavailable in this shell. Open the main Settings menu to configure local models.';renderFleetScopes()}
   }
   if(cmd==='pilot-register')void registerSelectedPilot();
   if(cmd==='world-observe'&&fleetIsGuild())observeWorld();
   if(cmd==='world-move-proposal'&&fleetIsGuild())prepareMove();
-  if(cmd==='refresh'){if(state.guild){void refresh();void refreshTurns();if(state.hostTransport)void refreshHost();void state.worldHost?.refresh()}state.worldView?.update();renderFleetScopes()}
+  if(cmd==='refresh'){if(state.guild){void refresh();void refreshTurns();void refreshWorkerStatus();if(state.hostTransport)void refreshHost();if(state.worldHost)void state.worldHost.refresh().then(()=>mountCurrentRoom(state.worldHost)).catch(error=>{state.worldError='Worldweaver refresh failed: '+clean(String(error?.message||error),220);render()});else void connectWorld()}state.worldView?.update();renderFleetScopes()}
   if(cmd==='focus-active')focusActivity();
+  if(cmd==='world-connect'&&fleetIsGuild())void connectWorld();
   if(cmd==='world-provision'&&fleetIsGuild())void provisionWorld();
+  if(cmd==='opensim-connect'&&fleetIsGuild())void connectOpenSim();
+  if(cmd==='opensim-disconnect'&&fleetIsGuild())disconnectOpenSim();
   if(cmd==='world-3d'&&fleetIsGuild())switchWorldMode('3d');
   if(cmd==='world-2d'&&fleetIsGuild())switchWorldMode('2d');
   if(cmd==='focus-chat'){setView('conversation');$('#cw-sl-message')?.focus()}
@@ -845,9 +861,36 @@ async function provisionWorld(){
   }catch(error){if(epoch===state.worldEpoch)state.worldError='Could not start Worldweaver: '+clean(String(error?.message||error),240)}
   finally{if(epoch===state.worldEpoch){state.worldOpening=false;render()}}
 }
+async function connectOpenSim(){
+  if(state.openSimBusy||!fleetIsGuild()||!state.worldHost||!state.worldLinked)return;
+  const guildId=state.guild.id,room=state.worldHost.worldRef(),endpoint=$('[data-sl-opensim-url]')?.value;
+  state.openSimBusy=true;state.openSimStatus='Connecting to the local OpenSim region export…';render();
+  try{
+    const url=normalizeOpenSimBridgeUrl(endpoint);
+    const geometry=await connectOpenSimRegion(url);
+    if(state.root?.hidden||state.guild?.id!==guildId||state.worldHost?.worldRef()!==room)return;
+    state.openSimGeometry=geometry;state.openSimWorldRef=room;state.openSimUrl=url;
+    state.openSimStatus='Connected · region '+geometry.regionId+' · revision '+geometry.revision+' · '+geometry.faces.length+' faces. Read-only export; no avatar controller.';
+    await mountCurrentRoom(state.worldHost);
+  }catch(error){state.openSimStatus='OpenSim connection failed: '+clean(String(error?.message||error),280)+'. Check exporter permissions, browser CORS and loopback address.'}
+  finally{state.openSimBusy=false;render()}
+}
+function disconnectOpenSim(){
+  state.openSimGeometry=null;state.openSimWorldRef=null;
+  state.openSimStatus='OpenSim export disconnected. Worldweaver provisional geometry remains available.';
+  if(state.worldHost?.getSnapshot())void mountCurrentRoom(state.worldHost).catch(error=>{state.worldError=clean(String(error?.message||error),250);render()});
+  render();
+}
 async function mountCurrentRoom(host){
   const room=host.worldRef();
-  return attachWorldSource({getSnapshot:host.getSnapshot,getLayout:host.getLayout,
+  const geometry=state.openSimWorldRef===room?state.openSimGeometry:null;
+  // Locally observed OpenSim geometry is never written to the signed Guild world.
+  // Bind exported prims to the selected room solely for renderer projection.
+  const layout=geometry?Object.freeze({sceneGeometry:{...geometry,
+    objects:geometry.objects.map(x=>({...x,instanceId:room})),
+    footprints:geometry.footprints.map(x=>({...x,instanceId:room})),
+    faces:geometry.faces.map(x=>({...x,instanceId:room}))}}):null;
+  return attachWorldSource({getSnapshot:host.getSnapshot,getLayout:layout?()=>layout:host.getLayout,
     worldRef:room,subscribe:host.subscribe,
     onActivate:selection=>{
       if(selection?.objectType==='space'&&selection.objectId!==room){
@@ -863,6 +906,7 @@ async function enterWorldRoom(worldRef){
   if(!host||!state.worldLinked)return;
   try{
     const selected=host.selectRoom(worldRef);
+    if(state.openSimWorldRef&&state.openSimWorldRef!==worldRef){state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='OpenSim export detached on room change. Connect an export for this room.'}
     await mountCurrentRoom(host);
     $('[data-sl-scene-context]').textContent=selected.title+
       ' · actual signed Worldweaver space, rendered with provisional local geometry.';
@@ -932,7 +976,9 @@ async function attachWorldSource({getSnapshot,getLayout,worldRef,subscribe,onAct
   }
   host.hidden=false;$('[data-sl-stage]').hidden=true;
   state.worldMode='3d';
-  $('[data-sl-scene-context]').textContent='Guild-signed Worldweaver local renderer · same manifest in 3D and accessible 2D. Scene geometry is provisional; NPC locomotion is not implemented.';
+  $('[data-sl-scene-context]').textContent=state.openSimGeometry&&state.openSimWorldRef===worldRef
+    ?'Live local view of an OpenSim region-module export; source geometry in 3D and 2D. Guild signatures still authorize pilots; avatar movement is not connected.'
+    :'Guild-signed Worldweaver local renderer · same manifest in 3D and accessible 2D. Scene geometry is provisional; NPC locomotion is not implemented.';
   switchWorldMode('3d');renderPresence();return view;
 }
 function detachWorldSource(){
