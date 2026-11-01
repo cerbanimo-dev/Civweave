@@ -1,7 +1,7 @@
 (function installCivweaveModelRuntime(global) {
   "use strict";
 
-  const VERSION = "1.0.7-ios-webgpu-qwen35-bundled-wasm";
+  const VERSION = "1.0.8-desktop-ollama-role-routing";
   const RESULT_SCHEMA = "civweave-model-result-1.0";
   const CAPABILITY_SCHEMA = "civweave-model-capabilities-1.0";
   const SHARED_MODEL_STORAGE_KEY = "civweave-shared-model";
