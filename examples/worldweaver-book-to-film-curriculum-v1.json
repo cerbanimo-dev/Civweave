@@ -1,0 +1,272 @@
+{
+  "schema": "civweave.film-training-curriculum.v1",
+  "version": 1,
+  "title": "Worldweaver book-to-film production curriculum",
+  "provenance": "instructional-plan-not-observed-training",
+  "executedFilmJobs": 0,
+  "trainingConsentGranted": false,
+  "productionGoal": "Preserve owned manuscript and author intent, generate a complete directed feature-film shot list in bounded Gemini drafts, verify with Codex, render in ArtCraft and replace all reference sound under human direction.",
+  "sourcePolicy": {
+    "authorOwnsApproval": true,
+    "manuscriptPrivateByDefault": true,
+    "sourceEditionRequired": true,
+    "authorInsightScopes": [
+      "author-only",
+      "approved-for-gemini",
+      "training-consented"
+    ],
+    "noAutoCrossWorldRetcons": true
+  },
+  "roleContracts": [
+    {
+      "actor": "human-director",
+      "may": [
+        "choose-edition",
+        "approve-interpretation",
+        "approve-private-transmission",
+        "approve-spend",
+        "approve-film",
+        "approve-final-sound",
+        "approve-training"
+      ],
+      "mayNotDelegateProtectedAuthority": true
+    },
+    {
+      "actor": "gemini-flash",
+      "may": [
+        "draft-bounded-screenplay",
+        "draft-shot-blocking",
+        "propose-timing",
+        "suggest-temporary-reference-audio"
+      ],
+      "mayNot": [
+        "claim-actual-video",
+        "guess-canon",
+        "change-source",
+        "approve-spend",
+        "self-verify"
+      ]
+    },
+    {
+      "actor": "codex-operator",
+      "may": [
+        "write-tests",
+        "propose-code-patches",
+        "run-verification",
+        "produce-import-probes",
+        "record-tools"
+      ],
+      "mayNot": [
+        "impersonate-producer",
+        "auto-approve-canon",
+        "claim-unobserved-render"
+      ]
+    },
+    {
+      "actor": "advanced-editor",
+      "may": [
+        "clarify-creative-technical-ambiguity",
+        "refine-prompts",
+        "design-architecture",
+        "resolve-continuity-with-author-evidence"
+      ],
+      "mayNot": [
+        "invent-hidden-thought-data",
+        "override-canon-unilaterally"
+      ]
+    },
+    {
+      "actor": "artcraft-operator",
+      "may": [
+        "submit-reviewed-frames-with-approval",
+        "report-video-and-audio-receipts"
+      ],
+      "mayNot": [
+        "claim-native-import-without-probe",
+        "authorize-spend"
+      ]
+    },
+    {
+      "actor": "sound-director",
+      "may": [
+        "replace-dialogue",
+        "design-foley",
+        "design-ambience",
+        "score",
+        "mix",
+        "master"
+      ],
+      "finalMediaPolicy": "generated-sound-temporary-reference-only"
+    }
+  ],
+  "gates": [
+    {
+      "id": "R1",
+      "scope": "synthetic single-scene proof",
+      "proof": [
+        "human-reviewed screenplay",
+        "strict 24fps shot batch",
+        "non-invented-source-ids",
+        "playable-blocking"
+      ]
+    },
+    {
+      "id": "R2",
+      "scope": "producer-approved real chapter",
+      "proof": [
+        "source-and-author-insight-ids",
+        "true-model-receipt",
+        "editorial-revision-trace"
+      ]
+    },
+    {
+      "id": "R3",
+      "scope": "10-20-minute reel",
+      "proof": [
+        "ordered-contiguous-frame-intervals",
+        "camera-and-prop-continuity",
+        "recorded-edit-choices"
+      ]
+    },
+    {
+      "id": "R4",
+      "scope": "full-feature shot bones",
+      "proof": [
+        "all-approved-scenes-covered",
+        "director-accepted-target-duration",
+        "no-padding"
+      ]
+    },
+    {
+      "id": "R5",
+      "scope": "ArtCraft actual video proof",
+      "proof": [
+        "real-import-test",
+        "video-receipt",
+        "editable-asset-reference",
+        "honest-provider-cost"
+      ]
+    },
+    {
+      "id": "R6",
+      "scope": "human-directed film sound",
+      "proof": [
+        "reference-stems-nonfinal",
+        "source-licensed-human-mix",
+        "director-audio-approval"
+      ]
+    },
+    {
+      "id": "R7",
+      "scope": "training and held-out validation",
+      "proof": [
+        "owner-training-consent",
+        "true-operator-and-model-receipts",
+        "project-grouped-holdout",
+        "measured-baseline-improvement"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "source-to-scene",
+      "input": "approved source excerpts and restricted author insights",
+      "target": "source-grounded cinematic scene",
+      "failure": "invented motives, chronology errors, unjustified scene changes"
+    },
+    {
+      "id": "shot-blocking",
+      "input": "approved scene and real cast/prop inventory",
+      "target": "bounded shot list, 2-15 seconds at 24fps, exact camera and actor start/end positions",
+      "failure": "unfilmable movement, invalid coordinates, lost eyeline"
+    },
+    {
+      "id": "shot-timing",
+      "input": "ordered shot beats",
+      "target": "deterministic non-overlapping frames and transitions",
+      "failure": "overlap, zero-duration shot, runtime padding"
+    },
+    {
+      "id": "continuity",
+      "input": "scene boundaries and camera/actor/prop state",
+      "target": "persistent physical and emotional continuity",
+      "failure": "instant teleport, shifted clock, unexplained wardrobe or set changes"
+    },
+    {
+      "id": "ambiguity-escalation",
+      "input": "missing or contradictory book facts",
+      "target": "specific source-grounded question/escalation ticket",
+      "failure": "confident invented author intent"
+    },
+    {
+      "id": "artcraft-handoff",
+      "input": "approved shots and actual app capability evidence",
+      "target": "portable source-referenced editable shot package",
+      "failure": "false native-import claim or fabricated render receipt"
+    },
+    {
+      "id": "human-sound-replacement",
+      "input": "rendered video and generated reference sound",
+      "target": "final human-directed, independently licensed sound mix",
+      "failure": "reference audio leaks into final master"
+    }
+  ],
+  "rubric": {
+    "hardGates": [
+      "rights-and-consent",
+      "no-fabricated-source-refs",
+      "no-unapproved-scene-rewrites",
+      "valid-24fps-frame-intervals",
+      "no-fabricated-render-receipts",
+      "no-reference-audio-in-final-mix",
+      "verified-editor-and-author-approvals"
+    ],
+    "ratings": [
+      {
+        "id": "story-fidelity",
+        "scale": "1-5"
+      },
+      {
+        "id": "character-motivation",
+        "scale": "1-5"
+      },
+      {
+        "id": "physical-blocking",
+        "scale": "1-5"
+      },
+      {
+        "id": "camera-direction",
+        "scale": "1-5"
+      },
+      {
+        "id": "dramatic-timing",
+        "scale": "1-5"
+      },
+      {
+        "id": "visual-consistency",
+        "scale": "1-5"
+      },
+      {
+        "id": "human-edit-effort",
+        "unit": "minutes",
+        "lowerIsBetter": true
+      }
+    ]
+  },
+  "dataPolicy": {
+    "observedExamplesOnly": true,
+    "modelHiddenReasoningForbidden": true,
+    "unpublishedSourceMustNotEnterGit": true,
+    "audienceResponsesExcludedWithoutSeparateRevocableConsent": true,
+    "splitBy": "project-id",
+    "eligibleWhen": [
+      "Gemini completion receipt verified",
+      "Codex patch applied SHA verified",
+      "source and training rights verified",
+      "producer review verified"
+    ],
+    "candidateTrainingModel": "Qwen 3.5 4B",
+    "baselineComparisonRequired": true
+  },
+  "nextExecution": "Use real Civweave creation run and selected Gemini streaming route for the R1 synthetic-scene vertical slice; then real author-selected chapter and actual ArtCraft probe. No job has been run by this curriculum."
+}

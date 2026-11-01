@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Worldweaver · Book to Film Bones</title><style>
+:root{color-scheme:dark;font:15px/1.5 system-ui;background:#0e1826;color:#eaf4f6}*{box-sizing:border-box}body{max-width:1220px;margin:auto;padding:18px}a{color:#b2e1d9}p,small{color:#bdcad4}
+main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}section{border:1px solid #597184;border-radius:14px;background:#172b3e;padding:15px;min-width:0}.wide{grid-column:1/-1}
+h1{font-size:clamp(1.6rem,5vw,2.4rem)}h2{font-size:1.2rem}
+input,select,textarea,button{font:inherit;color:inherit}input,select,textarea{width:100%;padding:9px;border-radius:8px;background:#0d1b2b;border:1px solid #9db4c4}
+textarea{min-height:120px;resize:vertical}label{display:block;font-weight:600;margin:12px 0 5px}
+button{padding:9px 12px;min-height:44px;border:1px solid #a9ddd6;border-radius:9px;background:#254b5d;cursor:pointer;margin:8px 6px 4px 0}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #f9d198;outline-offset:2px}
+pre{max-height:320px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;padding:10px;background:#0b1a28;border-radius:8px}
+.status{border-left:3px solid #92d5c1;padding:5px 10px}small{display:block}nav{margin:10px 0 20px}@media(max-width:760px){main{grid-template-columns:1fr}.wide{grid-column:1}}
+</style></head><body><header><small>WORLDWEAVER · PRIVATE FILM PRODUCTION</small><h1>Book → Movie Bones</h1><p>Gemini makes bounded shot drafts. Codex prepares and tests technical edits. The actual producer approves story choices, source use, expenditure and final delivery. ArtCraft reference sound is replaced during the human-directed mix.</p>
+<nav><a href="./worldweaver-performance-lab.html">Performance Studio</a> · <a href="./worldweaver-story-seed-atlas.html">World Seed Atlas</a></nav></header><main>
+<section><h2>1 · Bring the reviewed book adaptation</h2><p>Export a private project JSON from the Performance Studio first. This page reads it locally, never uploads it.</p>
+<label for="source-file">Performance Studio project</label><input id="source-file" type="file" accept=".json,application/json">
+<label for="scene">Approved scene</label><select id="scene"><option value="">Import a project</option></select><p id="project-status" class="status" role="status">No imported production.</p></section>
+<section><h2>2 · Prepare Gemini shot task</h2><label for="model">Configured Gemini model</label><input id="model" placeholder="Actual selected Gemini Flash model ID">
+<label for="insights">Author insight notes as JSON</label><textarea id="insights" spellcheck="false">[]</textarea>
+<label><input id="consent" type="checkbox" style="width:auto"> Approve selected scene and explicitly flagged insights for Gemini transmission</label>
+<button id="gemini">Export Gemini invocation packet</button>
+<p>Use the selected Civweave Gemini streaming runtime to execute the packet. This button alone performs no model call.</p></section>
+<section><h2>3 · Validate model shot batches</h2><p>Paste a genuine Gemini JSON response. Batches may contain 1–24 shots, each 2–15 seconds at 24 fps.</p>
+<label for="batch">Shot batch JSON</label><textarea id="batch" spellcheck="false" placeholder='{"schema":"civweave.film-shot-batch.v1", ...}'></textarea>
+<button id="add">Validate and add</button><button id="clear">Clear batches</button><p id="batch-status" class="status">No validated shots.</p></section>
+<section><h2>4 · Assemble feature-length plan</h2><label for="runtime">Target film duration (minutes)</label><input id="runtime" type="number" min="1" max="240" value="90">
+<button id="compile">Compile movie bones</button><button id="export">Export ArtCraft shot manifest</button>
+<pre id="coverage">Nothing assembled yet.</pre><p>Missing scenes and runtime are reported, never invented to fill time. The exported plan is not a native ArtCraft project.</p></section>
+<section class="wide"><h2>5 · Codex technical pass and training export</h2>
+<label for="branch">Task branch</label><input id="branch" value="staging">
+<label for="sha">Actual Git base commit SHA</label><input id="sha" placeholder="40-character verified SHA" maxlength="40">
+<label for="goal">Codex instruction</label><textarea id="goal">Implement and test the next source-verified ArtCraft shot import/export mapping. Preserve the canonical Worldweaver authority, producer approval, generated reference audio and independent human final sound mix.</textarea>
+<button id="codex">Export bounded Codex task</button>
+<label for="records">Verified review and execution records (JSON array)</label><input id="records" type="file" accept=".json,application/json">
+<label><input id="train-consent" type="checkbox" style="width:auto"> I authorize training export of these rights-cleared, actually executed and approved records</label>
+<button id="training">Export candidates for trusted receipt verification</button><p id="feedback" role="status" class="status">No Codex request, Gemini call, render or training has been performed by this page.</p></section></main>
+<script type="module">
+import {makeGeminiShotTask,validateShotBatch,assembleFilmBones,makeCodexFilmTask,exportCivweaveFilmTraining} from '../shared/worldweaver-film-bones-v1.mjs';
+const $=id=>document.getElementById(id);let state=null,batches=[],film=null,trainingRecords=null;
+function download(name,contents,type='application/json'){const u=URL.createObjectURL(new Blob([contents],{type})),a=document.createElement('a');a.href=u;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1200)}
+const save=(name,value)=>download(name,JSON.stringify(value,null,2));
+async function handle(fn){try{await fn()}catch(e){$('feedback').textContent=e.message||String(e)}}
+$('source-file').addEventListener('change',()=>handle(async()=>{
+ const file=$('source-file').files?.[0];if(!file)return;
+ if(file.size>2500000)throw Error('Project too large for local browser preview');
+ const data=JSON.parse(await file.text());
+ if(data.schema!=='civweave.performance-studio.v1'||!data.project||!Array.isArray(data.proposals))throw Error('Expected a Performance Studio snapshot');
+ state=data;batches=[];film=null;$('scene').replaceChildren();
+ const scenes=data.proposals.filter(s=>s.status==='approved'&&s.reviewedBy);
+ for(const s of scenes){const option=document.createElement('option');option.value=s.id;option.textContent=s.title;$('scene').append(option)}
+ $('project-status').textContent=data.project.title+' · '+scenes.length+' reviewed scenes · local-only';
+ $('batch-status').textContent='No shots.';$('coverage').textContent='Nothing assembled yet.';
+}));
+$('gemini').addEventListener('click',()=>handle(()=>{
+ const task=makeGeminiShotTask(state,$('scene').value,{selectedModel:$('model').value,remoteSourceConsent:$('consent').checked,insights:JSON.parse($('insights').value)});
+ save('civweave-gemini-shot-request.json',task);$('feedback').textContent='Model request packet exported; no API call made.';
+}));
+$('add').addEventListener('click',()=>handle(()=>{
+ const raw=JSON.parse($('batch').value),tested=validateShotBatch(state,raw);
+ if(batches.some(b=>b.shots.some(x=>tested.shots.some(y=>x.id===y.id))))throw Error('Duplicate shot in existing batch');
+ batches.push(raw);film=null;$('batch').value='';
+ $('batch-status').textContent=batches.length+' batches / '+batches.reduce((n,b)=>n+b.shots.length,0)+' shot plans';
+ $('feedback').textContent='Shot batch validated without claiming any render.';
+}));
+$('clear').addEventListener('click',()=>{batches=[];film=null;$('batch-status').textContent='No shots.';$('coverage').textContent='Nothing assembled yet.'});
+$('compile').addEventListener('click',()=>handle(()=>{
+ film=assembleFilmBones(state,batches,{targetMinutes:Number($('runtime').value)});
+ $('coverage').textContent=JSON.stringify({status:film.status,shotCount:film.shotCount,estimatedMinutes:Math.round(film.estimatedSeconds/60*100)/100,missingMinutes:Math.round(film.missingSeconds/60*100)/100,missingSceneIds:film.missingScenes,uncoveredDialogue:film.uncoveredDialogueByScene,continuityFlags:film.continuityFlags,finalSoundPolicy:film.soundPolicy},null,2);
+ $('feedback').textContent='Coverage compiled. Missing material is not automatically generated.';
+}));
+$('export').addEventListener('click',()=>handle(()=>{
+ if(!film)throw Error('Compile the reel before exporting');
+ save('artcraft-worldweaver-shot-directions.json',film);$('feedback').textContent='Shot manifest exported; no ArtCraft native import or render was claimed.';
+}));
+$('codex').addEventListener('click',()=>handle(()=>{
+ const task=makeCodexFilmTask({branch:$('branch').value,baseCommit:$('sha').value,goal:$('goal').value,
+  inputs:state?.project?.id?[state.project.id]:[],acceptance:['Verify one approved scene end to end','Test camera and actor movement grammar','Record genuine model and renderer receipts','Preserve original sound references separately','No private manuscripts committed to Git']});
+ save('civweave-codex-film-task.json',task);$('feedback').textContent='Codex request exported, not assigned or approved.';
+}));
+$('records').addEventListener('change',()=>handle(async()=>{
+ const f=$('records').files?.[0];if(!f)return;if(f.size>5000000)throw Error('Records file too large');
+ trainingRecords=JSON.parse(await f.text());if(!Array.isArray(trainingRecords))throw Error('Expected an array of review receipts');
+ $('feedback').textContent=trainingRecords.length+' records imported; eligibility checked on export.';
+}));
+$('training').addEventListener('click',()=>handle(()=>{
+ if(!$('train-consent').checked)throw Error('Source owner must authorize training candidates');
+ if(!Array.isArray(trainingRecords))throw Error('Import records before exporting');
+ save('civweave-film-training-pending-verification.json',{schema:'civweave.film-training-candidates.v1',trainingReady:false,receiptVerification:'required-by-trusted-Civweave-host',records:trainingRecords});
+ $('feedback').textContent=trainingRecords.length+' candidate records exported for trusted host verification; not model-training ready.';
+}));
+</script></body></html>
