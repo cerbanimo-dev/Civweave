@@ -50,3 +50,10 @@ test('Collective controls have one dispatch owner and navigation leaves the full
  const chat=src.indexOf("await loader.openChat('civweave'");assert.ok(chat>0&&src.slice(chat,chat+230).includes('close();'),'Addressed chat must become visible after success');
  assert.ok(src.includes("window.location.assign('/app/civweave-guild-quest-v1.html')"),'Quest button must enter canonical Quest surface');
 });
+
+test('Guild entry cache-busts Collective module alongside its stylesheet',()=>{
+ const launcher=readFileSync(new URL('../public/app/cerbanimo-intention-landscape-v1.js',import.meta.url),'utf8');
+ const lounge=readFileSync(new URL('../public/app/starling-lounge-v1.mjs',import.meta.url),'utf8');
+ assert.ok(launcher.includes("starling-lounge-v1.mjs?v=brand-responsive-fleet-r6-opensim"));
+ assert.ok(lounge.includes("starling-lounge-v1.css?v=brand-responsive-fleet-r6-opensim"));
+});
