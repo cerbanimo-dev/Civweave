@@ -1,0 +1,28 @@
+name: Guild daily steward contract
+on:
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - 'cloudflare/mobile-guild-edge/src/guild-daily-planner-v1.mjs'
+      - 'cloudflare/mobile-guild-edge/src/guild-starling-transport-v1.mjs'
+      - 'scripts/test-guild-daily-planner-v1.mjs'
+      - 'docs/architecture/guild-daily-steward-v1.md'
+      - '.github/workflows/guild-daily-steward-v1.yml'
+  push:
+    branches: [staging, main]
+    paths:
+      - 'cloudflare/mobile-guild-edge/src/guild-daily-planner-v1.mjs'
+      - 'cloudflare/mobile-guild-edge/src/guild-starling-transport-v1.mjs'
+      - 'scripts/test-guild-daily-planner-v1.mjs'
+      - '.github/workflows/guild-daily-steward-v1.yml'
+permissions:
+  contents: read
+jobs:
+  steward:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/test-guild-daily-planner-v1.mjs scripts/test-guild-starling-collective-v1.mjs

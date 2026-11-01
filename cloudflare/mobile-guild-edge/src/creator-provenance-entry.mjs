@@ -2,8 +2,9 @@ import {capacityForStage,progressForStage,GUILD_MILESTONES} from './guild-capaci
 import {CHECK_POLICY,nodeLiveness,locationVerdict,rewardAllowed,proofFresh} from './guild-community-proof-v1.mjs';
 import {GUILD_STARLING_ROUTE,executeGuildStarlingAction} from './guild-starling-collective-v1.mjs';
 import {guildStarlingAction} from './guild-starling-transport-v1.mjs';
+import {readDailyGuildPlanPreview} from './guild-daily-planner-v1.mjs';
 import {buildGuildNeuronFlow} from './guild-neuron-flow-v1.mjs';
-import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,acknowledgeGuildNotice,fileBanAppeal,sponsorBanAppeal,fileRemovalAppeal,sponsorRemovalAppeal,governanceStatus,reportQueue,markReportDelivery,reportReceipt,delegatedRole,isBanned} from './guild-democratic-governance-state-v1.mjs';
+import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,acknowledgeGuildNotice,fileBanAppeal,sponsorBanAppeal,fileRemovalAppeal,sponsorRemovalAppeal,governanceStatus,reportQueue,markReportDelivery,reportReceipt,delegatedRole,isBanned,ensureGovernanceTables} from './guild-democratic-governance-state-v1.mjs';
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
 import {GUILD_QUEST_ROUTE,GUILD_QUEST_CORS,guildQuestAction,readGuildQuestInput,executeGuildQuestAction,guildQuestJson,guildQuestError} from './guild-quest-publications-v1.mjs';
 
@@ -101,7 +102,26 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
     if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))throw Object.assign(new Error('Guild session belongs to a different Guild.'),{status:403});
     const session=this.sessionForHash({tokenHash,requestedNodeId});
     if(!session?.ok)throw Object.assign(new Error(session?.error||'Guild session is invalid.'),{status:session?.status||401});
-    return executeGuildStarlingAction(this.ctx.storage,{guildId:this.baseStatus().guildId,nodeId:session.nodeId,userId:session.userId},action,input,{knownMemberCount:this.status().memberCount});
+    const member={guildId:this.baseStatus().guildId,nodeId:session.nodeId,userId:session.userId};
+    if(action==='plan'){
+      // Only independent accepted-work reviews count as proof of participation.
+      // A proof over a multi-realm Quest cannot establish one specific skill.
+      ensureGovernanceTables(this.sql);
+      const cutoff=new Date(Date.now()-60*86400000).toISOString();
+      const accepted=[...this.sql.exec(
+        "SELECT author_id,quest_id,accepted_at FROM guild_work_proofs WHERE status='accepted' AND accepted_at >= ? ORDER BY accepted_at DESC LIMIT 100",cutoff)];
+      const contributions=[];
+      for(const row of accepted){
+        const record=await this.ctx.storage.get('guild-quest:record:'+member.guildId+':'+row.quest_id);
+        if(record?.status!=='published')continue;
+        const realms=[...new Set((record.quest?.plan?.paths||[]).map(p=>String(p.realm||'').toLowerCase().trim()).filter(Boolean))];
+        if(realms.length!==1)continue;
+        contributions.push({guildId:member.guildId,userId:row.author_id,verified:true,
+          authority:'canonical-contribution',accepted:true,occurredAt:row.accepted_at,skillIds:realms});
+      }
+      return readDailyGuildPlanPreview(this.ctx.storage,member,{verifiedContributionFeed:true,contributions});
+    }
+    return executeGuildStarlingAction(this.ctx.storage,member,action,input,{knownMemberCount:this.status().memberCount});
   }
   async guildQuestAction({tokenHash,requestedNodeId,action,input}={}){
     if(requestedNodeId&&!this.resolveResidentNode(requestedNodeId))throw Object.assign(new Error('Guild capacity session belongs to a different Guild.'),{status:403});
