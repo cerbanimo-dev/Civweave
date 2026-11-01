@@ -14,7 +14,7 @@ pre{max-height:320px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;p
 <section><h2>1 · Bring the reviewed book adaptation</h2><p>Export a private project JSON from the Performance Studio first. This page reads it locally, never uploads it.</p>
 <label for="source-file">Performance Studio project</label><input id="source-file" type="file" accept=".json,application/json">
 <label for="scene">Approved scene</label><select id="scene"><option value="">Import a project</option></select><p id="project-status" class="status" role="status">No imported production.</p></section>
-<section><h2>2 · Prepare Gemini shot task</h2><label for="model">Configured Gemini model</label><input id="model" value="gemini-2.5-flash">
+<section><h2>2 · Prepare Gemini shot task</h2><label for="model">Configured Gemini model</label><input id="model" placeholder="Actual selected Gemini Flash model ID">
 <label for="insights">Author insight notes as JSON</label><textarea id="insights" spellcheck="false">[]</textarea>
 <label><input id="consent" type="checkbox" style="width:auto"> Approve selected scene and explicitly flagged insights for Gemini transmission</label>
 <button id="gemini">Export Gemini invocation packet</button>
