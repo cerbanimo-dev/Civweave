@@ -1210,6 +1210,7 @@ async function ensureSummonUI(){
   if(!palette||!scene)return;
   state.summonUI=mountWorldweaverSummonUI({palette,scene,getCatalog:summonCatalog,
     getWorldRef:()=>fleetIsGuild()&&state.worldLinked?state.worldHost?.worldRef():null,
+    getPlacements:()=>state.worldHost?.getSnapshot()?.placements||[],
     transport:state.summonTransport});
  }catch(error){
   const palette=$('.sl-summon-panel');
