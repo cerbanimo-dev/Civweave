@@ -354,7 +354,24 @@ function assignDesktopRole(panel,role,name){
  const output=panel.querySelector('[data-ai-fleet-desktop-status]');
  if(output)output.textContent=ROLES[role].label+' desktop assignment saved; no inference started.';
 }
-function activateDesktopFleet(layer,panel){
+let desktopRuntimePromise=null;
+function ensureDesktopRuntime(){
+ const ready=()=>globalThis.CivweaveModelRuntime?.version==='1.0.8-desktop-ollama-role-routing';
+ if(ready())return Promise.resolve(true);
+ if(desktopRuntimePromise)return desktopRuntimePromise;
+ desktopRuntimePromise=new Promise((resolve,reject)=>{
+  const script=document.createElement('script');
+  script.async=false;
+  script.src='/app/shared/civweave-model-runtime.js?v=1.0.20-desktop-ollama-fleet';
+  script.onload=()=>ready()?resolve(true):reject(Error('The refreshed desktop Ollama role router did not initialize. Reload Civweave and try again.'));
+  script.onerror=()=>reject(Error('Desktop Ollama router could not load. No AI route was changed.'));
+  if(!document.head?.isConnected)return reject(Error('Civweave Settings is closing.'));
+  document.head.append(script);
+ }).finally(()=>{desktopRuntimePromise=null});
+ return desktopRuntimePromise;
+}
+async function activateDesktopFleet(layer,panel){
+ await ensureDesktopRuntime();
  const state=desktopFleetState();
  const model=state.roles.swift||Object.values(state.roles)[0];
  if(!model||!state.models.some(item=>item.name===model))
@@ -730,7 +747,10 @@ function render(layer){
         .finally(()=>{el.disabled=false});return;
      }
      if(el.hasAttribute('data-ai-fleet-desktop-activate')){
-       try{activateDesktopFleet(layer,panel)}catch(error){const output=panel.querySelector('[data-ai-fleet-desktop-status]');if(output)output.textContent=String(error?.message||error)}
+       el.disabled=true;
+       void activateDesktopFleet(layer,panel)
+        .catch(error=>{const output=panel.querySelector('[data-ai-fleet-desktop-status]');if(output)output.textContent=String(error?.message||error)})
+        .finally(()=>{el.disabled=false});
        return;
      }
      const presetId=el.dataset.aiFleetDownloadPreset;
