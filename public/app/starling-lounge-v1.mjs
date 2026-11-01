@@ -31,7 +31,7 @@ const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);retu
 const human=person=>person?.name||'Unknown persona';
 function setup(){
   if(state.root)return state.root;
-  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=brand-responsive-fleet-r5';document.head.append(style);
+  const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=brand-responsive-fleet-r6-opensim';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
   root.innerHTML=`<div class="sl-chrome"><header class="sl-head">
   <div class="sl-brand"><img class="sl-brand-mark" src="/app/logos/civweave-icon-192.png" alt="" width="48" height="48"><div class="sl-brand-copy"><small>CIVWEAVE · WORLDWEAVER</small><h1 data-sl-main-title>AI Fleets</h1><p data-sl-main-description>Local device and Guild simulation spaces</p></div></div>
@@ -515,7 +515,20 @@ function click(event){
   if(cmd==='pilot-register')void registerSelectedPilot();
   if(cmd==='world-observe'&&fleetIsGuild())observeWorld();
   if(cmd==='world-move-proposal'&&fleetIsGuild())prepareMove();
-  if(cmd==='refresh'){if(state.guild){void refresh();void refreshTurns();void refreshWorkerStatus();if(state.hostTransport)void refreshHost();if(state.worldHost)void state.worldHost.refresh().then(()=>mountCurrentRoom(state.worldHost)).catch(error=>{state.worldError='Worldweaver refresh failed: '+clean(String(error?.message||error),220);render()});else void connectWorld()}state.worldView?.update();renderFleetScopes()}
+  if(cmd==='refresh'){
+    if(state.guild){
+      void refresh();void refreshTurns();void refreshWorkerStatus();
+      if(state.hostTransport)void refreshHost();
+      const host=state.worldHost;
+      if(host)void host.refresh().then(packet=>{
+        if(state.worldHost!==host||state.root?.hidden)return;
+        if(packet)return mountCurrentRoom(host);
+        detachWorldSource();state.worldError='No signed Worldweaver world yet. Use Start local world on the founding device.';render();
+      }).catch(error=>{state.worldError='Worldweaver refresh failed: '+clean(String(error?.message||error),220);render()});
+      else void connectWorld();
+    }
+    state.worldView?.update();renderFleetScopes();
+  }
   if(cmd==='focus-active')focusActivity();
   if(cmd==='world-connect'&&fleetIsGuild())void connectWorld();
   if(cmd==='world-provision'&&fleetIsGuild())void provisionWorld();
@@ -524,7 +537,11 @@ function click(event){
   if(cmd==='world-3d'&&fleetIsGuild())switchWorldMode('3d');
   if(cmd==='world-2d'&&fleetIsGuild())switchWorldMode('2d');
   if(cmd==='focus-chat'){setView('conversation');$('#cw-sl-message')?.focus()}
-  if(cmd==='open-planner'){close();globalThis.CivweaveStarlingCollectiveV1?.open?.()}
+  if(cmd==='open-planner'){
+    const workbench=globalThis.CivweaveStarlingCollectiveV1;
+    if(typeof workbench?.open==='function'){close();workbench.open()}
+    else{state.workerMessage='The existing Starling planning workbench is not loaded. Use the Civweave main Quest planner until it is available.';render()}
+  }
   if(cmd==='turn'&&fleetIsGuild())void runLocalTurn();
   if(cmd==='round'&&fleetIsGuild())void runLocalRound();
   if(cmd==='worker-toggle')void toggleWorker();
@@ -534,7 +551,12 @@ function click(event){
   if(cmd==='host-enable')void setHostAutopilot(true);
   if(cmd==='host-disable')void setHostAutopilot(false);
   if(cmd==='host-import')void importHostDraft();
-  if(cmd==='quest'){close();globalThis.CivweaveGuildQuestTrackerV1?.openQuestMap?.()}
+  if(cmd==='quest'){
+    // The Guild Quest board owns its own screen; do not silently invoke an
+    // optional global that may not be mounted in the current app shell.
+    close();
+    window.location.assign('/app/civweave-guild-quest-v1.html');
+  }
 }
 /* The Lounge reads signed Guild object-mesh records. An ordinary window event
  * is never admitted into the transcript as a real model turn. */
