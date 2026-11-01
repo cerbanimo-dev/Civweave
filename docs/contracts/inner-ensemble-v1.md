@@ -42,3 +42,35 @@ The current frontend requires all selected model tags to appear in Desktop Fleet
 ## Out of scope
 
 Autonomous agent privileges, private/hosted generation, multi-host leases, model weight updates, real-world autobiographical ingestion without consent, automatic Guild publication, clinical inference, and guaranteed simultaneous inference on insufficient hardware.
+
+
+## Nightly development, model sleep, and fictional trigger takeover (v2)
+
+### UTC Cloudflare rollover
+
+The node-cloud included-neuron ledger uses UTC calendar day keys and advertises \`resetsAt\` at the next **00:00 UTC**. This is an accounting boundary, **not** an existing event emitted to the user's local machine and not proof that an autonomous Cloudflare scheduler has run.
+
+\`public/app/shared/daily-sleep-cycle-v1.mjs\` is the host-independent nightly *policy/transaction coordinator*. The production Cloudflare job runner, exclusive server lease, authenticated Guild context reader, verified free-only reserve/settle transport, durable account storage, and local trainer must be bound through concrete adapters before unattended processing can run. The module deliberately refuses to spend without those adapters, an enabled opt-in, and verified member/Guild authorization.
+
+The intended run is:
+
+1. **23:15–23:58 UTC**, while ordinary daily billing is still active: use *eligible, verified remaining* **free included** neurons for observations, tomorrow options, and draft planning. The nightly budget is the minimum of the member's remaining included allowance, Workers AI free pool, shared daily remaining, and any separately authorized Guild allowance. Preserve at least **25 neurons** and never silently use paid overage or lifetime balances. A no-charge path is required.
+2. **At 00:00 UTC**, the next daily included allowance begins. Stop participating author-ensemble inference and unload owned Ollama model sessions on the opted-in host. No training is performed on Cloudflare Workers.
+3. **Sleep**: consolidate provenance-preserving fictional experience and Guild progress. An explicitly installed local/Guild trainer may prepare a LoRA adapter, subject to evaluation on held-out test data and ability to roll back. Failed training keeps the previous adapter. No raw, private Guild material may automatically enter an author's adapter.
+4. **Before daily Quest draft planning**, verify the sleep receipt (complete or degraded), then provide only authorized planning context, authorized member contribution history, and vetted observations. Generate **review-only** draft Quest beats. Do not create tasks for inactive people, invent completion evidence, or claim human ratification. The real Guild Quest owner must handle publication.
+
+Without the server-side scheduling adapters, these are executable domain policies and mocks, **not** a claim of live overnight cloud generation.
+
+### Trigger meters and temporary front switching
+
+\`inner-activation-v1.mjs\` implements an author-controlled fictional activation meter for every layer, including the currently front-facing layer.
+
+On each shared event, models may add JSON \`activation: {delta,reason}\` to their action proposal. Changes are bounded to **−25/+35** points per turn. Every meter decays by default **12** points per event. With automatic takeovers enabled (author adjustable), an internal layer reaching **70/100** becomes temporary front on the **next** event, not during an already-dispatched turn. It releases at **32/100**, after a **3-turn maximum**, or if disabled; a **2-turn cooldown** reduces rapid oscillation. The default/home front is the author's manual selection. A manual front switch immediately clears any temporary control.
+
+The smallest model can simulate executive control and provide its own front-facing narrative, but its permissions never escalate. No agent obtains tool, money, Guild role, publication, voting, or human-authenticated authority from a meter. These meters are storytelling mechanics, **not clinical measurements** or diagnoses.
+
+The Author Lab now includes trigger enable/disable, threshold/release settings, live meter displays, reset, and an **opt-in** UTC model-unload control. Model unload is supported only against the explicitly selected **loopback** desktop Ollama host, and the host page must be open to receive its timer. The page has no actual Cloudflare overnight cron or unattended training process. A full always-on deployment requires an authorized local host scheduler.
+
+### Contract tests
+
+\`node --test scripts/test-inner-activation-v1.mjs scripts/test-daily-sleep-cycle-v1.mjs\` covers meter bounds, hysteresis, cooldown, front routing, free-only daily accounting, rollover, local trainer fallback, and Quest draft gating. Mock tests do not certify Cloudflare billing deployment or LoRA quality.
