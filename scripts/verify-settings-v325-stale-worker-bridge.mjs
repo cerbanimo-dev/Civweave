@@ -9,8 +9,8 @@ const actions=await readFile(new URL('../public/app/settings-local-route-v331.js
 
 assert.match(source,/1\.1\.6-settings-local-route-v326-llama32-download/);
 assert.match(source,/settings-v325-parent-source-recovery-v4-local-selection-authority/);
-assert.match(source,/DIRECT_VERSION='1\.2\.3-settings-v325-direct-local-models-qwen-import-owner'/);
-assert.match(source,/settings-local-models-direct-v325\.js\?v=1\.2\.3-qwen-import-owner/);
+assert.match(source,/DIRECT_VERSION='1\.2\.5-settings-v325-direct-local-models-ios-webgpu-qwen'/);
+assert.match(source,/settings-local-models-direct-v325\.js\?v=1\.2\.5-ios-webgpu-qwen/);
 assert.match(source,/STATUS_PLACEMENT_VERSION='1\.0\.1-settings-local-progress-card-owned-direct-aware'/);
 assert.match(source,/CIVWEAVE SETTINGS · v325/);
 assert.match(source,/settings-local-route-v331\.js\?cwAction=1/);
