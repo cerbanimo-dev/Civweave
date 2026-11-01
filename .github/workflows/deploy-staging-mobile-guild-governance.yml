@@ -1,0 +1,90 @@
+name: Deploy Isolated Staging Guild Council
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'cloudflare/mobile-guild-edge/src/**'
+      - 'cloudflare/mobile-guild-edge/wrangler.staging.jsonc'
+      - '.github/workflows/deploy-staging-mobile-guild-governance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-staging-guild-governance
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy separate staging Guild Capacity Durable Object
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: staging
+      url: https://civweave-guild-governance-staging.new-new-york-84759cba63.workers.dev
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.KAMIDO_CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.KAMIDO_CLOUDFLARE_ACCOUNT_ID }}
+      STAGING_WORKER: civweave-guild-governance-staging
+      STAGING_ORIGIN: https://civweave-guild-governance-staging.new-new-york-84759cba63.workers.dev
+    defaults:
+      run:
+        working-directory: cloudflare/mobile-guild-edge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Refuse production and verify isolation
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = staging
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p=JSON.parse(fs.readFileSync('wrangler.staging.jsonc','utf8'));
+          if(p.name!=='civweave-guild-governance-staging'||p.main!=='src/creator-provenance-entry.mjs'||p.vars?.CIVWEAVE_ENVIRONMENT!=='staging')
+            throw Error('Refusing a non-staging Guild Worker target');
+          if(p.name==='civweave-guild-cloud'||p.name==='civweave-guild-edge')throw Error('Production Worker target');
+          if(Object.keys(p.vars||{}).some(k=>/REPORT_RELAY/i.test(k)))throw Error('Peer relay must remain unconfigured');
+          if(!p.durable_objects?.bindings?.some(x=>x.name==='CAPACITY'))throw Error('Missing isolated Guild capacity state');
+          console.log('Verified isolated staging Worker and Durable Object configuration.');
+          NODE
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing staging Cloudflare API token'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing staging Cloudflare account ID'; exit 2; }
+      - name: Install Worker dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Verify governance and Guild onboarding before deployment
+        run: |
+          set -euo pipefail
+          node --check src/creator-provenance-entry.mjs
+          node --check src/guild-democratic-governance-state-v1.mjs
+          node --check src/guild-democratic-governance-v1.mjs
+          node --test ../../scripts/test-guild-democratic-governance-v1.mjs
+      - name: Check Cloudflare account
+        run: npx wrangler whoami
+      - name: Refuse configured peer-report relay secrets
+        run: |
+          set -euo pipefail
+          npx wrangler secret list --config wrangler.staging.jsonc --format json > /tmp/civweave-guild-staging-secrets.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const raw=JSON.parse(fs.readFileSync('/tmp/civweave-guild-staging-secrets.json','utf8'));
+          const names=(Array.isArray(raw)?raw:raw?.result||[]).map(x=>String(x.name||x.key||''));
+          if(names.some(n=>n==='CIVWEAVE_GUILD_REPORT_RELAY_TOKEN'))throw Error('Peer-report relay secret must not be active in staging sandbox');
+          NODE
+      - name: Deploy isolated Guild Council Worker
+        run: npx wrangler deploy --config wrangler.staging.jsonc
+      - name: Probe deployed staging Guild Council endpoints without credentials
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            result="$(curl --silent --show-error --output /tmp/guild-council-staging.json --write-out '%{http_code}' "$STAGING_ORIGIN/api/guild/governance" || true)"
+            if [ "$result" = '401' ]; then break; fi
+            sleep 3
+          done
+          test "$result" = '401' || { echo "Expected authenticated-only Guild Council 401, got $result"; cat /tmp/guild-council-staging.json; exit 4; }
+          report_status="$(curl --silent --show-error --output /tmp/guild-council-staging-report.json --write-out '%{http_code}' "$STAGING_ORIGIN/api/guild/governance/nearby" || true)"
+          test "$report_status" = '401' || { echo "Peer reports must reject unauthenticated staging reads"; exit 5; }
+          echo "Verified isolated staging Guild Council Worker, authentication required."
