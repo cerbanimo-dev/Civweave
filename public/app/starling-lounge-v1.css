@@ -9,7 +9,8 @@
  background:radial-gradient(ellipse at 68% -14%,#354c56 0,transparent 50%),radial-gradient(ellipse at 0 75%,#352c49 0,transparent 54%),var(--sl-bg);
  padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark
 }
-#cw-starling-lounge[hidden],#cw-starling-lounge [hidden]{display:none!important}
+#cw-starling-lounge[hidden],#cw-starling-lounge[hidden],
+#cw-starling-lounge [hidden]{display:none!important}
 #cw-starling-lounge h1,#cw-starling-lounge h2,#cw-starling-lounge h3,#cw-starling-lounge p{margin-top:0}
 #cw-starling-lounge h1,#cw-starling-lounge h2,#cw-starling-lounge h3{line-height:1.2}
 #cw-starling-lounge h1{font-size:clamp(21px,2.7vw,32px);letter-spacing:-.035em;margin:1px 0}
