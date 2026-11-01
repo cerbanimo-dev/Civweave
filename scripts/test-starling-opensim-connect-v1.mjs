@@ -68,3 +68,15 @@ test('OpenSim controls can issue actual human-authorized NPC commands and displa
  assert.ok(src.includes("worldTools().prepare"),'Only registered signed pilot may submit a bounded simulator command');
  assert.ok(!src.includes("localStorage.setItem('civweave.opensim"),'Do not persist controller tokens in localStorage');
 });
+
+test('Local Fleet can control local-only OpenSim without pretending to sign a Guild pilot',()=>{
+ const src=readFileSync(new URL('../public/app/starling-lounge-v1.mjs',import.meta.url),'utf8');
+ const markup=src.slice(src.indexOf('root.innerHTML=`'),src.indexOf('`;',src.indexOf('root.innerHTML=`')));
+ assert.match(markup,/data-sl-opensim-persona/);
+ assert.match(markup,/data-sl-opensim-preview/);
+ assert.ok(src.includes('local operator-controlled command')||src.includes('Local operator-controlled command'));
+ assert.match(src,/if\(fleetIsGuild\(\)\)worldTools\(\)\.prepare/);
+ assert.match(src,/createOpenSim3DPreview/);
+ assert.ok(markup.indexOf('data-sl-opensim-url')>markup.indexOf('data-sl-guild-fleet'));
+ assert.ok(markup.indexOf('data-sl-opensim-url')<markup.indexOf('data-sl-panel="conversation"'));
+});
