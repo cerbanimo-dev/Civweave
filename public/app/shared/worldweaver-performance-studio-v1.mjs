@@ -162,13 +162,20 @@ export function createPerformanceStudio({id,clock,authorize,initialState}={}){
     record.reviewedAt=at;record.reviewNotes=bounded(command.notes,700,'set review notes');
     receipt.stagePlan=record.id;receipt.decision=record.status;
    }else if(type==='assign-cast'){
-    only(command,['type','character','avatarRef','pilotPrincipalId','voiceRef'],'cast');
+    only(command,['type','character','avatarRef','pilotPrincipalId','voiceRef','displayName','personaBrief','canonRules','relationships','interactionRules'],'cast');
     if(actor.kind!=='human')throw new Error('Cast bindings require human review');
     const char=identifier(command.character,'character');
     if(next.casts.length>=STAGE_LIMITS.cast&&!next.casts.some(c=>c.character===char))throw new TypeError('Too many cast roles');
     const cast={character:char,avatarRef:identifier(command.avatarRef,'avatar reference'),
      pilotPrincipalId:identifier(command.pilotPrincipalId,'pilot principal'),
      voiceRef:command.voiceRef?identifier(command.voiceRef,'voice reference'):null,
+     // Optional author-written performance guidance. These fields are never
+     // inferred from manuscript excerpts, model output, or audience messages.
+     displayName:optional(command.displayName,100,'character display name'),
+     personaBrief:optional(command.personaBrief,1500,'character persona brief'),
+     canonRules:optional(command.canonRules,2000,'author canon rules'),
+     relationships:optional(command.relationships,1200,'character relationships'),
+     interactionRules:optional(command.interactionRules,1200,'character improv rules'),
      approvedBy:actor.principalId};
     next.casts=next.casts.filter(c=>c.character!==char).concat(cast);
     receipt.cast=char;
