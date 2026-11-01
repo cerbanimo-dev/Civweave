@@ -64,6 +64,8 @@ export function normalizeAuthorTemplate(input){
   target.permissions.autonomousActions=false;
   target.permissions.shareWithGuild=false;
  }
+ if(!result.agents[result.controls.frontAgentId].enabled||!result.agents[result.controls.frontAgentId].permissions.speak)
+  throw new TypeError('Select an enabled front-facing layer in Author Lab.');
  return result;
 }
 function messagesFor(template,id,event,history){
@@ -86,7 +88,7 @@ function messagesFor(template,id,event,history){
   'There are no executable tools, funds, Guild powers, or publication permissions in this run.',
   'Keep responses concise. The adult layer is not required to overrule the other two.'
  ].join('\n');
- const prior=history.filter(x=>x.eventId!==event.eventId&&(x.type==='response'||x.type==='experience')&&
+ const prior=(template.controls.autoRemember?history:[]).filter(x=>x.eventId!==event.eventId&&(x.type==='response'||x.type==='experience')&&
   (x.agentId===id||template.controls.crossTalk&&x.type==='response')).slice(-template.controls.historyLimit);
  const context=prior.map(row=>(row.type==='experience'?'Fictional experience: ':'Previous '+row.agentId+' response: ')+text(row.text,750)).join('\n');
  return [{role:'system',content:system},{role:'user',content:
