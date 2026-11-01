@@ -26,7 +26,7 @@ const normalize=(o)=>{
 export function createHarmlessCommunity({
  mesh,verifyReader,verifyWriter,newId=()=>crypto.randomUUID(),clock=()=>new Date().toISOString()
 }={}){
- if(!mesh||typeof mesh.createObject!=='function'||typeof mesh.validateObject!=='function')
+ if(!mesh||typeof mesh.createObject!=='function'||typeof mesh.validateObject!=='function'||typeof mesh.getObject!=='function')
    throw new TypeError('The Civweave signed object mesh is required.');
  const canRead=id=>typeof verifyReader==='function'&&verifyReader(id)===true;
  const canWrite=id=>typeof verifyWriter==='function'&&verifyWriter(id)===true;
@@ -49,7 +49,7 @@ export function createHarmlessCommunity({
   const id='harmless-post:'+gid+':'+newId();
   if(!/^harmless-post:[A-Za-z0-9:_-]{1,180}:[A-Za-z0-9_-]{1,100}$/.test(id))
     throw new TypeError('Invalid HARMLESS entry ID.');
-  if(await mesh.getObject?.(id))throw new Error('HARMLESS entry ID collision; earlier post preserved.');
+  if(await mesh.getObject(id))throw new Error('HARMLESS entry ID collision; earlier post preserved.');
   const authorDeviceId=await mesh.deviceId(),at=clock();
   if(!Number.isFinite(Date.parse(at)))throw new TypeError('Invalid timestamp.');
   return mesh.createObject({
