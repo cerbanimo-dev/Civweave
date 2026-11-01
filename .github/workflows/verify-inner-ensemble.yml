@@ -1,0 +1,37 @@
+name: Verify Author Inner Ensemble
+on:
+  pull_request:
+    paths:
+      - 'public/app/shared/inner-ensemble-v1.mjs'
+      - 'public/app/shared/inner-ensemble-panel-v1.mjs'
+      - 'public/app/shared/civweave-ai-fleet-v1.js'
+      - 'public/app/author-lab/templates/**'
+      - 'scripts/test-inner-ensemble-v1.mjs'
+      - '.github/workflows/verify-inner-ensemble.yml'
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/shared/inner-ensemble-v1.mjs'
+      - 'public/app/shared/inner-ensemble-panel-v1.mjs'
+      - 'public/app/shared/civweave-ai-fleet-v1.js'
+      - 'public/app/author-lab/templates/**'
+      - 'scripts/test-inner-ensemble-v1.mjs'
+jobs:
+  inner-ensemble:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify JavaScript syntax
+        run: |
+          node --check public/app/shared/inner-ensemble-v1.mjs
+          node --check public/app/shared/inner-ensemble-panel-v1.mjs
+          node --check public/app/shared/civweave-ai-fleet-v1.js
+      - name: Run author-ensemble and fleet contracts
+        run: |
+          node --test scripts/test-inner-ensemble-v1.mjs
+          node --test scripts/test-ai-fleet-v1.mjs
