@@ -3,7 +3,7 @@ import {CHECK_POLICY,nodeLiveness,locationVerdict,rewardAllowed,proofFresh} from
 import {GUILD_STARLING_ROUTE,executeGuildStarlingAction} from './guild-starling-collective-v1.mjs';
 import {guildStarlingAction} from './guild-starling-transport-v1.mjs';
 import {buildGuildNeuronFlow} from './guild-neuron-flow-v1.mjs';
-import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,governanceStatus,reportQueue,markReportDelivery,reportReceipt,delegatedRole,isBanned} from './guild-democratic-governance-state-v1.mjs';
+import {creditVerifiedContribution,proposeGovernance,castGovernanceVote,openGovernanceCase,respondToGovernanceCase,submitWorkProof,reviewWorkProof,acknowledgeGuildNotice,fileBanAppeal,sponsorBanAppeal,governanceStatus,reportQueue,markReportDelivery,reportReceipt,delegatedRole,isBanned} from './guild-democratic-governance-state-v1.mjs';
 import baseWorker,{CivweaveGuildEdgeState,CivweaveGuildCapacityState as BaseGuildCapacityState,CivweaveGuildNodeState} from './index.mjs';
 import {GUILD_QUEST_ROUTE,GUILD_QUEST_CORS,guildQuestAction,readGuildQuestInput,executeGuildQuestAction,guildQuestJson,guildQuestError} from './guild-quest-publications-v1.mjs';
 
@@ -65,7 +65,15 @@ export class CivweaveGuildCapacityState extends BaseGuildCapacityState{
       actorId:session.userId,ballotId:clean(input.ballotId,200),choice:input.choice})}));
     if(input?.action==='review-work')return this.ctx.storage.transactionSync(()=>({ok:true,proof:reviewWorkProof(this.sql,{
       actorId:session.userId,proofId:clean(input.proofId,140),decision:clean(input.decision,30)})}));
+    if(input?.action==='ack-notice')return this.ctx.storage.transactionSync(()=>({ok:true,notice:acknowledgeGuildNotice(this.sql,{
+      actorId:session.userId,kind:clean(input.kind,20),refId:clean(input.refId,160)})}));
+    if(input?.action==='sponsor-appeal')return this.ctx.storage.transactionSync(()=>({ok:true,ballot:sponsorBanAppeal(this.sql,{
+      guildId,origin,actorId:session.userId,appealId:clean(input.appealId,160)})}));
     throw Object.assign(new Error('Unknown Guild vote action.'),{status:400});
+  }
+  submitBanAppeal({userId,credentialHash,ballotId='',statement}={}){
+    return this.ctx.storage.transactionSync(()=>({ok:true,appeal:fileBanAppeal(this.sql,{
+      actorId:userId,credentialHash,ballotId,statement})}));
   }
   async submitGovernanceWork({tokenHash,requestedNodeId,input}={}){
     const session=this.sessionForHash({tokenHash,requestedNodeId});
@@ -401,6 +409,17 @@ export default{
       if(request.method==='GET'&&url.pathname==='/api/guild/governance/receipt'){
         const receipt=await stub.publicPeerReport({ballotId:clean(url.searchParams.get('ballotId'),200)});
         return receipt?json({ok:true,receipt}):json({ok:false,error:'Unknown approved peer report.'},404);
+      }
+      if(url.pathname==='/api/guild/governance/appeal'&&request.method==='POST'){
+        try{
+          const raw=await request.text();
+          if(enc.encode(raw).byteLength>5000)return json({ok:false,error:'Appeal is too large.'},413);
+          const input=JSON.parse(raw);
+          const result=await stub.submitBanAppeal({userId:loginUserId(input.userId),
+            credentialHash:await loginCredentialHash(input.credential),
+            ballotId:clean(input.ballotId,200),statement:input.statement});
+          return json(result,201);
+        }catch(error){return errorResponse(error)}
       }
       try{
         const tokenHash=await sessionTokenHash(bearer(request));

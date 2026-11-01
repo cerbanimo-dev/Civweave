@@ -21,6 +21,8 @@ export function ensureGovernanceTables(sql){
   sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_cases(id TEXT PRIMARY KEY,action TEXT NOT NULL,target_user_id TEXT NOT NULL,opened_by TEXT NOT NULL,reason_code TEXT,statement TEXT NOT NULL,created_at TEXT NOT NULL,notice_until TEXT NOT NULL,response TEXT,responded_at TEXT,ballot_id TEXT)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_work_proofs(id TEXT PRIMARY KEY,author_id TEXT NOT NULL,quest_id TEXT NOT NULL,statement TEXT NOT NULL,status TEXT NOT NULL,required_approvals INTEGER NOT NULL,created_at TEXT NOT NULL,accepted_at TEXT)");
   sql.exec("CREATE TABLE IF NOT EXISTS guild_work_reviews(proof_id TEXT NOT NULL,reviewer_id TEXT NOT NULL,decision TEXT NOT NULL,at TEXT NOT NULL,PRIMARY KEY(proof_id,reviewer_id))");
+  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_notice_reads(user_id TEXT NOT NULL,kind TEXT NOT NULL,ref_id TEXT NOT NULL,read_at TEXT NOT NULL,PRIMARY KEY(user_id,kind,ref_id))");
+  sql.exec("CREATE TABLE IF NOT EXISTS guild_governance_appeals(id TEXT PRIMARY KEY,ban_ballot_id TEXT NOT NULL UNIQUE,target_user_id TEXT NOT NULL,statement TEXT NOT NULL,created_at TEXT NOT NULL,ballot_id TEXT)");
 }
 export function creditVerifiedContribution(sql,{id,userId,kind,at=nowIso()}){
   if(!validGuildUser(userId)||!['physical-check-in','accepted-work-proof'].includes(kind)||!id)
@@ -262,12 +264,82 @@ export function governanceStatus(sql,{actorId='',now=Date.now()}={}){
     new Date(now).toISOString()).map(row=>({userId:row.user_id,expiresAt:row.expires_at}));
   const cases=rows(sql,'SELECT * FROM guild_governance_cases ORDER BY created_at DESC LIMIT 40').map(viewCase);
   const workProofs=rows(sql,'SELECT * FROM guild_work_proofs ORDER BY created_at DESC LIMIT 40').map(viewWork);
+  const notices=noticeItems(sql,actorId);
+  const appeals=rows(sql,'SELECT * FROM guild_governance_appeals ORDER BY created_at DESC LIMIT 40').map(row=>viewAppeal(sql,row));
   const outboundReports=rows(sql,'SELECT ballot_id,delivery_state,recipient_count,attempts,delivered_at FROM guild_governance_reports ORDER BY rowid DESC LIMIT 20')
     .map(row=>({ballotId:row.ballot_id,state:row.delivery_state,recipients:Number(row.recipient_count),attempts:Number(row.attempts),deliveredAt:row.delivered_at}));
   return {schema:GUILD_GOVERNANCE_SCHEMA,eligible,activeCount:eligible.length,majority:Math.floor(eligible.length/2)+1,
     actorEligible:contributors.includes(actorId)&&eligible.includes(actorId),actorCanVote:eligible.includes(actorId),actorRole:actorId?delegatedRole(sql,actorId):'member',ballots,
-    bans,cases,workProofs,outboundReports,reportQueuedCount:outboundReports.filter(row=>row.state!=='delivered').length};
+    bans,cases,workProofs,notices,unreadNoticeCount:notices.filter(n=>!n.readAt).length,appeals,outboundReports,reportQueuedCount:outboundReports.filter(row=>row.state!=='delivered').length};
 }
+
+function noticeItems(sql,actorId){
+  if(!validGuildUser(actorId))return [];
+  const cases=rows(sql,'SELECT id,action,target_user_id,created_at FROM guild_governance_cases WHERE target_user_id=? ORDER BY created_at DESC LIMIT 40',actorId)
+    .map(c=>({kind:'case',refId:c.id,label:'Respond to '+c.action+' case',createdAt:c.created_at}));
+  const ballots=rows(sql,'SELECT id,action,electorate_json,created_at FROM guild_governance_ballots ORDER BY created_at DESC LIMIT 40')
+    .filter(row=>JSON.parse(row.electorate_json).includes(actorId))
+    .map(b=>({kind:'ballot',refId:b.id,label:'Vote on '+b.action+' decision',createdAt:b.created_at}));
+  const work=rows(sql,"SELECT id,author_id,created_at FROM guild_work_proofs WHERE status='pending' AND author_id<>? ORDER BY created_at DESC LIMIT 40",actorId)
+    .map(p=>({kind:'work',refId:p.id,label:'Review completed Guild Quest work',createdAt:p.created_at}));
+  const receipts=rows(sql,'SELECT kind,ref_id,read_at FROM guild_governance_notice_reads WHERE user_id=?',actorId);
+  const read=new Map(receipts.map(r=>[r.kind+':'+r.ref_id,r.read_at]));
+  return [...cases,...ballots,...work].map(item=>({...item,readAt:read.get(item.kind+':'+item.refId)||null}))
+    .sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,80);
+}
+export function acknowledgeGuildNotice(sql,{actorId,kind,refId,now=Date.now()}){
+  ensureGovernanceTables(sql);
+  if(!rows(sql,'SELECT user_id FROM resident_members WHERE user_id=? LIMIT 1',actorId)[0])
+    throw fail('Only an authenticated Guild member can acknowledge a notice.',403);
+  if(!['case','ballot','work'].includes(kind))throw fail('Unknown notice kind.',400);
+  if(!noticeItems(sql,actorId).some(item=>item.kind===kind&&item.refId===refId))
+    throw fail('This notice is not addressed to the authenticated Guild member.',403);
+  sql.exec('INSERT OR IGNORE INTO guild_governance_notice_reads(user_id,kind,ref_id,read_at) VALUES(?,?,?,?)',
+    actorId,kind,refId,new Date(now).toISOString());
+  const readAt=rows(sql,'SELECT read_at FROM guild_governance_notice_reads WHERE user_id=? AND kind=? AND ref_id=?',actorId,kind,refId)[0]?.read_at;
+  return {kind,refId,readAt};
+}
+function viewAppeal(sql,row){
+  const ballot=row.ballot_id?rows(sql,'SELECT status FROM guild_governance_ballots WHERE id=?',row.ballot_id)[0]:null;
+  return {id:row.id,banBallotId:row.ban_ballot_id,targetUserId:row.target_user_id,statement:row.statement,
+    createdAt:row.created_at,ballotId:row.ballot_id||null,
+    status:ballot?.status==='approved'?'approved':ballot?.status==='rejected'?'rejected':row.ballot_id?'voting':'pending'};
+}
+export function fileBanAppeal(sql,{actorId,credentialHash,ballotId,statement,now=Date.now()}){
+  ensureGovernanceTables(sql);
+  if(!validGuildUser(actorId)||!/^[a-f0-9]{64}$/.test(String(credentialHash||'')))
+    throw fail('Appeal requires valid account and device credential.',403);
+  const ban=ballotId?rows(sql,'SELECT user_id,credential_hash,expires_at,ballot_id FROM guild_governance_bans WHERE user_id=? AND ballot_id=? AND expires_at>? LIMIT 1',
+    actorId,ballotId,new Date(now).toISOString())[0]:
+    rows(sql,'SELECT user_id,credential_hash,expires_at,ballot_id FROM guild_governance_bans WHERE user_id=? AND credential_hash=? AND expires_at>? ORDER BY imposed_at DESC LIMIT 1',
+      actorId,credentialHash,new Date(now).toISOString())[0];
+  if(!ban||!ban.credential_hash||ban.credential_hash!==credentialHash)throw fail('No matching active ban with this device credential.',403);
+  const original=rows(sql,'SELECT action,status,target_user_id FROM guild_governance_ballots WHERE id=? LIMIT 1',ban.ballot_id)[0];
+  if(!original||original.action!=='ban'||original.status!=='approved'||original.target_user_id!==actorId)
+    throw fail('Appeal can only be filed against an approved active ban.',409);
+  if(typeof statement!=='string'||statement.trim().length<20||statement.trim().length>2000)
+    throw fail('Explain the appeal in 20–2,000 characters.',400);
+  if(rows(sql,'SELECT id FROM guild_governance_appeals WHERE ban_ballot_id=? LIMIT 1',ban.ballot_id)[0])
+    throw fail('An appeal was already filed for this ban.',409);
+  const id='guild-appeal:'+crypto.randomUUID();
+  sql.exec('INSERT INTO guild_governance_appeals(id,ban_ballot_id,target_user_id,statement,created_at) VALUES(?,?,?,?,?)',
+    id,ban.ballot_id,actorId,statement.trim(),new Date(now).toISOString());
+  return viewAppeal(sql,rows(sql,'SELECT * FROM guild_governance_appeals WHERE id=?',id)[0]);
+}
+export function sponsorBanAppeal(sql,{guildId,origin,actorId,appealId,now=Date.now()}){
+  ensureGovernanceTables(sql);
+  const appeal=rows(sql,'SELECT * FROM guild_governance_appeals WHERE id=?',appealId)[0];
+  if(!appeal)throw fail('Member appeal not found.',404);
+  if(appeal.ballot_id)throw fail('An appeal ballot has already been opened.',409);
+  if(!electorateSnapshot(sql,{now}).contributors.includes(actorId))
+    throw fail('Only a member with a recent verified contribution may sponsor an appeal.',403);
+  if(!isBanned(sql,appeal.target_user_id,{now}))throw fail('This Guild ban is no longer active.',409);
+  const statement='Reconsider ban appeal: '+appeal.statement.slice(0,900);
+  const ballot=proposeGovernance(sql,{guildId,origin,actorId,action:'lift-ban',targetUserId:appeal.target_user_id,statement,now});
+  sql.exec('UPDATE guild_governance_appeals SET ballot_id=? WHERE id=?',ballot.id,appeal.id);
+  return ballot;
+}
+
 export function reportQueue(sql){
   ensureGovernanceTables(sql);
   return rows(sql,"SELECT ballot_id,receipt_json,delivery_state,attempts FROM guild_governance_reports WHERE delivery_state!='delivered' ORDER BY rowid LIMIT 5")
