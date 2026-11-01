@@ -5,8 +5,23 @@ import {exportFilmCraftInterchange,exportQwenLoRADataset} from '../shared/worldw
 import {createWorldweaver} from '../shared/worldweaver-core-v1.mjs';
 import {createOpenSim3DPreview} from '../shared/worldweaver-3d-preview-v1.mjs';
 import {projectWorld2D,renderWorldMap2D} from '../shared/worldweaver-map-2d-v1.mjs';
+import {getWorldSeed} from '../shared/worldweaver-story-seeds-v1.mjs';
 
 const $=id=>document.getElementById(id);
+// A selected reviewed world seed can prefill a draft, not its rights or approvals.
+const seedParam=new URLSearchParams(location.search).get('seed');
+if(seedParam){
+ try{
+  const seed=getWorldSeed(seedParam);
+  $('production-title').value='Door & Dawn · '+seed.title;
+  $('book-title').value='Door & Dawn · author-development world seed';
+  $('scene-title').value='Opening · '+seed.title;
+  $('scene-synopsis').value=seed.firstScene;
+  $('location').value=seed.title;
+  $('art-brief').value=seed.visual.direction+'; original scene design for '+seed.title+
+   '. Civweave district drawings are moodboards only, not source-specific finished artwork.';
+ }catch{ /* Invalid URL seed never creates a scene or bypasses author review. */ }
+}
 const text=(x,max=220)=>String(x??'').slice(0,max);
 const human={kind:'human',principalId:'lab:producer',verified:true};
 // Synthetic lab identity is not proof of authenticated Guild authority.
