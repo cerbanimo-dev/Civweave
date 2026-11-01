@@ -1,0 +1,39 @@
+name: Verify Nightly Sleep and Inner Activation
+on:
+  pull_request:
+    paths:
+      - 'public/app/shared/inner-activation-v1.mjs'
+      - 'public/app/shared/inner-ensemble-v1.mjs'
+      - 'public/app/shared/inner-ensemble-panel-v1.mjs'
+      - 'public/app/shared/daily-sleep-cycle-v1.mjs'
+      - 'scripts/test-daily-sleep-cycle-v1.mjs'
+      - 'scripts/test-inner-activation-v1.mjs'
+      - '.github/workflows/verify-nightly-sleep.yml'
+  push:
+    branches: [staging, main]
+    paths:
+      - 'public/app/shared/inner-activation-v1.mjs'
+      - 'public/app/shared/inner-ensemble-v1.mjs'
+      - 'public/app/shared/inner-ensemble-panel-v1.mjs'
+      - 'public/app/shared/daily-sleep-cycle-v1.mjs'
+      - 'scripts/test-daily-sleep-cycle-v1.mjs'
+      - 'scripts/test-inner-activation-v1.mjs'
+jobs:
+  nightly-sleep:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check syntax
+        run: |
+          node --check public/app/shared/inner-activation-v1.mjs
+          node --check public/app/shared/inner-ensemble-v1.mjs
+          node --check public/app/shared/inner-ensemble-panel-v1.mjs
+          node --check public/app/shared/daily-sleep-cycle-v1.mjs
+      - name: Verify nightly lifecycle and trigger behavior
+        run: |
+          node --test scripts/test-daily-sleep-cycle-v1.mjs scripts/test-inner-activation-v1.mjs scripts/test-inner-ensemble-v1.mjs
