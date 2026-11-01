@@ -1,0 +1,57 @@
+/* Device-specific Worldweaver controls: desktop side shelf, mobile lower shelf. */
+#cw-starling-lounge .sl-summon-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(174px,220px);gap:11px;align-items:stretch;min-width:0}
+#cw-starling-lounge .sl-summon-layout>.sl-scene-shell{min-width:0}
+#cw-starling-lounge .sl-summon-panel{min-width:0;align-self:stretch;background:linear-gradient(165deg,#17352e,#1c2937);border:1px solid #588b80;border-radius:15px;overflow:hidden;color:#edf7f3}
+#cw-starling-lounge .sl-summon-inner{display:flex;flex-direction:column;gap:9px;padding:12px;min-width:0;height:100%}
+#cw-starling-lounge .sl-summon-head{display:flex;justify-content:space-between;align-items:flex-start;gap:4px}
+#cw-starling-lounge .sl-summon-head small{font-size:.63rem;letter-spacing:.08em;color:#b8d8d2}
+#cw-starling-lounge .sl-summon-head h3{font-size:1rem;margin:2px 0 0;line-height:1.2;color:#f2d5af}
+#cw-starling-lounge .sl-summon-head button{min-width:38px;min-height:38px;padding:3px}
+#cw-starling-lounge .sl-summon-kinds{display:flex;gap:5px;flex-wrap:wrap}
+#cw-starling-lounge .sl-summon-kinds button{flex:1 1 64px;min-height:37px;font-size:.74rem;padding:6px;border-radius:8px;background:#152d34;color:inherit;border:1px solid #627d81;white-space:normal}
+#cw-starling-lounge .sl-summon-kinds button[aria-pressed=true]{border-color:#d7b88f;background:#375750;color:#fff}
+#cw-starling-lounge .sl-summon-items{display:grid;align-content:start;gap:7px;max-height:270px;overflow-y:auto;overscroll-behavior:contain;min-height:50px}
+#cw-starling-lounge .sl-summon-item{text-align:left;display:grid;gap:3px;min-width:0;min-height:55px;padding:9px 10px;cursor:grab;touch-action:none;border:1px solid #526e75;background:#203e42;color:inherit;border-radius:10px}
+#cw-starling-lounge .sl-summon-item:active{cursor:grabbing}
+#cw-starling-lounge .sl-summon-item[aria-pressed=true]{border-color:#f1c88d;box-shadow:inset 0 0 0 1px #f1c88d}
+#cw-starling-lounge .sl-summon-item-title{font-weight:700;font-size:.85rem;overflow-wrap:anywhere}
+#cw-starling-lounge .sl-summon-item small{font-size:.73rem;opacity:.78;line-height:1.3}
+#cw-starling-lounge .sl-summon-empty{font-size:.79rem;color:#c9d5d3;margin:4px 0;overflow-wrap:anywhere}
+#cw-starling-lounge .sl-summon-help,#cw-starling-lounge .sl-summon-status{font-size:.78rem;line-height:1.4;margin:0;color:#d1e0de;overflow-wrap:anywhere}
+#cw-starling-lounge .sl-summon-status{min-height:2.5em;padding:8px;border:1px solid #52746d;border-radius:8px;background:#0e292a}
+#cw-starling-lounge .sl-summon-place{min-height:44px;white-space:normal;border-radius:9px;border:1px solid #c2a67b;background:#31544c;color:inherit;padding:8px;font-weight:700}
+#cw-starling-lounge .sl-summon-place:disabled{opacity:.5;cursor:default}
+#cw-starling-lounge .sl-summon-panel.sl-summon-collapsed{align-self:start}
+#cw-starling-lounge .sl-summon-collapsed .sl-summon-kinds,
+#cw-starling-lounge .sl-summon-collapsed .sl-summon-items,
+#cw-starling-lounge .sl-summon-collapsed .sl-summon-help,
+#cw-starling-lounge .sl-summon-collapsed .sl-summon-place,
+#cw-starling-lounge .sl-summon-collapsed .sl-summon-status{display:none}
+#cw-starling-lounge .sl-scene-shell{position:relative}
+#cw-starling-lounge .sl-scene-shell.sl-summon-drop-ready{outline:3px dashed #f2ce9d;outline-offset:-4px}
+.sl-summon-drag-ghost{position:fixed;z-index:2147483000;pointer-events:none;transform:translate(-50%,-110%);padding:10px 14px;border-radius:13px;background:#275b50;border:2px solid #f1cf99;color:#fff;font:bold 13px system-ui;box-shadow:0 8px 26px #0009;max-width:175px;white-space:normal}
+#cw-starling-lounge .sl-summon-call-layer{position:absolute;inset:0;pointer-events:none;z-index:7;display:flex;align-items:center;justify-content:center;padding:12px}
+#cw-starling-lounge .sl-summon-call{display:flex;gap:10px;align-items:center;max-width:360px;min-width:0;padding:14px;border-radius:17px;border:1px solid #a9d4bd;background:#102c31ec;color:#fff;box-shadow:0 12px 38px #0008;animation:slCallArrive .45s ease-out both}
+#cw-starling-lounge .sl-summon-call-figure{width:55px;height:66px;flex:0 0 55px;border-radius:12px;background:#3a5e62;display:grid;place-items:center;font-size:2rem;overflow:hidden}
+#cw-starling-lounge .sl-summon-call-figure img{width:100%;height:100%;object-fit:cover}
+#cw-starling-lounge .sl-summon-call-copy{display:grid;gap:4px;min-width:0;font-size:.83rem;line-height:1.4}
+#cw-starling-lounge .sl-summon-call-copy strong{font-size:1rem;color:#f5d29d}
+#cw-starling-lounge .sl-summon-call[data-call-state=ringing] .sl-summon-call-figure{animation:slPhoneRing 1.2s ease-in-out infinite}
+#cw-starling-lounge .sl-summon-call[data-call-state=accepted] .sl-summon-call-figure{background:#286449}
+#cw-starling-lounge .sl-summon-call[data-call-state=joined] .sl-summon-call-figure{background:#26634f}
+#cw-starling-lounge .sl-summon-call-exit{animation:slCallDash 1.4s ease-in forwards}
+@keyframes slCallArrive{from{opacity:0;transform:translateY(12px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes slPhoneRing{0%,100%{transform:rotate(0)}20%{transform:rotate(-7deg)}40%{transform:rotate(7deg)}60%{transform:rotate(-5deg)}}
+@keyframes slCallDash{0%,40%{opacity:1;transform:translateX(0)}100%{opacity:0;transform:translateX(110%)}}
+#cw-starling-lounge .sl-summon-panel :focus-visible{outline:3px solid #f2cd98;outline-offset:2px}
+@media(max-width:850px){
+ #cw-starling-lounge .sl-summon-layout{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto}
+ #cw-starling-lounge .sl-summon-panel{grid-row:2}
+ #cw-starling-lounge .sl-summon-items{display:flex;overflow-x:auto;overflow-y:hidden;max-height:none;min-height:74px;padding-bottom:3px;scroll-snap-type:x mandatory}
+ #cw-starling-lounge .sl-summon-item{flex:0 0 min(42vw,165px);scroll-snap-align:start}
+ #cw-starling-lounge .sl-summon-kinds button{flex:1 1 auto}
+}
+@media(prefers-reduced-motion:reduce){
+ #cw-starling-lounge .sl-summon-call,#cw-starling-lounge .sl-summon-call-figure{animation:none!important}
+ #cw-starling-lounge .sl-summon-call-exit{opacity:.15}
+}
