@@ -64,7 +64,7 @@ $('add').addEventListener('click',()=>handle(()=>{
 $('clear').addEventListener('click',()=>{batches=[];film=null;$('batch-status').textContent='No shots.';$('coverage').textContent='Nothing assembled yet.'});
 $('compile').addEventListener('click',()=>handle(()=>{
  film=assembleFilmBones(state,batches,{targetMinutes:Number($('runtime').value)});
- $('coverage').textContent=JSON.stringify({status:film.status,shotCount:film.shotCount,estimatedMinutes:Math.round(film.estimatedSeconds/60*100)/100,missingMinutes:Math.round(film.missingSeconds/60*100)/100,missingSceneIds:film.missingScenes,finalSoundPolicy:film.soundPolicy},null,2);
+ $('coverage').textContent=JSON.stringify({status:film.status,shotCount:film.shotCount,estimatedMinutes:Math.round(film.estimatedSeconds/60*100)/100,missingMinutes:Math.round(film.missingSeconds/60*100)/100,missingSceneIds:film.missingScenes,uncoveredDialogue:film.uncoveredDialogueByScene,continuityFlags:film.continuityFlags,finalSoundPolicy:film.soundPolicy},null,2);
  $('feedback').textContent='Coverage compiled. Missing material is not automatically generated.';
 }));
 $('export').addEventListener('click',()=>handle(()=>{
