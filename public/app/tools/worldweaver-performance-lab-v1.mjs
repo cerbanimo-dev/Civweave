@@ -6,6 +6,7 @@ import {createWorldweaver} from '../shared/worldweaver-core-v1.mjs';
 import {createOpenSim3DPreview} from '../shared/worldweaver-3d-preview-v1.mjs';
 import {projectWorld2D,renderWorldMap2D} from '../shared/worldweaver-map-2d-v1.mjs';
 import {getWorldSeed} from '../shared/worldweaver-story-seeds-v1.mjs';
+import {projectBookCast,bookNpcCommand,bookEncounterMessages,convergenceRoster} from '../shared/worldweaver-convergence-cast-v1.mjs';
 
 const $=id=>document.getElementById(id);
 // A selected reviewed world seed can prefill a draft, not its rights or approvals.
@@ -233,11 +234,87 @@ $('assign-avatar').addEventListener('click',()=>{
  try{
   const scene=getScene();
   if(!scene||scene.status!=='approved')throw new Error('Approve a scene before casting');
+  const characterGuide={};
+  for(const [field,element] of [
+    ['displayName','cast-display-name'],['personaBrief','cast-persona'],
+    ['canonRules','cast-canon'],['relationships','cast-relationships'],
+    ['interactionRules','cast-improv']
+  ])if($(element).value.trim())characterGuide[field]=$(element).value.trim();
   studio.dispatch({type:'assign-cast',character:$('cast-character').value,
-   avatarRef:$('cast-avatar').value,pilotPrincipalId:$('cast-pilot').value},human);
+   avatarRef:$('cast-avatar').value,pilotPrincipalId:$('cast-pilot').value,...characterGuide},human);
   updateScenes();showStage();
   status('Cast/rig reference approved. Stage marker is assigned; actual native avatar rig deployment remains a separate trusted tool.');
  }catch(error){status('Role binding rejected: '+text(error.message));}
+});
+// Convergence is an author-reviewed projection of this SAME Performance Studio
+// casting. No copied manuscript, separate chat runtime, or auto-published canon.
+function reviewedBookPacket(){return projectBookCast(studio.snapshot());}
+function chosenBookCharacter(){
+  const character=$('cast-character').value;
+  if(!character)throw new Error('Select an approved speaking character.');
+  return character;
+}
+function privateBookApproval(packet,person){
+  const cast=studio.snapshot().casts.find(c=>c.character===person.id);
+  return cast?.approvedBy===human.principalId && packet.projectId===studio.snapshot().project?.id;
+}
+$('export-convergence').addEventListener('click',()=>{
+  try{
+    const packet=reviewedBookPacket();
+    download('civweave-convergence-private-book-cast.json',JSON.stringify(packet,null,2));
+    $('convergence-preview').textContent=convergenceRoster({bookPacket:packet}).map(p=>p.team+': '+p.name).join('\n')+
+      '\n\nPrivate author-review packet only. Public story opening and signed Guild deployment are not unlocked.';
+    status('Exported '+packet.characters.length+' reviewed book personalities without manuscript or participant data.');
+  }catch(error){status('Cast export blocked: '+text(error.message));}
+});
+$('rig-book').addEventListener('click',()=>{
+  try{
+    const packet=reviewedBookPacket(),character=chosenBookCharacter();
+    const runtime=globalThis.CivweaveModelRuntime;
+    const cfg=runtime?.readSharedConfig?.('agentic')||runtime?.readSharedConfig?.('interactive');
+    if(!cfg?.model||!cfg?.provider||['manual','deterministic'].includes(cfg.provider))
+      throw new Error('Select a real model in Civweave AI settings.');
+    const person=packet.characters.find(p=>p.id===character);
+    if(!person)throw new Error('Review and cast this speaking role first.');
+    const command=bookNpcCommand({bookPacket:packet,character,instanceId:room.id,
+      modelId:cfg.model,pilotPrincipalId:person.pilotPrincipalId,
+      verifyAuthorApproval:privateBookApproval});
+    const result=world.dispatch(command,human);
+    $('convergence-preview').textContent=JSON.stringify({name:person.name,
+      personaRef:command.personaRef,registeredNpc:result.npc?.id||null,
+      modelId:cfg.model,status:'Local manifest only; no model started or native avatar created'},null,2);
+    status('Registered a local Worldweaver book-character pilot manifest. Author review and real runtime execution remain separate.');
+  }catch(error){status('Local book pilot not registered: '+text(error.message,280));}
+});
+$('rehearse-convergence').addEventListener('click',async()=>{
+  if(modelBusy)return;
+  modelBusy=true;$('rehearse-convergence').disabled=true;
+  try{
+    const packet=reviewedBookPacket(),character=chosenBookCharacter();
+    const runtime=globalThis.CivweaveModelRuntime;
+    const cfg=runtime?.readSharedConfig?.('agentic')||runtime?.readSharedConfig?.('interactive');
+    if(!cfg?.provider||['manual','deterministic'].includes(cfg.provider))
+      throw new Error('Select a local or consented hosted model in Civweave AI settings.');
+    if(runtime?.endpointLeavesDevice?.(cfg)&&!$('cloud-consent').checked)
+      throw new Error('Explicit remote model consent required for this rehearsal.');
+    const messages=bookEncounterMessages({bookPacket:packet,character,
+      phase:'cerbanimo-encounter',sceneContext:$('convergence-setup').value});
+    const {runCodeInference}=await import('/creator-suite/shared/code-inference-route-v1.mjs');
+    const loaders=await import('/creator-suite/shared/creator-inference-loaders-v1.mjs');
+    status('Rehearsing a private book-character encounter. No canon changes or automatic publication.');
+    const result=await runCodeInference(cfg,messages,{
+      selection:loaders.currentCreatorLocalSelection(),loadLocal:loaders.loadCreatorLocalRuntime,
+      loadServer:loaders.loadCreatorServerRuntime,sharedRuntime:runtime,
+      mediaType:'text',taskTier:'complex',maxTokens:Math.min(Math.max(500,Number(cfg.maxTokens)||1200),4096)
+    });
+    if(result?.status!=='success'||result?.fallback?.provider==='deterministic')
+      throw new Error('The selected model did not return a completed rehearsal.');
+    const output=result.outputText??result.text??result.outputJson??result.output??'';
+    if(!output)throw new Error('The selected model returned no visible dialogue.');
+    $('convergence-preview').textContent=typeof output==='string'?output.slice(0,12000):JSON.stringify(output,null,2).slice(0,12000);
+    status('Noncanonical Convergence encounter rehearsed with the selected Civweave model.');
+  }catch(error){status('Convergence rehearsal unavailable: '+text(error.message,280));}
+  finally{modelBusy=false;$('cloud-consent').checked=false;$('rehearse-convergence').disabled=false;}
 });
 $('scene-select').addEventListener('change',()=>{selected=$('scene-select').value;showStage();updateScenes()});
 for(const [button,decision] of [['approve-scene','approved'],['reject-scene','rejected']]){
