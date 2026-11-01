@@ -278,14 +278,29 @@ function guildRadioHost(){
  return null;
 }
 function radioVolume(){if(audio)audio.volume=userVolume*(broadcastSpeaking?0.23:1)}
-function cancelDj(){try{globalThis.speechSynthesis?.cancel()}catch{}broadcastSpeaking=false;radioVolume()}
+let djGeneration=0;
+function cancelDj(){djGeneration++;try{globalThis.speechSynthesis?.cancel()}catch{}broadcastSpeaking=false;radioVolume()}
 function cueDj(text){
  broadcastCue=String(text||'').slice(0,12000);renderBroadcastStatus();cancelDj();
  if(broadcastMuted||!broadcastMode||!globalThis.speechSynthesis||!globalThis.SpeechSynthesisUtterance)return;
- const line=new SpeechSynthesisUtterance(broadcastCue);line.rate=1.08;
- line.onstart=()=>{broadcastSpeaking=true;radioVolume()};
- line.onend=line.onerror=()=>{broadcastSpeaking=false;radioVolume()};
- try{speechSynthesis.speak(line)}catch{cancelDj()}
+ // Android speech engines can silently truncate long utterances. Speak short
+ // sentences sequentially without creating a separate audio/music owner.
+ const sentences=broadcastCue.split(/(?<=[.!?])\\s+|\\n+/).map(value=>value.trim()).filter(Boolean),segments=[];
+ for(const sentence of sentences){
+  let rest=sentence;
+  while(rest.length>210){let cut=rest.lastIndexOf(' ',210);if(cut<100)cut=210;segments.push(rest.slice(0,cut));rest=rest.slice(cut).trim()}
+  if(rest)segments.push(rest);
+ }
+ const generation=djGeneration;let cursor=0;broadcastSpeaking=true;radioVolume();
+ const next=()=>{
+  if(generation!==djGeneration||!broadcastMode||broadcastMuted)return;
+  if(cursor>=segments.length){broadcastSpeaking=false;radioVolume();return}
+  const utterance=new SpeechSynthesisUtterance(segments[cursor++]);utterance.rate=1.08;
+  utterance.onend=()=>{if(generation===djGeneration)next()};
+  utterance.onerror=()=>{if(generation===djGeneration){broadcastSpeaking=false;radioVolume()}};
+  try{globalThis.speechSynthesis.speak(utterance)}catch{cancelDj()}
+ };
+ next();
 }
 function leaveGuildBroadcast(){
  broadcastMode='';broadcastPaused=false;broadcastPacket=null;broadcastChunk='';broadcastCue='';broadcastSource='';
@@ -349,7 +364,7 @@ async function syncGuildRadio(force=false){
   }else if(audio&&Math.abs((Number(audio.currentTime)||0)-current.offsetSeconds)>8){
    try{if(audio.seekable?.length&&current.offsetSeconds<=audio.seekable.end(audio.seekable.length-1))audio.currentTime=current.offsetSeconds}catch{}
   }
-  const label=panel?.querySelector('[data-radio-guild-now]');if(label)label.textContent='On air: '+current.chunk.title+' · next change '+new Date(current.track.endAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  const label=panel?.querySelector('[data-radio-guild-now]');if(label)label.textContent='DJ '+current.chunk.dj+' · '+current.chunk.title+' · next change '+new Date(current.track.endAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
   return true;
  }catch(error){status('Guild radio sync failed: '+String(error?.message||error).slice(0,125));return false}
  finally{broadcastBusy=false;renderBroadcastStatus()}
