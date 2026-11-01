@@ -1,3 +1,5 @@
+import {buildGuildRadioSchedule,guildRadioWindow} from '../../../public/app/shared/guild-radio-schedule-v1.mjs';
+import radioCorpus from '../../../public/downloads/hub-media/open-music/guild-bundles-v1.json' with {type:'json'};
 import {DurableObject} from 'cloudflare:workers';
 
 const WORKER_VERSION='1.2.0-guild-location-parity';
@@ -88,7 +90,7 @@ export class CivweaveGuildNodeState extends DurableObject{
   configure({guildId,nodeId,displayName,publicOrigin,location}={}){const existingNode=this.meta('nodeId'),existingGuild=this.meta('guildId');if(existingNode&&(existingNode!==nodeId||existingGuild!==guildId))throw Object.assign(new Error('This Cloudflare node is already bound to another Guild node.'),{status:409});const createdAt=this.meta('createdAt')||now();this.putMeta('guildId',guildId);this.putMeta('nodeId',nodeId);this.putMeta('displayName',displayName);this.putMeta('publicOrigin',publicOrigin);if(location)this.putMeta('location',location);this.putMeta('createdAt',createdAt);this.putMeta('updatedAt',location?.syncedAt||now());return this.manifest()}
   setLocation(location){if(!this.meta('nodeId'))throw Object.assign(new Error('This Cloudflare node is not configured.'),{status:409});this.putMeta('location',location);this.putMeta('updatedAt',location.syncedAt||now());return this.manifest()}
   health(){return{ok:Boolean(this.meta('nodeId')),service:'civweave-guild-cloud-node',version:WORKER_VERSION,guildId:this.meta('guildId'),nodeId:this.meta('nodeId'),runtime:'cloudflare-workers-ai'}}
-  manifest(){return{ok:Boolean(this.meta('nodeId')),manifest:{schema:NODE_MANIFEST_SCHEMA,guildId:this.meta('guildId'),nodeId:this.meta('nodeId'),displayName:this.meta('displayName'),publicOrigin:this.meta('publicOrigin'),runtime:'cloudflare-workers-ai',capabilities:['guild-relay','workers-ai','signed-object-mesh','creator-provenance','guild-map-location'],location:this.meta('location'),createdAt:this.meta('createdAt'),updatedAt:this.meta('updatedAt')}}}
+  manifest(){return{ok:Boolean(this.meta('nodeId')),manifest:{schema:NODE_MANIFEST_SCHEMA,guildId:this.meta('guildId'),nodeId:this.meta('nodeId'),displayName:this.meta('displayName'),publicOrigin:this.meta('publicOrigin'),runtime:'cloudflare-workers-ai',capabilities:['guild-relay','workers-ai','signed-object-mesh','creator-provenance','guild-map-location','guild-radio-schedule'],location:this.meta('location'),createdAt:this.meta('createdAt'),updatedAt:this.meta('updatedAt')}}}
 }
 
 async function authenticate(request,stub){const token=bearer(request);if(!validSecret(token))throw Object.assign(new Error('Guild synchronization authorization is required.'),{status:401});if(!await stub.authorized(await membershipHash(token)))throw Object.assign(new Error('Guild synchronization authorization was rejected.'),{status:403})}
@@ -107,7 +109,12 @@ export default{
     try{
       if(request.method==='GET'&&url.pathname==='/')return statusPage(env,url.origin);
       if(request.method==='GET'&&url.pathname==='/api/health'){const status=await guildState.status(),infrastructure=await fabricStatus(env,url.origin);return json({ok:true,service:'civweave-guild-cloud',version:WORKER_VERSION,claimed:status.claimed,guildId:status.guildId,location:status.location,infrastructure})}
-      if(request.method==='GET'&&url.pathname==='/api/guild/status'){const status=await guildState.status();return json({...status,infrastructure:await fabricStatus(env,url.origin)})}
+      if(request.method==='GET'&&url.pathname==='/api/guild/radio/schedule'){
+         const status=await guildState.status();if(!status.claimed)return json({ok:false,error:'Pair this Guild before broadcasting.'},409);
+         const current=Date.now();const packet=buildGuildRadioSchedule({guildId:status.guildId,bundles:radioCorpus.bundles,tracks:radioCorpus.tracks,nowMs:current});
+         return json({...guildRadioWindow(packet,current),serverNow:new Date(current).toISOString(),corpusVersion:radioCorpus.schema});
+       }
+       if(request.method==='GET'&&url.pathname==='/api/guild/status'){const status=await guildState.status();return json({...status,infrastructure:await fabricStatus(env,url.origin)})}
       if(request.method==='GET'&&url.pathname==='/api/fabric/capacity'){const status=await capacityStub(env).status();return json({...status,aiEnabled:Boolean(env.AI)})}
       if(request.method==='GET'&&url.pathname==='/api/fabric/manifest'){const guild=await guildState.status(),infrastructure=await fabricStatus(env,url.origin);return json({ok:true,schema:FABRIC_SCHEMA,guildId:guild.guildId,displayName:guild.displayName,workerOrigin:url.origin,location:guild.location,infrastructure,capabilities:['always-online-guild-edge','three-starter-nodes','workers-ai','signed-object-relay','creator-provenance','guild-map-location']})}
       if(request.method==='POST'&&url.pathname==='/api/guild/claim'){
