@@ -63,7 +63,7 @@ test('OpenSim controls can issue actual human-authorized NPC commands and displa
  const must=['data-sl-action="opensim-move"','data-sl-action="opensim-speak"',
  'data-sl-action="opensim-receipt"','data-sl-opensim-token','data-sl-move-z',
  'getOpenSimLiveStatus','submitOpenSimCommand','getOpenSimActionReceipt',
- "tool==='move'","tool==='speak'","openSimRegionId","state.worldLayout"];
+ "executeOpenSim('move')","executeOpenSim('speak')","openSimRegionId","state.worldLayout"];
  for(const v of must)assert.ok(src.includes(v),'Missing interactive OpenSim control: '+v);
  assert.ok(src.includes("worldTools().prepare"),'Only registered signed pilot may submit a bounded simulator command');
  assert.ok(!src.includes("localStorage.setItem('civweave.opensim"),'Do not persist controller tokens in localStorage');
