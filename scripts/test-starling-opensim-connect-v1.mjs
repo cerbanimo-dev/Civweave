@@ -57,3 +57,14 @@ test('Guild entry cache-busts Collective module alongside its stylesheet',()=>{
  assert.ok(launcher.includes("starling-lounge-v1.mjs?v=brand-responsive-fleet-r6-opensim"));
  assert.ok(lounge.includes("starling-lounge-v1.css?v=brand-responsive-fleet-r6-opensim"));
 });
+
+test('OpenSim controls can issue actual human-authorized NPC commands and display results',()=>{
+ const src=readFileSync(new URL('../public/app/starling-lounge-v1.mjs',import.meta.url),'utf8');
+ const must=['data-sl-action="opensim-move"','data-sl-action="opensim-speak"',
+ 'data-sl-action="opensim-receipt"','data-sl-opensim-token','data-sl-move-z',
+ 'getOpenSimLiveStatus','submitOpenSimCommand','getOpenSimActionReceipt',
+ "tool:'move'","tool:'speak'","openSimRegionId","state.worldLayout"];
+ for(const v of must)assert.ok(src.includes(v),'Missing interactive OpenSim control: '+v);
+ assert.ok(src.includes("worldTools().prepare"),'Only registered signed pilot may submit a bounded simulator command');
+ assert.ok(!src.includes("localStorage.setItem('civweave.opensim"),'Do not persist controller tokens in localStorage');
+});
