@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-curated-playlists.v1",
-  "built_at": "2026-10-30T15:02:58Z",
+  "built_at": "2026-11-02T13:53:58Z",
   "vocal_required": true,
   "instrumental_only_rejected": true,
   "playlists": [
@@ -603,6 +603,66 @@
           "curation": "vocal-pool-unreviewed"
         },
         {
+          "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
+          "title": "A Story of Striking the Root: Striking Down Public Unions",
+          "artist": "Papa_Zulu",
+          "provider": "ccmixter",
+          "provider_id": "31513",
+          "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions.mp3",
+              "mime": "",
+              "bytes": 10835218,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_4.mp3",
+              "mime": "",
+              "bytes": 761566,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_1.mp3",
+              "mime": "",
+              "bytes": 489056,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_2.mp3",
+              "mime": "",
+              "bytes": 469830,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Papa_Zulu",
+            "source_title": "A Story of Striking the Root: Striking Down Public Unions",
+            "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:spoken_word"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:0284a7078fa2894918b9a54b",
           "title": "America Mad & Naked",
           "artist": "Stefan Kartenberg",
@@ -975,6 +1035,66 @@
           "curation": "community-playlist-unreviewed"
         },
         {
+          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+          "title": "Je ne peux pas le retenir",
+          "artist": "Bluemillenium",
+          "provider": "ccmixter",
+          "provider_id": "62208",
+          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+              "mime": "",
+              "bytes": 7686314,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+              "mime": "",
+              "bytes": 17472728,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
+              "mime": "",
+              "bytes": 27410552,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
+              "mime": "",
+              "bytes": 24630340,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Bluemillenium",
+            "source_title": "Je ne peux pas le retenir",
+            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:29a3747e9b48a3d2c306100f",
           "title": "Lamadio Tiado",
           "artist": "Admiral Bob",
@@ -1101,6 +1221,48 @@
           ],
           "explicit": null,
           "curation": "metadata-discovered"
+        },
+        {
+          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
+          "title": "Melange",
+          "artist": "musikpirat",
+          "provider": "ccmixter",
+          "provider_id": "65481",
+          "source_url": "https://ccmixter.org/files/musikpirat/65481",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
+              "mime": "",
+              "bytes": 13348615,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "musikpirat",
+            "source_title": "Melange",
+            "source_url": "https://ccmixter.org/files/musikpirat/65481",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
         },
         {
           "candidate_id": "openmusic:a867d261c1261699a060058d",
@@ -2011,6 +2173,179 @@
           "curation": "vocal-pool-unreviewed"
         },
         {
+          "candidate_id": "openmusic:c5f1c8e5b8dd81a252eab50a",
+          "title": "Like A Rapper",
+          "artist": "Donnie Ozone",
+          "provider": "ccmixter",
+          "provider_id": "36041",
+          "source_url": "https://ccmixter.org/files/donnieozone/36041",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/donnieozone/donnieozone_-_Like_A_Rapper.mp3",
+              "mime": "",
+              "bytes": 7412551,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Donnie Ozone",
+            "source_title": "Like A Rapper",
+            "source_url": "https://ccmixter.org/files/donnieozone/36041",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "genre:vocal-pool:rap"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:e60583e6feb04fe7091e32be",
+          "title": "Longing - spacious choir remix",
+          "artist": "Zep Hurme",
+          "provider": "ccmixter",
+          "provider_id": "33335",
+          "source_url": "https://ccmixter.org/files/zep_hurme/33335",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/zep_hurme/zep_hurme_-_Longing_-_spacious_choir_remix.mp3",
+              "mime": "",
+              "bytes": 3195884,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Zep Hurme",
+            "source_title": "Longing - spacious choir remix",
+            "source_url": "https://ccmixter.org/files/zep_hurme/33335",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "creative commons",
+            "collaborative music",
+            "sharing",
+            "genre:community-playlist:11087"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:ad23b08d76ca2949a732730a",
+          "title": "Longing for Tumbleweeds",
+          "artist": "Admiral Bob",
+          "provider": "ccmixter",
+          "provider_id": "33347",
+          "source_url": "https://ccmixter.org/files/admiralbob77/33347",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_Longing_for_Tumbleweeds.mp3",
+              "mime": "",
+              "bytes": 2756120,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Admiral Bob",
+            "source_title": "Longing for Tumbleweeds",
+            "source_url": "https://ccmixter.org/files/admiralbob77/33347",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "creative commons",
+            "collaborative music",
+            "sharing",
+            "genre:community-playlist:11087"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:4d26528f76438920cdc55d62",
+          "title": "Orc March",
+          "artist": "basematic",
+          "provider": "ccmixter",
+          "provider_id": "33579",
+          "source_url": "https://ccmixter.org/files/basematic/33579",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/basematic/basematic_-_Orc_March.mp3",
+              "mime": "",
+              "bytes": 4755166,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "basematic",
+            "source_title": "Orc March",
+            "source_url": "https://ccmixter.org/files/basematic/33579",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "creative commons",
+            "collaborative music",
+            "sharing",
+            "genre:community-playlist:11087"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:0284a7078fa2894918b9a54b",
           "title": "America Mad & Naked",
           "artist": "Stefan Kartenberg",
@@ -2101,51 +2436,6 @@
           "curation": "vocal-pool-unreviewed"
         },
         {
-          "candidate_id": "openmusic:29a3747e9b48a3d2c306100f",
-          "title": "Lamadio Tiado",
-          "artist": "Admiral Bob",
-          "provider": "ccmixter",
-          "provider_id": "33497",
-          "source_url": "https://ccmixter.org/files/admiralbob77/33497",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/admiralbob77/admiralbob77_-_Lamadio_Tiado.mp3",
-              "mime": "",
-              "bytes": 4174621,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Admiral Bob",
-            "source_title": "Lamadio Tiado",
-            "source_url": "https://ccmixter.org/files/admiralbob77/33497",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "creative commons",
-            "collaborative music",
-            "sharing",
-            "share",
-            "genre:community-playlist:11087"
-          ],
-          "explicit": null,
-          "curation": "community-playlist-unreviewed"
-        },
-        {
           "candidate_id": "openmusic:a867d261c1261699a060058d",
           "title": "Norleans Lovas",
           "artist": "Jeris",
@@ -2191,45 +2481,50 @@
           "curation": "community-playlist-unreviewed"
         },
         {
-          "candidate_id": "openmusic:4ef39c8e26d3577ef48f3949",
-          "title": "Twilight of the Cinema",
-          "artist": "septahelix",
+          "candidate_id": "openmusic:3a520100734c289fc8ab1332",
+          "title": "Welcome to the New World",
+          "artist": "Jeris",
           "provider": "ccmixter",
-          "provider_id": "33343",
-          "source_url": "https://ccmixter.org/files/septahelix/33343",
+          "provider_id": "71321",
+          "source_url": "https://ccmixter.org/files/VJ_Memes/71321",
           "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "spdx": "CC-BY",
+            "label": "Attribution (4.0)",
+            "url": "https://creativecommons.org/licenses/by/4.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
             "commercial_use": true,
             "redistribution": true,
             "derivatives": true,
-            "share_alike": true
+            "share_alike": false
           },
           "files": [
             {
-              "url": "https://ccmixter.org/content/septahelix/septahelix_-_Twilight_of_the_Cinema.mp3",
+              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_Welcome_to_the_New_World_1.mp3",
               "mime": "",
-              "bytes": 7555851,
+              "bytes": 12144892,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_Welcome_to_the_New_World.mp3",
+              "mime": "",
+              "bytes": 18911651,
               "role": "source-download"
             }
           ],
           "attribution": {
-            "creator": "septahelix",
-            "source_title": "Twilight of the Cinema",
-            "source_url": "https://ccmixter.org/files/septahelix/33343",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+            "creator": "Jeris",
+            "source_title": "Welcome to the New World",
+            "source_url": "https://ccmixter.org/files/VJ_Memes/71321",
+            "license": "Attribution (4.0)",
+            "license_url": "https://creativecommons.org/licenses/by/4.0/"
           },
           "vocal_verified": true,
           "instrumental_only": false,
-          "teeth_score": 1,
+          "teeth_score": 0,
           "themes": [
             "creative commons",
             "collaborative music",
             "sharing",
-            "share",
             "genre:community-playlist:11087"
           ],
           "explicit": null,
@@ -2515,6 +2810,66 @@
           "curation": "community-playlist-unreviewed"
         },
         {
+          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+          "title": "Je ne peux pas le retenir",
+          "artist": "Bluemillenium",
+          "provider": "ccmixter",
+          "provider_id": "62208",
+          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+              "mime": "",
+              "bytes": 7686314,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+              "mime": "",
+              "bytes": 17472728,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
+              "mime": "",
+              "bytes": 27410552,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
+              "mime": "",
+              "bytes": 24630340,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Bluemillenium",
+            "source_title": "Je ne peux pas le retenir",
+            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:29a3747e9b48a3d2c306100f",
           "title": "Lamadio Tiado",
           "artist": "Admiral Bob",
@@ -2558,6 +2913,48 @@
           ],
           "explicit": null,
           "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
+          "title": "Melange",
+          "artist": "musikpirat",
+          "provider": "ccmixter",
+          "provider_id": "65481",
+          "source_url": "https://ccmixter.org/files/musikpirat/65481",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
+              "mime": "",
+              "bytes": 13348615,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "musikpirat",
+            "source_title": "Melange",
+            "source_url": "https://ccmixter.org/files/musikpirat/65481",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
         },
         {
           "candidate_id": "openmusic:097b58402e76a542a6ffad23",
@@ -3282,6 +3679,108 @@
           "curation": "community-playlist-unreviewed"
         },
         {
+          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+          "title": "Je ne peux pas le retenir",
+          "artist": "Bluemillenium",
+          "provider": "ccmixter",
+          "provider_id": "62208",
+          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+              "mime": "",
+              "bytes": 7686314,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+              "mime": "",
+              "bytes": 17472728,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
+              "mime": "",
+              "bytes": 27410552,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
+              "mime": "",
+              "bytes": 24630340,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Bluemillenium",
+            "source_title": "Je ne peux pas le retenir",
+            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
+          "title": "Melange",
+          "artist": "musikpirat",
+          "provider": "ccmixter",
+          "provider_id": "65481",
+          "source_url": "https://ccmixter.org/files/musikpirat/65481",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
+              "mime": "",
+              "bytes": 13348615,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "musikpirat",
+            "source_title": "Melange",
+            "source_url": "https://ccmixter.org/files/musikpirat/65481",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:e37793d5f3dbc8c4ff61220c",
           "title": "Free Hearts",
           "artist": "Mana Junkie",
@@ -3728,6 +4227,66 @@
           ],
           "explicit": null,
           "curation": "web-source-candidate"
+        },
+        {
+          "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
+          "title": "A Story of Striking the Root: Striking Down Public Unions",
+          "artist": "Papa_Zulu",
+          "provider": "ccmixter",
+          "provider_id": "31513",
+          "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions.mp3",
+              "mime": "",
+              "bytes": 10835218,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_4.mp3",
+              "mime": "",
+              "bytes": 761566,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_1.mp3",
+              "mime": "",
+              "bytes": 489056,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_2.mp3",
+              "mime": "",
+              "bytes": 469830,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Papa_Zulu",
+            "source_title": "A Story of Striking the Root: Striking Down Public Unions",
+            "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:spoken_word"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
         },
         {
           "candidate_id": "openmusic:16113b4f19ba21a7d0631de2",
@@ -6282,12 +6841,12 @@
       "name": "Cerbanimo",
       "entries": [
         {
-          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-          "title": "Je ne peux pas le retenir",
-          "artist": "Bluemillenium",
+          "candidate_id": "openmusic:64440c7e11114879d9855b8c",
+          "title": "How it is",
+          "artist": "Jeris",
           "provider": "ccmixter",
-          "provider_id": "62208",
-          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+          "provider_id": "33819",
+          "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
           "license": {
             "spdx": "CC-BY-SA",
             "label": "Attribution Share-Alike (3.0)",
@@ -6300,34 +6859,22 @@
           },
           "files": [
             {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is.mp3",
               "mime": "",
-              "bytes": 7686314,
+              "bytes": 4684322,
               "role": "source-download"
             },
             {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is_2.mp3",
               "mime": "",
-              "bytes": 17472728,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
-              "mime": "",
-              "bytes": 27410552,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
-              "mime": "",
-              "bytes": 24630340,
+              "bytes": 4684322,
               "role": "source-download"
             }
           ],
           "attribution": {
-            "creator": "Bluemillenium",
-            "source_title": "Je ne peux pas le retenir",
-            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+            "creator": "Jeris",
+            "source_title": "How it is",
+            "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
             "license": "Attribution Share-Alike (3.0)",
             "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
           },
@@ -6335,51 +6882,11 @@
           "instrumental_only": false,
           "teeth_score": 1,
           "themes": [
-            "share"
+            "share",
+            "genre:funk"
           ],
           "explicit": null,
-          "curation": "metadata-discovered"
-        },
-        {
-          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
-          "title": "Melange",
-          "artist": "musikpirat",
-          "provider": "ccmixter",
-          "provider_id": "65481",
-          "source_url": "https://ccmixter.org/files/musikpirat/65481",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
-              "mime": "",
-              "bytes": 13348615,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "musikpirat",
-            "source_title": "Melange",
-            "source_url": "https://ccmixter.org/files/musikpirat/65481",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
+          "curation": "genre-discovered"
         },
         {
           "candidate_id": "openmusic:1203b215c04a63c86d197be1",
@@ -6525,12 +7032,12 @@
           "curation": "hand-seeded"
         },
         {
-          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-          "title": "Je ne peux pas le retenir",
-          "artist": "Bluemillenium",
+          "candidate_id": "openmusic:67428b002bc563392fea3623",
+          "title": "Funk It: How It Is",
+          "artist": "Aussens@iter",
           "provider": "ccmixter",
-          "provider_id": "62208",
-          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+          "provider_id": "56698",
+          "source_url": "https://ccmixter.org/files/tobias_weber/56698",
           "license": {
             "spdx": "CC-BY-SA",
             "label": "Attribution Share-Alike (3.0)",
@@ -6543,34 +7050,22 @@
           },
           "files": [
             {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.mp3",
               "mime": "",
-              "bytes": 7686314,
+              "bytes": 6393774,
               "role": "source-download"
             },
             {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.flac",
               "mime": "",
-              "bytes": 17472728,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
-              "mime": "",
-              "bytes": 27410552,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
-              "mime": "",
-              "bytes": 24630340,
+              "bytes": 29779249,
               "role": "source-download"
             }
           ],
           "attribution": {
-            "creator": "Bluemillenium",
-            "source_title": "Je ne peux pas le retenir",
-            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+            "creator": "Aussens@iter",
+            "source_title": "Funk It: How It Is",
+            "source_url": "https://ccmixter.org/files/tobias_weber/56698",
             "license": "Attribution Share-Alike (3.0)",
             "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
           },
@@ -6578,18 +7073,19 @@
           "instrumental_only": false,
           "teeth_score": 1,
           "themes": [
-            "share"
+            "share",
+            "genre:funk"
           ],
           "explicit": null,
-          "curation": "metadata-discovered"
+          "curation": "genre-discovered"
         },
         {
-          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
-          "title": "Melange",
-          "artist": "musikpirat",
+          "candidate_id": "openmusic:64440c7e11114879d9855b8c",
+          "title": "How it is",
+          "artist": "Jeris",
           "provider": "ccmixter",
-          "provider_id": "65481",
-          "source_url": "https://ccmixter.org/files/musikpirat/65481",
+          "provider_id": "33819",
+          "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
           "license": {
             "spdx": "CC-BY-SA",
             "label": "Attribution Share-Alike (3.0)",
@@ -6602,16 +7098,22 @@
           },
           "files": [
             {
-              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
+              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is.mp3",
               "mime": "",
-              "bytes": 13348615,
+              "bytes": 4684322,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is_2.mp3",
+              "mime": "",
+              "bytes": 4684322,
               "role": "source-download"
             }
           ],
           "attribution": {
-            "creator": "musikpirat",
-            "source_title": "Melange",
-            "source_url": "https://ccmixter.org/files/musikpirat/65481",
+            "creator": "Jeris",
+            "source_title": "How it is",
+            "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
             "license": "Attribution Share-Alike (3.0)",
             "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
           },
@@ -6619,10 +7121,11 @@
           "instrumental_only": false,
           "teeth_score": 1,
           "themes": [
-            "share"
+            "share",
+            "genre:funk"
           ],
           "explicit": null,
-          "curation": "metadata-discovered"
+          "curation": "genre-discovered"
         },
         {
           "candidate_id": "openmusic:efee2b7d70e3b7ebd635c026",
@@ -7041,12 +7544,12 @@
           "curation": "hand-seeded"
         },
         {
-          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-          "title": "Je ne peux pas le retenir",
-          "artist": "Bluemillenium",
+          "candidate_id": "openmusic:67428b002bc563392fea3623",
+          "title": "Funk It: How It Is",
+          "artist": "Aussens@iter",
           "provider": "ccmixter",
-          "provider_id": "62208",
-          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+          "provider_id": "56698",
+          "source_url": "https://ccmixter.org/files/tobias_weber/56698",
           "license": {
             "spdx": "CC-BY-SA",
             "label": "Attribution Share-Alike (3.0)",
@@ -7059,34 +7562,22 @@
           },
           "files": [
             {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.mp3",
               "mime": "",
-              "bytes": 7686314,
+              "bytes": 6393774,
               "role": "source-download"
             },
             {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.flac",
               "mime": "",
-              "bytes": 17472728,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
-              "mime": "",
-              "bytes": 27410552,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
-              "mime": "",
-              "bytes": 24630340,
+              "bytes": 29779249,
               "role": "source-download"
             }
           ],
           "attribution": {
-            "creator": "Bluemillenium",
-            "source_title": "Je ne peux pas le retenir",
-            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+            "creator": "Aussens@iter",
+            "source_title": "Funk It: How It Is",
+            "source_url": "https://ccmixter.org/files/tobias_weber/56698",
             "license": "Attribution Share-Alike (3.0)",
             "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
           },
@@ -7094,18 +7585,19 @@
           "instrumental_only": false,
           "teeth_score": 1,
           "themes": [
-            "share"
+            "share",
+            "genre:funk"
           ],
           "explicit": null,
-          "curation": "metadata-discovered"
+          "curation": "genre-discovered"
         },
         {
-          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
-          "title": "Melange",
-          "artist": "musikpirat",
+          "candidate_id": "openmusic:64440c7e11114879d9855b8c",
+          "title": "How it is",
+          "artist": "Jeris",
           "provider": "ccmixter",
-          "provider_id": "65481",
-          "source_url": "https://ccmixter.org/files/musikpirat/65481",
+          "provider_id": "33819",
+          "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
           "license": {
             "spdx": "CC-BY-SA",
             "label": "Attribution Share-Alike (3.0)",
@@ -7118,16 +7610,22 @@
           },
           "files": [
             {
-              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
+              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is.mp3",
               "mime": "",
-              "bytes": 13348615,
+              "bytes": 4684322,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is_2.mp3",
+              "mime": "",
+              "bytes": 4684322,
               "role": "source-download"
             }
           ],
           "attribution": {
-            "creator": "musikpirat",
-            "source_title": "Melange",
-            "source_url": "https://ccmixter.org/files/musikpirat/65481",
+            "creator": "Jeris",
+            "source_title": "How it is",
+            "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
             "license": "Attribution Share-Alike (3.0)",
             "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
           },
@@ -7135,10 +7633,11 @@
           "instrumental_only": false,
           "teeth_score": 1,
           "themes": [
-            "share"
+            "share",
+            "genre:funk"
           ],
           "explicit": null,
-          "curation": "metadata-discovered"
+          "curation": "genre-discovered"
         },
         {
           "candidate_id": "openmusic:68857722998f65e49ac879c1",
@@ -7190,196 +7689,47 @@
       "name": "FellowFare",
       "entries": [
         {
-          "candidate_id": "openmusic:67428b002bc563392fea3623",
-          "title": "Funk It: How It Is",
-          "artist": "Aussens@iter",
+          "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
+          "title": "Language of My Reality",
+          "artist": "Colin Mutchler",
           "provider": "ccmixter",
-          "provider_id": "56698",
-          "source_url": "https://ccmixter.org/files/tobias_weber/56698",
+          "provider_id": "836",
+          "source_url": "https://ccmixter.org/files/commonsplice/836",
           "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "spdx": "CC-BY",
+            "label": "Attribution",
+            "url": "http://creativecommons.org/licenses/by/2.5/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
             "commercial_use": true,
             "redistribution": true,
             "derivatives": true,
-            "share_alike": true
+            "share_alike": false
           },
           "files": [
             {
-              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.mp3",
+              "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
               "mime": "",
-              "bytes": 6393774,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.flac",
-              "mime": "",
-              "bytes": 29779249,
+              "bytes": 2866820,
               "role": "source-download"
             }
           ],
           "attribution": {
-            "creator": "Aussens@iter",
-            "source_title": "Funk It: How It Is",
-            "source_url": "https://ccmixter.org/files/tobias_weber/56698",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+            "creator": "Colin Mutchler",
+            "source_title": "Language of My Reality",
+            "source_url": "https://ccmixter.org/files/commonsplice/836",
+            "license": "Attribution",
+            "license_url": "http://creativecommons.org/licenses/by/2.5/"
           },
           "vocal_verified": true,
           "instrumental_only": false,
-          "teeth_score": 1,
+          "teeth_score": 3,
           "themes": [
+            "freedom",
             "share",
-            "genre:funk"
+            "commons"
           ],
           "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:64440c7e11114879d9855b8c",
-          "title": "How it is",
-          "artist": "Jeris",
-          "provider": "ccmixter",
-          "provider_id": "33819",
-          "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is.mp3",
-              "mime": "",
-              "bytes": 4684322,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is_2.mp3",
-              "mime": "",
-              "bytes": 4684322,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Jeris",
-            "source_title": "How it is",
-            "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:funk"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:67428b002bc563392fea3623",
-          "title": "Funk It: How It Is",
-          "artist": "Aussens@iter",
-          "provider": "ccmixter",
-          "provider_id": "56698",
-          "source_url": "https://ccmixter.org/files/tobias_weber/56698",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.mp3",
-              "mime": "",
-              "bytes": 6393774,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.flac",
-              "mime": "",
-              "bytes": 29779249,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Aussens@iter",
-            "source_title": "Funk It: How It Is",
-            "source_url": "https://ccmixter.org/files/tobias_weber/56698",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:funk"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:64440c7e11114879d9855b8c",
-          "title": "How it is",
-          "artist": "Jeris",
-          "provider": "ccmixter",
-          "provider_id": "33819",
-          "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is.mp3",
-              "mime": "",
-              "bytes": 4684322,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is_2.mp3",
-              "mime": "",
-              "bytes": 4684322,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Jeris",
-            "source_title": "How it is",
-            "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:funk"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
+          "curation": "metadata-discovered"
         },
         {
           "candidate_id": "openmusic:7ec8f974c2a7c48d9092f8f2",
@@ -7518,6 +7868,49 @@
           ],
           "explicit": false,
           "curation": "hand-seeded"
+        },
+        {
+          "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
+          "title": "Language of My Reality",
+          "artist": "Colin Mutchler",
+          "provider": "ccmixter",
+          "provider_id": "836",
+          "source_url": "https://ccmixter.org/files/commonsplice/836",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution",
+            "url": "http://creativecommons.org/licenses/by/2.5/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
+              "mime": "",
+              "bytes": 2866820,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Colin Mutchler",
+            "source_title": "Language of My Reality",
+            "source_url": "https://ccmixter.org/files/commonsplice/836",
+            "license": "Attribution",
+            "license_url": "http://creativecommons.org/licenses/by/2.5/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "freedom",
+            "share",
+            "commons"
+          ],
+          "explicit": null,
+          "curation": "metadata-discovered"
         },
         {
           "candidate_id": "openmusic:27801c9086d750f118d7005c",
@@ -7787,54 +8180,6 @@
           "curation": "community-playlist-unreviewed"
         },
         {
-          "candidate_id": "openmusic:67428b002bc563392fea3623",
-          "title": "Funk It: How It Is",
-          "artist": "Aussens@iter",
-          "provider": "ccmixter",
-          "provider_id": "56698",
-          "source_url": "https://ccmixter.org/files/tobias_weber/56698",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.mp3",
-              "mime": "",
-              "bytes": 6393774,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/tobias_weber/tobias_weber_-_Funk_It_How_It_Is.flac",
-              "mime": "",
-              "bytes": 29779249,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Aussens@iter",
-            "source_title": "Funk It: How It Is",
-            "source_url": "https://ccmixter.org/files/tobias_weber/56698",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:funk"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
           "candidate_id": "openmusic:c6976a19797beea16bf397bf",
           "title": "Give It To Me",
           "artist": "Alex",
@@ -7908,54 +8253,6 @@
           ],
           "explicit": null,
           "curation": "community-playlist-unreviewed"
-        },
-        {
-          "candidate_id": "openmusic:64440c7e11114879d9855b8c",
-          "title": "How it is",
-          "artist": "Jeris",
-          "provider": "ccmixter",
-          "provider_id": "33819",
-          "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is.mp3",
-              "mime": "",
-              "bytes": 4684322,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_How_it_is_2.mp3",
-              "mime": "",
-              "bytes": 4684322,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Jeris",
-            "source_title": "How it is",
-            "source_url": "https://ccmixter.org/files/VJ_Memes/33819",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:funk"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
         },
         {
           "candidate_id": "openmusic:7ec8f974c2a7c48d9092f8f2",
@@ -9502,6 +9799,49 @@
           "curation": "hand-seeded"
         },
         {
+          "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
+          "title": "Language of My Reality",
+          "artist": "Colin Mutchler",
+          "provider": "ccmixter",
+          "provider_id": "836",
+          "source_url": "https://ccmixter.org/files/commonsplice/836",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution",
+            "url": "http://creativecommons.org/licenses/by/2.5/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
+              "mime": "",
+              "bytes": 2866820,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Colin Mutchler",
+            "source_title": "Language of My Reality",
+            "source_url": "https://ccmixter.org/files/commonsplice/836",
+            "license": "Attribution",
+            "license_url": "http://creativecommons.org/licenses/by/2.5/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 3,
+          "themes": [
+            "freedom",
+            "share",
+            "commons"
+          ],
+          "explicit": null,
+          "curation": "metadata-discovered"
+        },
+        {
           "candidate_id": "openmusic:27801c9086d750f118d7005c",
           "title": "Mine + Yours = Ours",
           "artist": "George_Ellinas",
@@ -9653,49 +9993,6 @@
       "name": "Anarchadia",
       "entries": [
         {
-          "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
-          "title": "Language of My Reality",
-          "artist": "Colin Mutchler",
-          "provider": "ccmixter",
-          "provider_id": "836",
-          "source_url": "https://ccmixter.org/files/commonsplice/836",
-          "license": {
-            "spdx": "CC-BY",
-            "label": "Attribution",
-            "url": "http://creativecommons.org/licenses/by/2.5/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": false
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
-              "mime": "",
-              "bytes": 2866820,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Colin Mutchler",
-            "source_title": "Language of My Reality",
-            "source_url": "https://ccmixter.org/files/commonsplice/836",
-            "license": "Attribution",
-            "license_url": "http://creativecommons.org/licenses/by/2.5/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 3,
-          "themes": [
-            "freedom",
-            "share",
-            "commons"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
-        },
-        {
           "candidate_id": "openmusic:50d2be30400a36d307ecad5c",
           "title": "Power To Strike",
           "artist": "Aussens@iter",
@@ -9743,65 +10040,6 @@
           ],
           "explicit": null,
           "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
-          "title": "A Story of Striking the Root: Striking Down Public Unions",
-          "artist": "Papa_Zulu",
-          "provider": "ccmixter",
-          "provider_id": "31513",
-          "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions.mp3",
-              "mime": "",
-              "bytes": 10835218,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_4.mp3",
-              "mime": "",
-              "bytes": 761566,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_1.mp3",
-              "mime": "",
-              "bytes": 489056,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_2.mp3",
-              "mime": "",
-              "bytes": 469830,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Papa_Zulu",
-            "source_title": "A Story of Striking the Root: Striking Down Public Unions",
-            "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
         },
         {
           "candidate_id": "openmusic:729b3951f4837a0078354778",
@@ -9917,102 +10155,6 @@
             "creator": "Pitx",
             "source_title": "100 Paper Washingtons",
             "source_url": "https://ccmixter.org/files/Pitx/34033",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:rock"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:db7211a775298f8e3e72e788",
-          "title": "100 Paper Washingtons by Scomber",
-          "artist": "BeatMachine",
-          "provider": "ccmixter",
-          "provider_id": "62141",
-          "source_url": "https://ccmixter.org/files/BeatMachine/62141",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/BeatMachine/BeatMachine_-_100_Paper_Washingtons_by_Scomber.mp3",
-              "mime": "",
-              "bytes": 3698982,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/BeatMachine/BeatMachine_-_100_Paper_Washingtons_by_Scomber_1.mp3",
-              "mime": "",
-              "bytes": 3698982,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "BeatMachine",
-            "source_title": "100 Paper Washingtons by Scomber",
-            "source_url": "https://ccmixter.org/files/BeatMachine/62141",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:rock"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:80a750778c06f1157a34a7aa",
-          "title": "Can't Hold It Back",
-          "artist": "Stefan Kartenberg",
-          "provider": "ccmixter",
-          "provider_id": "52953",
-          "source_url": "https://ccmixter.org/files/JeffSpeed68/52953",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Can_t_Hold_It_Back.mp3",
-              "mime": "",
-              "bytes": 14073024,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/JeffSpeed68/JeffSpeed68_-_Can_t_Hold_It_Back.flac",
-              "mime": "",
-              "bytes": 41815312,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Stefan Kartenberg",
-            "source_title": "Can't Hold It Back",
-            "source_url": "https://ccmixter.org/files/JeffSpeed68/52953",
             "license": "Attribution Share-Alike (3.0)",
             "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
           },
@@ -10304,48 +10446,6 @@
           "curation": "genre-discovered"
         },
         {
-          "candidate_id": "openmusic:d2d4f3ec6faee9ee73cd0339",
-          "title": "I Won The Bet (Time To Collect)",
-          "artist": "coruscate",
-          "provider": "ccmixter",
-          "provider_id": "60772",
-          "source_url": "https://ccmixter.org/files/Coruscate/60772",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/Coruscate/Coruscate_-_I_Won_The_Bet_(Time_To_Collect)_1.mp3",
-              "mime": "",
-              "bytes": 5228714,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "coruscate",
-            "source_title": "I Won The Bet (Time To Collect)",
-            "source_url": "https://ccmixter.org/files/Coruscate/60772",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share",
-            "genre:hip_hop"
-          ],
-          "explicit": null,
-          "curation": "genre-discovered"
-        },
-        {
           "candidate_id": "openmusic:5c6c8ff4f84f67478d8ad372",
           "title": "In Peace",
           "artist": "unreal_dm",
@@ -10473,49 +10573,6 @@
           ],
           "explicit": null,
           "curation": "web-source-candidate"
-        },
-        {
-          "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
-          "title": "Language of My Reality",
-          "artist": "Colin Mutchler",
-          "provider": "ccmixter",
-          "provider_id": "836",
-          "source_url": "https://ccmixter.org/files/commonsplice/836",
-          "license": {
-            "spdx": "CC-BY",
-            "label": "Attribution",
-            "url": "http://creativecommons.org/licenses/by/2.5/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": false
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
-              "mime": "",
-              "bytes": 2866820,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Colin Mutchler",
-            "source_title": "Language of My Reality",
-            "source_url": "https://ccmixter.org/files/commonsplice/836",
-            "license": "Attribution",
-            "license_url": "http://creativecommons.org/licenses/by/2.5/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 3,
-          "themes": [
-            "freedom",
-            "share",
-            "commons"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
         },
         {
           "candidate_id": "openmusic:e7a2409812c167b088a02d12",
@@ -10836,49 +10893,6 @@
           ],
           "explicit": null,
           "curation": "community-playlist-unreviewed"
-        },
-        {
-          "candidate_id": "openmusic:ea7f108f89fd5df653e0ffe3",
-          "title": "Language of My Reality",
-          "artist": "Colin Mutchler",
-          "provider": "ccmixter",
-          "provider_id": "836",
-          "source_url": "https://ccmixter.org/files/commonsplice/836",
-          "license": {
-            "spdx": "CC-BY",
-            "label": "Attribution",
-            "url": "http://creativecommons.org/licenses/by/2.5/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": false
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_Language_of_My_Reality.mp3",
-              "mime": "",
-              "bytes": 2866820,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Colin Mutchler",
-            "source_title": "Language of My Reality",
-            "source_url": "https://ccmixter.org/files/commonsplice/836",
-            "license": "Attribution",
-            "license_url": "http://creativecommons.org/licenses/by/2.5/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 3,
-          "themes": [
-            "freedom",
-            "share",
-            "commons"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
         },
         {
           "candidate_id": "openmusic:0730fcef03f4b49779c900a0",
@@ -11298,65 +11312,6 @@
           ],
           "explicit": null,
           "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:d87c2f010f4c78442398cc0b",
-          "title": "A Story of Striking the Root: Striking Down Public Unions",
-          "artist": "Papa_Zulu",
-          "provider": "ccmixter",
-          "provider_id": "31513",
-          "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions.mp3",
-              "mime": "",
-              "bytes": 10835218,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_4.mp3",
-              "mime": "",
-              "bytes": 761566,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_1.mp3",
-              "mime": "",
-              "bytes": 489056,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Papa_Zulu/Papa_Zulu_-_A_Story_of_Striking_the_Root_Striking_Down_Public_Unions_2.mp3",
-              "mime": "",
-              "bytes": 469830,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Papa_Zulu",
-            "source_title": "A Story of Striking the Root: Striking Down Public Unions",
-            "source_url": "https://ccmixter.org/files/Papa_Zulu/31513",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
         },
         {
           "candidate_id": "openmusic:80a750778c06f1157a34a7aa",

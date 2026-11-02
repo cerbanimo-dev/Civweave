@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-10-30T15:02:58Z",
-  "entry_count": 184,
+  "built_at": "2026-11-02T13:53:58Z",
+  "entry_count": 185,
   "entries": [
     {
       "candidate_id": "openmusic:7189acce0e060fd13b8f61d9",
@@ -1396,8 +1396,12 @@
       ],
       "explicit": null,
       "curation": "metadata-discovered",
-      "playlist_id": "anarchadia",
+      "playlist_id": "fellowfare",
       "playlist_matches": [
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "share"
+        },
         {
           "playlist_id": "anarchadia",
           "matched_query": "freedom"
@@ -1405,10 +1409,6 @@
         {
           "playlist_id": "civweave",
           "matched_query": "freedom"
-        },
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "share"
         }
       ],
       "provider": "ccmixter"
@@ -2816,10 +2816,6 @@
         {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:blues"
         }
       ],
       "provider": "ccmixter"
@@ -2988,12 +2984,17 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:spoken_word"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_id": "anarchadia",
+      "curation": "vocal-pool-unreviewed",
+      "playlist_id": "civweave",
       "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:spoken_word"
+        },
         {
           "playlist_id": "anarchadia",
           "matched_query": "freedom"
@@ -3001,10 +3002,6 @@
         {
           "playlist_id": "civweave",
           "matched_query": "freedom"
-        },
-        {
-          "playlist_id": "civweave",
-          "matched_query": "vocal-pool:spoken_word"
         }
       ],
       "provider": "ccmixter"
@@ -3187,10 +3184,6 @@
         {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:ambient"
         }
       ],
       "provider": "ccmixter"
@@ -3294,15 +3287,11 @@
           "matched_query": "community-playlist:10742"
         },
         {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -3413,18 +3402,14 @@
       ],
       "explicit": null,
       "curation": "genre-discovered",
-      "playlist_id": "fellowfare",
+      "playlist_id": "cerbanimo",
       "playlist_matches": [
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
         {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -3491,15 +3476,11 @@
           "matched_query": "community-playlist:10742"
         },
         {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -3653,15 +3634,11 @@
           "matched_query": "community-playlist:10742"
         },
         {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "civweave",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -3716,16 +3693,8 @@
       ],
       "explicit": null,
       "curation": "genre-discovered",
-      "playlist_id": "fellowfare",
+      "playlist_id": "cerbanimo",
       "playlist_matches": [
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:soul"
-        },
         {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
@@ -3733,6 +3702,14 @@
         {
           "playlist_id": "living-school",
           "matched_query": "genre:jazz"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:soul"
         }
       ],
       "provider": "ccmixter"
@@ -3840,10 +3817,6 @@
       "playlist_matches": [
         {
           "playlist_id": "anarchadia",
-          "matched_query": "genre:hip_hop"
-        },
-        {
-          "playlist_id": "cerbanimo",
           "matched_query": "genre:hip_hop"
         }
       ],
@@ -3970,30 +3943,31 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_id": "cerbanimo",
+      "curation": "vocal-pool-unreviewed",
+      "playlist_id": "civweave",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "labor"
-        },
-        {
-          "playlist_id": "civweave",
-          "matched_query": "collaboration"
-        },
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
         },
         {
           "playlist_id": "cerbanimo",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "collaboration"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
+        },
+        {
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -4057,10 +4031,6 @@
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "genre:chill"
-        },
-        {
-          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         }
       ],
@@ -4290,26 +4260,27 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_id": "cerbanimo",
+      "curation": "vocal-pool-unreviewed",
+      "playlist_id": "civweave",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "energy"
-        },
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
         },
         {
           "playlist_id": "cerbanimo",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "energy"
+        },
+        {
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -4753,10 +4724,6 @@
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "genre:chill"
-        },
-        {
-          "playlist_id": "living-school",
           "matched_query": "genre:chill"
         }
       ],
@@ -10571,6 +10538,70 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "community-playlist:43545"
+        }
+      ],
+      "provider": "ccmixter"
+    },
+    {
+      "candidate_id": "openmusic:3a520100734c289fc8ab1332",
+      "title": "Welcome to the New World",
+      "artist": "Jeris",
+      "source_url": "https://ccmixter.org/files/VJ_Memes/71321",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (4.0)",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "Jeris",
+        "source_title": "Welcome to the New World",
+        "source_url": "https://ccmixter.org/files/VJ_Memes/71321",
+        "license": "Attribution (4.0)",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_Welcome_to_the_New_World_1.mp3",
+          "mime": "",
+          "bytes": 12144892,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_Welcome_to_the_New_World.mp3",
+          "mime": "",
+          "bytes": 18911651,
+          "role": "source-download"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "creative commons",
+        "collaborative music",
+        "sharing",
+        "genre:community-playlist:11087"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_id": "civweave",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "community-playlist:11087"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "community-playlist:9158"
         }
       ],
       "provider": "ccmixter"
