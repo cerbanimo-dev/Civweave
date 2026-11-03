@@ -238,3 +238,20 @@ test('HARMLESS is discoverable in local and Guild fleet, and only permits append
  assert.match(styles,/data-sl-view=harmless/);
  assert.doesNotMatch(src,/data-sl-harmless-.*contenteditable/);
 });
+
+test('Guildkeeper report panel supports signed file sync, controlled host grants and polling',()=>{
+ const src=read('public/app/starling-lounge-v1.mjs');
+ const shell=read('public/service-worker-shell-assets-v1.js');
+ for(const part of ['data-sl-action="report-refresh"','data-sl-action="report-save"',
+   'data-sl-action="report-trust"','data-sl-action="report-revoke"',
+   'data-sl-report-preview','createStarlingReportProducerRegistry',
+   'createStarlingReportProducerVerifier','publishDailyGuildReport',
+   'archivePairedHostJobs','startHostReportPolling']){
+   assert.ok(src.includes(part),'Missing report interface wiring: '+part);
+ }
+ for(const file of ['starling-daily-report-v1.mjs','starling-report-producers-v1.mjs',
+   'starling-cloud-report-bridge-v1.mjs']){
+   assert.ok(shell.includes(file),'Optional offline shell missing '+file);
+ }
+ assert.doesNotMatch(src,/setInterval\(/,'Lounge polling must not create persistent global timers');
+});
