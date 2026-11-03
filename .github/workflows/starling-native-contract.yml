@@ -16,6 +16,9 @@ on:
       - 'public/app/shared/starling-collective-worker-v1.mjs'
       - 'public/app/shared/starling-daily-report-v1.mjs'
       - 'public/app/shared/starling-report-producers-v1.mjs'
+      - 'public/app/shared/starling-cloud-report-bridge-v1.mjs'
+      - 'public/app/server-ai-router-v301.js'
+      - 'public/service-worker-shell-assets-v1.js'
       - 'public/app/pocket-guild-node-v1.mjs'
       - 'cloudflare/mobile-guild-edge/src/index.mjs'
       - 'scripts/test-mobile-guild-create-v1.mjs'
@@ -41,12 +44,14 @@ jobs:
           node --check public/app/shared/starling-collective-worker-v1.mjs
           node --check public/app/shared/starling-daily-report-v1.mjs
           node --check public/app/shared/starling-report-producers-v1.mjs
+          node --check public/app/shared/starling-cloud-report-bridge-v1.mjs
+          node --check public/app/server-ai-router-v301.js
           node --check public/app/pocket-guild-node-v1.mjs
           node --check cloudflare/mobile-guild-edge/src/index.mjs
           node --check public/app/shared/starling-collective-tools-v1.mjs
           node --check public/app/starling-lounge-v1.mjs
           node --check public/app/mobile-guild-create-v1.mjs
           node --check tools/starling/aider-adapter-v1.mjs
-          node --test scripts/test-starling-collective-v1.mjs scripts/test-starling-collective-turns-v1.mjs scripts/test-starling-collective-worker-v1.mjs scripts/test-starling-collective-tools-v1.mjs scripts/test-starling-aider-adapter-v1.mjs scripts/test-starling-lounge-contract-v1.mjs scripts/test-starling-daily-report-v1.mjs scripts/test-starling-report-producers-v1.mjs scripts/test-starling-report-relay-v1.mjs
+          node --test scripts/test-starling-collective-v1.mjs scripts/test-starling-collective-turns-v1.mjs scripts/test-starling-collective-worker-v1.mjs scripts/test-starling-collective-tools-v1.mjs scripts/test-starling-aider-adapter-v1.mjs scripts/test-starling-lounge-contract-v1.mjs scripts/test-starling-daily-report-v1.mjs scripts/test-starling-report-producers-v1.mjs scripts/test-starling-report-relay-v1.mjs scripts/test-starling-cloud-report-bridge-v1.mjs
       - name: Verify real Guild creation path
         run: node scripts/test-mobile-guild-create-v1.mjs
