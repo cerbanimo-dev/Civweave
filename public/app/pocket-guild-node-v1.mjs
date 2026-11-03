@@ -18,7 +18,7 @@ function rememberPrimaryAck(value,deliveryId){const id=clean(deliveryId,800);if(
 async function syncCloudPrimary(value,api){
   if(globalThis.navigator?.onLine===false)return Object.freeze({ok:false,attached:true,status:'offline',sent:0,received:0});
   const endpoint=new URL('api/envelopes',value.primaryOrigin),headers={'content-type':'application/json','authorization':`Bearer ${value.membershipKey}`};
-  let sent=0,received=0,stateChanged=false;
+  let sent=0,received=0,reportReceived=0,stateChanged=false;
   const pending=typeof api.listOutbox==='function'?await api.listOutbox('pending'):[];
   for(const delivery of pending){
     if(delivery?.id&&value.primaryAcks?.[delivery.id])continue;
@@ -42,7 +42,12 @@ async function syncCloudPrimary(value,api){
       for(const envelope of payload.envelopes){
         const object=envelope?.payload;if(!cloudObjectForGuild(object,value.guildId))continue;
         const result=await api.ingest(object,{fromPeer:`cloud:${value.guildId}`,localNodeId:await api.deviceId()});
-        if(result?.status==='accepted')received++;
+        if(result?.status==='accepted'){
+          received++;
+          if(['civweave.starling-daily-report-file.v1','civweave.starling-report-event.v1','civweave.starling-report-producer-grant.v1'].includes(object.kind)){
+            reportReceived++;value.lastReportSyncAt=now();value.lastReportDay=String(object.payload?.day||object.payload?.at||'').slice(0,10)||value.lastReportDay||null;
+          }
+        }
       }
       // Older Guild edges return only the latest window; do not invent a cursor
       // that may skip missing envelopes. They remain compatible pending upgrade.
@@ -51,12 +56,13 @@ async function syncCloudPrimary(value,api){
       if(payload.hasMore!==true)break;
     }
   }catch(error){if(stateChanged){value.updatedAt=now();write(value)}return Object.freeze({ok:false,attached:true,status:'sync-error',sent,received,error:String(error?.message||error)})}
-  const current=state();if(current?.guildId===value.guildId){current.primaryAcks=value.primaryAcks||{};current.primaryCursor=value.primaryCursor||0;current.lastPrimarySyncAt=now();current.updatedAt=now();write(current)}
-  return Object.freeze({ok:true,attached:true,status:'synced',sent,received,primaryGateway:value.primaryOrigin,lastPrimarySyncAt:now()});
+  const current=state();if(current?.guildId===value.guildId){current.primaryAcks=value.primaryAcks||{};current.primaryCursor=value.primaryCursor||0;current.lastReportSyncAt=value.lastReportSyncAt||current.lastReportSyncAt||null;current.lastReportDay=value.lastReportDay||current.lastReportDay||null;current.lastPrimarySyncAt=now();current.updatedAt=now();write(current)}
+  if(reportReceived&&typeof globalThis.dispatchEvent==='function'&&typeof globalThis.CustomEvent==='function')try{globalThis.dispatchEvent(new CustomEvent('civweave:starling-report-synced',{detail:{guildId:value.guildId,count:reportReceived,at:now()}}))}catch{}
+  return Object.freeze({ok:true,attached:true,status:'synced',sent,received,reportReceived,primaryGateway:value.primaryOrigin,lastPrimarySyncAt:now()});
 }
 async function enroll({guildId,primaryOrigin=null,membershipKey=null}={}){
   const id=clean(guildId,180);if(!id)throw new TypeError('guildId is required.');const api=mesh(),credential=await api.credential(),prior=state(),origin=normalizeGateway(primaryOrigin),key=normalizeMembershipKey(membershipKey,{required:Boolean(origin)}),sameGuild=prior?.guildId===id;
-  const next={schema:'civweave.pocket-guild-node.v1',version:VERSION,guildId:id,primaryOrigin:origin,primaryCursor:sameGuild&&origin===prior?.primaryOrigin?prior?.primaryCursor||0:0,membershipKey:key||(sameGuild?prior?.membershipKey||null:null),cloudAttached:Boolean(origin),deviceId:credential.id,role:'guild-host',route:'pocket-node',authorizedPeers:sameGuild?prior.authorizedPeers||{}:{},primaryAcks:sameGuild?prior.primaryAcks||{}:{},lastPrimarySyncAt:sameGuild?prior.lastPrimarySyncAt||null:null,createdAt:sameGuild?prior.createdAt||now():now(),updatedAt:now()};
+  const next={schema:'civweave.pocket-guild-node.v1',version:VERSION,guildId:id,primaryOrigin:origin,primaryCursor:sameGuild&&origin===prior?.primaryOrigin?prior?.primaryCursor||0:0,lastReportSyncAt:sameGuild?prior?.lastReportSyncAt||null:null,lastReportDay:sameGuild?prior?.lastReportDay||null:null,membershipKey:key||(sameGuild?prior?.membershipKey||null:null),cloudAttached:Boolean(origin),deviceId:credential.id,role:'guild-host',route:'pocket-node',authorizedPeers:sameGuild?prior.authorizedPeers||{}:{},primaryAcks:sameGuild?prior.primaryAcks||{}:{},lastPrimarySyncAt:sameGuild?prior.lastPrimarySyncAt||null:null,createdAt:sameGuild?prior.createdAt||now():now(),updatedAt:now()};
   api.configure({groups:[`guild:${id}`]});write(next);if(origin)startPrimarySync();return status();
 }
 function requireState(){const value=state();if(!value)throw new Error('This device has not been enrolled as a Pocket Guild Node.');return value}
@@ -74,7 +80,7 @@ async function syncPrimary(){const value=requireState();if(!value.primaryOrigin)
 function bindPrimarySyncListeners(){if(primarySyncListenersBound||typeof globalThis.addEventListener!=='function')return;primarySyncListenersBound=true;globalThis.addEventListener('online',()=>{if(state()?.primaryOrigin)syncPrimary().catch(()=>{})});globalThis.addEventListener('visibilitychange',()=>{if(globalThis.document?.visibilityState==='visible'&&state()?.primaryOrigin)syncPrimary().catch(()=>{})})}
 function startPrimarySync({intervalMs=PRIMARY_SYNC_INTERVAL_MS}={}){stopPrimarySync();bindPrimarySyncListeners();primarySyncTimer=setInterval(()=>{if(state()?.primaryOrigin)syncPrimary().catch(()=>{})},Math.max(15_000,Number(intervalMs)||PRIMARY_SYNC_INTERVAL_MS));primarySyncTimer?.unref?.();queueMicrotask(()=>syncPrimary().catch(()=>{}));return true}
 function stopPrimarySync(){if(primarySyncTimer!=null){clearInterval(primarySyncTimer);primarySyncTimer=null}return true}
-function status(){const value=state(),meshStatus=globalThis.CivweaveLocalMeshV146?.status?.()||null;if(!value)return Object.freeze({version:VERSION,enrolled:false,policy:POCKET_NODE_POLICY,mesh:meshStatus});const plan=selectPocketSyncWindow(Object.values(value.authorizedPeers||{}),{limit:POCKET_NODE_POLICY.maxActiveSyncPeers});return Object.freeze({version:VERSION,enrolled:true,guildId:value.guildId,primaryOrigin:value.primaryOrigin||null,cloudAttached:Boolean(value.primaryOrigin),deviceId:value.deviceId,role:value.role,route:value.route,lastPrimarySyncAt:value.lastPrimarySyncAt||null,primaryCursor:value.primaryCursor||0,policy:POCKET_NODE_POLICY,authorizedPeers:plan.authorizedCount,activePeerTarget:plan.active.length,standbyPeers:plan.standby.length,mesh:meshStatus})}
+function status(){const value=state(),meshStatus=globalThis.CivweaveLocalMeshV146?.status?.()||null;if(!value)return Object.freeze({version:VERSION,enrolled:false,policy:POCKET_NODE_POLICY,mesh:meshStatus});const plan=selectPocketSyncWindow(Object.values(value.authorizedPeers||{}),{limit:POCKET_NODE_POLICY.maxActiveSyncPeers});return Object.freeze({version:VERSION,enrolled:true,guildId:value.guildId,primaryOrigin:value.primaryOrigin||null,cloudAttached:Boolean(value.primaryOrigin),deviceId:value.deviceId,role:value.role,route:value.route,lastPrimarySyncAt:value.lastPrimarySyncAt||null,primaryCursor:value.primaryCursor||0,lastReportSyncAt:value.lastReportSyncAt||null,lastReportDay:value.lastReportDay||null,policy:POCKET_NODE_POLICY,authorizedPeers:plan.authorizedCount,activePeerTarget:plan.active.length,standbyPeers:plan.standby.length,mesh:meshStatus})}
 
 export const CivweavePocketGuildNodeV1=Object.freeze({version:VERSION,policy:POCKET_NODE_POLICY,enroll,state,status,authorizePeer,revokePeer,markPeerSynced,rotationPlan,rotateNow,attachPrimary,detachPrimary,syncPrimary,startPrimarySync,stopPrimarySync});
 globalThis.CivweavePocketGuildNodeV1=CivweavePocketGuildNodeV1;
