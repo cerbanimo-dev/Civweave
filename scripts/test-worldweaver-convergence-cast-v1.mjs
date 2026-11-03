@@ -85,3 +85,23 @@ test('Book encounter prompt is role-scoped, not a second chat or canonical manus
   assert.throws(()=>bookEncounterMessages({bookPacket:pack,character:'maggie',phase:'public-now'}),/phase/);
   assert.throws(()=>bookEncounterMessages({bookPacket:pack,character:'unknown'}),/not in the reviewed/);
 });
+
+test('author-approved favorite films reach all four Convergence model prompts without forced references',()=>{
+  const source=performance();
+  for(const character of ['landry','delia']){
+    source.casts.push({character,displayName:character,avatarRef:'approved:'+character,
+      pilotPrincipalId:'pilot:'+character,approvedBy:'author:cami'});
+    source.proposals[0].dialogue.push({character,text:'Line'});
+  }
+  const packet=projectBookCast(source);
+  const favorites={magnus:'Southland Tales',maggie:'Scott Pilgrim vs. the World',
+    landry:'The Big Lebowski',delia:'Death Proof'};
+  for(const [character,film] of Object.entries(favorites)){
+    const [system]=bookEncounterMessages({bookPacket:packet,character});
+    assert.ok(system.content.includes('favorite film: '+film),character+' is missing its preference');
+    assert.match(system.content,/do not force references/);
+    const command=bookNpcCommand({bookPacket:packet,character,instanceId:'world:1',
+      modelId:'model:4b',pilotPrincipalId:'verified:model:4b',verifyAuthorApproval:()=>true});
+    assert.ok(command.pilotPrompt.includes('favorite film: '+film),character+' NPC prompt is missing its preference');
+  }
+});
