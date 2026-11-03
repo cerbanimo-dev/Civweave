@@ -24,6 +24,12 @@ test('canonical fleet, fixed 20 unique questions per character, five variants',a
   assert.equal(plan.length,5*13*20);
   assert.equal(new Set(plan.map(x=>x.caseId)).size,plan.length);
   assert.deepEqual([...new Set(plan.map(x=>x.variant))],variants.map(x=>x.id));
+  const custom={id:'book:unlisted-character',person:{name:'Unlisted Character',personaBrief:'Careful and skeptical',canonRules:'Never invent access to unseen events',relationships:'Respects other characters autonomy',interactionRules:'Improv remains provisional'}};
+  const bookPlan=planCases({questionBank:bank,characters:[custom],variants:variants.map(x=>({...x,text:'test variant'})),bindings:bound});
+  assert.equal(bookPlan.length,100);
+  assert.match(bookPlan[0].prompt[2].content,/Careful and skeptical/);
+  assert.deepEqual([...new Set(bookPlan.map(x=>x.question))].length,20);
+
 });
 test('one outstanding model call; all five variants complete in order; resume is idempotent',async()=>{
   let active=0,peak=0,hits=0;const requests=[];
