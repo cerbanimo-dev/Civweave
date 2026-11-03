@@ -1,0 +1,25 @@
+name: Character fleet benchmark contracts
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'tools/character-fleet-bench/**'
+      - '.github/workflows/character-fleet-bench.yml'
+  pull_request:
+    paths:
+      - 'tools/character-fleet-bench/**'
+      - '.github/workflows/character-fleet-bench.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sequential-batch-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate question coverage and sequential mock inference
+        run: node --test tools/character-fleet-bench/test.mjs
