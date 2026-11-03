@@ -1,0 +1,15 @@
+{
+  "default": {
+    "provider": "ollama",
+    "model": "qwen3.5:4b",
+    "endpoint": "http://127.0.0.1:11434"
+  },
+  "characters": {
+    "starling:aphra": {
+      "model": "qwen3.5:4b"
+    },
+    "book:maggie": {
+      "model": "qwen3.5:4b"
+    }
+  }
+}

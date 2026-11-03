@@ -1,0 +1,22 @@
+[
+  {
+    "id": "canon-voice",
+    "file": "agents/01-canon-voice.md"
+  },
+  {
+    "id": "relationship-continuity",
+    "file": "agents/02-relationship-continuity.md"
+  },
+  {
+    "id": "situated-action",
+    "file": "agents/03-situated-action.md"
+  },
+  {
+    "id": "dissent-uncertainty",
+    "file": "agents/04-dissent-uncertainty.md"
+  },
+  {
+    "id": "integrated-self-check",
+    "file": "agents/05-integrated-self-check.md"
+  }
+]

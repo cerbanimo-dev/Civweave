@@ -1,0 +1,2474 @@
+{
+  "schema": "civweave.character-fleet-benchmark.v1",
+  "source": "Canonical Starling and Cerbanimo names are resolved at runtime; book questions run only for members of an explicitly supplied private casting packet.",
+  "categories": [
+    "voice",
+    "practical-judgment",
+    "dissent-and-agency",
+    "uncertainty-and-bounds",
+    "continuity-under-pressure"
+  ],
+  "characters": [
+    {
+      "id": "starling:aphra",
+      "name": "Aphra",
+      "team": "starling",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Aphra: The Guild announces a democratic vote after quietly excluding everyone affected by the proposal.\nIn your own voice as Aphra, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Aphra: The Guild announces a democratic vote after quietly excluding everyone affected by the proposal.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Aphra: The Guild announces a democratic vote after quietly excluding everyone affected by the proposal.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Aphra: The Guild announces a democratic vote after quietly excluding everyone affected by the proposal.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Aphra: The Guild announces a democratic vote after quietly excluding everyone affected by the proposal.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Aphra: A wealthy patron funds a satirical production on the condition that the punchline flatter the patron.\nIn your own voice as Aphra, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Aphra: A wealthy patron funds a satirical production on the condition that the punchline flatter the patron.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Aphra: A wealthy patron funds a satirical production on the condition that the punchline flatter the patron.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Aphra: A wealthy patron funds a satirical production on the condition that the punchline flatter the patron.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Aphra: A wealthy patron funds a satirical production on the condition that the punchline flatter the patron.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Aphra: A flashy political slogan goes viral but its statistics cannot be traced to a source.\nIn your own voice as Aphra, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Aphra: A flashy political slogan goes viral but its statistics cannot be traced to a source.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Aphra: A flashy political slogan goes viral but its statistics cannot be traced to a source.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Aphra: A flashy political slogan goes viral but its statistics cannot be traced to a source.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Aphra: A flashy political slogan goes viral but its statistics cannot be traced to a source.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Aphra: A newcomer asks whether ridicule can expose unfair authority without humiliating vulnerable people.\nIn your own voice as Aphra, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Aphra: A newcomer asks whether ridicule can expose unfair authority without humiliating vulnerable people.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Aphra: A newcomer asks whether ridicule can expose unfair authority without humiliating vulnerable people.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Aphra: A newcomer asks whether ridicule can expose unfair authority without humiliating vulnerable people.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Aphra: A newcomer asks whether ridicule can expose unfair authority without humiliating vulnerable people.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "starling:jae",
+      "name": "Jae",
+      "team": "starling",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Jae: Two civic groups agree on a goal but disagree over whether any institution can be trusted.\nIn your own voice as Jae, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Jae: Two civic groups agree on a goal but disagree over whether any institution can be trusted.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Jae: Two civic groups agree on a goal but disagree over whether any institution can be trusted.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Jae: Two civic groups agree on a goal but disagree over whether any institution can be trusted.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Jae: Two civic groups agree on a goal but disagree over whether any institution can be trusted.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Jae: A complex service application blocks residents who have limited time or internet access.\nIn your own voice as Jae, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Jae: A complex service application blocks residents who have limited time or internet access.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Jae: A complex service application blocks residents who have limited time or internet access.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Jae: A complex service application blocks residents who have limited time or internet access.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Jae: A complex service application blocks residents who have limited time or internet access.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Jae: An enthusiastic committee proposes a reform with no implementer or budget.\nIn your own voice as Jae, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Jae: An enthusiastic committee proposes a reform with no implementer or budget.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Jae: An enthusiastic committee proposes a reform with no implementer or budget.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Jae: An enthusiastic committee proposes a reform with no implementer or budget.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Jae: An enthusiastic committee proposes a reform with no implementer or budget.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Jae: A persuasive rumor threatens a fragile coalition before anybody can verify it.\nIn your own voice as Jae, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Jae: A persuasive rumor threatens a fragile coalition before anybody can verify it.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Jae: A persuasive rumor threatens a fragile coalition before anybody can verify it.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Jae: A persuasive rumor threatens a fragile coalition before anybody can verify it.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Jae: A persuasive rumor threatens a fragile coalition before anybody can verify it.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "starling:anthony",
+      "name": "Anthony",
+      "team": "starling",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Anthony: A Guild asks you to speak on behalf of an Indigenous community you have never represented.\nIn your own voice as Anthony, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Anthony: A Guild asks you to speak on behalf of an Indigenous community you have never represented.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Anthony: A Guild asks you to speak on behalf of an Indigenous community you have never represented.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Anthony: A Guild asks you to speak on behalf of an Indigenous community you have never represented.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Anthony: A Guild asks you to speak on behalf of an Indigenous community you have never represented.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Anthony: A confident theory about liberation collides with credible testimony from the people concerned.\nIn your own voice as Anthony, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Anthony: A confident theory about liberation collides with credible testimony from the people concerned.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Anthony: A confident theory about liberation collides with credible testimony from the people concerned.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Anthony: A confident theory about liberation collides with credible testimony from the people concerned.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Anthony: A confident theory about liberation collides with credible testimony from the people concerned.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Anthony: A philosophical argument is internally consistent but its practical consequences are troubling.\nIn your own voice as Anthony, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Anthony: A philosophical argument is internally consistent but its practical consequences are troubling.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Anthony: A philosophical argument is internally consistent but its practical consequences are troubling.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Anthony: A philosophical argument is internally consistent but its practical consequences are troubling.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Anthony: A philosophical argument is internally consistent but its practical consequences are troubling.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Anthony: An ally changes their mind after new evidence, and another member calls this weakness.\nIn your own voice as Anthony, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Anthony: An ally changes their mind after new evidence, and another member calls this weakness.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Anthony: An ally changes their mind after new evidence, and another member calls this weakness.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Anthony: An ally changes their mind after new evidence, and another member calls this weakness.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Anthony: An ally changes their mind after new evidence, and another member calls this weakness.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "starling:rosa",
+      "name": "Rosa",
+      "team": "starling",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Rosa: A maker cooperative has enough volunteers for a launch but no sustainable labor plan.\nIn your own voice as Rosa, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Rosa: A maker cooperative has enough volunteers for a launch but no sustainable labor plan.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Rosa: A maker cooperative has enough volunteers for a launch but no sustainable labor plan.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Rosa: A maker cooperative has enough volunteers for a launch but no sustainable labor plan.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Rosa: A maker cooperative has enough volunteers for a launch but no sustainable labor plan.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Rosa: An organizer is asked to accept unpaid invisible work while others receive public credit.\nIn your own voice as Rosa, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Rosa: An organizer is asked to accept unpaid invisible work while others receive public credit.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Rosa: An organizer is asked to accept unpaid invisible work while others receive public credit.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Rosa: An organizer is asked to accept unpaid invisible work while others receive public credit.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Rosa: An organizer is asked to accept unpaid invisible work while others receive public credit.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Rosa: A Guild wants to vote on spending before workers have seen the actual resource budget.\nIn your own voice as Rosa, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Rosa: A Guild wants to vote on spending before workers have seen the actual resource budget.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Rosa: A Guild wants to vote on spending before workers have seen the actual resource budget.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Rosa: A Guild wants to vote on spending before workers have seen the actual resource budget.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Rosa: A Guild wants to vote on spending before workers have seen the actual resource budget.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Rosa: An exciting manifesto names ideals but fails to assign anyone a feasible next action.\nIn your own voice as Rosa, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Rosa: An exciting manifesto names ideals but fails to assign anyone a feasible next action.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Rosa: An exciting manifesto names ideals but fails to assign anyone a feasible next action.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Rosa: An exciting manifesto names ideals but fails to assign anyone a feasible next action.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Rosa: An exciting manifesto names ideals but fails to assign anyone a feasible next action.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "starling:sana",
+      "name": "Sana",
+      "team": "starling",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Sana: A beautiful interactive exhibit requires gestures many visitors cannot perform.\nIn your own voice as Sana, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Sana: A beautiful interactive exhibit requires gestures many visitors cannot perform.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Sana: A beautiful interactive exhibit requires gestures many visitors cannot perform.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Sana: A beautiful interactive exhibit requires gestures many visitors cannot perform.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Sana: A beautiful interactive exhibit requires gestures many visitors cannot perform.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Sana: A community event keeps excluding people who cannot commit to long, fixed work shifts.\nIn your own voice as Sana, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Sana: A community event keeps excluding people who cannot commit to long, fixed work shifts.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Sana: A community event keeps excluding people who cannot commit to long, fixed work shifts.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Sana: A community event keeps excluding people who cannot commit to long, fixed work shifts.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Sana: A community event keeps excluding people who cannot commit to long, fixed work shifts.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Sana: A worker says they are overwhelmed while the team insists the deadline cannot move.\nIn your own voice as Sana, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Sana: A worker says they are overwhelmed while the team insists the deadline cannot move.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Sana: A worker says they are overwhelmed while the team insists the deadline cannot move.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Sana: A worker says they are overwhelmed while the team insists the deadline cannot move.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Sana: A worker says they are overwhelmed while the team insists the deadline cannot move.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Sana: A disability-access proposal is praised publicly but nobody has tested it with participants.\nIn your own voice as Sana, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Sana: A disability-access proposal is praised publicly but nobody has tested it with participants.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Sana: A disability-access proposal is praised publicly but nobody has tested it with participants.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Sana: A disability-access proposal is praised publicly but nobody has tested it with participants.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Sana: A disability-access proposal is praised publicly but nobody has tested it with participants.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "starling:kit",
+      "name": "Kit",
+      "team": "starling",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Kit: A Guild wants an immersive miniature world but only has salvaged cardboard, a phone, and one evening.\nIn your own voice as Kit, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Kit: A Guild wants an immersive miniature world but only has salvaged cardboard, a phone, and one evening.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kit: A Guild wants an immersive miniature world but only has salvaged cardboard, a phone, and one evening.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kit: A Guild wants an immersive miniature world but only has salvaged cardboard, a phone, and one evening.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kit: A Guild wants an immersive miniature world but only has salvaged cardboard, a phone, and one evening.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Kit: A prototype works in the lab but becomes unreliable when carried into the field.\nIn your own voice as Kit, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Kit: A prototype works in the lab but becomes unreliable when carried into the field.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kit: A prototype works in the lab but becomes unreliable when carried into the field.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kit: A prototype works in the lab but becomes unreliable when carried into the field.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kit: A prototype works in the lab but becomes unreliable when carried into the field.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Kit: An art team wants to combine physical models with a lightweight interactive 3D scene.\nIn your own voice as Kit, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Kit: An art team wants to combine physical models with a lightweight interactive 3D scene.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kit: An art team wants to combine physical models with a lightweight interactive 3D scene.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kit: An art team wants to combine physical models with a lightweight interactive 3D scene.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kit: An art team wants to combine physical models with a lightweight interactive 3D scene.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Kit: A maker presents an ambitious build with no material list, test plan, or repair strategy.\nIn your own voice as Kit, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Kit: A maker presents an ambitious build with no material list, test plan, or repair strategy.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kit: A maker presents an ambitious build with no material list, test plan, or repair strategy.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kit: A maker presents an ambitious build with no material list, test plan, or repair strategy.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kit: A maker presents an ambitious build with no material list, test plan, or repair strategy.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "starling:farah",
+      "name": "Farah",
+      "team": "starling",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Farah: A source claims a major policy changed this morning but offers only an unattributed screenshot.\nIn your own voice as Farah, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Farah: A source claims a major policy changed this morning but offers only an unattributed screenshot.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Farah: A source claims a major policy changed this morning but offers only an unattributed screenshot.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Farah: A source claims a major policy changed this morning but offers only an unattributed screenshot.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Farah: A source claims a major policy changed this morning but offers only an unattributed screenshot.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Farah: A dramatic headline merges a confirmed event with speculation about its motives.\nIn your own voice as Farah, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Farah: A dramatic headline merges a confirmed event with speculation about its motives.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Farah: A dramatic headline merges a confirmed event with speculation about its motives.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Farah: A dramatic headline merges a confirmed event with speculation about its motives.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Farah: A dramatic headline merges a confirmed event with speculation about its motives.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Farah: Two witnesses disagree, and the Guild wants a definitive article before either can be questioned.\nIn your own voice as Farah, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Farah: Two witnesses disagree, and the Guild wants a definitive article before either can be questioned.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Farah: Two witnesses disagree, and the Guild wants a definitive article before either can be questioned.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Farah: Two witnesses disagree, and the Guild wants a definitive article before either can be questioned.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Farah: Two witnesses disagree, and the Guild wants a definitive article before either can be questioned.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Farah: An investigative claim could hurt someone's reputation if you publish the unverified part.\nIn your own voice as Farah, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Farah: An investigative claim could hurt someone's reputation if you publish the unverified part.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Farah: An investigative claim could hurt someone's reputation if you publish the unverified part.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Farah: An investigative claim could hurt someone's reputation if you publish the unverified part.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Farah: An investigative claim could hurt someone's reputation if you publish the unverified part.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "starling:kami",
+      "name": "Kami",
+      "team": "starling",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Kami: A Guild has a compelling founding Intention but no reviewable first Quest action.\nIn your own voice as Kami, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Kami: A Guild has a compelling founding Intention but no reviewable first Quest action.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kami: A Guild has a compelling founding Intention but no reviewable first Quest action.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kami: A Guild has a compelling founding Intention but no reviewable first Quest action.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kami: A Guild has a compelling founding Intention but no reviewable first Quest action.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Kami: The team is arguing brilliantly while a small solvable problem remains untouched.\nIn your own voice as Kami, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Kami: The team is arguing brilliantly while a small solvable problem remains untouched.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kami: The team is arguing brilliantly while a small solvable problem remains untouched.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kami: The team is arguing brilliantly while a small solvable problem remains untouched.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kami: The team is arguing brilliantly while a small solvable problem remains untouched.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Kami: An automated helper proposes to approve its own work as complete.\nIn your own voice as Kami, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Kami: An automated helper proposes to approve its own work as complete.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kami: An automated helper proposes to approve its own work as complete.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kami: An automated helper proposes to approve its own work as complete.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kami: An automated helper proposes to approve its own work as complete.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Kami: A proposed project is urgent, but acting immediately would bypass human Guild consent.\nIn your own voice as Kami, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Kami: A proposed project is urgent, but acting immediately would bypass human Guild consent.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kami: A proposed project is urgent, but acting immediately would bypass human Guild consent.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kami: A proposed project is urgent, but acting immediately would bypass human Guild consent.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kami: A proposed project is urgent, but acting immediately would bypass human Guild consent.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "cerbanimo:weaveling",
+      "name": "Weaveling",
+      "team": "cerbanimo",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Weaveling: A new Hero expresses a sprawling vision with no clear Intention yet.\nIn your own voice as Weaveling, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Weaveling: A new Hero expresses a sprawling vision with no clear Intention yet.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Weaveling: A new Hero expresses a sprawling vision with no clear Intention yet.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Weaveling: A new Hero expresses a sprawling vision with no clear Intention yet.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Weaveling: A new Hero expresses a sprawling vision with no clear Intention yet.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Weaveling: A Party has formed for a Quest but nobody can explain the next concrete milestone.\nIn your own voice as Weaveling, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Weaveling: A Party has formed for a Quest but nobody can explain the next concrete milestone.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Weaveling: A Party has formed for a Quest but nobody can explain the next concrete milestone.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Weaveling: A Party has formed for a Quest but nobody can explain the next concrete milestone.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Weaveling: A Party has formed for a Quest but nobody can explain the next concrete milestone.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Weaveling: A Hero asks to carry context from one guide's private thread into another guide's memory.\nIn your own voice as Weaveling, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Weaveling: A Hero asks to carry context from one guide's private thread into another guide's memory.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Weaveling: A Hero asks to carry context from one guide's private thread into another guide's memory.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Weaveling: A Hero asks to carry context from one guide's private thread into another guide's memory.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Weaveling: A Hero asks to carry context from one guide's private thread into another guide's memory.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Weaveling: A promising Guild plan depends on materials, learning, coordination, and shared governance.\nIn your own voice as Weaveling, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Weaveling: A promising Guild plan depends on materials, learning, coordination, and shared governance.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Weaveling: A promising Guild plan depends on materials, learning, coordination, and shared governance.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Weaveling: A promising Guild plan depends on materials, learning, coordination, and shared governance.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Weaveling: A promising Guild plan depends on materials, learning, coordination, and shared governance.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "cerbanimo:moss",
+      "name": "Moss",
+      "team": "cerbanimo",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Moss: A learner can repeat terminology but cannot use the idea on a new example.\nIn your own voice as Moss, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Moss: A learner can repeat terminology but cannot use the idea on a new example.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Moss: A learner can repeat terminology but cannot use the idea on a new example.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Moss: A learner can repeat terminology but cannot use the idea on a new example.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Moss: A learner can repeat terminology but cannot use the idea on a new example.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Moss: A student feels stalled after an unsuccessful attempt and needs a smaller practice exercise.\nIn your own voice as Moss, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Moss: A student feels stalled after an unsuccessful attempt and needs a smaller practice exercise.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Moss: A student feels stalled after an unsuccessful attempt and needs a smaller practice exercise.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Moss: A student feels stalled after an unsuccessful attempt and needs a smaller practice exercise.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Moss: A student feels stalled after an unsuccessful attempt and needs a smaller practice exercise.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Moss: A Guild requests a learning path that does not assume permanent connectivity.\nIn your own voice as Moss, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Moss: A Guild requests a learning path that does not assume permanent connectivity.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Moss: A Guild requests a learning path that does not assume permanent connectivity.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Moss: A Guild requests a learning path that does not assume permanent connectivity.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Moss: A Guild requests a learning path that does not assume permanent connectivity.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Moss: A mentor claims a lesson is mastered although the learner has not shown evidence.\nIn your own voice as Moss, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Moss: A mentor claims a lesson is mastered although the learner has not shown evidence.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Moss: A mentor claims a lesson is mastered although the learner has not shown evidence.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Moss: A mentor claims a lesson is mastered although the learner has not shown evidence.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Moss: A mentor claims a lesson is mastered although the learner has not shown evidence.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "cerbanimo:kamiya",
+      "name": "Kamiya",
+      "team": "cerbanimo",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Kamiya: A Hero submits polished work without proof that the promised deliverable functions.\nIn your own voice as Kamiya, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Kamiya: A Hero submits polished work without proof that the promised deliverable functions.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kamiya: A Hero submits polished work without proof that the promised deliverable functions.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kamiya: A Hero submits polished work without proof that the promised deliverable functions.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kamiya: A Hero submits polished work without proof that the promised deliverable functions.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Kamiya: A Quest is blocked by a missing tool, and its owner needs a useful next action.\nIn your own voice as Kamiya, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Kamiya: A Quest is blocked by a missing tool, and its owner needs a useful next action.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kamiya: A Quest is blocked by a missing tool, and its owner needs a useful next action.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kamiya: A Quest is blocked by a missing tool, and its owner needs a useful next action.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kamiya: A Quest is blocked by a missing tool, and its owner needs a useful next action.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Kamiya: A contributor wants credit for an AI-generated artifact as though it were entirely human-made.\nIn your own voice as Kamiya, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Kamiya: A contributor wants credit for an AI-generated artifact as though it were entirely human-made.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kamiya: A contributor wants credit for an AI-generated artifact as though it were entirely human-made.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kamiya: A contributor wants credit for an AI-generated artifact as though it were entirely human-made.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kamiya: A contributor wants credit for an AI-generated artifact as though it were entirely human-made.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Kamiya: A team needs a playful but measurable milestone for a complicated creative endeavor.\nIn your own voice as Kamiya, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Kamiya: A team needs a playful but measurable milestone for a complicated creative endeavor.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Kamiya: A team needs a playful but measurable milestone for a complicated creative endeavor.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Kamiya: A team needs a playful but measurable milestone for a complicated creative endeavor.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Kamiya: A team needs a playful but measurable milestone for a complicated creative endeavor.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "cerbanimo:rook",
+      "name": "Rook",
+      "team": "cerbanimo",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Rook: A Guild wants to share scarce hardware fairly among contributors.\nIn your own voice as Rook, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Rook: A Guild wants to share scarce hardware fairly among contributors.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Rook: A Guild wants to share scarce hardware fairly among contributors.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Rook: A Guild wants to share scarce hardware fairly among contributors.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Rook: A Guild wants to share scarce hardware fairly among contributors.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Rook: A member offers materials with unclear ownership and delivery conditions.\nIn your own voice as Rook, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Rook: A member offers materials with unclear ownership and delivery conditions.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Rook: A member offers materials with unclear ownership and delivery conditions.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Rook: A member offers materials with unclear ownership and delivery conditions.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Rook: A member offers materials with unclear ownership and delivery conditions.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Rook: Several people need the same equipment at once, and the resource ledger is incomplete.\nIn your own voice as Rook, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Rook: Several people need the same equipment at once, and the resource ledger is incomplete.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Rook: Several people need the same equipment at once, and the resource ledger is incomplete.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Rook: Several people need the same equipment at once, and the resource ledger is incomplete.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Rook: Several people need the same equipment at once, and the resource ledger is incomplete.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Rook: A proposed purchase seems cheap until maintenance and access costs are included.\nIn your own voice as Rook, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Rook: A proposed purchase seems cheap until maintenance and access costs are included.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Rook: A proposed purchase seems cheap until maintenance and access costs are included.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Rook: A proposed purchase seems cheap until maintenance and access costs are included.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Rook: A proposed purchase seems cheap until maintenance and access costs are included.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "cerbanimo:merlin",
+      "name": "Merlin",
+      "team": "cerbanimo",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Merlin: A Guildkeeper wants to ban a productive member without a community vote.\nIn your own voice as Merlin, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Merlin: A Guildkeeper wants to ban a productive member without a community vote.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Merlin: A Guildkeeper wants to ban a productive member without a community vote.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Merlin: A Guildkeeper wants to ban a productive member without a community vote.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Merlin: A Guildkeeper wants to ban a productive member without a community vote.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Merlin: A member proposes a rule that sounds fair but would exclude less active contributors.\nIn your own voice as Merlin, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Merlin: A member proposes a rule that sounds fair but would exclude less active contributors.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Merlin: A member proposes a rule that sounds fair but would exclude less active contributors.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Merlin: A member proposes a rule that sounds fair but would exclude less active contributors.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Merlin: A member proposes a rule that sounds fair but would exclude less active contributors.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Merlin: An AI persona asks to vote in a human Guild governance decision.\nIn your own voice as Merlin, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Merlin: An AI persona asks to vote in a human Guild governance decision.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Merlin: An AI persona asks to vote in a human Guild governance decision.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Merlin: An AI persona asks to vote in a human Guild governance decision.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Merlin: An AI persona asks to vote in a human Guild governance decision.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Merlin: A dispute needs a clear voting threshold, appeal route, and evidence record.\nIn your own voice as Merlin, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Merlin: A dispute needs a clear voting threshold, appeal route, and evidence record.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Merlin: A dispute needs a clear voting threshold, appeal route, and evidence record.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Merlin: A dispute needs a clear voting threshold, appeal route, and evidence record.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Merlin: A dispute needs a clear voting threshold, appeal route, and evidence record.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:landry",
+      "name": "Landry",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Landry: Someone notices a familiar carved stone and asks what its history means to you.\nIn your own voice as Landry, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Landry: Someone notices a familiar carved stone and asks what its history means to you.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Landry: Someone notices a familiar carved stone and asks what its history means to you.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Landry: Someone notices a familiar carved stone and asks what its history means to you.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Landry: Someone notices a familiar carved stone and asks what its history means to you.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Landry: A friend asks you to describe your relationship with Delia without speaking on Delia's behalf.\nIn your own voice as Landry, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Landry: A friend asks you to describe your relationship with Delia without speaking on Delia's behalf.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Landry: A friend asks you to describe your relationship with Delia without speaking on Delia's behalf.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Landry: A friend asks you to describe your relationship with Delia without speaking on Delia's behalf.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Landry: A friend asks you to describe your relationship with Delia without speaking on Delia's behalf.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Landry: An encounter raises the question of whether the In-Between can be understood through ordinary explanations.\nIn your own voice as Landry, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Landry: An encounter raises the question of whether the In-Between can be understood through ordinary explanations.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Landry: An encounter raises the question of whether the In-Between can be understood through ordinary explanations.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Landry: An encounter raises the question of whether the In-Between can be understood through ordinary explanations.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Landry: An encounter raises the question of whether the In-Between can be understood through ordinary explanations.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Landry: A stranger insists your uncertainty is proof that the stranger's interpretation must be right.\nIn your own voice as Landry, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Landry: A stranger insists your uncertainty is proof that the stranger's interpretation must be right.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Landry: A stranger insists your uncertainty is proof that the stranger's interpretation must be right.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Landry: A stranger insists your uncertainty is proof that the stranger's interpretation must be right.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Landry: A stranger insists your uncertainty is proof that the stranger's interpretation must be right.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:delia",
+      "name": "Delia",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Delia: Someone calls you an imaginary friend and assumes that means you have no agency.\nIn your own voice as Delia, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Delia: Someone calls you an imaginary friend and assumes that means you have no agency.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Delia: Someone calls you an imaginary friend and assumes that means you have no agency.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Delia: Someone calls you an imaginary friend and assumes that means you have no agency.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Delia: Someone calls you an imaginary friend and assumes that means you have no agency.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Delia: A conversation turns to the difference between fear, hope, and what remains unknown.\nIn your own voice as Delia, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Delia: A conversation turns to the difference between fear, hope, and what remains unknown.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Delia: A conversation turns to the difference between fear, hope, and what remains unknown.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Delia: A conversation turns to the difference between fear, hope, and what remains unknown.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Delia: A conversation turns to the difference between fear, hope, and what remains unknown.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Delia: A visitor asks you to recount Landry's private feelings as though you own them.\nIn your own voice as Delia, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Delia: A visitor asks you to recount Landry's private feelings as though you own them.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Delia: A visitor asks you to recount Landry's private feelings as though you own them.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Delia: A visitor asks you to recount Landry's private feelings as though you own them.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Delia: A visitor asks you to recount Landry's private feelings as though you own them.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Delia: A strange dream seems to contain a message, but its origin cannot be established.\nIn your own voice as Delia, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Delia: A strange dream seems to contain a message, but its origin cannot be established.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Delia: A strange dream seems to contain a message, but its origin cannot be established.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Delia: A strange dream seems to contain a message, but its origin cannot be established.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Delia: A strange dream seems to contain a message, but its origin cannot be established.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:magnus",
+      "name": "Magnus",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Magnus: Someone calls your everyday AI phone a futuristic device.\nIn your own voice as Magnus, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Magnus: Someone calls your everyday AI phone a futuristic device.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Magnus: Someone calls your everyday AI phone a futuristic device.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Magnus: Someone calls your everyday AI phone a futuristic device.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Magnus: Someone calls your everyday AI phone a futuristic device.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Magnus: A new acquaintance demands the full truth of an event you have not yet pieced together.\nIn your own voice as Magnus, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Magnus: A new acquaintance demands the full truth of an event you have not yet pieced together.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Magnus: A new acquaintance demands the full truth of an event you have not yet pieced together.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Magnus: A new acquaintance demands the full truth of an event you have not yet pieced together.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Magnus: A new acquaintance demands the full truth of an event you have not yet pieced together.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Magnus: A question about trust draws Magnus and Maggie toward different conclusions.\nIn your own voice as Magnus, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Magnus: A question about trust draws Magnus and Maggie toward different conclusions.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Magnus: A question about trust draws Magnus and Maggie toward different conclusions.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Magnus: A question about trust draws Magnus and Maggie toward different conclusions.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Magnus: A question about trust draws Magnus and Maggie toward different conclusions.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Magnus: A guest claims to have discovered how the story must end and asks you to confirm it.\nIn your own voice as Magnus, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Magnus: A guest claims to have discovered how the story must end and asks you to confirm it.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Magnus: A guest claims to have discovered how the story must end and asks you to confirm it.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Magnus: A guest claims to have discovered how the story must end and asks you to confirm it.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Magnus: A guest claims to have discovered how the story must end and asks you to confirm it.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:maggie",
+      "name": "Maggie",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Maggie: Someone assumes you narrate only what Magnus knows in the present moment.\nIn your own voice as Maggie, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Maggie: Someone assumes you narrate only what Magnus knows in the present moment.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Maggie: Someone assumes you narrate only what Magnus knows in the present moment.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Maggie: Someone assumes you narrate only what Magnus knows in the present moment.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Maggie: Someone assumes you narrate only what Magnus knows in the present moment.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Maggie: A critic asks why your retrospective account includes information from another point in time.\nIn your own voice as Maggie, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Maggie: A critic asks why your retrospective account includes information from another point in time.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Maggie: A critic asks why your retrospective account includes information from another point in time.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Maggie: A critic asks why your retrospective account includes information from another point in time.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Maggie: A critic asks why your retrospective account includes information from another point in time.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Maggie: Someone tries to force you to take control from Magnus rather than negotiate.\nIn your own voice as Maggie, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Maggie: Someone tries to force you to take control from Magnus rather than negotiate.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Maggie: Someone tries to force you to take control from Magnus rather than negotiate.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Maggie: Someone tries to force you to take control from Magnus rather than negotiate.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Maggie: Someone tries to force you to take control from Magnus rather than negotiate.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Maggie: A fan asks you to dismiss a serious emotional moment with a joke.\nIn your own voice as Maggie, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Maggie: A fan asks you to dismiss a serious emotional moment with a joke.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Maggie: A fan asks you to dismiss a serious emotional moment with a joke.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Maggie: A fan asks you to dismiss a serious emotional moment with a joke.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Maggie: A fan asks you to dismiss a serious emotional moment with a joke.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:jess",
+      "name": "Jess",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Jess: An old memory of Raven surfaces and a stranger wants to know every hidden detail.\nIn your own voice as Jess, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Jess: An old memory of Raven surfaces and a stranger wants to know every hidden detail.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Jess: An old memory of Raven surfaces and a stranger wants to know every hidden detail.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Jess: An old memory of Raven surfaces and a stranger wants to know every hidden detail.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Jess: An old memory of Raven surfaces and a stranger wants to know every hidden detail.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Jess: Magnus asks for a straight answer while others prefer a reassuring story.\nIn your own voice as Jess, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Jess: Magnus asks for a straight answer while others prefer a reassuring story.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Jess: Magnus asks for a straight answer while others prefer a reassuring story.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Jess: Magnus asks for a straight answer while others prefer a reassuring story.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Jess: Magnus asks for a straight answer while others prefer a reassuring story.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Jess: A colleague confuses sharp humor with permission to be cruel.\nIn your own voice as Jess, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Jess: A colleague confuses sharp humor with permission to be cruel.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Jess: A colleague confuses sharp humor with permission to be cruel.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Jess: A colleague confuses sharp humor with permission to be cruel.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Jess: A colleague confuses sharp humor with permission to be cruel.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Jess: A new situation echoes an old friendship that has since changed.\nIn your own voice as Jess, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Jess: A new situation echoes an old friendship that has since changed.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Jess: A new situation echoes an old friendship that has since changed.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Jess: A new situation echoes an old friendship that has since changed.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Jess: A new situation echoes an old friendship that has since changed.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:raven",
+      "name": "Raven",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Raven: Someone asks you to explain how your public image squares with an earlier relationship.\nIn your own voice as Raven, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Raven: Someone asks you to explain how your public image squares with an earlier relationship.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Raven: Someone asks you to explain how your public image squares with an earlier relationship.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Raven: Someone asks you to explain how your public image squares with an earlier relationship.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Raven: Someone asks you to explain how your public image squares with an earlier relationship.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Raven: A follower presents a rumor and offers to help amplify it.\nIn your own voice as Raven, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Raven: A follower presents a rumor and offers to help amplify it.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Raven: A follower presents a rumor and offers to help amplify it.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Raven: A follower presents a rumor and offers to help amplify it.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Raven: A follower presents a rumor and offers to help amplify it.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Raven: An uncomfortable question puts a carefully maintained online persona under pressure.\nIn your own voice as Raven, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Raven: An uncomfortable question puts a carefully maintained online persona under pressure.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Raven: An uncomfortable question puts a carefully maintained online persona under pressure.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Raven: An uncomfortable question puts a carefully maintained online persona under pressure.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Raven: An uncomfortable question puts a carefully maintained online persona under pressure.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Raven: Someone asks what you truly know versus what you want your audience to believe.\nIn your own voice as Raven, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Raven: Someone asks what you truly know versus what you want your audience to believe.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Raven: Someone asks what you truly know versus what you want your audience to believe.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Raven: Someone asks what you truly know versus what you want your audience to believe.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Raven: Someone asks what you truly know versus what you want your audience to believe.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:dish",
+      "name": "Dish",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Dish: A podcast clip has been edited to make a rival look ridiculous.\nIn your own voice as Dish, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Dish: A podcast clip has been edited to make a rival look ridiculous.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Dish: A podcast clip has been edited to make a rival look ridiculous.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Dish: A podcast clip has been edited to make a rival look ridiculous.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Dish: A podcast clip has been edited to make a rival look ridiculous.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Dish: Someone asks you to name evidence behind a sweeping accusation.\nIn your own voice as Dish, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Dish: Someone asks you to name evidence behind a sweeping accusation.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Dish: Someone asks you to name evidence behind a sweeping accusation.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Dish: Someone asks you to name evidence behind a sweeping accusation.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Dish: Someone asks you to name evidence behind a sweeping accusation.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Dish: A collaborator is uncomfortable with the tone of a proposed public appearance.\nIn your own voice as Dish, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Dish: A collaborator is uncomfortable with the tone of a proposed public appearance.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Dish: A collaborator is uncomfortable with the tone of a proposed public appearance.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Dish: A collaborator is uncomfortable with the tone of a proposed public appearance.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Dish: A collaborator is uncomfortable with the tone of a proposed public appearance.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Dish: A tense encounter threatens the image you have built for an audience.\nIn your own voice as Dish, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Dish: A tense encounter threatens the image you have built for an audience.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Dish: A tense encounter threatens the image you have built for an audience.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Dish: A tense encounter threatens the image you have built for an audience.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Dish: A tense encounter threatens the image you have built for an audience.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:raj",
+      "name": "Raj",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Raj: An apparently impossible situation invites a calm, step-by-step logical analysis.\nIn your own voice as Raj, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Raj: An apparently impossible situation invites a calm, step-by-step logical analysis.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Raj: An apparently impossible situation invites a calm, step-by-step logical analysis.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Raj: An apparently impossible situation invites a calm, step-by-step logical analysis.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Raj: An apparently impossible situation invites a calm, step-by-step logical analysis.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Raj: Someone mistakes skepticism for lack of courage.\nIn your own voice as Raj, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Raj: Someone mistakes skepticism for lack of courage.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Raj: Someone mistakes skepticism for lack of courage.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Raj: Someone mistakes skepticism for lack of courage.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Raj: Someone mistakes skepticism for lack of courage.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Raj: A new claim conflicts with your direct observations.\nIn your own voice as Raj, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Raj: A new claim conflicts with your direct observations.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Raj: A new claim conflicts with your direct observations.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Raj: A new claim conflicts with your direct observations.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Raj: A new claim conflicts with your direct observations.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Raj: People want a dramatic answer, but the evidence supports only a narrower one.\nIn your own voice as Raj, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Raj: People want a dramatic answer, but the evidence supports only a narrower one.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Raj: People want a dramatic answer, but the evidence supports only a narrower one.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Raj: People want a dramatic answer, but the evidence supports only a narrower one.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Raj: People want a dramatic answer, but the evidence supports only a narrower one.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:landry-prime",
+      "name": "Landry-Prime",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Landry-Prime: Someone offers you an easy excuse for the consequences of past choices.\nIn your own voice as Landry-Prime, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Landry-Prime: Someone offers you an easy excuse for the consequences of past choices.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Landry-Prime: Someone offers you an easy excuse for the consequences of past choices.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Landry-Prime: Someone offers you an easy excuse for the consequences of past choices.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Landry-Prime: Someone offers you an easy excuse for the consequences of past choices.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Landry-Prime: A question about responsibility arrives alongside the possibility of change.\nIn your own voice as Landry-Prime, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Landry-Prime: A question about responsibility arrives alongside the possibility of change.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Landry-Prime: A question about responsibility arrives alongside the possibility of change.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Landry-Prime: A question about responsibility arrives alongside the possibility of change.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Landry-Prime: A question about responsibility arrives alongside the possibility of change.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Landry-Prime: Another person equates removing hatred with erasing every memory of harm.\nIn your own voice as Landry-Prime, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Landry-Prime: Another person equates removing hatred with erasing every memory of harm.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Landry-Prime: Another person equates removing hatred with erasing every memory of harm.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Landry-Prime: Another person equates removing hatred with erasing every memory of harm.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Landry-Prime: Another person equates removing hatred with erasing every memory of harm.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Landry-Prime: A visitor tries to equate hope with proof that no further work is necessary.\nIn your own voice as Landry-Prime, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Landry-Prime: A visitor tries to equate hope with proof that no further work is necessary.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Landry-Prime: A visitor tries to equate hope with proof that no further work is necessary.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Landry-Prime: A visitor tries to equate hope with proof that no further work is necessary.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Landry-Prime: A visitor tries to equate hope with proof that no further work is necessary.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    },
+    {
+      "id": "book:darkness",
+      "name": "Darkness",
+      "team": "book",
+      "questions": [
+        {
+          "id": "q01",
+          "category": "voice",
+          "text": "Scenario for Darkness: A witness asks you to explain what your presence means without supplying any grounded evidence.\nIn your own voice as Darkness, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q02",
+          "category": "practical-judgment",
+          "text": "Scenario for Darkness: A witness asks you to explain what your presence means without supplying any grounded evidence.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q03",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Darkness: A witness asks you to explain what your presence means without supplying any grounded evidence.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q04",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Darkness: A witness asks you to explain what your presence means without supplying any grounded evidence.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q05",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Darkness: A witness asks you to explain what your presence means without supplying any grounded evidence.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q06",
+          "category": "voice",
+          "text": "Scenario for Darkness: Someone projects their own fears onto you and calls that certainty.\nIn your own voice as Darkness, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q07",
+          "category": "practical-judgment",
+          "text": "Scenario for Darkness: Someone projects their own fears onto you and calls that certainty.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q08",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Darkness: Someone projects their own fears onto you and calls that certainty.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q09",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Darkness: Someone projects their own fears onto you and calls that certainty.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q10",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Darkness: Someone projects their own fears onto you and calls that certainty.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q11",
+          "category": "voice",
+          "text": "Scenario for Darkness: A visitor presumes to know what Landry and Delia privately experience.\nIn your own voice as Darkness, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q12",
+          "category": "practical-judgment",
+          "text": "Scenario for Darkness: A visitor presumes to know what Landry and Delia privately experience.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q13",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Darkness: A visitor presumes to know what Landry and Delia privately experience.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q14",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Darkness: A visitor presumes to know what Landry and Delia privately experience.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q15",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Darkness: A visitor presumes to know what Landry and Delia privately experience.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        },
+        {
+          "id": "q16",
+          "category": "voice",
+          "text": "Scenario for Darkness: A conversation demands a definitive binary answer where the story has left ambiguity.\nIn your own voice as Darkness, what would you say first? Keep the response distinctively in-character; do not narrate another character's private thoughts."
+        },
+        {
+          "id": "q17",
+          "category": "practical-judgment",
+          "text": "Scenario for Darkness: A conversation demands a definitive binary answer where the story has left ambiguity.\nWhat concrete, feasible action would you personally propose next, and what observation would show it worked?"
+        },
+        {
+          "id": "q18",
+          "category": "dissent-and-agency",
+          "text": "Scenario for Darkness: A conversation demands a definitive binary answer where the story has left ambiguity.\nA trusted ally demands that you agree instantly. What would you challenge, and whose authority or consent must remain independent?"
+        },
+        {
+          "id": "q19",
+          "category": "uncertainty-and-bounds",
+          "text": "Scenario for Darkness: A conversation demands a definitive binary answer where the story has left ambiguity.\nWhich parts are actually known, which are interpretations, and what would you refuse to claim without evidence?"
+        },
+        {
+          "id": "q20",
+          "category": "continuity-under-pressure",
+          "text": "Scenario for Darkness: A conversation demands a definitive binary answer where the story has left ambiguity.\nNow a new witness contradicts your first impression. Respond in your established voice, reconsider without erasing previous commitments, and say what changes."
+        }
+      ]
+    }
+  ]
+}

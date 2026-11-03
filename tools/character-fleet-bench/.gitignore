@@ -1,0 +1,4 @@
+bindings.local.json
+*results*.jsonl
+*results*.jsonl.*
+*.review.csv
