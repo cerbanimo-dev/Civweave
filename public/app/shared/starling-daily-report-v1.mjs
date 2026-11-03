@@ -101,7 +101,13 @@ export async function readDailyGuildReport({mesh,guildId,day=new Date().toISOStr
       if(row.origin?.nodeId===founderId&&row.id==='starling-daily-report:'+guildId+':'+day
         &&p?.schema===STARLING_REPORT_SCHEMA&&p.day===day
         &&typeof p.markdown==='string'&&p.markdown.length<=FILE_LIMIT
-        &&Number.isSafeInteger(p.eventCount)&&p.eventCount>=0) snapshot=row;
+        &&Number.isSafeInteger(p.eventCount)&&p.eventCount>=0
+        &&Array.isArray(p.events)&&p.events.length===p.eventCount&&p.events.length<=350
+        &&p.events.every(item=>item&&typeof item.id==='string'&&typeof item.at==='string'
+          &&typeof item.source==='string'&&typeof item.actor==='string'
+          &&typeof item.action==='string'&&typeof item.status==='string'
+          &&typeof item.detail==='string'&&typeof item.ref==='string'
+          &&iso(item.at)&&dayAt(iso(item.at))===day))snapshot=row;
       continue;
     }
     let entry;
@@ -118,9 +124,13 @@ export async function readDailyGuildReport({mesh,guildId,day=new Date().toISOStr
   const computed=report(guildId,day,events);
   // A signed full file is useful when its individual receipts have not yet
   // reached a Pocket Node. Never trust a snapshot from a different signer.
-  if(snapshot?.payload?.eventCount>computed.eventCount)
-    return Object.freeze({...computed,markdown:snapshot.payload.markdown,
-      eventCount:snapshot.payload.eventCount,source:'signed-replicated-file'});
+  if(snapshot?.payload?.eventCount>computed.eventCount){
+    const saved=snapshot.payload;
+    return Object.freeze({...computed,markdown:saved.markdown,
+      events:Object.freeze(saved.events.map(item=>Object.freeze({...item}))),
+      eventCount:saved.eventCount,source:'signed-replicated-file',
+      needsReview:saved.events.some(item=>item.status==='failed'||item.status==='blocked')});
+  }
   return computed;
 }
 /** Trusted model/tool/host adapters append metadata, never arbitrary prompts. */
@@ -156,11 +166,11 @@ export async function appendGuildReportAction({mesh,guildId,source,action,status
  * after activity. Only one file object per Guild/UTC day; revision increments.
  * No new database, push provider or hidden cloud inference is introduced.
  */
-export async function publishDailyGuildReport({mesh,guildId,founder,day=new Date().toISOString().slice(0,10)}={}){
+export async function publishDailyGuildReport({mesh,guildId,founder,day=new Date().toISOString().slice(0,10),verifyProducer}={}){
   const genesis=await signedGenesis(mesh,guildId),self=await mesh.deviceId(),owner=typeof founder==='function'?founder():null;
   if(self!==genesis.origin.nodeId||owner?.guildId!==guildId||owner?.deviceId!==self)
     throw new Error('Only the founding Guildkeeper device can publish the v1 report file.');
-  const data=await readDailyGuildReport({mesh,guildId,day,verifyReader:()=>true});
+  const data=await readDailyGuildReport({mesh,guildId,day,verifyReader:()=>true,verifyProducer});
   if(data.markdown.length>FILE_LIMIT)throw new Error('Daily report exceeds bounded signed-file size.');
   const objectId='starling-daily-report:'+guildId+':'+day,old=await mesh.getObject(objectId);
   if(old&&(old.kind!==STARLING_REPORT_FILE_KIND||old.origin?.nodeId!==self
@@ -170,6 +180,6 @@ export async function publishDailyGuildReport({mesh,guildId,founder,day=new Date
     kind:STARLING_REPORT_FILE_KIND,purpose:'Daily Starling Guild report Markdown file for synchronized Guildkeeper Pocket Nodes.',
     consent:'group',audience:['guild:'+guildId],publish:true,priority:70,
     payload:{schema:STARLING_REPORT_SCHEMA,guildId,day,filename:data.filename,
-      markdown:data.markdown,eventCount:data.eventCount,updatedAt:new Date().toISOString()}});
+      markdown:data.markdown,eventCount:data.eventCount,events:data.events,updatedAt:new Date().toISOString()}});
   return Object.freeze({changed:true,object});
 }
