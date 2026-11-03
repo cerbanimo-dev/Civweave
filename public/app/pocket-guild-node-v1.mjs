@@ -29,17 +29,34 @@ async function syncCloudPrimary(value,api){
     }catch(error){if(stateChanged){value.updatedAt=now();write(value)}return Object.freeze({ok:false,attached:true,status:'sync-error',sent,received,error:String(error?.message||error)})}
   }
   try{
-    const readUrl=new URL(endpoint);readUrl.searchParams.set('limit','200');
-    const response=await fetch(readUrl,{headers:{authorization:`Bearer ${value.membershipKey}`},cache:'no-store'});if(!response.ok)throw new Error(`Guild cloud primary returned ${response.status}`);
-    const payload=await response.json();
-    for(const envelope of payload.envelopes||[]){const object=envelope?.payload;if(!cloudObjectForGuild(object,value.guildId))continue;try{const result=await api.ingest(object,{fromPeer:`cloud:${value.guildId}`,localNodeId:await api.deviceId()});if(result?.status==='accepted')received++}catch{}}
+    // Cursor pages protect devices that were offline longer than one 200-item
+    // relay window. Persist each fully ingested page before requesting the next.
+    for(let page=0;page<10;page++){
+      const readUrl=new URL(endpoint);readUrl.searchParams.set('limit','200');
+      readUrl.searchParams.set('after',String(value.primaryCursor||0));
+      const response=await fetch(readUrl,{headers:{authorization:`Bearer ${value.membershipKey}`},cache:'no-store'});
+      if(!response.ok)throw new Error(`Guild cloud primary returned ${response.status}`);
+      const payload=await response.json();
+      if(payload?.guildId!==value.guildId||!Array.isArray(payload.envelopes))
+        throw new Error('Guild cloud primary returned a mismatched or malformed envelope page.');
+      for(const envelope of payload.envelopes){
+        const object=envelope?.payload;if(!cloudObjectForGuild(object,value.guildId))continue;
+        const result=await api.ingest(object,{fromPeer:`cloud:${value.guildId}`,localNodeId:await api.deviceId()});
+        if(result?.status==='accepted')received++;
+      }
+      // Older Guild edges return only the latest window; do not invent a cursor
+      // that may skip missing envelopes. They remain compatible pending upgrade.
+      if(!Number.isSafeInteger(payload.nextCursor)||payload.nextCursor<(value.primaryCursor||0))break;
+      value.primaryCursor=payload.nextCursor;stateChanged=true;
+      if(payload.hasMore!==true)break;
+    }
   }catch(error){if(stateChanged){value.updatedAt=now();write(value)}return Object.freeze({ok:false,attached:true,status:'sync-error',sent,received,error:String(error?.message||error)})}
-  const current=state();if(current?.guildId===value.guildId){current.primaryAcks=value.primaryAcks||{};current.lastPrimarySyncAt=now();current.updatedAt=now();write(current)}
+  const current=state();if(current?.guildId===value.guildId){current.primaryAcks=value.primaryAcks||{};current.primaryCursor=value.primaryCursor||0;current.lastPrimarySyncAt=now();current.updatedAt=now();write(current)}
   return Object.freeze({ok:true,attached:true,status:'synced',sent,received,primaryGateway:value.primaryOrigin,lastPrimarySyncAt:now()});
 }
 async function enroll({guildId,primaryOrigin=null,membershipKey=null}={}){
   const id=clean(guildId,180);if(!id)throw new TypeError('guildId is required.');const api=mesh(),credential=await api.credential(),prior=state(),origin=normalizeGateway(primaryOrigin),key=normalizeMembershipKey(membershipKey,{required:Boolean(origin)}),sameGuild=prior?.guildId===id;
-  const next={schema:'civweave.pocket-guild-node.v1',version:VERSION,guildId:id,primaryOrigin:origin,membershipKey:key||(sameGuild?prior?.membershipKey||null:null),cloudAttached:Boolean(origin),deviceId:credential.id,role:'guild-host',route:'pocket-node',authorizedPeers:sameGuild?prior.authorizedPeers||{}:{},primaryAcks:sameGuild?prior.primaryAcks||{}:{},lastPrimarySyncAt:sameGuild?prior.lastPrimarySyncAt||null:null,createdAt:sameGuild?prior.createdAt||now():now(),updatedAt:now()};
+  const next={schema:'civweave.pocket-guild-node.v1',version:VERSION,guildId:id,primaryOrigin:origin,primaryCursor:sameGuild&&origin===prior?.primaryOrigin?prior?.primaryCursor||0:0,membershipKey:key||(sameGuild?prior?.membershipKey||null:null),cloudAttached:Boolean(origin),deviceId:credential.id,role:'guild-host',route:'pocket-node',authorizedPeers:sameGuild?prior.authorizedPeers||{}:{},primaryAcks:sameGuild?prior.primaryAcks||{}:{},lastPrimarySyncAt:sameGuild?prior.lastPrimarySyncAt||null:null,createdAt:sameGuild?prior.createdAt||now():now(),updatedAt:now()};
   api.configure({groups:[`guild:${id}`]});write(next);if(origin)startPrimarySync();return status();
 }
 function requireState(){const value=state();if(!value)throw new Error('This device has not been enrolled as a Pocket Guild Node.');return value}
@@ -51,13 +68,16 @@ async function rotateNow(){const api=mesh(),plan=rotationPlan(),activeIds=new Se
   const flushed=[];for(const session of api.sessions?.values?.()||[]){if(session?.peerId&&activeIds.has(session.peerId)&&session.channel?.readyState==='open'){try{flushed.push({peerId:session.peerId,...await api.flushSession(session)});markPeerSynced(session.peerId)}catch(error){flushed.push({peerId:session.peerId,error:String(error?.message||error)})}}}
   return Object.freeze({plan,flushed:Object.freeze(flushed)});
 }
-async function attachPrimary(primaryOrigin,{membershipKey=null}={}){const value=requireState(),origin=normalizeGateway(primaryOrigin);if(!origin)throw new TypeError('A public/cloud gateway is required to attach a primary.');value.primaryOrigin=origin;value.membershipKey=normalizeMembershipKey(membershipKey||value.membershipKey,{required:true});value.cloudAttached=true;value.updatedAt=now();write(value);startPrimarySync();return status()}
-function detachPrimary(){const value=requireState();value.primaryOrigin=null;value.membershipKey=null;value.cloudAttached=false;value.primaryAcks={};value.updatedAt=now();write(value);stopPrimarySync();return status()}
+async function attachPrimary(primaryOrigin,{membershipKey=null}={}){const value=requireState(),origin=normalizeGateway(primaryOrigin);if(!origin)throw new TypeError('A public/cloud gateway is required to attach a primary.');if(value.primaryOrigin!==origin)value.primaryCursor=0;value.primaryOrigin=origin;value.membershipKey=normalizeMembershipKey(membershipKey||value.membershipKey,{required:true});value.cloudAttached=true;value.updatedAt=now();write(value);startPrimarySync();return status()}
+function detachPrimary(){const value=requireState();value.primaryOrigin=null;value.membershipKey=null;value.cloudAttached=false;value.primaryAcks={};value.primaryCursor=0;value.updatedAt=now();write(value);stopPrimarySync();return status()}
 async function syncPrimary(){const value=requireState();if(!value.primaryOrigin)return Object.freeze({ok:false,attached:false,status:'no-primary-gateway'});const api=mesh();if(value.membershipKey)return syncCloudPrimary(value,api);if(typeof api.syncGateway!=='function')throw new Error('Civweave gateway synchronization is unavailable.');return api.syncGateway(value.primaryOrigin)}
 function bindPrimarySyncListeners(){if(primarySyncListenersBound||typeof globalThis.addEventListener!=='function')return;primarySyncListenersBound=true;globalThis.addEventListener('online',()=>{if(state()?.primaryOrigin)syncPrimary().catch(()=>{})});globalThis.addEventListener('visibilitychange',()=>{if(globalThis.document?.visibilityState==='visible'&&state()?.primaryOrigin)syncPrimary().catch(()=>{})})}
 function startPrimarySync({intervalMs=PRIMARY_SYNC_INTERVAL_MS}={}){stopPrimarySync();bindPrimarySyncListeners();primarySyncTimer=setInterval(()=>{if(state()?.primaryOrigin)syncPrimary().catch(()=>{})},Math.max(15_000,Number(intervalMs)||PRIMARY_SYNC_INTERVAL_MS));primarySyncTimer?.unref?.();queueMicrotask(()=>syncPrimary().catch(()=>{}));return true}
 function stopPrimarySync(){if(primarySyncTimer!=null){clearInterval(primarySyncTimer);primarySyncTimer=null}return true}
-function status(){const value=state(),meshStatus=globalThis.CivweaveLocalMeshV146?.status?.()||null;if(!value)return Object.freeze({version:VERSION,enrolled:false,policy:POCKET_NODE_POLICY,mesh:meshStatus});const plan=selectPocketSyncWindow(Object.values(value.authorizedPeers||{}),{limit:POCKET_NODE_POLICY.maxActiveSyncPeers});return Object.freeze({version:VERSION,enrolled:true,guildId:value.guildId,primaryOrigin:value.primaryOrigin||null,cloudAttached:Boolean(value.primaryOrigin),deviceId:value.deviceId,role:value.role,route:value.route,lastPrimarySyncAt:value.lastPrimarySyncAt||null,policy:POCKET_NODE_POLICY,authorizedPeers:plan.authorizedCount,activePeerTarget:plan.active.length,standbyPeers:plan.standby.length,mesh:meshStatus})}
+function status(){const value=state(),meshStatus=globalThis.CivweaveLocalMeshV146?.status?.()||null;if(!value)return Object.freeze({version:VERSION,enrolled:false,policy:POCKET_NODE_POLICY,mesh:meshStatus});const plan=selectPocketSyncWindow(Object.values(value.authorizedPeers||{}),{limit:POCKET_NODE_POLICY.maxActiveSyncPeers});return Object.freeze({version:VERSION,enrolled:true,guildId:value.guildId,primaryOrigin:value.primaryOrigin||null,cloudAttached:Boolean(value.primaryOrigin),deviceId:value.deviceId,role:value.role,route:value.route,lastPrimarySyncAt:value.lastPrimarySyncAt||null,primaryCursor:value.primaryCursor||0,policy:POCKET_NODE_POLICY,authorizedPeers:plan.authorizedCount,activePeerTarget:plan.active.length,standbyPeers:plan.standby.length,mesh:meshStatus})}
 
 export const CivweavePocketGuildNodeV1=Object.freeze({version:VERSION,policy:POCKET_NODE_POLICY,enroll,state,status,authorizePeer,revokePeer,markPeerSynced,rotationPlan,rotateNow,attachPrimary,detachPrimary,syncPrimary,startPrimarySync,stopPrimarySync});
 globalThis.CivweavePocketGuildNodeV1=CivweavePocketGuildNodeV1;
+// Restore an explicitly paired cloud primary when the PWA restarts. Do not
+// attach the download origin or enroll in any Guild without prior consent.
+if(typeof window!=='undefined'&&state()?.primaryOrigin)queueMicrotask(()=>startPrimarySync());
