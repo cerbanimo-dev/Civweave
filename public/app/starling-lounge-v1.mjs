@@ -25,7 +25,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,reportData:null,reportBusy:false,reportQueued:false,reportMessage:'Syncing signed Guild daily report…',worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
+const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,reportData:null,reportBusy:false,reportQueued:false,reportQueuedPublish:false,reportMessage:'Syncing signed Guild daily report…',worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -740,7 +740,7 @@ async function refreshTurns(){
 }
 async function refreshDailyReport({publish=false}={}){
   if(!state.guild||state.root?.hidden)return;
-  if(state.reportBusy){state.reportQueued=state.reportQueued||publish;return}
+  if(state.reportBusy){state.reportQueued=true;state.reportQueuedPublish=state.reportQueuedPublish||publish;return}
   state.reportBusy=true;
   const guild=state.guild;
   try{
@@ -757,7 +757,7 @@ async function refreshDailyReport({publish=false}={}){
   }catch(error){if(state.guild?.id===guild.id)state.reportMessage='Daily report unavailable: '+clean(String(error?.message||error),260)}
   finally{
     state.reportBusy=false;if(state.guild?.id===guild.id)render();
-    if(state.reportQueued){const next=state.reportQueued;state.reportQueued=false;queueMicrotask(()=>void refreshDailyReport({publish:next}));}
+    if(state.reportQueued){const next=state.reportQueuedPublish;state.reportQueued=false;state.reportQueuedPublish=false;queueMicrotask(()=>void refreshDailyReport({publish:next}));}
   }
 }
 async function saveDailyReport(){
@@ -1098,6 +1098,24 @@ async function connectHost(){
   }catch(error){state.hostTransport=null;state.hostKind=null;state.hostStatus='Host unavailable: '+clean(String(error?.message||error),320)}
   finally{state.hostBusy=false;render()}
 }
+async function archivePairedHostJobs(guild,jobs){
+  if(!Array.isArray(jobs)||!guild?.id||!state.hostKind)return;
+  await turnService();
+  const mobile=await import('./mobile-guild-create-v1.mjs');
+  const owner=mobile.mobileGuildStatus();
+  if(owner?.guildId!==guild.id||owner.deviceId!==await state.turnMesh.deviceId())return;
+  const report=await import('./shared/starling-daily-report-v1.mjs');
+  const statuses={queued:'proposed',running:'started',completed:'completed',failed:'failed',cancelled:'blocked',interrupted:'blocked'};
+  for(const job of jobs.slice(0,30)){
+    if(job?.guildId!==guild.id||!/^[0-9a-f]{32}$/.test(job.jobId||'')||!statuses[job.state])continue;
+    await report.appendGuildReportAction({
+      mesh:state.turnMesh,guildId:guild.id,source:'community-local',action:'inference',
+      status:statuses[job.state],actor:clean(job.personaId,50)||'Starling host',
+      summary:'Paired '+state.hostKind+' model host reported '+job.state+' for a review-only draft. No Quest completion verified.',
+      referenceId:job.jobId,idempotencyKey:job.jobId+'_'+job.state
+    });
+  }
+}
 async function refreshHost(){
   if(!state.hostTransport||!state.guild)return;
   const guild=state.guild,client=state.hostTransport;
@@ -1105,6 +1123,7 @@ async function refreshHost(){
     const list=await client.listJobs();
     if(list?.schema!=='civweave.starling-host-job-list.v1'||!Array.isArray(list.jobs))throw new Error('Invalid host job list.');
     const jobs=list.jobs.filter(job=>job?.guildId===guild.id);
+    try{await archivePairedHostJobs(guild,jobs)}catch(error){state.reportMessage='Host report sync needs review: '+clean(String(error?.message||error),220)}
     state.hostJob=jobs[0]||null;
     if(state.hostJob){
       const job=await client.job(state.hostJob.jobId);
@@ -1130,6 +1149,7 @@ async function submitHostDraft(){
       model,intention,brief:clean($('#cw-sl-message')?.value,1200),maxTokens:440
     });
     state.hostJob=job;
+    try{await archivePairedHostJobs(state.guild,[job])}catch(error){state.reportMessage='Host report sync needs review: '+clean(String(error?.message||error),220)}
     state.hostStatus='Queued '+state.hostKind+' local '+state.speaker+' draft. You may close Civweave and return to review it.';
     $('[data-sl-host-output]').textContent='';
   }catch(error){state.hostStatus='Could not queue draft: '+clean(String(error?.message||error),330)}
