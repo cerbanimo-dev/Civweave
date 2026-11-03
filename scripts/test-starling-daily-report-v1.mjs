@@ -50,6 +50,24 @@ test('cloud and community host metadata require independently trusted writer ide
   h.node.id='device:founder';
   await assert.rejects(()=>appendGuildReportAction({...input,source:'cloud-ai',summary:'x'.repeat(400)}),/oversized/);
 });
+test('offline reader merges signed full file with disjoint newer local receipts',async()=>{
+  const h=harness();
+  h.record('turn-early','civweave.starling-collective-turn.v1',{
+    schema:'civweave.starling-collective-turn.v1',turnId:'turn-early',
+    at:day+'T08:00:00Z',text:'Morning field notes'
+  });
+  await publishDailyGuildReport({mesh:h.mesh,guildId:'garden',day,founder:h.founder});
+  h.objects.delete('turn-early');
+  h.record('turn-late','civweave.starling-collective-turn.v1',{
+    schema:'civweave.starling-collective-turn.v1',turnId:'turn-late',
+    at:day+'T18:00:00Z',text:'Evening field notes'
+  });
+  const merged=await h.read();
+  assert.equal(merged.source,'signed-replicated-file');
+  assert.equal(merged.eventCount,2);
+  assert.match(merged.markdown,/Morning field notes/);
+  assert.match(merged.markdown,/Evening field notes/);
+});
 test('replayed paired host job status is idempotent and cannot overwrite mismatched provenance',async()=>{
   const h=harness(),args={mesh:h.mesh,guildId:'garden',source:'community-local',
     action:'inference',status:'completed',summary:'Paired host reported completed',
