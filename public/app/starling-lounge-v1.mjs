@@ -25,7 +25,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
+const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,reportData:null,reportBusy:false,reportQueued:false,reportMessage:'Syncing signed Guild daily report…',worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -174,6 +174,12 @@ function setup(){
   <aside class="sl-card sl-operations" data-sl-panel="operations" data-sl-guild-only aria-label="Compute and execution controls">
    <div class="sl-panel-title"><div><span class="sl-kicker">04 · OPERATIONS</span><h2>Control room</h2></div></div>
    <p class="sl-sub">Plan, run and review without leaving this shared scene.</p><button type="button" data-sl-action="open-planner">Open legacy planning workbench</button>
+   <section class="sl-operation-block" aria-label="Starling Guild daily report">
+     <h3>Daily Guild report · UTC</h3><p class="sl-sub">Signed model and worker activity syncs through the Guild object mesh. The founding Guildkeeper device republishes a complete Markdown report while connected. Remote/cloud hosts require separately authenticated signing.</p>
+     <div class="sl-flex"><button type="button" data-sl-action="report-refresh">Sync report</button><button type="button" data-sl-action="report-save">Save .md on this phone</button></div>
+     <p class="sl-status" data-sl-report-status role="status">Reading signed activity…</p>
+     <details><summary>Read today's report</summary><pre data-sl-report-preview style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:20rem;overflow:auto"></pre></details>
+   </section>
    <div class="sl-operation-block"><h3>Browser-local collective</h3><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button></div><p class="sl-status" data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</p></div>
    <section class="sl-host-panel sl-operation-block" aria-label="Local execution host"><h3>Device execution host</h3><p class="sl-sub">Resume approved local drafts after leaving the commune. No task claims or spending.</p><label>Backend <select data-sl-host-kind><option value="termux">Termux companion · port 8767</option><option value="android">Android native bridge · WorkManager</option></select></label><div class="sl-flex"><button type="button" data-sl-action="host-connect">Connect</button><button type="button" data-sl-action="host-submit">Queue local draft</button><button type="button" data-sl-action="host-refresh">Refresh jobs</button></div><div class="sl-flex"><button type="button" data-sl-action="host-enable">Enable host autopilot</button><button type="button" data-sl-action="host-disable">Disable host autopilot</button></div><p class="sl-status" data-sl-host-status role="status">Choose a host and connect.</p><pre data-sl-host-output class="sl-host-output"></pre><button type="button" data-sl-action="host-import">Import completed draft for Guild review</button></section>
    <details class="sl-toolbench sl-operation-block"><summary>Collective toolbench · installed capabilities</summary><div data-sl-toolbench></div></details>
@@ -538,6 +544,9 @@ function render(){
   const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning||!fleetIsGuild()||!STARLING_PERSONAS[state.selectedAgent];
   const control=$('[data-sl-action=worker-toggle]');if(control){control.disabled=state.workerLoading;control.textContent=state.workerEnabled?'Disable local autopilot':'Enable local autopilot'}
   const worker=$('[data-sl-worker-status]');if(worker)worker.textContent=state.workerMessage;
+  const reportStatus=$('[data-sl-report-status]');if(reportStatus)reportStatus.textContent=state.reportMessage;
+  const reportPreview=$('[data-sl-report-preview]');if(reportPreview&&state.reportData)reportPreview.textContent=state.reportData.markdown;
+  const reportSave=$('[data-sl-action=report-save]');if(reportSave)reportSave.disabled=!state.reportData;
   const hostLabel=$('[data-sl-host-status]');if(hostLabel)hostLabel.textContent=state.hostStatus;
   for(const cmd of ['host-connect','host-submit','host-refresh','host-enable','host-disable','host-import']){const control=$('[data-sl-action='+cmd+']');if(control)control.disabled=state.hostBusy||((cmd!=='host-connect')&&!state.hostTransport)}
   const imp=$('[data-sl-action=host-import]');if(imp)imp.disabled=state.hostBusy||state.hostJob?.state!=='completed';
@@ -578,11 +587,11 @@ async function refresh(){
   }catch(error){state.snapshot=null;state.opportunities=[];state.status='unavailable';state.error=clean(String(error?.message||error),500)}
   finally{state.loading=false;render()}
 }
-function close(){if(!state.root)return;state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.summonUI?.close();state.summonUI=null;if(state.autoSummonTransport){state.summonTransport?.close?.();state.summonTransport=null;state.autoSummonTransport=false}state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
+function close(){if(!state.root)return;state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.summonUI?.close();state.summonUI=null;if(state.autoSummonTransport){state.summonTransport?.close?.();state.summonTransport=null;state.autoSummonTransport=false}state.bookPacket=null;renderBookCast();state.localOpenSimViewer?.close();state.localOpenSimViewer=null;state.root.hidden=true;state.worldEpoch++;state.turnSubscribe?.();state.turnSubscribe=null;state.reportData=null;state.worker?.stop();detachWorldSource();state.worldHost?.close();state.worldHost=null;unbindGuideActivity();document.body.style.removeProperty('overflow')}
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
-  if(state.guild?.id!==(guild?.id||null)){state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  if(state.guild?.id!==(guild?.id||null)){state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.reportData=null;state.reportMessage='Syncing signed Guild daily report…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
   const share=state.root.querySelector('[data-sl-harmless-share]');if(share)share.checked=false;
   const discover=state.root.querySelector('[data-sl-harmless-discovery]');
   if(discover){try{discover.checked=localStorage.getItem('civweave.harmless.discovery.v1')==='1'}catch{discover.checked=false}}
@@ -591,7 +600,7 @@ function open(guild){
   state.root.hidden=false;document.body.style.overflow='hidden';void ensureSummonUI();void connectEncryptedWorldCalls();setView('world');setFleetScope(guild?'guild':'local');state.root.querySelector('[data-sl-action=close]').focus();
   void ensureLocalFleetCatalog().then(()=>{if(!state.root?.hidden)renderFleetScopes()}).catch(error=>{state.fleetMessage=clean(String(error?.message||error),200);renderFleetScopes()});
   void connectGuideRuntime();
-  if(state.guild){void refresh();void refreshTurns();void refreshWorkerStatus();void connectWorld()}
+  if(state.guild){void refresh();void refreshTurns();void refreshDailyReport({publish:true});void refreshWorkerStatus();void connectWorld()}
 }
 async function send(event){
   event.preventDefault();
@@ -631,7 +640,7 @@ function click(event){
   if(cmd==='world-move-proposal'&&fleetIsGuild())prepareMove();
   if(cmd==='refresh'){
     if(state.guild){
-      void refresh();void refreshTurns();void refreshWorkerStatus();
+      void refresh();void refreshTurns();void refreshDailyReport({publish:true});void refreshWorkerStatus();
       if(state.hostTransport)void refreshHost();
       const host=state.worldHost;
       if(host)void host.refresh().then(packet=>{
@@ -656,6 +665,8 @@ function click(event){
   if(cmd==='focus-chat'){setView('conversation');$('#cw-sl-message')?.focus()}
   if(cmd==='harmless-refresh')void refreshHarmless();
   if(cmd==='harmless-export')void exportHarmless();
+  if(cmd==='report-refresh')void refreshDailyReport({publish:true});
+  if(cmd==='report-save')void saveDailyReport();
   if(cmd==='harmless-agent')void generateHarmlessPost();
   if(cmd==='open-planner'){
     const workbench=globalThis.CivweaveStarlingCollectiveV1;
@@ -715,7 +726,10 @@ async function refreshTurns(){
     if(!state.turnSubscribe){
       state.turnSubscribe=mesh.subscribe(event=>{
         if(state.root?.hidden)return;
-        if(['object-created','object-received'].includes(event?.type) && event.detail?.kind==='civweave.starling-collective-turn.v1')void refreshTurns();
+        if(!['object-created','object-received'].includes(event?.type))return;
+        if(event.detail?.kind==='civweave.starling-collective-turn.v1')void refreshTurns();
+        if(['civweave.starling-collective-turn.v1','civweave.starling-collective-work-receipt.v1','civweave.starling-report-event.v1','civweave.starling-daily-report-file.v1'].includes(event.detail?.kind))
+          void refreshDailyReport({publish:event.type==='object-created'&&event.detail?.kind!=='civweave.starling-daily-report-file.v1'});
       });
     }
   }catch(error){
@@ -723,6 +737,36 @@ async function refreshTurns(){
       state.feed=[];state.turnError='Signed transcript unavailable: '+clean(String(error?.message||error),330);
     }
   }finally{state.turnsLoading=false;if(state.guild?.id===guild.id)render()}
+}
+async function refreshDailyReport({publish=false}={}){
+  if(!state.guild||state.root?.hidden)return;
+  if(state.reportBusy){state.reportQueued=state.reportQueued||publish;return}
+  state.reportBusy=true;
+  const guild=state.guild;
+  try{
+    await turnService();
+    const [mod,mobile]=await Promise.all([import('./shared/starling-daily-report-v1.mjs'),import('./mobile-guild-create-v1.mjs')]);
+    const mesh=state.turnMesh,founder=mobile.mobileGuildStatus();
+    const isFounder=founder?.guildId===guild.id&&founder?.deviceId===await mesh.deviceId();
+    const authorized=()=>Boolean(isFounder||globalThis.CivweaveGuildQuestsV1?.sessionForGuild?.(guild));
+    if(publish&&isFounder)await mod.publishDailyGuildReport({mesh,guildId:guild.id,founder:mobile.mobileGuildStatus});
+    const data=await mod.readDailyGuildReport({mesh,guildId:guild.id,verifyReader:authorized});
+    if(state.guild?.id!==guild.id||state.root?.hidden)return;
+    state.reportData=data;
+    state.reportMessage=data.eventCount+' recorded action'+(data.eventCount===1?'':'s')+' · '+(data.source==='signed-replicated-file'?'synced full report file':'locally reconstructed from signed Guild records')+' · '+data.day+' UTC';
+  }catch(error){if(state.guild?.id===guild.id)state.reportMessage='Daily report unavailable: '+clean(String(error?.message||error),260)}
+  finally{
+    state.reportBusy=false;if(state.guild?.id===guild.id)render();
+    if(state.reportQueued){const next=state.reportQueued;state.reportQueued=false;queueMicrotask(()=>void refreshDailyReport({publish:next}));}
+  }
+}
+async function saveDailyReport(){
+  if(!state.reportData){await refreshDailyReport();if(!state.reportData)return}
+  const data=state.reportData,blob=new Blob([data.markdown],{type:'text/markdown;charset=utf-8'});
+  const url=URL.createObjectURL(blob),anchor=document.createElement('a');
+  anchor.href=url;anchor.download=data.filename;anchor.style.display='none';document.body.append(anchor);
+  try{anchor.click();state.reportMessage='Requested download: '+data.filename+' · signed activity also stays in the Guild mesh.'}
+  finally{anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);render()}
 }
 async function optionalHarmlessContext(brief){
   try{
