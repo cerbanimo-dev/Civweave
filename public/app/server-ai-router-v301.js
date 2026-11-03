@@ -294,6 +294,23 @@ async function cloudflare(request,trace){
   const guildOwned=isMobileGuildSession(session);
   const telemetry=guildOwned?recordGuildUsage(session,body):(hostAccess()?.recordUsage?.({nodeId:session.nodeId,chargedNeurons:Number(body?.usage?.chargedNeurons||0),quota:body.quota||null})||{});
   trace.push({route:'cloudflare-workers-ai',status:'success',nodeId:session.nodeId,source:session.source||'capacity-session',model:body.model||payload.model});
+  // Only report an actual successful Starling-specific cloud request, and
+  // only for the same authenticated Guild. The existing router/ledger owns
+  // all metering; the signed mesh merely receives an activity observation.
+  if(body?.ok===true&&typeof request?.purpose==='string'&&/^starling-collective-cloud-/.test(request.purpose)
+      &&session.guildId&&request.guildId===session.guildId){
+    try{
+      const mod=await import('/app/shared/starling-cloud-report-bridge-v1.mjs');
+      await mod.recordStarlingCloudGeneration({
+        mesh:globalThis.CivweaveLocalMeshV146,request,session,response:body,
+        model:body.model||payload.model
+      });
+    }catch(error){
+      try{dispatchEvent(new CustomEvent('civweave:starling-report-sync-error',{
+        detail:{guildId:session.guildId,at:now(),message:clean(error?.message||error,200)}
+      }))}catch{}
+    }
+  }
   return resultFor(request,{provider:'cloudflare-workers-ai',model:body.model||nested?.model||payload.model,text:text||JSON.stringify(outputJson),outputJson,usage:{...(body.usage||{}),chargedNeurons:Number(body?.usage?.chargedNeurons||0),remainingNeurons:telemetry.remainingNeurons,approximateTurnsLeft:telemetry.approximateTurnsLeft},diagnostics:[{code:guildOwned?'GUILD_OWNED_CLOUDFLARE':'CLOUDFLARE_CAPACITY',message:guildOwned?`Used this device's paired mobile Guild Cloudflare node ${session.nodeId}.`:`Used capacity-backed Workers AI through ${session.nodeId}; lifetime credits are never spent unless explicitly allowed.`}],routeTrace:trace});
 }
 async function handle(request={}){
