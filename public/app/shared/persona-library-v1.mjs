@@ -4,6 +4,7 @@
  * Existing selected-model runtime performs 4B direction and 0.8B/2B/4B acting.
  * Model text is advisory; Worldweaver's trusted authorizer owns real tools.
  */
+import {favoriteFilmForPersona} from './blade-mirror-favorite-films-v1.mjs';
 export const PERSONA_LIBRARY_SCHEMA='civweave.persona-library.v1';
 const TIERS=['0.8b','2b','4b'];
 const safe=(v,max=4000)=>typeof v==='string'?v.trim().slice(0,max):'';
@@ -54,7 +55,8 @@ export function availableKnowledge(input,characterId,stage){
 const safeEmotes=(c,stage)=>array(c.verifiedEmotes)
   .filter(e=>e&&e.verified===true&&Number.isInteger(e.stage)&&e.stage<=stage&&safe(e.source,180))
   .slice(0,8).map(e=>safe(e.text,240)).filter(Boolean);
-const compactCharacter=(c,stage)=>({id:c.id,name:c.name,role:c.role,voice:safe(c.voice,1000),
+const compactCharacter=(c,stage,pack)=>({id:c.id,name:c.name,role:c.role,voice:safe(c.voice,1000),
+    favoriteFilm:favoriteFilmForPersona(pack,c),
     traits:array(c.traits).slice(0,20),wants:array(c.wants).slice(0,20),
     fears:array(c.fears).slice(0,20),emotes:safeEmotes(c,stage)});
 /** One 4B call prepares scene-specific instructions for many 0.8B actors. */
@@ -63,7 +65,7 @@ export function createDirectorRequest({pack,stage,scenario,participants,goals=[]
   if(!Number.isInteger(stage)||stage<0||!safe(scenario,8000))throw new TypeError('Scenario and numbered stage required.');
   const ids=array(participants);
   if(!ids.length||ids.length>24||!unique(ids))throw new TypeError('Choose 1–24 distinct characters.');
-  const cast=ids.map(id=>compactCharacter(member(p,id),stage));
+  const cast=ids.map(id=>compactCharacter(member(p,id),stage,p));
   const awareness=Object.fromEntries(ids.map(id=>[id,availableKnowledge(p,id,stage).map(e=>e.id)]));
   // A single multi-character director must see only common knowledge. A
   // character's private memories are directed in an isolated request below.
@@ -114,9 +116,11 @@ export function compileImprovPrompt({pack,stage,characterId,scene,directives,his
   const events=availableKnowledge(p,characterId,stage);
   const selected=events.filter(e=>d.knownEventIds.includes(e.id));
   const sample=safeEmotes(c,stage);
+  const favoriteFilm=favoriteFilmForPersona(p,c);
   return [
     'FICTIONAL PERSONA — '+safe(c.name,100),
     'Voice: '+safe(c.voice,1200),
+    ...(favoriteFilm?['Author-approved favorite film: '+favoriteFilm+'. This is background taste; mention only when relevant, without inventing scenes or forcing references.']:[]),
     'Traits: '+array(c.traits).slice(0,12).join('; '),
     'Goals: '+array(c.wants).slice(0,12).join('; '),
     'Embodied reactions and gestures: '+JSON.stringify(sample),
@@ -187,9 +191,11 @@ export function worldweaverNpcCommand({pack,characterId,instanceId,modelId,pilot
   if(!safe(modelId,100)||!safe(pilotPrincipalId,120)||!safe(instanceId,180))
     throw new TypeError('Model, authenticated pilot and world instance required.');
   const knowledge=availableKnowledge(p,characterId,stage);
+  const favoriteFilm=favoriteFilmForPersona(p,c);
   return {type:'rig-npc',instanceId,modelId,pilotPrincipalId,name:c.name,
     personaRef:p.id+':'+c.id,
-    pilotPrompt:('You play fictional '+c.name+'. '+safe(c.voice,450)+'. Established personal knowledge: '+
+    pilotPrompt:('You play fictional '+c.name+'. '+safe(c.voice,450)+'. '+
+      (favoriteFilm?'Author-approved favorite film: '+favoriteFilm+'. Mention only when relevant. ':'')+'Established personal knowledge: '+
       knowledge.map(e=>e.summary).join('; ')).slice(0,2500),
     capabilities:['observe','inspect','speak','move','present']};
 }
@@ -208,7 +214,7 @@ export function createPrivateDirectorRequest({pack,stage,scenario,characterId,pa
   const memory=availableKnowledge(p,characterId,stage);
   const payload={scenario:safe(scenario,8000),branchId,stage,targetCharacter:characterId,
     goals:array(goals).slice(0,16).map(x=>safe(x,350)),
-    character:compactCharacter(target,stage),
+    character:compactCharacter(target,stage,p),
     others:otherIds.filter(id=>id!==characterId).map(id=>({id,name:member(p,id).name})),
     knownEvents:memory,allowedEventIds:memory.map(e=>e.id),
     output:{characters:{[characterId]:{characterGoal:'string',emotion:'string',instructions:'string',
