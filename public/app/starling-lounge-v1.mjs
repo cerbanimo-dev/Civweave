@@ -25,7 +25,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,reportData:null,reportBusy:false,reportQueued:false,reportQueuedPublish:false,reportMessage:'Syncing signed Guild daily report…',worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
+const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,reportData:null,reportBusy:false,reportQueued:false,reportQueuedPublish:false,reportMessage:'Syncing signed Guild daily report…',reportGrants:[],reportIsFounder:false,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -178,6 +178,13 @@ function setup(){
      <h3>Daily Guild report · UTC</h3><p class="sl-sub">Signed model and worker activity syncs through the Guild object mesh. The founding Guildkeeper device republishes a complete Markdown report while connected. Remote/cloud hosts require separately authenticated signing.</p>
      <div class="sl-flex"><button type="button" data-sl-action="report-refresh">Sync report</button><button type="button" data-sl-action="report-save">Save .md on this phone</button></div>
      <p class="sl-status" data-sl-report-status role="status">Reading signed activity…</p>
+     <details><summary>Authorize remote report-only devices</summary>
+       <p class="sl-sub">Only the founding Guildkeeper may authorize a separately enrolled cloud or community device to sign report metadata. This does not grant AI inference, Guild membership, Quest authority or access to funds.</p>
+       <label>Signed mesh device ID <input data-sl-report-device maxlength="220" placeholder="device:…"></label>
+       <label>Report source <select data-sl-report-source><option value="community-local">Community device local model</option><option value="cloud-ai">Guild cloud model</option><option value="trusted-tool">Approved tool host</option></select></label>
+       <div class="sl-flex"><button type="button" data-sl-action="report-trust">Authorize 7 days</button><button type="button" data-sl-action="report-revoke">Revoke device</button><button type="button" data-sl-action="report-copy-device">Copy this device ID</button></div>
+       <p class="sl-sub">Trusted report hosts for this Guild:</p><div data-sl-report-hosts class="sl-status"></div>
+     </details>
      <details><summary>Read today's report</summary><pre data-sl-report-preview style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:20rem;overflow:auto"></pre></details>
    </section>
    <div class="sl-operation-block"><h3>Browser-local collective</h3><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button></div><p class="sl-status" data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</p></div>
@@ -547,6 +554,8 @@ function render(){
   const reportStatus=$('[data-sl-report-status]');if(reportStatus)reportStatus.textContent=state.reportMessage;
   const reportPreview=$('[data-sl-report-preview]');if(reportPreview&&state.reportData)reportPreview.textContent=state.reportData.markdown;
   const reportSave=$('[data-sl-action=report-save]');if(reportSave)reportSave.disabled=!state.reportData;
+  for(const action of ['report-trust','report-revoke']){const button=$('[data-sl-action='+action+']');if(button)button.disabled=!state.reportIsFounder||state.reportBusy}
+  const reportHosts=$('[data-sl-report-hosts]');if(reportHosts){reportHosts.textContent=state.reportGrants.length?state.reportGrants.map(row=>row.deviceId+' · '+row.source+' · '+(!row.enabled?'revoked':row.expired?'expired':'until '+row.expiresAt.slice(0,10))).join(' | '):'No remote report producers authorized.'}
   const hostLabel=$('[data-sl-host-status]');if(hostLabel)hostLabel.textContent=state.hostStatus;
   for(const cmd of ['host-connect','host-submit','host-refresh','host-enable','host-disable','host-import']){const control=$('[data-sl-action='+cmd+']');if(control)control.disabled=state.hostBusy||((cmd!=='host-connect')&&!state.hostTransport)}
   const imp=$('[data-sl-action=host-import]');if(imp)imp.disabled=state.hostBusy||state.hostJob?.state!=='completed';
@@ -591,7 +600,7 @@ function close(){if(!state.root)return;state.harmlessSubscribe?.();state.harmles
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
-  if(state.guild?.id!==(guild?.id||null)){state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.reportData=null;state.reportMessage='Syncing signed Guild daily report…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  if(state.guild?.id!==(guild?.id||null)){state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.reportData=null;state.reportGrants=[];state.reportIsFounder=false;state.reportMessage='Syncing signed Guild daily report…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
   const share=state.root.querySelector('[data-sl-harmless-share]');if(share)share.checked=false;
   const discover=state.root.querySelector('[data-sl-harmless-discovery]');
   if(discover){try{discover.checked=localStorage.getItem('civweave.harmless.discovery.v1')==='1'}catch{discover.checked=false}}
@@ -667,6 +676,9 @@ function click(event){
   if(cmd==='harmless-export')void exportHarmless();
   if(cmd==='report-refresh')void refreshDailyReport({publish:true});
   if(cmd==='report-save')void saveDailyReport();
+  if(cmd==='report-trust')void manageReportProducer('trust');
+  if(cmd==='report-revoke')void manageReportProducer('revoke');
+  if(cmd==='report-copy-device')void copyReportDeviceId();
   if(cmd==='harmless-agent')void generateHarmlessPost();
   if(cmd==='open-planner'){
     const workbench=globalThis.CivweaveStarlingCollectiveV1;
@@ -728,7 +740,7 @@ async function refreshTurns(){
         if(state.root?.hidden)return;
         if(!['object-created','object-received'].includes(event?.type))return;
         if(event.detail?.kind==='civweave.starling-collective-turn.v1')void refreshTurns();
-        if(['civweave.starling-collective-turn.v1','civweave.starling-collective-work-receipt.v1','civweave.starling-report-event.v1','civweave.starling-daily-report-file.v1'].includes(event.detail?.kind))
+        if(['civweave.starling-collective-turn.v1','civweave.starling-collective-work-receipt.v1','civweave.starling-report-event.v1','civweave.starling-daily-report-file.v1','civweave.starling-report-producer-grant.v1'].includes(event.detail?.kind))
           void refreshDailyReport({publish:event.type==='object-created'&&event.detail?.kind!=='civweave.starling-daily-report-file.v1'});
       });
     }
@@ -745,20 +757,42 @@ async function refreshDailyReport({publish=false}={}){
   const guild=state.guild;
   try{
     await turnService();
-    const [mod,mobile]=await Promise.all([import('./shared/starling-daily-report-v1.mjs'),import('./mobile-guild-create-v1.mjs')]);
+    const [mod,mobile,producers]=await Promise.all([import('./shared/starling-daily-report-v1.mjs'),import('./mobile-guild-create-v1.mjs'),import('./shared/starling-report-producers-v1.mjs')]);
     const mesh=state.turnMesh,founder=mobile.mobileGuildStatus();
     const isFounder=founder?.guildId===guild.id&&founder?.deviceId===await mesh.deviceId();
     const authorized=()=>Boolean(isFounder||globalThis.CivweaveGuildQuestsV1?.sessionForGuild?.(guild));
-    if(publish&&isFounder)await mod.publishDailyGuildReport({mesh,guildId:guild.id,founder:mobile.mobileGuildStatus});
-    const data=await mod.readDailyGuildReport({mesh,guildId:guild.id,verifyReader:authorized});
+    const verifyProducer=producers.createStarlingReportProducerVerifier({mesh,guildId:guild.id});
+    if(publish&&isFounder)await mod.publishDailyGuildReport({mesh,guildId:guild.id,founder:mobile.mobileGuildStatus,verifyProducer});
+    const data=await mod.readDailyGuildReport({mesh,guildId:guild.id,verifyReader:authorized,verifyProducer});
+    const registry=producers.createStarlingReportProducerRegistry({mesh,founder:mobile.mobileGuildStatus});
+    const grants=await registry.list({guildId:guild.id,verifyReader:authorized});
     if(state.guild?.id!==guild.id||state.root?.hidden)return;
-    state.reportData=data;
+    state.reportData=data;state.reportGrants=grants;state.reportIsFounder=isFounder;
     state.reportMessage=data.eventCount+' recorded action'+(data.eventCount===1?'':'s')+' · '+(data.source==='signed-replicated-file'?'synced full report file':'locally reconstructed from signed Guild records')+' · '+data.day+' UTC';
   }catch(error){if(state.guild?.id===guild.id)state.reportMessage='Daily report unavailable: '+clean(String(error?.message||error),260)}
   finally{
     state.reportBusy=false;if(state.guild?.id===guild.id)render();
     if(state.reportQueued){const next=state.reportQueuedPublish;state.reportQueued=false;state.reportQueuedPublish=false;queueMicrotask(()=>void refreshDailyReport({publish:next}));}
   }
+}
+async function manageReportProducer(action){
+  const guild=state.guild;if(!guild||!state.reportIsFounder||state.reportBusy)return;
+  const deviceId=clean($('[data-sl-report-device]')?.value,220);
+  const source=$('[data-sl-report-source]')?.value;
+  try{
+    await turnService();
+    const [mod,mobile]=await Promise.all([import('./shared/starling-report-producers-v1.mjs'),import('./mobile-guild-create-v1.mjs')]);
+    const registry=mod.createStarlingReportProducerRegistry({mesh:state.turnMesh,founder:mobile.mobileGuildStatus});
+    if(action==='trust')await registry.issue({guildId:guild.id,deviceId,source,days:7,confirmConsent:({deviceId,source})=>window.confirm('Allow '+deviceId+' to publish signed '+source+' report metadata to Guild '+guild.id+' for 7 days? This does not grant inference or task authority.')});
+    else if(action==='revoke')await registry.revoke({guildId:guild.id,deviceId});
+    state.reportMessage=action==='trust'?'Authorized signed report-only host '+deviceId+'.':'Revoked host '+deviceId+'.';
+    await refreshDailyReport({publish:true});
+  }catch(error){state.reportMessage='Report host permission rejected: '+clean(String(error?.message||error),240);render()}
+}
+async function copyReportDeviceId(){
+  try{await turnService();const id=await state.turnMesh.deviceId();await navigator.clipboard.writeText(id);
+    state.reportMessage='Copied this device’s signed mesh ID. Do not share its private signing key.'}
+  catch(error){state.reportMessage='Cannot copy signed device ID: '+clean(String(error?.message||error),230)}render();
 }
 async function saveDailyReport(){
   if(!state.reportData){await refreshDailyReport();if(!state.reportData)return}
