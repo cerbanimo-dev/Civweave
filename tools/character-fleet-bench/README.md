@@ -9,7 +9,7 @@ The authoritative runtime rosters remain:
 - Five guide identities: `public/app/shared/worldweaver-convergence-cast-v1.mjs` with roles from `public/app/assets/ai/profiles.json`
 - Book characters: only those in an explicitly supplied **private** Performance Studio Convergence casting packet (author-reviewed, unsigned preview), never an invented live installation.
 
-`questions.json` holds twenty **character-specific** test questions for each of those thirteen canonical personas plus ten prepared book identities (Landry, Delia, Magnus, Maggie, Jess, Raven, Dish, Raj, Landry-Prime, Darkness). Book seeds are dormant unless a matching approved cast profile is supplied. Other author-cast book roles require author-reviewed question cards before evaluation; the runner does not silently invent their history.
+`questions.json` holds twenty **character-specific** test questions for each of those thirteen canonical personas plus ten prepared book identities (Landry, Delia, Magnus, Maggie, Jess, Raven, Dish, Raj, Landry-Prime, Darkness). Book seeds are dormant unless a matching approved cast profile is supplied. Other author-cast book roles automatically receive twenty private questions grounded in their approved casting brief, canon rules, relationships, and interaction rules. Missing details are explicitly treated as unknown rather than invented.
 
 Each character's twenty questions cover four specific scenarios with five probes each: voice, practical judgment, disagreement/agency, uncertainty, and changed-evidence continuity. Five editable agent-file overlays test canon/voice, relationship continuity, situated action, principled dissent, and integrated synthesis. Base canon is always loaded from the existing owners; overlays do not replace it.
 
