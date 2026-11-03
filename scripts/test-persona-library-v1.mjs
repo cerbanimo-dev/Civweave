@@ -66,3 +66,32 @@ test('worldweaver NPC command uses the canonical model runtime assignment',()=>{
   assert.equal(cmd.type,'rig-npc');assert.equal(cmd.modelId,'qwen3.5:0.8b');
   assert.match(cmd.pilotPrompt,/Jess/);assert.deepEqual(cmd.capabilities,['observe','inspect','speak','move','present']);
 });
+
+test('author-approved films reach scene direction, acting prompts, and Worldweaver NPC pilots',()=>{
+  const films={magnus:'Southland Tales',maggie:'Scott Pilgrim vs. the World',
+    landry:'The Big Lebowski',delia:'Death Proof'};
+  const characters=Object.keys(films).map(id=>({
+    id,name:id,role:'protagonist',modelTier:id==='magnus'||id==='maggie'?'4b':'2b',
+    improvTier:'0.8b',voice:'In-character'
+  }));
+  const story={schema:'civweave.persona-library.v1',id:'blade-mirror-saga',
+    version:1,characters,events:[]};
+  const director=createDirectorRequest({pack:story,stage:0,scenario:'A quiet film discussion',
+    participants:Object.keys(films)});
+  const directorCast=JSON.parse(director.messages[1].content).cast;
+  for(const [id,film] of Object.entries(films)){
+    assert.equal(directorCast.find(x=>x.id===id).favoriteFilm,film);
+    const directions={characters:{[id]:{characterGoal:'Respond naturally',emotion:'calm',
+      instructions:'Answer the question',knownEventIds:[],escalateWhen:[],improvFreedom:'bounded'}}};
+    const acting=compileImprovPrompt({pack:story,stage:0,characterId:id,
+      scene:'A discussion',directives:directions});
+    assert.ok(acting.includes('favorite film: '+film));
+    const npc=worldweaverNpcCommand({pack:story,characterId:id,instanceId:'world:1',
+      modelId:'model:2b',pilotPrincipalId:'verified:model',stage:0});
+    assert.ok(npc.pilotPrompt.includes('favorite film: '+film));
+  }
+  const unrelated={...story,id:'unrelated-story'};
+  const otherRequest=createDirectorRequest({pack:unrelated,stage:0,scenario:'Chat',
+    participants:['magnus']});
+  assert.equal(JSON.parse(otherRequest.messages[1].content).cast[0].favoriteFilm,null);
+});
