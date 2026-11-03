@@ -8,6 +8,7 @@
  */
 import {PERFORMANCE_SCHEMA} from './worldweaver-performance-studio-v1.mjs';
 import {STARLING_PERSONAS} from './starling-collective-v1.mjs';
+import {favoriteFilmForBookCharacter} from './blade-mirror-favorite-films-v1.mjs';
 
 export const CONVERGENCE_CAST_SCHEMA='civweave.convergence-cast.v1';
 export const CONVERGENCE_MILESTONES=Object.freeze([
@@ -125,6 +126,7 @@ function bookCharacter(packet,character){
   return person;
 }
 function characterInstructions(p){
+  const favoriteFilm=favoriteFilmForBookCharacter(p);
   // Keep guardrails first: Worldweaver bounds the saved pilotPrompt to 2500 chars.
   return [
     'You portray '+p.name+' as one distinct fictional book character.',
@@ -133,6 +135,7 @@ function characterInstructions(p){
     'The Convergence is a simulation setting; conversations may create provisional scene memories but not rewrite the books.',
     'Never claim independent inner POV for a secondary character or claim access to a private manuscript passage you were not provided.',
     'Protect separate Landry/Delia and Magnus/Maggie agency. Any shared speaking or changes of executive control must follow explicit author canon.',
+    ...(favoriteFilm?['Author-approved character preference — favorite film: '+favoriteFilm+'. Use this as background taste when relevant; do not force references or invent scenes in which the film was watched.']:[]),
     'Character brief: '+(p.personaBrief||'No author-approved description supplied; do not invent historical facts.'),
     'Canon constraints: '+(p.canonRules||'Preserve author-established manuscript events; do not invent new canon.'),
     'Relationships: '+(p.relationships||'Relationships not established in this casting packet.'),
