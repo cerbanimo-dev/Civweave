@@ -73,6 +73,17 @@ export class CivweaveGuildEdgeState extends DurableObject{
   authorizedOwner(candidateHash){const expected=this.meta('ownerKeyHash');return Boolean(expected&&constantTimeEqual(expected,candidateHash))}
   putEnvelope(envelope){const revisionHash=clean(envelope?.payload?.revisionHash,300);if(!revisionHash)return{ok:false,status:400,error:'Envelope revision hash is required.'};this.sql.exec('INSERT OR IGNORE INTO envelopes (revision_hash,envelope_json,stored_at) VALUES (?,?,?)',revisionHash,JSON.stringify(envelope),Date.now());this.sql.exec(`DELETE FROM envelopes WHERE seq NOT IN (SELECT seq FROM envelopes ORDER BY seq DESC LIMIT ${MAX_STORED_ENVELOPES})`);return{ok:true,revisionHash}}
   listEnvelopes(limit=200){const take=Math.max(1,Math.min(200,Number(limit)||200));const rows=[...this.sql.exec(`SELECT envelope_json FROM envelopes ORDER BY seq DESC LIMIT ${take}`)].reverse();return rows.map(row=>JSON.parse(row.envelope_json))}
+  // Incremental Guild Pocket sync. Querying only the most recent 200 objects
+  // can silently lose a report while a phone has been offline for days.
+  listEnvelopesSince(after=0,limit=200){
+    const cursor=Number(after);
+    if(!Number.isSafeInteger(cursor)||cursor<0)throw Object.assign(new TypeError('Invalid Guild envelope cursor.'),{status:400});
+    const take=Math.max(1,Math.min(200,Number(limit)||200));
+    const rows=[...this.sql.exec('SELECT seq, envelope_json FROM envelopes WHERE seq > ? ORDER BY seq ASC LIMIT ?',cursor,take+1)];
+    const page=rows.slice(0,take);
+    return {envelopes:page.map(row=>JSON.parse(row.envelope_json)),
+      nextCursor:page.length?Number(page[page.length-1].seq):cursor,hasMore:rows.length>take};
+  }
 }
 
 export class CivweaveGuildCapacityState extends DurableObject{
@@ -142,7 +153,7 @@ export default{
       }
       if(url.pathname==='/api/envelopes'){
         const status=await guildState.status();if(!status.claimed)throw Object.assign(new Error('This public edge has not been paired to a Guild yet.'),{status:409});await authenticate(request,guildState);
-        if(request.method==='GET'){const limit=url.searchParams.get('limit');return json({ok:true,guildId:status.guildId,envelopes:await guildState.listEnvelopes(limit)})}
+        if(request.method==='GET'){const limit=url.searchParams.get('limit'),after=url.searchParams.get('after');return json({ok:true,guildId:status.guildId,...(after===null?{envelopes:await guildState.listEnvelopes(limit)}:await guildState.listEnvelopesSince(after,limit))})}
         if(request.method==='POST'){
           const length=Number(request.headers.get('content-length')||0);if(length>MAX_ENVELOPE_BYTES)throw Object.assign(new Error('Guild envelope is too large for this public edge.'),{status:413});const raw=await request.text();if(encoder.encode(raw).byteLength>MAX_ENVELOPE_BYTES)throw Object.assign(new Error('Guild envelope is too large for this public edge.'),{status:413});let envelope;try{envelope=JSON.parse(raw)}catch{throw Object.assign(new Error('Guild envelope is not valid JSON.'),{status:400})}if(envelope?.schema!==ENVELOPE_SCHEMA||!envelope?.payload)throw Object.assign(new Error('Invalid Civweave community envelope.'),{status:400});await verifyObject(envelope.payload,status.guildId);const stored=await guildState.putEnvelope(envelope);if(stored?.ok===false)return json({ok:false,error:stored.error},stored.status||400);return json({...stored,guildId:status.guildId},201)
         }
