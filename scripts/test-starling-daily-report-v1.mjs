@@ -50,6 +50,16 @@ test('cloud and community host metadata require independently trusted writer ide
   h.node.id='device:founder';
   await assert.rejects(()=>appendGuildReportAction({...input,source:'cloud-ai',summary:'x'.repeat(400)}),/oversized/);
 });
+test('replayed paired host job status is idempotent and cannot overwrite mismatched provenance',async()=>{
+  const h=harness(),args={mesh:h.mesh,guildId:'garden',source:'community-local',
+    action:'inference',status:'completed',summary:'Paired host reported completed',
+    referenceId:'a'.repeat(32),idempotencyKey:'job1_completed'};
+  const a=await appendGuildReportAction(args);
+  const b=await appendGuildReportAction(args);
+  assert.equal(a.id,b.id);
+  assert.equal((await h.read()).eventCount,1);
+  await assert.rejects(()=>appendGuildReportAction({...args,status:'failed'}),/collision/);
+});
 test('founder republishes a versioned file into the Guild mesh and does not duplicate unchanged reports',async()=>{
   const h=harness();
   h.record('turn-a','civweave.starling-collective-turn.v1',{schema:'civweave.starling-collective-turn.v1',turnId:'turn-a',at:day+'T09:00:00Z',text:'Proposed plan'});
