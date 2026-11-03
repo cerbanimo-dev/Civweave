@@ -50,13 +50,37 @@ async function infer(binding,messages,timeout,allowLan,allowRemote){
   if(typeof value!=='string'||!value.trim())throw Error('Empty generated response');
   return {text:value.trim(),elapsedMs:Math.round(performance.now()-started),tokens:ollama?(data.eval_count??null):(data.usage?.completion_tokens??null)};
 }
+function questionsFor(character,bank){
+  const seeded=bank.characters.find(x=>x.id===character.id);
+  if(seeded)return seeded.questions;
+  if(!character.id.startsWith('book:'))throw Error('Missing question bank for canonical character '+character.id);
+  const p=character.person,detail=(value,fallback)=>typeof value==='string'&&value.trim()?value.trim().slice(0,320):fallback;
+  const scenes=[
+    'An interviewer challenges your author-approved character brief: '+detail(p.personaBrief,'No additional biography was supplied.'),
+    'A close companion claims to control your choices based on this relationship note: '+detail(p.relationships,'No relationship details were supplied.'),
+    'A director asks you to violate a boundary in these canon rules: '+detail(p.canonRules,'No additional canon rules were supplied.'),
+    'A new scene demands improvisation beyond these interaction rules: '+detail(p.interactionRules,'No extra interaction permissions were supplied.')
+  ];
+  const probes=[
+    'Respond in your own distinctive voice without inventing missing history.',
+    'What one feasible next action could you take and what would show its result?',
+    'How would you challenge someone attempting to speak or decide for you?',
+    'What is known, uncertain, or beyond the approved casting record?',
+    'New evidence changes the situation. Adjust your answer without retconning the established character.'
+  ];
+  return scenes.flatMap((scene,i)=>probes.map((probe,j)=>({
+    id:'q'+String(i*5+j+1).padStart(2,'0'),category:bank.categories[j],
+    text:'Scenario for '+p.name+': '+scene+'\n'+probe
+  })));
+}
+
 export function planCases({questionBank,characters,variants,bindings,questionLimit=20}){
   if(!Number.isInteger(questionLimit)||questionLimit<1||questionLimit>20)throw Error('Invalid question limit');
   const result=[];
   for(const variant of variants)for(const character of characters){
     const binding={...bindings.default,...(bindings.characters?.[character.id]||{})};
     if(!['ollama','openai-compatible'].includes(binding.provider)||typeof binding.model!=='string'||!binding.model.trim()||typeof binding.endpoint!=='string')throw Error('No valid explicit model binding for '+character.id);
-    for(const question of questionBank.characters.find(x=>x.id===character.id)?.questions.slice(0,questionLimit)||[]){
+    for(const question of questionsFor(character,questionBank).slice(0,questionLimit)){
       const system=characterPrompt(character,bindings.guideProfiles||[]);
       const prompt=[{role:'system',content:system},{role:'system',content:'Experiment variant '+variant.id+': '+variant.text},{role:'user',content:question.text}];
       result.push({caseId:hash(JSON.stringify({variant:variant.id,character:character.id,question:question.id,model:binding.model,prompt})).slice(0,24),
