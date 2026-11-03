@@ -121,17 +121,15 @@ export async function readDailyGuildReport({mesh,guildId,day=new Date().toISOStr
     }else entry=memberEntry(row,founderId);
     if(entry&&dayAt(entry.at)===day)events.push(entry);
   }
-  const computed=report(guildId,day,events);
-  // A signed full file is useful when its individual receipts have not yet
-  // reached a Pocket Node. Never trust a snapshot from a different signer.
-  if(snapshot?.payload?.eventCount>computed.eventCount){
-    const saved=snapshot.payload;
-    return Object.freeze({...computed,markdown:saved.markdown,
-      events:Object.freeze(saved.events.map(item=>Object.freeze({...item}))),
-      eventCount:saved.eventCount,source:'signed-replicated-file',
-      needsReview:saved.events.some(item=>item.status==='failed'||item.status==='blocked')});
+  // Merge the founder's signed portable file with newer individual receipts.
+  // Count-only fallback loses disjoint events when the phone sees N snapshots
+  // and N other receipts; both sets must survive offline reconciliation.
+  if(snapshot){
+    const merged=new Map(snapshot.payload.events.map(entry=>[entry.id,entry]));
+    for(const event of events)merged.set(event.id,event);
+    return report(guildId,day,[...merged.values()],'signed-replicated-file');
   }
-  return computed;
+  return report(guildId,day,events);
 }
 /** Trusted model/tool/host adapters append metadata, never arbitrary prompts. */
 export async function appendGuildReportAction({mesh,guildId,source,action,status,actor='',summary='',referenceId='',idempotencyKey='',now=()=>new Date(),verifyProducer}={}){
