@@ -124,7 +124,7 @@ export async function readDailyGuildReport({mesh,guildId,day=new Date().toISOStr
   return computed;
 }
 /** Trusted model/tool/host adapters append metadata, never arbitrary prompts. */
-export async function appendGuildReportAction({mesh,guildId,source,action,status,actor='',summary='',referenceId='',now=()=>new Date(),verifyProducer}={}){
+export async function appendGuildReportAction({mesh,guildId,source,action,status,actor='',summary='',referenceId='',idempotencyKey='',now=()=>new Date(),verifyProducer}={}){
   if(!mesh?.deviceId||!mesh?.createObject||!mesh?.validateObject)throw new TypeError('Canonical signer required.');
   const genesis=await signedGenesis(mesh,guildId),deviceId=await mesh.deviceId();
   if(deviceId!==genesis.origin.nodeId&&(
@@ -132,7 +132,19 @@ export async function appendGuildReportAction({mesh,guildId,source,action,status
   ))throw new Error('Unapproved Guild report writer.');
   if(!allowedSources.has(source)||!allowedAction.has(action)||!allowedStatus.has(status)||!clean(summary,361)||summary.length>360)
     throw new TypeError('Unsupported or oversized report action.');
-  const at=now().toISOString(),id='starling-report-event:'+guildId+':'+crypto.randomUUID();
+  if(idempotencyKey&&!/^[a-zA-Z0-9_-]{1,80}$/.test(idempotencyKey))throw new TypeError('Safe host event idempotency key required.');
+  const at=now().toISOString(),id='starling-report-event:'+guildId+':'+(idempotencyKey?source+':'+idempotencyKey:crypto.randomUUID());
+  if(idempotencyKey){
+    const prior=await mesh.getObject(id);
+    if(prior){
+      if(prior.kind!==STARLING_REPORT_EVENT_KIND||prior.origin?.nodeId!==deviceId
+         ||prior.payload?.guildId!==guildId||prior.payload?.source!==source
+         ||prior.payload?.action!==action||prior.payload?.status!==status
+         ||prior.payload?.referenceId!==clean(referenceId,180)
+         ||(await mesh.validateObject(prior))?.ok!==true)throw new Error('Signed host event key collision.');
+      return prior;
+    }
+  }
   return mesh.createObject({id,revision:1,kind:STARLING_REPORT_EVENT_KIND,
     purpose:'Auditable Starling host action metadata; not independently verified task completion.',
     consent:'group',audience:['guild:'+guildId],publish:true,priority:45,
