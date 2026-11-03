@@ -45,6 +45,8 @@ test('Pocket Guild receives 450 signed relay envelopes across cursor pages and s
   const outcome=await CivweavePocketGuildNodeV1.syncPrimary();
   assert.equal(outcome.ok,true);
   assert.equal(outcome.received,450);
+  assert.equal(outcome.reportReceived,450);
+  assert.match(CivweavePocketGuildNodeV1.status().lastReportSyncAt,/^2026-/);
   assert.equal(new Set(seen).size,450);
   assert.deepEqual(requests.map(x=>x.cursor),[0,200,400]);
   assert.equal(CivweavePocketGuildNodeV1.state().primaryCursor,450);
