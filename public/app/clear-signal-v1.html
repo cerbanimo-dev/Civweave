@@ -14,7 +14,7 @@
 <header>
 <div class="eyebrow">Magnus's field kit · Local-first edition</div>
 <h1>Clear Signal</h1>
-<p><a href="/app/working-campus-v440.html" style="display:inline-block;margin:0 0 8px;color:var(--cyan);font-weight:700">← Return to Civweave</a></p>
+<p><a id="return-to-civweave" href="/app/working-campus-v440.html" style="display:inline-block;margin:0 0 8px;color:var(--cyan);font-weight:700">← Return to Civweave</a></p>
 <p class="intro">A quiet place to get your bearings when things feel confusing or intense.</p>
 <div class="tag">Self-check tool · Not a threat detector</div>
 </header>
@@ -27,7 +27,7 @@
 <div class="btnrow">
 <button class="primary" id="save-offline" type="button">Save for offline</button>
 <button id="check-offline" type="button">Check offline copy</button>
-<a class="download-file" href="/app/clear-signal-v1.html" download="Clear_Signal_Offline.html">Download portable HTML</a>
+<a id="download-portable" class="download-file" href="/app/clear-signal-v1.html" download="Clear_Signal_Offline.html">Download portable HTML</a>
 </div>
 <p id="offline-status" class="offline-status" role="status" aria-live="polite">Checking offline availability…</p>
 <p class="note">After saving, test by turning on airplane mode and reopening this page. Browser storage can still be cleared by the device; the downloaded HTML file is a separate backup. This tool does not read, save, or upload your personal notes.</p>
@@ -76,6 +76,14 @@ const offlineStatus=document.getElementById('offline-status');
 const offlineSave=document.getElementById('save-offline');
 const offlineCheck=document.getElementById('check-offline');
 const offlineNotice=message=>{offlineStatus.textContent=message};
+if(location.protocol==='file:'){
+  offlineSave.hidden=true;
+  offlineCheck.hidden=true;
+  const downloadLink=document.getElementById('download-portable');
+  if(downloadLink)downloadLink.hidden=true;
+  const backLink=document.getElementById('return-to-civweave');
+  if(backLink){backLink.href='https://civweave.cc/';backLink.textContent='Open Civweave (online)'}
+}
 async function offlineCached(){
   const cache=await caches.open(OFFLINE_CACHE);
   const response=await cache.match(new Request(new URL(OFFLINE_PATH,location.origin).href));
