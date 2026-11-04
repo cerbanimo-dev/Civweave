@@ -1,0 +1,62 @@
+name: Verify Starling PvE Production Release
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/app/starling-lounge-v1.mjs'
+      - 'public/app/shared/starling-*.mjs'
+      - 'public/app/pocket-guild-node-v1.mjs'
+      - 'public/app/server-ai-router-v301.js'
+      - 'cloudflare/mobile-guild-edge/src/index.mjs'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'scripts/test-starling-*.mjs'
+      - '.github/workflows/verify-starling-pve-production-v1.yml'
+  push:
+    branches: [main, release/starling-pve-improv-prod-v1]
+    paths:
+      - 'public/app/starling-lounge-v1.mjs'
+      - 'public/app/shared/starling-*.mjs'
+      - 'public/app/pocket-guild-node-v1.mjs'
+      - 'public/app/server-ai-router-v301.js'
+      - 'cloudflare/mobile-guild-edge/src/index.mjs'
+      - 'scripts/test-starling-*.mjs'
+      - '.github/workflows/verify-starling-pve-production-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  starling-pve:
+    name: Signed scenes, cloud budgets and phone delivery contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check production release source syntax
+        run: |
+          node --check public/app/starling-lounge-v1.mjs
+          node --check public/app/shared/starling-collective-turns-v1.mjs
+          node --check public/app/shared/starling-collective-worker-v1.mjs
+          node --check public/app/shared/starling-story-pve-v1.mjs
+          node --check public/app/shared/starling-report-ui-v1.mjs
+          node --check public/app/shared/starling-daily-report-v1.mjs
+          node --check public/app/shared/starling-report-producers-v1.mjs
+          node --check public/app/shared/starling-cloud-report-bridge-v1.mjs
+          node --check public/app/server-ai-router-v301.js
+          node --check public/app/pocket-guild-node-v1.mjs
+          node --check cloudflare/mobile-guild-edge/src/index.mjs
+      - name: Execute signed story and Guild reporting tests
+        run: |
+          node --test \
+            scripts/test-starling-collective-turns-v1.mjs \
+            scripts/test-starling-collective-worker-v1.mjs \
+            scripts/test-starling-story-pve-v1.mjs \
+            scripts/test-starling-daily-report-v1.mjs \
+            scripts/test-starling-report-producers-v1.mjs \
+            scripts/test-starling-report-relay-v1.mjs \
+            scripts/test-starling-cloud-report-bridge-v1.mjs \
+            scripts/test-starling-pve-prod-contract-v1.mjs
+      - name: Verify Guild founding enrollment
+        run: node scripts/test-mobile-guild-create-v1.mjs
