@@ -38,7 +38,7 @@ function memberEntry(row,foundingId){
   if(row.origin?.nodeId!==foundingId)return null;
   const p=row.payload||{},at=iso(p.at);if(!at)return null;
   if(row.kind===TURN&&p.schema===TURN&&p.turnId===row.id&&clean(p.text,3500))
-    return {id:row.id,at,source:p.source==='local-host'?'community-local':'local-device',
+    return {id:row.id,at,source:p.source==='cloud-model'?'cloud-ai':p.source==='local-host'?'community-local':'local-device',
       actor:clean(p.personaId,45)||'Starling',action:'draft',status:'proposed',
       detail:clean(p.brief,150)||clean(p.text,200),ref:row.id,unverified:true};
   if(row.kind===RECEIPT&&p.schema==='civweave.starling-work-receipt.v1'
