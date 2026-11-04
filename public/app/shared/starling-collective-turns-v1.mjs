@@ -1,4 +1,5 @@
 import {STARLING_PERSONAS} from './starling-collective-v1.mjs';
+import {starlingPveDirection,STARLING_PVE_PHASES} from './starling-story-pve-v1.mjs';
 
 /**
  * One native Starling Collective turn owner. The signed object mesh owns
@@ -30,7 +31,8 @@ function normalizeTurn(payload,object){
     signatureHash:clean(object.revisionHash,200),
     signerId:id(object.origin?.nodeId),
     provenance:payload.source==='local-host'?'founding-device-signed-host-draft':'founding-device-signed-self-report',hostBackend:clean(payload.hostBackend,30)||null,
-    completionVerified:false
+    completionVerified:false,storyMode:payload.storyMode==='pve'?'pve':'planning',
+    pveSceneId:clean(payload.pveSceneId,180)||null,pvePhase:STARLING_PVE_PHASES.includes(payload.pvePhase)?payload.pvePhase:null
   });
 }
 export function createCollectiveTurnService({mesh,model,founder}={}){
@@ -62,7 +64,7 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
     const max=Math.max(1,Math.min(200,Number.isInteger(limit)?limit:100));
     return Object.freeze(turns.slice(-max));
   }
-  async function runOneTurn({guildId,personaId,questId='',taskPrompt=''}={},internalToken=null){
+  async function runOneTurn({guildId,personaId,questId='',taskPrompt='',storyMode='planning',pveSceneId='',pvePhase='encounter'}={},internalToken=null){
     if(busy||(roundBusy&&internalToken!==roundToken))throw new Error('A Collective local model turn is already running.');
     busy=true;
     try{
@@ -87,12 +89,20 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
         'Do not issue tool commands, spend resources or ask for privileged data.',
         'Stay under 220 words.'
       ].join('\n');
-      const messages=[{role:'system',content:system},...prior.map(row=>({role:'assistant',content:row.personaId+': '+row.text.slice(0,1000)})),{role:'user',content:clean(taskPrompt,1200)||'Suggest one useful next action for the Guild, taking previous Collective turns into account.'}];
-      const result=await model.generate({purpose:'starling-collective-local-turn-v1',executionProfile:'interactive',config,messages,maxTokens:440,requireExternalConsent:true});
+      if(!['planning','pve'].includes(storyMode))throw new TypeError('Unsupported Starling generation mode.');
+      const pve=storyMode==='pve'?starlingPveDirection({
+        persona:person,foundingIntention:goal,brief:taskPrompt,
+        prior,pvePhase,phase:pvePhase,sceneId:pveSceneId||('scene-'+crypto.randomUUID())
+      }):null;
+      const messages=pve
+        ?[{role:'system',content:pve.system},{role:'user',content:pve.user}]
+        :[{role:'system',content:system},...prior.map(row=>({role:'assistant',content:row.personaId+': '+row.text.slice(0,1000)})),{role:'user',content:clean(taskPrompt,1200)||'Suggest one useful next action for the Guild, taking previous Collective turns into account.'}];
+      const result=await model.generate({purpose:storyMode==='pve'?'starling-collective-pve-improv-v1':'starling-collective-local-turn-v1',executionProfile:'interactive',config,messages,maxTokens:440,requireExternalConsent:true});
       const text=readableOutput(result);
       if(result?.actual?.provider&& !allowed.has(result.actual.provider))throw new Error('Unexpected nonlocal model completed the request. No Collective turn was saved.');
       const turnId='starling-turn:'+guild+':'+crypto.randomUUID(),at=new Date().toISOString();
-      const payload={schema:STARLING_TURN_SCHEMA,turnId,guildId:guild,personaId:person.id,text,brief:clean(taskPrompt,1200),at,model:clean(result.actual?.model||config.model,200),questId:id(questId)||null,source:'local-model',completionVerified:false};
+      const payload={schema:STARLING_TURN_SCHEMA,turnId,guildId:guild,personaId:person.id,text,brief:clean(taskPrompt,1200),at,model:clean(result.actual?.model||config.model,200),questId:id(questId)||null,source:'local-model',completionVerified:false,storyMode,
+        ...(pve?{pveSceneId:pve.sceneId,pvePhase:pve.phase}:{} )};
       return await mesh.createObject({
         id:turnId,revision:1,kind:STARLING_TURN_KIND,
         purpose:'Signed Starling Collective local-model turn for Guild member review, not verified task completion.',
@@ -106,19 +116,23 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
    * the next actor starts; no simultaneous resident LLM instances are needed.
    * One failed turn stops the round without rolling back previous signed turns.
    */
-  async function runRound({guildId,personas=['kami','farah','rosa'],taskPrompt='',onTurn}={}){
+  async function runRound({guildId,personas=['kami','farah','rosa'],taskPrompt='',storyMode='planning',onTurn}={}){
     if(busy||roundBusy)throw new Error('A Collective local model turn is already running.');
     if(!Array.isArray(personas)||personas.length<2||personas.length>4||new Set(personas).size!==personas.length
        ||personas.some(key=>!STARLING_PERSONAS[key]))throw new TypeError('Choose two to four distinct Starling personas.');
+    if(!['planning','pve'].includes(storyMode))throw new TypeError('Unsupported Starling round mode.');
     roundBusy=true;
+    const pveSceneId=storyMode==='pve'?'scene-'+crypto.randomUUID():'';
     let completed=0;
     try{
       for(const personaId of personas){
-        const record=await runOneTurn({guildId,personaId,taskPrompt},roundToken);
+        const phase=STARLING_PVE_PHASES[Math.min(completed,STARLING_PVE_PHASES.length-1)];
+        const record=await runOneTurn({guildId,personaId,taskPrompt,storyMode,pveSceneId,pvePhase:phase},roundToken);
         completed++;
         if(typeof onTurn==='function'){try{onTurn(record,completed,personas.length)}catch{}}
       }
-      return Object.freeze({schema:'civweave.starling-collective-round.v1',guildId,completed,total:personas.length,status:'recorded',completionVerified:false});
+      return Object.freeze({schema:'civweave.starling-collective-round.v1',guildId,completed,total:personas.length,status:'recorded',completionVerified:false,
+        storyMode,pveSceneId:pveSceneId||null});
     }finally{roundBusy=false}
   }
   /**
