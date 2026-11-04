@@ -7,7 +7,8 @@ test('production Guild Lounge exposes signed PvE and report controls without giv
   const src=read('public/app/starling-lounge-v1.mjs');
   for(const term of ['data-sl-action="turn"','data-sl-action="round"','data-sl-action="cloud-pve"',
     'storyMode:\'pve\'','runCloudPveTurn','createStarlingGuildReportPanel','data-sl-report-root',
-    'recordHostJobs','Sync report','pve'])assert.ok(src.includes(term),'Missing PvE/report integration: '+term);
+    'recordHostJobs','pve'])assert.ok(src.includes(term),'Missing PvE/report integration: '+term);
+  assert.match(read('public/app/shared/starling-report-ui-v1.mjs'),/Sync report/);
   assert.match(src,/allowLifetimeCredits:false/);
   assert.match(src,/globalThis\.confirm\?\./);
   assert.doesNotMatch(src,/autoPay|autoSpendPaidCredits/);
