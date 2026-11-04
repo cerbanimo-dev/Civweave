@@ -223,10 +223,10 @@ test('HARMLESS is discoverable in local and Guild fleet, and only permits append
  assert.match(src,/notebook\.append\(fields\)/);
  assert.match(src,/community\.append\(\{\.\.\.fields,guildId:state\.guild\.id\}\)/);
  assert.match(src,/data-sl-action="harmless-agent"/);
- assert.match(src,/harmless-community-v1\\.mjs/);
- assert.match(src,/harmless-identities-v1\\.mjs/);
- assert.match(src,/harmless-continuity-v1\\.mjs/);
- assert.match(src,/harmless-markdown-v1\\.mjs/);
+ assert.match(src,/harmless-community-v1\.mjs/);
+ assert.match(src,/harmless-identities-v1\.mjs/);
+ assert.match(src,/harmless-continuity-v1\.mjs/);
+ assert.match(src,/harmless-markdown-v1\.mjs/);
  assert.match(src,/data-sl-harmless-share/);
  assert.match(src,/data-sl-harmless-discovery/);
  assert.match(src,/data-sl-harmless-daily-limit/);
