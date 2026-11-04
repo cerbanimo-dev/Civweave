@@ -80,7 +80,7 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
       if(inference==='local'&&!original)throw new Error('Select a local model in Civweave Settings first.');
       const config=inference==='local'?(model.normalizeConfig?.(original)||original):null;
       if(inference==='local'&&(!allowed.has(config.provider)||model.endpointLeavesDevice?.(config)!==false))
-        throw new Error('This local Starling turn requires a model running on this device or its approved LAN host.');
+        throw new Error('Starling local inference requires a model running on this device or its approved LAN host.');
       if(inference==='cloud'&&typeof model.cloudGenerate!=='function')throw new Error('No authorized Guild Cloudflare AI transport is available.');
       const prior=await readTurns({guildId:guild,verifyReader:()=>true,limit:200});
       if(inference==='cloud'){
