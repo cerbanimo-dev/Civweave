@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1526">
+<title>Clear Signal — Magnus's Interface</title>
+<style>
+:root{color-scheme:dark;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--bg:#0d1526;--card:#172238;--line:#35455f;--ink:#f3f6fb;--muted:#b9c9da;--cyan:#85dded;--gold:#f0cf8a;--ok:#9ee2bc}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#213653 0,var(--bg) 50%);color:var(--ink);line-height:1.5}main{max-width:640px;margin:0 auto;padding:22px 16px 90px}header{margin:0 0 24px}.eyebrow{color:var(--cyan);text-transform:uppercase;letter-spacing:.16em;font-weight:700;font-size:.72rem}h1{font-size:clamp(2rem,8vw,3.3rem);line-height:1.08;margin:8px 0}h2{font-size:1.25rem;margin:0 0 9px}h3{font-size:1rem;margin:0 0 10px}p{margin:8px 0 13px;color:var(--muted)}strong{color:var(--ink)}.intro{font-size:1.07rem}.panel{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 8px 30px #0002}.quote{color:var(--gold);font-weight:600}.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}.controls button:first-child{grid-column:span 2}.btn,button{background:#273b56;color:var(--ink);border:1px solid #6588a3;border-radius:14px;min-height:52px;padding:12px 13px;font-weight:700;font-size:1rem;cursor:pointer}button:focus-visible,textarea:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}button.primary{background:#cae9ed;border-color:#cae9ed;color:#0d2732}button.selected{border-color:var(--gold);background:#524534}button.small{font-size:.9rem;min-height:44px}button:active{transform:translateY(1px)}.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:18px 0}.nav button{font-size:.83rem;min-height:46px;padding:9px 3px}.nav button[aria-current="page"]{border-color:var(--cyan);background:#23506a}.screen[hidden]{display:none!important}.status{background:#203c4e;border:1px solid #527a86;border-radius:15px;padding:13px 15px;margin-top:14px}.status strong{color:var(--ok)}.note{font-size:.83rem;color:var(--muted)}.steps{padding-left:22px;color:var(--ink)}.steps li{margin:10px 0}.progress{font-size:1.06rem;font-weight:600;color:var(--cyan);margin:16px 0}.chips{display:flex;flex-wrap:wrap;gap:9px}.chips button{font-size:.88rem;min-height:42px}.prompt{background:#22354c;border-radius:13px;padding:14px 16px;color:var(--ink);margin:12px 0}.fields label{display:block;font-weight:700;margin:16px 0 6px}textarea{resize:vertical;min-height:95px;width:100%;background:#0e1b30;color:var(--ink);font:inherit;padding:13px;border:1px solid #647c91;border-radius:12px}.support-script{color:var(--ink);background:#0e1b30;border:1px solid #425873;border-radius:12px;padding:14px;margin:10px 0}.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.btnrow button{flex:1 1 180px}.footer{border-top:1px solid var(--line);padding-top:18px;margin-top:25px;font-size:.83rem}a{color:var(--cyan)}.tag{display:inline-block;font-size:.7rem;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}@media(max-width:355px){.nav{grid-template-columns:repeat(2,1fr)}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">Magnus's field kit · Local-first edition</div>
+<h1>Clear Signal</h1>
+<p><a href="/app/working-campus-v440.html" style="display:inline-block;margin:0 0 8px;color:var(--cyan);font-weight:700">← Return to Civweave</a></p>
+<p class="intro">A quiet place to get your bearings when things feel confusing or intense.</p>
+<div class="tag">Self-check tool · Not a threat detector</div>
+</header>
+<div class="nav" role="navigation" aria-label="Clear Signal sections">
+<button data-target="checkin" aria-current="page">Check-in</button><button data-target="ground">Ground</button><button data-target="facts">Sort it out</button><button data-target="support">Support</button>
+</div>
+<section id="checkin" class="screen" aria-labelledby="checkin-title">
+<div class="panel"><h2 id="checkin-title">How does this moment feel?</h2>
+<p>Choose what fits. This is your report, not a measurement of what's happening outside you.</p>
+<div class="controls"><button class="primary" data-feel="steady">I'm feeling steady</button><button data-feel="foggy">I'm confused or foggy</button><button data-feel="overwhelmed">I'm overwhelmed</button></div>
+<div id="checkin-status" class="status" role="status" aria-live="polite"><strong>No check-in yet.</strong><div>It's okay to start anywhere.</div></div>
+</div>
+<div class="panel"><h3>Three simple anchors</h3><div class="chips"><button data-anchor="feet">Feel my feet</button><button data-anchor="room">Name the room</button><button data-anchor="care">Water, food, rest</button></div><p id="anchor-text" aria-live="polite">Pick an anchor to see a tiny next step.</p></div>
+</section>
+<section id="ground" class="screen" hidden aria-labelledby="ground-title">
+<div class="panel"><h2 id="ground-title">Back to this room</h2><p>You can take this at your own pace. No visualization or special beliefs required.</p>
+<div class="prompt" id="ground-prompt" aria-live="polite">Look around. Say five things you can see, even if they're ordinary.</div><div class="progress" id="ground-progress">Step 1 of 5</div>
+<div class="btnrow"><button class="primary" id="ground-next">Next gentle step</button><button id="ground-reset">Start again</button></div>
+</div><div class="panel"><h3>A short reset</h3><ol class="steps"><li>Put both feet on something firm if comfortable.</li><li>Notice how the chair or floor supports your weight.</li><li>Take one natural breath without forcing it.</li><li>Say today's date, your name, and where you are.</li></ol></div>
+</section>
+<section id="facts" class="screen" hidden aria-labelledby="facts-title">
+<div class="panel"><h2 id="facts-title">What do I know right now?</h2><p>Confusion can have many causes. Separate direct observations from possible explanations before deciding what to do.</p>
+<div class="fields"><label for="observed">What did I directly notice?</label><textarea id="observed" placeholder="For example: I lost track of the conversation, or I slept very little."></textarea>
+<label for="interpret">What explanation am I considering?</label><textarea id="interpret" placeholder="A possibility, not an established fact."></textarea>
+<label for="nextstep">What's one safe, checkable next step?</label><textarea id="nextstep" placeholder="For example: drink water, rest, ask a trusted person, or contact a clinician."></textarea></div>
+<div class="btnrow"><button id="copy-notes" class="primary">Copy my notes</button><button id="clear-notes">Clear notes</button></div><p class="note">Notes stay on this page until you leave or reload; nothing is uploaded or saved automatically.</p><p id="notes-result" aria-live="polite" class="note"></p></div>
+</section>
+<section id="support" class="screen" hidden aria-labelledby="support-title">
+<div class="panel"><h2 id="support-title">You can ask for company</h2><p>Choose someone you trust to help you check what's happening, sit with you, or get support.</p><div class="support-script" id="message">I'm feeling confused or overwhelmed and would appreciate a calm check-in. Could you talk with me for a few minutes?</div><div class="btnrow"><button class="primary" id="copy-message">Copy message</button><button id="reassure-message">Ask for simple company</button></div><p id="copy-result" aria-live="polite" class="note"></p></div>
+<div class="panel"><h3>If confusion is new or severe</h3><p>Sudden confusion, fainting, difficulty speaking, weakness, or feeling physically unsafe deserves urgent medical attention. Call local emergency services or ask someone nearby for help. If confusion keeps happening, a clinician can help look for causes such as sleep, medications, stress, or a health issue.</p></div>
+</section>
+<p class="quote">“When the signal gets messy, make the next step smaller.” — Magnus, fictional interface note</p>
+<p class="footer">This is a voluntary grounding aid. It cannot detect magic, psychic signals, surveillance, attacks, or medical conditions. It makes no network requests. Your entries are not stored or sent anywhere by this page. Reopening it while offline depends on your browser cache.</p>
+</main>
+<script>
+(()=>{'use strict';
+const screens=[...document.querySelectorAll('.screen')];const nav=[...document.querySelectorAll('[data-target]')];function show(id){for(const s of screens)s.hidden=s.id!==id;for(const b of nav)b.setAttribute('aria-current',b.dataset.target===id?'page':'false');window.scrollTo?.({top:0,behavior:'instant'});}for(const b of nav)b.addEventListener('click',()=>show(b.dataset.target));
+const checks={steady:['Steady is worth noticing.','You can keep things simple and take your time.'],foggy:['You noticed confusion.','Try grounding, drinking some water, or asking someone you trust to sit with you.'],overwhelmed:['You noticed overwhelm.','Reduce stimulation if you can. You do not have to work out the cause right now.']};for(const b of document.querySelectorAll('[data-feel]'))b.addEventListener('click',()=>{const [title,msg]=checks[b.dataset.feel];document.querySelectorAll('[data-feel]').forEach(x=>x.classList.toggle('selected',x===b));document.getElementById('checkin-status').innerHTML='<strong>'+title+'</strong><div>'+msg+'</div>';});
+const anchors={feet:'Notice where your feet meet the floor, bed, or chair. Press gently for two seconds.',room:'Name the room you are in. Look for one ordinary object you could touch.',care:'Check whether you have had water, food, a break, and enough sleep.'};for(const b of document.querySelectorAll('[data-anchor]'))b.addEventListener('click',()=>document.getElementById('anchor-text').textContent=anchors[b.dataset.anchor]);
+const grounding=['Look around. Say five things you can see, even if they are ordinary.','Notice four things you can feel with your skin or feet.','Listen for three sounds, near or far.','Notice two smells, or name two familiar smells.','Notice one taste, or name one simple fact about right now.'];let step=0;function renderStep(){document.getElementById('ground-prompt').textContent=grounding[step];document.getElementById('ground-progress').textContent='Step '+(step+1)+' of 5';document.getElementById('ground-next').textContent=step===4?'Return to start':'Next gentle step';}document.getElementById('ground-next').addEventListener('click',()=>{step=(step+1)%5;renderStep();});document.getElementById('ground-reset').addEventListener('click',()=>{step=0;renderStep();});
+async function copyText(str,resultId){const el=document.getElementById(resultId);try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(str);el.textContent='Copied.';}else{el.textContent='Clipboard access unavailable here. Select and copy the text manually.';}}catch{el.textContent='Clipboard blocked in this browser. Select and copy the text manually.';}}
+document.getElementById('copy-notes').addEventListener('click',()=>copyText(['Direct observations:\n'+document.getElementById('observed').value,'Possible explanation (unverified):\n'+document.getElementById('interpret').value,'Safe next step:\n'+document.getElementById('nextstep').value].join('\n\n'),'notes-result'));document.getElementById('clear-notes').addEventListener('click',()=>{for(const id of ['observed','interpret','nextstep'])document.getElementById(id).value='';document.getElementById('notes-result').textContent='Notes cleared.';});
+document.getElementById('copy-message').addEventListener('click',()=>copyText(document.getElementById('message').textContent,'copy-result'));document.getElementById('reassure-message').addEventListener('click',()=>{document.getElementById('message').textContent='Could you spend some quiet time with me? I would appreciate friendly company without needing to explain everything.';document.getElementById('copy-result').textContent='You can copy this version.';});
+show('checkin');
+})();
+</script>
+</body>
+</html>
