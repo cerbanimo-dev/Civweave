@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0d1526">
 <title>Clear Signal — Magnus's Interface</title>
 <style>
-:root{color-scheme:dark;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--bg:#0d1526;--card:#172238;--line:#35455f;--ink:#f3f6fb;--muted:#b9c9da;--cyan:#85dded;--gold:#f0cf8a;--ok:#9ee2bc}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#213653 0,var(--bg) 50%);color:var(--ink);line-height:1.5}main{max-width:640px;margin:0 auto;padding:22px 16px 90px}header{margin:0 0 24px}.eyebrow{color:var(--cyan);text-transform:uppercase;letter-spacing:.16em;font-weight:700;font-size:.72rem}h1{font-size:clamp(2rem,8vw,3.3rem);line-height:1.08;margin:8px 0}h2{font-size:1.25rem;margin:0 0 9px}h3{font-size:1rem;margin:0 0 10px}p{margin:8px 0 13px;color:var(--muted)}strong{color:var(--ink)}.intro{font-size:1.07rem}.panel{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 8px 30px #0002}.quote{color:var(--gold);font-weight:600}.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}.controls button:first-child{grid-column:span 2}.btn,button{background:#273b56;color:var(--ink);border:1px solid #6588a3;border-radius:14px;min-height:52px;padding:12px 13px;font-weight:700;font-size:1rem;cursor:pointer}button:focus-visible,textarea:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}button.primary{background:#cae9ed;border-color:#cae9ed;color:#0d2732}button.selected{border-color:var(--gold);background:#524534}button.small{font-size:.9rem;min-height:44px}button:active{transform:translateY(1px)}.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:18px 0}.nav button{font-size:.83rem;min-height:46px;padding:9px 3px}.nav button[aria-current="page"]{border-color:var(--cyan);background:#23506a}.screen[hidden]{display:none!important}.status{background:#203c4e;border:1px solid #527a86;border-radius:15px;padding:13px 15px;margin-top:14px}.status strong{color:var(--ok)}.note{font-size:.83rem;color:var(--muted)}.steps{padding-left:22px;color:var(--ink)}.steps li{margin:10px 0}.progress{font-size:1.06rem;font-weight:600;color:var(--cyan);margin:16px 0}.chips{display:flex;flex-wrap:wrap;gap:9px}.chips button{font-size:.88rem;min-height:42px}.prompt{background:#22354c;border-radius:13px;padding:14px 16px;color:var(--ink);margin:12px 0}.fields label{display:block;font-weight:700;margin:16px 0 6px}textarea{resize:vertical;min-height:95px;width:100%;background:#0e1b30;color:var(--ink);font:inherit;padding:13px;border:1px solid #647c91;border-radius:12px}.support-script{color:var(--ink);background:#0e1b30;border:1px solid #425873;border-radius:12px;padding:14px;margin:10px 0}.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.btnrow button{flex:1 1 180px}.footer{border-top:1px solid var(--line);padding-top:18px;margin-top:25px;font-size:.83rem}a{color:var(--cyan)}.tag{display:inline-block;font-size:.7rem;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}@media(max-width:355px){.nav{grid-template-columns:repeat(2,1fr)}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+:root{color-scheme:dark;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--bg:#0d1526;--card:#172238;--line:#35455f;--ink:#f3f6fb;--muted:#b9c9da;--cyan:#85dded;--gold:#f0cf8a;--ok:#9ee2bc}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#213653 0,var(--bg) 50%);color:var(--ink);line-height:1.5}main{max-width:640px;margin:0 auto;padding:22px 16px 90px}header{margin:0 0 24px}.eyebrow{color:var(--cyan);text-transform:uppercase;letter-spacing:.16em;font-weight:700;font-size:.72rem}h1{font-size:clamp(2rem,8vw,3.3rem);line-height:1.08;margin:8px 0}h2{font-size:1.25rem;margin:0 0 9px}h3{font-size:1rem;margin:0 0 10px}p{margin:8px 0 13px;color:var(--muted)}strong{color:var(--ink)}.intro{font-size:1.07rem}.panel{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 8px 30px #0002}.quote{color:var(--gold);font-weight:600}.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}.controls button:first-child{grid-column:span 2}.btn,button{background:#273b56;color:var(--ink);border:1px solid #6588a3;border-radius:14px;min-height:52px;padding:12px 13px;font-weight:700;font-size:1rem;cursor:pointer}button:focus-visible,textarea:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}button.primary{background:#cae9ed;border-color:#cae9ed;color:#0d2732}button.selected{border-color:var(--gold);background:#524534}button.small{font-size:.9rem;min-height:44px}button:active{transform:translateY(1px)}.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:18px 0}.nav button{font-size:.83rem;min-height:46px;padding:9px 3px}.nav button[aria-current="page"]{border-color:var(--cyan);background:#23506a}.screen[hidden]{display:none!important}.status{background:#203c4e;border:1px solid #527a86;border-radius:15px;padding:13px 15px;margin-top:14px}.status strong{color:var(--ok)}.note{font-size:.83rem;color:var(--muted)}.steps{padding-left:22px;color:var(--ink)}.steps li{margin:10px 0}.progress{font-size:1.06rem;font-weight:600;color:var(--cyan);margin:16px 0}.chips{display:flex;flex-wrap:wrap;gap:9px}.chips button{font-size:.88rem;min-height:42px}.prompt{background:#22354c;border-radius:13px;padding:14px 16px;color:var(--ink);margin:12px 0}.fields label{display:block;font-weight:700;margin:16px 0 6px}textarea{resize:vertical;min-height:95px;width:100%;background:#0e1b30;color:var(--ink);font:inherit;padding:13px;border:1px solid #647c91;border-radius:12px}.support-script{color:var(--ink);background:#0e1b30;border:1px solid #425873;border-radius:12px;padding:14px;margin:10px 0}.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.btnrow button{flex:1 1 180px}.footer{border-top:1px solid var(--line);padding-top:18px;margin-top:25px;font-size:.83rem}a{color:var(--cyan)}.offline-status{min-height:3.2em;padding:12px;border:1px solid var(--line);border-radius:12px;color:var(--ink);background:#101e33}.offline-status strong{color:var(--ok)}a.download-file{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;text-align:center;min-height:52px;padding:12px 13px;background:#273b56;border:1px solid #6588a3;border-radius:14px;color:var(--ink);font-weight:700;flex:1 1 180px}.tag{display:inline-block;font-size:.7rem;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}@media(max-width:355px){.nav{grid-template-columns:repeat(2,1fr)}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -21,6 +21,17 @@
 <div class="nav" role="navigation" aria-label="Clear Signal sections">
 <button data-target="checkin" aria-current="page">Check-in</button><button data-target="ground">Ground</button><button data-target="facts">Sort it out</button><button data-target="support">Support</button>
 </div>
+<section class="panel" id="offline-tools" aria-labelledby="offline-title">
+<h2 id="offline-title">Keep this page ready offline</h2>
+<p>While connected, save a local copy for reopening inside Civweave. You can also download the entire self-contained page and open that HTML file from your phone's Files app, without Civweave or internet.</p>
+<div class="btnrow">
+<button class="primary" id="save-offline" type="button">Save for offline</button>
+<button id="check-offline" type="button">Check offline copy</button>
+<a class="download-file" href="/app/clear-signal-v1.html" download="Clear_Signal_Offline.html">Download portable HTML</a>
+</div>
+<p id="offline-status" class="offline-status" role="status" aria-live="polite">Checking offline availability…</p>
+<p class="note">After saving, test by turning on airplane mode and reopening this page. Browser storage can still be cleared by the device; the downloaded HTML file is a separate backup. This tool does not read, save, or upload your personal notes.</p>
+</section>
 <section id="checkin" class="screen" aria-labelledby="checkin-title">
 <div class="panel"><h2 id="checkin-title">How does this moment feel?</h2>
 <p>Choose what fits. This is your report, not a measurement of what's happening outside you.</p>
@@ -47,7 +58,7 @@
 <div class="panel"><h3>If confusion is new or severe</h3><p>Sudden confusion, fainting, difficulty speaking, weakness, or feeling physically unsafe deserves urgent medical attention. Call local emergency services or ask someone nearby for help. If confusion keeps happening, a clinician can help look for causes such as sleep, medications, stress, or a health issue.</p></div>
 </section>
 <p class="quote">“When the signal gets messy, make the next step smaller.” — Magnus, fictional interface note</p>
-<p class="footer">This is a voluntary grounding aid. It cannot detect magic, psychic signals, surveillance, attacks, or medical conditions. It makes no network requests. Your entries are not stored or sent anywhere by this page. Reopening it while offline depends on your browser cache.</p>
+<p class="footer">This is a voluntary grounding aid. It cannot detect magic, psychic signals, surveillance, attacks, or medical conditions. It makes no network requests. Your entries are not stored or sent anywhere by this page. Use Save for offline and verify; browser storage may be cleared. A downloaded standalone HTML file works separately.</p>
 </main>
 <script>
 (()=>{'use strict';
@@ -58,6 +69,62 @@ const grounding=['Look around. Say five things you can see, even if they are ord
 async function copyText(str,resultId){const el=document.getElementById(resultId);try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(str);el.textContent='Copied.';}else{el.textContent='Clipboard access unavailable here. Select and copy the text manually.';}}catch{el.textContent='Clipboard blocked in this browser. Select and copy the text manually.';}}
 document.getElementById('copy-notes').addEventListener('click',()=>copyText(['Direct observations:\n'+document.getElementById('observed').value,'Possible explanation (unverified):\n'+document.getElementById('interpret').value,'Safe next step:\n'+document.getElementById('nextstep').value].join('\n\n'),'notes-result'));document.getElementById('clear-notes').addEventListener('click',()=>{for(const id of ['observed','interpret','nextstep'])document.getElementById(id).value='';document.getElementById('notes-result').textContent='Notes cleared.';});
 document.getElementById('copy-message').addEventListener('click',()=>copyText(document.getElementById('message').textContent,'copy-result'));document.getElementById('reassure-message').addEventListener('click',()=>{document.getElementById('message').textContent='Could you spend some quiet time with me? I would appreciate friendly company without needing to explain everything.';document.getElementById('copy-result').textContent='You can copy this version.';});
+/* CLEAR_SIGNAL_OFFLINE_BEGIN */
+const OFFLINE_PATH='/app/clear-signal-v1.html';
+const OFFLINE_CACHE='civweave-offline-clear-signal-v1';
+const offlineStatus=document.getElementById('offline-status');
+const offlineSave=document.getElementById('save-offline');
+const offlineCheck=document.getElementById('check-offline');
+const offlineNotice=message=>{offlineStatus.textContent=message};
+async function offlineCached(){
+  const cache=await caches.open(OFFLINE_CACHE);
+  const response=await cache.match(new Request(new URL(OFFLINE_PATH,location.origin).href));
+  if(!response?.ok)return false;
+  const page=await response.clone().text();
+  return page.includes('<title>Clear Signal')&&page.includes('id="checkin"')&&page.includes('id="offline-tools"');
+}
+async function checkOfflineCopy(){
+  if(location.protocol==='file:'){offlineNotice('Portable HTML copy: ready to use without internet. Keep this file on your device.');return true}
+  if(typeof caches==='undefined'){offlineNotice('This browser does not expose offline storage. Use Download portable HTML instead.');return false}
+  try{
+    const ready=await offlineCached();
+    if(!ready){offlineNotice('No verified offline copy saved yet. Connect to the internet and select Save for offline.');return false}
+    const controlled=Boolean(navigator.serviceWorker?.controller);
+    offlineNotice(controlled
+      ?'Offline copy verified in device storage. Reopen through the Civweave app after disconnecting to test it.'
+      :'Offline copy saved, but this page is not yet controlled by the Civweave offline worker. Download portable HTML for a reliable independent backup.');
+    return true;
+  }catch(error){offlineNotice('Unable to inspect device storage. Use Download portable HTML instead.');return false}
+}
+async function saveOfflineCopy(){
+  if(location.protocol==='file:'){offlineNotice('This portable HTML file already works offline. Keep it on your device.');return true}
+  if(typeof caches==='undefined'){offlineNotice('Offline storage is unavailable here. Use Download portable HTML instead.');return false}
+  offlineSave.disabled=true;offlineNotice('Saving an offline copy…');
+  try{
+    const url=new URL(OFFLINE_PATH,location.origin);
+    const key=new Request(url.href,{method:'GET',credentials:'same-origin'});
+    const response=await fetch(key,{cache:'reload',credentials:'same-origin'});
+    if(!response?.ok||response.redirected||response.url&&new URL(response.url).origin!==location.origin)throw new Error('The page was not available from this origin.');
+    const copy=response.clone();
+    const content=await copy.text();
+    if(!content.includes('<title>Clear Signal')||!content.includes('id="checkin"')||!content.includes('id="offline-tools"'))throw new Error('The response was not the Clear Signal page.');
+    const cache=await caches.open(OFFLINE_CACHE);
+    await cache.put(key,response.clone());
+    if(!await offlineCached())throw new Error('Offline copy could not be verified.');
+    let durable=false;
+    try{durable=Boolean(await navigator.storage?.persist?.())}catch{}
+    offlineNotice('Offline copy saved and verified locally.'+(durable?' Device storage is marked persistent.':' The device may still clear browser storage.')+' For extra safety, download portable HTML and test offline reopening.');
+    return true;
+  }catch(error){
+    offlineNotice('Could not save a verified offline copy. Check your connection and storage, or download the standalone HTML. '+String(error?.message||error).slice(0,110));
+    return false;
+  }finally{offlineSave.disabled=false}
+}
+offlineSave.addEventListener('click',()=>saveOfflineCopy());
+offlineCheck.addEventListener('click',()=>checkOfflineCopy());
+void checkOfflineCopy();
+/* CLEAR_SIGNAL_OFFLINE_END */
+
 show('checkin');
 })();
 </script>
