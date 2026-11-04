@@ -71,7 +71,7 @@ test('offline reader merges signed full file with disjoint newer local receipts'
 test('replayed paired host job status is idempotent and cannot overwrite mismatched provenance',async()=>{
   const h=harness(),args={mesh:h.mesh,guildId:'garden',source:'community-local',
     action:'inference',status:'completed',summary:'Paired host reported completed',
-    referenceId:'a'.repeat(32),idempotencyKey:'job1_completed'};
+    referenceId:'a'.repeat(32),idempotencyKey:'job1_completed',now:()=>new Date(day+'T12:00:00Z')};
   const a=await appendGuildReportAction(args);
   const b=await appendGuildReportAction(args);
   assert.equal(a.id,b.id);
