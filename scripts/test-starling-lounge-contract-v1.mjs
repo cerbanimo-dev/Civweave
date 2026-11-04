@@ -247,7 +247,8 @@ test('Guildkeeper report panel supports signed file sync, controlled host grants
    'data-sl-action="report-trust"','data-sl-action="report-revoke"',
    'data-sl-report-preview','createStarlingReportProducerRegistry',
    'createStarlingReportProducerVerifier','publishDailyGuildReport',
-   'archivePairedHostJobs','startHostReportPolling']){
+   'archivePairedHostJobs','startHostReportPolling','syncDailyReportNow',
+   'CivweavePocketGuildNodeV1.syncPrimary']){
    assert.ok(src.includes(part),'Missing report interface wiring: '+part);
  }
  for(const file of ['starling-daily-report-v1.mjs','starling-report-producers-v1.mjs',
