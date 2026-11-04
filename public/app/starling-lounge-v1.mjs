@@ -13,7 +13,7 @@ function setup(){
   if(state.root)return state.root;
   const style=document.createElement('link');style.rel='stylesheet';style.href='/app/starling-lounge-v1.css?v=starling-native-r1';document.head.append(style);
   const root=el('section');root.id=ID;root.setAttribute('aria-label','Starling Lounge');root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.hidden=true;
-  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><div class="sl-flex sl-run"><h2 class="sl-grow">Collective conversation</h2><button type="button" class="sl-strong" data-sl-action="turn">Run one local turn</button><button type="button" data-sl-action="round">Run 3-person round</button></div><p class="sl-status" data-sl-turn-status>No local model run has started. Runs are explicitly started, one at a time, and never use hosted credits.</p><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button><small data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</small></div><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Brief for the selected persona</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Give the persona one focused task or question. Running a local turn records this brief for Guild review…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Run one local turn to deliver this brief to the selected persona through your local model. Both brief and reply are saved to the Guild mesh. Open in Civweave chat uses the existing shared chat instead.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><section class="sl-host-panel" aria-label="Local execution host"><h3>Local execution host</h3><p class="sl-sub">Run and recover drafts after closing the Lounge, using either Android native work or the paired Termux host. No task claims or spending.</p><label>Backend <select data-sl-host-kind><option value="termux">Termux companion · port 8767</option><option value="android">Android native bridge · WorkManager</option></select></label><div class="sl-flex"><button type="button" data-sl-action="host-connect">Connect</button><button type="button" data-sl-action="host-submit">Queue local draft</button><button type="button" data-sl-action="host-refresh">Refresh jobs</button></div><div class="sl-flex"><button type="button" data-sl-action="host-enable">Enable host autopilot</button><button type="button" data-sl-action="host-disable">Disable host autopilot</button></div><p class="sl-status" data-sl-host-status role="status">Choose a host and connect.</p><pre data-sl-host-output class="sl-host-output"></pre><button type="button" data-sl-action="host-import">Import completed draft for Guild review</button></section><p class="sl-status" data-sl-work-status></p></aside></div>';
+  root.innerHTML='<header class="sl-head"><div><small>THE COLLECTIVE · CIVWEAVE GUILD</small><h1>✦ Starling Lounge</h1></div><div class="sl-flex"><small data-sl-guild></small><button type="button" data-sl-action="refresh">Refresh</button><button type="button" data-sl-action="close" aria-label="Close Starling Lounge">Close ×</button></div></header><div class="sl-layout"><aside class="sl-card"><p class="sl-label">The cast · eight voices</p><div class="sl-cast" data-sl-cast></div><p class="sl-status">AI-generated fictional characters. Their internal deliberations do not count as human Guild votes.</p></aside><main class="sl-card"><p class="sl-label">The living lounge · activity and conversation</p><div class="sl-stage" data-sl-stage><div class="sl-moon"></div><div class="sl-ensemble" data-sl-ensemble aria-label="Collective personas"></div><img class="sl-stage-avatar" data-sl-stage-avatar alt="Selected Starling Collective avatar"><div class="sl-stage-name" data-sl-stage-name></div></div><div class="sl-narrative" data-sl-summary></div><div class="sl-flex sl-run"><h2 class="sl-grow">PvE improv · play the story</h2><button type="button" class="sl-strong" data-sl-action="turn">Play next encounter</button><button type="button" data-sl-action="round">Play 3-beat scene</button></div><p class="sl-status" data-sl-turn-status>No scene has started. Encounter → complication → consequence. Signed fiction goes to Guild review, not automatically into book canon. Uses your chosen local model.</p><p class="sl-sub">Mission: the little dudes PvE the world, improvising environment hazards, NPCs, reversible choices and meaningful consequences. They may propose story facts, but cannot claim human Quests, invent approvals, spend credits or rewrite established canon.</p><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable PvE autopilot</button><small data-sl-worker-status>Off · Guildkeeper opt-in required · up to four local scene beats per day, only while Lounge is open.</small></div><div class="sl-feed" data-sl-feed aria-live="polite"></div><form class="sl-compose" data-sl-form><label for="cw-sl-message">Optional scene seed</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Set a place, encounter or obstacle for the next PvE scene. The cast will improvise from it and preserve earlier consequences…" required></textarea><button type="submit" class="sl-strong">Open message in Civweave chat</button></form><p class="sl-status" data-sl-message-status>Run a PvE scene to send the prompt to your selected Starling persona through the local model. Signed fictional scenes are saved in the Guild mesh for review. Open in Civweave chat uses the existing shared chat instead.</p></main><aside class="sl-card sl-work"><p class="sl-label">The maker’s corner · Guild Quest tracker</p><div class="sl-metric-row" data-sl-metrics></div><h2>Quest beats and outputs</h2><div data-sl-outputs></div><h3>Possible AI help</h3><div data-sl-offers></div><h3>Collective Toolbench</h3><div data-sl-toolbench></div><section class="sl-host-panel" aria-label="Local execution host"><h3>Local execution host</h3><p class="sl-sub">Run and recover drafts after closing the Lounge, using either Android native work or the paired Termux host. No task claims or spending.</p><label>Backend <select data-sl-host-kind><option value="termux">Termux companion · port 8767</option><option value="android">Android native bridge · WorkManager</option></select></label><div class="sl-flex"><button type="button" data-sl-action="host-connect">Connect</button><button type="button" data-sl-action="host-submit">Queue local draft</button><button type="button" data-sl-action="host-refresh">Refresh jobs</button></div><div class="sl-flex"><button type="button" data-sl-action="host-enable">Enable host autopilot</button><button type="button" data-sl-action="host-disable">Disable host autopilot</button></div><p class="sl-status" data-sl-host-status role="status">Choose a host and connect.</p><pre data-sl-host-output class="sl-host-output"></pre><button type="button" data-sl-action="host-import">Import completed draft for Guild review</button></section><p class="sl-status" data-sl-work-status></p></aside></div>';
   root.addEventListener('click',click);
   root.querySelector('[data-sl-form]').addEventListener('submit',send);
   root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close()}});
@@ -49,7 +49,8 @@ function renderFeed(){
     const who=STARLING_PERSONAS[message.personaId];
     entry.append(el('b','',who?.name||message.personaId));
     const time=el('time','',new Date(message.at).toLocaleString());entry.append(time);
-    if(message.brief)para(entry,'Requested brief: '+message.brief,'sl-sub');
+    if(message.storyMode==='pve')para(entry,'PvE improv · '+(message.pvePhase||'encounter')+' · '+(message.pveSceneId||'unassigned scene'),'sl-sub');
+    if(message.brief)para(entry,'Requested scene seed: '+message.brief,'sl-sub');
     para(entry,message.text);
     para(entry,'Signed by founding Guild device · local-model self-report; not verified Quest completion.','sl-sub');
     node.append(entry);
@@ -89,9 +90,9 @@ function render(){
   if(!state.root)return;
   $('[data-sl-guild]').textContent=state.guild?.name||state.guild?.displayName||state.guild?.id||'Guild not selected';
   renderSpeaker();renderFeed();renderWork();
-  const button=$('[data-sl-action=turn]');if(button){button.disabled=state.turnsRunning;button.textContent=state.turnsRunning?'Generating local turn…':'Run one local turn'}
+  const button=$('[data-sl-action=turn]');if(button){button.disabled=state.turnsRunning;button.textContent=state.turnsRunning?'Improvising scene…':'Play next encounter'}
   const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning;
-  const control=$('[data-sl-action=worker-toggle]');if(control){control.disabled=state.workerLoading;control.textContent=state.workerEnabled?'Disable local autopilot':'Enable local autopilot'}
+  const control=$('[data-sl-action=worker-toggle]');if(control){control.disabled=state.workerLoading;control.textContent=state.workerEnabled?'Disable PvE autopilot':'Enable PvE autopilot'}
   const worker=$('[data-sl-worker-status]');if(worker)worker.textContent=state.workerMessage;
   const hostLabel=$('[data-sl-host-status]');if(hostLabel)hostLabel.textContent=state.hostStatus;
   for(const cmd of ['host-connect','host-submit','host-refresh','host-enable','host-disable','host-import']){const control=$('[data-sl-action='+cmd+']');if(control)control.disabled=state.hostBusy||((cmd!=='host-connect')&&!state.hostTransport)}
@@ -215,13 +216,13 @@ async function runLocalTurn(){
   if(state.turnsRunning||!state.guild)return;
   const guild=state.guild,personaId=state.speaker;
   state.turnsRunning=true;state.turnError='';
-  state.turnMessage='The selected local model is generating one turn. No cloud budget or automatic loop is enabled.';
+  state.turnMessage='The selected local model is improvising a fictional PvE encounter. No hosted budget is used.';
   render();
   try{
     await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
     const service=await turnService();
-    await service.runOneTurn({guildId:guild.id,personaId,taskPrompt:clean($('#cw-sl-message')?.value,1200)});
-    if(state.guild?.id===guild.id){$('#cw-sl-message').value='';state.turnMessage='Local model turn saved and signed to Guild mesh.';await refreshTurns()}
+    await service.runOneTurn({guildId:guild.id,personaId,taskPrompt:clean($('#cw-sl-message')?.value,1200),storyMode:'pve'});
+    if(state.guild?.id===guild.id){$('#cw-sl-message').value='';state.turnMessage='PvE encounter recorded and signed to Guild mesh for story review.';await refreshTurns()}
   }catch(error){if(state.guild?.id===guild.id)state.turnError=clean(String(error?.message||error),500)}
   finally{state.turnsRunning=false;if(state.guild?.id===guild.id)render()}
 }
@@ -231,13 +232,13 @@ async function runLocalRound(){
   const ids=Object.keys(STARLING_PERSONAS),start=ids.indexOf(state.speaker);
   const personas=[0,1,2].map(offset=>ids[(Math.max(0,start)+offset)%ids.length]);
   state.turnsRunning=true;state.turnError='';
-  state.turnMessage='Starting a 3-person sequential local round. Each signed response will be saved before the next persona runs.';
+  state.turnMessage='Playing one three-beat PvE encounter: opening, complication, consequence. Each scene beat is signed before the next begins.';
   render();
   try{
     await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
     const service=await turnService();
     const result=await service.runRound({
-      guildId:guild.id,personas,taskPrompt:clean($('#cw-sl-message')?.value,1200),
+      guildId:guild.id,personas,storyMode:'pve',taskPrompt:clean($('#cw-sl-message')?.value,1200),
       onTurn:(record,completed,total)=>{
         if(state.guild?.id===guild.id){
           state.turnMessage=completed+'/'+total+' personas have submitted signed local turns.';
@@ -248,7 +249,7 @@ async function runLocalRound(){
     });
     if(state.guild?.id===guild.id){
       $('#cw-sl-message').value='';
-      state.turnMessage=result.completed+' persona turns recorded. Guild members can review the signed transcript.';
+      state.turnMessage=result.completed+' PvE scene beats recorded. Guild members can review the signed story without changing canon.';
       await refreshTurns();
     }
   }catch(error){
@@ -292,7 +293,7 @@ async function refreshWorkerStatus(){
     const worker=await ensureWorker(),status=await worker.status(guild.id);
     if(state.guild?.id!==guild.id||state.root?.hidden)return;
     state.workerEnabled=status.enabled;
-    state.workerMessage=status.enabled?'Enabled locally · at most '+status.dailyLimit+' turns/day; resumes while Lounge remains open.':'Off · Guildkeeper opt-in required. No background generation.';
+    state.workerMessage=status.enabled?'PvE enabled locally · at most '+status.dailyLimit+' beats/day; runs while Lounge remains open.':'PvE off · Guildkeeper opt-in required. No background generation.';
     if(status.enabled&&!status.active&&localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id)!=='termux'&&localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id)!=='android'){
       await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
       await worker.start(guild.id,{onStatus:result=>{
@@ -321,7 +322,7 @@ async function toggleWorker(){
       // visible opt-in control. It does not grant Quest/task/tool authority.
       await worker.enable(guild.id,{confirmConsent:()=>true,intervalMinutes:60,dailyLimit:4});
       await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
-      state.workerEnabled=true;state.workerMessage='Local autopilot enabled · up to 4 turns/day, one per hour while Lounge is open.';
+      state.workerEnabled=true;state.workerMessage='PvE autopilot enabled · up to 4 local improvised story beats/day, one per hour while Lounge is open.';
       await worker.start(guild.id,{onStatus:result=>{
         if(state.guild?.id!==guild.id||state.root?.hidden)return;
         state.workerMessage='Autopilot: '+result.status+(result.error?' · '+result.error:'');
