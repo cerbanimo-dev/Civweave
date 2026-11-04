@@ -269,7 +269,12 @@ function usableCapacitySession(){
   return rows.find(item=>item.nodeId===preferred)||rows[0]||null;
 }
 async function cloudflare(request,trace){
-  const session=usableCapacitySession();
+  // Starling cloud PvE is a Guild-owned, preauthorized operation. Never fall
+  // back to unrelated marketplace sessions or other Guilds' neuron balances.
+  const starlingCloud=/^starling-collective-cloud-pve-v1$/.test(String(request?.purpose||''));
+  const session=starlingCloud?mobileGuildCapacitySession():usableCapacitySession();
+  if(starlingCloud&&(!session?.guildId||request?.guildId!==session.guildId))
+    throw new Error('Cloud PvE requires the matching, paired Guild-owned AI node.');
   if(!session){trace.push({route:'cloudflare-workers-ai',status:'skipped',reason:'no active Guild-owned or host-capacity session'});return null}
   const endpointUrl=session.generateUrl?new URL(session.generateUrl):new URL('/api/ai/node/generate',session.origin);
   if(!session.generateUrl)endpointUrl.searchParams.set('nodeId',session.nodeId);
@@ -294,6 +299,22 @@ async function cloudflare(request,trace){
   const guildOwned=isMobileGuildSession(session);
   const telemetry=guildOwned?recordGuildUsage(session,body):(hostAccess()?.recordUsage?.({nodeId:session.nodeId,chargedNeurons:Number(body?.usage?.chargedNeurons||0),quota:body.quota||null})||{});
   trace.push({route:'cloudflare-workers-ai',status:'success',nodeId:session.nodeId,source:session.source||'capacity-session',model:body.model||payload.model});
+  // Auditing is best-effort: the existing Guild-owned cloud ledger remains the
+  // only spending authority and report failures never double-bill inference.
+  if(body?.ok===true&&typeof request?.purpose==='string'&&/^starling-collective-cloud-/.test(request.purpose)
+      &&session.guildId&&request.guildId===session.guildId){
+    try{
+      const bridge=await import('/app/shared/starling-cloud-report-bridge-v1.mjs');
+      await bridge.recordStarlingCloudGeneration({
+        mesh:globalThis.CivweaveLocalMeshV146,request,session,response:body,
+        model:body.model||payload.model
+      });
+    }catch(error){
+      try{dispatchEvent(new CustomEvent('civweave:starling-report-sync-error',{
+        detail:{guildId:session.guildId,at:now(),message:clean(error?.message||error,200)}
+      }))}catch{}
+    }
+  }
   return resultFor(request,{provider:'cloudflare-workers-ai',model:body.model||nested?.model||payload.model,text:text||JSON.stringify(outputJson),outputJson,usage:{...(body.usage||{}),chargedNeurons:Number(body?.usage?.chargedNeurons||0),remainingNeurons:telemetry.remainingNeurons,approximateTurnsLeft:telemetry.approximateTurnsLeft},diagnostics:[{code:guildOwned?'GUILD_OWNED_CLOUDFLARE':'CLOUDFLARE_CAPACITY',message:guildOwned?`Used this device's paired mobile Guild Cloudflare node ${session.nodeId}.`:`Used capacity-backed Workers AI through ${session.nodeId}; lifetime credits are never spent unless explicitly allowed.`}],routeTrace:trace});
 }
 async function handle(request={}){

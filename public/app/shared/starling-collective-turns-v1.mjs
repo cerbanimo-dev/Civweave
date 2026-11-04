@@ -1,4 +1,5 @@
 import {STARLING_PERSONAS} from './starling-collective-v1.mjs';
+import {starlingPveDirection,STARLING_PVE_PHASES} from './starling-story-pve-v1.mjs';
 
 /**
  * One native Starling Collective turn owner. The signed object mesh owns
@@ -29,8 +30,9 @@ function normalizeTurn(payload,object){
     model:clean(payload.model,200),questId:id(payload.questId)||null,
     signatureHash:clean(object.revisionHash,200),
     signerId:id(object.origin?.nodeId),
-    provenance:payload.source==='local-host'?'founding-device-signed-host-draft':'founding-device-signed-self-report',hostBackend:clean(payload.hostBackend,30)||null,
-    completionVerified:false
+    provenance:payload.source==='local-host'?'founding-device-signed-host-draft':payload.source==='cloud-model'?'founding-device-signed-cloud-self-report':'founding-device-signed-self-report',inference:payload.source==='cloud-model'?'cloud':'local',hostBackend:clean(payload.hostBackend,30)||null,
+    completionVerified:false,storyMode:payload.storyMode==='pve'?'pve':'planning',
+    pveSceneId:clean(payload.pveSceneId,180)||null,pvePhase:STARLING_PVE_PHASES.includes(payload.pvePhase)?payload.pvePhase:null
   });
 }
 export function createCollectiveTurnService({mesh,model,founder}={}){
@@ -62,7 +64,7 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
     const max=Math.max(1,Math.min(200,Number.isInteger(limit)?limit:100));
     return Object.freeze(turns.slice(-max));
   }
-  async function runOneTurn({guildId,personaId,questId='',taskPrompt=''}={},internalToken=null){
+  async function runOneTurn({guildId,personaId,questId='',taskPrompt='',storyMode='planning',inference='local',pveSceneId='',pvePhase='encounter'}={},internalToken=null){
     if(busy||(roundBusy&&internalToken!==roundToken))throw new Error('A Collective local model turn is already running.');
     busy=true;
     try{
@@ -72,11 +74,20 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
       if(owner?.guildId!==guild||owner.deviceId!==founding.origin.nodeId||await mesh.deviceId()!==founding.origin.nodeId)throw new Error('Only the Guild founding device may initiate this local Collective run.');
       const goal=clean(founding.payload?.foundingIntention?.text||owner.foundingIntention?.text,3500);
       if(!goal)throw new Error('The Guild founding Intention must be available before the Collective can run.');
-      const original=model.readSharedConfig?.('interactive');
-      if(!original)throw new Error('Select a local model in Civweave Settings first.');
-      const config=model.normalizeConfig?.(original)||original;
-      if(!allowed.has(config.provider)||model.endpointLeavesDevice?.(config)!==false)throw new Error('This version of Starling requires local inference; hosted generation and remote model endpoints are not enabled.');
-      const prior=await readTurns({guildId:guild,verifyReader:()=>true,limit:6});
+      if(!['local','cloud'].includes(inference)||inference==='cloud'&&storyMode!=='pve')
+        throw new Error('Cloud Guild inference is available only for explicitly started PvE scenes.');
+      const original=inference==='local'?model.readSharedConfig?.('interactive'):null;
+      if(inference==='local'&&!original)throw new Error('Select a local model in Civweave Settings first.');
+      const config=inference==='local'?(model.normalizeConfig?.(original)||original):null;
+      if(inference==='local'&&(!allowed.has(config.provider)||model.endpointLeavesDevice?.(config)!==false))
+        throw new Error('Starling local inference requires a model running on this device or its approved LAN host.');
+      if(inference==='cloud'&&typeof model.cloudGenerate!=='function')throw new Error('No authorized Guild Cloudflare AI transport is available.');
+      const prior=await readTurns({guildId:guild,verifyReader:()=>true,limit:200});
+      if(inference==='cloud'){
+        const date=new Date().toISOString().slice(0,10);
+        if(prior.filter(row=>row.inference==='cloud'&&row.at.startsWith(date)).length>=4)
+          throw new Error('This Guild has reached its four Starling cloud scene beats for today.');
+      }
       const system=[
         'You are '+person.name+', a fictional member of the Starling Collective. Your role: '+person.role+'.',
         'Working style: '+person.style+'. Reasoning approach: '+person.wiring+'.',
@@ -87,15 +98,26 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
         'Do not issue tool commands, spend resources or ask for privileged data.',
         'Stay under 220 words.'
       ].join('\n');
-      const messages=[{role:'system',content:system},...prior.map(row=>({role:'assistant',content:row.personaId+': '+row.text.slice(0,1000)})),{role:'user',content:clean(taskPrompt,1200)||'Suggest one useful next action for the Guild, taking previous Collective turns into account.'}];
-      const result=await model.generate({purpose:'starling-collective-local-turn-v1',executionProfile:'interactive',config,messages,maxTokens:440,requireExternalConsent:true});
+      if(!['planning','pve'].includes(storyMode))throw new TypeError('Unsupported Starling generation mode.');
+      const pve=storyMode==='pve'?starlingPveDirection({
+        persona:person,foundingIntention:goal,brief:taskPrompt,
+        prior,pvePhase,phase:pvePhase,sceneId:pveSceneId||('scene-'+crypto.randomUUID())
+      }):null;
+      const messages=pve
+        ?[{role:'system',content:pve.system},{role:'user',content:pve.user}]
+        :[{role:'system',content:system},...prior.map(row=>({role:'assistant',content:row.personaId+': '+row.text.slice(0,1000)})),{role:'user',content:clean(taskPrompt,1200)||'Suggest one useful next action for the Guild, taking previous Collective turns into account.'}];
+      const result=inference==='cloud'
+        ?await model.cloudGenerate({guildId:guild,purpose:'starling-collective-cloud-pve-v1',requestId:'pve-'+crypto.randomUUID().replaceAll('-',''),messages,maxTokens:440,allowLifetimeCredits:false})
+        :await model.generate({purpose:storyMode==='pve'?'starling-collective-pve-improv-v1':'starling-collective-local-turn-v1',executionProfile:'interactive',config,messages,maxTokens:440,requireExternalConsent:true});
       const text=readableOutput(result);
-      if(result?.actual?.provider&& !allowed.has(result.actual.provider))throw new Error('Unexpected nonlocal model completed the request. No Collective turn was saved.');
+      if(inference==='cloud'&&result?.actual?.provider!=='cloudflare-workers-ai')throw new Error('Guild cloud PvE refused a non-Cloudflare response.');
+      if(inference==='local'&&result?.actual?.provider&&!allowed.has(result.actual.provider))throw new Error('Unexpected nonlocal model completed the request. No Collective turn was saved.');
       const turnId='starling-turn:'+guild+':'+crypto.randomUUID(),at=new Date().toISOString();
-      const payload={schema:STARLING_TURN_SCHEMA,turnId,guildId:guild,personaId:person.id,text,brief:clean(taskPrompt,1200),at,model:clean(result.actual?.model||config.model,200),questId:id(questId)||null,source:'local-model',completionVerified:false};
+      const payload={schema:STARLING_TURN_SCHEMA,turnId,guildId:guild,personaId:person.id,text,brief:clean(taskPrompt,1200),at,model:clean(result.actual?.model||config?.model,200),questId:id(questId)||null,source:inference==='cloud'?'cloud-model':'local-model',completionVerified:false,storyMode,
+        ...(pve?{pveSceneId:pve.sceneId,pvePhase:pve.phase}:{} )};
       return await mesh.createObject({
         id:turnId,revision:1,kind:STARLING_TURN_KIND,
-        purpose:'Signed Starling Collective local-model turn for Guild member review, not verified task completion.',
+        purpose:'Signed Starling Collective fictional scene for Guild review, not approved canon, Quest execution or verified task completion.',
         consent:'group',audience:['guild:'+guild],publish:true,priority:40,
         payload
       });
@@ -106,19 +128,23 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
    * the next actor starts; no simultaneous resident LLM instances are needed.
    * One failed turn stops the round without rolling back previous signed turns.
    */
-  async function runRound({guildId,personas=['kami','farah','rosa'],taskPrompt='',onTurn}={}){
+  async function runRound({guildId,personas=['kami','farah','rosa'],taskPrompt='',storyMode='planning',onTurn}={}){
     if(busy||roundBusy)throw new Error('A Collective local model turn is already running.');
     if(!Array.isArray(personas)||personas.length<2||personas.length>4||new Set(personas).size!==personas.length
        ||personas.some(key=>!STARLING_PERSONAS[key]))throw new TypeError('Choose two to four distinct Starling personas.');
+    if(!['planning','pve'].includes(storyMode))throw new TypeError('Unsupported Starling round mode.');
     roundBusy=true;
+    const pveSceneId=storyMode==='pve'?'scene-'+crypto.randomUUID():'';
     let completed=0;
     try{
       for(const personaId of personas){
-        const record=await runOneTurn({guildId,personaId,taskPrompt},roundToken);
+        const phase=STARLING_PVE_PHASES[Math.min(completed,STARLING_PVE_PHASES.length-1)];
+        const record=await runOneTurn({guildId,personaId,taskPrompt,storyMode,pveSceneId,pvePhase:phase},roundToken);
         completed++;
         if(typeof onTurn==='function'){try{onTurn(record,completed,personas.length)}catch{}}
       }
-      return Object.freeze({schema:'civweave.starling-collective-round.v1',guildId,completed,total:personas.length,status:'recorded',completionVerified:false});
+      return Object.freeze({schema:'civweave.starling-collective-round.v1',guildId,completed,total:personas.length,status:'recorded',completionVerified:false,
+        storyMode,pveSceneId:pveSceneId||null});
     }finally{roundBusy=false}
   }
   /**

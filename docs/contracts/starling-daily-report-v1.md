@@ -1,0 +1,31 @@
+# Starling Collective daily Guild report (staging v1)
+
+## Contract
+
+Each Guild has one rolling **UTC-day** Markdown report (`starling-<guild>-YYYY-MM-DD.md`). It is not an AI-generated summary, a private reasoning transcript, or a substitute for the canonical Quest/evidence ledger.
+
+- The Starling signed object mesh already carries per-persona turns and worker receipts. As they are created, the founder's open Lounge regenerates a report and publishes an incremented `civweave.starling-daily-report-file.v1` group object (ID `starling-daily-report:<guildId>:<date>`). The report is an actual signed Markdown string, not just a UI placeholder. A Pocket Node can read a replicated full file even when some underlying events have not yet arrived.
+- `civweave.starling-report-event.v1` is an append-only signed action **metadata** type for cloud inference, streamed community local inference, trusted tools, or other authorized producer adapters. It records action type, status, actor, reference ID and a bounded summary. It does not copy raw prompts, credentials, model chain-of-thought, or arbitrary files. Producer adapters should write a `started` and terminal `completed`/`failed`/`blocked` record as appropriate. A completed inference means a model call ended, **not** that a Quest was completed.
+- A paired local Termux / Android host journal is sampled on connection, manual refresh and a 60-second poll while the Lounge is open. The founding device signs idempotent, review-only observation records for queued/running/completed/failed/cancelled/interrupted jobs. This is an authenticated local pairing observation, not independent verification of host execution.
+- The report on a reader's phone is reconstructed from valid signed Guild-scoped objects; the reader merges the founder-signed full-file entries with any separately received, newer signed receipts, even when both sides have the same event count. The **Save .md on this phone** button explicitly exports the report. Guild mesh storage itself is the offline in-app copy; a normal mobile PWA cannot silently write to the phone's Downloads folder.
+- The report includes date, Guild ID, count of reported actions, execution/completion states, source devices, role, actions, descriptions, and references. All signed Collective statements remain unverified until their ordinary human/Quest review.
+
+## Authorization and transport
+
+`readDailyGuildReport` requires a trusted Guild-membership reader callback. It verifies signed Guild genesis, signature validity, Guild-group audience, record type, signer, date, and bounded fields. The founder's own signed turns and worker receipts are allowed.
+
+An off-device cloud or community model host MUST have a trusted host/device authorization callback (`verifyProducer`) checked at write time and on receiving phones; a model output string, anonymous job ID, session preference, or public Guild name is not a credential. Remote events otherwise **fail closed**. `starling-report-producers-v1.mjs` now implements that separate report-only authorization: the founder may explicitly grant one device a source scope for up to 30 days, and may revoke it. The Guild operations panel exposes a seven-day authorization and revocation flow. Each enrolled producer signs with its *own* mesh device credential; access is independently checked on both writer and reader. The grant is not an inference key, Guild membership, or task permission.
+
+The transport is the existing Civweave signed object mesh plus configured Guild Pocket peer links or explicitly attached cloud primary. The Guild Cloudflare relay now exposes cursor-based, ascending pagination, with the Pocket Node saving its last successfully received cursor and automatically restarting an attached primary when the PWA runs again. Legacy non-cursor GET remains supported; the relay retains up to 2,000 envelopes, so very long offline periods still require persisted full-file snapshots or a durable additional replica. There is no new cloud database, second sync engine, push-notification vendor, or AI usage budget. The group report is visible to authorized Guild replicas, so summaries must be suitable for Guild-level sharing.
+
+## Current limits / remaining integration
+
+1. Staging collects browser-local signed turns, opted-in browser worker receipts, and observed paired local-host states. Host journals are checked every minute while the Lounge remains open. These update when Civweave/Lounge is active and peers can synchronize. The report modules are listed as optional service-worker assets for offline availability after installation.
+2. The existing Guild cloud AI router now invokes `starling-cloud-report-bridge-v1.mjs` **after an actually successful Starling-specific cloud response**, using the already authenticated Guild session. It writes a signed, deduplicated generation observation, uses actual returned neuron usage when available, and never stores prompts or outputs. This is a reporting hook, not a new cloud Starling execution mode: the current native Starling turn runner remains local-only until its separate hosted generation caps, consent and canonical budget checks are wired. Unrelated Guild chat or provider calls do not become Starling reports.
+3. Full, out-of-app background delivery requires native mobile background sync/push or an already-authorized persistent host. PWAs may pause when closed; do not promise instant background arrival. The reader refreshes when Civweave next becomes active.
+4. Daily rollover uses UTC, matching the existing Guild worker's UTC daily cap. Guild-specific timezone support can be added with an explicit stored Guild preference and server-verified rollover.
+5. A live deployment and an Android/iOS offline/online integration test remain necessary; contract tests cover signed grants, revocation, expiry, cloud observations, local aggregation, file revision/reconciliation, duplicate suppression, and multi-page Pocket relay recovery. In-process test success is not evidence that the cloud edge or native push is deployed.
+
+## Verification
+
+Run `npm run test:starling-reports` and `node --check public/app/starling-lounge-v1.mjs`. They are also included in `npm run check` and `starling-native-contract.yml`.

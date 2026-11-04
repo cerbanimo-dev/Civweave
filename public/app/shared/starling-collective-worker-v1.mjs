@@ -117,9 +117,9 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     try{
       // The local turn service contains the model routing and signed transcript
       // owner. A run never marks a canonical Cerbanimo Quest beat complete.
-      const taskPrompt=opportunity?'Review the member-posted Quest beat "'+clean(opportunity.beatTitle,240)+'" as an opportunity to offer voluntary AI assistance. Draft a concrete proposal aligned with the Guild Intention. State that this is an offer only: do not claim the task, spend resources, or mark it completed.':'Review our Guild founding Intention and recent Collective discussion. Produce one practical, reviewable contribution. Do not claim a task or mark work complete.';
-      const output=await turnService.runOneTurn({guildId:guild,personaId,questId:opportunity?.questId||'',taskPrompt});
-      await record(guild,p.revision,runId,'completed',{personaId,questId:opportunity?.questId||null,beatId:opportunity?.beatId||null,offerOnly:Boolean(opportunity),turnId:clean(output?.payload?.turnId||output?.id,180)});
+      const taskPrompt=opportunity?'A published human Quest beat is a possible FICTIONAL encounter seed: "'+clean(opportunity.beatTitle,240)+'". Improvise an environment challenge around its theme as a review-only story offer. Do not claim a task, treat the beat as approved book canon, spend resources, or mark any work completed.':'Improvise the next fictional PvE encounter from the Guildkeeper premise and the last scenes. Let the environment challenge the cast, carry a consequence forward, and leave an actionable story hook. Do not claim a task or mark work complete.';
+      const output=await turnService.runOneTurn({guildId:guild,personaId,questId:opportunity?.questId||'',taskPrompt,storyMode:'pve'});
+      await record(guild,p.revision,runId,'completed',{personaId,questId:opportunity?.questId||null,beatId:opportunity?.beatId||null,offerOnly:Boolean(opportunity),storyMode:'pve',turnId:clean(output?.payload?.turnId||output?.id,180)});
       return {status:'completed',executed:1,personaId,offerOnly:Boolean(opportunity),turnId:clean(output?.payload?.turnId||output?.id,180)};
     }catch(error){
       await record(guild,p.revision,runId,'failed',{personaId,error:clean(String(error?.message||error),280)});
