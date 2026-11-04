@@ -51,3 +51,23 @@ test('native Android bridge is origin-scoped and work is durable',()=>{
   assert.doesNotMatch(bridge,/\.addJavascriptInterface\(/);
   for(const term of ['getSharedPreferences','commit()','claimVerified','http://127.0.0.1:8080/v1/chat/completions','StarlingLocalEngine','cancelRequested'])assert.ok(worker.includes(term),term);
 });
+
+test('durable community hosts perform PvE improvisation, not real Guild work',()=>{
+  const termux=read('public/termux/civweave_starling_host.py');
+  const android=read('native/android/civweave-starling-v1/src/main/java/cc/civweave/starling/StarlingNativeWorker.kt');
+  const lounge=read('public/app/starling-lounge-v1.mjs');
+  for(const [label,code] of [['Termux',termux],['Android',android]]){
+    for(const word of ['PvE improv','SCENE, MOVE, ENVIRONMENT REACTS, COST / DISCOVERY, NEXT HOOK','provisional']){
+      assert.ok(code.includes(word),label+' lacks improv contract: '+word);
+    }
+    assert.match(code,/No (?:real-world task claims|web research)/);
+    assert.doesNotMatch(code,/Provide one useful, testable next step|Propose one useful next step/);
+  }
+  assert.match(termux,/Play the next PvE story encounter/);
+  assert.match(android,/Improvise the next fictional PvE story encounter/);
+  assert.match(lounge,/local PvE improv scene/);
+  assert.match(lounge,/PvE autopilot enabled/);
+  // Host envelopes and auth remain draft-only. Fiction never authorizes a Quest.
+  assert.match(termux,/"action": "draft-only"/);
+  assert.match(android,/\.put\("action", "draft-only"\)/);
+});

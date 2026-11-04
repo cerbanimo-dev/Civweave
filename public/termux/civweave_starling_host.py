@@ -237,7 +237,7 @@ class StarlingHost:
                 idx = schedule["usedToday"] % len(PERSONAS)
                 job = checked_job({"schema": SCHEMA, "jobId": secrets.token_hex(16), "guildId": guild,
                                   "personaId": PERSONAS[idx], "model": schedule["model"], "intention": schedule["intention"],
-                                  "brief": "Draft one reviewable, nonbinding action aligned with the Guild Intention.",
+                                  "brief": "Play the next PvE story encounter. Let the fictional environment challenge the cast; leave a meaningful consequence and next hook.",
                                   "maxTokens": 440, "action": "draft-only"})
                 schedule["lastAttempt"] = self.clock()
                 schedule["nextAt"] = self.clock() + schedule["intervalMinutes"] * 60
@@ -255,10 +255,15 @@ class StarlingHost:
             self._save()
             job_id = pending["jobId"]
             system = ("You are " + pending["personaId"] + " in the fictional Civweave Starling Collective. "
-                "Guild Intention: " + pending["intention"] + ". "
-                "Produce a concise, reviewable draft only. No web research, tool access, task claims, "
-                "Guild governance votes, spending, fabricated evidence, or assertion of completed work.")
-            prompt = pending["brief"] or "Provide one useful, testable next step."
+                "Guildkeeper-authored provisional story premise: " + pending["intention"] + ". "
+                "Your job is fictional PvE improv: play an encounter against an environment hazard, puzzle or NPC. "
+                "Yes-and the previous fictional action without erasing its costs. The environment reacts causally; "
+                "keep choices meaningful, allow setbacks, and leave an open playable hook for the next cast member. "
+                "Use compact headings SCENE, MOVE, ENVIRONMENT REACTS, COST / DISCOVERY, NEXT HOOK. "
+                "Invented story facts are provisional, never approved book canon. "
+                "No web research, tool access, real-world task claims, human votes, credit spending, "
+                "fabricated evidence, or assertions of completed real work. Output a reviewable fictional scene only.")
+            prompt = pending["brief"] or "Play the next PvE story encounter, complicate the world and leave a consequence."
             submission = {"model": pending["model"], "messages": [
                 {"role": "system", "content": system}, {"role": "user", "content": prompt}],
                 "max_tokens": pending["maxTokens"], "temperature": 0.2, "client_key": job_id}
