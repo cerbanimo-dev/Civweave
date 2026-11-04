@@ -674,7 +674,7 @@ function click(event){
   if(cmd==='focus-chat'){setView('conversation');$('#cw-sl-message')?.focus()}
   if(cmd==='harmless-refresh')void refreshHarmless();
   if(cmd==='harmless-export')void exportHarmless();
-  if(cmd==='report-refresh')void refreshDailyReport({publish:true});
+  if(cmd==='report-refresh')void syncDailyReportNow();
   if(cmd==='report-save')void saveDailyReport();
   if(cmd==='report-trust')void manageReportProducer('trust');
   if(cmd==='report-revoke')void manageReportProducer('revoke');
@@ -749,6 +749,23 @@ async function refreshTurns(){
       state.feed=[];state.turnError='Signed transcript unavailable: '+clean(String(error?.message||error),330);
     }
   }finally{state.turnsLoading=false;if(state.guild?.id===guild.id)render()}
+}
+async function syncDailyReportNow(){
+  const guildId=state.guild?.id;
+  if(!guildId||state.root?.hidden)return;
+  let cloudError='';
+  try{
+    const pocket=await import('./pocket-guild-node-v1.mjs');
+    const linked=pocket.CivweavePocketGuildNodeV1.state();
+    if(linked?.guildId===guildId&&linked.primaryOrigin){
+      const result=await pocket.CivweavePocketGuildNodeV1.syncPrimary();
+      if(result?.status!=='synced')cloudError='Cloud relay not synchronized: '+clean(result?.status||'unknown',120);
+    }
+  }catch(error){cloudError='Cloud relay unavailable: '+clean(error?.message||String(error),160)}
+  if(state.guild?.id===guildId){
+    await refreshDailyReport({publish:true});
+    if(cloudError){state.reportMessage+=' · '+cloudError;render()}
+  }
 }
 async function refreshDailyReport({publish=false}={}){
   if(!state.guild||state.root?.hidden)return;
