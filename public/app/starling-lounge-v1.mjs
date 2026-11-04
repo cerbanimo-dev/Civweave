@@ -450,10 +450,10 @@ async function submitHostDraft(){
     const intention=await selectedFoundingIntention(),guildId=state.guild.id,model='qwen35-4b-native';
     const job=await state.hostTransport.submit({
       jobId:crypto.randomUUID().replaceAll('-',''),guildId,personaId:state.speaker,
-      model,intention,brief:clean($('#cw-sl-message')?.value,1200),maxTokens:440
+      model,intention,brief:clean($('#cw-sl-message')?.value,1200)||'Improvise the next fictional PvE encounter from this Guildkeeper story premise. Let the environment challenge the cast; leave a cost and next hook.',maxTokens:440
     });
     state.hostJob=job;
-    state.hostStatus='Queued '+state.hostKind+' local '+state.speaker+' draft. You may close Civweave and return to review it.';
+    state.hostStatus='Queued '+state.hostKind+' local PvE improv scene for '+state.speaker+'. You may close Civweave and return to review the fictional result.';
     $('[data-sl-host-output]').textContent='';
   }catch(error){state.hostStatus='Could not queue draft: '+clean(String(error?.message||error),330)}
   finally{state.hostBusy=false;render()}
@@ -477,7 +477,7 @@ async function setHostAutopilot(enabled){
       const result=await state.hostTransport.schedule({guildId,enabled:true,intention,model:'qwen35-4b-native',intervalMinutes:60,dailyLimit:4});
       if(result.enabled!==true)throw new Error('Host did not acknowledge scheduling.');
       localStorage.setItem(hostPreference(guildId),kind); // preference, never an authorization token
-      state.hostStatus=kind+' autopilot enabled locally: at most 4 drafts/day, minimum 60-minute interval. Review each result.';
+      state.hostStatus=kind+' PvE autopilot enabled: at most 4 fictional scene beats/day, minimum 60-minute interval. Review each scene before canon.';
     }else{
       await state.hostTransport.schedule({guildId,enabled:false});
       if(localStorage.getItem(hostPreference(guildId))===kind)localStorage.removeItem(hostPreference(guildId));
