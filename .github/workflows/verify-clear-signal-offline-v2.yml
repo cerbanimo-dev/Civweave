@@ -1,0 +1,44 @@
+name: Clear Signal offline readiness
+on:
+  pull_request:
+    branches: [staging, main]
+    paths:
+      - 'public/app/clear-signal-v1.html'
+      - 'public/app/working-campus-v440.html'
+      - 'public/app/working-campus-v156.html'
+      - 'public/app/offline-package-v208.json'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/test-clear-signal-v1.mjs'
+      - 'scripts/test-clear-signal-offline-v2.mjs'
+      - '.github/workflows/verify-clear-signal-offline-v2.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/clear-signal-v1.html'
+      - 'public/app/offline-package-v208.json'
+      - 'public/service-worker-shell-assets-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/test-clear-signal-v1.mjs'
+      - 'scripts/test-clear-signal-offline-v2.mjs'
+      - '.github/workflows/verify-clear-signal-offline-v2.yml'
+jobs:
+  clear-signal-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check generated service worker and syntax
+        run: |
+          node scripts/build-service-worker-v211.mjs --check
+          node --check public/service-worker-shell-assets-v1.js
+          node --check public/service-worker-v203.js
+      - name: Verify privacy, offline manifest and functional cache behavior
+        run: |
+          node scripts/test-clear-signal-v1.mjs
+          node --test scripts/test-clear-signal-offline-v2.mjs
