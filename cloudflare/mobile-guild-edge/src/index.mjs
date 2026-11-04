@@ -1,5 +1,5 @@
-import {buildGuildRadioSchedule,guildRadioWindow} from '../../../public/app/shared/guild-radio-schedule-v1.mjs';
-import radioCorpus from '../../../public/downloads/hub-media/open-music/guild-bundles-v1.json' with {type:'json'};
+import {buildGuildRadioSchedule,guildRadioWindow} from './guild-radio-schedule-v1.mjs';
+import radioCorpus from './guild-bundles-v1.json' with {type:'json'};
 import {DurableObject} from 'cloudflare:workers';
 
 const WORKER_VERSION='1.2.0-guild-location-parity';
