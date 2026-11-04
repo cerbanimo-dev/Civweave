@@ -269,7 +269,12 @@ function usableCapacitySession(){
   return rows.find(item=>item.nodeId===preferred)||rows[0]||null;
 }
 async function cloudflare(request,trace){
-  const session=usableCapacitySession();
+  // Starling cloud PvE is a Guild-owned, preauthorized operation. Never fall
+  // back to unrelated marketplace sessions or other Guilds' neuron balances.
+  const starlingCloud=/^starling-collective-cloud-pve-v1$/.test(String(request?.purpose||''));
+  const session=starlingCloud?mobileGuildCapacitySession():usableCapacitySession();
+  if(starlingCloud&&(!session?.guildId||request?.guildId!==session.guildId))
+    throw new Error('Cloud PvE requires the matching, paired Guild-owned AI node.');
   if(!session){trace.push({route:'cloudflare-workers-ai',status:'skipped',reason:'no active Guild-owned or host-capacity session'});return null}
   const endpointUrl=session.generateUrl?new URL(session.generateUrl):new URL('/api/ai/node/generate',session.origin);
   if(!session.generateUrl)endpointUrl.searchParams.set('nodeId',session.nodeId);
