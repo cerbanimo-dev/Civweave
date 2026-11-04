@@ -220,7 +220,8 @@ test('HARMLESS is discoverable in local and Guild fleet, and only permits append
  assert.match(src,/data-sl-view="harmless"/);
  assert.match(src,/data-sl-panel="harmless"/);
  assert.match(src,/harmless-notebook-v1\.mjs/);
- assert.match(src,/\.append\(\{name,subject,body\}\)/);
+ assert.match(src,/notebook\.append\(fields\)/);
+ assert.match(src,/community\.append\(\{\.\.\.fields,guildId:state\.guild\.id\}\)/);
  assert.match(src,/data-sl-action="harmless-agent"/);
  assert.match(src,/harmless-community-v1\\.mjs/);
  assert.match(src,/harmless-identities-v1\\.mjs/);
