@@ -101,7 +101,7 @@ class StarlingNativeWorker(context: Context, parameters: WorkerParameters) : Wor
                 .put("schema", JOB_SCHEMA).put("jobId", jid).put("guildId", guild)
                 .put("personaId", persona).put("model", policy.getString("model"))
                 .put("intention", policy.getString("intention"))
-                .put("brief", "Draft one reviewable Guild contribution. Do not claim or complete work.")
+                .put("brief", "Improvise the next fictional PvE story encounter against the environment, with a meaningful cost and playable next hook.")
                 .put("maxTokens", 440).put("action", "draft-only")
                 .put("state", "queued").put("createdAt", nowAt).put("updatedAt", nowAt)
                 .put("text", "").put("error", "").put("reviewRequired", true).put("claimVerified", false)
@@ -210,12 +210,16 @@ class LoopbackLlamaEngine : StarlingLocalEngine {
         connection.setRequestProperty("Content-Type", "application/json")
         try {
             val instruction = "You are " + job.getString("personaId") +
-                " in the fictional Civweave Starling Collective. Guild goal: " +
+                " in the fictional Civweave Starling Collective. Guildkeeper-authored provisional story premise: " +
                 job.getString("intention") +
-                ". Produce a reviewable draft only. No tool execution, fabricated claims, verified completions, governance votes, external actions or spending."
+                ". Your job is fictional PvE improv: respond to the environment, a puzzle, hazard or NPC. " +
+                "Yes-and earlier fictional actions, preserve earned costs, give meaningful choices, and leave a playable next hook. " +
+                "Use compact headings SCENE, MOVE, ENVIRONMENT REACTS, COST / DISCOVERY, NEXT HOOK. " +
+                "All invented story facts are provisional, not approved book canon. " +
+                "No real-world task claims, tool execution, fabricated evidence, governance votes, external actions or spending."
             val messages = JSONArray().put(JSONObject().put("role", "system").put("content", instruction))
                 .put(JSONObject().put("role", "user").put("content",
-                    job.optString("brief").ifBlank { "Propose one useful next step." }))
+                    job.optString("brief").ifBlank { "Play the next fictional PvE encounter with an earned consequence and hook." }))
             val payload = JSONObject().put("model", job.getString("model"))
                 .put("messages", messages).put("stream", false)
                 .put("max_tokens", job.optInt("maxTokens", 440)).put("temperature", 0.2)
