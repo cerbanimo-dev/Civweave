@@ -73,3 +73,27 @@ test('planning mode stays available to nonstory workflows; invalid story mode ca
   await assert.rejects(()=>h.service.runOneTurn({guildId:'garden',personaId:'kami',storyMode:'unauthorized'}),/mode/);
   assert.equal(h.requests.length,1);
 });
+
+test('cloud PvE is opt-in, Guild scoped and limited to four signed beats per UTC day',async()=>{
+  const h=harness(),calls=[];
+  h.model.cloudGenerate=async request=>{
+    calls.push(request);
+    return {status:'success',outputText:'SCENE: A narrow passage. MOVE: We retreat. ENVIRONMENT REACTS: An echo follows. COST / DISCOVERY: We lose our map. NEXT HOOK: Find a lantern.',actual:{provider:'cloudflare-workers-ai',model:'@cf/test'}};
+  };
+  for(let i=0;i<4;i++)await h.service.runOneTurn({guildId:'garden',personaId:'kami',inference:'cloud',storyMode:'pve'});
+  assert.equal(h.items.length,4);
+  assert.equal(calls.length,4);
+  assert.equal(calls.every(c=>c.guildId==='garden'&&c.maxTokens===440&&c.allowLifetimeCredits===false&&/^starling-collective-cloud-pve-v1$/.test(c.purpose)),true);
+  assert.equal(h.items.every(x=>x.payload.source==='cloud-model'&&x.payload.completionVerified===false),true);
+  await assert.rejects(()=>h.service.runOneTurn({guildId:'garden',personaId:'rosa',inference:'cloud',storyMode:'pve'}),/four Starling cloud/);
+  assert.equal(calls.length,4);
+});
+test('cloud PvE refuses unspecified consent path, planning modes and non-Cloudflare fallback',async()=>{
+  const h=harness(),calls=[];
+  await assert.rejects(()=>h.service.runOneTurn({guildId:'garden',personaId:'kami',inference:'cloud',storyMode:'pve'}),/authorized Guild Cloudflare/);
+  h.model.cloudGenerate=async request=>{calls.push(request);return {status:'success',outputText:'A response',actual:{provider:'ollama'}}};
+  await assert.rejects(()=>h.service.runOneTurn({guildId:'garden',personaId:'kami',inference:'cloud',storyMode:'pve'}),/non-Cloudflare/);
+  await assert.rejects(()=>h.service.runOneTurn({guildId:'garden',personaId:'kami',inference:'cloud',storyMode:'planning'}),/explicitly started PvE/);
+  assert.equal(h.items.length,0);
+  assert.equal(calls.length,1);
+});
