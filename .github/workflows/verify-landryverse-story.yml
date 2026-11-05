@@ -1,0 +1,38 @@
+name: Verify Landryverse Story
+on:
+  pull_request:
+    paths:
+      - 'docs/universe/the-girls-who-stole-tomorrow/**'
+      - 'scripts/build-landryverse-story-v1.mjs'
+      - 'scripts/test-landryverse-story-v1.mjs'
+      - '.github/workflows/verify-landryverse-story.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  story-rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check story runner syntax
+        run: |
+          node --check scripts/build-landryverse-story-v1.mjs
+          node --check scripts/test-landryverse-story-v1.mjs
+      - name: Test story, portable client and canonical universe boundaries
+        run: node --test scripts/test-landryverse-story-v1.mjs scripts/test-worldweaver-portable-client-v1.mjs scripts/test-worldweaver-universe-v1.mjs
+      - name: Build offline universe and run scripted chapter table read
+        run: node scripts/build-landryverse-story-v1.mjs --out dist/landryverse-test
+      - name: Preserve the offline universe and attributed test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: landryverse-story-test
+          path: |
+            dist/landryverse-test/*.civweave.html
+            dist/landryverse-test/table-read-report.json
+            dist/landryverse-test/portable-blueprint.json
+          if-no-files-found: error
+          retention-days: 14
