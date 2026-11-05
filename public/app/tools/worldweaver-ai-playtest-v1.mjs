@@ -15,7 +15,7 @@ const roleInput=form.elements.namedItem('role');
 const personaInput=form.elements.namedItem('personaId');
 const send=form.querySelector('[data-ww-ai-send]');
 const roomInput=form.elements.namedItem('world');
-let activeSession=null,sessionMode='',activeRequest=0,busy=false;
+let activeSession=null,sessionMode='',activeRequest=0,busy=false,activeController=null;
 
 for(const room of COMMONS_BETWEEN.rooms){
   const item=document.createElement('option');
@@ -25,6 +25,8 @@ for(const room of COMMONS_BETWEEN.rooms){
 function settingsOwner(){return globalThis.CivweaveSettingsV320}
 function showStatus(message){status.textContent=message}
 function endSession(message='In-memory scene history cleared.'){
+  activeController?.abort('Worldweaver playtest ended by user or settings change.');
+  activeController=null;
   activeRequest+=1;
   activeSession?.clearMemory();
   activeSession=null;sessionMode='';
@@ -80,6 +82,8 @@ form.addEventListener('submit',async event=>{
   if(!prompt){showStatus('A scene prompt is required.');return}
   busy=true;send.disabled=true;
   const requestId=++activeRequest;
+  const controller=new AbortController();
+  activeController=controller;
   showStatus('Sending one requested story proposal. No Worldweaver action will be committed.');
   try{
     if(!activeSession){
@@ -99,7 +103,7 @@ form.addEventListener('submit',async event=>{
       personaId:role==='loom'?'loom':role==='lari'?'lari':String(personaInput.value||'').trim(),
       actorPrompt:String(form.elements.namedItem('personaPrompt').value||''),
       worldContext:room.description+'\n'+String(form.elements.namedItem('worldContext').value||''),
-      scenePrompt:prompt,maxOutputTokens:200
+      scenePrompt:prompt,maxOutputTokens:200,signal:controller.signal
     });
     if(requestId!==activeRequest)return;
     output.textContent=result.text;
@@ -112,7 +116,7 @@ form.addEventListener('submit',async event=>{
       showStatus('No approved fiction output: '+String(error?.message||error).slice(0,320));
       output.textContent='No Worldweaver change was made.';
     }
-  }finally{busy=false;send.disabled=false}
+  }finally{if(activeController===controller)activeController=null;busy=false;send.disabled=false}
 });
 roleInput.addEventListener('change',syncRole);
 form.querySelector('[data-ww-ai-end]').addEventListener('click',()=>endSession());
