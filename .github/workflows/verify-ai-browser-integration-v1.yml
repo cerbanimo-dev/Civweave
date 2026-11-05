@@ -1,0 +1,33 @@
+name: Verify AI browser integration (Thread C)
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/ai-browser-bridge-v1.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/test-ai-browser-bridge-v1.mjs'
+      - 'docs/contracts/ai-browser-integration-v1.md'
+      - '.github/workflows/verify-ai-browser-integration-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          node --check public/app/ai-browser-bridge-v1.js
+          node --check scripts/test-ai-browser-bridge-v1.mjs
+          node --check public/app/local-ai/bootstrap-v266.js
+      - name: AI browser integration contract
+        run: node scripts/test-ai-browser-bridge-v1.mjs
+      - name: Existing browser agent contract
+        run: node scripts/verify-local-browser-agent-v1.mjs
