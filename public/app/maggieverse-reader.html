@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#151123">
+<title>Maggieverse · Soundtrack Reader</title>
+<style>
+:root{color-scheme:dark;--bg:#0c0e17;--panel:#151a28;--panel2:#1d2233;--muted:#b0bacc;--line:#35415a;--gold:#f1c98b;--cyan:#a7e8e2;--text:#f0f0f5;font-family:system-ui,-apple-system,sans-serif}*{box-sizing:border-box}body{margin:0;background:linear-gradient(140deg,#151024,#091725 65%,#0a0e17);color:var(--text);min-height:100vh}a{color:var(--cyan)}button,input,select{font:inherit}button{cursor:pointer;border:1px solid #536078;border-radius:11px;background:#293047;color:var(--text);padding:10px 13px;min-height:44px}button:hover:not(:disabled){background:#36415c}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}.gold{background:#654521;border-color:#a77f40}.gold:hover:not(:disabled){background:#80572b}input,select{min-height:44px;width:100%;padding:10px;border:1px solid #586179;background:#0d1424;color:var(--text);border-radius:9px}input[type=file]{padding:8px}input[type=number]{min-width:0}h1,h2,h3,p{margin:0}h1{font:700 clamp(1.4rem,3.5vw,2rem)/1.2 Georgia,serif;letter-spacing:.01em}h2{font-size:1.08rem}h3{font-size:.97rem}.muted,.small{color:var(--muted)}.small{font-size:.82rem;line-height:1.5}.eyebrow{font-size:.69rem;text-transform:uppercase;font-weight:800;color:var(--gold);letter-spacing:.13em}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,345px);gap:15px;max-width:1350px;margin:auto;padding:16px 18px 90px}.top{grid-column:1/-1;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:13px 8px 8px}.top .brand{display:grid;gap:4px}.topnav{display:flex;flex-wrap:wrap;gap:8px}.topnav a{border:1px solid var(--line);padding:10px 12px;text-decoration:none;border-radius:12px;font-weight:700}.panel{border:1px solid var(--line);border-radius:18px;background:#111827e6;box-shadow:0 9px 45px #0003}.read{overflow:hidden;min-height:68vh;display:flex;flex-direction:column}.bookhead{padding:17px 20px;border-bottom:1px solid var(--line);display:grid;gap:10px}.controls{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}.controls label{display:grid;gap:6px}.controls .file{grid-column:1/-1}.reading{padding:clamp(20px,5vw,55px);flex:1;background:radial-gradient(ellipse at 48% 0%,#222334 0%,#131725 70%)}.page{font:1.18rem/1.85 Georgia,serif;white-space:pre-wrap;overflow-wrap:anywhere;max-width:70ch;margin:auto;min-height:18rem}.page::selection{background:#7da6ac;color:#0a141a}.readerfooter{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:15px;border-top:1px solid var(--line)}.readerfooter button{min-width:74px}.progress{font-size:.87rem;text-align:center;color:var(--muted)}.soundtrack{padding:18px;display:grid;align-content:start;gap:14px}.hr{border-top:1px solid var(--line);padding-top:13px}.stack{display:grid;gap:9px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{display:grid;gap:5px;font-size:.82rem;color:#d5dbe8}.cta{display:flex;gap:8px;flex-wrap:wrap}.cue{padding:12px;border:1px solid #535477;border-radius:12px;background:#1e2638;display:grid;gap:7px}.cue.active{border-color:var(--gold);background:#34291e}.cue .tag{color:var(--gold);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.cue .name{font-weight:750}.cue-actions{display:flex;gap:7px;flex-wrap:wrap}.cue-actions button{font-size:.82rem;padding:6px 9px;min-height:35px}.listen{border-color:#34a476;background:#175739}.listen:hover:not(:disabled){background:#21694a}.preview{border:1px solid #416457;padding:12px;border-radius:14px;background:#12251f}.preview p{line-height:1.5}.preview iframe{border:0;border-radius:12px;width:100%;min-height:155px}.status{font-size:.84rem;min-height:1.5em;color:var(--cyan);line-height:1.45}.error{color:#ffbaba}.empty{font-style:italic;color:var(--muted);font-size:.87rem}.noshow{display:none!important}#cue-list{display:grid;gap:9px;max-height:34vh;overflow:auto}.counter{font-variant-numeric:tabular-nums}.footnote{grid-column:1/-1;text-align:center;padding:15px;color:#a9b5c7;font-size:.8rem;line-height:1.5}@media(max-width:880px){.layout{grid-template-columns:1fr;padding:9px 9px 90px}.top{padding:12px 8px}.read{min-height:55vh}.soundtrack{gap:13px}.reading{padding:20px}.page{font-size:1.1rem;line-height:1.78;min-height:250px}#cue-list{max-height:none}.controls{grid-template-columns:1fr 130px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="layout">
+<header class="top">
+  <div class="brand"><div class="eyebrow">Civweave · Living Library</div><h1>Maggieverse Soundtrack Reader</h1><p class="small">Books stay on this device. Music choices stay yours.</p></div>
+  <nav class="topnav"><a href="/app/working-campus-v440.html">Civweave</a><a href="/app/living-library-seedling-v1.html">Living Library</a></nav>
+</header>
+<section class="panel read" aria-label="Book reader">
+  <div class="bookhead">
+    <h2 id="book-title">Sample · The Loom</h2>
+    <p id="book-description" class="small">Import your own book to set page-specific soundtrack cues. EPUB, TXT and Markdown are supported; EPUB is displayed in accessible plain-text reading mode.</p>
+    <div class="controls">
+      <label class="field file">Open a local book <input type="file" id="book-file" accept=".epub,.txt,.md,text/plain,application/epub+zip"></label>
+      <label class="field">Reader page length
+        <select id="page-size"><option value="1200">Short</option><option value="2100" selected>Standard</option><option value="3200">Long</option></select>
+      </label>
+      <button id="reset-book" type="button">Sample book</button>
+    </div>
+  </div>
+  <div class="reading" id="reading-area"><article id="page" class="page" aria-label="Current reading page"></article></div>
+  <div class="readerfooter">
+    <button type="button" id="previous" aria-label="Previous page">← Back</button>
+    <div class="progress"><strong class="counter" id="position">1 / 1</strong><div id="progress">0% read</div></div>
+    <button type="button" id="next" aria-label="Next page">Next →</button>
+  </div>
+</section>
+<aside class="panel soundtrack" aria-label="Soundtrack cue editor">
+  <div class="stack">
+    <div class="eyebrow">Scene soundtrack</div><h2>Music for this page</h2>
+    <p class="small">Playlist ranges appear on their assigned pages. A song can be suggested at a single page turn. No Spotify audio starts or changes automatically.</p>
+    <div id="now-cue" class="preview"><p class="empty">No cue at this page yet.</p></div>
+    <div id="embed-region" class="noshow"><h3>Spotify player</h3><p class="small" id="playing-label"></p><div id="spotify-embed"></div><button id="close-player" type="button">Close player</button></div>
+  </div>
+  <form id="cue-form" class="stack hr">
+    <h2>Assign a page range or song</h2>
+    <label class="field">Cue type
+      <select id="cue-kind"><option value="playlist">Playlist for page range</option><option value="track">Song suggestion at one page</option></select>
+    </label>
+    <div class="grid2">
+      <label class="field">From reader page<input id="cue-start" type="number" value="1" min="1" required></label>
+      <label class="field" id="to-field">Through page<input id="cue-end" type="number" value="1" min="1" required></label>
+    </div>
+    <label class="field">Playlist shortcut
+      <select id="preset">
+        <option value="">Choose preset or paste your own URL</option>
+        <option value="https://open.spotify.com/playlist/2BLWIhSfHdbcfG5rP8IqoX">Civweave Radio</option>
+        <option value="https://open.spotify.com/playlist/1q6YDYRU6hekl2MkHkI2X3">FellowFare Radio</option>
+      </select>
+    </label>
+    <label class="field">Spotify playlist/track link<input id="cue-url" type="url" inputmode="url" placeholder="https://open.spotify.com/playlist/..." required></label>
+    <label class="field">Cue title<input id="cue-label" type="text" maxlength="120" placeholder="The threshold / Higher Ground"></label>
+    <label class="field">Editorial note (optional)<input id="cue-note" type="text" maxlength="340" placeholder="Begin after turning into chapter 4"></label>
+    <button class="gold" type="submit">Save this cue</button>
+  </form>
+  <section class="stack hr">
+    <div class="cta"><h2>Book cue sheet</h2><span class="small" id="cue-count">0 cues</span></div>
+    <div class="cta"><button type="button" id="export">Export JSON</button><label class="field" style="flex:1;min-width:160px">Import JSON<input id="import" type="file" accept="application/json,.json"></label></div>
+    <p class="small">Cue sheets are specific to this book edition and reader page length. They save locally; imported book content is never uploaded.</p>
+    <div id="cue-list"></div>
+  </section>
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+</aside>
+<footer class="footnote">Spotify embeds load only after you select Listen; availability, previews and playback are determined by Spotify. Browser autoplay and licensing restrictions apply. Automatic page-synchronized playback requires a separately licensed, rights-cleared audio source.</footer>
+</main>
+<script type="module">
+import {paginate,readBook,normalizeSpotify,normalizeCue,activeCues,chooseCue,exportCueSheet,importCueSheet,readerStorageKey,fingerprint} from './shared/maggieverse-reader-core.mjs';
+const $=id=>document.getElementById(id);
+const SAMPLE=('It began, as all inconvenient universes do, with a door that should not have opened.\n\n' +
+'Landry examined the rune stone. Somewhere behind the forest, another forest waited. Delia said she could hear the difference.\n\n' +
+'Maggie, who knew precisely how much trouble a door could be, suggested that everyone stop trying to categorize reality and find a decent soundtrack first.\n\n' +
+'The Loom answered by moving a single thread.\n\n').repeat(10);
+let book={title:'Sample · The Loom',text:SAMPLE,bookId:'maggieverse-demo-'+fingerprint(SAMPLE)};
+let pages=[],current=1,cues=[],selectedSpotify='';
+function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
+const save=()=>{
+  try {localStorage.setItem(readerStorageKey(book.bookId+'-'+$('page-size').value),JSON.stringify({current,cues,pageCount:pages.length}));}
+  catch {status('Could not save reader progress on this device.',true);}
+};
+function restore(){
+  cues=[];current=1;
+  try{
+    const data=JSON.parse(localStorage.getItem(readerStorageKey(book.bookId+'-'+$('page-size').value))||'null');
+    if(data && data.pageCount===pages.length){
+      current=Math.max(1,Math.min(pages.length,Math.floor(Number(data.current)||1)));
+      cues=(Array.isArray(data.cues)?data.cues:[]).map(c=>normalizeCue(c,pages.length)).filter(Boolean);
+    }
+  }catch {status('Some saved reader data could not be loaded.',true);}
+}
+function buildPages(keep=false){
+  const previous=pages.length?current/pages.length:0;
+  pages=paginate(book.text,Number($('page-size').value));
+  if(!pages.length){pages=['This book has no readable text.'];}
+  restore();
+  if(keep){current=Math.max(1,Math.min(pages.length,Math.round(previous*pages.length)||1));}
+  $('book-title').textContent=book.title;
+  $('cue-start').max=String(pages.length);
+  $('cue-end').max=String(pages.length);
+  render();
+}
+function render(){
+  $('page').textContent=pages[current-1]||'';
+  $('position').textContent=current+' / '+pages.length;
+  $('progress').textContent=Math.round((current/pages.length)*100)+'% read · stable reader pages';
+  $('previous').disabled=current<=1;
+  $('next').disabled=current>=pages.length;
+  $('cue-count').textContent=cues.length+' cue'+(cues.length===1?'':'s');
+  $('cue-start').value=String(current);
+  $('cue-end').value=String(current);
+  renderCue();
+  renderCueList();
+  save();
+}
+function goTo(page){
+  const next=Math.min(pages.length,Math.max(1,Math.floor(page)));
+  if(current===next)return;
+  current=next;render();
+}
+const append=(parent,tag,text,klass)=>{
+  const el=document.createElement(tag);if(text!==undefined)el.textContent=text;
+  if(klass)el.className=klass;parent.append(el);return el;
+};
+function linkButton(parent,cue,label){
+  const button=append(parent,'button',label,'listen');
+  button.type='button';
+  button.addEventListener('click',()=>listen(cue));
+  return button;
+}
+function listen(cue){
+  const spotify=normalizeSpotify(cue.url);
+  if(!spotify) return status('This Spotify link is invalid.',true);
+  selectedSpotify=spotify.url;
+  const region=$('embed-region'),mount=$('spotify-embed');
+  mount.replaceChildren();
+  const iframe=document.createElement('iframe');
+  iframe.title='Spotify '+cue.kind+' · '+cue.label;
+  iframe.src=spotify.embed;
+  iframe.loading='lazy';
+  iframe.allow='autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+  iframe.style.height=spotify.type==='playlist'?'350px':'155px';
+  iframe.style.width='100%';
+  iframe.style.border='0';
+  mount.append(iframe);
+  $('playing-label').textContent='Loaded by choice: '+cue.label+'. Page turns do not change this player.';
+  region.classList.remove('noshow');
+  status('Spotify player opened. Use Spotify’s play button to listen.');
+}
+function renderCue(){
+  const region=$('now-cue');region.replaceChildren();
+  const matches=activeCues(cues,current),top=chooseCue(cues,current);
+  if(!matches.length){append(region,'p','No cue assigned here. Turn a page or add a range.','empty');return;}
+  append(region,'div',top.kind==='track'?'Song suggestion on this page':'Playlist in this page range','eyebrow');
+  append(region,'strong',top.label);
+  if(top.note)append(region,'p',top.note,'small');
+  const row=append(region,'div',undefined,'cta');
+  linkButton(row,top,'Listen on Spotify');
+  const link=append(row,'a','Open in Spotify');
+  link.href=top.url;link.target='_blank';link.rel='noopener noreferrer';
+  if(matches.length>1)append(region,'p',String(matches.length)+' choices apply to this page. See the cue list below.','small');
+}
+function renderCueList(){
+  const root=$('cue-list');root.replaceChildren();
+  if(!cues.length){append(root,'p','No cues saved for this book.','empty');return;}
+  cues.forEach(cue=>{
+    const active=current>=cue.startPage && current<=cue.endPage;
+    const item=append(root,'div',undefined,'cue'+(active?' active':''));
+    append(item,'div',(cue.kind==='track'?'SONG · PAGE ':'PLAYLIST · PAGES ')+cue.startPage+(cue.endPage!==cue.startPage?'–'+cue.endPage:''),'tag');
+    append(item,'div',cue.label,'name');
+    if(cue.note)append(item,'p',cue.note,'small');
+    const actions=append(item,'div',undefined,'cue-actions');
+    const jump=append(actions,'button','Go to page');jump.type='button';jump.addEventListener('click',()=>goTo(cue.startPage));
+    linkButton(actions,cue,'Listen');
+    const del=append(actions,'button','Remove');del.type='button';
+    del.setAttribute('aria-label','Remove cue '+cue.label);
+    del.addEventListener('click',()=>{cues=cues.filter(item=>item.id!==cue.id);render();status('Cue removed.');});
+  });
+}
+$('next').addEventListener('click',()=>goTo(current+1));
+$('previous').addEventListener('click',()=>goTo(current-1));
+document.addEventListener('keydown',event=>{
+  if(event.altKey||event.ctrlKey||event.metaKey||/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(document.activeElement?.tagName||''))return;
+  if(event.key==='ArrowRight'){event.preventDefault();goTo(current+1);}
+  if(event.key==='ArrowLeft'){event.preventDefault();goTo(current-1);}
+});
+$('book-file').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{
+    status('Reading local book…');
+    book=await readBook(file);
+    buildPages();
+    status('Book opened on this device. Reader pages are not print-edition page numbers.');
+  }catch(error){status(error.message||'Book could not be opened.',true);}
+  e.target.value='';
+});
+$('reset-book').addEventListener('click',()=>{
+  book={title:'Sample · The Loom',text:SAMPLE,bookId:'maggieverse-demo-'+fingerprint(SAMPLE)};
+  buildPages();status('Sample book opened.');
+});
+$('page-size').addEventListener('change',()=>{buildPages(true);status('Page length changed. Page cues for other page lengths remain saved separately.');});
+$('cue-kind').addEventListener('change',()=>{
+  const track=$('cue-kind').value==='track';
+  $('to-field').classList.toggle('noshow',track);
+  $('cue-end').required=!track;
+  $('preset').disabled=track;
+  if(track && !$('cue-url').value.includes('/track/'))$('cue-url').value='';
+  if(!track && $('cue-url').value.includes('/track/'))$('cue-url').value='';
+});
+$('preset').addEventListener('change',()=>{
+  if($('preset').value){
+    $('cue-url').value=$('preset').value;
+    if(!$('cue-label').value)$('cue-label').value=$('preset').selectedOptions[0].textContent;
+  }
+});
+$('cue-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const kind=$('cue-kind').value;
+  const startPage=Number($('cue-start').value);
+  const cue=normalizeCue({kind,startPage,endPage:kind==='track'?startPage:Number($('cue-end').value),url:$('cue-url').value,label:$('cue-label').value,note:$('cue-note').value,id:'cue-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)},pages.length);
+  if(!cue){status('Check the page numbers and use a Spotify track URL for songs or playlist URL for ranges.',true);return;}
+  cues.push(cue);cues=cues.slice(-1500);render();status('Saved cue to this book and page length.');
+  $('cue-label').value='';$('cue-note').value='';$('cue-url').value='';$('preset').value='';
+});
+$('close-player').addEventListener('click',()=>{
+  $('spotify-embed').replaceChildren();
+  $('embed-region').classList.add('noshow');selectedSpotify='';
+  status('Spotify player closed.');
+});
+$('export').addEventListener('click',()=>{
+  const raw=exportCueSheet(book.bookId,cues,pages.length);
+  const url=URL.createObjectURL(new Blob([raw],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download='maggieverse-'+book.bookId+'-'+$('page-size').value+'-cues.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+  status('Cue sheet exported as JSON.');
+});
+$('import').addEventListener('change',async event=>{
+  const file=event.target.files?.[0];if(!file)return;
+  try{
+    if(file.size>512000)throw new Error('Cue JSON exceeds 500 KB.');
+    const imported=importCueSheet(await file.text(),book.bookId,pages.length);
+    cues=imported;render();status('Imported '+imported.length+' cues. Existing local cues were replaced.');
+  }catch(error){status(error.message||'Could not import cue sheet.',true);}
+  event.target.value='';
+});
+buildPages();
+</script>
+</body>
+</html>
