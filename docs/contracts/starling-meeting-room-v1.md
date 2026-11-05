@@ -60,3 +60,12 @@ node --test scripts/test-starling-meeting-room-v1.mjs
 ```
 
 This PR is foundational only: it does not claim a running 3D room, cross-device presence, live spatial audio, or staging deployment.
+
+
+## Browser-loadable room preview
+
+`public/app/tools/starling-meeting-room-lab.html` is an optional, zero-dependency CSS 3D meeting lab. It offers a circular meeting space, four sample participants, camera rotation/zoom/reset, an accessible semantic roster, a 2D view toggle and reduced-motion styles. It never asks for microphone permissions, loads a model, plays speech, or connects to a Guild. The "simulate" buttons only change local demonstration state.
+
+Preview it by serving the existing `public/` directory and opening `/app/tools/starling-meeting-room-lab.html`. The module uses an ordinary relative import of the shared room projection. It is **not** the production Guild meeting launch route. Live wiring requires Mica to identify the canonical meeting/session capability and supply authenticated revisioned snapshots from Thread 2; do not infer authority from demonstration UI.
+
+Automated checks: `node --test scripts/test-starling-meeting-room-v1.mjs` and `node --check public/app/tools/starling-meeting-room-lab.mjs`. The dedicated GitHub workflow runs these checks for staging changes. Full browser visual verification, keyboard and mobile testing, and real-time speaker lease revocation remain outstanding.
