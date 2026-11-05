@@ -11,9 +11,10 @@ export function createMeetingAudioPresenter({start, stop}) {
   let sessionId = null;
   let revision = -1;
   let disposed = false;
+  let sessionClosed = false;
   const safeStop = id => { try { stop(id); } catch { /* never re-enable playback */ } };
   function update(snapshot) {
-    if (disposed) return null;
+    if (disposed || sessionClosed) return null;
     const id = typeof snapshot?.sessionId === 'string' && /^[a-zA-Z0-9][\w.:-]{0,95}$/.test(snapshot.sessionId) ? snapshot.sessionId : null;
     const rev = snapshot?.revision;
     if (!id || !Number.isSafeInteger(rev) || rev < 0) {
@@ -24,7 +25,8 @@ export function createMeetingAudioPresenter({start, stop}) {
     if (sessionId !== null && id !== sessionId) {
       if (current !== null) safeStop(current);
       current = null;
-      // Session change requires a new presenter instance, preventing old-session replay.
+      // A crossover permanently retires the presenter: old-session frames cannot restart it.
+      sessionClosed = true;
       return null;
     }
     if (rev <= revision) return current;
