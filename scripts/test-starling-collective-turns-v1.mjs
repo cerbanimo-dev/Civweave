@@ -146,3 +146,23 @@ test('unreviewed, foreign-Guild or incomplete host results cannot create signed 
  }
  assert.equal(rows.length,0);
 });
+
+test('PvE handoff continues from the last signed encounter and its NEXT HOOK',async()=>{
+ const {service,calls,model}=makeHarness({result:'SCENE: The bridge creaks.\\nNEXT HOOK: A lantern appears across the river.'});
+ await service.runOneTurn({guildId:'garden',personaId:'kami',taskPrompt:'Improvise one fictional PvE encounter.'});
+ model.generate=async request=>{calls.push(request);return {status:'success',outputText:'SCENE: The lantern moves.',actual:{provider:'ollama'}};};
+ await service.runOneTurn({guildId:'garden',personaId:'rosa',taskPrompt:'Improvise the next fictional PvE encounter.'});
+ const second=calls[1];
+ assert.match(second.messages[0].content,/NEXT HOOK/);
+ assert.match(second.messages.some(m=>m.content.includes('lantern appears'))?second.messages.at(-2).content:'',/lantern appears/);
+ assert.match(second.messages.at(-1).content,/continue.*previous.*encounter/i);
+});
+test('PvE continuation excludes generic deliberation and a different Quest line',async()=>{
+ const {service,calls}=makeHarness({result:'NEXT HOOK: Visit the red tower.'});
+ await service.runOneTurn({guildId:'garden',personaId:'kami',taskPrompt:'Review planning options.'});
+ await service.runOneTurn({guildId:'garden',personaId:'rosa',questId:'q-other',taskPrompt:'Improvise one fictional PvE encounter.'});
+ await service.runOneTurn({guildId:'garden',personaId:'sana',questId:'q-current',taskPrompt:'Improvise one fictional PvE encounter.'});
+ const third=calls[2];
+ assert.equal(third.messages.some(m=>m.content.includes('red tower')),false);
+ assert.match(third.messages.at(-1).content,/fictional PvE/);
+});
