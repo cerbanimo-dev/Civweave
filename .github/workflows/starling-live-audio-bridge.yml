@@ -1,0 +1,24 @@
+name: Starling live audio bridge
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/shared/starling-live-media-bridge-v1.mjs'
+      - 'public/app/shared/starling-live-turn-manager-v1.mjs'
+      - 'scripts/test-starling-live-media-bridge-v1.mjs'
+      - '.github/workflows/starling-live-audio-bridge.yml'
+  pull_request:
+    paths:
+      - 'public/app/shared/starling-live-media-bridge-v1.mjs'
+      - 'public/app/shared/starling-live-turn-manager-v1.mjs'
+      - 'scripts/test-starling-live-media-bridge-v1.mjs'
+      - '.github/workflows/starling-live-audio-bridge.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/test-starling-live-turn-manager-v1.mjs scripts/test-starling-live-media-bridge-v1.mjs
