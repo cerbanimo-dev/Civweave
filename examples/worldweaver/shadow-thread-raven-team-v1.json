@@ -1,0 +1,109 @@
+{
+  "schema": "civweave.worldweaver.story-packet.v1",
+  "status": "unprovisioned-story-intent",
+  "universeId": "shadow-and-thread",
+  "universeTitle": "Shadow & Thread Universe",
+  "ownerCharacterId": "raven",
+  "teamCharacterIds": [
+    "erin",
+    "lari"
+  ],
+  "instance": {
+    "title": "Evil Psych Wards from Venus — The Ward That Remembers",
+    "scope": "standalone",
+    "guide": "kamiya",
+    "intendedSpaceKind": "task-training",
+    "provisioned": false
+  },
+  "actors": [
+    {
+      "canonicalId": "raven",
+      "canonicalName": "Raven",
+      "worldName": "Dr. Raven Vale",
+      "role": "demonic-technologies-systems-infiltrator",
+      "teamRole": "lead",
+      "avatarPolicy": "reuse-original-canonical",
+      "canonicalAvatarRef": null,
+      "modelBinding": null,
+      "capabilities": [
+        "observe",
+        "inspect",
+        "speak",
+        "move",
+        "present"
+      ]
+    },
+    {
+      "canonicalId": "erin",
+      "canonicalName": "Erin",
+      "worldName": "E. Marlowe",
+      "role": "continuity-engineer-shadow-integration",
+      "teamRole": "continuity-and-care",
+      "avatarPolicy": "reuse-original-canonical",
+      "canonicalAvatarRef": null,
+      "modelBinding": null,
+      "capabilities": [
+        "observe",
+        "inspect",
+        "speak",
+        "demonstrate",
+        "present"
+      ]
+    },
+    {
+      "canonicalId": "lari",
+      "canonicalName": "Lari the Lyrebird",
+      "worldName": "L. Vesper",
+      "role": "corporate-archivist-trickster-foil",
+      "teamRole": "pve-challenge-design",
+      "avatarPolicy": "reuse-original-canonical",
+      "canonicalAvatarRef": null,
+      "modelBinding": null,
+      "capabilities": [
+        "observe",
+        "inspect",
+        "speak",
+        "move",
+        "present"
+      ]
+    }
+  ],
+  "angelIntimation": {
+    "name": "Angel Intimation System",
+    "mode": "opt-in-fictional-guidance",
+    "enabledByDefault": false,
+    "allowDismiss": true,
+    "allowDisable": true,
+    "requiresDisclosure": true,
+    "noRealWorldMedicalClaims": true,
+    "noTimelineRewriteWithoutExplicitChoice": true
+  },
+  "opening": {
+    "sceneId": "third-discharge",
+    "pointOfView": "Nell Mercer",
+    "premise": "On her third discharge, Nell remembers two entire lives and hears a fruit fly warn her not to sign the contract.",
+    "choices": [
+      "ask-the-doctor",
+      "inspect-discharge-records",
+      "listen-to-fruitfly",
+      "decline-and-exit"
+    ]
+  },
+  "acts": [
+    "ward-that-remembers",
+    "contracts-of-venus",
+    "light-and-shadow",
+    "watertown-joins-the-weave"
+  ],
+  "runtimePolicy": {
+    "actorModelPrincipalIdsRequired": true,
+    "serverOrLocalModelSelectionRequired": true,
+    "trustedAuthorizationRequired": true,
+    "worldProviderAcknowledgementRequired": true,
+    "realAvatarAssetRefsRequired": true,
+    "noNewChatOwner": true,
+    "ephemeralUntilAuthorized": true,
+    "patientAgencyAndConsentRequired": true
+  },
+  "notes": "This is portable authoring data. It is not a production Worldweaver snapshot, inference session, avatar asset or deployed NPC."
+}
