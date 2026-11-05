@@ -1,0 +1,62 @@
+# Starling Collective 3D meeting room — Thread 4
+
+Status: foundation proposed for staging. Target demonstration: 2026-11-11.
+
+## Capability boundary
+
+The 3D room is an optional **presentation** of an existing Guild/Party meeting capability. It must not own chat, session authentication, a transcript, turn grants, audio capture, model routing, Guild votes, Quest completion, or persistent memory. It must work with a semantic 2D fallback and must never block meeting attendance when GPU/WebGL is unavailable.
+
+- Thread 1 / Mica: owns integration, event contracts, authentication and deployment review.
+- Thread 2: owns turn arbitration, permissions, interruptions, listening and speaking grants.
+- Thread 3: provides model audio and speech output subject to Thread 2 authorization.
+- Thread 4: owns projected avatar appearance, seating, movement, speaking/listening animation and positional playback presentation.
+- Thread 5: owns agenda/transcripts/decisions/Quest record integrations.
+
+## Interface v1
+
+The pure browser-compatible module `public/app/shared/starling-meeting-room-v1.mjs` exposes:
+
+- `positionParticipants(participants)` => deterministic bounded coordinates (max 16).
+- `projectAvatarState(participant, session)` => `absent|disconnected|idle|muted|requesting_turn|listening|speaking`.
+- `projectMeetingRoom(session)` => `{status,avatars:[{id,seat,position,facingRadians,displayName,kind,state,audioEnabled}]}`.
+
+Inputs are UI projections only; upstream meeting session owner must validate the identity, grants and participant roster. Every event is scoped by authenticated meeting/session ID and current monotonic revision at the boundary before projection. Do not use this local projection as an authorization check on the server.
+
+Sample session snapshot:
+
+```json
+{
+  "roomStatus": "live",
+  "activeSpeakerId": "moss",
+  "grantedSpeakerId": "moss",
+  "participants": [
+    {"id":"human-1","displayName":"Host","kind":"human","connected":true},
+    {"id":"moss","displayName":"Moss","kind":"agent","connected":true},
+    {"id":"rook","displayName":"Rook","kind":"agent","connected":true,"handRaised":true}
+  ]
+}
+```
+
+A participant speaks **only** when `activeSpeakerId` and `grantedSpeakerId` both match the participant and the room is live, the participant connected and neither muted nor prohibited. Incoming model text does not activate speaking. The room plays authorized audio only; no client-side inferred turn granting. The renderer must cease already playing media immediately when a grant is revoked or session changes.
+
+## Rendering plan
+
+Start with a lightweight WebGL renderer using GLB avatar assets when available, with geometric placeholders and a semantic DOM fallback. Import Three.js only after a user opens the 3D mode and resources permit; do not add a mandatory package dependency or start model inference. Bind `state` to avatar animations and `audioEnabled` to the *presentation* playback switch, while Thread 2 and the media transport still enforce stream permissions.
+
+Accessible controls must remain HTML controls outside the scene: participant list, hand raise/request turn, mute, leave, captions/transcript and reduced-motion preferences. On mobile prioritize low-poly static avatars, bounded participant count, and explicit audio opt-in.
+
+## Next integration work
+
+1. Thread 2 supplies event schema and signed/verified turn lease lifecycle (room ID, revision, expiry, revoke).
+2. Thread 3 supplies the media stream with interruption/abort semantics.
+3. Thread 1 identifies the canonical Guild meeting session owner and launch route (no duplicate chat UI).
+4. Thread 4 binds this projection into a lazily loaded scene + accessible fallback and tests reconnect/revoke.
+5. Thread 5 feeds transcript/agenda into the existing meeting record owner.
+
+## Verification
+
+```sh
+node --test scripts/test-starling-meeting-room-v1.mjs
+```
+
+This PR is foundational only: it does not claim a running 3D room, cross-device presence, live spatial audio, or staging deployment.
