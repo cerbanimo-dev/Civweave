@@ -33,18 +33,18 @@ function validUrl(raw){
  if(!['http:','https:'].includes(parsed.protocol)||parsed.username||parsed.password)throw fail('BROWSER_URL_INVALID','Only HTTP(S) URLs without embedded credentials are allowed.');
  const h=parsed.hostname.toLowerCase().replace(/^\[|\]$/g,'');
  const parts=h.split('.').map(Number),numeric=parts.length===4&&parts.every(x=>Number.isInteger(x)&&x>=0&&x<=255);
- if(!h||h==='localhost'||/\.(?:localhost|local|internal|invalid)$/.test(h)||h==='::1'||h==='::'||/^f[cd][0-9a-f:]*$/i.test(h)||/^fe[89ab][0-9a-f:]*$/i.test(h)||
+ if(!h||h==='localhost'||/\.(?:localhost|local|internal|invalid)$/.test(h)||h.includes(':')||
  (numeric&&(parts[0]===0||parts[0]===10||parts[0]===127||parts[0]===169&&parts[1]===254||parts[0]===172&&parts[1]>=16&&parts[1]<=31||parts[0]===192&&parts[1]===168||parts[0]===100&&parts[1]>=64&&parts[1]<=127||parts[0]>=224)))
  throw fail('BROWSER_URL_PRIVATE','Private, loopback, local and reserved browser targets are not allowed.');
  parsed.hash='';return parsed.href;
 }
-async function approve(request,operation,tool){
+async function approve(request,operation,tool,target={}){
  const authority=permissions();
  if(!authority||typeof authority.authorize!=='function')throw fail('BROWSER_PERMISSION_REQUIRED','Browser permissions are not installed; live access and model sharing are disabled.');
  const c=browserConfig(request)||{};
  // No self-asserted approved/consent flags are accepted. Only the permission
  // authority can validate a real user grant for this exact session and actor.
- const decision=await authority.authorize({operation,tool,grantId:clean(c.grantId,180),sessionId:session(request),actorId:actor(request),provider:provider(request),questId:clean(c.questId,180)});
+ const decision=await authority.authorize({operation,tool,grantId:clean(c.grantId,180),sessionId:session(request),actorId:actor(request),provider:provider(request),questId:clean(c.questId,180),targetUrl:clean(target.url,4000),query:clean(target.query,1200)});
  if(!(decision===true||decision?.allowed===true))throw fail('BROWSER_PERMISSION_DENIED','The user has not approved this browser operation.');
  return true;
 }
@@ -72,7 +72,7 @@ async function invoke(request,name,args={},known=new Set()){
    const result=await browser().searchArchive(query,{limit:8});
    const evidence=provenance(result,name);recordUrls(evidence,known);return evidence;
  }
- await approve(request,'live-browser',name);
+ await approve(request,'live-browser',name,{url,query});
  let result;
  const backend=mcp();
  if(typeof backend?.invoke==='function'){
@@ -134,7 +134,7 @@ async function run(request,context={}){
  const offDevice=!deviceModel(request);
  // Viewing a page or downloaded private archive through cloud AI is separate
  // from approval to browse the network. Do not send its contents by default.
- if(offDevice)await approve(request,'share-browser-evidence-with-model',firstTool);
+ if(offDevice)await approve(request,'share-browser-evidence-with-model',firstTool,{url:initialUrl,query:initialQuery});
  let current=await invoke(request,firstTool,initialUrl?{url:initialUrl}:{query:initialQuery},known);
  evidence.push(current);trace.push({tool:firstTool,status:'success',mode:current.sourceType});
  let answer='',finalResult=null,steps=1;
