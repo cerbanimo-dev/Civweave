@@ -76,3 +76,18 @@ Automated checks: `node --test scripts/test-starling-meeting-room-v1.mjs` and `n
 `public/app/shared/starling-meeting-audio-v1.mjs` provides `createMeetingAudioPresenter({start,stop})` to control playback on an **already authenticated** session stream supplied by Thread 1/2. It is not a media transport or security boundary. The caller must verify grant signatures and session membership; no caller may use local lab's synthetic session grants as real authorization. A snapshot must include `sessionId` (bounded identifier), monotonically increasing integer `revision`, `roomStatus`, `participants`, `activeSpeakerId`, and `grantedSpeakerId`. On a revoked grant, muted/disconnected participant, invalid snapshot, or room closure, the presenter immediately calls `stop` on the previously active stream. A session switch stops playback and requires a **fresh presenter** for the new session, preventing old-room media reuse. `dispose()` stops active playback and makes the instance inert. Playback-start failures fail silently and trigger a stop call. The wrapper must never call TTS/model APIs or infer who can speak from transcript text.
 
 The presenter deliberately has no client-generated grant, wall-clock lease inference or network reconnect loop. Thread 2's authoritative lease expiration and Thread 3's media cancellation must occur upstream; revision equality is treated as replay and discarded. A direct Guild integration must clean up on exit, page navigation and participant removal.
+
+
+## Thread 4 host microphone preview (capture-only)
+
+The standalone meeting lab now offers explicit **Start listening** and **Stop microphone** controls, a local speech-activity indicator and an ephemeral live-caption region. It reuses `public/app/guide-voice-runtime-v1.js`, the existing canonical microphone and offline speech-recognition owner. The voice owner accepts `start({routeToChat:false})`: it publishes ordinary `civweave:guide-voice-transcript` events but **does not submit** recognized text to the canonical guide chat, change guide context, or invoke an agent. A plain `start()` continues normal guide-chat behavior. Stopping clears the capture-only policy and shuts down the canonical speech session; the lab also stops on navigation.
+
+Browser and local model requirements are unchanged: the host must grant microphone permission and have a supported installed on-device speech model or on-device browser speech pack. There is no automatic cloud transcription fallback. The activity indicator is only populated by Parakeet speech-detected events; a browser speech recognizer may show a listening state without calibrated levels. Do not treat it as an audio transport or microphone waveform monitor.
+
+**Not included:** any audio transmission to other participants, online STT, per-agent speech streaming, remote guest microphones, meeting authentication or consented persisted transcripts. Those belong to the integration workstreams. This is an opt-in local preview, not a published Guild meeting feature. Do not wire microphone access from another module or create a parallel media capture owner.
+
+Verification:
+```sh
+node --test scripts/test-guide-voice-context-v1.mjs scripts/test-starling-meeting-room-v1.mjs
+node --check public/app/tools/starling-meeting-room-lab.mjs
+```
