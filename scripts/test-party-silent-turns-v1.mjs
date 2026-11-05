@@ -32,3 +32,21 @@ test('incoming network packets never prompt a model',()=>{
   const ingest=source.slice(source.indexOf('async function ingestPacket('),source.indexOf('async function sendWebRtc('));
   assert.doesNotMatch(ingest,/aiReply\(|assistant\.respond\(/);
 });
+
+test('Party interruption uses abort signal and prevents a cancelled response from being published',()=>{
+  assert.match(source,/const partyTurnControllers=new Map\(\)/);
+  assert.match(source,/function cancelPartyTurn\(planId\)/);
+  assert.match(source,/controller\.abort\(\)/);
+  assert.match(source,/signal:controller\.signal/);
+  assert.match(source,/if\(controller\.signal\.aborted\)return null/);
+});
+test('a visible Stop reply control only exists while an AI turn runs',()=>{
+  assert.match(source,/data-party-stop/);
+  assert.match(source,/partyTurnBusy\.has\(plan\.id\)/);
+  assert.match(source,/target\.closest\('\[data-party-stop\]'\)/);
+});
+test('turn cleanup and prompt-off discard stale replies',()=>{
+  assert.match(source,/partyTurnControllers\.delete\(plan\.id\)/);
+  assert.match(source,/partyTurnBusy\.delete\(plan\.id\)/);
+  assert.match(source,/if\(!value\)cancelPartyTurn\(planId\)/);
+});
