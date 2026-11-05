@@ -43,6 +43,12 @@ test('per-character model prompts do not reveal another actor private knowledge'
  assert.equal(out.turns[0].model,'qwen3.5:2b');
  assert.equal(out.turns[1].model,'qwen3.5:4b');
  assert.equal(out.turns.at(-1).actor,'landry');
+ // The two remote participants have not personally seen the photo or heard
+ // Delia's private speech until Landry explicitly relays those details.
+ for(const index of [2,3]){
+  assert.doesNotMatch(requests[index].messages[1].content,/cut-out fifth face|Delia:/i);
+  assert.match(requests[index].messages[1].content,/phone|calendar/i);
+ }
  assert.deepEqual(out.turns.map(x=>x.actor),['landry','delia','maggie','magnus','merlin','gaia-kami','diner-child','landry']);
  for(const r of requests){
   assert.equal(r.messages.length,2);
