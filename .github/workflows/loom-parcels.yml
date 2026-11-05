@@ -39,6 +39,10 @@ concurrency:
 
 jobs:
   parcel:
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.tier) || '["seed","source"]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -54,7 +58,7 @@ jobs:
           node --test scripts/test-loom-parcel.mjs
       - name: Package source into tiny independently hashed binary parcels
         env:
-          LOOM_TIER: ${{ inputs.tier || 'seed' }}
+          LOOM_TIER: ${{ matrix.tier }}
           LOOM_KIB: ${{ inputs.chunk_kib || '128' }}
         run: |
           node scripts/loom-parcel.mjs pack \
@@ -67,7 +71,7 @@ jobs:
       - name: Downloadable parcel kit (extract outer ZIP for individual parcels)
         uses: actions/upload-artifact@v4
         with:
-          name: loom-${{ inputs.tier || 'seed' }}-${{ github.run_number }}
+          name: loom-${{ matrix.tier }}-${{ github.run_number }}
           path: ${{ runner.temp }}/loom-parcels/
           if-no-files-found: error
           retention-days: 30
