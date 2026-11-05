@@ -11,9 +11,9 @@ function base64url(bytes) {
 }
 async function memberToken({ nodeId = 'guild-one', userId = 'test-resident', exp = Math.floor(Date.now() / 1000) + 3600 } = {}) {
   const encoded = base64url(encoder.encode(JSON.stringify({ v: 1, nodeId, userId, exp })));
-  const material = await crypto.subtle.digest('SHA-256', encoder.encode(`${domain}\\0${secret}`));
+  const material = await crypto.subtle.digest('SHA-256', encoder.encode(`${domain}\0${secret}`));
   const key = await crypto.subtle.importKey('raw', material, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(`${domain}\\n${encoded}`));
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(`${domain}\n${encoded}`));
   return `${encoded}.${base64url(sig)}`;
 }
 const request = async (path, body, { token = null, nodeId = 'guild-one' } = {}) => new Request(
@@ -32,7 +32,7 @@ function fixture() {
           if (kind === 'snapshot') return Response.json({ success: true, result: { screenshot: 'aGVsbG8=', markdown: '# Example', accessibilityTree: { role: 'RootWebArea' } }, meta: { title: 'Example' } });
           if (kind === 'scrape') return Response.json({ success: true, result: [{ selector: 'h1', results: [{ text: 'Example Domain', html: '<h1>Example Domain</h1>', attributes: [] }] }], meta: { title: 'Example Domain' } });
           if (kind === 'links') return Response.json({ success: true, result: ['https://example.org/info'] });
-          return Response.json({ success: true, result: '# Example Domain\\n\\nA public page.', meta: { title: 'Example Domain' } });
+          return Response.json({ success: true, result: '# Example Domain\n\nA public page.', meta: { title: 'Example Domain' } });
         },
       },
     },
