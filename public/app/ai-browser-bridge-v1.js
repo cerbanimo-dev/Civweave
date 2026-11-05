@@ -8,6 +8,7 @@ const ID='ai-browser-research-v1';
 if(globalThis.CivweaveAIBrowserBridgeV1?.version===VERSION)return;
 const TOOLS=Object.freeze(['browser.search','browser.navigate','browser.read','browser.extract','browser.capture']);
 const MAX_STEPS=4;
+let registered=false;
 const clean=(value,max=10000)=>String(value??'').trim().slice(0,max);
 const lower=value=>clean(value,200).toLowerCase();
 const browser=()=>globalThis.CivweaveBrowserToolV1||null;
@@ -178,8 +179,8 @@ async function run(request,context={}){
  return result;
 }
 async function handle(request,context){if(!browserConfig(request))return null;return{handled:true,result:await run(request,context)}}
-function register(){const runtime=spine();if(!runtime?.register)return false;runtime.register(ID,{handle},90);return true}
-function status(){return Object.freeze({version:VERSION,registered:Boolean(spine()?.diagnostics?.()?.middleware?.includes?.(ID)),tools:TOOLS,transport:Boolean(mcp()?.invoke||browser()?.live),permissions:Boolean(permissions()?.authorize),localOffline:Boolean(browser()?.searchArchive)})}
+function register(){const runtime=spine();if(!runtime?.register)return false;runtime.register(ID,{handle},90);registered=true;return true}
+function status(){return Object.freeze({version:VERSION,registered,tools:TOOLS,transport:Boolean(mcp()?.invoke||browser()?.live),permissions:Boolean(permissions()?.authorize),localOffline:Boolean(browser()?.searchArchive)})}
 function createRequest(base,{role='loom',provider:chosenProvider,sessionId='',grantId='',questId='',query='',url='',question='',mode='archive',maxSteps=3}={}){
  const next={...base,config:{...(base.config||{})}};
  if(chosenProvider)next.config.provider=chosenProvider;
