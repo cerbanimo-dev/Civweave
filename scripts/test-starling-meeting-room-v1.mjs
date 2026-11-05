@@ -68,9 +68,9 @@ test('room media presenter stops playing on grant revocation and speaker replace
   const calls=[];
   const presenter=createMeetingAudioPresenter({start:(id)=>calls.push('start:'+id),stop:(id)=>calls.push('stop:'+id)});
   const people=[{id:'moss'},{id:'rook'}];
-  presenter.update({participants:people,roomStatus:'live',activeSpeakerId:'moss',grantedSpeakerId:'moss'});
-  presenter.update({participants:people,roomStatus:'live',activeSpeakerId:'rook',grantedSpeakerId:'rook'});
-  presenter.update({participants:people,roomStatus:'live',activeSpeakerId:null,grantedSpeakerId:null});
+  presenter.update({participants:people,roomStatus:'live',activeSpeakerId:'moss',grantedSpeakerId:'moss',sessionId:'a',revision:1});
+  presenter.update({participants:people,roomStatus:'live',activeSpeakerId:'rook',grantedSpeakerId:'rook',sessionId:'a',revision:2});
+  presenter.update({participants:people,roomStatus:'live',activeSpeakerId:null,grantedSpeakerId:null,sessionId:'a',revision:3});
   assert.deepEqual(calls,['start:moss','stop:moss','start:rook','stop:rook']);
   presenter.dispose();
 });
