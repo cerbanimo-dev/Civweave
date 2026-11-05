@@ -331,6 +331,11 @@ export const SHADOW_THREAD_REPLAY=deepFreeze({
       ],
       "choices": [
         {
+          "id": "audit-the-docket",
+          "label": "Open the missing CURRENT register",
+          "next": "audit-hatch-docket"
+        },
+        {
           "id": "challenge-contract",
           "label": "File the challenge",
           "next": "challenge-contract"
@@ -407,6 +412,93 @@ export const SHADOW_THREAD_REPLAY=deepFreeze({
       "choices": [],
       "ending": "voluntary-exit",
       "hint": "Refusal is a complete ending, not a failure."
+    },
+    "audit-hatch-docket": {
+      "title": "The Register of the Living",
+      "description": "Nell and Zip discover a missing record class that changes the meaning of every alleged consent signature. A newly authored continuation of Playtest 001.",
+      "beats": [
+        {
+          "speaker": "Zip",
+          "canonicalId": null,
+          "action": "reads the overlooked register",
+          "text": "There are three books in here. Drafted. Accepted. Imposed. Wanna guess which one's the heaviest?"
+        },
+        {
+          "speaker": "Nell Mercer",
+          "canonicalId": null,
+          "action": "flips to the first page of the imposed register",
+          "text": "Every line has my name. None has my handwriting."
+        },
+        {
+          "speaker": "Raven",
+          "canonicalId": "raven",
+          "worldName": "Dr. Raven Vale",
+          "action": "identifies a missing index",
+          "text": "That's what the index doesn't show. Our system counted possible versions of you, but never the person standing in front of it."
+        },
+        {
+          "speaker": "Erin",
+          "canonicalId": "erin",
+          "worldName": "E. Marlowe",
+          "action": "runs an independent read-only continuity check",
+          "text": "Sixty-four signatures from projected futures. Zero from present-day Nell. The contract's consent field is empty."
+        },
+        {
+          "speaker": "Lari",
+          "canonicalId": "lari",
+          "worldName": "L. Vesper",
+          "action": "tests the loophole with a deliberately polished explanation",
+          "text": "In our defense, the contract requires unanimous approval. We were merely very generous about who qualified as you."
+        },
+        {
+          "speaker": "Nell Mercer",
+          "canonicalId": null,
+          "action": "states the decisive objection",
+          "text": "Then add a column. CURRENT. And write this down: I count."
+        },
+        {
+          "speaker": "Zip",
+          "canonicalId": null,
+          "action": "slides a loose brass tab into the empty register slot",
+          "text": "Bigfixer repair number one: a place for the actual person. Amazing what you can fix with a tab."
+        },
+        {
+          "speaker": "Raven",
+          "canonicalId": "raven",
+          "worldName": "Dr. Raven Vale",
+          "action": "acknowledges the systemic challenge",
+          "text": "That one correction may invalidate six thousand years of policy."
+        },
+        {
+          "speaker": "Erin",
+          "canonicalId": "erin",
+          "worldName": "E. Marlowe",
+          "action": "preserves the evidence",
+          "text": "Then we had better keep the original records."
+        }
+      ],
+      "choices": [
+        {
+          "id": "challenge-contract",
+          "label": "Submit Nell's formal challenge",
+          "next": "challenge-contract"
+        },
+        {
+          "id": "inspect-contract",
+          "label": "Review the original contract before filing",
+          "next": "inspect-contract"
+        },
+        {
+          "id": "decline-and-exit",
+          "label": "Take the evidence and leave voluntarily",
+          "next": "decline-and-exit"
+        }
+      ],
+      "clues": [
+        "no present-tense signatures",
+        "missing CURRENT register"
+      ],
+      "hint": "Only Nell can authorize choices for the Nell who exists here now."
     }
   }
 });

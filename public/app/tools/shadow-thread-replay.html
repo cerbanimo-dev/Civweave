@@ -24,6 +24,12 @@ label{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer}input[type
 summary{cursor:pointer;font-weight:650}.meta{color:#cbbccc;font-size:.85rem}
 @media(max-width:600px){main{padding-top:1rem}.box{padding:1rem}.toolbar button{flex:1}}
 @media(prefers-reduced-motion:no-preference){.box{animation:appear .18s ease-out}@keyframes appear{from{opacity:.7;transform:translateY(4px)}to{opacity:1;transform:none}}}
+
+.portrait{max-height:100px;max-width:100px;object-fit:contain;background:#19121f;border-radius:10px;border:1px solid #6b5270}
+.cast-entry{display:flex;gap:.7rem;align-items:center;margin:.6rem 0}
+.cast-entry span{display:block}
+#actor-select,#actor-note,#cast-file{background:#2b2132;border:1px solid #96778f;border-radius:9px;color:#fff5e8;font:inherit;padding:.5rem;max-width:100%}
+#actor-note{width:min(100%,32rem)}#cast-file{width:min(100%,28rem)}
 </style>
 </head>
 <body><main>
@@ -49,17 +55,36 @@ summary{cursor:pointer;font-weight:650}.meta{color:#cbbccc;font-size:.85rem}
 <p id="hint" class="hint" hidden></p>
 <h2 id="choice-title">What does Nell do?</h2><div id="choices" class="actions-list"></div>
 </section>
+<section class="box" aria-label="Optional actor improvisation">
+<h2>Actor rehearsal · selected Civweave AI</h2>
+<p class="description">Optionally request fresh fictional lines from Raven, Erin and Lari using your existing selected local model, or a cloud model only with existing external-provider consent. These lines are private proposals, not new canon or independently deployed NPCs.</p>
+<div class="toolbar">
+<label for="actor-select">Actor</label><select id="actor-select" aria-label="Select a story actor">
+<option value="raven">Raven · Dr. Raven Vale</option><option value="erin">Erin · E. Marlowe</option><option value="lari">Lari · L. Vesper</option>
+</select>
+<button type="button" id="actor-one">Improvise one line</button>
+<button type="button" id="actor-round">Improvise 3-actor round</button>
+</div>
+<p><label for="actor-note">Optional player direction</label><input type="text" id="actor-note" maxlength="350" placeholder="e.g. Let Nell question the record's authority"></p>
+<p><label for="cast-file">Approved private cast packet (optional; used only on this device)</label>
+<input id="cast-file" type="file" accept=".json,application/json"></p>
+<p id="model-status" role="status" aria-live="polite" class="status">AI rehearsal is off until you request a turn.</p>
+<div id="model-proposals" aria-label="Uncommitted actor proposals"></div>
+<p class="meta">Missing original avatar files remain unrendered. Only an existing canonical asset or a reviewed cast binding may supply artwork.</p>
+</section>
 <section class="box" aria-label="Playthrough history">
 <details><summary>Your story history</summary><ol id="history"></ol></details>
 <details><summary>Clues discovered</summary><ul id="clues"></ul></details>
 <details><summary>Character identities and avatar status</summary><ul id="actors"></ul><p class="meta">These are authored role aliases. The characters' original avatar bindings and live model pilots have not been provisioned.</p></details>
 </section>
 </main>
+<script defer src="../shared/civweave-model-runtime.js"></script>
 <script type="module">
 import {createStoryReplay,SHADOW_THREAD_REPLAY} from '../shared/worldweaver-story-replay-v1.mjs';
+import {resolveShadowThreadActors,improviseShadowThreadActor,improviseShadowThreadRound} from '../shared/worldweaver-shadow-thread-actors-v1.mjs';
 const $=id=>document.getElementById(id);
 const storageKey='civweave.worldweaver.replay.'+SHADOW_THREAD_REPLAY.id+'.v1';
-let saved=false,engine;
+let saved=false,engine,castPacket=null,modelBusy=false,proposals=[];
 function showStatus(text){$('status').textContent=text;}
 function readSaved(){
  try{const s=localStorage.getItem(storageKey);return s?JSON.parse(s):null;}
@@ -101,7 +126,7 @@ function render(){
  $('choices').replaceChildren();
  for(const choice of view.choices){
   const button=add($('choices'),'button',choice.label,'choice');button.type='button';
-  button.addEventListener('click',()=>{try{engine.choose(choice.id);persist();render();$('scene-title').focus();}catch(error){showStatus('Unavailable choice: '+error.message);}});
+  button.addEventListener('click',()=>{try{engine.choose(choice.id);proposals=[];renderProposals();persist();render();$('scene-title').focus();}catch(error){showStatus('Unavailable choice: '+error.message);}});
  }
  $('history').replaceChildren();
  if(!view.history.length)add($('history'),'li','No choices yet.');
@@ -109,11 +134,17 @@ function render(){
  $('clues').replaceChildren();if(!view.clues.length)add($('clues'),'li','Not yet discovered.');
  for(const clue of view.clues)add($('clues'),'li',clue);
  $('actors').replaceChildren();
- for(const actor of view.actors)add($('actors'),'li',actor.canonicalName+' → '+actor.worldName+' (canonical avatar reserved; not loaded)');
+ for(const actor of resolveShadowThreadActors({castPacket})){
+  const li=add($('actors'),'li','','cast-entry');
+  if(actor.avatarRef){
+   const img=document.createElement('img');img.className='portrait';img.alt=actor.canonicalName+' original reviewed character artwork';img.loading='lazy';img.src=actor.avatarRef;li.append(img);
+  }
+  add(li,'span',actor.canonicalName+' → '+actor.worldName+' ('+(actor.avatarResolved?'original asset linked':'awaiting existing original avatar')+')');
+ }
 }
 $('scene-title').tabIndex=-1;
 $('angel').addEventListener('change',()=>{engine.setAngelIntimation($('angel').checked);persist();render();});
-$('restart').addEventListener('click',()=>{engine.restart();persist();render();$('scene-title').focus();});
+$('restart').addEventListener('click',()=>{engine.restart();proposals=[];renderProposals();persist();render();$('scene-title').focus();});
 $('export').addEventListener('click',()=>{
  const record={scenario:SHADOW_THREAD_REPLAY.id,sourcePlaytest:SHADOW_THREAD_REPLAY.originFixture,mode:'scripted-deterministic-replay',state:engine.snapshot()};
  const url=URL.createObjectURL(new Blob([JSON.stringify(record,null,2)],{type:'application/json'}));
@@ -121,6 +152,49 @@ $('export').addEventListener('click',()=>{
  document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
  showStatus('Local story record exported. No public game history has been changed.');
 });
+
+function renderProposals(){
+ $('model-proposals').replaceChildren();
+ for(const turn of proposals){
+  const entry=add($('model-proposals'),'article','','scene');
+  add(entry,'strong',turn.worldName+' · AI-generated rehearsal');
+  add(entry,'small','Not approved canon · '+turn.modelProvider);
+  add(entry,'p',turn.text);
+ }
+}
+async function generateActorRound(all){
+ if(modelBusy)return;
+ modelBusy=true;$('actor-one').disabled=true;$('actor-round').disabled=true;
+ $('model-status').textContent='Using the existing selected Civweave model runtime. No automatic loop is enabled.';
+ try{
+  await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
+  const runtime=globalThis.CivweaveModelRuntime;
+  if(!runtime?.generate)throw new Error('Selected Civweave model runtime unavailable; configure AI & Safety first.');
+  const playerPrompt=$('actor-note').value.trim().slice(0,350);
+  const results=all?await improviseShadowThreadRound({replay:engine,modelRuntime:runtime,castPacket,playerPrompt}):
+   [await improviseShadowThreadActor({replay:engine,modelRuntime:runtime,castPacket,playerPrompt,actorId:$('actor-select').value})];
+  proposals.push(...results);proposals=proposals.slice(-9);
+  renderProposals();
+  $('model-status').textContent=results.length+' real model response(s) received, private and uncommitted. Scripted replay remains unchanged.';
+ }catch(error){
+  $('model-status').textContent='No verified actor turn was accepted: '+String(error?.message||error).slice(0,260);
+ }finally{
+  modelBusy=false;$('actor-one').disabled=false;$('actor-round').disabled=false;
+ }
+}
+$('actor-one').addEventListener('click',()=>void generateActorRound(false));
+$('actor-round').addEventListener('click',()=>void generateActorRound(true));
+$('cast-file').addEventListener('change',async()=>{
+ const f=$('cast-file').files?.[0];if(!f)return;
+ if(f.size>80000){$('model-status').textContent='Private cast packet is too large.';return}
+ try{
+  const packet=JSON.parse(await f.text());
+  resolveShadowThreadActors({castPacket:packet});
+  castPacket=packet;render();
+  $('model-status').textContent='Reviewed casting packet structure accepted locally. This is not a signed Guild pilot registration.';
+ }catch(error){castPacket=null;render();$('model-status').textContent='Invalid cast packet: '+String(error?.message||error).slice(0,190)}
+});
+
 render();if(!$('status').textContent.includes('Saved path'))showStatus('Ready to play · progress saves locally after each choice.');
 </script>
 </body></html>
