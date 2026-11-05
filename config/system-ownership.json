@@ -216,6 +216,28 @@
       "bootstrap": "public/app/local-ai/bootstrap-v266.js",
       "rule": "Settings may manage downloaded models but must never start inference on open."
     },
+    "browser-research": {
+      "capability": "Offline archive and authenticated live web research, with human-controlled connected browser tool permissions",
+      "owner": "public/app/browser-tool-v1.js",
+      "modelCaller": "public/app/local-ai/browser-agent-v1.js",
+      "sessionPolicyHelper": "public/app/shared/browser-session-policy-v1.mjs",
+      "remoteAdapter": "cloudflare/node-cloud/src/browser-tool-entry-v1.mjs",
+      "authenticationOwner": "public/app/host-node-session-v1.js",
+      "contract": "docs/contracts/browser-session-and-mcp-permissions-v1.md",
+      "executableContracts": [
+        "scripts/verify-local-browser-agent-v1.mjs",
+        "scripts/test-browser-session-policy-v1.mjs",
+        "scripts/test-browser-guild-session-selection-v1.mjs",
+        "scripts/test-browser-remote-target-safety-v1.mjs"
+      ],
+      "rules": [
+        "The canonical browser tool owns delegated research; new connected browser surfaces delegate rather than creating another chat or browser authority.",
+        "All AI connected-session navigation, extraction, capture and cross-origin read operations require one-use verified human approvals.",
+        "Guild browser tools use only the exact selected signed member session; never fall back to another stored Guild.",
+        "The model adapter receives no human approval interface or bearer token; model claims cannot grant permissions.",
+        "A remote Browser Run instance is not equivalent to the user-visible authenticated iframe session."
+      ]
+    },
     "guild-quest-publication": {
       "capability": "Explicit member submission and shared Guild viewing of saved Weaveling Quests",
       "owner": "cloudflare/mobile-guild-edge/src/guild-quest-publications-v1.mjs",
