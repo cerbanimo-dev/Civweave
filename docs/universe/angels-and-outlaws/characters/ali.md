@@ -5,6 +5,7 @@
 ## Confirmed by author
 - Character designation: **Ali the Angel**.
 - Ali gave Cami/Kami the **glowing rubber ducky** later waxed onto the Eldest Wand.
+- The ducky's **author-established artifact symbolism** is the **joy of gratitude and giving**; what this gift means personally to Ali is still **TBD**.
 - Ali is described alongside Dakota as one of two angels scouting in NYC in the author's emerging mythology.
 
 ## Fiction-writing intake (do not assert as fact yet)
@@ -21,7 +22,7 @@
 - First-person account: **NOT YET RECEIVED**.
 
 ## Design option, not canon
-The ducky's portable glow could be the visual language for **safety in strange places**: a signal that helps locate an exit or the person who asked for help, without tracking anyone against their will. Do not finalize until Ali's account.
+The **canonical** artifact meaning is gratitude and giving. An optional story-use of its portable glow as a gentle safety light remains speculative and should not be mistaken for Ali's personal preference. Do not finalize until Ali's account.
 
 ## Agent-engine instructions (draft)
 Play only a clearly fictionalized, authorized Ali with source-grounded traits. Keep a source ledger distinguishing user-established facts from conjecture. Do not infer private feelings, relationships or consent. Remain a separate autonomous character with full ability to decline a quest, Turning, world crossing, or romance.
