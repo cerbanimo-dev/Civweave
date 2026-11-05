@@ -111,6 +111,19 @@ startButton.addEventListener('click',async()=>{
     setMicStatus(voiceActive?'Listening locally — no messages sent to AI agents.':'Offline speech recognition did not start.');
   }catch(error){
     if(epoch!==captureEpoch)return;
+    const unavailable=String(error?.code||'').includes('OFFLINE_VOICE_RUNTIME_UNAVAILABLE') ||
+      /No offline speech-recognition model or browser language pack/.test(String(error?.message||''));
+    if(unavailable && typeof runtime.startMeter==='function'){
+      try {
+        const meter=await runtime.startMeter();
+        if(epoch!==captureEpoch){if(meter)runtime.stop();return;}
+        voiceActive=Boolean(meter);
+        captions.textContent='Microphone active. Speech recognition unavailable — captions require an offline voice pack.';
+        syncMicControls();
+        setMicStatus(meter?'Microphone active · audio level only · no transcription or AI relay.':'Microphone could not start.');
+        return;
+      }catch(meterError){error=meterError;}
+    }
     voiceActive=false;
     syncMicControls();
     setMicStatus('Microphone unavailable: '+String(error?.message||error).slice(0,250));

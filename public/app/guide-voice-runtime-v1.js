@@ -128,7 +128,53 @@ async function start(options={}){
   }
   throw Object.assign(new Error('No offline speech-recognition model or browser language pack is installed. Install a Civweave voice pack or an on-device browser language pack.'),{code:'OFFLINE_VOICE_RUNTIME_UNAVAILABLE'});
 }
-function stop(){const current=recognition;recognition=null;listening=false;lastInterim='';routeTranscriptsToChat=true;try{current?.stop?.()}catch{}try{current?.abort?.()}catch{}sessionSource='';emitState({stopped:true});return true}
+let meterSession=null;
+async function startMeter(){
+  if(listening||meterSession)return false;
+  if(!navigator.mediaDevices?.getUserMedia)throw new Error('Microphone capture is unavailable in this browser.');
+  const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});
+  const AudioCtx=globalThis.AudioContext||globalThis.webkitAudioContext;
+  if(!AudioCtx){stream.getTracks().forEach(track=>track.stop());throw new Error('Web Audio microphone monitoring is unavailable.')}
+  let context,source,analyser,frame=0,disposed=false;
+  const cleanup=()=>{
+    if(disposed)return;
+    disposed=true;
+    if(frame)cancelAnimationFrame(frame);
+    try{source?.disconnect()}catch{}
+    try{analyser?.disconnect()}catch{}
+    for(const track of stream.getTracks())try{track.stop()}catch{}
+    try{context?.close?.()}catch{}
+  };
+  try{
+    context=new AudioCtx();
+    if(context.state==='suspended')await context.resume();
+    source=context.createMediaStreamSource(stream);
+    analyser=context.createAnalyser();
+    analyser.fftSize=512;
+    source.connect(analyser);
+    // The analyser is never connected to speakers and no recording is stored.
+    const buffer=new Uint8Array(analyser.fftSize);
+    const sample=()=>{
+      if(disposed)return;
+      analyser.getByteTimeDomainData(buffer);
+      let sum=0;
+      for(let i=0;i<buffer.length;i++){const v=(buffer[i]-128)/128;sum+=v*v;}
+      const rms=Math.sqrt(sum/buffer.length);
+      emitState({phase:'speech-detected',rms,mode:'meter-only'});
+      frame=requestAnimationFrame(sample);
+    };
+    const session={stop:cleanup,abort:cleanup};
+    meterSession=session;
+    recognition=session;
+    listening=true;
+    sessionSource='local-microphone-meter';
+    routeTranscriptsToChat=false;
+    emitState({mode:'meter-only',captionsAvailable:false});
+    frame=requestAnimationFrame(sample);
+    return true;
+  }catch(error){cleanup();throw error}
+}
+function stop(){const current=recognition;recognition=null;meterSession=null;listening=false;lastInterim='';routeTranscriptsToChat=true;try{current?.stop?.()}catch{}try{current?.abort?.()}catch{}sessionSource='';emitState({stopped:true});return true}
 async function toggle(options={}){if(listening){stop();return false}await start(options);return true}
 
 async function speak(text,options={}){
@@ -144,7 +190,7 @@ addEventListener('civweave:local-ai-transcript',event=>onTranscript(event.detail
 addEventListener('civweave:avatar-direct-text',event=>{const detail=event.detail||{};if(!listening||detail.phase!=='response'||!clean(detail.text))return;void speak(detail.text,{guide:detail.system})});
 addEventListener('pagehide',()=>{stop();stopSpeaking()},{capture:false});
 
-const api=Object.freeze({version:VERSION,guides:GUIDE,systems:SYSTEMS,resolveAddress,routeTranscript,start,stop,toggle,speak,stopSpeaking,state,settings,saveSettings,onTranscript,installedSpeechModelStatus,ensureModelPackRuntime,ensureSpeechExecutor});
+const api=Object.freeze({version:VERSION,guides:GUIDE,startMeter,systems:SYSTEMS,resolveAddress,routeTranscript,start,stop,toggle,speak,stopSpeaking,state,settings,saveSettings,onTranscript,installedSpeechModelStatus,ensureModelPackRuntime,ensureSpeechExecutor});
 globalThis.CivweaveGuideVoiceV1=api;
 try{dispatchEvent(new CustomEvent('civweave:guide-voice-ready',{detail:state()}))}catch{}
 })();

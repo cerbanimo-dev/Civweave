@@ -218,3 +218,27 @@ test('meeting capture mode publishes final transcript without submitting into sh
   voice.onTranscript({text:'Hey Moss, normal routing restored',final:true});
   assert.equal(calls.includes('chat-submit'),true);
 });
+
+
+test('mic meter-only mode works without a speech pack and tears down audio tracks',async()=>{
+  let stopped=0, closed=0;
+  const tracks=[{stop:()=>stopped++}];
+  const ctx=runBrowserScript('public/app/guide-voice-runtime-v1.js',{
+    navigator:{language:'en-US',mediaDevices:{getUserMedia:async()=>({getTracks:()=>tracks})}},
+    AudioContext:class {
+      constructor(){this.state='running';this.sampleRate=48000}
+      createMediaStreamSource(){return{connect(){},disconnect(){}}}
+      createAnalyser(){return{fftSize:0,frequencyBinCount:16,connect(){},disconnect(){},getByteTimeDomainData:arr=>arr.fill(128)}}
+      close(){closed++}
+    },
+    requestAnimationFrame:()=>1,cancelAnimationFrame:()=>{}
+  });
+  const voice=ctx.CivweaveGuideVoiceV1;
+  assert.equal(await voice.startMeter(),true);
+  assert.equal(voice.state().listening,true);
+  assert.equal(voice.state().source,'local-microphone-meter');
+  voice.stop();
+  assert.equal(stopped,1);
+  assert.equal(closed,1);
+  assert.equal(voice.state().listening,false);
+});
