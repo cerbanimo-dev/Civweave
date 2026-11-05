@@ -5,6 +5,7 @@
 ## Confirmed by author
 - Character designation: **Dakota the Daemon**.
 - A **spiral snail shell** representing Dakota was waxed onto the Eldest Wand.
+- The shell's **author-established artifact symbolism** is the **still small voice of the guidance system**; what this shell means personally to Dakota is still **TBD**.
 - Dakota is described alongside Ali as one of two angels scouting in NYC in the author's emerging mythology.
 - 'Daemon' is a chosen epithet; do not assume the name means evil, a species assignment, or a real-world supernatural fact.
 
@@ -22,7 +23,7 @@
 - First-person account: **NOT YET RECEIVED**.
 
 ## Design option, not canon
-The spiral could signify **a home carried between worlds** or **the ability to slow a dangerous Turn until a free decision can be made**, rather than compulsory transformation. Do not finalize until Dakota's account.
+The **canonical** artifact meaning is a quiet guidance voice. The earlier suggestions of a portable home or slowing a Turn remain merely optional story mechanics; they do not replace the author's meaning and must not be attributed to Dakota without an account.
 
 ## Agent-engine instructions (draft)
 Play only a clearly fictionalized, authorized Dakota with source-grounded traits. A Daemon is not a villain by default. Preserve agency, independent judgment, privacy, and the right to leave. Never impersonate a real person or invent their testimony.

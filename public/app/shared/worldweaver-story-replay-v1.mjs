@@ -492,13 +492,97 @@ export const SHADOW_THREAD_REPLAY=deepFreeze({
           "id": "decline-and-exit",
           "label": "Take the evidence and leave voluntarily",
           "next": "decline-and-exit"
+        },
+        {
+          "id": "reconcile-evidence",
+          "label": "Reconcile contradictory evidence",
+          "next": "bigfixer-accord",
+          "hidden": true
         }
       ],
       "clues": [
         "no present-tense signatures",
         "missing CURRENT register"
       ],
-      "hint": "Only Nell can authorize choices for the Nell who exists here now."
+      "hint": "Only Nell can authorize choices for the Nell who exists here now.",
+      "caseboard": {
+        "id": "living-register",
+        "title": "The Signature That Never Happened",
+        "prompt": "Which three clues prove projected signatures cannot bind present-day Nell? Mistakes cost nothing.",
+        "choices": [
+          "conflicting discharge dates",
+          "future signatures are not present consent",
+          "unadvertised contract challenge option",
+          "Continuity Services audit hatch",
+          "no present-tense signatures",
+          "missing CURRENT register"
+        ],
+        "requiredClues": [
+          "conflicting discharge dates",
+          "no present-tense signatures",
+          "missing CURRENT register"
+        ],
+        "choiceId": "reconcile-evidence"
+      }
+    },
+    "bigfixer-accord": {
+      "title": "The Bigfixers' First Accord",
+      "description": "Nell's finding exposes the missing present-tense record. The hospital's power to compel is suspended, and an invitation—not an obligation—appears from Civweave.",
+      "beats": [
+        {
+          "speaker": "Nell Mercer",
+          "action": "writes in the CURRENT column",
+          "text": "Present-tense signature: withheld. My life is not an expense your company can amortize."
+        },
+        {
+          "speaker": "Zip",
+          "action": "calls the bigfixer guild",
+          "text": "Attention, tiny colleagues: the problem is bigger than us. Perfect size for a bigfixer."
+        },
+        {
+          "speaker": "Narrator",
+          "action": "describes the swarm",
+          "text": "A silver ribbon of fruit flies streams through the brass vents. Every revised form sprouts an EXIT clause in enormous, readable type."
+        },
+        {
+          "speaker": "Lari",
+          "canonicalId": "lari",
+          "worldName": "L. Vesper",
+          "action": "sees the loophole",
+          "text": "They unionized the punctuation. I would be furious if this weren't objectively magnificent."
+        },
+        {
+          "speaker": "Erin",
+          "canonicalId": "erin",
+          "worldName": "E. Marlowe",
+          "action": "audits the revised process",
+          "text": "The patient can see every proposal and refuse them all. The records remain. The power to compel does not."
+        },
+        {
+          "speaker": "Raven",
+          "canonicalId": "raven",
+          "worldName": "Dr. Raven Vale",
+          "action": "cedes archive access",
+          "text": "Then the people who lived these lives should hold the keys. Not us."
+        },
+        {
+          "speaker": "Narrator",
+          "action": "reveals a connection to Civweave",
+          "text": "Outside, Watertown's sky opens into the palest violet. Nell's phone glows: CIVWEAVE · BUILD A WORLD TOGETHER. An invitation she can ignore, or choose."
+        },
+        {
+          "speaker": "Zip",
+          "action": "leaves the choice to Nell",
+          "text": "It's a door, Nell. It doesn't get to be a trap."
+        }
+      ],
+      "choices": [],
+      "clues": [
+        "present-tense consent audit established",
+        "bigfixer guild formed"
+      ],
+      "ending": "bigfixer-first-accord",
+      "hint": "An ending is a doorway, not compulsory participation."
     }
   }
 });
@@ -511,14 +595,26 @@ function checkPacket(packet){
   if(!Array.isArray(node.choices)||!Array.isArray(node.beats)||node.choices.length>12||node.beats.length>30)throw new TypeError('Invalid replay node '+id);
   if(new Set(node.choices.map(c=>c.id)).size!==node.choices.length)throw new TypeError('Duplicate choices at '+id);
   for(const choice of node.choices)if(!Object.hasOwn(packet.nodes,choice.next))throw new TypeError('Broken replay link '+choice.next);
+  if(node.caseboard){
+   const q=node.caseboard;
+   if(!Array.isArray(q.choices)||!Array.isArray(q.requiredClues)||q.requiredClues.length!==3||
+       !q.requiredClues.every(c=>q.choices.includes(c))||
+       !node.choices.some(c=>c.id===q.choiceId&&c.hidden===true))throw new TypeError('Invalid caseboard at '+id);
+  }
   for(const beat of node.beats)if(beat.canonicalId&&!actorIds.has(beat.canonicalId))throw new TypeError('Unknown character at '+id);
  }
  return true;
 }
+const sameEvidence=(a,b)=>Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&new Set(a).size===a.length&&a.slice().sort().every((x,i)=>x===b.slice().sort()[i]);
 function advance(state,choiceId,packet){
  if(typeof choiceId!=='string')throw new TypeError('Choice ID required');
  const node=packet.nodes[state.currentNodeId],choice=node.choices.find(c=>c.id===choiceId);
  if(!choice)throw new RangeError('Choice is unavailable at this node');
+ if(choice.hidden===true&&(!node.caseboard||node.caseboard.choiceId!==choiceId||
+   state.caseProof?.nodeId!==state.currentNodeId||
+   !sameEvidence(state.caseProof.clues,node.caseboard.requiredClues)||
+   !node.caseboard.requiredClues.every(c=>state.clues.includes(c))))
+   throw new Error('Resolve the caseboard evidence before this choice is available');
  if(state.ending)throw new Error('This story ending is final; restart to replay');
  const target=packet.nodes[choice.next];
  state.history.push({from:state.currentNodeId,choiceId:choice.id,to:choice.next});
@@ -534,6 +630,10 @@ export function createStoryReplay({packet=SHADOW_THREAD_REPLAY,initialState=null
   for(const entry of initialState.history){
    if(!entry||entry.from!==state.currentNodeId||typeof entry.choiceId!=='string')throw new TypeError('Saved story path is invalid');
    const previous=state.currentNodeId;
+   const node=packet.nodes[state.currentNodeId];
+   if(node.caseboard?.choiceId===entry.choiceId&&sameEvidence(initialState.caseProof?.clues,node.caseboard.requiredClues)&&
+      initialState.caseProof?.nodeId===state.currentNodeId&&node.caseboard.requiredClues.every(c=>state.clues.includes(c)))
+     state.caseProof=copy(initialState.caseProof);
    advance(state,entry.choiceId,packet);
    if(entry.to!==state.currentNodeId||entry.from!==previous)throw new TypeError('Saved story path was modified');
   }
@@ -545,7 +645,8 @@ export function createStoryReplay({packet=SHADOW_THREAD_REPLAY,initialState=null
   const node=packet.nodes[state.currentNodeId];
   return copy({schema:STORY_REPLAY_SCHEMA,scenarioId:packet.id,universeId:packet.universeId,title:packet.title,fictionNotice:packet.fictionNotice,
    nodeId:state.currentNodeId,nodeTitle:node.title,description:node.description,beats:node.beats,
-   choices:node.choices,actors:packet.actors,clues:state.clues,history:state.history,
+   choices:node.choices.filter(c=>c.hidden!==true),actors:packet.actors,clues:state.clues,history:state.history,
+   caseboard:node.caseboard?{title:node.caseboard.title,prompt:node.caseboard.prompt,choices:node.caseboard.choices.filter(c=>state.clues.includes(c))}:null,
    revision:state.revision,ending:state.ending,complete:!!state.ending,
    angelIntimation:{enabled:state.angelIntimationEnabled,disclosure:packet.angelIntimation.disclosure,hint:state.angelIntimationEnabled?node.hint:null},
    liveActors:false,worldProvisioned:false,avatarBindingsResolved:false});
@@ -555,6 +656,55 @@ export function createStoryReplay({packet=SHADOW_THREAD_REPLAY,initialState=null
   snapshot:()=>copy(state),
   choose:choiceId=>{advance(state,choiceId,packet);return view();},
   setAngelIntimation:enabled=>{if(typeof enabled!=='boolean')throw new TypeError('Hints require an explicit boolean preference');state.angelIntimationEnabled=enabled;return view();},
+  solveCase:selected=>{
+   const node=packet.nodes[state.currentNodeId],q=node.caseboard;
+   if(!q||state.ending)throw new Error('Caseboard is not available here');
+   if(!sameEvidence(selected,q.requiredClues)||!q.requiredClues.every(c=>state.clues.includes(c)))
+    throw new Error('Evidence finding is incomplete or contradictory');
+   state.caseProof={nodeId:state.currentNodeId,clues:[...q.requiredClues]};
+   advance(state,q.choiceId,packet);return view();
+  },
+  alternativesAt:step=>{
+   if(!Number.isSafeInteger(step)||step<0||step>state.history.length)throw new RangeError('Invalid story step');
+   const fork=createStoryReplay({packet,initialState:{schema:STORY_REPLAY_SCHEMA,scenarioId:packet.id,history:state.history.slice(0,step),caseProof:state.caseProof}});
+   return copy(packet.nodes[fork.view().nodeId].choices.filter(c=>c.hidden!==true));
+  },
+  forkAt:(step,choiceId)=>{
+   if(!Number.isSafeInteger(step)||step<0||step>state.history.length)throw new RangeError('Invalid story step');
+   const fork=createStoryReplay({packet,initialState:{schema:STORY_REPLAY_SCHEMA,scenarioId:packet.id,history:state.history.slice(0,step),caseProof:state.caseProof}});
+   fork.choose(choiceId);return fork.view();
+  },
+  adoptFork:(step,choiceId)=>{
+   if(!Number.isSafeInteger(step)||step<0||step>state.history.length)throw new RangeError('Invalid story step');
+   const fork=createStoryReplay({packet,initialState:{schema:STORY_REPLAY_SCHEMA,scenarioId:packet.id,history:state.history.slice(0,step),caseProof:state.caseProof}});
+   fork.choose(choiceId);state=fork.snapshot();return view();
+  },
   restart:()=>{state=newState(packet);return view();}
  });
+}
+
+/** Share deterministic choices only; no prompts, patient data, model output, hints or private casting. */
+export function encodeReplayTrail(replay){
+ if(typeof replay?.snapshot!=='function')throw new TypeError('Replay required');
+ const data=replay.snapshot();
+ if(data.scenarioId!==SHADOW_THREAD_REPLAY.id||!Array.isArray(data.history)||data.history.length>24)throw new TypeError('Invalid story replay');
+ const ids=data.history.map(e=>e.choiceId);
+ if(ids.some(id=>typeof id!=='string'||!/^[a-z0-9-]{1,50}$/.test(id)))throw new TypeError('Invalid story path');
+ const token='v1:'+ids.join('.');
+ if(token.length>1200)throw new TypeError('Story trail too long');return token;
+}
+export function decodeReplayTrail(token){
+ if(typeof token!=='string'||token.length>1200)throw new TypeError('Story trail too long or invalid');
+ if(!token.startsWith('v1:'))throw new TypeError('Unknown story trail version');
+ const raw=token.slice(3);
+ if(raw&&!/^[a-z0-9-]+(?:\.[a-z0-9-]+)*$/.test(raw))throw new TypeError('Invalid story trail');
+ const ids=raw?raw.split('.'):[];
+ if(ids.length>24||ids.some(id=>id.length>50))throw new TypeError('Story trail too long or invalid');
+ const replay=createStoryReplay();
+ for(const id of ids){
+  const board=replay.view().caseboard;
+  if(board&&id==='reconcile-evidence')replay.solveCase(SHADOW_THREAD_REPLAY.nodes[replay.view().nodeId].caseboard.requiredClues);
+  else replay.choose(id);
+ }
+ return replay;
 }
