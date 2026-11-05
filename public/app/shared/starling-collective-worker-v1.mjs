@@ -77,7 +77,7 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
       const p=row?.payload;
       if(row?.kind!==STARLING_WORK_RECEIPT||row?.consent!=='group'||row.origin?.nodeId!==signer
          ||!row.audience?.includes('guild:'+guild)||p?.schema!==RECEIPT_SCHEMA||p.guildId!==guild||p.policyRevision!==revision
-         ||!['started','completed','failed'].includes(p.status)||!clean(p.runId,180)||!Number.isFinite(Date.parse(p.at)))continue;
+         ||!['started','completed','failed','reviewed'].includes(p.status)||!clean(p.runId,180)||!Number.isFinite(Date.parse(p.at)))continue;
       if((await mesh.validateObject(row))?.ok===true)verified.push(p);
     }
     return verified.sort((a,b)=>Date.parse(a.at)-Date.parse(b.at)||a.runId.localeCompare(b.runId)||a.status.localeCompare(b.status));
@@ -86,6 +86,27 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const payload={schema:RECEIPT_SCHEMA,guildId:guild,policyRevision:revision,runId,status,at:new Date(now()).toISOString(),...extra};
     return mesh.createObject({id:'starling-work-receipt:'+guild+':'+runId+':'+status,revision:1,kind:STARLING_WORK_RECEIPT,purpose:'Auditable local Starling worker attempt; model output is a self-report until independently reviewed.',consent:'group',audience:['guild:'+guild],publish:true,priority:35,payload});
   }
+  /**
+   * Explicitly acknowledge an interrupted run after inspecting its signed
+   * receipt and any saved turn. This never completes a Quest, erases evidence,
+   * or retries the previous run automatically. The original attempt still
+   * counts against daily limits.
+   */
+  async function reviewInterrupted(guildId,runId,{confirmReview}={}){
+    const guild=clean(guildId,180),run=clean(runId,80);
+    if(!/^[A-Za-z0-9_-]{1,80}$/.test(run))throw new TypeError('A valid worker run ID is required.');
+    const genesis=await requireFounder(guild),p=await policy(guild,genesis.origin.nodeId);
+    if(!p)throw new Error('Valid worker policy required for interruption review.');
+    const events=await receipts(guild,genesis.origin.nodeId,p.revision);
+    const list=events.filter(item=>item.runId===run);
+    if(list.some(x=>x.status==='reviewed'))throw new Error('Worker run already reviewed.');
+    if(!list.some(x=>x.status==='started')||list.some(x=>['completed','failed'].includes(x.status)))
+      throw new Error('An unresolved started worker run is required for review.');
+    if(typeof confirmReview!=='function'||confirmReview({guildId:guild,runId:run,notice:'The run may have generated an unsigned draft. Inspect the Guild transcript and local host before acknowledging.'})!==true)
+      throw new Error('Explicit Guildkeeper review confirmation is required.');
+    await record(guild,p.revision,run,'reviewed',{reviewRequired:false,claimVerified:false});
+    return Object.freeze({status:'reviewed',guildId:guild,runId:run,completionVerified:false});
+  }
   async function oneTick(guild){
     const genesis=await requireFounder(guild),p=await policy(guild,genesis.origin.nodeId);
     if(!p?.enabled)return {status:'disabled',executed:0};
@@ -93,7 +114,7 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const runs=new Map();
     for(const item of events){const list=runs.get(item.runId)||[];list.push(item);runs.set(item.runId,list)}
     for(const list of runs.values()){
-      if(list.some(x=>x.status==='started')&&!list.some(x=>x.status==='completed'||x.status==='failed'))
+      if(list.some(x=>x.status==='started')&&!list.some(x=>['completed','failed','reviewed'].includes(x.status)))
         return {status:'interrupted-review-required',executed:0};
       if(list.some(x=>x.status==='failed'))return {status:'failed-review-required',executed:0};
     }
@@ -178,5 +199,5 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const snapshot=guildQuestBeatSnapshot({guildId:selected,publications:all});
     return discoverGuildOpportunities({snapshot,capabilities,verifyHumanPublisher});
   }
-  return Object.freeze({status,enable,disable,tick,start,stop,discover});
+  return Object.freeze({status,enable,disable,reviewInterrupted,tick,start,stop,discover});
 }
