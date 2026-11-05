@@ -4,7 +4,7 @@
   "setting": "The Blade & Mirror Saga / post-Book-VI Maggieverse / Civweave Worldweaver",
   "author": "Cami Ryn Tharp",
   "status": "author-directed fictional continuity record with factual software-work distinctions",
-  "realWorldNote": "Creative scenes and magical roles are fictional. GitHub changes and automated CI are documented separately and do not establish supernatural effects, autonomous character execution or real-world meetings.",
+  "realWorldNote": "Creative scenes and magical roles are fictional. GitHub software changes and automated CI are documented separately and do not establish supernatural effects, autonomous character execution or real-world meetings.",
   "sources": [
     {
       "path": "docs/lore/post-book-vi-kami-ryn-ascension-2026-11-05.md",
@@ -121,6 +121,22 @@
         "merlin"
       ],
       "details": "First-chapter draft, eleven proposed character/system sheets, Loom Coordinates, four Worldweaver draft rooms, fourteen scripted turns, 17/17 relevant tests passed."
+    },
+    {
+      "id": "live-fleet-preview",
+      "time": null,
+      "kind": "software-development-with-unverified-model-access",
+      "title": "Opt-in eight-turn author-only character-model rehearsal prepared",
+      "characters": [
+        "landry",
+        "delia",
+        "maggie",
+        "magnus",
+        "merlin",
+        "gaia-kami",
+        "diner-child"
+      ],
+      "details": "Existing character-fleet inference adapter reused for role-specific sequential prompts; no local/hosted model endpoint available from GitHub actions. Scripted/mocked tests are separate from a real private-model run."
     },
     {
       "id": "movie-night",

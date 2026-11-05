@@ -17,7 +17,7 @@ test('November 5 date, author and fictional continuity remain explicit',()=>{
 
 test('day ledger covers the author-established worlds without claiming production deployment',()=>{
  const ids=ledger.storyBeats.map(b=>b.id);
- assert.deepEqual(ids,['wand','succession','worldweaver','digital-y','shadow-thread','angels-outlaws','stolen-tomorrow','movie-night']);
+ assert.deepEqual(ids,['wand','succession','worldweaver','digital-y','shadow-thread','angels-outlaws','stolen-tomorrow','live-fleet-preview','movie-night']);
  assert.equal(ledger.storyBeats[0].time,'08:33');
  assert.equal(ledger.restrictions.lastStoryEvent,'movie-night');
  assert.match(ledger.realWorldNote,/software/);

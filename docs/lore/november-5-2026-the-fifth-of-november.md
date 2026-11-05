@@ -146,7 +146,7 @@ They wrote a first chapter. They made character sheets. They gave the Loom its C
 
 A test suite opened four draft places and walked fourteen scripted dialogue and scene turns through the chapter. Seventeen tests passed. The portable client built. It could keep notes offline.
 
-For the moment, the actual model actors had not taken independent turns in that first table read. That fact belonged in the story ledger too. There was no point saving tomorrow by lying about today.
+For the moment, the actual model actors had not taken independent turns in that first table read. A separate opt-in eight-turn rehearsal was prepared to ask actual selected models for their own dialogue, one at a time. Until a real model endpoint answered, the work remained an invitation rather than a performance. That distinction belonged in the story ledger too. There was no point saving tomorrow by lying about today.
 
 “You see?” Landry said, looking at the last empty square on the calendar. “It doesn't tell us whether tomorrow is safe.”
 
