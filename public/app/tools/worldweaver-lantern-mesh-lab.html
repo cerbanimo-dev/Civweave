@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Lantern Mesh · Worldweaver Universe</title>
+<style>
+:root{color-scheme:dark;font:15px system-ui,sans-serif;background:#0b1015;color:#f3efe0}
+*{box-sizing:border-box}body{margin:auto;max-width:1180px;padding:18px}
+header,.card{border:1px solid #3b4650;border-radius:14px;padding:16px;background:#111923}
+h1{margin:.1rem 0;font-size:clamp(2rem,6vw,4rem)}h2{font-size:1.1rem}
+p{line-height:1.5;color:#cbd3d7}.tag{color:#f1d98b}.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px}
+select,button{font:inherit;padding:.65rem .8rem;border-radius:9px;border:1px solid #596875;background:#18232d;color:inherit}
+#map{min-height:390px}pre{white-space:pre-wrap;word-break:break-word;max-height:330px;overflow:auto}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="tag">WORLDWEAVER UNIVERSE · LOCAL DEMO</div><h1 id="title"></h1><p id="tagline"></p><p id="principles"></p></header>
+<div class="grid">
+<section class="card"><label for="district">District</label> <select id="district"></select><p id="description"></p><div id="map"></div></section>
+<aside class="card"><h2>Story pressure</h2><p id="pressure"></p><button id="pressure-button">Draw another pressure</button><p id="status">No external action has been performed.</p><h2>Model-safe observation</h2><pre id="observation"></pre></aside>
+</div>
+<script type="module" src="./worldweaver-lantern-mesh-lab-v1.mjs"></script>
+</body></html>
