@@ -4,6 +4,13 @@ on:
   pull_request:
     paths:
       - 'public/app/browser-tool-v1.js'
+      - 'public/app/browser-connection-v1.js'
+      - 'public/app/browser-receiver-v1.html'
+      - 'public/app/shared/browser-connection-core-v1.mjs'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/manifest.webmanifest'
+      - 'scripts/test-browser-connection-v1.mjs'
       - 'public/app/local-ai/browser-agent-v1.js'
       - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/offline-package-v208.json'
@@ -28,10 +35,14 @@ jobs:
       - name: Syntax
         run: |
           node --check public/app/browser-tool-v1.js
+          node --check public/app/browser-connection-v1.js
+          node --check public/app/shared/browser-connection-core-v1.mjs
           node --check public/app/local-ai/browser-agent-v1.js
           node --check public/app/local-ai/bootstrap-v266.js
           node --check cloudflare/node-cloud/src/browser-tool-entry-v1.mjs
           node --check cloudflare/node-cloud/src/server-ai-entry-v3.mjs
           node --check scripts/verify-local-browser-agent-v1.mjs
       - name: Contract regression
-        run: node scripts/verify-local-browser-agent-v1.mjs
+        run: |
+          node scripts/verify-local-browser-agent-v1.mjs
+          node --test scripts/test-browser-connection-v1.mjs
