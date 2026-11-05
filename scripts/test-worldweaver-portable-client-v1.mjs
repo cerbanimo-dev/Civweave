@@ -66,7 +66,8 @@ for(const blueprint of [COMMONS_BETWEEN,LANTERN_MESH]){
     assert.equal(app.nodes['cw-panel-journal'].hidden,false);
     const saved=JSON.parse(app.memory.get('civweave.portable.world.'+blueprint.id+'.v1'));
     assert.equal(saved.quests[0].done,true);
-    assert.equal(saved.journal[0],'Personal observation');
+    assert.equal(saved.journal[0].text,'Personal observation');
+    assert.match(saved.journal[0].id,/^[A-Za-z0-9:_-]+$/);
   });
 }
 

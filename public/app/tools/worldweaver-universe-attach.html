@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attach portable universe · Civweave</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui;background:#09140f;color:#effff3}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#123722,#09140f 70%)}
+main{max-width:900px;margin:auto;padding:28px 16px 60px}h1{font-size:clamp(1.9rem,5vw,3rem)}h2{font-size:1.25rem}
+p,li{line-height:1.5}small,.muted{color:#c0d6c6}
+.panel{padding:18px;border:1px solid #5d916b;border-radius:16px;background:#10261a;margin:16px 0}
+button,.import{cursor:pointer;font:inherit;background:#256544;border:1px solid #a4eeb8;color:#fff;padding:12px 15px;border-radius:10px}
+button[disabled]{opacity:.55;cursor:not-allowed}button:focus-visible,input:focus-visible{outline:3px solid #a4eeb8}
+.rows{display:grid;gap:9px}.row{display:flex;gap:12px;align-items:flex-start;border-top:1px solid #385844;padding:11px 0}
+.row strong,.row small{display:block}.row span{flex:1;overflow-wrap:anywhere}
+label.file{display:inline-flex;cursor:pointer;padding:10px;border:1px solid #668a74;border-radius:10px}
+.status{padding:10px 0;color:#d6f8dc}input[type=checkbox]{width:20px;height:20px;flex:none}
+</style>
+</head>
+<body><main>
+<p class="muted">Civweave · Worldweaver · attachment</p>
+<h1>Review portable universe drafts</h1>
+<p>Attach to the Guild or HTTPS local node you already chose in Civweave. This page verifies a current membership using Civweave’s existing session owner, then asks you to approve each import. No passwords, bearer tokens or credentials are passed to the portable HTML file.</p>
+<section class="panel">
+<h2>1. Verify your Civweave session</h2>
+<p class="muted" id="cw-attachment-target">Selected Guild from this browser</p>
+<button type="button" id="cw-verify">Verify Guild or node membership</button>
+<p class="status" id="cw-auth-status" role="status">Not connected. Sign in and select a Guild in Civweave first.</p>
+<p><a href="/app/" style="color:#a9f2bf" target="_blank" rel="noopener">Open Civweave to select a Guild</a></p>
+</section>
+<section class="panel">
+<h2>2. Review imported drafts</h2>
+<p>Return to the portable world window to approve its transfer after verification. If popup communication is unavailable, choose a JSON draft export instead.</p>
+<label class="file">Choose exported drafts JSON <input id="cw-drafts-file" type="file" accept=".json,application/json"></label>
+<p class="status" id="cw-drafts-status" role="status">No drafts received.</p>
+<h3>Quest steps → Action Board Inbox</h3>
+<p class="muted">Checked steps are still unverified local drafts. No official Quest state, proof, or Guild publication will be created.</p>
+<div id="cw-quest-review" class="rows"></div>
+<h3>Journal notes → private local object mesh</h3>
+<p class="muted">These notes stay private on this browser; they will not be broadcast to the Guild.</p>
+<div id="cw-journal-review" class="rows"></div>
+<button type="button" id="cw-approve" disabled>Approve selected imports</button>
+<p class="status" id="cw-import-status" role="status"></p>
+</section>
+<p class="muted">This page is an authenticated local handoff, not a second chat system, Quest publisher, or world authority. Shared Guild Quests still use the normal reviewed Weaveling publication workflow.</p>
+</main>
+<script src="../host-node-session-v1.js"></script>
+<script src="../local-object-mesh-v146.js"></script>
+<script type="module" src="./worldweaver-universe-attach-v1.mjs"></script>
+</body></html>
