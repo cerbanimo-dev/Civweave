@@ -5,6 +5,7 @@ on:
     branches: [staging]
     paths:
       - 'public/app/shared/starling-meeting-room-v1.mjs'
+      - 'public/app/shared/starling-meeting-audio-v1.mjs'
       - 'public/app/tools/starling-meeting-room-lab.*'
       - 'scripts/test-starling-meeting-room-v1.mjs'
       - '.github/workflows/starling-meeting-room.yml'
@@ -31,4 +32,6 @@ jobs:
       - name: Test Starling meeting room presentation contract
         run: node --test scripts/test-starling-meeting-room-v1.mjs
       - name: Check room lab module syntax
-        run: node --check public/app/tools/starling-meeting-room-lab.mjs
+        run: |
+          node --check public/app/tools/starling-meeting-room-lab.mjs
+          node --check public/app/shared/starling-meeting-audio-v1.mjs
