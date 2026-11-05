@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Starling Collective · 3D Meeting Lab</title>
+<link rel="stylesheet" href="./starling-meeting-room-lab.css">
+<script type="module" src="./starling-meeting-room-lab.mjs"></script>
+</head>
+<body>
+<main class="layout">
+  <header class="masthead">
+    <div><p class="eyebrow">Civweave / Worldweaver · Thread 4</p><h1>Starling Meeting Room</h1></div>
+    <div><strong class="lab-tag">LOCAL VISUAL DEMO</strong><p class="muted">No live model connection or audio capture</p></div>
+  </header>
+  <section class="room-panel" aria-label="3D meeting space">
+    <div class="room-toolbar">
+      <label class="toggle"><input id="three-d-toggle" type="checkbox" checked> 3D view</label>
+      <div role="group" aria-label="Camera controls">
+        <button id="rotate-left" type="button" aria-label="Rotate camera left">↶</button>
+        <button id="rotate-right" type="button" aria-label="Rotate camera right">↷</button>
+        <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        <button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+        <button id="reset-camera" type="button">Reset view</button>
+      </div>
+    </div>
+    <div id="viewport" class="viewport" role="img" aria-label="Decorative 3D visualization of seated meeting participants; the accessible participant list follows">
+      <div class="world-camera" id="world-camera">
+        <div class="floor"></div><div class="table-top"></div><div class="table-base"></div>
+        <div id="avatar-layer" class="avatar-layer"></div>
+      </div>
+      <p class="scene-note">Visual-only preview · turn permission stays with Thread 2</p>
+    </div>
+    <p id="room-status" class="status-line" role="status" aria-live="polite">Loading local room preview.</p>
+  </section>
+  <aside class="people-panel" aria-label="Meeting participants">
+    <h2>Participants</h2><p class="muted">The list remains available without the 3D scene.</p>
+    <ul id="participant-list" class="participant-list"></ul>
+    <h2>Visual test controls</h2>
+    <p class="muted">These buttons only modify an isolated sample snapshot; they cannot grant a real speaking turn.</p>
+    <div class="demo-controls">
+      <button type="button" id="demo-grant">Simulate Moss turn</button>
+      <button type="button" id="demo-revoke">Revoke demo turn</button>
+      <button type="button" id="demo-hand">Toggle Rook hand raise</button>
+      <button type="button" id="demo-disconnect">Toggle Kamiya connection</button>
+    </div>
+    <p class="muted">For live use, Guild identity, room membership, and turn grants must be supplied by the authenticated meeting owner.</p>
+  </aside>
+</main>
+</body>
+</html>
