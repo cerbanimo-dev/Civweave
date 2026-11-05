@@ -11,5 +11,9 @@ test('rehearsal UI exposes stop, emergency mute, floor grants, and mic opt-in',(
  assert.match(ui,/bridge\.voiceActivity/);
  assert.match(ui,/getUserMedia/);
  assert.match(ui,/getTracks\(\)\.forEach\(track=>track\.stop\(\)\)/);
- assert.doesNotMatch(ui,/fetch\(|WebSocket\(|localStorage|navigator\.sendBeacon/);
+ assert.doesNotMatch(ui,/fetch\(|WebSocket\(|navigator\.sendBeacon/);
+ assert.match(ui,/createMeetingRecorder/);
+ assert.match(ui,/record-opt-in/);
+ assert.match(html,/id="export-meeting"/);
+ assert.match(html,/id="record-opt-in"/);
 });
