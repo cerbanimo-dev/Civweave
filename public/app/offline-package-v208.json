@@ -38,6 +38,9 @@
     "/app/survival/index.html"
   ],
   "assets": [
+    "/app/browser-receiver-v1.html",
+    "/app/browser-connection-v1.js",
+    "/app/shared/browser-connection-core-v1.mjs",
     "/finder",
     "/node-ai/operator",
     "/app/federation-finder-map-v275.html",
