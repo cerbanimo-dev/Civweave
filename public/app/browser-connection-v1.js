@@ -125,7 +125,7 @@ function discuss(){
  if(guide?.open)guide.open({focus:true,prefill:prompt});else status('Guide chat is unavailable. Open the shared chat to discuss this page.');
 }
 function open({url='',title=''}={}){
- ensureRoot();opened=true;root.hidden=false;root.querySelector('[data-network]').checked=authorized;
+ ensureRoot();if(globalThis.matchMedia?.('(max-width:720px)').matches)globalThis.CivweaveGuideChatSurfaceV350?.close?.();opened=true;root.hidden=false;root.querySelector('[data-network]').checked=authorized;
  if(url)void navigate(url,{title});
  else root.querySelector('[data-url]').focus({preventScroll:true});
  emit('civweave:browser-opened');return true;
