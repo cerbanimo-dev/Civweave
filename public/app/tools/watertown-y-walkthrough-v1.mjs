@@ -56,7 +56,11 @@ const visited=new Set(),goalNames={
 let goal='fitness',openedScreen=null;
 const buttonState={forward:false,back:false,left:false,right:false,strafeLeft:false,strafeRight:false};
 const heldKeys=new Set(),canvas=$('view'),ctx=canvas.getContext('2d');
-if(!ctx)throw new Error('This browser cannot render the first-person view; use the map controls.');
+if(!ctx){
+ canvas.classList.add('hidden');
+ canvas.setAttribute('aria-hidden','true');
+ // Keep the map and destination buttons working when canvas is unavailable.
+}
 const normalizeAngle=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
@@ -313,6 +317,7 @@ function resizeCanvas(){
  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
 }
 function drawWorld(){
+ if(!ctx)return;
  resizeCanvas();const w=canvas.width,h=canvas.height,fov=Math.PI/2.35;
  ctx.clearRect(0,0,w,h);
  const sky=ctx.createLinearGradient(0,0,0,h/2);
@@ -417,4 +422,42 @@ document.addEventListener('visibilitychange',()=>{
 addEventListener('pagehide',()=>{stopped=true;});
 addEventListener('pageshow',()=>{if(stopped){stopped=false;previous=0;requestAnimationFrame(frame);}});
 orientation();requestAnimationFrame(frame);
-say('Welcome to the fictionalized Digital Y. Aster at reception can introduce the first quest. Use the 2D buttons for accessible fast travel.');
+function refreshReport(){
+ let storageAvailable=false;
+ try{storageAvailable=Boolean(localStorage.getItem(QUEST_STORAGE_KEY));}catch{}
+ const report={
+  product:'Civweave Digital Y · Walkthrough QA',
+  revision:'digital-y-walkthrough-v1-2026-11-05b',
+  world:'fictionalized schematic',
+  localView:ctx?'3D and 2D':'2D only (canvas unavailable)',
+  viewport:{width:innerWidth,height:innerHeight},
+  zone:zoneAt(scene,player)?.id||'corridor',
+  position:{x:Number(player.x.toFixed(2)),y:Number(player.y.toFixed(2))},
+  nearStation:nearestInteraction(scene,player)?.id||null,
+  screensCreated:snapshot.screens.length,
+  lastOpenedScreen:openedScreen,
+  quest:{completed:qt.filter(([id])=>visited.has(id)).map(([id])=>id),
+   remaining:qt.filter(([id])=>!visited.has(id)).map(([id])=>id),goal},
+  questStorageAvailable:storageAvailable,
+  routeStatus:$('routeSummary').textContent,
+  scheduleSnapshot:'2026-11',
+  userEnteredPlanExcluded:true
+ };
+ const text=JSON.stringify(report,null,2);
+ $('testReport').value=text;
+ $('reportStatus').textContent='Report refreshed locally. Nothing was uploaded.';
+ return text;
+}
+$('refreshReport').addEventListener('click',refreshReport);
+$('copyReport').addEventListener('click',async()=>{
+ const text=refreshReport();
+ try{
+  await navigator.clipboard.writeText(text);
+  $('reportStatus').textContent='Test report copied. Paste it into this thread.';
+ }catch{
+  $('testReport').focus();$('testReport').select();
+  $('reportStatus').textContent='Clipboard unavailable. Select and copy the visible report manually.';
+ }
+});
+say(ctx?'Welcome to the fictionalized Digital Y. Aster at reception can introduce the first quest. Use the 2D buttons for accessible fast travel.':
+ '3D canvas is unavailable on this device. The 2D map, destinations, schedules and quest remain usable.');
