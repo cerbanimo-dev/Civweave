@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07131f">
+<title>Worldweaver · AI Playtest</title>
+<style>
+:root{color-scheme:dark;background:#07131f;color:#eef7f5;font:15px/1.5 system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 20% 0%,#183a4b,#07131f 46%,#02070e)}
+main{width:min(920px,calc(100% - 28px));margin:0 auto;padding:22px 0 70px}
+h1{font-size:clamp(1.8rem,6vw,3rem);margin:10px 0 6px;line-height:1.1}
+h2{font-size:1.2rem}p{color:#c1d1d8}
+small{color:#90e5d7;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+a{color:#b0e9df}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #85e7cb;outline-offset:2px}
+article{margin:16px 0;padding:18px;border:1px solid #a3ddcf45;border-radius:20px;background:#10212eeb}
+form{display:grid;gap:14px}label{display:grid;gap:6px;font-weight:700}
+input,select,textarea,button{width:100%;font:inherit;min-height:44px;color:#ecf7f8;border:1px solid #b5ded450;border-radius:10px;background:#071723;padding:10px 12px}
+textarea{min-height:90px;resize:vertical}button{font-weight:800;cursor:pointer;background:#225a58}
+button:disabled{cursor:wait;opacity:.6}button.secondary{background:#213043}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.check{display:flex;gap:12px;align-items:flex-start;font-weight:500}.check input{flex:0 0 22px;width:22px;min-height:22px;margin:0}
+button.inline{width:auto;min-width:170px}.actions{display:flex;flex-wrap:wrap;gap:10px}
+.output{white-space:pre-wrap;overflow-wrap:anywhere;min-height:70px;padding:14px;border-radius:12px;background:#071723;border:1px solid #b5ded431}
+.status{font-size:.88rem;min-height:1.5rem;color:#b3e8df}aside{border-left:3px solid #edca81;padding:9px 12px;background:#edca8112;color:#f6e6c7}
+@media(max-width:570px){main{width:calc(100% - 20px);padding-top:12px}.grid{grid-template-columns:1fr}article{padding:13px}.actions button{width:100%}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<small>Civweave · Worldweaver · optional staging playtest</small>
+<h1>The Loom &amp; the Actors</h1>
+<p>Playtest one model-generated scene proposal at a time. Nothing becomes book canon, a Worldweaver action, an actual Guild task, or verified Quest completion until the proper owner approves it.</p>
+<a href="/app/commons-between.html">Return to The Commons Between</a>
+</header>
+<article>
+<h2>Provider setup</h2>
+<p id="ww-ai-connection">Model settings are read only when you start a playtest. A ChatGPT subscription is not an OpenAI API key; the providers may charge separately.</p>
+<p><button class="inline secondary" type="button" data-open-unified-ai-settings>Open shared AI Settings</button></p>
+<aside>Security limitation: This staging-only BYOK test uses the existing browser-held provider credentials. They are not secured by a backend credential broker. Use only restricted, revocable testing keys; do not put private Guild information, identifying data, or secrets in prompts. The on-screen spend limit is an estimate, not a billing guarantee.</aside>
+</article>
+<article>
+<h2>Generate a fiction proposal</h2>
+<form id="ww-ai-playtest-form">
+<div class="grid">
+<label>Model role
+<select name="role" data-ww-ai-role>
+<option value="loom">The Loom · world narration</option>
+<option value="actors">Actor · selected character</option>
+<option value="lari">Lari the Lyrebird · foil</option>
+</select></label>
+<label>Room
+<select name="world" data-ww-ai-world></select></label>
+</div>
+<div class="grid">
+<label>Character name / ID
+<input name="personaId" maxlength="80" autocomplete="off" value="maggie" required></label>
+<label>Estimated session spend ceiling (USD, not guaranteed)
+<input name="maxReservedUsd" type="number" value="0.01" step="0.001" min="0" max="0.05" data-ww-ai-budget required></label>
+</div>
+<label>Character direction
+<input name="personaPrompt" maxlength="1200" value="Expressive fictional character, respectful of human choice." autocomplete="off"></label>
+<label>World description
+<textarea name="worldContext" maxlength="3000">A welcoming public gathering area inside The Commons Between.</textarea></label>
+<label>Your scene prompt
+<textarea name="scenePrompt" maxlength="3000" required>Introduce a curious visitor to this room and offer an optional, reversible quest.</textarea></label>
+<label class="check"><input type="checkbox" name="externalConsent" data-ww-ai-consent required><span>I authorize sending only this fiction prompt and its role/context to the configured provider for this playtest. I understand usage may cost money. No background generation.</span></label>
+<div class="actions"><button class="inline" type="submit" data-ww-ai-send>Generate proposal (one request)</button><button class="inline secondary" type="button" data-ww-ai-end>End &amp; clear in-memory session</button></div>
+<p id="ww-ai-budget-status" class="status" role="status" aria-live="polite">No API request has been made.</p>
+</form>
+</article>
+<article>
+<h2>Uncommitted fiction output</h2>
+<output class="output" id="ww-ai-output" aria-live="polite">No scene generated.</output>
+</article>
+<footer><small>Staging test · no automatic NPC actions · no stored conversation transcript</small><p>Published rate references: <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">OpenAI GPT-6 Luna</a> and <a href="https://ai.google.dev/gemini-api/docs/pricing">Gemini API</a>. Rates must be reconfirmed if the model changes. Dedicated secure-key service is tracked in <a href="https://github.com/cerbanimo-dev/Civweave/issues/984">issue #984</a>.</p></footer>
+</main>
+<script src="/app/settings-gateway-v317.js" defer></script>
+<script type="module" src="/app/tools/worldweaver-ai-playtest-v1.mjs"></script>
+</body>
+</html>

@@ -25,7 +25,7 @@ On startup, if no configured external route and user has not explicitly opted fo
 
 ChatGPT subscription access is not an OpenAI API key; a separately provisioned provider API key and eligible billing/account access are required. API usage may cost money. The default key-lifetime selection is session-only. The current browser-only settings runtime stores session credentials in browser session storage, including one per provider for Binary Mode; **sessionStorage is not a hardened secret vault**. This is a constrained early implementation, not a production-grade secure BYOK deployment. Production should use a trusted per-user authenticated backend or device-secured secret broker with scoped, revocable tokens and clear user consent. Never emit keys to logs, Quest text, Guild reports, prompt payloads for other providers, shared mesh objects, public repository files, or analytics.
 
-World mode preference is stored under `civweave.worldweaver.ai-mode.v1`. Startup local-only choice is under `civweave.ai-startup-choice.v1`. These are nonsecret settings. The explicit on-demand Worldweaver session adapter `public/app/shared/worldweaver-ai-session-v1.mjs` now uses the canonical model runtime's `generate()` with separate OpenAI and Gemini configurations. `public/app/shared/worldweaver-ai-handoff-v1.mjs` requires an authenticated bound model pilot and queues proposed `speak` intents through the canonical Worldweaver owner. Model output is **never** reported as a successfully executed action, and this does not install any autonomous scheduler or new chat runtime. A real user-controlled scene UI, per-provider health tests, and approved remote execution acknowledgement remain pending.
+World mode preference is stored under `civweave.worldweaver.ai-mode.v1`. Startup local-only choice is under `civweave.ai-startup-choice.v1`. These are nonsecret settings. The explicit on-demand Worldweaver session adapter `public/app/shared/worldweaver-ai-session-v1.mjs` now uses the canonical model runtime's `generate()` with separate OpenAI and Gemini configurations. `public/app/shared/worldweaver-ai-handoff-v1.mjs` requires an authenticated bound model pilot and queues proposed `speak` intents through the canonical Worldweaver owner. Model output is **never** reported as a successfully executed action, and this does not install any autonomous scheduler or new chat runtime. The optional, explicit-gesture story proposal playtest at `/app/tools/worldweaver-ai-playtest.html` exposes the shared session runtime; per-provider health tests, browser-safe credential brokerage, and approved remote execution acknowledgement remain pending.
 
 ## Runtime isolation and spending controls
 
@@ -36,6 +36,17 @@ World mode preference is stored under `civweave.worldweaver.ai-mode.v1`. Startup
 - The Settings owner offers provider-specific read-on-demand session configurations. Those keys remain accessible to same-origin browser JavaScript; `sessionStorage` and legacy “remember on device” preferences are not suitable for production secret handling. The secure credential-broker implementation is still a separate prerequisite to production activation. No automatic BYOK migration or key upload is performed.
 - For the active client session, call `createConfiguredWorldweaverAISession({settings:CivweaveSettingsV320,runtime:CivweaveModelRuntime,consent:true,pricePerMillion,budget})`. On an authenticated character action, use `queueWorldweaverActorLine` with the existing canonical `world` and verified bound `actor`. The caller remains responsible for real authorization, user consent, and current pricing.
 
+## Optional staging story playtest
+
+The Commons Between links to `/app/tools/worldweaver-ai-playtest.html`. It is **a developer playtest presentation**, not a second model owner, a new chat interface, a live multiplayer provider, or a route that publishes quests or changes canonical Worldweaver state.
+
+- The page starts with **zero** remote calls. The existing Settings owner is loaded solely for the user-requested provider configuration; the canonical model runtime is lazily imported only during a deliberate form submission.
+- The user chooses Loom, one character, or Lari; a room; a bounded prompt; a two-call limit; and an estimated USD cap no greater than five cents. They must explicitly check external-request consent before requesting each generation. Session history lives in memory and is cleared by End Session or page exit. Changing saved provider settings invalidates the current session.
+- `public/app/shared/worldweaver-ai-pricing-v1.mjs` allows only exact models with a reviewed standard-text price on November 5, 2026: OpenAI `gpt-6-luna` ($0.10 input/$0.50 output per million tokens); Gemini `gemini-3.1-flash-lite` ($0.25/$1.50) and `gemini-3.7-flash` ($0.75/$3.75). Unsupported models, missing keys, missing provider consent, Local Only (without a verified local model adapter), and untested Multiverse fail closed. Rates are estimates and can change; verification references are https://developers.openai.com/api/docs/models/gpt-6-luna and https://ai.google.dev/gemini-api/docs/pricing.
+- Each returned provider result must declare the **same actual provider and model** as the requested approved route. A mismatched or missing identity is rejected, with no write to character memory. User-visible provider errors redact the selected credential.
+- Results appear only as **uncommitted fiction proposals**, not as verified NPC speech, official Quest proof, or changes to shared world state. No raw API key is put in on-screen output or into the shared Guild mesh.
+- Browser-held credentials remain a **staging-only security weakness**. These are voluntary test calls with revocable test keys and client-estimated bounds; the browser controls do not offer a financial guarantee, and production remains blocked by issue #984 until server-enforced spending and a secure key broker are built.
+
 ## Readiness and test gate
 
 `resolveWorldweaverAIRoles` returns explicit enabled flags, missing providers, and a ready Boolean. System requires one configured primary; Binary requires both OpenAI and Gemini; Multiverse additionally requires Grok test approval for full character/foil readiness (DeepSeek remains separately optional). Missing providers are never silently replaced by another service.
@@ -43,7 +54,7 @@ World mode preference is stored under `civweave.worldweaver.ai-mode.v1`. Startup
 Run:
 
 ```sh
-node --test scripts/test-worldweaver-ai-roles-v1.mjs scripts/test-worldweaver-ai-setup-v1.mjs scripts/test-worldweaver-ai-session-v1.mjs scripts/test-worldweaver-ai-handoff-v1.mjs
+node --test scripts/test-worldweaver-ai-roles-v1.mjs scripts/test-worldweaver-ai-setup-v1.mjs scripts/test-worldweaver-ai-session-v1.mjs scripts/test-worldweaver-ai-handoff-v1.mjs scripts/test-worldweaver-ai-playtest-v1.mjs
 npm run test:worldweaver
 ```
 
