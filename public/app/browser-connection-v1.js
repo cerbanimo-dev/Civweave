@@ -115,7 +115,7 @@ async function renderEvidence(output){
   function walk(value,depth=0){
     if(depth>4||examined++>130||links.length>=24)return;
     if(typeof value==='string'){
-      for(const match of value.matchAll(/\\[([^\\]\\n]{1,160})\\]\\((https?:\\/\\/[^)\\s]+)\\)/g))add(match[2],match[1]);
+      for(const match of value.matchAll(/\[([^\]\n]{1,160})\]\((https?:\/\/[^)\s]+)\)/g))add(match[2],match[1]);
       return;
     }
     if(Array.isArray(value)){for(const row of value.slice(0,60))walk(row,depth+1);return}
