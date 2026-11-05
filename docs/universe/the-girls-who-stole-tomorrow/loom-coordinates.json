@@ -1,0 +1,136 @@
+{
+  "schema": "civweave.loom-coordinates.story-draft.v1",
+  "universeId": "landryverse-girls-who-stole-tomorrow",
+  "title": "The Girls Who Stole Tomorrow",
+  "series": "The Blade & Mirror Saga",
+  "status": "author-review-proposal",
+  "provenance": {
+    "created": "2026-11-05",
+    "source": "Team Blade & Mirror story room",
+    "runtimeReceipts": [],
+    "castApproval": "pending",
+    "playableExport": "not generated; docs are authoring source, not a .civweave.html universe"
+  },
+  "narrative": {
+    "branch": "post-Part-I possible future, exact placement pending author approval",
+    "viewpoint": "landry",
+    "pov": "first-person limited",
+    "openingLocation": "Landry's kitchen, then an independent roadside diner",
+    "openingBeat": "A calendar cannot render tomorrow",
+    "centralQuestion": "Who has the right to decide which futures may happen?",
+    "tone": [
+      "pulp mystery",
+      "cosmic satire",
+      "emotional realism",
+      "hopeful fantasy"
+    ],
+    "spoilerPolicy": "Reveal the Other Landry only in author notes, not chapter one"
+  },
+  "worldRules": [
+    {
+      "id": "calendar-blank",
+      "claim": "Calendars and appointments fail to display any day after the coming midnight",
+      "evidence": "Direct observation and independent calls",
+      "certainty": "provisional observed effect, global reach unverified"
+    },
+    {
+      "id": "future-objects",
+      "claim": "Messages and photographs may arrive from futures not yet lived",
+      "evidence": "The child's physical photograph",
+      "certainty": "provisional, origin unverified"
+    },
+    {
+      "id": "preservation",
+      "claim": "Unchosen futures are stored rather than automatically destroyed",
+      "evidence": "Writer's-room design only",
+      "certainty": "author spoiler, not an in-world fact"
+    },
+    {
+      "id": "library-cost",
+      "claim": "Opening a stored future risks collapsing incompatible possibilities",
+      "evidence": "Writer's-room design only",
+      "certainty": "author spoiler, mechanism to refine"
+    },
+    {
+      "id": "choice",
+      "claim": "Nobody's future can be canonically transferred without individual choice",
+      "evidence": "Theme and story constraint",
+      "certainty": "hard authoring guardrail"
+    }
+  ],
+  "systems": {
+    "authority": "The canonical Civweave Worldweaver/Performance Studio owns actual world and approved cast state",
+    "mode": "PvE narrative simulation draft",
+    "consent": "Explicit to cross worlds, share control or send model context",
+    "npcCapabilities": [
+      "observe",
+      "inspect",
+      "speak",
+      "move",
+      "demonstrate",
+      "present"
+    ],
+    "disabled": [
+      "purchase",
+      "vote",
+      "publish",
+      "admin",
+      "unrestricted-network",
+      "silent-persona-transfer"
+    ],
+    "eventReceipts": "none",
+    "aiExecution": "none; rehearsal text authored through sheet-guided simulation"
+  },
+  "clocks": {
+    "narrativeClock": "morning of day zero",
+    "midnightCountdown": "approaching; exact elapsed time provisional",
+    "tickingEvents": [
+      "calendar stops listing dates",
+      "independent witnesses report the same anomaly"
+    ]
+  },
+  "chapterOneState": {
+    "scene": "diner",
+    "observations": [
+      "Landry and Delia see a tomorrow-less calendar",
+      "Magnus and Maggie separately report a similar anomaly",
+      "A seven-year-old girl claims six rescues",
+      "A photograph shows four known people and a fifth face deliberately removed",
+      "A fruit fly notices a seam in the photo; its significance remains unverified"
+    ],
+    "openQuestions": [
+      "Where did the photograph originate?",
+      "Who removed the fifth face?",
+      "What does six rescues mean?",
+      "What happens at midnight?"
+    ],
+    "resolved": [
+      "Landry chooses to ask questions and protect the child's consent"
+    ],
+    "knowledgeByActor": {
+      "landry": [
+        "calendar symptom",
+        "friends' reports",
+        "child's claims",
+        "cut photograph"
+      ],
+      "delia": [
+        "shared scene observations",
+        "unusual blank future dates"
+      ],
+      "magnus": [
+        "his own screen and reports relayed by Landry"
+      ],
+      "maggie": [
+        "her own account of the screen and the phone call"
+      ],
+      "diner-child": [
+        "six rescues claim",
+        "photo origin not yet disclosed"
+      ],
+      "auctioneer": [],
+      "counterpart-landry": [],
+      "bigfixer": []
+    }
+  }
+}
