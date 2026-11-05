@@ -112,7 +112,16 @@ export function createWorldweaverAISession({
       messages,maxOutputTokens:maxOutput,maxRepairAttempts:0,allowDeterministicFallback:false,
       config:{...config,maxTokens:maxOutput}
     });
-    if(result?.status!=='success')return fail(clip(result?.error?.message||('generation failed: '+(result?.status||'unknown')),200));
+    if(result?.status!=='success'){
+      // Provider error messages may echo a credential; strip the selected key
+      // before surfacing anything to the calling presentation.
+      const message=clip(result?.error?.message||('generation failed: '+(result?.status||'unknown')),200);
+      return fail(config.apiKey?message.replaceAll(config.apiKey,'[REDACTED]'):message);
+    }
+    // Never accept a silent paid-provider reroute, or a response whose
+    // originating model is unknown. The shared runtime reports actual IDs.
+    if(result?.actual?.provider!==config.provider||result?.actual?.model!==config.model||result?.fallback?.used)
+      return fail('unverified provider or model identity; the proposal was rejected.');
     const text=clip(result.outputText,12000);
     if(!text)return fail('model returned an empty proposal.');
     history.set(scope,[...previous,{role:'user',content:scene},{role:'assistant',content:text}].slice(-8));
