@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starling Collective · Meeting Control</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0c111b;color:#eef3fa}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 80% 0,#223147 0,transparent 40%),#0c111b}
+main{max-width:1140px;margin:0 auto;padding:24px 18px 80px}header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:24px}
+h1{font-size:clamp(1.5rem,3vw,2.4rem);margin:.15em 0}h2{font-size:1.06rem;margin:0 0 15px}
+.eyebrow{font-size:.8rem;color:#97bacd;letter-spacing:.12em;text-transform:uppercase}.muted{color:#aebdce;font-size:.9rem}
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}@media(max-width:750px){.grid{grid-template-columns:1fr}}
+.panel{border:1px solid #354355;background:#141e2b;border-radius:16px;padding:20px;margin-bottom:16px}
+button,textarea,input{font:inherit}button{cursor:pointer;background:#284461;color:#f8fbff;border:1px solid #567591;border-radius:9px;padding:10px 14px;font-weight:600}
+button:hover:not(:disabled){background:#395775}button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid #91d6ed}
+button:disabled{opacity:.4;cursor:not-allowed}button.danger{background:#832d3c;border-color:#d3717d}button.primary{background:#176f68;border-color:#53b4a6}
+button.secondary{background:#192a38}.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.member{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #344251;gap:12px}
+.member:first-child{border:0}.member small{display:block;color:#a9b8c8}.member .actions{display:flex;gap:8px;flex-wrap:wrap}
+.pill{display:inline-block;border:1px solid #58718a;padding:4px 10px;border-radius:22px;color:#bcd0dc;font-size:.78rem}
+.pill.live{border-color:#66c6ab;background:#194639;color:#d2ffeb}.pill.held{border-color:#f2c37c;color:#ffe3b3}
+textarea,input{width:100%;padding:12px;background:#0b1420;color:#f2f7ff;border:1px solid #465b6a;border-radius:8px}
+textarea{resize:vertical;min-height:95px;margin-bottom:10px}.feed{max-height:330px;overflow:auto;list-style:none;padding:0;margin:0}
+.feed li{padding:10px 0;border-top:1px solid #344251;overflow-wrap:anywhere}.feed time{font-size:.75rem;color:#9cadbf;display:block}
+#micstatus{font-variant-numeric:tabular-nums} .notice{border-left:3px solid #78a9c9;padding:8px 12px;color:#c3d3e2;font-size:.88rem;margin:13px 0}
+</style></head>
+<body><main>
+<header><div><div class="eyebrow">Civweave / Starling Collective / Thread 2</div><h1>Meeting Control Console</h1><div class="muted">Local rehearsal · agents silent until host grants the floor</div></div>
+<div class="toolbar"><span id="status" class="pill">Ready</span><button id="silence" class="danger">Silence all agents</button><button id="resume" class="secondary">Resume room</button></div></header>
+<div class="notice">This console rehearses local speaking permissions with demonstration drafts. It does not connect other users, remotely hosted models, or a shared meeting server. Microphone access is optional and stays on this device.</div>
+<div class="grid">
+<section>
+<div class="panel"><h2>Speaking floor</h2><p id="floor" aria-live="polite">Nobody has the floor.</p><div class="toolbar"><button id="interrupt" class="primary">I'm speaking — interrupt</button><button id="stop" class="secondary">Stop agent speech</button></div></div>
+<div class="panel"><h2>Participants</h2><div id="members"></div></div>
+<div class="panel"><h2>Offer an agent draft</h2><label for="speaker">Agent</label><select id="speaker" style="display:block;margin:8px 0 12px;background:#102030;color:#fff;padding:10px;border:1px solid #526677;border-radius:8px"></select><label for="draft">Private draft (never spoken until granted)</label><textarea id="draft" placeholder="Enter a test response to rehearse floor control"></textarea><button id="offer" class="primary">Raise agent hand</button></div>
+</section>
+<section>
+<div class="panel"><h2>Microphone interruption</h2><p class="muted">Optional microphone voice-activity detector. When human speech exceeds the threshold, any agent turn is revoked. No audio is stored or sent.</p><div class="toolbar"><button id="micstart">Enable microphone</button><button id="micstop" disabled>Disable microphone</button></div><p id="micstatus" aria-live="polite" class="muted">Microphone off</p></div>
+<div class="panel"><h2>Human transcript</h2><p class="muted">Type a human utterance to test interruption and transcript handoff.</p><textarea id="transcript" placeholder="Maggie, what do you think?"></textarea><button id="submit-transcript">Submit human speech</button></div>
+<div class="panel"><h2>Room activity</h2><ul id="feed" class="feed" aria-live="polite"></ul></div>
+</section></div>
+</main><script type="module" src="/app/starling-meeting-console-v1.mjs"></script></body></html>
