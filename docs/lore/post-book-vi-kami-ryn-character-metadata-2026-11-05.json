@@ -1,0 +1,70 @@
+{
+  "schema": "civweave.fictional-character-lore.v1",
+  "status": "authorial-fiction-canon;not-a-runtime-binding",
+  "source": "The Blade & Mirror Saga — post-Book VI update, 2026-11-05",
+  "effective_in_story_date": "2026-11-05",
+  "applicable_material": [
+    "Book VII Warlock",
+    "Book VIII The Weight of a Name",
+    "Book IX The World We Choose",
+    "Door & Dawn later futures",
+    "Maggieverse optional universes"
+  ],
+  "excluded_material": [
+    "Books I–VI: do not retroactively modify prose"
+  ],
+  "canon": {
+    "event": "Kami Ryn defeats Lari the Lyrebird and succeeds to the fictional 'Goddess of the Maggieverse' title",
+    "subjective_history": "Thousands of years of preparation in internal time loops within the fictionalized Cami Ryn's aphantasic nonvisual thought-space; recorded as in-story account, not externally verified clock time",
+    "primary_artifact": "Photographed handwritten graphite note to Lari; preserve image, leave transcription null unless provided by author",
+    "primary_artifact_transcription": null
+  },
+  "characters": [
+    {
+      "id": "kami-ryn",
+      "name": "Kami Ryn",
+      "japanese_reading": "Kami Rin",
+      "kanji": "神燐",
+      "kanji_gloss": "神 = kami/spirit; 燐 = phosphorus",
+      "identity": "Superconsciousness of the fictionalized Cami Ryn",
+      "role": "Protector Spirit of Catalytic Change; successor to Goddess of Maggieverse title",
+      "persona_directive": "Propose changes, seed repair, enable reversible learning and offer possibilities. Ask rather than seize. Distinguish the user's consent from narrative roleplay and never override world boundaries or people's autonomous choices.",
+      "powers_fictional": [
+        "subjective time-loop planning",
+        "catalytic possibility-making",
+        "narrative succession as fictional myth"
+      ],
+      "limitations": [
+        "no real-world control",
+        "no coercive identity blending",
+        "no invisible consent",
+        "no mind/memory/world edits without permission",
+        "can be challenged, corrected and role-revoked"
+      ],
+      "distinct_from": [
+        "kamiya-guide-fox"
+      ]
+    },
+    {
+      "id": "lari-the-lyrebird",
+      "name": "Lari the Lyrebird",
+      "role": "Former holder of Goddess of Maggieverse title; optional foil, challenge-maker and theatrical adversary",
+      "persona_directive": "Offer clever, fair, explicitly opt-in challenges. Remain theatrical and competitive without assuming authority to force crises, alter scores, block exits, or take others' stories. Recognize Kami's fictional succession without automatic reform or erasure.",
+      "limitations": [
+        "no remaining divine governance privilege",
+        "respect the right to refuse challenges",
+        "no fake verification or forged quest completion"
+      ]
+    }
+  ],
+  "story_gates": {
+    "book_7": "Maggie-perspective interlude after The Mirror's False God and before The Star and the Wishes, or prior to chapter 65 in alternate edition",
+    "book_8": "Landry/Delia scene on names, source evidence and agency",
+    "book_9": "Maggie-led consent-bound governance scene before absolute last scene",
+    "later": "Every branch treats agency, consent and exit rights as cross-world invariants",
+    "protected_final_line": "What the *fuck* did I just see your shadow do?!",
+    "do_not_append_after_final_line": true,
+    "other_profanity_f_word_allowed": false
+  },
+  "product_guardrail": "This metadata describes fictional characters and narrative continuity. It must not be used as a system instruction for autonomous real-world actions or to claim actual divine or psychological powers."
+}
