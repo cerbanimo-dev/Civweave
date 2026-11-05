@@ -8,6 +8,7 @@ One morning all calendars stop at midnight. A seven-year-old girl tells Landry s
 
 ## Contents
 - [Authoring manifest](manifest.json) — proposed universe metadata and source ownership.
+- [Five-act outline](outline.md) — adventure beats, reveals, PvE challenges and continuity gates.
 - [Loom Coordinates](loom-coordinates.json) — world facts, states, uncertainty, tools, scene and actor knowledge.
 - [Customized character sheets](cast/character-sheets.json) — eleven role/character configurations, including The Loom and the combined editorial aspects.
 - [Turn-taking protocol](cast/turn-protocol.md) — how to run character-led passes using the existing approved inference owner.

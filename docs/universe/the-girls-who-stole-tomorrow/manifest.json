@@ -21,7 +21,8 @@
     "rehearsal": "rehearsals/01-turns.md",
     "chapter": "manuscript/01-the-last-date.md",
     "lore": "lore.md",
-    "continuity": "continuity-review.md"
+    "continuity": "continuity-review.md",
+    "outline": "outline.md"
   },
   "integration": {
     "canonicalWorldweaver": "public/app/shared/worldweaver-core-v1.mjs",
