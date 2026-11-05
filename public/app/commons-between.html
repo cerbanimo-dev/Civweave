@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07131f">
+<title>The Commons Between · Civweave</title>
+<style>
+:root{color-scheme:dark;--ink:#07131f;--panel:#0c1b27;--line:#d8bd7440;--gold:#f2d483;--mint:#86e4d1;--violet:#b99cff;--text:#f4ead2;--muted:#a9bdc0}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#173447 0,#07131f 42%,#040a10 100%);color:var(--text);font:15px/1.5 Inter,system-ui,sans-serif;min-height:100vh}
+header{padding:max(18px,env(safe-area-inset-top)) 18px 14px;border-bottom:1px solid var(--line);background:#07131fe8;position:sticky;top:0;z-index:2;backdrop-filter:blur(10px)}
+header small{display:block;color:var(--mint);font-size:10px;letter-spacing:.16em;font-weight:800;text-transform:uppercase}
+header h1{margin:3px 0 4px;font:700 clamp(25px,4vw,38px)/1.08 Georgia,serif}
+header p{margin:0;color:var(--muted);max-width:900px}
+main{display:grid;grid-template-columns:minmax(280px,380px) minmax(0,1fr);gap:18px;padding:18px;max-width:1280px;margin:0 auto}
+.card{border:1px solid var(--line);border-radius:18px;background:linear-gradient(150deg,#ffffff0a,#ffffff04);box-shadow:0 16px 50px #0005;padding:16px}
+.status{display:grid;gap:10px}.status strong{font-size:18px}.pill{display:inline-flex;width:max-content;padding:5px 8px;border:1px solid #86e4d13d;border-radius:999px;background:#86e4d10d;color:#cdf7ed;font-size:11px;font-weight:800}
+.warning{padding:10px 12px;border-left:3px solid var(--gold);background:#f2d4830c;color:#e9dcc1;border-radius:0 10px 10px 0}
+.rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.room{border:1px solid #ffffff16;border-radius:15px;background:#ffffff06;padding:14px;display:flex;flex-direction:column;gap:8px}
+.room.active{border-color:#86e4d188;background:linear-gradient(145deg,#86e4d118,#b99cff0b);box-shadow:0 0 0 1px #86e4d122 inset}
+.room h2{margin:0;font-size:17px}.room p{margin:0;color:var(--muted);font-size:13px;min-height:58px}
+button,a.btn{min-height:42px;border:1px solid #f2d48366;border-radius:12px;padding:9px 12px;background:linear-gradient(180deg,#f2d4831e,#86e4d10d);color:#fff4d3;font:800 13px/1.2 Inter,system-ui,sans-serif;cursor:pointer;text-decoration:none;text-align:center}
+button:hover,button:focus-visible,a.btn:hover,a.btn:focus-visible{outline:2px solid #86e4d155;outline-offset:2px}
+.meta{color:#9fb4b6;font-size:12px}.portal{margin-top:12px;padding:12px;border:1px dashed #b99cff55;border-radius:13px;background:#b99cff08}
+footer{padding:0 18px 24px;max-width:1280px;margin:0 auto;color:#8ea3a6;font-size:12px}
+@media(max-width:760px){main{grid-template-columns:1fr;padding:12px}.rooms{grid-template-columns:1fr}header{padding-left:12px;padding-right:12px}}
+</style>
+</head>
+<body>
+<header>
+<small>Civweave · Worldweaver staging</small>
+<h1>The Commons Between</h1>
+<p>One shared Civweave universe shell. Move between rooms locally now; trusted multiplayer provider connection is shown separately and never faked.</p>
+</header>
+<main>
+<section class="card status" aria-labelledby="entry-status-title">
+  <span class="pill">LOCAL WORLD ENTRY</span>
+  <strong id="entry-status-title">Opening selected Guild…</strong>
+  <div id="guild-meta" class="meta"></div>
+  <div class="warning" id="provider-status">DreamGrid / OpenSimulator provider: not connected.</div>
+  <a class="btn" href="/app/hub-map-v1.html">← Back to Guild Map</a>
+</section>
+<section class="card" aria-labelledby="rooms-title">
+  <h2 id="rooms-title" style="margin-top:0">Rooms</h2>
+  <div id="rooms" class="rooms" aria-live="polite"></div>
+  <div class="portal">
+    <strong id="portal-count">Story portals</strong>
+    <div class="meta">Door & Dawn worlds remain opt-in sessions. Entering a portal does not rewrite book canon or mark Quest work complete.</div>
+  </div>
+</section>
+</main>
+<footer id="universe-foot">Canonical blueprint loading…</footer>
+<script type="module" src="/app/commons-between-entry-v1.mjs"></script>
+</body>
+</html>
