@@ -10,6 +10,8 @@ then issues a short-lived **proposal grant** containing meetingId, participantId
 capability: `propose`, and expiresAt (epoch milliseconds).
 The grant shape is not cryptographically signed by this module; untrusted clients
 must never be allowed to mint their own grants or invoke this module directly.
+The caller MUST inject an asynchronous `verifyProposalGrant(grant,request)`
+callback returning exactly `true`; otherwise the bridge refuses generation.
 
 `proposeMeetingTurn({meetingId,participantId,grant,provider,config,events,prompt,silent})`
 returns `{kind:'speech_proposal',meetingId,participantId,provider,model,text,requiresSpeechGrant:true}`.
@@ -24,8 +26,11 @@ meetingId, participantId, capability: `speak`, expiresAt, and optional id.
 returns an `authorized_speech` envelope. Before playing audio, Thread 2 must
 *also* re-check the grant's signature or server-side record, cancellation,
 participant mute status, active meeting, and that the grant has not been consumed.
-The current helper checks only scope and expiry: it is not a replacement for
-server-side authentication, concurrency control or one-time token consumption.
+The helper requires an asynchronous `verifySpeechGrant(grant,proposal)`
+callback returning exactly `true`, and must be called with `await`.
+That trusted callback MUST verify authentication, current meeting state,
+revocations and atomically consume a one-time speaking grant. The bridge
+also checks scope and expiry but cannot replace the trusted controller.
 
 ## Transport
 - OpenAI: fixed official HTTPS chat completions endpoint, explicit model and
@@ -55,3 +60,8 @@ The last 24 visible events are bounded to 8,000 characters each.
 
 **Do not merge this PR expecting a functioning live meeting.** It is a
 standalone transport/authorization boundary for integration.
+
+The bridge accepts an optional caller `AbortSignal`; a revoked turn should abort
+in-flight generation. HTTP redirects are disallowed to prevent credential leaks.
+The PR adds an isolated GitHub Actions test workflow; validation is pending until
+a run finishes successfully.
