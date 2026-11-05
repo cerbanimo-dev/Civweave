@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Civweave Seed Universe</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#07100d;color:#eef8f2}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:
+ radial-gradient(circle at 50% 18%,rgba(109,255,179,.14),transparent 28rem),
+ linear-gradient(#07100d,#030706)}
+main{width:min(1180px,94vw);margin:auto;padding:2rem 0 5rem}
+header{display:grid;gap:.5rem;margin-bottom:1.5rem}
+.eyebrow{letter-spacing:.18em;text-transform:uppercase;font-size:.72rem;opacity:.65}
+h1{margin:0;font-size:clamp(2rem,6vw,4.8rem);line-height:.95}
+p{max-width:72ch;line-height:1.6;color:#bfd0c6}
+.stage{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr);gap:1rem;align-items:stretch}
+.panel{border:1px solid rgba(220,255,237,.16);border-radius:24px;background:rgba(8,18,14,.72);backdrop-filter:blur(12px);overflow:hidden}
+.carousel-wrap{min-height:430px;display:grid;place-items:center;perspective:1100px;position:relative}
+.carousel{width:210px;height:250px;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.realm-card{position:absolute;inset:0;border:1px solid rgba(220,255,237,.28);border-radius:22px;padding:1.25rem;background:linear-gradient(160deg,rgba(33,77,57,.96),rgba(7,16,13,.97));box-shadow:0 18px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;justify-content:flex-end}
+.realm-card small{opacity:.66;text-transform:uppercase;letter-spacing:.12em}
+.realm-card strong{font-size:1.35rem;margin:.35rem 0}
+.realm-card span{color:#cce0d4;font-size:.88rem;line-height:1.35}
+.controls{position:absolute;left:1rem;right:1rem;bottom:1rem;display:flex;justify-content:space-between}
+button{border:1px solid rgba(220,255,237,.24);background:#12241b;color:#eef8f2;padding:.7rem 1rem;border-radius:999px;cursor:pointer}
+button:hover{background:#1b3427}
+.details{padding:1.4rem;display:grid;align-content:start;gap:.75rem}
+.details h2{font-size:1.75rem;margin:0}
+.meta{display:flex;gap:.5rem;flex-wrap:wrap}
+.pill{font-size:.75rem;border:1px solid rgba(220,255,237,.2);border-radius:999px;padding:.35rem .55rem;color:#bfe6ce}
+.station-list{display:grid;gap:.5rem;margin-top:.5rem}
+.station{border-left:2px solid rgba(134,255,188,.45);padding:.4rem .7rem}
+.station b{display:block;font-size:.9rem}
+.station span{font-size:.78rem;color:#aebfb5}
+.highway{margin-top:1rem;padding:1.25rem}
+.highway h2{margin:.1rem 0 1rem}
+.road{display:grid;gap:.55rem;position:relative;padding:1rem;border-radius:20px;background:linear-gradient(90deg,rgba(255,255,255,.025),rgba(255,255,255,.06),rgba(255,255,255,.025))}
+.lane{display:grid;grid-template-columns:1fr auto;align-items:center;min-height:72px;padding:.8rem 1rem;border-radius:16px;border:1px solid rgba(220,255,237,.12);background:rgba(20,41,31,.72)}
+.lane strong{font-size:1rem}
+.lane span{font-size:.78rem;opacity:.65}
+.interchange{margin-top:1rem;display:flex;justify-content:center}
+.interchange div{border:1px dashed rgba(231,255,239,.3);border-radius:18px;padding:.8rem 1rem;text-align:center}
+.threshold{text-align:center;margin:.5rem 0 1rem;color:#8ff5b8;font-size:.78rem;letter-spacing:.13em;text-transform:uppercase}
+@media(max-width:760px){.stage{grid-template-columns:1fr}.carousel-wrap{min-height:380px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">Worldweaver · executable topology</div>
+<h1>Civweave Seed Universe</h1>
+<p>A four-realm universe built from the existing Worldweaver authority. The carousel selects a realm; the road below shows the three-lane intention highway and Anarchadia governance interchange.</p>
+</header>
+<section class="stage">
+<div class="panel carousel-wrap" aria-label="Realm carousel">
+<div class="carousel" id="carousel"></div>
+<div class="controls"><button id="prev" type="button">← Previous</button><button id="next" type="button">Next →</button></div>
+</div>
+<aside class="panel details" id="details" aria-live="polite"></aside>
+</section>
+<section class="panel highway">
+<h2>Intention Highway</h2>
+<div class="threshold">The Threshold</div>
+<div class="road" id="road"></div>
+<div class="interchange" id="interchange"></div>
+</section>
+</main>
+<script type="module">
+import {CIVWEAVE_SEED_UNIVERSE_V1,createUniverseScene} from '../shared/worldweaver-universe-v1.mjs';
+
+const universe=CIVWEAVE_SEED_UNIVERSE_V1;
+const scene=createUniverseScene(universe);
+const carousel=document.querySelector('#carousel');
+const details=document.querySelector('#details');
+const road=document.querySelector('#road');
+const interchange=document.querySelector('#interchange');
+let selected=0;
+
+const realmById=id=>universe.realms.find(realm=>realm.id===id);
+
+function buildCarousel(){
+  universe.realms.forEach((realm,index)=>{
+    const card=document.createElement('button');
+    card.type='button';
+    card.className='realm-card';
+    card.style.transform=`rotateY(${index*90}deg) translateZ(210px)`;
+    const small=document.createElement('small');small.textContent=realm.system;
+    const strong=document.createElement('strong');strong.textContent=realm.title;
+    const span=document.createElement('span');span.textContent=realm.description;
+    card.append(small,strong,span);
+    card.addEventListener('click',()=>select(index));
+    carousel.append(card);
+  });
+}
+
+function select(index){
+  selected=(index+universe.realms.length)%universe.realms.length;
+  carousel.style.transform=`rotateY(${selected*-90}deg)`;
+  const realm=universe.realms[selected];
+  details.replaceChildren();
+
+  const eyebrow=document.createElement('div');eyebrow.className='eyebrow';eyebrow.textContent=realm.system;
+  const title=document.createElement('h2');title.textContent=realm.title;
+  const description=document.createElement('p');description.textContent=realm.description;
+  const meta=document.createElement('div');meta.className='meta';
+  for(const value of [`Guide: ${realm.guide}`,`Space: ${realm.kind}`,`Stations: ${realm.stations.length}`]){
+    const pill=document.createElement('span');pill.className='pill';pill.textContent=value;meta.append(pill);
+  }
+  const list=document.createElement('div');list.className='station-list';
+  realm.stations.forEach(station=>{
+    const row=document.createElement('div');row.className='station';
+    const name=document.createElement('b');name.textContent=station.title;
+    const type=document.createElement('span');type.textContent=station.stationType;
+    row.append(name,type);list.append(row);
+  });
+  details.append(eyebrow,title,description,meta,list);
+}
+
+function buildHighway(){
+  scene.highway.lanes.forEach(lane=>{
+    const realm=realmById(lane.realmId);
+    const row=document.createElement('div');row.className='lane';
+    const name=document.createElement('strong');name.textContent=realm.title;
+    const purpose=document.createElement('span');purpose.textContent=lane.purpose.toUpperCase();
+    row.append(name,purpose);
+    row.addEventListener('click',()=>select(universe.realms.findIndex(candidate=>candidate.id===realm.id)));
+    road.append(row);
+  });
+  const realm=realmById(scene.highway.interchangeRealmId);
+  const box=document.createElement('div');
+  const label=document.createElement('strong');label.textContent=realm.title;
+  const note=document.createElement('div');note.textContent='Governance interchange';
+  box.append(label,note);interchange.append(box);
+}
+
+document.querySelector('#prev').addEventListener('click',()=>select(selected-1));
+document.querySelector('#next').addEventListener('click',()=>select(selected+1));
+buildCarousel();
+buildHighway();
+select(0);
+</script>
+</body>
+</html>
