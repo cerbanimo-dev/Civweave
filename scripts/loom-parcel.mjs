@@ -122,10 +122,12 @@ async function pack(o) {
     manifest:'manifest.json.br',manifestSha256:sha(packed),fileCount:files.length,
     sourceBytes:totalInputBytes,uniqueParcelCount:partsWritten,
     packedParcelBytes:totalPackedBytes,chunkBytes,
-    restore:'node scripts/loom-parcel.mjs restore --out PARCEL_DIRECTORY --into EMPTY_DESTINATION',
+    restore:'node loom-restore.mjs restore --out PARCEL_DIRECTORY --into EMPTY_DESTINATION',
     note:'Tracked source only; not Git history, a private memory archive or model-weight backup.',
   };
   await writeFile(path.join(out,'loom-seed.json'),JSON.stringify(index,null,2)+'\n');
+  // Ship the decoder uncompressed to avoid a recovery bootstrap dependency.
+  await writeFile(path.join(out,'loom-restore.mjs'),await readFile(fileURLToPath(import.meta.url)));
   return index;
 }
 async function loadManifest(out) {
