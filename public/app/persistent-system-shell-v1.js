@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.21-guild-quest-map-route';
+const VERSION='1.1.23-maggieverse-reader';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
