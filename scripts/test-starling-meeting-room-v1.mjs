@@ -113,3 +113,17 @@ test('duplicate participant IDs preserve first identity and cannot overwrite mut
   assert.equal(room.avatars[0].displayName,'Original');
   assert.equal(room.avatars[0].audioEnabled,false);
 });
+
+
+test('host voice preview uses existing canonical capture and never opens a second microphone', async()=>{
+  const {readFileSync}=await import('node:fs');
+  const html=readFileSync(new URL('../public/app/tools/starling-meeting-room-lab.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../public/app/tools/starling-meeting-room-lab.mjs',import.meta.url),'utf8');
+  for(const id of ['start-mic','stop-mic','mic-status','live-captions','speech-activity'])assert.match(html,new RegExp('id="'+id+'"'));
+  assert.match(html,/src="\.\.\/guide-voice-runtime-v1\.js"/);
+  assert.match(js,/CivweaveGuideVoiceV1/);
+  assert.match(js,/routeToChat:false/);
+  assert.match(js,/civweave:guide-voice-transcript/);
+  assert.match(js,/pagehide/);
+  assert.doesNotMatch(js,/getUserMedia|MediaRecorder|new AudioContext|WebSocket|fetch\(/);
+});

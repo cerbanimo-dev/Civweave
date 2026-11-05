@@ -6,6 +6,8 @@ on:
     paths:
       - 'public/app/shared/starling-meeting-room-v1.mjs'
       - 'public/app/shared/starling-meeting-audio-v1.mjs'
+      - 'public/app/guide-voice-runtime-v1.js'
+      - 'scripts/test-guide-voice-context-v1.mjs'
       - 'public/app/tools/starling-meeting-room-lab.*'
       - 'scripts/test-starling-meeting-room-v1.mjs'
       - '.github/workflows/starling-meeting-room.yml'
@@ -31,6 +33,8 @@ jobs:
           node-version: '22'
       - name: Test Starling meeting room presentation contract
         run: node --test scripts/test-starling-meeting-room-v1.mjs
+      - name: Test canonical offline voice meeting mode
+        run: node --test scripts/test-guide-voice-context-v1.mjs
       - name: Check room lab module syntax
         run: |
           node --check public/app/tools/starling-meeting-room-lab.mjs

@@ -66,3 +66,71 @@ $('demo-revoke').addEventListener('click',()=>{session.activeSpeakerId=null;sess
 $('demo-hand').addEventListener('click',()=>{const p=participants.find(p=>p.id==='rook');p.handRaised=!p.handRaised;render()});
 $('demo-disconnect').addEventListener('click',()=>{const p=participants.find(p=>p.id==='kamiya');p.connected=!p.connected;render()});
 refresh();
+
+
+/**
+ * This is only a local host speech preview. The canonical Civweave voice
+ * runtime remains the sole microphone owner; no audio leaves this page.
+ */
+let captureEpoch=0;
+let voiceActive=false;
+const startButton=$('start-mic'),stopButton=$('stop-mic');
+const micStatus=$('mic-status'),captions=$('live-captions'),activity=$('speech-activity');
+const voice=()=>globalThis.CivweaveGuideVoiceV1;
+function setMicStatus(message){micStatus.textContent=message}
+function syncMicControls(pending=false){
+  startButton.disabled=pending||voiceActive;
+  stopButton.disabled=!pending&&!voiceActive;
+}
+function stopHostMicrophone(){
+  captureEpoch++;
+  try{voice()?.stop?.()}catch{}
+  voiceActive=false;
+  activity.value=0;
+  syncMicControls();
+  setMicStatus('Microphone off');
+}
+startButton.addEventListener('click',async()=>{
+  const runtime=voice();
+  if(!runtime?.start||!runtime?.stop){
+    setMicStatus('Civweave offline voice runtime is unavailable in this preview.');
+    return;
+  }
+  if(voiceActive)return;
+  const epoch=++captureEpoch;
+  syncMicControls(true);
+  setMicStatus('Requesting local microphone access…');
+  try{
+    const started=await runtime.start({routeToChat:false});
+    if(epoch!==captureEpoch){
+      if(started)runtime.stop();
+      return;
+    }
+    voiceActive=Boolean(started);
+    syncMicControls();
+    setMicStatus(voiceActive?'Listening locally — no messages sent to AI agents.':'Offline speech recognition did not start.');
+  }catch(error){
+    if(epoch!==captureEpoch)return;
+    voiceActive=false;
+    syncMicControls();
+    setMicStatus('Microphone unavailable: '+String(error?.message||error).slice(0,250));
+  }
+});
+stopButton.addEventListener('click',stopHostMicrophone);
+addEventListener('civweave:guide-voice-transcript',event=>{
+  if(!voiceActive)return;
+  const data=event?.detail||{};
+  if(typeof data.text==='string'){
+    captions.textContent=(data.final===false?'Listening: ':'Recognized: ')+data.text.slice(0,2000);
+    if(data.final!==false)activity.value=0;
+  }
+});
+addEventListener('civweave:guide-voice-state',event=>{
+  if(!voiceActive)return;
+  const data=event?.detail||{};
+  if(data.phase==='speech-detected')activity.value=Math.max(5,Math.min(100,Math.round(Number(data.rms||0)*2500)));
+  if(data.phase==='transcript-ready')activity.value=0;
+  if(data.error)setMicStatus('Speech error: '+String(data.error).slice(0,250));
+  if(data.ended||data.stopped){voiceActive=false;activity.value=0;syncMicControls();setMicStatus('Microphone off');}
+});
+addEventListener('pagehide',stopHostMicrophone,{once:true});

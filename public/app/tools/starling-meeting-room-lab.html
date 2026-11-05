@@ -6,13 +6,14 @@
 <meta name="color-scheme" content="dark">
 <title>Starling Collective · 3D Meeting Lab</title>
 <link rel="stylesheet" href="./starling-meeting-room-lab.css">
+<script defer src="../guide-voice-runtime-v1.js"></script>
 <script type="module" src="./starling-meeting-room-lab.mjs"></script>
 </head>
 <body>
 <main class="layout">
   <header class="masthead">
     <div><p class="eyebrow">Civweave / Worldweaver · Thread 4</p><h1>Starling Meeting Room</h1></div>
-    <div><strong class="lab-tag">LOCAL VISUAL DEMO</strong><p class="muted">No live model connection or audio capture</p></div>
+    <div><strong class="lab-tag">LOCAL VISUAL DEMO</strong><p class="muted">Local host speech test · no AI relay</p></div>
   </header>
   <section class="room-panel" aria-label="3D meeting space">
     <div class="room-toolbar">
@@ -37,6 +38,18 @@
   <aside class="people-panel" aria-label="Meeting participants">
     <h2>Participants</h2><p class="muted">The list remains available without the 3D scene.</p>
     <ul id="participant-list" class="participant-list"></ul>
+    <section aria-labelledby="host-voice-title" class="host-voice">
+      <h2 id="host-voice-title">Host microphone · local captions</h2>
+      <p class="muted">Start listening uses Civweave's existing offline speech runtime. Your words appear here only; they are not automatically sent to agents or saved by this preview. Requires a compatible on-device speech model.</p>
+      <div class="demo-controls">
+        <button id="start-mic" type="button">Start listening</button>
+        <button id="stop-mic" type="button" disabled>Stop microphone</button>
+      </div>
+      <p id="mic-status" role="status" aria-live="polite">Microphone off</p>
+      <label for="speech-activity">Speech activity</label>
+      <progress id="speech-activity" max="100" value="0">0%</progress>
+      <p id="live-captions" class="caption-output" aria-live="polite">Recognized speech appears here.</p>
+    </section>
     <h2>Visual test controls</h2>
     <p class="muted">These buttons only modify an isolated sample snapshot; they cannot grant a real speaking turn.</p>
     <div class="demo-controls">
