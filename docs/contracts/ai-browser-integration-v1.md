@@ -73,7 +73,9 @@ Expose \`globalThis.CivweaveBrowserPermissionsV1.authorize(details)\`, which ret
   sessionId: '...',
   actorId: '...',
   provider: '...',
-  questId: '...'
+  questId: '...',
+  targetUrl: 'https://example.org/page', // exact target, when applicable
+  query: 'user-approved bounded query'    // exact query, when applicable
 }
 \`\`\`
 
