@@ -2,6 +2,16 @@ name: Verify Worldweaver Core
 on:
   pull_request:
     paths:
+      - 'public/app/shared/worldweaver-ai-roles-v1.mjs'
+      - 'public/app/shared/worldweaver-ai-session-v1.mjs'
+      - 'public/app/shared/worldweaver-ai-handoff-v1.mjs'
+      - 'public/app/new-user-onboarding-v1.js'
+      - 'public/app/new-user-onboarding-v1.css'
+      - 'public/app/settings-gateway-v317.js'
+      - 'scripts/test-worldweaver-ai-roles-v1.mjs'
+      - 'scripts/test-worldweaver-ai-setup-v1.mjs'
+      - 'scripts/test-worldweaver-ai-session-v1.mjs'
+      - 'scripts/test-worldweaver-ai-handoff-v1.mjs'
       - 'public/app/shared/worldweaver-core-v1.mjs'
       - 'public/app/shared/worldweaver-screen-v1.mjs'
       - 'public/app/shared/worldweaver-map-2d-v1.mjs'
@@ -62,6 +72,16 @@ on:
     branches: [staging]
     paths:
       - '.github/workflows/verify-worldweaver-core.yml'
+      - 'public/app/shared/worldweaver-ai-roles-v1.mjs'
+      - 'public/app/shared/worldweaver-ai-session-v1.mjs'
+      - 'public/app/shared/worldweaver-ai-handoff-v1.mjs'
+      - 'public/app/new-user-onboarding-v1.js'
+      - 'public/app/new-user-onboarding-v1.css'
+      - 'public/app/settings-gateway-v317.js'
+      - 'scripts/test-worldweaver-ai-roles-v1.mjs'
+      - 'scripts/test-worldweaver-ai-setup-v1.mjs'
+      - 'scripts/test-worldweaver-ai-session-v1.mjs'
+      - 'scripts/test-worldweaver-ai-handoff-v1.mjs'
       - 'public/app/shared/worldweaver-core-v1.mjs'
       - 'public/app/shared/worldweaver-story-replay-v1.mjs'
       - 'public/app/tools/shadow-thread-replay.html'

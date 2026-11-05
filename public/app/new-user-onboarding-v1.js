@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1-new-user-onboarding-canonical-artifacts';
+const VERSION='1.1.0-new-user-onboarding-ai-setup';
 const STORAGE_KEY='civweave.onboarding.hero-tour.v1';
 const ROOT_ID='cw-new-user-onboarding-v1';
 if(globalThis.CivweaveNewUserOnboardingV1?.version===VERSION)return;
@@ -19,6 +19,15 @@ const EXPRESSIONS=Object.freeze({
 });
 
 const STEPS=Object.freeze([
+  Object.freeze({
+    system:'civweave',expression:'waving',kicker:'First, choose your AI',title:'Who will weave your world?',role:'Weaveling · AI setup guide',
+    paragraphs:[
+      'Start with one system model. Use your own OpenAI API key or Gemini API key, or choose Local Only to keep using downloaded models and manual offline rules.',
+      'System mode lets your selected provider play the Loom, every character, and Lari. Binary mode gives the Loom to ChatGPT and the full cast—including Lari—to Gemini. Multiverse mode adds DeepSeek and Grok only after testing and separate approval.'
+    ],
+    connection:'API credentials are optional for Local Only. Cloud API billing is separate from consumer subscriptions. Your key belongs in the shared Settings screen, never a chat, Quest, Guild message, or world scene.',
+    handoff:'Weaveling will introduce the five connected systems as soon as your model choice is made.',next:'Meet Weaveling'
+  }),
   Object.freeze({
     system:'civweave',expression:'waving',kicker:'Welcome, Hero',title:'An intention becomes a Quest.',role:'Weaveling · Quest guide',
     paragraphs:[
@@ -70,6 +79,7 @@ let root=null;
 let index=0;
 let previousFocus=null;
 let inertState=[];
+let resumeAfterSettings=false;
 
 const clean=value=>String(value??'').trim();
 const safeParse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -82,8 +92,9 @@ function hasMeaningfulPriorActivity(){
   try{const campus=safeParse(localStorage.getItem('civweave.working-campus.v1'),{});return Boolean(clean(campus?.wish)||campus?.plan)}catch{return false}
 }
 function forcedByUrl(){const value=new URLSearchParams(location.search).get('onboarding');return value==='1'||value==='tour'||value==='replay'}
+function needsAISetup(){return globalThis.CivweaveSettingsV320?.needsAISetup?.()??false}
 function shouldAutoOpen(){
-  if(forcedByUrl())return true;
+  if(forcedByUrl()||needsAISetup())return true;
   const record=readRecord();
   if(record?.status==='completed'||record?.status==='skipped')return false;
   return !hasMeaningfulPriorActivity();
@@ -111,14 +122,17 @@ function createRoot(){
   root.setAttribute('role','dialog');
   root.setAttribute('aria-modal','true');
   root.setAttribute('aria-labelledby','cw-onboarding-title');
-  root.innerHTML=`<div class="cw-onboarding-card"><header class="cw-onboarding-top"><small>Optional Civweave orientation</small><button class="cw-onboarding-skip" type="button" data-cw-onboarding-skip>Skip tour</button></header><nav class="cw-onboarding-rail" aria-label="Guide handoff order">${railMarkup()}</nav><div class="cw-onboarding-stage"><div class="cw-onboarding-character"><div class="cw-onboarding-avatar" role="img"></div></div><div class="cw-onboarding-copy"><p class="cw-onboarding-kicker"></p><h2 id="cw-onboarding-title"></h2><p class="cw-onboarding-role"></p><div data-cw-onboarding-paragraphs></div><div class="cw-onboarding-connection"></div><div class="cw-onboarding-handoff"></div><p class="cw-onboarding-note">This tour explains the story-world language. The underlying technical systems remain local-first software, and none of these steps commits you to a Quest, Party, or Guild.</p><div class="cw-onboarding-actions"><div class="cw-onboarding-action-group"><button class="cw-onboarding-back" type="button" data-cw-onboarding-back>Back</button><button class="cw-onboarding-next" type="button" data-cw-onboarding-next></button></div><span class="cw-onboarding-progress" aria-live="polite"></span></div></div></div></div>`;
+  root.innerHTML=`<div class="cw-onboarding-card"><header class="cw-onboarding-top"><small>Optional Civweave orientation</small><button class="cw-onboarding-skip" type="button" data-cw-onboarding-skip>Skip tour</button></header><nav class="cw-onboarding-rail" aria-label="Guide handoff order">${railMarkup()}</nav><div class="cw-onboarding-stage"><div class="cw-onboarding-character"><div class="cw-onboarding-avatar" role="img"></div></div><div class="cw-onboarding-copy"><p class="cw-onboarding-kicker"></p><h2 id="cw-onboarding-title"></h2><p class="cw-onboarding-role"></p><div data-cw-onboarding-paragraphs></div><div class="cw-onboarding-connection"></div><div class="cw-onboarding-ai-setup" data-cw-ai-setup-actions hidden><p>Choose one path to start:</p><div class="cw-onboarding-ai-choices"><button type="button" data-cw-ai-setup-openai>Connect ChatGPT / OpenAI API</button><button type="button" data-cw-ai-setup-gemini>Connect Gemini API</button><button type="button" data-cw-ai-setup-local>Local only · no API key</button></div><p class="cw-onboarding-ai-status" data-cw-ai-setup-status role="status" aria-live="polite"></p></div><div class="cw-onboarding-handoff"></div><p class="cw-onboarding-note">This tour explains the story-world language. The underlying technical systems remain local-first software, and none of these steps commits you to a Quest, Party, or Guild.</p><div class="cw-onboarding-actions"><div class="cw-onboarding-action-group"><button class="cw-onboarding-back" type="button" data-cw-onboarding-back>Back</button><button class="cw-onboarding-next" type="button" data-cw-onboarding-next></button></div><span class="cw-onboarding-progress" aria-live="polite"></span></div></div></div></div>`;
   document.body.append(root);
   root.addEventListener('click',event=>{
     const stepButton=event.target.closest?.('[data-cw-onboarding-step]');
     if(stepButton){show(Number(stepButton.dataset.cwOnboardingStep)||0);return}
     if(event.target.closest?.('[data-cw-onboarding-skip]')){close('skipped');return}
     if(event.target.closest?.('[data-cw-onboarding-back]')){show(Math.max(0,index-1));return}
-    if(event.target.closest?.('[data-cw-onboarding-next]')){if(index>=STEPS.length-1)close('completed');else show(index+1)}
+    if(event.target.closest?.('[data-cw-ai-setup-openai]')){beginProviderSetup('openai');return}
+    if(event.target.closest?.('[data-cw-ai-setup-gemini]')){beginProviderSetup('gemini');return}
+    if(event.target.closest?.('[data-cw-ai-setup-local]')){try{globalThis.CivweaveSettingsV320?.chooseLocalOnly?.();show(1)}catch(error){root.querySelector('[data-cw-ai-setup-status]').textContent=String(error?.message||error)}return}
+    if(event.target.closest?.('[data-cw-onboarding-next]')){if(index===0&&needsAISetup()){root.querySelector('[data-cw-ai-setup-status]').textContent='Connect one API provider or choose Local Only to continue. You can also skip and decide next time.';return}if(index>=STEPS.length-1)close('completed');else show(index+1)}
   });
   root.addEventListener('keydown',event=>{
     if(event.key==='Escape'){event.preventDefault();close('skipped');return}
@@ -153,11 +167,21 @@ function show(nextIndex){
   root.querySelector('[data-cw-onboarding-paragraphs]').innerHTML=step.paragraphs.map(text=>`<p>${escapeHtml(text)}</p>`).join('');
   root.querySelector('.cw-onboarding-connection').textContent=step.connection;
   root.querySelector('.cw-onboarding-handoff').textContent=step.handoff;
+  root.querySelector('[data-cw-ai-setup-actions]').hidden=index!==0;
+  if(index===0)root.querySelector('[data-cw-ai-setup-status]').textContent=needsAISetup()?'No API key configured. Cloud models are not required to continue locally.':'Your AI startup choice is already saved. You can change it under Settings.';
   const back=root.querySelector('[data-cw-onboarding-back]');back.hidden=index===0;
   root.querySelector('[data-cw-onboarding-next]').textContent=index===STEPS.length-1?step.next:`${step.next} →`;
   root.querySelector('.cw-onboarding-progress').textContent=`${index+1} of ${STEPS.length} · ${sprite.guide}`;
   renderRail();highlight(step.system);
   try{dispatchEvent(new CustomEvent('civweave:onboarding-step',{detail:{version:VERSION,index,system:step.system,guide:sprite.guide}}))}catch{}
+}
+function beginProviderSetup(provider){
+  const settings=globalThis.CivweaveSettingsV320;
+  if(!settings?.openForProvider){root.querySelector('[data-cw-ai-setup-status]').textContent='Shared Settings are unavailable; use Local Only or try again.';return false}
+  close('provider-setup');
+  resumeAfterSettings=true;
+  settings.openForProvider(provider);
+  return true;
 }
 function open({step=0,force=false}={}){
   if(!force&&!shouldAutoOpen())return false;
@@ -186,7 +210,15 @@ function bindReplay(){
   button.addEventListener('click',()=>open({force:true}));
   return true;
 }
-function boot(){createRoot();bindReplay();if(shouldAutoOpen())requestAnimationFrame(()=>requestAnimationFrame(()=>open({force:true})))}
+function boot(){
+  createRoot();bindReplay();
+  addEventListener('civweave:model-settings-closed',()=>{
+    if(!resumeAfterSettings)return;
+    resumeAfterSettings=false;
+    if(!needsAISetup())open({force:true,step:1});
+  });
+  if(shouldAutoOpen())requestAnimationFrame(()=>requestAnimationFrame(()=>open({force:true,step:needsAISetup()?0:1})));
+}
 
 globalThis.CivweaveNewUserOnboardingV1=Object.freeze({version:VERSION,storageKey:STORAGE_KEY,steps:STEPS,sprites:SPRITES,open,close,reset,status,bindReplay,autoSkipsExistingActivity:true,soloAllowed:true,partyEncouraged:true,guildStewardLore:'Guildkeeper',artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest',runtimeInjection:false,replayControl:true});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
