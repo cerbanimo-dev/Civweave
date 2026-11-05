@@ -68,8 +68,11 @@ function readWorldweaverProviderConfig(provider){
   if(!['openai','gemini','local'].includes(provider))throw new RangeError('Worldweaver provider is not supported.');
   if(provider==='local'){
     const state=readState();
-    if(!['downloaded-local','ollama','openai-compatible'].includes(state.route)
-      ||(state.route==='openai-compatible'&&!/^https?:\\/\\/(localhost|127\\.|\\[::1\\])/i.test(state.endpoint)))return null;
+    if(!['downloaded-local','ollama','openai-compatible'].includes(state.route))return null;
+    if(state.route==='openai-compatible'){
+      let hostname;try{hostname=new URL(state.endpoint).hostname}catch{return null}
+      if(!['localhost','127.0.0.1','[::1]'].includes(hostname))return null;
+    }
     return{provider:state.route,model:state.model,endpoint:state.endpoint,externalConsent:false};
   }
   const route=provider==='openai'?'openai-compatible':'gemini';
