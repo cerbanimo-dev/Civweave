@@ -1,0 +1,74 @@
+name: Loom Tiny Parcels
+
+on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: 'seed = tiny kit; source = code/text; full = all eligible tracked files'
+        type: choice
+        options: [seed, source, full]
+        default: seed
+        required: true
+      chunk_kib:
+        description: 'Maximum KiB for each independently verifiable binary parcel'
+        type: choice
+        options: ['64', '128', '256']
+        default: '128'
+        required: true
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'scripts/loom-parcel.mjs'
+      - 'scripts/test-loom-parcel.mjs'
+      - 'docs/operations/loom-parcels.md'
+      - '.github/workflows/loom-parcels.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'scripts/loom-parcel.mjs'
+      - 'scripts/test-loom-parcel.mjs'
+      - 'docs/operations/loom-parcels.md'
+      - '.github/workflows/loom-parcels.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: loom-parcels-${{ github.ref }}-${{ inputs.tier || 'seed' }}
+  cancel-in-progress: true
+
+jobs:
+  parcel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test exact binary round trips and tamper rejection
+        run: |
+          node --check scripts/loom-parcel.mjs
+          node --test scripts/test-loom-parcel.mjs
+      - name: Package source into tiny independently hashed binary parcels
+        env:
+          LOOM_TIER: ${{ inputs.tier || 'seed' }}
+          LOOM_KIB: ${{ inputs.chunk_kib || '128' }}
+        run: |
+          node scripts/loom-parcel.mjs pack \
+            --root . --out "$RUNNER_TEMP/loom-parcels" \
+            --tier "$LOOM_TIER" --chunk-kib "$LOOM_KIB"
+      - name: Verify and restore exact source offline
+        run: |
+          node scripts/loom-parcel.mjs verify --out "$RUNNER_TEMP/loom-parcels"
+          node scripts/loom-parcel.mjs restore --out "$RUNNER_TEMP/loom-parcels" --into "$RUNNER_TEMP/loom-restored"
+      - name: Downloadable parcel kit (extract outer ZIP for individual parcels)
+        uses: actions/upload-artifact@v4
+        with:
+          name: loom-${{ inputs.tier || 'seed' }}-${{ github.run_number }}
+          path: ${{ runner.temp }}/loom-parcels/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
