@@ -42,6 +42,7 @@ button[aria-pressed=true]{background:#004f60;color:white}
 #questProgress li.done{text-decoration:line-through;color:#28704b}
 #choices{display:flex;flex-wrap:wrap;gap:8px}
 #plan{width:100%;min-height:275px;line-height:1.48;padding:13px;border-radius:8px;border:2px solid #aac8cd;font:14px ui-monospace,monospace;resize:vertical}
+#testReport{width:100%;min-height:160px;line-height:1.4;padding:10px;border:2px solid #aac8cd;border-radius:8px;font:13px ui-monospace,monospace;resize:vertical}
 .hidden{display:none!important}
 #tabRow{display:flex;gap:9px;margin:0 0 12px;flex-wrap:wrap}
 details{margin:12px 0}summary{font-weight:850;cursor:pointer}
@@ -109,6 +110,13 @@ details{margin:12px 0}summary{font-weight:850;cursor:pointer}
 <h2 id="screenHeading">Studio schedule</h2>
 <div id="scheduleHost"><p>Approach a schedule board and interact, or select one in the accessible map.</p></div>
 </div>
+<details id="diagnostics">
+<summary>Testing diagnostics</summary>
+<p class="muted">Generate a shareable report of your location, quest progress and screen state. It never includes your editable plan text or account information.</p>
+<div class="controls"><button type="button" id="refreshReport">Refresh report</button><button type="button" id="copyReport" class="primary">Copy test report</button></div>
+<textarea id="testReport" aria-label="Shareable Digital Y test report" readonly spellcheck="false"></textarea>
+<p id="reportStatus" class="muted" role="status" aria-live="polite"></p>
+</details>
 </aside>
 </main>
 <footer>Prototype uses the existing Worldweaver manifest and safe screen presenter for schedules; no real membership, booking, AI inference, live OpenSimulator region or Gym system is connected.</footer>
