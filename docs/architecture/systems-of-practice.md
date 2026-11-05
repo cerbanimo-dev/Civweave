@@ -136,6 +136,16 @@ The v1 P-256 ECDH + HKDF + AES-GCM envelope is a baseline transport-privacy laye
 
 The API and privacy boundaries are defined in `docs/contracts/guild-quest-publication-v1.md` and exercised by `scripts/test-guild-quest-publications-v1.mjs` and `scripts/test-guild-quest-publication-ui-v1.mjs`.
 
+## Maggieverse Soundtrack Reader
+
+- One device-local reader/cue core: \`public/app/shared/maggieverse-reader-core.mjs\`.
+- Device library owner: \`public/app/shared/maggieverse-reader-library.mjs\` (bounded IndexedDB; no upload).
+- Presentation: \`public/app/maggieverse-reader.html\`, opened as the Civweave \`nativePage=reader\` inside \`public/app/persistent-system-shell-v1.js\` and its matching first-frame bootstrap.
+- Weaveling's \`Soundtrack Reader\` shortcut belongs to the existing \`public/app/themed-system-nav-v178.js\`; no sixth realm or competing navigation owner.
+- Reader soundtrack cues are editorial prompts; Spotify frames are opened only after reader action, never automatically advanced when a page changes. This extension does not own, interrupt or replace the canonical radio.
+- Offline package seeds the static reader and the playlist planning CSV; actual Spotify media always requires its service.
+- Contract: \`scripts/test-maggieverse-reader.mjs\`, enforced in \`.github/workflows/maggieverse-reader.yml\`.
+
 ## Radio and review
 
 - Radio owner: `public/app/system-radio-agent-v233.js`

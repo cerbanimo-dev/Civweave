@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.21-guild-quest-map-route';
+const VERSION='1.1.23-maggieverse-reader';
 const SYSTEMS=new Set(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const ROUTES=Object.freeze({
   civweave:['/app/working-campus-v440.html',{}],
@@ -9,7 +9,7 @@ const ROUTES=Object.freeze({
   fellowfare:['/app/fellowfare-cabinet-v144.html',{cabinet:'1'}],
   anarchadia:['/app/anarchadia-console-v139.html',{cabinet:'1'}]
 });
-const CIVWEAVE_NATIVE_PAGES=Object.freeze({'guild-quests':'/app/civweave-guild-quest-v1.html'});
+const CIVWEAVE_NATIVE_PAGES=Object.freeze({'guild-quests':'/app/civweave-guild-quest-v1.html',reader:'/app/maggieverse-reader.html'});
 const ANARCHADIA_NATIVE_PAGES=Object.freeze({governance:'/app/anarchadia-governance-v145.html',workbench:'/app/services/anarchadia/workbench.html'});
 const ANARCHADIA_GOVERNANCE_ROUTES=new Set(['overview','identity','changes','ballots','federation','execution']);
 const ANARCHADIA_WORKBENCH_ROUTES=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);
@@ -48,6 +48,7 @@ let backlightTimers=[];
 function cleanSystem(value){const id=String(value||'').toLowerCase();return SYSTEMS.has(id)?id:'civweave'}
 function parse(value,fallback={}){try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}}
 function nativeOptions(system,options={}){
+  if(system==='civweave'&&options.nativePage==='reader')return {nativePage:'reader'};
   if(system==='civweave'&&options.nativePage==='guild-quests'){const id=String(options.submitQuest||'');return{nativePage:'guild-quests',...(/^[A-Za-z0-9:_-]{1,180}$/.test(id)?{submitQuest:id}:{})}}
   const nativePage=system==='anarchadia'&&Object.prototype.hasOwnProperty.call(ANARCHADIA_NATIVE_PAGES,options.nativePage)?options.nativePage:'';
   if(!nativePage)return{};
@@ -259,6 +260,7 @@ function intercept(event){
   event.preventDefault();event.stopImmediatePropagation();closeQuickMenu();
   if(feature==='settings'){openSettings();return}
   if(feature==='chat'){openGuide(system);return}
+  if(feature==='reader'&&system==='civweave'){navigate('civweave',{nativePage:'reader',source:'shared-navbar-quick'});return}
   navigate(system,{feature,source:'shared-navbar-quick'});
 }
 function bindBacklights(){

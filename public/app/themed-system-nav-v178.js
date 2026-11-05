@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.165-five-system-navigation-v235-viewport-bounds';
+const VERSION='1.0.166-five-system-navigation-maggieverse-reader';
 const NAV_ID='cw-themed-system-nav';
 const MENU_ID='cw-themed-system-nav-menu';
 const STYLE_ID='cw-themed-system-nav-style';
@@ -50,6 +50,7 @@ const QUICK=Object.freeze({
   civweave:Object.freeze([
     Object.freeze({id:'quest',label:'Current Quest',hint:'Resume the active Quest'}),
     Object.freeze({id:'library',label:'Quest Library',hint:'Open saved Quests'}),
+    Object.freeze({id:'reader',label:'Soundtrack Reader',hint:'Read books and arrange scene music'}),
     Object.freeze({id:'chat',label:'Talk to Weaveling',hint:'Open the Civweave guide thread'}),
     Object.freeze({id:'settings',label:'Settings',hint:'Open shared Civweave settings'})
   ]),
@@ -243,7 +244,7 @@ function activateLocalFeature(system,feature){
   if(system==='anarchadia'){if(feature==='passport'){document.querySelector('[data-screen-target="home"]')?.click();return reveal(document.querySelector('.ac-passport'))}if(feature==='governance'){const control=document.querySelector('[data-ag145-open]');if(control){control.click();return true}return false}const control=document.querySelector(`[data-screen-target="${feature}"]`);if(control){control.click();return true}return false}
   return false;
 }
-function launchFeature(system,feature){closeQuickMenu({restoreFocus:false});if(feature==='settings'&&openSettings())return true;if(system===currentSystem()&&activateLocalFeature(system,feature))return true;return routeSystem(system,feature)}
+function launchFeature(system,feature){closeQuickMenu({restoreFocus:false});if(system==='civweave'&&feature==='reader'){location.assign('/app/persistent-system-shell-v1.html?system=civweave&nativePage=reader&installed=1');return true;}if(feature==='settings'&&openSettings())return true;if(system===currentSystem()&&activateLocalFeature(system,feature))return true;return routeSystem(system,feature)}
 function clearRequestedFeature(){const url=new URL(location.href);if(!url.searchParams.has('feature'))return;url.searchParams.delete('feature');history.replaceState(history.state,'',`${url.pathname}${url.search}${url.hash}`)}
 function applyRequestedFeature(){const feature=String(new URLSearchParams(location.search).get('feature')||'').trim();if(!feature)return true;const system=currentSystem();if(!system)return false;const request=`${system}:${feature}`;if(EMBEDDED&&consumedFeature===request)return true;if(activateLocalFeature(system,feature)){if(EMBEDDED)consumedFeature=request;else clearRequestedFeature();return true}return false}
 function installRequestedFeatureLifecycle(){

@@ -1,0 +1,27 @@
+name: Maggieverse soundtrack reader
+on:
+  pull_request:
+    paths:
+      - "public/app/maggieverse-reader.html"
+      - "public/app/shared/maggieverse-reader-core.mjs"
+      - "public/app/maggieverse-playlist-cues.csv"
+      - "scripts/test-maggieverse-reader.mjs"
+      - ".github/workflows/maggieverse-reader.yml"
+  push:
+    branches: [staging, main]
+    paths:
+      - "public/app/maggieverse-reader.html"
+      - "public/app/shared/maggieverse-reader-core.mjs"
+      - "public/app/maggieverse-playlist-cues.csv"
+      - "scripts/test-maggieverse-reader.mjs"
+      - ".github/workflows/maggieverse-reader.yml"
+jobs:
+  reader-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --test scripts/test-maggieverse-reader.mjs

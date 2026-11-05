@@ -139,6 +139,8 @@ Current route table:
 
 This table is a **route snapshot**, not an architecture contract. If the dispatcher changes, update this table in the same change. Do not infer shared-system ownership from these filenames.
 
+Civweave's \`nativePage=reader\` displays the native Maggieverse Soundtrack Reader (\`public/app/maggieverse-reader.html\`). It retains the parent-owned five-system navigation, reads local EPUB/TXT/MD files, saves imported text to an optional bounded IndexedDB shelf, maintains per-edition reader-page cues, and exposes manual Spotify playlist/song embeds. The shared radio remains separately owned. Reader assets are seeded in the offline package; remote Spotify playback is not an offline guarantee.
+
 Civweave's fixed `nativePage=guild-quests` displays the existing Guild Quest tracker within the persistent shell; `submitQuest` accepts only a bounded saved Quest identifier and opens its preview without publishing.
 
 Anarchadia's Governance and Workbench are native content destinations within the same persistent shell. `persistent-system-shell-v1.js` accepts only the fixed `nativePage=governance` and `nativePage=workbench` routes for Anarchadia, with allowlisted Workbench views and bounded proposal/Quest identifiers. The first-frame bootstrap uses the same fixed destinations, and the shell validates the expected content origin, path, and launch parameters. Native entry and return controls delegate to the parent's existing `CivweavePersistentSystemShellV1.navigate` owner; standalone returns preserve the installed/embedding context without creating another shell or navigation owner.

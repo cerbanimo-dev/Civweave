@@ -493,6 +493,23 @@
         "public/app/tools/worldweaver-geometry-lab.html",
         "public/app/tools/worldweaver-performance-lab.html"
       ]
+    },
+    "maggieverse-reader": {
+      "capability": "Device-local book reading, per-book soundtrack cue sheets and user-initiated Spotify references",
+      "owner": "public/app/shared/maggieverse-reader-core.mjs",
+      "deviceLibraryOwner": "public/app/shared/maggieverse-reader-library.mjs",
+      "presentation": "public/app/maggieverse-reader.html",
+      "nativePage": "reader",
+      "navigationOwner": "public/app/themed-system-nav-v178.js",
+      "routeOwner": "public/app/persistent-system-shell-v1.js",
+      "localStoragePrefix": "civweave.maggieverse-reader.v1.",
+      "rules": [
+        "Book bytes and per-book cue data stay on the device unless the reader explicitly exports a cue sheet.",
+        "The original Civweave five-system navigation and parent-owned radio remain unchanged; reader playback does not create another radio owner.",
+        "Spotify embeds open only after explicit user selection and never synchronize sound recordings to page turns.",
+        "Reader page numbers are reflowed edition-specific pages; cue import rejects mismatched book identities and page lengths.",
+        "Only a rights-cleared audio owner may later offer automated page-turn playback."
+      ]
     }
   }
 }
