@@ -86,6 +86,17 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const payload={schema:RECEIPT_SCHEMA,guildId:guild,policyRevision:revision,runId,status,at:new Date(now()).toISOString(),...extra};
     return mesh.createObject({id:'starling-work-receipt:'+guild+':'+runId+':'+status,revision:1,kind:STARLING_WORK_RECEIPT,purpose:'Auditable local Starling worker attempt; model output is a self-report until independently reviewed.',consent:'group',audience:['guild:'+guild],publish:true,priority:35,payload});
   }
+  async function pendingReview(guildId){
+    const guild=clean(guildId,180),genesis=await requireFounder(guild),p=await policy(guild,genesis.origin.nodeId);
+    if(!p)return null;
+    const events=await receipts(guild,genesis.origin.nodeId,p.revision),runs=new Map();
+    for(const event of events){const list=runs.get(event.runId)||[];list.push(event);runs.set(event.runId,list)}
+    for(const [runId,list] of runs){
+      if(list.some(x=>x.status==='started')&&!list.some(x=>['completed','failed','reviewed'].includes(x.status)))
+        return Object.freeze({runId,status:'interrupted-review-required',guildId:guild});
+    }
+    return null;
+  }
   /**
    * Explicitly acknowledge an interrupted run after inspecting its signed
    * receipt and any saved turn. This never completes a Quest, erases evidence,
@@ -199,5 +210,5 @@ export function createStarlingGuildWorker({mesh,turnService,founder,now=()=>Date
     const snapshot=guildQuestBeatSnapshot({guildId:selected,publications:all});
     return discoverGuildOpportunities({snapshot,capabilities,verifyHumanPublisher});
   }
-  return Object.freeze({status,enable,disable,reviewInterrupted,tick,start,stop,discover});
+  return Object.freeze({status,enable,disable,pendingReview,reviewInterrupted,tick,start,stop,discover});
 }
