@@ -1,0 +1,67 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createStarlingLiveMediaBridge,createBrowserSpeechPlayback} from '../public/app/shared/starling-live-media-bridge-v1.mjs';
+test('model output never reaches audio until a host grant',async()=>{
+ const spoken=[];let resolveSpeech;
+ const playback={speak:(text,opts)=>{spoken.push({text,opts});return new Promise(resolve=>{resolveSpeech=resolve})},stop:()=>{}};
+ const bridge=createStarlingLiveMediaBridge({hostId:'host',playback});
+ bridge.register({actorId:'host',participantId:'kami'});
+ assert.equal(spoken.length,0);
+ assert.deepEqual(await bridge.grantAndSpeak({actorId:'host',speakerId:'kami',turnId:'t0'}),{spoken:false,reason:'no-draft'});
+ bridge.offerDraft({actorId:'kami',requestId:'q1',text:'A proposal'});
+ assert.equal(spoken.length,0);
+ const pending=bridge.grantAndSpeak({actorId:'host',speakerId:'kami',turnId:'t1'});
+ assert.equal(spoken.length,1);
+ assert.equal(spoken[0].opts.canSpeak(),true);
+ resolveSpeech(true);assert.equal((await pending).spoken,true);
+ assert.equal(spoken[0].opts.canSpeak(),false);
+ bridge.dispose();
+});
+test('human voice activity interrupts and revokes audio while preserving transcript intent',async()=>{
+ let done,stops=0;const transcripts=[];
+ const bridge=createStarlingLiveMediaBridge({hostId:'host',playback:{speak:()=>new Promise(resolve=>done=resolve),stop:()=>stops++},onTranscript:v=>transcripts.push(v)});
+ bridge.register({actorId:'host',participantId:'agent1'});
+ bridge.register({actorId:'host',participantId:'guest',kind:'human'});
+ bridge.offerDraft({actorId:'agent1',requestId:'r1',text:'Long answer'});
+ const pending=bridge.grantAndSpeak({actorId:'host',speakerId:'agent1',turnId:'a1'});
+ bridge.voiceActivity({actorId:'guest'});
+ assert.equal(bridge.snapshot().active,null);
+ assert.equal(stops,1);
+ bridge.transcript({actorId:'guest',text:'Wait',final:true});
+ assert.equal(transcripts.length,1);
+ assert.equal(transcripts[0].text,'Wait');
+ done(true);
+ assert.equal((await pending).spoken,false);
+ bridge.dispose();
+});
+test('mute, reconnect and emergency mute cancel and fail closed',async()=>{
+ const bridge=createStarlingLiveMediaBridge({hostId:'host',playback:{speak:async()=>true,stop:()=>{}}});
+ bridge.register({actorId:'host',participantId:'agent1'});
+ bridge.offerDraft({actorId:'agent1',requestId:'a1',text:'Hello'});
+ bridge.emergencyMute({actorId:'host'});
+ assert.equal(bridge.snapshot().locked,true);
+ assert.equal((await bridge.grantAndSpeak({actorId:'host',speakerId:'agent1',turnId:'t1'})).spoken,false);
+ bridge.resume({actorId:'host'});
+ bridge.mute({actorId:'host',participantId:'agent1'});
+ assert.equal(bridge.offerDraft({actorId:'agent1',requestId:'a2',text:'Again'}).accepted,false);
+ bridge.reconnect({actorId:'agent1',participantId:'agent1'});
+ assert.equal(bridge.snapshot().pending.length,0);
+ assert.throws(()=>bridge.emergencyMute({actorId:'agent1'}),/Host authority/);
+ bridge.dispose();
+});
+test('browser TTS double-checks permission and obeys cancellation',async()=>{
+ let spoken=0,cancelled=0,last;
+ class Utterance{constructor(text){this.text=text;last=this}}
+ const tts=createBrowserSpeechPlayback({speechSynthesis:{speak:()=>spoken++,cancel:()=>cancelled++},Utterance});
+ assert.equal(await tts.speak('No permission',{canSpeak:()=>false}),false);
+ assert.equal(spoken,0);
+ const controller=new AbortController();
+ const speaking=tts.speak('Okay',{canSpeak:()=>true,signal:controller.signal});
+ assert.equal(spoken,1);
+ controller.abort();
+ assert.equal(await speaking,false);
+ assert.ok(cancelled>0);
+ const finished=tts.speak('Completed',{canSpeak:()=>true});
+ last.onend();
+ assert.equal(await finished,true);
+});
