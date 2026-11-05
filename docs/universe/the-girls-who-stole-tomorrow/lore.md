@@ -43,3 +43,6 @@
 
 ## Change record
 - **2026-11-05:** Added proposed novel, premise, bounded world rules, ensemble role sheets, first-chapter observations and hidden reveal planning. No existing canon promoted without author review.
+
+## November fifth convergence (dated source)
+The author-directed [Fifth of November chronicle](../../lore/november-5-2026-the-fifth-of-november.md) is the day's connected-book narrative across The Blade & Mirror Saga, with its own [provenance ledger](../../lore/november-5-2026-day-ledger.json). Its **last event** is Cami's invited fictional gathering of cast members to watch *V for Vendetta*. The chronicle does not retroactively change Books I–VI or make movie attendance a real-world claim. The Landryverse chapter remains a separately reviewed draft.
