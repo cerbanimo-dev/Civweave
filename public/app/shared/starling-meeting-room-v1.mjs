@@ -47,7 +47,10 @@ export function projectAvatarState(participant, session = {}) {
 
 export function projectMeetingRoom(session = {}) {
   const positions = positionParticipants(session.participants);
-  const byId = new Map((Array.isArray(session.participants) ? session.participants : []).filter(p => p && safeId(p.id)).map(p => [p.id, p]));
+  const byId = new Map();
+  for (const p of Array.isArray(session.participants) ? session.participants : []) {
+    if (p && safeId(p.id) && !byId.has(p.id)) byId.set(p.id, p);
+  }
   const avatars = positions.map(seat => {
     const p = byId.get(seat.id);
     return {
