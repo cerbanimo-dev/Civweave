@@ -5,8 +5,9 @@
  */
 import {COMMONS_BETWEEN} from '../shared/worldweaver-universe-v1.mjs';
 import {createConfiguredWorldweaverAISession} from '../shared/worldweaver-ai-handoff-v1.mjs';
-import {resolvePlaytestPricing} from '../shared/worldweaver-ai-pricing-v1.mjs';
+import {resolvePlaytestPricing,allowedPlaytestHostname} from '../shared/worldweaver-ai-pricing-v1.mjs';
 
+const hostAllowed=allowedPlaytestHostname(location.hostname);
 const form=document.querySelector('#ww-ai-playtest-form');
 const status=document.querySelector('#ww-ai-budget-status');
 const output=document.querySelector('#ww-ai-output');
@@ -35,6 +36,7 @@ function endSession(message='In-memory scene history cleared.'){
   showStatus(message);
 }
 function showConfiguration(){
+  if(!hostAllowed){connected.textContent='Paid AI playtesting is disabled on this host. Visit the dedicated staging origin for opt-in testing.';return}
   const settings=settingsOwner();
   if(!settings){connected.textContent='Shared AI Settings unavailable. Open Civweave from a supported browser route.';return}
   const mode=settings.readWorldMode();
@@ -62,6 +64,7 @@ async function runtimeForExplicitRequest(){
 }
 form.addEventListener('submit',async event=>{
   event.preventDefault();
+  if(!hostAllowed){showStatus('The paid AI playtest is unavailable on this production or unapproved host.');return}
   if(busy)return;
   const consent=form.elements.namedItem('externalConsent').checked;
   if(!consent){showStatus('Check the explicit external-request consent box before generating.');return}
@@ -124,3 +127,7 @@ addEventListener('civweave:model-settings-saved',()=>{endSession('Provider setti
 addEventListener('civweave:worldweaver-ai-mode-changed',()=>{endSession('World mode changed. Review and approve a new session before generation.');showConfiguration()});
 addEventListener('pagehide',()=>activeSession?.clearMemory());
 syncRole();showConfiguration();
+if(!hostAllowed){send.disabled=true;form.querySelector('[data-ww-ai-consent]').disabled=true;
+  form.querySelector('[data-open-unified-ai-settings]')?.setAttribute('disabled','');
+  showStatus('No cloud model calls are permitted on this host.');}
+
