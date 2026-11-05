@@ -14,6 +14,9 @@ on:
       - 'public/app/tools/worldweaver-performance-lab.html'
       - 'public/app/tools/worldweaver-performance-lab-v1.mjs'
       - 'public/app/shared/worldweaver-story-seeds-v1.mjs'
+      - 'public/app/shared/worldweaver-universe-v1.mjs'
+      - 'scripts/test-worldweaver-universe-v1.mjs'
+      - 'docs/contracts/worldweaver-commons-between-universe-v1.md'
       - 'public/app/tools/worldweaver-story-seed-atlas.html'
       - 'scripts/test-worldweaver-story-seeds-v1.mjs'
       - 'docs/contracts/worldweaver-door-and-dawn-world-seeds.md'
@@ -46,7 +49,10 @@ on:
     paths:
       - '.github/workflows/verify-worldweaver-core.yml'
       - 'public/app/shared/worldweaver-core-v1.mjs'
+      - 'public/app/shared/worldweaver-universe-v1.mjs'
       - 'scripts/test-worldweaver-core-v1.mjs'
+      - 'scripts/test-worldweaver-universe-v1.mjs'
+      - 'docs/contracts/worldweaver-commons-between-universe-v1.md'
       - 'public/app/shared/worldweaver-story-seeds-v1.mjs'
       - 'public/app/tools/worldweaver-story-seed-atlas.html'
       - 'public/app/tools/worldweaver-performance-lab-v1.mjs'
@@ -66,5 +72,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --check public/app/shared/worldweaver-story-seeds-v1.mjs && node --check public/app/shared/worldweaver-core-v1.mjs && node --check public/app/shared/worldweaver-opensim-geometry-v1.mjs && node --check public/app/shared/worldweaver-performance-studio-v1.mjs && node --check public/app/shared/worldweaver-stagecraft-v1.mjs && node --check public/app/shared/worldweaver-adaptation-model-v1.mjs && node --check public/app/shared/worldweaver-filmcraft-interchange-v1.mjs && node --check public/app/tools/worldweaver-performance-lab-v1.mjs && node --check public/app/shared/worldweaver-3d-preview-v1.mjs && node --check public/app/shared/worldweaver-visual-scene-v1.mjs && node --check public/app/tools/worldweaver-geometry-lab-v1.mjs && node --check public/app/shared/worldweaver-map-2d-v1.mjs && node --check public/app/tools/worldweaver-map-lab-v1.mjs && node --check public/app/shared/worldweaver-screen-v1.mjs && node --check public/app/tools/worldweaver-screen-lab-v1.mjs && node --check public/app/tools/worldweaver-avatar-lab-v1.mjs
+      - run: node --check public/app/shared/worldweaver-story-seeds-v1.mjs && node --check public/app/shared/worldweaver-universe-v1.mjs && node --check public/app/shared/worldweaver-core-v1.mjs && node --check public/app/shared/worldweaver-opensim-geometry-v1.mjs && node --check public/app/shared/worldweaver-performance-studio-v1.mjs && node --check public/app/shared/worldweaver-stagecraft-v1.mjs && node --check public/app/shared/worldweaver-adaptation-model-v1.mjs && node --check public/app/shared/worldweaver-filmcraft-interchange-v1.mjs && node --check public/app/tools/worldweaver-performance-lab-v1.mjs && node --check public/app/shared/worldweaver-3d-preview-v1.mjs && node --check public/app/shared/worldweaver-visual-scene-v1.mjs && node --check public/app/tools/worldweaver-geometry-lab-v1.mjs && node --check public/app/shared/worldweaver-map-2d-v1.mjs && node --check public/app/tools/worldweaver-map-lab-v1.mjs && node --check public/app/shared/worldweaver-screen-v1.mjs && node --check public/app/tools/worldweaver-screen-lab-v1.mjs && node --check public/app/tools/worldweaver-avatar-lab-v1.mjs
       - run: npm run test:worldweaver
