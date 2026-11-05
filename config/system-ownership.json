@@ -3,6 +3,24 @@
   "policy": "extend-existing-owner-never-add-parallel-owner",
   "requiredForAgentWork": true,
   "systems": {
+    "browser-connection": {
+      "capability": "Shared in-PWA browser, installed PWA web-share receiver, and read-only MCP-compatible AI browsing tools",
+      "owner": "public/app/browser-connection-v1.js",
+      "policy": "public/app/shared/browser-connection-core-v1.mjs",
+      "hostedToolOwner": "public/app/browser-tool-v1.js",
+      "canonicalApi": "globalThis.CivweaveBrowserConnectionV1",
+      "presentationCaller": "public/app/guide-chat-surface-v350.js",
+      "receiver": "public/app/browser-receiver-v1.html",
+      "contract": "docs/contracts/shared-browser-connection-v1.md",
+      "rules": [
+        "The browser presents sources beside the one canonical guide chat; it never owns chat state or model inference.",
+        "Shared URLs are session-scoped and consumed once; receiving a share never starts inference or Guild publication.",
+        "Only read-only browser archive, search, open, links, and accessibility tools are available to AI.",
+        "Live tool calls require a human-granted session permission and the existing host-capacity session.",
+        "Remote text and framed webpages are untrusted; arbitrary scripting, login automation and private network URLs are forbidden.",
+        "Developer MCP tools remain a separate maintainer-only boundary, never a public PWA endpoint."
+      ]
+    },
     "action-board": {
       "capability": "Offline-first capture and context-filtered next-action projection over saved Quests",
       "owner": "public/app/action-board-v1.mjs",
