@@ -18,5 +18,5 @@ test('Commons entry surface uses the canonical universe blueprint',()=>{
   assert.match(entry,/COMMONS_BETWEEN/);
   assert.match(entry,/worldweaver-universe-v1\.mjs/);
   assert.match(entry,/civweave\.commons-between\.last-room\.v1/);
-  assert.match(entry,/DreamGrid \/ OpenSimulator provider: not connected/);
+  assert.match(html,/DreamGrid \/ OpenSimulator provider: not connected/);
 });
