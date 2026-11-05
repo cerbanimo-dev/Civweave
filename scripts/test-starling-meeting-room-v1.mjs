@@ -127,3 +127,12 @@ test('host voice preview uses existing canonical capture and never opens a secon
   assert.match(js,/pagehide/);
   assert.doesNotMatch(js,/getUserMedia|MediaRecorder|new AudioContext|WebSocket|fetch\(/);
 });
+
+
+test('missing speech pack falls back to local microphone meter, not cloud speech', async()=>{
+  const {readFileSync}=await import('node:fs');
+  const js=readFileSync(new URL('../public/app/tools/starling-meeting-room-lab.mjs',import.meta.url),'utf8');
+  assert.match(js,/runtime\.startMeter\(\)/);
+  assert.match(js,/audio level only/);
+  assert.doesNotMatch(js,/getUserMedia|MediaRecorder|WebSocket|fetch\(/);
+});
