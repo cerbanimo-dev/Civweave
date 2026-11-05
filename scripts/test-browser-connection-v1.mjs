@@ -39,6 +39,12 @@ test('one shared browser panel connects to canonical guide chat without creating
   assert.match(shell,/browser-connection-v1\.js/);
   assert.doesNotMatch(panel,/CivweaveAssistantV141\.respond|new WebSocket\(/);
 });
+test('downloaded local model cannot browse live until browser panel approval', () => {
+  const agent=read('public/app/local-ai/browser-agent-v1.js');
+  assert.match(agent,/function browserNetworkApproved\(/);
+  assert.match(agent,/liveAllowed=!offlineForced&&browserNetworkApproved\(\)/);
+});
+
 test('installed PWA receives shared pages through a same-origin Web Share Target', () => {
   const manifest=JSON.parse(read('public/app/manifest.webmanifest'));
   assert.equal(manifest.share_target?.action, '/app/browser-receiver-v1.html');
