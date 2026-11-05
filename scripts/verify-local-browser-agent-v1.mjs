@@ -31,6 +31,7 @@ assert.match(wrangler,/"browser"\s*:\s*\{[\s\S]*"binding"\s*:\s*"BROWSER"/,'Node
 assert.match(bootstrap,/browser-tool-v1\.js\?v=1\.0\.0/,'Local AI bootstrap must load the browser tool.');
 assert.match(bootstrap,/browser-agent-v1\.js\?v=1\.0\.1/,'Local AI bootstrap must load the hardened browser agent.');
 assert.equal(offline.assets.includes('/app/browser-tool-v1.js'),true,'Browser tool must be part of the offline core.');
+assert.equal(offline.assets.includes('/app/shared/browser-session-policy-v1.mjs'),true,'Browser consent policy must be cached for the installed/offline browser session.');
 assert.equal(offline.assets.includes('/app/local-ai/browser-agent-v1.js'),true,'Local browser agent must be part of the offline core.');
 assert.equal(offline.assets.includes('/app/knowledge-school-runtime-v243.mjs'),true,'Offline archive search runtime must be cached.');
 
