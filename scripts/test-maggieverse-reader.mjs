@@ -41,3 +41,29 @@ test('cue sheet import validates lengths, kinds, URLs and book identity', () => 
 });
 
 console.log('maggieverse reader: ok');
+
+
+test('Civweave shell exposes the reader through the one native page and themed navigation owner', async () => {
+  const fs=await import('node:fs/promises');
+  const shell=await fs.readFile(new URL('../public/app/persistent-system-shell-v1.js',import.meta.url),'utf8');
+  const bootstrap=await fs.readFile(new URL('../public/app/persistent-system-shell-v1.html',import.meta.url),'utf8');
+  const nav=await fs.readFile(new URL('../public/app/themed-system-nav-v178.js',import.meta.url),'utf8');
+  const reader=await fs.readFile(new URL('../public/app/maggieverse-reader.html',import.meta.url),'utf8');
+  assert.match(shell,/['"]reader['"]\s*:\s*['"]\/app\/maggieverse-reader\.html['"]/);
+  assert.match(bootstrap,/maggieverse-reader\.html/);
+  assert.match(nav,/id:'reader',label:'Soundtrack Reader'/);
+  assert.match(reader,/data-civweave-system="civweave"/);
+  assert.match(reader,/id="book-shelf"/);
+  assert.match(reader,/id="bookmark"/);
+  assert.match(reader,/id="edit-cue"/);
+  assert.match(reader,/id="open-playlist-plan"/);
+  assert.doesNotMatch(reader,/api\.spotify\.com\/v1\/me\/player/);
+});
+test('book library layer is explicitly device-local with a bounded record size', async () => {
+  const fs=await import('node:fs/promises');
+  const library=await fs.readFile(new URL('../public/app/shared/maggieverse-reader-library.mjs',import.meta.url),'utf8');
+  assert.match(library,/indexedDB\.open/);
+  assert.match(library,/MAX_LOCAL_BOOK_TEXT/);
+  assert.match(library,/deleteBook/);
+  assert.doesNotMatch(library,/fetch\s*\(/);
+});
