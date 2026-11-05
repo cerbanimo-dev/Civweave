@@ -6,6 +6,7 @@ The canonical encrypted ABBA Node Host backup remains at lib/node-reconstruction
 
 - loom-seed.json: tiny human-readable bootstrap (source commit, tier, manifest SHA-256).
 - manifest.json.br: Brotli-compressed inventory of exact file paths, sizes, modes, SHA-256 hashes and chunk references.
+- loom-restore.mjs: an **uncompressed self-contained decoder** shipped with each kit, so restoring never depends on fetching the original repository.
 - parts/<sha256>.lmp: independently verifiable binary chunks, each **at most 64, 128 or 256 KiB**. Brotli is used only when the compressed chunk is smaller; exact duplicate chunks are deduplicated.
 
 A seed or hash alone cannot recreate missing information. For actual reconstruction, retain the entire manifest **and all referenced parcels**. Checksums detect damage but are not digital signatures or proof of authorship.
@@ -24,8 +25,8 @@ Node 22+ and Git are required to pack. Restoring needs only Node 22+ and the pac
 
 ~~~sh
 node scripts/loom-parcel.mjs pack --root . --out ../loom-seed --tier seed --chunk-kib 64
-node scripts/loom-parcel.mjs verify --out ../loom-seed
-node scripts/loom-parcel.mjs restore --out ../loom-seed --into ../loom-restored
+node ../loom-seed/loom-restore.mjs verify --out ../loom-seed
+node ../loom-seed/loom-restore.mjs restore --out ../loom-seed --into ../loom-restored
 ~~~
 
 For broader code distribution:
