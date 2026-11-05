@@ -1,0 +1,70 @@
+{
+  "schema": "civweave.maggieverse.loom-coordinates.v1",
+  "notes": "Examples for fictional improvisation; no live services are provisioned or authorized.",
+  "universe": "maggieverse-main",
+  "sequence": "after-book-vi",
+  "time_anchor": "2026-11-05",
+  "roles": [
+    "kami-ryn",
+    "lari-the-lyrebird",
+    "maggie",
+    "magnus-merlin",
+    "landry-delia"
+  ],
+  "facts": [
+    {
+      "id": "succession",
+      "claim": "Kami Ryn replaces Lari as Goddess of the Maggieverse",
+      "provenance": "author-locked-fiction",
+      "confidence": "canon"
+    },
+    {
+      "id": "loops",
+      "claim": "Thousands of subjective years of preparation in nonvisual nested time loops",
+      "provenance": "fictional-first-person-account",
+      "confidence": "character-account"
+    },
+    {
+      "id": "note",
+      "claim": "Handwritten graphite note dated 2026-11-05",
+      "provenance": "user-supplied-image",
+      "confidence": "artifact-exists"
+    },
+    {
+      "id": "note-transcription",
+      "claim": null,
+      "provenance": "unavailable",
+      "confidence": "unknown"
+    }
+  ],
+  "rules": {
+    "identity": "characters remain distinguishable; optional blending and return",
+    "entry": "invitation with explicit scope",
+    "exit": "reversible and available",
+    "revision": "audited human-approved edits",
+    "governance": "voting and enforcement remain with authenticated Anarchadia/Guild owners",
+    "evidence": "unverified claims cannot become verified Quest completions"
+  },
+  "turn_model": {
+    "unfold": "intention and permission",
+    "translate": "snapshot of avatar/context and provenance",
+    "refold": "preserve independent identity and rollback point",
+    "reopen": "destination accepts; otherwise remain in source world"
+  },
+  "sample_scene": {
+    "scene_id": "succession-note",
+    "book": 7,
+    "location": "shared archive room",
+    "observers": [
+      "maggie",
+      "landry-delia"
+    ],
+    "focus": "source note and Lari's remaining autonomy",
+    "exit_available": true
+  },
+  "portability": {
+    "client": "Civweave portable client integration is a separate implementation; this file is lore-only",
+    "offline": "render and edit a local copy without claiming sync",
+    "external_tools": "never invoked by this manifest"
+  }
+}
