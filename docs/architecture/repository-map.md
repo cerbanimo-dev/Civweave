@@ -157,6 +157,7 @@ The canonical ownership list lives in `docs/architecture/systems-of-practice.md`
 | Settings presentation and persistence | `public/app/settings-gateway-v317.js`; local-model renderers delegate saves to this owner |
 | Family navigation/chrome | `public/app/themed-system-nav-v178.js` and `public/app/persistent-system-shell-v1.js` |
 | Route authority | `public/app/system-routes-v227.js` |
+| Delegated browser research + connected-session consent | `public/app/browser-tool-v1.js` (canonical client owner); `public/app/shared/browser-session-policy-v1.mjs` (pure human/AI permission helper); `cloudflare/node-cloud/src/browser-tool-entry-v1.mjs` (signed-session live proxy). Not yet a shared logged-in browser session. See `docs/contracts/browser-session-and-mcp-permissions-v1.md`. |
 | Guide chat workspace | `public/app/guide-workspace-v242.js` |
 | Guide chat loader | `public/app/family-ai-loader-v105.js` |
 | Local AI inference | `public/app/local-ai/runtime-v266.js` |
