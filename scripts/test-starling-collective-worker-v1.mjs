@@ -127,3 +127,26 @@ test('a Quest beat already offered to is not repeatedly offered every automatic 
  assert.match(h.calls[0].taskPrompt,/accessibility guide/);
  assert.doesNotMatch(h.calls[1].taskPrompt,/accessibility guide/);
 });
+
+test('automatic Guild worker produces bounded fictional PvE improv rather than pretending to complete real tasks',async()=>{
+ const h=harness();
+ await h.worker.enable('garden',{confirmConsent:()=>true});
+ const result=await h.worker.tick('garden');
+ assert.equal(result.status,'completed');
+ assert.match(h.calls[0].taskPrompt,/fictional PvE/i);
+ assert.match(h.calls[0].taskPrompt,/SCENE/i);
+ assert.match(h.calls[0].taskPrompt,/NEXT HOOK/i);
+ assert.match(h.calls[0].taskPrompt,/not.*Quest completion/i);
+ assert.equal(typeof h.worker.claimTask,'undefined');
+});
+test('a verified published human Quest beat is only an optional fictional seed, not permission to claim it',async()=>{
+ const h=harness();
+ const offer={guildId:'garden',questId:'q1',beatId:'beat1',beatTitle:'Run accessible garden tour',action:'suggest-offer-only',requiresCanonicalClaim:true};
+ const worker=createStarlingGuildWorker({mesh:h.mesh,turnService:h.model,founder:()=>({guildId:'garden',deviceId:'device:founder'}),now:()=>h.nowRef.value,randomId:()=>String(h.signed.length+1),readTaskOpportunities:async()=>[offer]});
+ await worker.enable('garden',{confirmConsent:()=>true});
+ await worker.tick('garden');
+ assert.match(h.calls[0].taskPrompt,/fictional PvE/i);
+ assert.match(h.calls[0].taskPrompt,/garden tour/);
+ assert.match(h.calls[0].taskPrompt,/not.*claim/i);
+ assert.equal(h.signed.at(-1).payload.offerOnly,true);
+});
