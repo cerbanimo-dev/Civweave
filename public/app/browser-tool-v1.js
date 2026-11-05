@@ -12,9 +12,25 @@ const hostAccess=()=>globalThis.CivweaveHostNodeSessionV1||null;
 function capacitySessions(){return storageObject(sessionStorage,CAPACITY_SESSION_KEY)}
 function marketPrefs(){return storageObject(localStorage,MARKET_PREF_KEY)}
 function usableCapacitySession(){
-  const owned=hostAccess()?.sessionFor?.();if(owned)return owned;
-  const all=capacitySessions(),preferred=clean(marketPrefs().preferredNodeId,180),rows=Object.values(all).filter(item=>item?.nodeId&&item?.token&&item?.origin&&(!item.expiresAt||Date.parse(item.expiresAt)>Date.now()));
-  return rows.find(item=>item.nodeId===preferred)||rows[0]||null;
+  // Never borrow whichever Guild happens to be first in tab storage. Browser
+  // research can expose browsing intent to its destination host.
+  const selected=storageObject(localStorage,hostAccess()?.selectionKey||'civweave.host-node.selection.v1');
+  const selectedNodeId=clean(selected.nodeId,180),selectedOrigin=clean(selected.origin,2000);
+  const preferred=clean(marketPrefs().preferredNodeId,180);
+  const selector=selectedNodeId||selectedOrigin||preferred;
+  if(!selector)return null;
+  const owned=hostAccess()?.sessionFor?.(selector);
+  const rows=Object.values(capacitySessions());
+  const session=owned||rows.find(item=>item?.nodeId===selector||item?.origin===selector);
+  if(!session?.nodeId||!session?.token||!session?.origin)return null;
+  if(selectedNodeId&&session.nodeId!==selectedNodeId)return null;
+  try{
+    const host=new URL(session.origin);
+    if(host.protocol!=='https:'||host.username||host.password)return null;
+    if(selectedOrigin&&new URL(selectedOrigin).origin!==host.origin)return null;
+  }catch{return null}
+  if(session.expiresAt){const expiry=Date.parse(session.expiresAt);if(!Number.isFinite(expiry)||expiry<=Date.now())return null}
+  return session;
 }
 function emit(type,detail={}){try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,at:new Date().toISOString(),...detail}}))}catch{}}
 function registerArchiveProvider(id,search){
