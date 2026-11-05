@@ -38,7 +38,7 @@ World mode preference is stored under `civweave.worldweaver.ai-mode.v1`. Startup
 
 ## Optional staging story playtest
 
-The Commons Between links to `/app/tools/worldweaver-ai-playtest.html`. It is **a developer playtest presentation**, not a second model owner, a new chat interface, a live multiplayer provider, or a route that publishes quests or changes canonical Worldweaver state.
+The Commons Between links to `/app/tools/worldweaver-ai-playtest.html`. The playtest presentation explicitly allows only `civweave-staging.pages.dev`, `localhost`, and `127.0.0.1`; on production or other domains, its submit action and consent control are disabled before credential reading or model-runtime loading. This is a client-side release guard, **not** a security boundary or substitute for server-enforced quotas. It is **a developer playtest presentation**, not a second model owner, a new chat interface, a live multiplayer provider, or a route that publishes quests or changes canonical Worldweaver state.
 
 - The page starts with **zero** remote calls. The existing Settings owner is loaded solely for the user-requested provider configuration; the canonical model runtime is lazily imported only during a deliberate form submission.
 - The user chooses Loom, one character, or Lari; a room; a bounded prompt; a two-call limit; and an estimated USD cap no greater than five cents. They must explicitly check external-request consent before requesting each generation. Session history lives in memory and is cleared by End Session or page exit. Changing saved provider settings invalidates the current session.
