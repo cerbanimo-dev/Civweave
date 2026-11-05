@@ -40,6 +40,15 @@ test('new drafts are staged through canonical Action Board, never as official Qu
   assert.deepEqual(again.receipts.map(x=>x.status),['unchanged','unchanged']);
   assert.equal(again.store.actions.length,2);
 });
+test('max-length escaped Quest title stays idempotent through canonical Action Board normalization',()=>{
+  const tricky='\\\\\"'.repeat(53)+'Z';
+  const sample=bundle(tricky.slice(0,160));
+  const first=stagePortableActions({},sample,['q1'],scope);
+  const second=stagePortableActions(first.store,sample,['q1'],scope);
+  assert.equal(first.store.actions.length,1);
+  assert.deepEqual(second.receipts.map(x=>x.status),['unchanged']);
+  assert.equal(second.store.actions.length,1);
+});
 test('changed same-ID draft preserves both versions and must be manually resolved',()=>{
   const first=stagePortableActions({},bundle(),['q1'],scope).store;
   const revised=bundle('Repair the telescope');
