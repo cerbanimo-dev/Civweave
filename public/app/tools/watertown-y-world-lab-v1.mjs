@@ -1,5 +1,6 @@
 import {createWorldweaver} from '../shared/worldweaver-core-v1.mjs';
 import {renderWorldScreen} from '../shared/worldweaver-screen-v1.mjs';
+import {projectWorld2D,renderWorldMap2D} from '../shared/worldweaver-map-2d-v1.mjs';
 
 /**
  * Local Worldweaver mockup: a guide-owned room with four real screen manifests.
@@ -67,6 +68,13 @@ function display(key){
  $('message').textContent=secure?
   'Selected '+selected.title+'. This demo authorized a local human screen cast; nothing was published to a live Guild or real YMCA.':
   'HTTPS is unavailable in this viewer. No world screen was cast. You can still open the standalone schedule.';
+ const map=projectWorld2D(snapshot,{worldRef:room.id});
+ $('worldMap').replaceChildren(renderWorldMap2D(map,{documentRef:document,onActivate:action=>{
+  if(action.objectType==='screen'){
+   const target=[...record.values()].find(item=>item.screenId===action.objectId);
+   if(target)display(target.key);
+  }else $('message').textContent='Selected '+action.objectType+' in the local Worldweaver schematic map.';
+ }}));
  $('casted').textContent=JSON.stringify({
   schema:snapshot.schema,revision:snapshot.revision,worldId:room.id,
   screens:snapshot.screens.map(row=>({
