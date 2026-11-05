@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {publishedPlaytestRates,resolvePlaytestPricing} from '../public/app/shared/worldweaver-ai-pricing-v1.mjs';
+import {publishedPlaytestRates,resolvePlaytestPricing,allowedPlaytestHostname} from '../public/app/shared/worldweaver-ai-pricing-v1.mjs';
 const file=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const configs={
  openai:{provider:'openai-compatible',endpoint:'https://api.openai.com/v1',model:'gpt-6-luna',apiKey:'test-key',externalConsent:true},
@@ -48,4 +48,17 @@ test('Commons Between links only to optional shared-runtime story proposal lab',
  const html=file('public/app/commons-between.html');
  assert.match(html,/worldweaver-ai-playtest\.html/);
  assert.match(html,/optional/i);
+});
+
+test('paid playtest host gate never accepts production or lookalike hosts',()=>{
+  for(const hostname of ['civweave.cc','www.civweave.cc','civweave.pages.dev',
+    'civweave-staging.pages.dev.attacker.com','civweave-staging.pages.dev.evil',
+    'some-other.pages.dev',''])assert.equal(allowedPlaytestHostname(hostname),false,hostname);
+  for(const hostname of ['civweave-staging.pages.dev','localhost','127.0.0.1'])
+    assert.equal(allowedPlaytestHostname(hostname),true,hostname);
+});
+test('playtest checks current host before loading runtime or reading provider keys',()=>{
+  const src=file('public/app/tools/worldweaver-ai-playtest-v1.mjs');
+  assert.match(src,/allowedPlaytestHostname\(location\.hostname\)/);
+  assert.match(src,/if\(!hostAllowed\)/);
 });
