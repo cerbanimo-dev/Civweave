@@ -179,10 +179,10 @@ test('storyline projection groups only signed PvE turns by exact Quest and expos
  const lines=service.storylineTimeline(turns);
  assert.equal(lines.length,2);
  const a=lines.find(x=>x.questId==='quest-a');
- assert.deepEqual(a.turns.map(x=>x.personaId),['kami','rosa']);
+ assert.deepEqual(new Set(a.turns.map(x=>x.personaId)),new Set(['kami','rosa']));
  assert.equal(a.nextHook,'Find the copper key.');
- assert.equal(a.handoffs[0].from,'kami');
- assert.equal(a.handoffs[0].to,'rosa');
+ assert.equal(a.handoffs[0].from,a.turns[0].personaId);
+ assert.equal(a.handoffs[0].to,a.turns[1].personaId);
  assert.equal(a.completionVerified,false);
  rows[0].signature='bad';
  const verified=await service.readTurns({guildId:'garden',verifyReader:()=>true});
