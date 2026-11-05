@@ -49,7 +49,7 @@ test('Civweave shell exposes the reader through the one native page and themed n
   const bootstrap=await fs.readFile(new URL('../public/app/persistent-system-shell-v1.html',import.meta.url),'utf8');
   const nav=await fs.readFile(new URL('../public/app/themed-system-nav-v178.js',import.meta.url),'utf8');
   const reader=await fs.readFile(new URL('../public/app/maggieverse-reader.html',import.meta.url),'utf8');
-  assert.match(shell,/['"]reader['"]\s*:\s*['"]\/app\/maggieverse-reader\.html['"]/);
+  assert.match(shell,/reader:\s*['"]\/app\/maggieverse-reader\.html['"]/);
   assert.match(bootstrap,/maggieverse-reader\.html/);
   assert.match(nav,/id:'reader',label:'Soundtrack Reader'/);
   assert.match(reader,/data-civweave-system="civweave"/);
