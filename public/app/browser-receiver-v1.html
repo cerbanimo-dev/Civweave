@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#07131e">
+<title>Open shared page in Civweave</title>
+<style>body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#07131e;color:#eff8ff;font:16px system-ui,sans-serif}main{padding:24px;max-width:32rem}a{color:#9ddeff}</style>
+</head>
+<body><main><h1>Receiving web page</h1><p id="status">Opening the shared Civweave browser…</p><p><a href="/app/persistent-system-shell-v1.html?system=civweave">Open Civweave</a></p></main>
+<script type="module">
+import {extractBrowserShare} from '/app/shared/browser-connection-core-v1.mjs';
+const params=new URLSearchParams(location.search);
+const share=extractBrowserShare({title:params.get('title'),text:params.get('text'),url:params.get('url')});
+history.replaceState(null,'',location.pathname);
+try{
+  sessionStorage.setItem('civweave.browser.receive.v1',JSON.stringify(share));
+  location.replace('/app/persistent-system-shell-v1.html?system=civweave');
+}catch{
+  document.getElementById('status').textContent='Could not transfer this shared page to Civweave. Please copy its URL and open the Connected browser manually.';
+}
+</script>
+</body>
+</html>
