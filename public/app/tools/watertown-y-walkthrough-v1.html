@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>Walk the Digital Y · Worldweaver Prototype</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#10313f;background:#eaf3f3}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}
+a{color:#006280;text-underline-offset:3px}a:focus-visible,button:focus-visible,textarea:focus-visible{outline:4px solid #e88c00;outline-offset:3px}
+header{padding:15px clamp(14px,2.3vw,32px);background:#00495a;color:#fff;display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+header h1{margin:2px 0;font-size:clamp(23px,2.5vw,37px)}header p{margin:4px 0;color:#d2f1f1}
+header nav a{color:#c6ffff}
+main{max-width:1800px;margin:auto;padding:clamp(10px,1.8vw,22px);display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:14px;align-items:start}
+.panel{border:2px solid #b6d2d5;background:#fff;border-radius:13px;padding:clamp(11px,1.3vw,18px);min-width:0}
+h2{font-size:clamp(19px,1.7vw,25px);margin:0 0 10px}h3{font-size:19px;margin:13px 0 6px}
+.muted{color:#536d76;font-size:14px;line-height:1.5}.notice{padding:12px 15px;background:#fff1cb;border-left:5px solid #b76b08;font-weight:700;border-radius:7px;margin:10px 0}
+#view{display:block;width:100%;height:clamp(340px,44vw,660px);background:#122e40;border-radius:9px;touch-action:none;cursor:crosshair}
+#map{display:block;width:100%;height:auto;max-height:345px;border:2px solid #aac8cd;border-radius:10px;background:#e5efed}
+#map:focus-visible{outline:4px solid #e88c00}
+button{font:800 15px system-ui;border:2px solid #3b808b;background:white;color:#014453;border-radius:9px;padding:10px 14px;min-height:49px;cursor:pointer}
+button:hover{background:#eaf5f6}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:#00677b;color:white;border-color:#00677b}
+button.primary:hover{background:#00566a}
+button[aria-pressed=true]{background:#004f60;color:white}
+.controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding:12px 0}
+.controls button{min-width:92px;touch-action:none;user-select:none}
+#interact{flex:1;min-width:190px}
+#location{font-size:18px;font-weight:850;margin-top:8px}
+#nearby{font-size:17px;font-weight:750;color:#075872;margin:8px 0;min-height:26px}
+#narration{padding:14px;background:#eaf4f5;border-left:5px solid #008198;border-radius:7px;min-height:78px;line-height:1.5}
+#scheduleHost{border-radius:10px;overflow:hidden}
+#scheduleHost .cw-worldweaver-screen iframe{display:block;width:100%;height:min(68vh,740px);min-height:450px;background:white;border:1px solid #aecacf}
+#scheduleHost .cw-worldweaver-screen h3{font-size:20px}
+#scheduleHost .cw-worldweaver-screen>p{font-size:13px;color:#526e75}
+#scheduleHost .cw-worldweaver-screen>a{display:inline-block;margin:8px 0}
+#scheduleHost iframe{width:100%;min-height:470px;border:2px solid #a0c0c6;border-radius:10px}
+#destinationList{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+#destinationList button{font-size:13px;padding:8px}
+#questProgress{margin:8px 0;padding-left:22px}#questProgress li{margin:5px 0}
+#questProgress li.done{text-decoration:line-through;color:#28704b}
+#choices{display:flex;flex-wrap:wrap;gap:8px}
+#plan{width:100%;min-height:275px;line-height:1.48;padding:13px;border-radius:8px;border:2px solid #aac8cd;font:14px ui-monospace,monospace;resize:vertical}
+.hidden{display:none!important}
+#tabRow{display:flex;gap:9px;margin:0 0 12px;flex-wrap:wrap}
+details{margin:12px 0}summary{font-weight:850;cursor:pointer}
+.small{font-size:13px}footer{max-width:1800px;margin:0 auto;padding:0 17px 20px;font-size:13px;color:#506c76}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+@media(max-width:600px){#destinationList{grid-template-columns:1fr 1fr}#view{height:350px}.controls button{min-width:72px;flex:1}#interact{flex-basis:100%}header nav{font-size:14px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header>
+<div><div class="small">CIVWEAVE · MAGGIEVERSE · LOCAL PROTOTYPE</div><h1>Walk the Digital Y</h1><p>A fictionalized, navigable YMCA-inspired learning space</p></div>
+<nav aria-label="Related tools"><a href="./watertown-y-world-lab.html">Screen lab</a> · <a href="./watertown-y-schedule-v2.html">Schedules</a> · <a href="./worldweaver-map-lab.html">Worldweaver map lab</a></nav>
+</header>
+<main>
+<section class="panel" aria-label="Three-dimensional world">
+<div class="notice">Unofficial imaginative prototype. The interior is schematic, not a verified model of the real Watertown Family YMCA. November 2026 schedules are a dated snapshot, not a live feed.</div>
+<canvas id="view" width="900" height="560" role="img" aria-label="First-person corridor view. Walk with the controls below or use accessible two-dimensional navigation.">Your browser does not support canvas. Use the 2D destination buttons below.</canvas>
+<div id="location" aria-live="off">Welcome Lobby</div>
+<div id="nearby" aria-live="polite">Explore the space.</div>
+<div class="controls" role="group" aria-label="Movement controls">
+<button type="button" data-move="left" aria-label="Turn left">↶ Turn</button>
+<button type="button" data-move="forward" aria-label="Walk forward">↑ Forward</button>
+<button type="button" data-move="back" aria-label="Walk backward">↓ Back</button>
+<button type="button" data-move="right" aria-label="Turn right">↷ Turn</button>
+<button type="button" class="primary" id="interact">Interact (E)</button>
+</div>
+<p class="muted">Desktop: W/S forward and backward, A/D strafe, ←/→ turn, E to interact. Mobile: hold the movement buttons. Select a screen or guide when close enough. The 2D route buttons provide accessible fast travel.</p>
+<div id="narration" role="status" aria-live="polite">You enter through a cheerful lobby. A welcome desk, notice boards and several doors lead into an expanded, imaginary Y.</div>
+</section>
+<aside class="panel" aria-label="Map, guidance and quest">
+<div id="tabRow" role="group" aria-label="Sidebar views">
+<button id="tab-map" type="button" aria-pressed="true">Map & rooms</button>
+<button id="tab-quest" type="button" aria-pressed="false">My quest</button>
+<button id="tab-schedule" type="button" aria-pressed="false">Schedule screen</button>
+</div>
+<div id="mapSection">
+<h2>Accessible two-dimensional map</h2>
+<svg id="map" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schematic Digital Y floor plan, showing rooms, corridors, interactive locations, and your position"></svg>
+<p class="muted">The map and first-person view share the same walls, doors, objects and current player position. Choose a destination for collision-checked accessible navigation.</p>
+<div id="destinationList" role="group" aria-label="Accessible destination list"></div>
+</div>
+<div id="questSection" class="hidden">
+<h2 id="questHeading">Find Your First Class</h2>
+<p class="muted">A short self-guided introduction. It works without cloud AI or a member account.</p>
+<ol id="questProgress"></ol>
+<h3>Pick a community intention</h3>
+<div id="choices" role="group" aria-label="Quest intentions">
+<button type="button" data-goal="fitness">Try a class</button>
+<button type="button" data-goal="learning">Learn a skill</button>
+<button type="button" data-goal="community">Meet neighbors</button>
+</div>
+<h3>Your editable draft plan</h3>
+<textarea id="plan" aria-label="Draft Civweave intention to quest plan" placeholder="Meet the guides and select an intention to build a plan."></textarea>
+<div class="controls"><button type="button" class="primary" id="exportPlan">Export Markdown</button><button type="button" id="resetQuest">Reset quest</button></div>
+<p id="completion" role="status"></p>
+</div>
+<div id="scheduleSection" class="hidden">
+<h2 id="screenHeading">Studio schedule</h2>
+<div id="scheduleHost"><p>Approach a schedule board and interact, or select one in the accessible map.</p></div>
+</div>
+</aside>
+</main>
+<footer>Prototype uses the existing Worldweaver manifest and safe screen presenter for schedules; no real membership, booking, AI inference, live OpenSimulator region or Gym system is connected.</footer>
+<script type="module" src="./watertown-y-walkthrough-v1.mjs"></script>
+</body></html>

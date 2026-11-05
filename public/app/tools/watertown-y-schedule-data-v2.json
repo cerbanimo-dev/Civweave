@@ -1,0 +1,1622 @@
+{
+  "schema": "civweave.ymca-schedule.v2",
+  "sourceMonth": "2026-11",
+  "timezone": "America/New_York",
+  "sourceUrl": "https://watertownymca.storage.googleapis.com/files/s3fs-public/2026-10/DTYGroupEx_2026NOV.pdf",
+  "studios": {
+    "cardio": {
+      "label": "Cardio Studio",
+      "page": 1,
+      "days": {
+        "Monday": [
+          {
+            "start": "05:15",
+            "end": "06:00",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "06:15",
+            "end": "07:00",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          },
+          {
+            "start": "07:10",
+            "end": "07:40",
+            "name": "Virtual GRIT Cardio",
+            "extra": ""
+          },
+          {
+            "start": "08:00",
+            "end": "09:00",
+            "name": "Enhance Fitness",
+            "extra": ""
+          },
+          {
+            "start": "09:30",
+            "end": "10:30",
+            "name": "LES MILLS TONE",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "12:00",
+            "name": "Arthritis Foundation",
+            "extra": ""
+          },
+          {
+            "start": "12:30",
+            "end": "13:30",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:45",
+            "name": "Virtual BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:30",
+            "name": "Virtual GRIT Strength",
+            "extra": ""
+          },
+          {
+            "start": "15:30",
+            "end": "16:00",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          },
+          {
+            "start": "16:30",
+            "end": "17:30",
+            "name": "BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "18:00",
+            "end": "19:00",
+            "name": "Pilates / Barre Combo",
+            "extra": ""
+          },
+          {
+            "start": "18:00",
+            "end": "19:00",
+            "name": "Functional Fitness",
+            "extra": "Turf"
+          },
+          {
+            "start": "20:15",
+            "end": "20:45",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          }
+        ],
+        "Tuesday": [
+          {
+            "start": "05:15",
+            "end": "05:45",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          },
+          {
+            "start": "06:00",
+            "end": "06:45",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:15",
+            "name": "Virtual BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "08:30",
+            "end": "09:30",
+            "name": "BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "09:45",
+            "end": "10:45",
+            "name": "Pilates",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "11:15",
+            "name": "Functional Fitness",
+            "extra": "Turf"
+          },
+          {
+            "start": "11:15",
+            "end": "12:15",
+            "name": "Silver Sneakers Classic",
+            "extra": ""
+          },
+          {
+            "start": "12:30",
+            "end": "13:30",
+            "name": "Chair Yoga",
+            "extra": ""
+          },
+          {
+            "start": "13:30",
+            "end": "14:00",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          },
+          {
+            "start": "14:30",
+            "end": "15:00",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "17:00",
+            "end": "18:00",
+            "name": "ZUMBA",
+            "extra": ""
+          },
+          {
+            "start": "18:30",
+            "end": "20:00",
+            "name": "American Kang Duk Won Karate",
+            "extra": "Registration required; Reserved"
+          },
+          {
+            "start": "20:15",
+            "end": "20:45",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          }
+        ],
+        "Wednesday": [
+          {
+            "start": "05:15",
+            "end": "06:15",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "06:30",
+            "end": "07:00",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          },
+          {
+            "start": "07:10",
+            "end": "07:40",
+            "name": "Virtual GRIT Athletic",
+            "extra": ""
+          },
+          {
+            "start": "08:00",
+            "end": "09:00",
+            "name": "Enhance Fitness",
+            "extra": ""
+          },
+          {
+            "start": "09:15",
+            "end": "10:15",
+            "name": "Shine Dance Fitness",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "12:00",
+            "name": "Arthritis Foundation",
+            "extra": ""
+          },
+          {
+            "start": "12:30",
+            "end": "13:30",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:45",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:30",
+            "name": "Virtual GRIT Cardio",
+            "extra": ""
+          },
+          {
+            "start": "16:30",
+            "end": "17:30",
+            "name": "Shine/Uplift",
+            "extra": ""
+          },
+          {
+            "start": "17:45",
+            "end": "18:45",
+            "name": "Line Dancing",
+            "extra": "Registration required"
+          },
+          {
+            "start": "18:00",
+            "end": "19:00",
+            "name": "Functional Fitness",
+            "extra": "Turf"
+          },
+          {
+            "start": "19:00",
+            "end": "19:30",
+            "name": "Virtual GRIT Cardio",
+            "extra": ""
+          },
+          {
+            "start": "19:45",
+            "end": "20:30",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          }
+        ],
+        "Thursday": [
+          {
+            "start": "05:15",
+            "end": "06:00",
+            "name": "Virtual BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "06:00",
+            "end": "06:45",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "07:00",
+            "end": "07:45",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          },
+          {
+            "start": "08:30",
+            "end": "09:30",
+            "name": "BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "09:45",
+            "end": "10:45",
+            "name": "Pilates / Barre Combo",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "11:15",
+            "name": "Functional Fitness",
+            "extra": "Turf"
+          },
+          {
+            "start": "11:15",
+            "end": "12:15",
+            "name": "Silver Sneakers Classic",
+            "extra": ""
+          },
+          {
+            "start": "12:30",
+            "end": "13:00",
+            "name": "Virtual BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "13:30",
+            "end": "14:00",
+            "name": "Virtual BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "14:30",
+            "end": "15:00",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "15:45",
+            "end": "16:45",
+            "name": "Shine Dance Fitness",
+            "extra": ""
+          },
+          {
+            "start": "17:00",
+            "end": "17:45",
+            "name": "LES MILLS TONE",
+            "extra": ""
+          },
+          {
+            "start": "18:30",
+            "end": "20:00",
+            "name": "American Kang Duk Won Karate",
+            "extra": "Registration required; Reserved"
+          },
+          {
+            "start": "20:15",
+            "end": "20:45",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          }
+        ],
+        "Friday": [
+          {
+            "start": "05:15",
+            "end": "06:00",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "06:15",
+            "end": "07:00",
+            "name": "Virtual BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "07:10",
+            "end": "07:40",
+            "name": "Virtual GRIT Strength",
+            "extra": ""
+          },
+          {
+            "start": "08:00",
+            "end": "09:00",
+            "name": "Enhance Fitness",
+            "extra": ""
+          },
+          {
+            "start": "09:15",
+            "end": "10:00",
+            "name": "Tabata",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "11:00",
+            "name": "Sound Bath",
+            "extra": ""
+          },
+          {
+            "start": "11:15",
+            "end": "12:15",
+            "name": "Silver Sneakers Classic",
+            "extra": ""
+          },
+          {
+            "start": "13:00",
+            "end": "13:45",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:45",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:30",
+            "name": "Virtual GRIT Athletic",
+            "extra": ""
+          },
+          {
+            "start": "16:30",
+            "end": "17:15",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "17:30",
+            "end": "18:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "18:30",
+            "end": "20:00",
+            "name": "American Kang Duk Won Karate",
+            "extra": "Registration required; Reserved"
+          },
+          {
+            "start": "20:15",
+            "end": "20:45",
+            "name": "Virtual BODYCOMBAT",
+            "extra": ""
+          }
+        ],
+        "Saturday": [
+          {
+            "start": "06:15",
+            "end": "07:00",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "07:45",
+            "end": "08:15",
+            "name": "Virtual BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "08:30",
+            "end": "09:30",
+            "name": "ZUMBA",
+            "extra": ""
+          },
+          {
+            "start": "09:45",
+            "end": "10:45",
+            "name": "BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "11:45",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          },
+          {
+            "start": "12:00",
+            "end": "13:00",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "16:30",
+            "name": "American Kang Duk Won Karate",
+            "extra": "Registration required; Reserved"
+          }
+        ],
+        "Sunday": [
+          {
+            "start": "08:30",
+            "end": "09:15",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "09:30",
+            "end": "10:05",
+            "name": "Virtual BODYCOMBAT Base",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "10:45",
+            "name": "Virtual GRIT Cardio",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "13:00",
+            "name": "American Kang Duk Won Karate",
+            "extra": "Registration required; Reserved"
+          },
+          {
+            "start": "14:00",
+            "end": "14:45",
+            "name": "Virtual BODYPUMP",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:45",
+            "name": "Virtual BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:30",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          }
+        ]
+      }
+    },
+    "spin": {
+      "label": "Spin Studio",
+      "page": 2,
+      "days": {
+        "Monday": [
+          {
+            "start": "05:30",
+            "end": "06:00",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "06:30",
+            "end": "07:15",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:00",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "08:15",
+            "end": "08:45",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "09:15",
+            "end": "10:00",
+            "name": "Indoor Cycling ICG",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "10:45",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "11:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "12:15",
+            "end": "12:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "13:00",
+            "end": "13:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:50",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "15:15",
+            "end": "15:50",
+            "name": "Virtual RPM Base",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "17:15",
+            "end": "18:00",
+            "name": "Indoor Cycling ICG",
+            "extra": ""
+          },
+          {
+            "start": "18:30",
+            "end": "19:15",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "20:00",
+            "end": "20:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          }
+        ],
+        "Tuesday": [
+          {
+            "start": "05:15",
+            "end": "06:05",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "06:30",
+            "end": "07:00",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:00",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "08:15",
+            "end": "08:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "09:45",
+            "end": "10:15",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "10:30",
+            "end": "11:15",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "11:30",
+            "end": "12:00",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "12:15",
+            "end": "12:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "13:00",
+            "end": "13:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:45",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:50",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "17:00",
+            "end": "17:45",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "18:00",
+            "end": "18:45",
+            "name": "Indoor Cycling ICG",
+            "extra": ""
+          },
+          {
+            "start": "19:30",
+            "end": "20:15",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          }
+        ],
+        "Wednesday": [
+          {
+            "start": "05:30",
+            "end": "06:20",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "06:30",
+            "end": "07:15",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:00",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "08:15",
+            "end": "08:45",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "09:15",
+            "end": "10:00",
+            "name": "Indoor Cycling ICG",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "10:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "11:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "12:15",
+            "end": "12:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "13:00",
+            "end": "13:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:50",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "15:15",
+            "end": "15:50",
+            "name": "Virtual RPM Base",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "17:00",
+            "end": "17:50",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "18:30",
+            "end": "19:15",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "20:00",
+            "end": "20:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          }
+        ],
+        "Thursday": [
+          {
+            "start": "05:30",
+            "end": "06:00",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "06:30",
+            "end": "07:00",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:00",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "08:15",
+            "end": "08:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "09:45",
+            "end": "10:15",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "10:30",
+            "end": "11:15",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "11:30",
+            "end": "12:00",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "12:15",
+            "end": "12:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "13:00",
+            "end": "13:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:45",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:50",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "17:00",
+            "end": "17:50",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "18:30",
+            "end": "19:00",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "19:30",
+            "end": "20:15",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          }
+        ],
+        "Friday": [
+          {
+            "start": "05:15",
+            "end": "06:05",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "06:30",
+            "end": "07:00",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:00",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "08:30",
+            "end": "09:00",
+            "name": "Easy Ride",
+            "extra": ""
+          },
+          {
+            "start": "09:15",
+            "end": "10:00",
+            "name": "Indoor Cycling ICG",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "10:45",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "11:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "12:15",
+            "end": "12:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "13:00",
+            "end": "13:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:50",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "15:15",
+            "end": "15:50",
+            "name": "Virtual RPM Base",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "17:00",
+            "end": "17:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "18:30",
+            "end": "19:15",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "20:00",
+            "end": "20:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          }
+        ],
+        "Saturday": [
+          {
+            "start": "06:30",
+            "end": "07:00",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:00",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "08:15",
+            "end": "08:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "09:15",
+            "end": "10:00",
+            "name": "Indoor Cycling ICG",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "10:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "11:15",
+            "end": "11:45",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "12:00",
+            "end": "12:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "13:00",
+            "end": "13:45",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          }
+        ],
+        "Sunday": [
+          {
+            "start": "08:30",
+            "end": "09:00",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "10:00",
+            "end": "10:50",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "11:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          },
+          {
+            "start": "12:00",
+            "end": "12:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "13:00",
+            "end": "13:45",
+            "name": "Virtual THE TRIP",
+            "extra": ""
+          },
+          {
+            "start": "14:00",
+            "end": "14:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:30",
+            "name": "Virtual RPM",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:30",
+            "name": "Virtual SPRINT",
+            "extra": ""
+          }
+        ]
+      }
+    },
+    "yoga": {
+      "label": "Yoga Studio",
+      "page": 3,
+      "days": {
+        "Monday": [
+          {
+            "start": "05:15",
+            "end": "06:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "06:00",
+            "end": "06:45",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:00",
+            "name": "Virtual BODYBALANCE Beginner (old)",
+            "extra": ""
+          },
+          {
+            "start": "08:30",
+            "end": "09:00",
+            "name": "Core Training Class",
+            "extra": ""
+          },
+          {
+            "start": "09:00",
+            "end": "09:30",
+            "name": "Good Morning Stretch",
+            "extra": ""
+          },
+          {
+            "start": "09:40",
+            "end": "10:40",
+            "name": "Gentle Yoga",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "11:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "12:00",
+            "end": "12:45",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "13:15",
+            "end": "14:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:45",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "17:00",
+            "end": "17:30",
+            "name": "LES MILLS CORE",
+            "extra": ""
+          },
+          {
+            "start": "18:00",
+            "end": "19:00",
+            "name": "Functional Fitness",
+            "extra": "Turf"
+          },
+          {
+            "start": "19:30",
+            "end": "20:15",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          }
+        ],
+        "Tuesday": [
+          {
+            "start": "05:15",
+            "end": "06:00",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "06:15",
+            "end": "06:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "07:00",
+            "end": "07:45",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "08:00",
+            "end": "08:15",
+            "name": "Virtual CORE Ab Blast",
+            "extra": ""
+          },
+          {
+            "start": "09:00",
+            "end": "10:00",
+            "name": "Tabata",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "11:15",
+            "name": "Functional Fitness",
+            "extra": "Turf"
+          },
+          {
+            "start": "10:30",
+            "end": "11:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "11:30",
+            "end": "12:00",
+            "name": "Virtual BODYBALANCE Flexibility",
+            "extra": ""
+          },
+          {
+            "start": "12:15",
+            "end": "13:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "13:45",
+            "end": "14:30",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "14:30",
+            "end": "14:50",
+            "name": "Virtual BODYBALANCE Yoga",
+            "extra": ""
+          },
+          {
+            "start": "15:30",
+            "end": "16:15",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "16:30",
+            "end": "17:15",
+            "name": "Tabata",
+            "extra": ""
+          },
+          {
+            "start": "18:30",
+            "end": "19:15",
+            "name": "Virtual CORE",
+            "extra": ""
+          }
+        ],
+        "Wednesday": [
+          {
+            "start": "05:15",
+            "end": "05:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "06:00",
+            "end": "06:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:00",
+            "name": "Virtual BODYBALANCE Flexibility",
+            "extra": ""
+          },
+          {
+            "start": "08:30",
+            "end": "09:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "10:30",
+            "end": "11:30",
+            "name": "Hatha Yoga",
+            "extra": ""
+          },
+          {
+            "start": "12:00",
+            "end": "12:30",
+            "name": "Tai Chi for Arthritis",
+            "extra": ""
+          },
+          {
+            "start": "13:15",
+            "end": "14:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "16:30",
+            "end": "17:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "17:15",
+            "end": "18:15",
+            "name": "BODYCOMBAT",
+            "extra": ""
+          },
+          {
+            "start": "18:00",
+            "end": "19:00",
+            "name": "Functional Fitness",
+            "extra": "Turf"
+          },
+          {
+            "start": "19:30",
+            "end": "20:15",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          }
+        ],
+        "Thursday": [
+          {
+            "start": "05:15",
+            "end": "06:00",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "06:15",
+            "end": "06:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "07:00",
+            "end": "07:45",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "08:00",
+            "end": "08:15",
+            "name": "Virtual CORE Ab Blast",
+            "extra": ""
+          },
+          {
+            "start": "09:00",
+            "end": "09:45",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "11:15",
+            "name": "Functional Fitness",
+            "extra": "Turf"
+          },
+          {
+            "start": "11:30",
+            "end": "12:00",
+            "name": "Virtual BODYBALANCE Flexibility",
+            "extra": ""
+          },
+          {
+            "start": "12:15",
+            "end": "13:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "13:45",
+            "end": "14:30",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "14:30",
+            "end": "15:00",
+            "name": "Virtual BODYBALANCE Strength",
+            "extra": ""
+          },
+          {
+            "start": "15:30",
+            "end": "16:15",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "17:00",
+            "end": "18:00",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "18:00",
+            "end": "19:00",
+            "name": "Pilates / Barre Combo",
+            "extra": ""
+          },
+          {
+            "start": "19:30",
+            "end": "20:15",
+            "name": "Virtual CORE",
+            "extra": ""
+          }
+        ],
+        "Friday": [
+          {
+            "start": "05:15",
+            "end": "06:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "06:00",
+            "end": "06:45",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "07:30",
+            "end": "08:00",
+            "name": "Virtual BODYBALANCE Strength",
+            "extra": ""
+          },
+          {
+            "start": "08:30",
+            "end": "09:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "09:15",
+            "end": "10:15",
+            "name": "Gentle Yoga",
+            "extra": ""
+          },
+          {
+            "start": "10:30",
+            "end": "11:30",
+            "name": "Zumba",
+            "extra": ""
+          },
+          {
+            "start": "12:00",
+            "end": "12:45",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "13:15",
+            "end": "14:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "15:00",
+            "end": "15:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:45",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "17:00",
+            "end": "17:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "19:30",
+            "end": "20:15",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          }
+        ],
+        "Saturday": [
+          {
+            "start": "06:15",
+            "end": "07:00",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "07:15",
+            "end": "08:00",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "08:15",
+            "end": "08:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "09:00",
+            "end": "09:45",
+            "name": "Virtual BODYATTACK",
+            "extra": ""
+          },
+          {
+            "start": "10:15",
+            "end": "10:45",
+            "name": "Virtual BODYBALANCE Flexibility",
+            "extra": ""
+          },
+          {
+            "start": "11:00",
+            "end": "11:30",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "12:00",
+            "end": "12:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "13:45",
+            "end": "14:30",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "15:15",
+            "end": "15:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:30",
+            "name": "Virtual BODYBALANCE Flexibility",
+            "extra": ""
+          }
+        ],
+        "Sunday": [
+          {
+            "start": "08:15",
+            "end": "09:00",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "09:30",
+            "end": "10:15",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "12:00",
+            "end": "13:00",
+            "name": "Virtual BODYBALANCE",
+            "extra": ""
+          },
+          {
+            "start": "13:30",
+            "end": "14:00",
+            "name": "Virtual BODYBALANCE Strength",
+            "extra": ""
+          },
+          {
+            "start": "15:15",
+            "end": "15:45",
+            "name": "Virtual CORE",
+            "extra": ""
+          },
+          {
+            "start": "16:00",
+            "end": "16:30",
+            "name": "Virtual BODYBALANCE Flexibility",
+            "extra": ""
+          }
+        ]
+      }
+    }
+  }
+}

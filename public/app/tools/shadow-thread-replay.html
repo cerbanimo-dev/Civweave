@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evil Psych Wards from Venus · Worldweaver Replay</title>
+<meta name="description" content="Replay the Third Discharge scenario from the Shadow & Thread Universe in Civweave.">
+<style>
+:root{color-scheme:dark;font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:#120e19;color:#fff5e8}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% 0%,#462b50 0%,#120e19 43%);min-height:100vh}
+main{width:min(900px,94vw);margin:0 auto;padding:2rem 0 5rem}
+a{color:#e2c3ff}header{border-bottom:1px solid #6e576d;margin-bottom:1.5rem;padding-bottom:1rem}
+.eyebrow{text-transform:uppercase;letter-spacing:.16em;color:#e6bfde;font-size:.76rem}h1{font:800 clamp(2rem,6vw,3.7rem)/1.06 system-ui;margin:.25rem 0 .7rem}h2{font-size:1.4rem;margin:.2rem 0 1rem}
+.description{max-width:70ch;color:#eedbdc}.box{background:#211928;border:1px solid #745b78;border-radius:16px;padding:1.25rem;margin:1rem 0}
+.notice{color:#f3d6c4;border-left:4px solid #e3ab7a;padding:.45rem 1rem;background:#38282e;margin:1rem 0}
+.toolbar,.actions{display:flex;gap:.65rem;flex-wrap:wrap;align-items:center}
+button{background:#443048;color:#fff6ed;border:1px solid #c8a8c9;border-radius:10px;font:inherit;padding:.65rem .9rem;min-height:44px;cursor:pointer}
+button:hover{background:#63446a}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffce8c;outline-offset:2px}
+button.choice{width:100%;display:block;text-align:left;background:#302339;border-color:#96778f;margin:.6rem 0}
+button.choice:hover{background:#594061}.scene{border-left:3px solid #b892bb;padding-left:1rem;margin:1rem 0}
+.scene strong{color:#f7caa1;display:block}.scene small{color:#d2b9cb}.scene p{margin:.25rem 0 .5rem;white-space:pre-wrap}
+.hint{border-left:3px solid #f1c675;padding:.45rem .8rem;background:#352d3a}
+aside{font-size:.88rem;color:#dacbd7}.status{min-height:1.5rem;color:#d1f5d7}
+label{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer}input[type=checkbox]{width:20px;height:20px;accent-color:#d1a2de}
+summary{cursor:pointer;font-weight:650}.meta{color:#cbbccc;font-size:.85rem}
+@media(max-width:600px){main{padding-top:1rem}.box{padding:1rem}.toolbar button{flex:1}}
+@media(prefers-reduced-motion:no-preference){.box{animation:appear .18s ease-out}@keyframes appear{from{opacity:.7;transform:translateY(4px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body><main>
+<header>
+<div class="eyebrow">Civweave · Worldweaver · Shadow &amp; Thread</div>
+<h1>Evil Psych Wards from Venus</h1>
+<p class="description">Play the original Third Discharge story and choose what Nell Mercer does next. Raven, Erin and Lari appear under their in-world names; their lines are scripted replay, not active AI actors.</p>
+<p><a href="./worldweaver-universe-lab.html">The Commons Between</a> · <a href="./worldweaver-story-seed-atlas.html">World Atlas</a></p>
+</header>
+<div id="fiction" class="notice">This is an imaginary alternate-universe hospital, not a description of any real medical institution or medical care.</div>
+<section class="box" aria-label="Replay controls">
+<div class="toolbar">
+<label><input id="angel" type="checkbox"> Angel Intimation — optional fictional hints</label>
+<button id="restart" type="button">Start over</button>
+<button id="export" type="button">Export my playthrough</button>
+</div>
+<p id="status" class="status" role="status" aria-live="polite">Loading local replay…</p>
+<p class="meta">Progress stays on this device unless you export it. No model, cloud, simulator, or medical service is contacted by the replay.</p>
+</section>
+<section id="play" class="box" aria-label="Story replay">
+<div class="eyebrow" id="chapter"></div><h2 id="scene-title"></h2><p id="description" class="description"></p>
+<div id="beats" aria-label="Story transcript"></div>
+<p id="hint" class="hint" hidden></p>
+<h2 id="choice-title">What does Nell do?</h2><div id="choices" class="actions-list"></div>
+</section>
+<section class="box" aria-label="Playthrough history">
+<details><summary>Your story history</summary><ol id="history"></ol></details>
+<details><summary>Clues discovered</summary><ul id="clues"></ul></details>
+<details><summary>Character identities and avatar status</summary><ul id="actors"></ul><p class="meta">These are authored role aliases. The characters' original avatar bindings and live model pilots have not been provisioned.</p></details>
+</section>
+</main>
+<script type="module">
+import {createStoryReplay,SHADOW_THREAD_REPLAY} from '../shared/worldweaver-story-replay-v1.mjs';
+const $=id=>document.getElementById(id);
+const storageKey='civweave.worldweaver.replay.'+SHADOW_THREAD_REPLAY.id+'.v1';
+let saved=false,engine;
+function showStatus(text){$('status').textContent=text;}
+function readSaved(){
+ try{const s=localStorage.getItem(storageKey);return s?JSON.parse(s):null;}
+ catch{return null;}
+}
+try{
+ engine=createStoryReplay({initialState:readSaved()});
+}catch(error){
+ engine=createStoryReplay();
+ showStatus('Saved path could not be verified; a fresh local story has been opened.');
+}
+function persist(){
+ try{localStorage.setItem(storageKey,JSON.stringify(engine.snapshot()));saved=true;showStatus('Progress saved on this device.');}
+ catch{saved=false;showStatus('Session only: device storage is unavailable. Export your playthrough to keep it.');}
+}
+function add(parent,tag,text,cls){
+ const element=document.createElement(tag);
+ if(cls)element.className=cls;
+ element.textContent=text;
+ parent.append(element);return element;
+}
+function render(){
+ const view=engine.view();
+ $('fiction').textContent=view.fictionNotice;
+ $('chapter').textContent='The Ward That Remembers · Scene '+(view.revision+1);
+ $('scene-title').textContent=view.nodeTitle;$('description').textContent=view.description;
+ $('beats').replaceChildren();
+ for(const beat of view.beats){
+  const article=add($('beats'),'article','','scene');
+  const actor=view.actors.find(a=>a.canonicalId===beat.canonicalId);
+  add(article,'strong',beat.worldName||actor?.worldName||beat.speaker);
+  add(article,'small',(actor?actor.canonicalName+' · ':'')+beat.action);
+  add(article,'p',beat.text);
+ }
+ $('angel').checked=view.angelIntimation.enabled;
+ $('hint').hidden=!view.angelIntimation.enabled;
+ $('hint').textContent=view.angelIntimation.enabled?view.angelIntimation.disclosure+' '+view.angelIntimation.hint:'';
+ $('choice-title').textContent=view.complete?'Scene complete — you can restart and choose another path.':'What does Nell do?';
+ $('choices').replaceChildren();
+ for(const choice of view.choices){
+  const button=add($('choices'),'button',choice.label,'choice');button.type='button';
+  button.addEventListener('click',()=>{try{engine.choose(choice.id);persist();render();$('scene-title').focus();}catch(error){showStatus('Unavailable choice: '+error.message);}});
+ }
+ $('history').replaceChildren();
+ if(!view.history.length)add($('history'),'li','No choices yet.');
+ for(const entry of view.history)add($('history'),'li',entry.from+' → '+entry.choiceId);
+ $('clues').replaceChildren();if(!view.clues.length)add($('clues'),'li','Not yet discovered.');
+ for(const clue of view.clues)add($('clues'),'li',clue);
+ $('actors').replaceChildren();
+ for(const actor of view.actors)add($('actors'),'li',actor.canonicalName+' → '+actor.worldName+' (canonical avatar reserved; not loaded)');
+}
+$('scene-title').tabIndex=-1;
+$('angel').addEventListener('change',()=>{engine.setAngelIntimation($('angel').checked);persist();render();});
+$('restart').addEventListener('click',()=>{engine.restart();persist();render();$('scene-title').focus();});
+$('export').addEventListener('click',()=>{
+ const record={scenario:SHADOW_THREAD_REPLAY.id,sourcePlaytest:SHADOW_THREAD_REPLAY.originFixture,mode:'scripted-deterministic-replay',state:engine.snapshot()};
+ const url=URL.createObjectURL(new Blob([JSON.stringify(record,null,2)],{type:'application/json'}));
+ const anchor=document.createElement('a');anchor.href=url;anchor.download='shadow-thread-my-playthrough.json';
+ document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ showStatus('Local story record exported. No public game history has been changed.');
+});
+render();if(!$('status').textContent.includes('Saved path'))showStatus('Ready to play · progress saves locally after each choice.');
+</script>
+</body></html>
