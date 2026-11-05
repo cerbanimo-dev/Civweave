@@ -1,0 +1,43 @@
+name: Verify shared browser connection
+on:
+  pull_request:
+    paths:
+      - 'public/app/browser-connection-v1.js'
+      - 'public/app/browser-receiver-v1.html'
+      - 'public/app/shared/browser-connection-core-v1.mjs'
+      - 'public/app/browser-tool-v1.js'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/test-browser-connection-v1.mjs'
+      - 'package.json'
+      - '.github/workflows/verify-shared-browser-connection-v1.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/browser-connection-v1.js'
+      - 'public/app/browser-receiver-v1.html'
+      - 'public/app/shared/browser-connection-core-v1.mjs'
+      - 'public/app/guide-chat-surface-v350.js'
+      - 'public/app/persistent-system-shell-v1.html'
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/test-browser-connection-v1.mjs'
+jobs:
+  browser-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and manifest validation
+        run: |
+          node --check public/app/browser-connection-v1.js
+          node --check public/app/shared/browser-connection-core-v1.mjs
+          node --check public/app/guide-chat-surface-v350.js
+          node -e "JSON.parse(require('fs').readFileSync('public/app/manifest.webmanifest','utf8'))"
+      - name: Shared browser receiver and MCP read-only contract
+        run: node --test scripts/test-browser-connection-v1.mjs
