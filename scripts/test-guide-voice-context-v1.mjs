@@ -193,3 +193,28 @@ test('guide chat owns wake-address submission and version-locks corrected voice 
   assert.match(source,/specialized-model-capabilities-v1\.js/);
   assert.match(source,/surface.*single-current-chat-surface|presentation:'single-current-chat-surface'/s);
 });
+
+test('meeting capture mode publishes final transcript without submitting into shared guide chat',async()=>{
+  const calls=[], events=[];
+  class LocalSpeech {
+    constructor(){this.processLocally=false}
+    start(){calls.push('mic-start')}
+    stop(){calls.push('mic-stop')}
+    abort(){}
+  }
+  const ctx=runBrowserScript('public/app/guide-voice-runtime-v1.js',{
+    SpeechRecognition:LocalSpeech,
+    dispatchEvent:event=>{events.push(event);return true},
+    CivweaveGuideChatSurfaceV350:{submitVoiceText:()=>{calls.push('chat-submit')},switchGuide:()=>{calls.push('chat-switch')}}
+  });
+  const voice=ctx.CivweaveGuideVoiceV1;
+  await voice.start({routeToChat:false});
+  voice.onTranscript({text:'Hey Moss, test message',final:true,source:'local-test'});
+  assert.equal(calls.includes('mic-start'),true);
+  assert.equal(calls.some(call=>call.startsWith('chat-')),false);
+  assert.equal(events.some(event=>event.type==='civweave:guide-voice-transcript'&&event.detail.text==='Hey Moss, test message'),true);
+  voice.stop();
+  assert.equal(calls.includes('mic-stop'),true);
+  voice.onTranscript({text:'Hey Moss, normal routing restored',final:true});
+  assert.equal(calls.includes('chat-submit'),true);
+});
