@@ -50,3 +50,40 @@ test('turn cleanup and prompt-off discard stale replies',()=>{
   assert.match(source,/partyTurnBusy\.delete\(plan\.id\)/);
   assert.match(source,/if\(!value\)cancelPartyTurn\(planId\)/);
 });
+
+function replyHarness(){
+  const match=source.match(/async function aiReply\(plan,system,text,sourceMessage,controller\)\{[^\n]+\}/);
+  assert.ok(match,'Canonical AI reply function must be found');
+  const writes=[],broadcasts=[];
+  let finish;
+  const response=new Promise(resolve=>{finish=resolve});
+  const assistant={respond:()=>response};
+  const globals={CivweaveFamilyAILoaderV105:{ensure:async()=>{}},CivweaveAssistantV141:assistant};
+  const fn=new Function('globalThis','currentSystem','historyForParty','clean','GUIDE','MESSAGE_SCHEMA','uid','now','readParty','writeParty','broadcastPayload','Number','return ('+match[0]+')')(
+    globals,()=> 'civweave',()=>[],(value,max=12000)=>String(value||'').slice(0,max),
+    {civweave:{name:'Weaveling'}},'test-schema',()=> 'response-1',()=> '2026-11-05T00:00:00Z',
+    ()=>({messages:[]}),(_id,party)=>writes.push(party),
+    async(_plan,data)=>{broadcasts.push(data)},Number
+  );
+  return {fn,finish,writes,broadcasts};
+}
+test('interrupted slow providers cannot persist or broadcast a late reply',async()=>{
+  const harness=replyHarness(),controller=new AbortController();
+  const pending=harness.fn({id:'p1'},'civweave','hello',{id:'h1'},controller);
+  await Promise.resolve();
+  controller.abort();
+  harness.finish({response:{answer:'stale answer'}});
+  assert.equal(await pending,null);
+  assert.equal(harness.writes.length,0);
+  assert.equal(harness.broadcasts.length,0);
+});
+test('uncancelled replies still enter the existing Party transcript and transport',async()=>{
+  const harness=replyHarness(),controller=new AbortController();
+  const pending=harness.fn({id:'p1'},'civweave','hello',{id:'h1'},controller);
+  await Promise.resolve();
+  harness.finish({response:{answer:'permitted answer'}});
+  const result=await pending;
+  assert.equal(result.text,'permitted answer');
+  assert.equal(harness.writes.length,1);
+  assert.equal(harness.broadcasts.length,1);
+});
