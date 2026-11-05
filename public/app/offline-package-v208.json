@@ -73,6 +73,7 @@
     "/app/server-ai-router-v301.js",
     "/app/server-ai-settings-v301.js",
     "/app/browser-tool-v1.js",
+    "/app/shared/browser-session-policy-v1.mjs",
     "/app/local-ai/browser-agent-v1.js",
     "/app/knowledge-school-runtime-v243.mjs",
     "/app/knowledge-library-tiers-v1.mjs",
