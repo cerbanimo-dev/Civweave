@@ -139,7 +139,10 @@ const fmt=time=>{const [h,m]=time.split(':').map(Number);return String((h+11)%12
 const span=(parent,tag,className,value)=>{
  const node=document.createElement(tag);if(className)node.className=className;node.textContent=value;parent.append(node);return node;
 };
-let mode='today',selected=localParts().day;
+const params=new URLSearchParams(location.search);
+const initialMode=params.get('mode');
+let mode=['today','day','week','tv'].includes(initialMode)?initialMode:'today';
+let selected=DAYS.includes(params.get('day'))?params.get('day'):localParts().day;
 function selectedDays(){
  $('days').replaceChildren();
  for(const d of DAYS){
@@ -182,12 +185,15 @@ function render(){
  let show=items;
  if(mode==='tv'){
   const nextIndex=items.findIndex(x=>mins(x.end)>local.minute);
-  show=items.slice(nextIndex<0?Math.max(0,items.length-4):nextIndex,nextIndex<0?undefined:nextIndex+4);
+  show=nextIndex<0?[]:items.slice(nextIndex,nextIndex+4);
  }
  $('heading').textContent=mode==='week'?'Full week at a glance':mode==='tv'?'Now and up next · '+selected:selected+' · Cardio Studio';
  $('subhead').textContent=mode==='tv'?'Large-type hallway view. Only four classes on screen.':mode==='week'?'Two-column overview. Select any day for larger cards.':'All classes in time order, including virtual and instructor-led sessions.';
  $('status').textContent=mode==='tv'?'Watertown local time · '+new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'}):items.length+' scheduled classes';
  $('cards').replaceChildren(...show.map(item=>card(item,now)));
+ if(!show.length)span($('cards'),'p','empty',mode==='tv'?'No more Cardio Studio classes today.':'No classes listed for this day.');
+ const stamp=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',month:'long',year:'numeric'}).format(new Date());
+ if(stamp!=='November 2026')$('status').textContent+=' · ARCHIVED NOV 2026';
  $('cards').classList.toggle('hide',mode==='week');
  $('weekGrid').classList.toggle('hide',mode!=='week');
  $('days').classList.toggle('hide',mode==='week'||mode==='today'||mode==='tv');
