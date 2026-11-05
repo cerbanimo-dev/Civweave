@@ -59,8 +59,8 @@ function publicScope(value){
 export async function verifyPortableGuildSession(sessionOwner){
   if(!sessionOwner?.ensureSelected||!sessionOwner?.status||!sessionOwner?.selectedOrigin)throw new Error('Existing Civweave Guild session owner is unavailable');
   const session=await sessionOwner.ensureSelected();
+  if(session?.authMode==='legacy-guildkeeper')throw new Error('Legacy Guildkeeper sessions cannot verify current membership for portable attachment');
   if(!session?.token||!session?.nodeId||!session?.userId||!session?.origin)throw new Error('Log in to a Guild before attachment');
-  if(session.authMode==='legacy-guildkeeper')throw new Error('Legacy Guildkeeper sessions cannot verify current membership for portable attachment');
   if(session.expiresAt&&Date.parse(session.expiresAt)<=Date.now())throw new Error('Guild session expired');
   const scope=publicScope(session);
   if(sessionOwner.selectedOrigin()!==scope.origin)throw new Error('Selected Guild origin mismatch');
