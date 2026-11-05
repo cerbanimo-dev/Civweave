@@ -1,3 +1,4 @@
+import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createWorldweaver} from '../public/app/shared/worldweaver-core-v1.mjs';
@@ -88,4 +89,18 @@ test('Guild map seeding requires an explicit Guild and preserves scope',()=>{
   assert.throws(()=>seedUniverse(world,{actor,scope:'guild-map'}),/Guild ID/);
   const seeded=seedUniverse(world,{actor,scope:'guild-map',guildId:'guild:test'});
   assert.ok(seeded.snapshot.instances.every(row=>row.scope==='guild-map'&&row.guildId==='guild:test'));
+});
+
+
+test('universe source stays static and injection-free',async()=>{
+  const [moduleSource,labSource]=await Promise.all([
+    readFile(new URL('../public/app/shared/worldweaver-universe-v1.mjs',import.meta.url),'utf8'),
+    readFile(new URL('../public/app/tools/worldweaver-universe-lab.html',import.meta.url),'utf8')
+  ]);
+  const combined=moduleSource+'\n'+labSource;
+  assert.doesNotMatch(combined,/createElement\s*\(\s*['"]script['"]/i);
+  assert.doesNotMatch(combined,/\beval\s*\(/);
+  assert.doesNotMatch(combined,/\bnew\s+Function\s*\(/);
+  assert.doesNotMatch(combined,/javascript\s*:/i);
+  assert.doesNotMatch(combined,/contentWindow|contentDocument|postMessage\s*\(/);
 });
