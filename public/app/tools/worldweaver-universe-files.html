@@ -25,7 +25,7 @@ import {exportPortableUniverseHtml} from '../shared/worldweaver-portable-client-
 const worlds={commons:COMMONS_BETWEEN,lantern:LANTERN_MESH};
 for(const id of Object.keys(worlds)){
   document.getElementById(id).addEventListener('click',()=>{
-    const w=worlds[id],html=exportPortableUniverseHtml(w);
+    const w=worlds[id],html=exportPortableUniverseHtml(w,{bridgeOrigin:location.protocol==='https:'?location.origin:'https://civweave.cc'});
     const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
     const link=document.createElement('a');link.href=url;link.download=w.id+'.civweave.html';
     document.body.append(link);link.click();link.remove();
