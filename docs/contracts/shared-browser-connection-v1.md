@@ -19,7 +19,8 @@ Browsers without Web Share Target can paste an address into the Connected browse
 ## In-app browser
 
 - Public URLs are previewed in a sandboxed iframe. Sites that prohibit embedding may appear blank; the **Read page** action offers a text-based Browser Run view, when user-authorized and the current Guild node has a valid host-capacity session.
-- Back/Forward reflect URLs entered in the Connected browser, not link navigation performed inside an opaque cross-origin frame. Cross-origin page DOM is never inspected directly by the PWA.
+- Back/Forward reflect URLs entered or selected in the Connected browser, not link navigation performed inside an opaque cross-origin frame. Cross-origin page DOM is never inspected directly by the PWA.
+- Live web search uses the existing Browser Run search and presents safe extracted result links that can be opened in the in-app browser. Unavailable hosts, embedded-page restrictions, or failed searches are presented as limitations, not invented results.
 - Offline knowledge search is always available when the relevant downloaded archive is present. A failed archive/host request must be shown as failure, not as fabricated results.
 - **Discuss in chat** pre-fills the canonical current guide chat with the page URL and, if the user explicitly read it, a bounded untrusted excerpt. The user still submits the message; incoming text is never silently transmitted to an AI.
 - The iframe is untrusted third-party content and must not receive Guild session tokens, application storage, app origin privileges, or automatic access to user data.
