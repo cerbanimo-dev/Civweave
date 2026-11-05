@@ -59,3 +59,11 @@ This foundation is **not** a deployed meeting service and does not claim to be a
 - Bridge persistent objects through the existing signed local object mesh, including offline forks/reconciliation; never treat this revision adapter as mesh consensus.
 - Reconcile requested Quest handoffs with verified canonical Quest IDs and completion evidence; pending records must not imply execution.
 - Expose the report through the installed app without creating a competing chat or event owner.
+
+## Canonical Quest reconciliation (Thread 5 read-only bridge)
+
+`lib/starling-meeting-quest-bridge.mjs` exposes `questHandoffSourceId(meetingId,decisionId,requestId)` and `reconcileQuestHandoffs(meeting,questEngine)`. `questEngine` must be the existing authenticated, Guild-scoped `CivweaveCerbanimoQuestV144` API, with its `readState()` method. It does not create, approve, modify, or complete Quests.
+
+An approved handoff is **pending** until the canonical Quest engine contains exactly one Quest with a matching `sourceActionId` of `starling:<meetingId>:<decisionId>:<questId>`. This convention must be supplied to the existing Quest engine through its authorized, human-controlled creation flow; the meeting engine does not install or trigger a new task engine. One match is `confirmed`; two or more are `conflict`; no match stays `handoff-pending`. Verified completion is true only if that one canonical Quest reports `status: 'completed'`. The requesting actor, the meeting transcript and an agent's assurance never count as independent proof.
+
+The adapter is a **read-only integration helper**, not a cross-device ownership or identity verifier. Thread 1 must verify the matching Guild and actual source provenance and build the authorized human action to create the Quest. The adapter is not proof that any meeting is live.
