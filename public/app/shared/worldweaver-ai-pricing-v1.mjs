@@ -7,6 +7,15 @@
  *
  * Pricing may change. This is NOT a provider-enforced billing cap.
  */
+/**
+ * UI-only release guard. This cannot replace a server-side credential broker
+ * or trusted quota enforcement, but prevents accidental production invocation
+ * through the optional staging playtest page.
+ */
+export function allowedPlaytestHostname(hostname){
+  const host=String(hostname||'').trim().toLowerCase();
+  return ['civweave-staging.pages.dev','localhost','127.0.0.1'].includes(host);
+}
 const RATES=Object.freeze({
   openai:Object.freeze({
     'gpt-6-luna':Object.freeze({input:0.1,output:0.5})
