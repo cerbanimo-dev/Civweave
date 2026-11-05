@@ -154,11 +154,15 @@ export function validateUniverse(universe){
 
   const highway=universe.highway;
   if(!highway||!Array.isArray(highway.lanes)||highway.lanes.length!==3)throw new TypeError('Intention Highway requires exactly three lanes.');
-  const laneRealms=new Set();
+  const laneIds=new Set(),laneRealms=new Set();
   for(const lane of highway.lanes){
     identifier(lane.id,'Lane ID');
+    if(laneIds.has(lane.id))throw new TypeError('Highway lane IDs must be unique.');
+    laneIds.add(lane.id);
     if(!realmIds.has(lane.realmId)||laneRealms.has(lane.realmId))throw new TypeError('Highway lanes must reference three distinct realms.');
     laneRealms.add(lane.realmId);
+    const laneRealm=universe.realms.find(realm=>realm.id===lane.realmId);
+    if(laneRealm?.system!==lane.system)throw new TypeError('Highway lane system must match its realm.');
     if(lane.system==='anarchadia')throw new TypeError('Anarchadia is an interchange, not an intention lane.');
   }
   if(!realmIds.has(highway.interchangeRealmId))throw new TypeError('Highway interchange realm does not exist.');
@@ -167,11 +171,17 @@ export function validateUniverse(universe){
 
   if(!Array.isArray(universe.portals)||universe.portals.length<3)throw new TypeError('Universe requires portals.');
   const portalIds=new Set(),nodes=new Set([universe.nexus.id,...realmIds]);
+  const portalPairs=new Set();
   for(const portal of universe.portals){
     identifier(portal.id,'Portal ID');
     if(portalIds.has(portal.id))throw new TypeError('Duplicate portal ID.');
     portalIds.add(portal.id);
     if(!nodes.has(portal.from)||!nodes.has(portal.to)||portal.from===portal.to)throw new TypeError('Portal endpoints must reference distinct universe nodes.');
+    portalPairs.add(portal.from+'>'+portal.to);
+  }
+  for(const lane of highway.lanes){
+    if(!portalPairs.has(universe.nexus.id+'>'+lane.realmId))throw new TypeError('Each intention lane requires a Threshold portal.');
+    if(!portalPairs.has(lane.realmId+'>'+highway.interchangeRealmId))throw new TypeError('Each intention lane requires an Anarchadia interchange portal.');
   }
   return true;
 }
