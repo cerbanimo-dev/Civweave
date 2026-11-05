@@ -24,7 +24,17 @@ export function normalizeAction(value, now=new Date().toISOString()){
     startAt:asDate(v.startAt), dueAt:asDate(v.dueAt),
     minutes:finiteMinutes(v.minutes), energy:['low','medium','high'].includes(state(v.energy))?state(v.energy):'',
     context:clean(v.context,100), waitingFor:clean(v.waitingFor,300),
-    completedAt:status==='done'?(asDate(v.completedAt)||now):'', focus:Boolean(v.focus)};
+    completedAt:status==='done'?(asDate(v.completedAt)||now):'', focus:Boolean(v.focus),
+    ...(v.portableOrigin&&typeof v.portableOrigin==='object'&&
+      /^[A-Za-z0-9:_-]{1,96}$/.test(clean(v.portableOrigin.universeId,96))&&
+      /^[A-Za-z0-9:_-]{1,80}$/.test(clean(v.portableOrigin.draftId,80))?
+      {portableOrigin:{
+        universeId:clean(v.portableOrigin.universeId,96),draftId:clean(v.portableOrigin.draftId,80),
+        fingerprint:clean(v.portableOrigin.fingerprint,220),
+        originallyDone:Boolean(v.portableOrigin.originallyDone),
+        origin:clean(v.portableOrigin.origin,300),nodeId:clean(v.portableOrigin.nodeId,180),
+        userId:clean(v.portableOrigin.userId,180),importedAt:asDate(v.portableOrigin.importedAt)||now
+      }}:{})};
 }
 export function normalizeStore(raw){
   const v=raw && typeof raw==='object' && !Array.isArray(raw)?raw:{};
