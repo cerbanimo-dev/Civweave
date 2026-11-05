@@ -128,6 +128,6 @@ addEventListener('civweave:worldweaver-ai-mode-changed',()=>{endSession('World m
 addEventListener('pagehide',()=>activeSession?.clearMemory());
 syncRole();showConfiguration();
 if(!hostAllowed){send.disabled=true;form.querySelector('[data-ww-ai-consent]').disabled=true;
-  form.querySelector('[data-open-unified-ai-settings]')?.setAttribute('disabled','');
+  document.querySelector('[data-open-unified-ai-settings]')?.setAttribute('disabled','');
   showStatus('No cloud model calls are permitted on this host.');}
 
