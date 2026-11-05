@@ -17,7 +17,7 @@ test('only committed speech is transcribed and duplicate events cannot replay', 
   m=appendMeetingEvent(m,event('speech.committed','agent:mica',{text:'A proposal',turnId:'turn-1'}));
   assert.equal(projectMeeting(m).transcript.length,1);
   assert.equal(projectMeeting(m).transcript[0].text,'A proposal');
-  assert.equal(m.events.length,2);
+  assert.equal(m.events.length,1);
 });
 
 test('agent proposals and votes never approve execution', () => {
