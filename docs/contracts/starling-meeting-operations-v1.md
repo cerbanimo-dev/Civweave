@@ -4,7 +4,7 @@ Target integration branch: `staging`. Intended first meeting: November 11, 2026.
 
 ## Functional boundary
 
-`lib/starling-meeting-operations.mjs` is a deterministic, offline-first event-record core. It does not own a chat UI, live audio, turns, model routing, Quest execution, voting governance, or hosted persistence.
+`public/app/shared/starling-meeting-operations-v1.mjs` (re-exported from `lib/starling-meeting-operations.mjs` for Node) is a deterministic, offline-first event-record core. It does not own a chat UI, live audio, turns, model routing, Quest execution, voting governance, or hosted persistence.
 
 - Thread 2 is the sole source of `speech.committed` events through `lib/starling-meeting-live-adapter.mjs`. Partial ASR, silent listening, inner model messages, and speculative replies are never transcript entries.
 - Thread 3 maps provider-specific model identities to stable meeting participant IDs, without importing model-private memory without explicit consent.
@@ -67,3 +67,11 @@ This foundation is **not** a deployed meeting service and does not claim to be a
 An approved handoff is **pending** until the canonical Quest engine contains exactly one Quest with a matching `sourceActionId` of `starling:<meetingId>:<decisionId>:<questId>`. This convention must be supplied to the existing Quest engine through its authorized, human-controlled creation flow; the meeting engine does not install or trigger a new task engine. One match is `confirmed`; two or more are `conflict`; no match stays `handoff-pending`. Verified completion is true only if that one canonical Quest reports `status: 'completed'`. The requesting actor, the meeting transcript and an agent's assurance never count as independent proof.
 
 The adapter is a **read-only integration helper**, not a cross-device ownership or identity verifier. Thread 1 must verify the matching Guild and actual source provenance and build the authorized human action to create the Quest. The adapter is not proof that any meeting is live.
+
+## Browser rehearsal integration and signed summary handoff
+
+`public/app/starling-meeting-console-v1.mjs` now uses the canonical shared core through `public/app/shared/starling-meeting-recorder-v1.mjs`. The local console displays an explicit opt-in toggle and Markdown export; it records only final human utterances or successfully spoken agent playback, never drafts, interim ASR or interrupted utterances. The existing Thread 2 bridge still exclusively controls floor grants. Records stay on the current browser and remain saved when toggled off, so users can export before clearing browser storage. The console is a local rehearsal with a synthetic Guildkeeper identity, **not** authenticated multi-user Guild operations.
+
+`public/app/shared/starling-meeting-mesh-bridge-v1.mjs` provides `publishMeetingSummary`, requiring a confirmed, Guild-scoped, human Guildkeeper caller and an explicit device audience. It uses the canonical `CivweaveLocalMeshV146.createObject` signing and delivery queue, with `consent: 'direct'`, short expiry and hop limit 1. It publishes **only a summary**: no transcript text, raw audio, private model drafts or personnel list. A signed-and-queued status does **not** confirm delivery or human authorization. Callers **must independently authenticate** the Guildkeeper, audience membership, consent and Guild scope using the existing identity and membership authority. No public sharing, automatic Guild posting or inbound merge is enabled.
+
+The browser/shared modules are the single implementation; `lib/starling-meeting-operations.mjs` and `lib/starling-meeting-records.mjs` only re-export them for existing Node callers. Remaining before the real meeting: wire authenticated Guild membership to this console or a native meeting surface, enforce recording consent per participant, implement signed incoming conflict review, and validate live multiplayer transport. The local rehearsal does not satisfy those gates by itself.
