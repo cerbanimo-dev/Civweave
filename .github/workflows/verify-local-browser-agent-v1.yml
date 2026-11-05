@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'public/app/browser-tool-v1.js'
+      - 'public/app/shared/browser-session-policy-v1.mjs'
       - 'public/app/local-ai/browser-agent-v1.js'
       - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/offline-package-v208.json'
@@ -11,6 +12,11 @@ on:
       - 'cloudflare/node-cloud/src/server-ai-entry-v3.mjs'
       - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'scripts/verify-local-browser-agent-v1.mjs'
+      - 'scripts/test-browser-session-policy-v1.mjs'
+      - 'scripts/test-browser-guild-session-selection-v1.mjs'
+      - 'scripts/test-browser-remote-target-safety-v1.mjs'
+      - 'docs/contracts/browser-session-and-mcp-permissions-v1.md'
+      - 'config/system-ownership.json'
       - '.github/workflows/verify-local-browser-agent-v1.yml'
   workflow_dispatch:
 
@@ -28,6 +34,7 @@ jobs:
       - name: Syntax
         run: |
           node --check public/app/browser-tool-v1.js
+          node --check public/app/shared/browser-session-policy-v1.mjs
           node --check public/app/local-ai/browser-agent-v1.js
           node --check public/app/local-ai/bootstrap-v266.js
           node --check cloudflare/node-cloud/src/browser-tool-entry-v1.mjs
@@ -35,3 +42,5 @@ jobs:
           node --check scripts/verify-local-browser-agent-v1.mjs
       - name: Contract regression
         run: node scripts/verify-local-browser-agent-v1.mjs
+      - name: Connected browser consent, Guild isolation, target safety
+        run: node --test scripts/test-browser-session-policy-v1.mjs scripts/test-browser-guild-session-selection-v1.mjs scripts/test-browser-remote-target-safety-v1.mjs

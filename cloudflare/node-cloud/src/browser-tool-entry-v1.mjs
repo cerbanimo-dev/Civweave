@@ -42,21 +42,23 @@ async function verifyCapacitySession(env, token, expectedNodeId) {
 function nodeIdFor(request) {
   return clean(request.headers.get('x-civweave-node-id') || new URL(request.url).searchParams.get('nodeId'), 180).toLowerCase();
 }
-function blockedIpv4(host) {
-  const parts = host.split('.').map(Number);
-  if (parts.length !== 4 || parts.some(part => !Number.isInteger(part) || part < 0 || part > 255)) return false;
-  const [a, b] = parts;
-  return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a >= 224;
-}
-function safeUrl(value) {
+/**
+ * Target preflight for the remote browser. Refuse all IP literals, including
+ * IPv4 shortcuts and IPv4-mapped IPv6. Browser Run must additionally enforce
+ * its own DNS/redirect egress restrictions; string checks alone cannot do so.
+ */
+export function safeUrl(value) {
   let url;
   try { url = new URL(clean(value, 4000)); }
   catch { throw Object.assign(new Error('Browser tool requires a valid URL.'), { status: 400 }); }
-  if (!['http:', 'https:'].includes(url.protocol)) throw Object.assign(new Error('Browser tool only permits HTTP(S) targets.'), { status: 400 });
-  if (url.username || url.password) throw Object.assign(new Error('Browser tool URLs may not contain embedded credentials.'), { status: 400 });
-  const host = url.hostname.replace(/^\[|\]$/g, '').toLowerCase();
-  if (!host || host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.invalid')) throw Object.assign(new Error('Browser tool refuses local or private hostnames.'), { status: 403 });
-  if (blockedIpv4(host) || host === '::' || host === '::1' || /^f[cd][0-9a-f:]*$/i.test(host) || /^fe[89ab][0-9a-f:]*$/i.test(host)) throw Object.assign(new Error('Browser tool refuses private, loopback, link-local, multicast, or unspecified IP targets.'), { status: 403 });
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password)
+    throw Object.assign(new Error('Browser tools only accept credential-free HTTP(S) targets.'), { status: 403 });
+  const host = url.hostname.replace(/^\[|\]$/g, '').replace(/\.$/, '').toLowerCase();
+  const localName = /(?:^|\.)(?:localhost|local|internal|invalid|test|onion|arpa|nip\.io|sslip\.io|xip\.io)$/.test(host);
+  const ipLiteral = host.includes(':') || /^[\d.]+$/.test(host);
+  if (!host || !host.includes('.') || host.includes('..') || localName || ipLiteral ||
+      !/^[a-z0-9.-]+$/.test(host))
+    throw Object.assign(new Error('Browser tool refuses IP literals, DNS-to-IP aliases and local or non-public hostnames.'), { status: 403 });
   url.hash = '';
   return url.href;
 }
