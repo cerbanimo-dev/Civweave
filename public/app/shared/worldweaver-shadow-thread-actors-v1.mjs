@@ -25,7 +25,7 @@ function castFor(packet,castPacket){
  return packet.actors.map(actor=>{
   const cast=byId.get(actor.canonicalId),asset=safeAsset(cast?.avatarRef)||DEFAULT_AVATAR[actor.canonicalId]||null;
   return {...COPY(actor),avatarRef:asset,avatarResolved:asset!==null,
-   avatarSource:cast&&safeAsset(cast.avatarRef)?'reviewed-casting':'existing-reviewed-sprite',
+   avatarSource:cast&&safeAsset(cast.avatarRef)?'reviewed-casting':asset?'existing-reviewed-sprite':'unresolved',
    personaBrief:safeText(cast?.personaBrief,800),canonRules:safeText(cast?.canonRules,1000)};
  });
 }
