@@ -134,7 +134,7 @@ function render(){
  const now=selected===local.day&&currentMonth?local.minute:-1;
  const display=mode==='tv'?(archive?list.slice(0,4):list.filter(x=>min(x.end)>local.minute).slice(0,4)):list;
  const title=studio==='all'?'All studios':DB.studios[studio].label;
- $('heading').textContent=(mode==='week'?'Weekly overview · ':mode==='tv'?'Now & Next · ':selected+' · ')+title;
+ $('heading').textContent=(mode==='week'?'Weekly overview · ':mode==='tv'?(archive?'Archived schedule · ':'Now & Next · '):selected+' · ')+title;
  $('description').textContent=mode==='week'?'Classes are grouped by day. Choose a studio to reduce the amount on screen.':mode==='tv'?'Only four upcoming classes are shown to keep signage readable.':'Choose a day or studio for a clearer list.';
  $('count').textContent=(mode==='week'?DAYS.reduce((n,d)=>n+schedule(d).length,0):list.length)+' classes on schedule';
  $('cards').replaceChildren(...display.map(x=>makeCard(x,now,currentMonth)));
@@ -150,7 +150,7 @@ function render(){
    }weekly.append(section)}
  }
  const query=new URLSearchParams({studio,mode,...(mode==='day'?{day}:{} )});
- history.replaceState(null,'',location.pathname+'?'+query.toString());
+ try{history.replaceState(null,'',location.pathname+'?'+query.toString())}catch{/* Opaque-origin in-world iframe: controls still work without URL mutation. */}
 }
 for(const b of document.querySelectorAll('[data-studio]'))b.addEventListener('click',()=>{studio=b.dataset.studio;render()});
 for(const b of document.querySelectorAll('[data-mode]'))b.addEventListener('click',()=>{mode=b.dataset.mode;render()});
