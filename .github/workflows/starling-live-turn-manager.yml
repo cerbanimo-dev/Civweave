@@ -1,0 +1,22 @@
+name: Starling live speaking gate
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/shared/starling-live-turn-manager-v1.mjs'
+      - 'scripts/test-starling-live-turn-manager-v1.mjs'
+      - '.github/workflows/starling-live-turn-manager.yml'
+  pull_request:
+    paths:
+      - 'public/app/shared/starling-live-turn-manager-v1.mjs'
+      - 'scripts/test-starling-live-turn-manager-v1.mjs'
+      - '.github/workflows/starling-live-turn-manager.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/test-starling-live-turn-manager-v1.mjs
