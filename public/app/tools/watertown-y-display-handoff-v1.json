@@ -1,0 +1,92 @@
+{
+  "schema": "civweave.worldweaver.design-handoff.v1",
+  "status": "staging-prototype-not-y-approved",
+  "location": {
+    "name": "Watertown Family YMCA — Downtown Mary L. Clemo Community Center",
+    "address": "146 Arsenal Street, Watertown, NY 13601",
+    "project": "Maggieverse digital Y",
+    "officialSchedule": "https://watertownymca.storage.googleapis.com/files/s3fs-public/2026-10/DTYGroupEx_2026NOV.pdf",
+    "officialScheduleIndex": "https://www.watertownymca.org/WatertownYMCASchedules",
+    "capturedMonth": "2026-11",
+    "timezone": "America/New_York",
+    "affiliation": "Unofficial virtual prototype pending YMCA approval"
+  },
+  "asset": {
+    "path": "/app/tools/watertown-y-schedule-v1.html",
+    "studio": "Cardio Studio",
+    "hasVerifiedData": true,
+    "hasLiveSync": false,
+    "preferredAspectRatio": "16:9",
+    "isThirdPartyUrl": false
+  },
+  "displays": [
+    {
+      "id": "y-entrance-classes",
+      "zone": "arrival-lobby",
+      "mode": "tv",
+      "urlQuery": "?mode=tv",
+      "purpose": "What is on now and next",
+      "camera": "readable from hallway",
+      "maxVisibleClasses": 4
+    },
+    {
+      "id": "y-cardio-entrance",
+      "zone": "outside-cardio-studio",
+      "mode": "today",
+      "urlQuery": "?mode=today",
+      "purpose": "All classes scheduled today",
+      "camera": "readable from standing at doorway"
+    },
+    {
+      "id": "y-community-kiosk",
+      "zone": "main-community-kiosk",
+      "mode": "week",
+      "urlQuery": "?mode=week",
+      "purpose": "Seven-day browsing",
+      "camera": "near interaction range"
+    },
+    {
+      "id": "y-in-world-phone",
+      "zone": "member-phone-panel",
+      "mode": "day",
+      "urlQuery": "?mode=day",
+      "purpose": "Personal schedule lookup",
+      "camera": "close-range personal display"
+    }
+  ],
+  "displayRules": [
+    "Never show the paper poster screenshot as the only schedule presentation.",
+    "Use text-first accessible HTML; no image-only schedule.",
+    "Keep times in America/New_York and make start/end times visually prominent.",
+    "Show live, virtual, turf and registration-required as distinct metadata.",
+    "For far-view mode restrict visible classes to four to avoid small text.",
+    "Retain current-month timestamp and clearly mark archived schedules.",
+    "Only the official YMCA site or an authorized manager can approve future schedule updates.",
+    "Do not imply real-time YMCA class reservations or instructor presence in the simulated environment.",
+    "Screens appear as non-executable website media inside authorized Worldweaver instances; access controlled by existing Worldweaver screen-cast rules."
+  ],
+  "plannedExtensions": [
+    {
+      "studio": "Spin Studio",
+      "sourcePage": 2,
+      "stage": "needs structured transcription"
+    },
+    {
+      "studio": "Yoga Studio",
+      "sourcePage": 3,
+      "stage": "needs structured transcription"
+    },
+    {
+      "studio": "Aquatics",
+      "stage": "requires independent official source"
+    },
+    {
+      "feature": "Authorized schedule feed/management",
+      "stage": "requires YMCA approval"
+    },
+    {
+      "feature": "Place screen surfaces in navigable Maggieverse YMCA",
+      "stage": "requires location/world scene integration"
+    }
+  ]
+}
