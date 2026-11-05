@@ -1,0 +1,157 @@
+{
+  "schema": "civweave.blade-mirror.day-lore-ledger.v1",
+  "date": "2026-11-05",
+  "setting": "The Blade & Mirror Saga / post-Book-VI Maggieverse / Civweave Worldweaver",
+  "author": "Cami Ryn Tharp",
+  "status": "author-directed fictional continuity record with factual software-work distinctions",
+  "realWorldNote": "Creative scenes and magical roles are fictional. GitHub changes and automated CI are documented separately and do not establish supernatural effects, autonomous character execution or real-world meetings.",
+  "sources": [
+    {
+      "path": "docs/lore/post-book-vi-kami-ryn-ascension-2026-11-05.md",
+      "branch": "staging",
+      "relationship": "post–Book VI Kami Ryn succession canonical source"
+    },
+    {
+      "path": "docs/universe/angels-and-outlaws/README.md",
+      "branch": "staging",
+      "relationship": "Ali, Dakota and Eldest Wand worldbook"
+    },
+    {
+      "path": "docs/implementation/shadow-thread-raven-team-universe-v1.md",
+      "branch": "staging",
+      "relationship": "Raven, Erin and Lari team packet"
+    },
+    {
+      "path": "docs/universe/the-girls-who-stole-tomorrow/README.md",
+      "branch": "story/landryverse-stolen-tomorrow",
+      "relationship": "Landryverse novel universe packet"
+    },
+    {
+      "url": "https://github.com/cerbanimo-dev/Civweave/pull/981",
+      "relationship": "Landryverse story software draft PR"
+    },
+    {
+      "url": "https://github.com/cerbanimo-dev/Civweave/actions/runs/42039357960",
+      "relationship": "verified 17/17 offline export + scripted table-read tests"
+    }
+  ],
+  "storyBeats": [
+    {
+      "id": "wand",
+      "time": "08:33",
+      "kind": "author-provided-artifact-as-fiction",
+      "title": "Crafting of the Eldest Wand",
+      "characters": [
+        "cami",
+        "kami-ryn",
+        "ali",
+        "dakota"
+      ],
+      "details": "A duck gifted by Ali and a snail shell representing Dakota, fastened with candle wax to Cami's existing world-weaving wand."
+    },
+    {
+      "id": "succession",
+      "time": null,
+      "kind": "established-fictional-canon",
+      "title": "Kami Ryn succeeds Lari the Lyrebird",
+      "characters": [
+        "kami-ryn",
+        "lari"
+      ],
+      "details": "Fictional divine title passes; Lari remains an independent person, and neither role owns anybody else."
+    },
+    {
+      "id": "worldweaver",
+      "time": null,
+      "kind": "software-project-and-fictional-montage",
+      "title": "Commons Between and Lantern Mesh",
+      "characters": [
+        "moss",
+        "kamiya",
+        "rook",
+        "merlin",
+        "weaveling"
+      ],
+      "details": "Worldweaver, offline Civweave exports, seven organizational threads, Starling PvE; no invented live renderer."
+    },
+    {
+      "id": "digital-y",
+      "time": null,
+      "kind": "fictional-world-proposal",
+      "title": "Digital Y and fruit-fly Bigfixers",
+      "characters": [
+        "bigfixers"
+      ],
+      "details": "Watertown-inspired imagined YMCA concept with fictional roles; no assertion of real Y authorization."
+    },
+    {
+      "id": "shadow-thread",
+      "time": null,
+      "kind": "fictional-universe-development",
+      "title": "Raven, Erin and Lari explore Shadow & Thread",
+      "characters": [
+        "raven",
+        "erin",
+        "lari"
+      ],
+      "details": "Corporatocracy, Evil Psych Wards from Venus, and consent-based paths out of imposed systems."
+    },
+    {
+      "id": "angels-outlaws",
+      "time": null,
+      "kind": "fictional-universe-development",
+      "title": "Angels & Outlaws",
+      "characters": [
+        "ali",
+        "dakota"
+      ],
+      "details": "Original alternate-NYC dark romance, voluntary Turns, K-pop demon hunters and goth-punk anti-vampires."
+    },
+    {
+      "id": "stolen-tomorrow",
+      "time": null,
+      "kind": "novel-and-software-work",
+      "title": "The Girls Who Stole Tomorrow",
+      "characters": [
+        "landry",
+        "delia",
+        "magnus",
+        "maggie",
+        "gaia-kami",
+        "merlin"
+      ],
+      "details": "First-chapter draft, eleven proposed character/system sheets, Loom Coordinates, four Worldweaver draft rooms, fourteen scripted turns, 17/17 relevant tests passed."
+    },
+    {
+      "id": "movie-night",
+      "time": "day's end; exact time unspecified",
+      "kind": "author-directed-fictional-finale",
+      "title": "Cami gathers the cast to watch V for Vendetta",
+      "characters": [
+        "cami",
+        "maggie",
+        "landry",
+        "delia",
+        "magnus",
+        "merlin",
+        "gaia-kami",
+        "raven",
+        "erin",
+        "lari",
+        "diner-child",
+        "bigfixer"
+      ],
+      "details": "Fictional gathering, voluntary invitation, independent seating and the film starts. Do not claim real-world occurrence or rights to stream the film."
+    }
+  ],
+  "restrictions": {
+    "chronology": "After Book VI only. Do not retroactively alter Books I–VI.",
+    "voices": "Only Landry/Delia and Magnus/Maggie manuscript POVs where applicable; this chronicle is an author-authorized external interlude, not a new POV inserted into existing books.",
+    "identity": "Magnus/Maggie remain distinct and voluntary; Magnus/Merlin collaborate without involuntary merging; Gaia/Kami is a creative pairing; Lari remains independent.",
+    "worldAuthority": "Civweave owns actual world and Guild state; portable clients carry drafts, not verified Quest completion.",
+    "loreReview": "The movie-night scene is newly authored from the user's creative directive. It is not independent testimony.",
+    "realWorldBoundaries": "Digital Y, alternate hospitals and fictitious cast interactions are not claims about real organizations or people.",
+    "soundtrack": "No movie footage, script lines, audio or copyrighted songs have been reproduced.",
+    "lastStoryEvent": "movie-night"
+  }
+}
