@@ -42,3 +42,22 @@ test('same session events yield deterministic view and do not mutate input', () 
   assert.equal(JSON.stringify(people),snapshot);
   assert.equal(a.avatars[0].displayName,'Cami');
 });
+
+test('browser room lab stays optional and maintains semantic fallback controls', async () => {
+  const {readFileSync}=await import('node:fs');
+  const html=readFileSync(new URL('../public/app/tools/starling-meeting-room-lab.html', import.meta.url),'utf8');
+  const js=readFileSync(new URL('../public/app/tools/starling-meeting-room-lab.mjs', import.meta.url),'utf8');
+  const css=readFileSync(new URL('../public/app/tools/starling-meeting-room-lab.css', import.meta.url),'utf8');
+  assert.match(html,/id="participant-list"/);
+  assert.match(html,/id="room-status"/);
+  assert.match(html,/id="three-d-toggle"/);
+  assert.match(html,/id="rotate-left"/);
+  assert.match(html,/id="zoom-in"/);
+  assert.match(html,/type="module" src="\.\/starling-meeting-room-lab\.mjs"/);
+  assert.match(js,/projectMeetingRoom/);
+  assert.match(js,/replaceChildren/);
+  assert.match(js,/addEventListener/);
+  assert.doesNotMatch(js,/fetch\(|WebSocket|setInterval|requestAnimationFrame|speechSynthesis|AudioContext/);
+  assert.match(css,/perspective:/);
+  assert.match(css,/@media \(prefers-reduced-motion: reduce\)/);
+});
