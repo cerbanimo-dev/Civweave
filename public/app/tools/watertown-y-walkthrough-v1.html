@@ -29,6 +29,7 @@ button[aria-pressed=true]{background:#004f60;color:white}
 #location{font-size:18px;font-weight:850;margin-top:8px}
 #nearby{font-size:17px;font-weight:750;color:#075872;margin:8px 0;min-height:26px}
 #narration{padding:14px;background:#eaf4f5;border-left:5px solid #008198;border-radius:7px;min-height:78px;line-height:1.5}
+.objective{background:#fff4cf;padding:10px 14px;border-left:5px solid #b97916;border-radius:7px;font-weight:800;margin:9px 0;font-size:16px}
 #scheduleHost{border-radius:10px;overflow:hidden}
 #scheduleHost .cw-worldweaver-screen iframe{display:block;width:100%;height:min(68vh,740px);min-height:450px;background:white;border:1px solid #aecacf}
 #scheduleHost .cw-worldweaver-screen h3{font-size:20px}
@@ -61,11 +62,14 @@ details{margin:12px 0}summary{font-weight:850;cursor:pointer}
 <canvas id="view" width="900" height="560" role="img" aria-label="First-person corridor view. Walk with the controls below or use accessible two-dimensional navigation.">Your browser does not support canvas. Use the 2D destination buttons below.</canvas>
 <div id="location" aria-live="off">Welcome Lobby</div>
 <div id="nearby" aria-live="polite">Explore the space.</div>
+<div id="nextObjective" class="objective" aria-live="polite">Next quest stop: Aster at reception</div>
 <div class="controls" role="group" aria-label="Movement controls">
 <button type="button" data-move="left" aria-label="Turn left">↶ Turn</button>
+<button type="button" data-move="strafeLeft" aria-label="Step left">← Step</button>
 <button type="button" data-move="forward" aria-label="Walk forward">↑ Forward</button>
 <button type="button" data-move="back" aria-label="Walk backward">↓ Back</button>
 <button type="button" data-move="right" aria-label="Turn right">↷ Turn</button>
+<button type="button" data-move="strafeRight" aria-label="Step right">Step →</button>
 <button type="button" class="primary" id="interact">Interact (E)</button>
 </div>
 <p class="muted">Desktop: W/S forward and backward, A/D strafe, ←/→ turn, E to interact. Mobile: hold the movement buttons. Select a screen or guide when close enough. The 2D route buttons provide accessible fast travel.</p>
@@ -81,12 +85,15 @@ details{margin:12px 0}summary{font-weight:850;cursor:pointer}
 <h2>Accessible two-dimensional map</h2>
 <svg id="map" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schematic Digital Y floor plan, showing rooms, corridors, interactive locations, and your position"></svg>
 <p class="muted">The map and first-person view share the same walls, doors, objects and current player position. Choose a destination for collision-checked accessible navigation.</p>
+<p id="routeSummary" class="muted" aria-live="polite">No destination selected yet.</p>
 <div id="destinationList" role="group" aria-label="Accessible destination list"></div>
 </div>
 <div id="questSection" class="hidden">
 <h2 id="questHeading">Find Your First Class</h2>
 <p class="muted">A short self-guided introduction. It works without cloud AI or a member account.</p>
 <ol id="questProgress"></ol>
+<button class="primary" type="button" id="nextStop">Go to next quest stop</button>
+<p class="muted">Quest milestones and your goal are saved on this device when storage is available. Your draft plan text is not saved automatically.</p>
 <h3>Pick a community intention</h3>
 <div id="choices" role="group" aria-label="Quest intentions">
 <button type="button" data-goal="fitness">Try a class</button>
