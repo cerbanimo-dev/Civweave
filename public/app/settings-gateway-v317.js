@@ -264,7 +264,10 @@ async function ggufSettingsAction(form,kind){
 }
 function selectLocalModel(selected){
   if(!selected?.active||!selected.id)return null;
-  return persist({...DEFAULTS,route:'downloaded-local',provider:'downloaded-local',model:selected.id,safeMode:Boolean(parse(getLocal(SAFE_MODE_KEY),{}).enabled)});
+  const result=persist({...DEFAULTS,route:'downloaded-local',provider:'downloaded-local',model:selected.id,safeMode:Boolean(parse(getLocal(SAFE_MODE_KEY),{}).enabled)});
+  setLocal(AI_SETUP_KEY,JSON.stringify({choice:'local-only',at:new Date().toISOString()}));
+  saveWorldMode('local-only');
+  return result;
 }
 function persist(state){
   const now=new Date().toISOString();
