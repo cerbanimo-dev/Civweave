@@ -7,7 +7,7 @@ const source=readFileSync(file,'utf8');
 function policy(){
   const match=source.match(/function partyTurnTargets\(\{prompt,mentions\}\)\{[^\n]+\}/);
   assert.ok(match,'Party must expose a deterministic silent-by-default target policy');
-  return new Function('return ('+match[0]+')')();
+  return new Function('SYSTEMS','return ('+match[0]+')')(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 }
 test('AI remains silent when the human has not enabled prompting',()=>{
   const targets=policy();
