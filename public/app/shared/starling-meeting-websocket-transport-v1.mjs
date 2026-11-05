@@ -8,14 +8,14 @@
  */
 const safeId=v=>typeof v==='string'&&/^[A-Za-z0-9:_-]{1,120}$/.test(v);
 const send=(socket,data)=>{try{socket.send(JSON.stringify(data));return true;}catch{return false;}};
-export function createStarlingMeetingWebSocketTransport({gateway,authorizeUpgrade,createPair,maxFrameBytes=8192,maxSocketsPerSession=32}={}){
+export function createStarlingMeetingWebSocketTransport({gateway,authorizeUpgrade,createPair,createUpgradeResponse=({client})=>new Response(null,{status:101,webSocket:client}),maxFrameBytes=8192,maxSocketsPerSession=32}={}){
   if(typeof gateway?.dispatch!=='function'||typeof authorizeUpgrade!=='function'||typeof createPair!=='function')
     throw new TypeError('Gateway, upgrade authorization and WebSocket pair factory required');
   const rooms=new Map();
   const errorResponse=(status,message)=>new Response(JSON.stringify({ok:false,error:message}),{
     status,headers:{'content-type':'application/json','cache-control':'no-store'}});
   const broadcast=(room,message)=>{
-    for(const socket of room.values())send(socket,message);
+    for(const member of room.values())send(member.socket,message);
   };
   const attach=async({request,sessionId}={})=>{
     if(!(request instanceof Request)||!safeId(sessionId))return errorResponse(400,'invalid-request');
@@ -33,7 +33,6 @@ export function createStarlingMeetingWebSocketTransport({gateway,authorizeUpgrad
     const [client,server]=Array.isArray(pair)?pair:Object.values(pair);
     if(!client||!server||typeof server.accept!=='function')return errorResponse(503,'websocket-unavailable');
     // No client-visible credential and no model prompt is sent in welcome.
-    server.accept();
     let closed=false,pending=Promise.resolve();
     const member={socket:server,actorId:identity.actorId,token:identity.token};
     room.set(identity.actorId,member);
@@ -55,6 +54,7 @@ export function createStarlingMeetingWebSocketTransport({gateway,authorizeUpgrad
       try{server.close(1008,joined.code||'join-rejected');}catch{}
       return errorResponse(403,'join-rejected');
     }
+    server.accept();
     send(server,{type:'meeting.welcome',sessionId,actorId:identity.actorId,state:joined.state});
     broadcast(room,{type:'meeting.state',state:joined.state,events:joined.events||[]});
     server.addEventListener('message',event=>{
@@ -90,7 +90,7 @@ export function createStarlingMeetingWebSocketTransport({gateway,authorizeUpgrad
     });
     server.addEventListener('close',()=>{pending=pending.then(leave).catch(()=>{});});
     server.addEventListener('error',()=>{pending=pending.then(leave).catch(()=>{});});
-    return new Response(null,{status:101,webSocket:client});
+    return createUpgradeResponse({client});
   };
   return Object.freeze({attach,roomCount:()=>rooms.size});
 }
