@@ -1,0 +1,25 @@
+name: Starling meeting operations contracts
+
+on:
+  pull_request:
+    paths:
+      - 'lib/starling-meeting-*.mjs'
+      - 'scripts/test-starling-meeting-*.mjs'
+      - 'docs/contracts/starling-meeting-operations-v1.md'
+      - '.github/workflows/starling-meeting-operations.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'lib/starling-meeting-*.mjs'
+      - 'scripts/test-starling-meeting-*.mjs'
+      - '.github/workflows/starling-meeting-operations.yml'
+
+jobs:
+  meeting-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/test-starling-meeting-operations.mjs scripts/test-starling-meeting-live-adapter.mjs scripts/test-starling-meeting-records.mjs scripts/test-starling-meeting-quest-bridge.mjs
