@@ -1,0 +1,121 @@
+{
+  "schema": "civweave.worldweaver.story-playtest.v1",
+  "universeId": "shadow-and-thread",
+  "scenarioId": "third-discharge",
+  "playtestId": "shadow-thread-playtest-001",
+  "kind": "authored-deterministic-simulation",
+  "liveWorld": false,
+  "liveModels": false,
+  "policy": {
+    "angelIntimationEnabled": false,
+    "contractSigned": false,
+    "timelineReplayAuthorized": false,
+    "canonicalAvatarsPreserved": true,
+    "actorAvatarBindingsResolved": false
+  },
+  "setup": {
+    "viewpoint": "Nell Mercer",
+    "playerInput": "listen-to-fruitfly",
+    "location": "Samaritan Hospital System (fictional alternate-universe Watertown), Ward That Remembers",
+    "time": "Wednesday, 03:33 AM (fictional local scene time)"
+  },
+  "beats": [
+    {
+      "turn": 1,
+      "speaker": "Zip",
+      "kind": "bigfixer",
+      "action": "speaks from ventilation grate",
+      "text": "Don't sign a thing. And check the dates. They overlap."
+    },
+    {
+      "turn": 2,
+      "speaker": "Nell Mercer",
+      "kind": "scripted-player-pilot",
+      "action": "examines discharge record without touching the form",
+      "text": "My first discharge was forty years after my second. So how did I sign both yesterday?"
+    },
+    {
+      "turn": 3,
+      "speaker": "Raven",
+      "worldName": "Dr. Raven Vale",
+      "kind": "authored-actor",
+      "action": "poses the first adversarial challenge",
+      "text": "That is the first sensible question anyone has asked in this ward. If you insist on an answer, you'll have to find a record the hospital didn't write."
+    },
+    {
+      "turn": 4,
+      "speaker": "Erin",
+      "worldName": "E. Marlowe",
+      "kind": "authored-actor",
+      "action": "freezes the proposed replay, opens read-only audit record",
+      "text": "No timeline rerun. No consent inferred from a future self. This is an audit, Nell. You can stop it at any moment."
+    },
+    {
+      "turn": 5,
+      "speaker": "Lari",
+      "worldName": "L. Vesper",
+      "kind": "authored-actor",
+      "action": "tests player with a false binary choice",
+      "text": "Two doors, darling: sign the discharge or spend another life here. I always did enjoy an efficient menu."
+    },
+    {
+      "turn": 6,
+      "speaker": "Zip",
+      "kind": "bigfixer",
+      "action": "uncovers a hidden third option underneath the form",
+      "text": "Three doors. The little one says CHALLENGE THE CONTRACT. They left it out of the brochure."
+    },
+    {
+      "turn": 7,
+      "speaker": "Raven",
+      "worldName": "Dr. Raven Vale",
+      "kind": "authored-actor",
+      "action": "accepts the evidence challenge and leaves the decision to Nell",
+      "text": "Then you've found the first crack in the system. The next move is yours."
+    }
+  ],
+  "result": {
+    "outcome": "first audit path revealed",
+    "clues": [
+      "conflicting discharge dates",
+      "future signatures are not present consent",
+      "unadvertised contract challenge option"
+    ],
+    "unlocked": [
+      "Continuity Services audit hatch"
+    ],
+    "timelineReplays": 0,
+    "contractsSigned": 0,
+    "hintsDelivered": 0,
+    "characterIdentityOverrides": 0,
+    "playerChoiceOverridden": false
+  },
+  "nextChoices": [
+    {
+      "id": "inspect-contract",
+      "label": "Inspect the original contract"
+    },
+    {
+      "id": "ask-erin",
+      "label": "Ask Erin to explain the continuity record"
+    },
+    {
+      "id": "follow-zip",
+      "label": "Follow Zip to the audit hatch"
+    },
+    {
+      "id": "decline-and-exit",
+      "label": "Refuse the procedure and request a safe exit"
+    }
+  ],
+  "acceptanceAssertions": [
+    "all-3-actor-ids-present",
+    "angel-opt-in-respected",
+    "no-timeline-replay",
+    "no-contract-autosign",
+    "no-avatar-overrides",
+    "player-may-decline",
+    "third-choice-exists"
+  ],
+  "note": "Fictional authored playtest only. Not an AI inference run, live NPC, medical service, world server, or proof of rendered avatar bindings."
+}
