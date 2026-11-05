@@ -61,3 +61,55 @@ test('browser room lab stays optional and maintains semantic fallback controls',
   assert.match(css,/perspective:/);
   assert.match(css,/@media \(prefers-reduced-motion: reduce\)/);
 });
+
+
+test('room media presenter stops playing on grant revocation and speaker replacement', async () => {
+  const {createMeetingAudioPresenter}=await import('../public/app/shared/starling-meeting-audio-v1.mjs');
+  const calls=[];
+  const presenter=createMeetingAudioPresenter({start:(id)=>calls.push('start:'+id),stop:(id)=>calls.push('stop:'+id)});
+  const people=[{id:'moss'},{id:'rook'}];
+  presenter.update({participants:people,roomStatus:'live',activeSpeakerId:'moss',grantedSpeakerId:'moss'});
+  presenter.update({participants:people,roomStatus:'live',activeSpeakerId:'rook',grantedSpeakerId:'rook'});
+  presenter.update({participants:people,roomStatus:'live',activeSpeakerId:null,grantedSpeakerId:null});
+  assert.deepEqual(calls,['start:moss','stop:moss','start:rook','stop:rook']);
+  presenter.dispose();
+});
+
+test('room media presenter refuses stale snapshots and stale session crossovers', async () => {
+  const {createMeetingAudioPresenter}=await import('../public/app/shared/starling-meeting-audio-v1.mjs');
+  const calls=[];
+  const presenter=createMeetingAudioPresenter({start:id=>calls.push('start:'+id),stop:id=>calls.push('stop:'+id)});
+  const people=[{id:'moss'}];
+  const live={participants:people,roomStatus:'live',activeSpeakerId:'moss',grantedSpeakerId:'moss'};
+  presenter.update({...live,sessionId:'guild-a',revision:3});
+  presenter.update({...live,sessionId:'guild-a',revision:2,activeSpeakerId:null});
+  assert.deepEqual(calls,['start:moss']);
+  presenter.update({participants:people,roomStatus:'idle',sessionId:'guild-b',revision:1});
+  assert.deepEqual(calls,['start:moss','stop:moss']);
+  presenter.update({...live,sessionId:'guild-a',revision:9});
+  assert.deepEqual(calls,['start:moss','stop:moss']);
+});
+
+test('room media presenter fails silent for invalid grants, errors, and disposal', async () => {
+  const {createMeetingAudioPresenter}=await import('../public/app/shared/starling-meeting-audio-v1.mjs');
+  const calls=[];
+  const presenter=createMeetingAudioPresenter({
+    start:id=>{calls.push('start:'+id);throw Error('autoplay denied')},
+    stop:id=>calls.push('stop:'+id)
+  });
+  const live={participants:[{id:'moss'}],roomStatus:'live',activeSpeakerId:'moss',grantedSpeakerId:'moss',sessionId:'test',revision:1};
+  assert.equal(presenter.update(live),null);
+  assert.deepEqual(calls,['start:moss','stop:moss']);
+  presenter.dispose();
+  assert.equal(presenter.update({...live,revision:2}),null);
+});
+
+test('duplicate participant IDs preserve first identity and cannot overwrite mute state', () => {
+  const room=projectMeetingRoom({
+    roomStatus:'live',activeSpeakerId:'moss',grantedSpeakerId:'moss',
+    participants:[{id:'moss',displayName:'Original',muted:true},{id:'moss',displayName:'Spoof',muted:false}]
+  });
+  assert.equal(room.avatars.length,1);
+  assert.equal(room.avatars[0].displayName,'Original');
+  assert.equal(room.avatars[0].audioEnabled,false);
+});
