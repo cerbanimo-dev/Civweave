@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Commons Between</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#07100d;color:#eef8f2}
+*{box-sizing:border-box} body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 12%,rgba(122,255,183,.15),transparent 30rem),linear-gradient(#07100d,#030706)}
+main{width:min(1180px,94vw);margin:auto;padding:2rem 0 5rem} header{margin-bottom:1.4rem}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.72rem;opacity:.62}
+h1{font-size:clamp(2.3rem,7vw,5.4rem);line-height:.9;margin:.3rem 0}.lede{max-width:70ch;color:#bfd1c7;line-height:1.55}
+.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(270px,.7fr);gap:1rem}.panel{border:1px solid rgba(225,255,238,.15);border-radius:24px;background:rgba(9,19,15,.78);overflow:hidden}
+.carousel-shell{min-height:440px;display:grid;place-items:center;perspective:1200px;position:relative}.carousel{width:200px;height:235px;transform-style:preserve-3d;position:relative;transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.card{position:absolute;inset:0;border:1px solid rgba(225,255,238,.28);border-radius:22px;background:linear-gradient(160deg,rgba(36,82,61,.97),rgba(7,16,13,.98));color:inherit;padding:1.1rem;text-align:left;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 20px 65px rgba(0,0,0,.4)}
+.card small,.pill{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.7}.card strong{font-size:1.25rem;margin:.35rem 0}.card span{font-size:.82rem;line-height:1.35;color:#c9ddd1}
+.controls{position:absolute;left:1rem;right:1rem;bottom:1rem;display:flex;justify-content:space-between}button{border:1px solid rgba(225,255,238,.22);border-radius:999px;background:#12251b;color:inherit;padding:.7rem 1rem;cursor:pointer}
+.details{padding:1.3rem}.details h2{margin:.35rem 0 0;font-size:1.8rem}.details p{color:#b8c9bf;line-height:1.5}.stations{display:grid;gap:.5rem;margin-top:1rem}.station{border-left:2px solid rgba(130,255,187,.42);padding:.35rem .65rem}.station b{display:block}.station span{font-size:.78rem;opacity:.65}
+.highway{padding:1.3rem;margin-top:1rem}.threshold{text-align:center;color:#8df0b5;letter-spacing:.14em;text-transform:uppercase;font-size:.73rem;margin:.4rem 0 1rem}.road{display:grid;gap:.55rem}.lane{display:grid;grid-template-columns:1fr auto;align-items:center;min-height:72px;padding:.8rem 1rem;border:1px solid rgba(225,255,238,.12);border-radius:16px;background:rgba(19,40,30,.75);cursor:pointer}.lane span{font-size:.75rem;opacity:.65}.interchange{text-align:center;margin-top:1rem}.interchange button{border-style:dashed}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.carousel-shell{min-height:390px}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">Worldweaver universe · staging</div><h1>The Commons Between</h1><p class="lede">One canonical Worldweaver universe. The 3D ring selects rooms; the three-lane highway keeps Living School, Cerbanimo and FellowFare visible around the same intention, with Anarchadia as the governance interchange.</p></header>
+<section class="grid">
+<div class="panel carousel-shell"><div class="carousel" id="carousel"></div><div class="controls"><button id="prev" type="button">← Previous</button><button id="next" type="button">Next →</button></div></div>
+<aside class="panel details" id="details" aria-live="polite"></aside>
+</section>
+<section class="panel highway"><h2>Intention Highway</h2><div class="threshold">The Threshold · Starling Commons</div><div class="road" id="road"></div><div class="interchange" id="interchange"></div></section>
+</main>
+<script type="module">
+import {COMMONS_BETWEEN,validateCommonsNavigation} from '../shared/worldweaver-universe-v1.mjs';
+validateCommonsNavigation(COMMONS_BETWEEN);
+const rooms=COMMONS_BETWEEN.rooms,nav=COMMONS_BETWEEN.navigation;
+const byId=id=>rooms.find(room=>room.id===id);
+const carousel=document.querySelector('#carousel'),details=document.querySelector('#details'),road=document.querySelector('#road'),interchange=document.querySelector('#interchange');
+let selected=0;
+function select(index){selected=(index+rooms.length)%rooms.length;carousel.style.transform=`rotateY(${selected*(-360/rooms.length)}deg)`;renderDetails(rooms[selected]);}
+function renderDetails(room){details.replaceChildren();const e=document.createElement('div');e.className='eyebrow';e.textContent=room.guide;const h=document.createElement('h2');h.textContent=room.title;const p=document.createElement('p');p.textContent=room.description;const s=document.createElement('div');s.className='stations';room.stations.forEach(station=>{const row=document.createElement('div');row.className='station';const b=document.createElement('b');b.textContent=station.title;const x=document.createElement('span');x.textContent=station.stationType;row.append(b,x);s.append(row)});details.append(e,h,p,s);}
+nav.carousel.roomOrder.forEach((id,index)=>{const room=byId(id);const card=document.createElement('button');card.type='button';card.className='card';card.style.transform=`rotateY(${index*(360/rooms.length)}deg) translateZ(260px)`;const small=document.createElement('small');small.textContent=room.guide;const strong=document.createElement('strong');strong.textContent=room.title;const span=document.createElement('span');span.textContent=room.description;card.append(small,strong,span);card.addEventListener('click',()=>select(index));carousel.append(card);});
+nav.intentionHighway.lanes.forEach(lane=>{const row=document.createElement('div');row.className='lane';const strong=document.createElement('strong');strong.textContent=lane.label;const span=document.createElement('span');span.textContent=lane.purpose.toUpperCase();row.append(strong,span);row.addEventListener('click',()=>select(nav.carousel.roomOrder.indexOf(lane.roomId)));road.append(row);});
+const gov=document.createElement('button');gov.type='button';gov.textContent='Anarchadia · governance interchange';gov.addEventListener('click',()=>select(nav.carousel.roomOrder.indexOf(nav.intentionHighway.interchange.roomId)));interchange.append(gov);
+document.querySelector('#prev').addEventListener('click',()=>select(selected-1));document.querySelector('#next').addEventListener('click',()=>select(selected+1));select(0);
+</script></body></html>

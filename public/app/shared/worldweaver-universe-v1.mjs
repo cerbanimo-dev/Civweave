@@ -70,6 +70,18 @@ const rooms=[
     screens:[{title:'Creator Screen',aspectRatio:'16:9'}]
   },
   {
+    id:'anarchadia-forum',
+    guide:'merlin',
+    title:'Anarchadia',
+    description:'Governance district for proposals, debate, visible decisions and routes back to the systems that own the affected work.',
+    stations:[
+      {stationType:'debate',title:'Forum Ring',instructions:'State proposals and objections with attributed speakers. Discussion alone does not create binding authority.'},
+      {stationType:'ballot',title:'Decision Commons',instructions:'Surface the canonical governance owner and eligible decision path. Worldweaver never fabricates a successful vote.'},
+      {stationType:'display',title:'Public Ledger Wall',instructions:'Display reviewed decisions, open questions and authoritative references without rewriting the owning system.'}
+    ],
+    screens:[{title:'Governance Screen',aspectRatio:'16:9'}]
+  },
+  {
     id:'convergence-stage',
     guide:'merlin',
     title:'Convergence Stage',
@@ -101,6 +113,38 @@ export const COMMONS_BETWEEN=freezeDeep({
     geometryStatus:'provisional-until-verified-provider-import',
     districts:LEGACY_VISUAL_DISTRICTS.map(row=>({id:row.id,name:row.name}))
   },
+  navigation:{
+    nexus:{
+      id:'threshold',
+      title:'The Threshold',
+      roomId:'starling-commons',
+      rule:'Arrival and visual navigation are presentation state until the canonical Worldweaver/runtime acknowledges movement.'
+    },
+    carousel:{
+      mode:'3d-ring',
+      roomOrder:['starling-commons','living-school','quest-forge','fellowfare-hall','anarchadia-forum','convergence-stage'],
+      rule:'The carousel selects a destination; it does not mutate Quest, curriculum, commerce, governance or canon state.'
+    },
+    intentionHighway:{
+      id:'intention-highway',
+      lanes:[
+        {id:'lane:living-school',system:'living-school',label:'Living School',roomId:'living-school',purpose:'learn'},
+        {id:'lane:cerbanimo',system:'cerbanimo',label:'Cerbanimo',roomId:'quest-forge',purpose:'build'},
+        {id:'lane:fellowfare',system:'fellowfare',label:'FellowFare',roomId:'fellowfare-hall',purpose:'exchange'}
+      ],
+      interchange:{system:'anarchadia',label:'Anarchadia',roomId:'anarchadia-forum'},
+      rule:'The three lanes visualize one intention across learning, making and exchange. Anarchadia is the governance interchange, not a fourth work lane.'
+    },
+    portals:[
+      {from:'starling-commons',to:'living-school'},
+      {from:'starling-commons',to:'quest-forge'},
+      {from:'starling-commons',to:'fellowfare-hall'},
+      {from:'living-school',to:'anarchadia-forum'},
+      {from:'quest-forge',to:'anarchadia-forum'},
+      {from:'fellowfare-hall',to:'anarchadia-forum'},
+      {from:'starling-commons',to:'convergence-stage'}
+    ]
+  },
   storyPortals:{
     source:'public/app/shared/worldweaver-story-seeds-v1.mjs',
     count:WORLD_SEED_COUNT,
@@ -123,6 +167,36 @@ export const COMMONS_BETWEEN=freezeDeep({
 });
 
 const validGuild=value=>typeof value==='string'&&/^[A-Za-z0-9:_-]{1,180}$/.test(value);
+
+export function validateCommonsNavigation(blueprint=COMMONS_BETWEEN){
+  if(!blueprint||typeof blueprint!=='object')throw new TypeError('Universe blueprint required.');
+  const roomIds=new Set((blueprint.rooms||[]).map(room=>room.id));
+  if(roomIds.size!==blueprint.rooms.length)throw new TypeError('Universe room IDs must be unique.');
+  const navigation=blueprint.navigation;
+  if(!navigation||!roomIds.has(navigation.nexus?.roomId))throw new TypeError('Threshold must resolve to a universe room.');
+  const order=navigation.carousel?.roomOrder;
+  if(!Array.isArray(order)||order.length!==roomIds.size||new Set(order).size!==order.length||order.some(id=>!roomIds.has(id)))
+    throw new TypeError('3D carousel must contain every universe room exactly once.');
+  const highway=navigation.intentionHighway;
+  if(!highway||!Array.isArray(highway.lanes)||highway.lanes.length!==3)throw new TypeError('Intention Highway requires exactly three lanes.');
+  const expected=['living-school','cerbanimo','fellowfare'];
+  const laneRooms=new Set();
+  highway.lanes.forEach((lane,index)=>{
+    if(lane.system!==expected[index])throw new TypeError('Intention Highway systems must remain Living School, Cerbanimo, FellowFare.');
+    if(!roomIds.has(lane.roomId)||laneRooms.has(lane.roomId))throw new TypeError('Intention Highway lanes require distinct existing rooms.');
+    laneRooms.add(lane.roomId);
+  });
+  if(highway.interchange?.system!=='anarchadia'||!roomIds.has(highway.interchange.roomId))
+    throw new TypeError('Anarchadia must remain the governance interchange.');
+  const portalPairs=new Set((navigation.portals||[]).map(portal=>portal.from+'>'+portal.to));
+  for(const lane of highway.lanes){
+    if(!portalPairs.has(navigation.nexus.roomId+'>'+lane.roomId))throw new TypeError('Threshold portal missing for intention lane.');
+    if(!portalPairs.has(lane.roomId+'>'+highway.interchange.roomId))throw new TypeError('Anarchadia portal missing for intention lane.');
+  }
+  return true;
+}
+validateCommonsNavigation(COMMONS_BETWEEN);
+
 
 /**
  * Materialize the blueprint as draft Worldweaver rooms.
