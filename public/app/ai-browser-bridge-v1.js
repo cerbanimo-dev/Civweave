@@ -114,12 +114,13 @@ async function generate(request,messages,context,{budget=650}={}){
  if(deviceModel(request)){
    if(!local()?.generate)throw fail('BROWSER_LOCAL_RUNTIME_UNAVAILABLE','A downloaded on-device model is not ready.');
    const output=await local().generate({messages,maxNewTokens:budget,temperature:0.1,thinking:false,stream:false,executionProfile:'agentic'});
-   return{text:clean(output?.text,24000),result:null,route:'downloaded-local'};
+   return{text:clean(output?.text,24000),result:null,localMetrics:output?.metrics||null,route:'downloaded-local'};
  }
  const runtime=context?.baseRuntime||spine()?.base?.()||globalThis.CivweaveModelRuntime;
  if(!runtime?.generate)throw fail('BROWSER_MODEL_UNAVAILABLE','The selected AI provider is unavailable.');
  const c={...(request.config||{}),stream:false,maxTokens:budget};
- const result=await runtime.generate({...request,purpose:'browser-research-assist-v1',messages,prompt:messages.at(-1)?.content||'',config:c,stream:false,requiresTools:false,capabilityRequirements:{requiresTools:false,externalResearch:false}});
+ const {browserResearch:privateBrowserGrant,...modelRequest}=request;
+ const result=await runtime.generate({...modelRequest,purpose:'browser-research-assist-v1',messages,prompt:messages.at(-1)?.content||'',config:c,stream:false,requiresTools:false,capabilityRequirements:{requiresTools:false,externalResearch:false}});
  if(result?.status&&result.status!=='success'&&result.status!=='fallback')throw fail('BROWSER_MODEL_FAILED','Model generation failed: '+clean(result?.error?.message||result.status,300));
  return{text:clean(result?.outputText||result?.text,24000),result,route:provider(request)||'configured-provider'};
 }
@@ -137,12 +138,12 @@ async function run(request,context={}){
  if(offDevice)await approve(request,'share-browser-evidence-with-model',firstTool,{url:initialUrl,query:initialQuery});
  let current=await invoke(request,firstTool,initialUrl?{url:initialUrl}:{query:initialQuery},known);
  evidence.push(current);trace.push({tool:firstTool,status:'success',mode:current.sourceType});
- let answer='',finalResult=null,steps=1;
+ let answer='',finalResult=null,steps=1;const generations=[];
  const maximum=Math.max(1,Math.min(MAX_STEPS,Number(config.maxSteps)||3));
  const visited=new Set([firstTool+':'+(initialUrl||initialQuery)]);
  while(steps<maximum){
    const output=await generate(request,researchPrompt(request,evidence),context,{budget:400});
-   finalResult=output.result||finalResult;
+   generations.push(output);finalResult=output.result||finalResult;
    const choice=parseDecision(output.text);
    if(!choice||choice.tool==='finish'){answer=clean(choice?.answer,16000);break}
    const tool=clean(choice.tool,80),args=choice.arguments&&typeof choice.arguments==='object'?choice.arguments:{};
@@ -160,10 +161,19 @@ async function run(request,context={}){
     {role:'user',content:'QUESTION: '+clean(config.question||request.prompt||request.context?.userMessage||'',4000)+'\nSOURCES: '+clean(safeJson(sourceList(evidence)),4000)+'\nEVIDENCE: '+clean(safeJson(evidence),14000)}
    ];
    const final=await generate(request,messages,context,{budget:950});
-   finalResult=final.result||finalResult;answer=clean(final.text,16000);
+   generations.push(final);finalResult=final.result||finalResult;answer=clean(final.text,16000);
  }
  const sources=sourceList(evidence);
- const result={...(finalResult||{}),schema:'civweave-model-result-1.0',purpose:clean(request.purpose,160)||'browser-research',status:'success',outputText:answer,outputJson:null,requested:finalResult?.requested||{provider:deviceModel(request)?'downloaded-local':provider(request)||'configured',model:clean(request.config?.model,160)},actual:finalResult?.actual||{provider:deviceModel(request)?'downloaded-local+browser-tools':provider(request)||'configured'},browserResearch:{schema:'civweave.ai-browser-research.v1',actorId:actor(request),sessionId:session(request),mode,sources,trace,steps:trace.length,networkPermissionRequired:mode==='live',modelSharePermissionRequired:offDevice}};
+ const totals=generations.reduce((acc,item)=>{
+  const usage=item.result?.usage||{},metrics=item.localMetrics||{};
+  acc.inputTokens+=Number(usage.inputTokens??metrics.promptTokens??0)||0;
+  acc.outputTokens+=Number(usage.outputTokens??metrics.generatedTokens??0)||0;
+  acc.costCents+=Number(usage.costCents??0)||0;
+  acc.generationMs+=Number(item.result?.timing?.generationMs??metrics.generationMs??0)||0;
+  return acc;
+ },{inputTokens:0,outputTokens:0,costCents:0,generationMs:0});
+ const usage={inputTokens:totals.inputTokens,outputTokens:totals.outputTokens,totalTokens:totals.inputTokens+totals.outputTokens,costCents:deviceModel(request)?0:generations.some(x=>x.result?.usage?.costCents!=null)?totals.costCents:null,remainingCents:finalResult?.usage?.remainingCents??null};
+ const result={...(finalResult||{}),schema:'civweave-model-result-1.0',requestId:finalResult?.requestId||'ai-browser-'+Date.now().toString(36),usage,timing:finalResult?.timing||{completedAt:new Date().toISOString(),generationMs:totals.generationMs},events:finalResult?.events||[],diagnostics:[...(finalResult?.diagnostics||[]),{code:'AI_BROWSER_RESEARCH',message:'Read-only, permission-scoped browser research with explicit source provenance.'}],stream:finalResult?.stream||{requested:false,used:false},structured:finalResult?.structured||{requested:false,valid:true,repairAttempts:0},purpose:clean(request.purpose,160)||'browser-research',status:'success',outputText:answer,outputJson:null,requested:finalResult?.requested||{provider:deviceModel(request)?'downloaded-local':provider(request)||'configured',model:clean(request.config?.model,160)},actual:finalResult?.actual||{provider:deviceModel(request)?'downloaded-local+browser-tools':provider(request)||'configured'},browserResearch:{schema:'civweave.ai-browser-research.v1',actorId:actor(request),sessionId:session(request),mode,sources,trace,steps:trace.length,networkPermissionRequired:mode==='live',modelSharePermissionRequired:offDevice}};
  try{globalThis.dispatchEvent?.(new CustomEvent('civweave:ai-browser-research',{detail:{actorId:actor(request),sessionId:session(request),mode,sourceCount:sources.length,stepCount:trace.length}}))}catch{}
  return result;
 }
