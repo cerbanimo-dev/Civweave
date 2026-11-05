@@ -3,6 +3,12 @@ on:
   pull_request:
     paths:
       - 'public/app/shared/worldweaver-core-v1.mjs'
+      - 'public/app/shared/worldweaver-ai-roles-v1.mjs'
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/new-user-onboarding-v1.js'
+      - 'public/app/new-user-onboarding-v1.css'
+      - 'scripts/test-worldweaver-ai-roles-v1.mjs'
+      - 'scripts/test-worldweaver-ai-setup-v1.mjs'
       - 'public/app/shared/worldweaver-screen-v1.mjs'
       - 'public/app/shared/worldweaver-map-2d-v1.mjs'
       - 'public/app/shared/worldweaver-opensim-geometry-v1.mjs'
