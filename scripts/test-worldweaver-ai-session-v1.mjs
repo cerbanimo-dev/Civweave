@@ -103,3 +103,9 @@ test('Local-only never sends to remote provider despite a saved cloud key',async
   await assert.rejects(session.propose(request),/local model|local rules/i);
   assert.equal(calls.length,0);
 });
+
+test('An explicit zero budget cannot be promoted to the default spending allowance',async()=>{
+  const {session,calls}=fixture({budget:{maxCalls:0,maxReservedUsd:0}});
+  await assert.rejects(session.propose(request),/budget|limit/i);
+  assert.equal(calls.length,0);
+});
