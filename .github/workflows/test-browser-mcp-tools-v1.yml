@@ -1,0 +1,25 @@
+name: Browser MCP Tools
+
+on:
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'cloudflare/node-cloud/src/browser-tool-entry-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v3.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v6.mjs'
+      - 'cloudflare/node-cloud/wrangler.staging.jsonc'
+      - 'scripts/test-browser-mcp-tools-v1.mjs'
+      - '.github/workflows/test-browser-mcp-tools-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  browser-mcp-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run browser MCP contract tests
+        run: node --test scripts/test-browser-mcp-tools-v1.mjs
