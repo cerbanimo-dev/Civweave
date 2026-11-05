@@ -378,5 +378,6 @@ function frame(t){
 }
 document.addEventListener('visibilitychange',()=>{previous=0;});
 addEventListener('pagehide',()=>{stopped=true;});
+addEventListener('pageshow',()=>{if(stopped){stopped=false;previous=0;requestAnimationFrame(frame);}});
 orientation();requestAnimationFrame(frame);
 say('Welcome to the fictionalized Digital Y. Aster at reception can introduce the first quest. Use the 2D buttons for accessible fast travel.');
