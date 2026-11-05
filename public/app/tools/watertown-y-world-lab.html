@@ -1,0 +1,65 @@
+<!doctype html><html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Digital Y · Worldweaver schedule screens prototype</title>
+<style>
+:root{color-scheme:light;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#edf5f4;color:#102f38}
+*{box-sizing:border-box}body{margin:0}
+header{background:#003f52;color:white;padding:22px clamp(15px,3vw,40px)}
+header h1{margin:4px 0;font-size:clamp(25px,2.7vw,40px)}
+header p{margin:8px 0;color:#dcf4f6}
+header a{color:#a8ebec}
+main{display:grid;grid-template-columns:minmax(280px,40%) minmax(0,60%);gap:18px;padding:20px;max-width:1900px;margin:auto}
+section{background:#fff;border-radius:15px;border:2px solid #b8d2d5;padding:20px;min-width:0}
+h2{font-size:clamp(20px,1.8vw,28px);margin:0 0 10px}
+.intro{font-size:16px;line-height:1.5}
+.plan{position:relative;aspect-ratio:1.27;width:100%;min-height:300px;background:#dbe7e5;border:5px solid #45656b;border-radius:9px;overflow:hidden;margin:20px 0}
+.plan::before{content:"";position:absolute;left:42%;top:7%;height:88%;border-left:5px solid #749096}
+.plan::after{content:"";position:absolute;top:58%;left:6%;width:90%;border-top:5px solid #749096}
+.area{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;padding:9px;font-weight:800;font-size:clamp(13px,1.1vw,18px);color:#334f57;pointer-events:none}
+.area.lobby{top:58%;left:5%;width:37%;height:35%}
+.area.cardio{top:6%;left:5%;width:37%;height:46%}
+.area.spin{top:6%;left:45%;width:49%;height:46%}
+.area.yoga{top:61%;left:46%;width:49%;height:30%}
+.mark{position:absolute;z-index:2;background:white;color:#003e51;border:3px solid #086579;border-radius:10px;cursor:pointer;font:800 clamp(12px,1.25vw,18px) system-ui;min-width:120px;min-height:56px;padding:8px 10px;box-shadow:0 2px 5px #0002}
+.mark[aria-pressed=true]{background:#005f73;color:white;border-color:#013b47}
+.mark:focus-visible{outline:4px solid orange;outline-offset:2px}
+.mark.lobby{left:8%;bottom:10%}.mark.cardio{left:8%;top:26%}.mark.spin{right:8%;top:25%}.mark.yoga{right:8%;bottom:13%}
+.legend{font-size:14px;color:#56707a}
+#selection{font-weight:900;font-size:22px}
+#message{font-size:15px;padding:12px;background:#e7f3f4;border-radius:8px;line-height:1.5}
+#casted{background:#f7fbfc;border:1px solid #b4cdd1;border-radius:8px;padding:12px;overflow:auto;white-space:pre-wrap;font:12px ui-monospace,monospace;max-height:180px}
+#stage{min-height:550px}
+#stage>.cw-worldweaver-screen{width:100%;max-width:none}
+.cw-worldweaver-screen h3{font-size:20px;margin:8px 0}
+.cw-worldweaver-screen iframe{display:block;width:100%;height:min(70vh,850px);min-height:510px;background:white;border:2px solid #93b4bc;border-radius:9px}
+.cw-worldweaver-screen p{font-size:14px;color:#526a73}
+.cw-worldweaver-screen>a{display:inline-block;padding:8px}
+.noscreen{padding:30px;border:2px dashed #95b7be;border-radius:10px;line-height:1.5}
+a{color:#04577b}
+@media(max-width:960px){main{grid-template-columns:1fr}.plan{max-width:700px;margin:15px auto}.cw-worldweaver-screen iframe{height:70vh;min-height:570px}}
+@media(max-width:480px){.mark{min-width:99px;font-size:12px;min-height:48px}.plan{min-height:270px}.area{font-size:12px}section{padding:14px}}
+</style>
+</head>
+<body>
+<header><div>WORLDWEAVER · DEMONSTRATION MICROSPACE</div><h1>Watertown Family YMCA · Digital schedule screens</h1>
+<p>Four locally simulated signage locations using Worldweaver's existing authorized screen-cast protocol, not a live YMCA deployment.</p>
+<p><a href="./watertown-y-schedule-v2.html">Open the standalone schedule kiosk</a> · <a href="./worldweaver-screen-lab.html">Worldweaver Screen Lab</a></p></header>
+<main>
+<section aria-labelledby="planTitle"><h2 id="planTitle">Choose a screen location</h2>
+<p class="intro">This is a <strong>schematic signage plan</strong>, not a measured floor plan of the actual facility. Select a labeled display to see its schedule.</p>
+<div class="plan" role="group" aria-label="Schematic room layout with four interactive schedule displays">
+<div class="area lobby">Reception / Lobby</div><div class="area cardio">Cardio zone</div><div class="area spin">Spin zone</div><div class="area yoga">Yoga zone</div>
+<button type="button" class="mark lobby" data-site="entrance" aria-pressed="true">Lobby board</button>
+<button type="button" class="mark cardio" data-site="cardio" aria-pressed="false">Cardio door</button>
+<button type="button" class="mark spin" data-site="spin" aria-pressed="false">Spin door</button>
+<button type="button" class="mark yoga" data-site="yoga" aria-pressed="false">Yoga door</button></div>
+<p class="legend">Placement positions are provisional until the real YMCA layout is approved and surveyed. All schedule data is explicitly dated November 2026.</p>
+<p id="message" role="status" aria-live="polite">Initializing local simulation…</p>
+<h2>Worldweaver screen state</h2><pre id="casted" aria-label="Current authorized screen manifests"></pre>
+</section>
+<section aria-labelledby="screenTitle"><h2 id="screenTitle">Lobby schedule</h2><div id="selection">All studios · Now & Next</div>
+<p class="intro">The schedule below is displayed using the shared Worldweaver screen presenter. Inside the world it runs in a restricted iframe without additional browser privileges.</p>
+<div id="stage"></div>
+</section>
+</main>
+<script type="module" src="./watertown-y-world-lab-v1.mjs"></script></body></html>
