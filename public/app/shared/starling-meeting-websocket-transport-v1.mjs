@@ -44,7 +44,11 @@ export function createStarlingMeetingWebSocketTransport({gateway,authorizeUpgrad
       if(room.get(identity.actorId)===member){
         room.delete(identity.actorId);
         const result=await dispatch('leave');
-        if(result.ok)broadcast(room,{type:'meeting.state',state:result.state,events:result.events});
+        if(result.ok){
+          broadcast(room,{type:'meeting.state',state:result.state,events:result.events});
+          if((result.events||[]).some(e=>e.type==='floor.revoked'))
+            broadcast(room,{type:'speech.stop',reason:'participant-disconnected',seq:result.state.seq});
+        }
         if(!room.size)rooms.delete(sessionId);
       }
     };
