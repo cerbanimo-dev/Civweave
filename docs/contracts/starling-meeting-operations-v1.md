@@ -6,7 +6,7 @@ Target integration branch: `staging`. Intended first meeting: November 11, 2026.
 
 `lib/starling-meeting-operations.mjs` is a deterministic, offline-first event-record core. It does not own a chat UI, live audio, turns, model routing, Quest execution, voting governance, or hosted persistence.
 
-- Thread 2 is the sole source of `speech.committed` events. Partial ASR, silent listening, inner model messages, and speculative replies are never transcript entries.
+- Thread 2 is the sole source of `speech.committed` events through `lib/starling-meeting-live-adapter.mjs`. Partial ASR, silent listening, inner model messages, and speculative replies are never transcript entries.
 - Thread 3 maps provider-specific model identities to stable meeting participant IDs, without importing model-private memory without explicit consent.
 - Thread 4 presents a projection of these records; the 3D environment is not their functional owner.
 - Thread 1 owns integration with the existing local object mesh, canonical Quest engine (`public/app/cerbanimo-quest-engine-v144.js`) and voting gate (`public/app/proposal-voting-gate-v2.js`), deployment, and audit.
@@ -42,6 +42,6 @@ Each event ID is idempotent. A committed turn ID is also idempotent. Proposals a
 3. A human explicitly approves a proposed decision before any Quest handoff; the canonical Quest engine validates and persists the actual Quest separately.
 4. Projection is safe without network or models. Records from an offline client remain provisional until the mesh confirms provenance and ordering.
 5. Participants are informed when transcript recording is active and can use a non-recorded meeting mode; consent and retention remain integration blockers.
-6. Automated tests: `node --test scripts/test-starling-meeting-operations.mjs`.
+6. Transcript capture defaults to off. The live adapter requires committed, spoken, floor-granted turns; its caller must supply authenticated participant IDs and consent state from trusted runtime state, never the model message. This mapping is not itself authentication.\n7. Automated tests: `node --test scripts/test-starling-meeting-operations.mjs scripts/test-starling-meeting-live-adapter.mjs`.
 
 This foundation is **not** a deployed meeting service and does not claim to be a complete voting, transcript-sync, or Quest integration.
