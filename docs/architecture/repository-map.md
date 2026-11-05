@@ -159,6 +159,7 @@ The canonical ownership list lives in `docs/architecture/systems-of-practice.md`
 | Route authority | `public/app/system-routes-v227.js` |
 | Guide chat workspace | `public/app/guide-workspace-v242.js` |
 | Guide chat loader | `public/app/family-ai-loader-v105.js` |
+| Connected browser / PWA receiving / read-only AI browsing | `public/app/browser-connection-v1.js`; `public/app/shared/browser-connection-core-v1.mjs`; `public/app/browser-receiver-v1.html` |
 | Local AI inference | `public/app/local-ai/runtime-v266.js` |
 | Local AI bootstrap | `public/app/local-ai/bootstrap-v266.js` |
 | Private messaging | `public/app/civweave-private-messaging-v1.js` |
