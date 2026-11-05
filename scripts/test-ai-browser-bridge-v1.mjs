@@ -62,7 +62,7 @@ function setup({selected=true,allow=null,providerAnswer='{"tool":"finish","answe
 {
  const {api,state,ctx}=setup({selected:false,allow:()=>({allowed:true})});
  ctx.CivweaveBrowserMCPV1={async invoke(payload){state.live++;state.transport.push(payload);return{mode:'live',liveFetched:true,results:[{title:'Remote',url:'https://example.org/remote',text:'Content'}]}}};
- const runtime={async generate(request){state.remote++;return{status:'success',outputText:'{"tool":"finish","answer":"Remote evidence [1]."}',actual:{provider:'gemini'}}}};
+ const runtime={async generate(request){state.remote++;assert.equal(Object.hasOwn(request,'browserResearch'),false,'browser grants must never be passed to model providers');return{status:'success',outputText:'{"tool":"finish","answer":"Remote evidence [1]."}',actual:{provider:'gemini'}}}};
  const request=api.createRequest({config:{provider:'gemini'},prompt:'Find sources'},{mode:'live',query:'civic studies',role:'gemini-actor',sessionId:'browser-session',grantId:'user-grant'});
  const result=await api.run(request,{baseRuntime:runtime});
  assert.equal(result.outputText,'Remote evidence [1].');
@@ -82,10 +82,12 @@ function setup({selected=true,allow=null,providerAnswer='{"tool":"finish","answe
  const {api,state,ctx}=setup({selected:false,allow:()=>true});
  ctx.CivweaveBrowserMCPV1={async invoke(payload){state.live++;state.transport.push(payload);return{mode:'live',liveFetched:true,results:[{title:'Observed',url:'https://example.org/observed',text:'Relevant source'}]}}};
  let generation=0;
- const runtime={async generate(){generation++;return{status:'success',outputText:generation===1?'{"tool":"browser.read","arguments":{"url":"https://example.org/observed"}}':'{"tool":"finish","answer":"Compared the two steps."}'}}};
+ const runtime={async generate(request){generation++;assert.equal(Object.hasOwn(request,'browserResearch'),false);return{status:'success',usage:{inputTokens:10,outputTokens:5,costCents:2},outputText:generation===1?'{"tool":"browser.read","arguments":{"url":"https://example.org/observed"}}':'{"tool":"finish","answer":"Compared the two steps."}'}}};
  const request=api.createRequest({config:{provider:'openai'},prompt:'Compare'},{mode:'live',role:'loom',sessionId:'loom-tab',grantId:'grant-3',query:'compare sources',maxSteps:3});
  const result=await api.run(request,{baseRuntime:runtime});
  assert.equal(result.outputText,'Compared the two steps.');
+ assert.equal(result.usage.totalTokens,30,'aggregate all planning and answer calls');
+ assert.equal(result.usage.costCents,4,'aggregate declared provider costs');
  assert.deepEqual(state.transport.map(x=>x.name),['browser.search','browser.read']);
  assert.deepEqual(state.perm.map(x=>x.operation),['share-browser-evidence-with-model','live-browser','share-browser-evidence-with-model','live-browser']);
  assert.equal(state.perm[2].targetUrl,'https://example.org/observed','a second URL must be reauthorized before off-device evidence sharing');
