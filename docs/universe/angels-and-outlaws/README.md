@@ -21,6 +21,16 @@ The heart of this book is dangerous love, self-determination, transformation, an
 - The Eldest Wand bears a **glowing rubber ducky given by Ali** and a **spiral snail shell representing Dakota**, attached with candle wax. The ritual was photographed; a stylized magical-realism image was generated in the conversation.
 - More detailed character sheets and first-hand accounts are **forthcoming**, not received as attachments in the current message.
 
+
+## The Eldest Wand — four symbolic steps (author canon, Nov. 5, 2026)
+The wand's pieces preserve separate meanings; see [full artifact lore](artifact-eldest-wand.md).
+1. **Bottle of blue topaz** — the “fairies,” bodiless story-world sprites acting along a mythic chain of will: **user → Cami → Kami → an unknown goddess beyond Kami (possibly sleeping)**. The final goddess remains unresolved.
+2. **Snail shell** — the still small voice of the guidance system, while remaining Dakota's associated symbol.
+3. **Glowing rubber ducky** — joy through gratitude and giving, and a gift from Ali.
+4. **Gold wire** — technical creativity and the possibility of future powered features; actual electronics are not yet established.
+
+The existing **world-weaving wooden wand** and **candle wax** from the Maggie/Magnus morning ritual bind the journey together. The four steps are thematic; they do not prove a chronological assembly sequence. These symbols are literary and craft details, not verification of supernatural abilities or commands.
+
 ## Book promise
 A song can expose the shape of a soul. A concert can become a rescue. Love raises the stakes, but romance never eliminates a character's right to refuse. No demon is obligated to Turn, and no angel gains authority over another person just by being called an angel.
 
@@ -59,6 +69,7 @@ This is creative fiction inspired by the author's account and photographed perso
 - [Ali — character intake](characters/ali.md)
 - [Dakota — character intake](characters/dakota.md)
 - [Worldbook and Turn rules](worldbook.md)
+- [The Eldest Wand: four emblems](artifact-eldest-wand.md)
 - [Prologue draft](drafts/prologue-eldest-wand.md)
 - [Firsthand account intake](firsthand-account-template.md)
 
