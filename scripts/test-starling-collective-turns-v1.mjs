@@ -166,3 +166,25 @@ test('PvE continuation excludes generic deliberation and a different Quest line'
  assert.equal(third.messages.some(m=>m.content.includes('red tower')),false);
  assert.match(third.messages.at(-1).content,/fictional PvE/);
 });
+
+
+test('storyline projection groups only signed PvE turns by exact Quest and exposes handoffs',async()=>{
+ const {service,model,rows}=makeHarness();
+ model.generate=async req=>({status:'success',outputText:'SCENE: A gate opens.\nNEXT HOOK: Find the copper key.',actual:{provider:'ollama',model:'qwen'}});
+ await service.runOneTurn({guildId:'garden',personaId:'kami',questId:'quest-a',taskPrompt:'Fictional PvE encounter one'});
+ await service.runOneTurn({guildId:'garden',personaId:'rosa',questId:'quest-a',taskPrompt:'Fictional PvE encounter two'});
+ await service.runOneTurn({guildId:'garden',personaId:'sana',questId:'quest-b',taskPrompt:'Fictional PvE encounter three'});
+ await service.runOneTurn({guildId:'garden',personaId:'kit',taskPrompt:'Review garden scheduling'});
+ const turns=await service.readTurns({guildId:'garden',verifyReader:()=>true});
+ const lines=service.storylineTimeline(turns);
+ assert.equal(lines.length,2);
+ const a=lines.find(x=>x.questId==='quest-a');
+ assert.deepEqual(a.turns.map(x=>x.personaId),['kami','rosa']);
+ assert.equal(a.nextHook,'Find the copper key.');
+ assert.equal(a.handoffs[0].from,'kami');
+ assert.equal(a.handoffs[0].to,'rosa');
+ assert.equal(a.completionVerified,false);
+ rows[0].signature='bad';
+ const verified=await service.readTurns({guildId:'garden',verifyReader:()=>true});
+ assert.equal(service.storylineTimeline(verified).find(x=>x.questId==='quest-a').turns.length,1);
+});
