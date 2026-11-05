@@ -19,7 +19,11 @@ const id=(value,label)=>{
 };
 const endpointOriginPath=value=>{try{const url=new URL(value);return url.href.replace(/\/+$/,'')}catch{return''}};
 const estimateTokens=messages=>Math.ceil(messages.reduce((n,m)=>n+String(m.content||'').length,0)/4)+messages.length*12;
-const validBudget=(data,defaultValue,max)=>Number.isFinite(data)&&data>0?Math.min(data,max):defaultValue;
+const validBudget=(data,defaultValue,max)=>{
+  if(data===undefined)return defaultValue;
+  if(!Number.isFinite(data)||data<0)throw new RangeError('Budget values must be nonnegative numbers.');
+  return Math.min(data,max);
+};
 const fail=(message)=>{throw new Error('Worldweaver AI: '+message)};
 
 function rolePrompt(role,personaId,personaPrompt){
