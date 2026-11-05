@@ -111,3 +111,24 @@ test('player page offers evidence, mirror and share-link actions without second 
  assert.doesNotMatch(html,/<iframe/i);
  assert.doesNotMatch(html,/innerHTML\s*=/);
 });
+
+test('solved secret ending can be shared as a clean choice-only trail',()=>{
+ const game=walk(createStoryReplay(),route);
+ game.solveCase(proof);
+ const token=encodeReplayTrail(game);
+ assert.match(token,/reconcile-evidence$/);
+ const reconstructed=decodeReplayTrail(token);
+ assert.equal(reconstructed.view().ending,'bigfixer-first-accord');
+ assert.deepEqual(reconstructed.view().clues,game.view().clues);
+ assert.deepEqual(reconstructed.view().history,game.view().history);
+});
+
+test('restoring a solved puzzle strips untrusted proof metadata',()=>{
+ const game=walk(createStoryReplay(),route);
+ game.solveCase(proof);
+ const saved=game.snapshot();
+ saved.caseProof.privateNotes='not part of this scene';
+ const restored=createStoryReplay({initialState:saved});
+ assert.equal(restored.view().ending,'bigfixer-first-accord');
+ assert.equal(restored.snapshot().caseProof.privateNotes,undefined);
+});

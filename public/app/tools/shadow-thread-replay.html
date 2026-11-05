@@ -26,6 +26,8 @@ summary{cursor:pointer;font-weight:650}.meta{color:#cbbccc;font-size:.85rem}
 @media(prefers-reduced-motion:no-preference){.box{animation:appear .18s ease-out}@keyframes appear{from{opacity:.7;transform:translateY(4px)}to{opacity:1;transform:none}}}
 
 .portrait{max-height:100px;max-width:100px;object-fit:contain;background:#19121f;border-radius:10px;border:1px solid #6b5270}
+.portrait-crop{height:96px;width:96px;border-radius:12px;overflow:hidden;flex-shrink:0;border:1px solid #886582}
+.portrait.sprite{height:192px;width:192px;max-height:none;max-width:none;object-fit:fill;border:0;border-radius:0}
 .cast-entry{display:flex;gap:.7rem;align-items:center;margin:.6rem 0}
 .cast-entry span{display:block}
 #actor-select,#actor-note,#cast-file{background:#2b2132;border:1px solid #96778f;border-radius:9px;color:#fff5e8;font:inherit;padding:.5rem;max-width:100%}
@@ -197,7 +199,9 @@ function render(){
  for(const actor of resolveShadowThreadActors({castPacket})){
   const li=add($('actors'),'li','','cast-entry');
   if(actor.avatarRef){
-   const img=document.createElement('img');img.className='portrait';img.alt=actor.canonicalName+' original reviewed character artwork';img.loading='lazy';img.src=actor.avatarRef;li.append(img);
+   const img=document.createElement('img');img.className=actor.avatarSource==='existing-reviewed-sprite'?'portrait sprite':'portrait';
+   img.alt=actor.canonicalName+' original reviewed character artwork';img.loading='lazy';img.src=actor.avatarRef;
+   const frame=document.createElement('div');frame.className='portrait-crop';frame.append(img);li.append(frame);
   }
   add(li,'span',actor.canonicalName+' → '+actor.worldName+' ('+(actor.avatarResolved?'original asset linked':'awaiting existing original avatar')+')');
  }
@@ -286,7 +290,7 @@ function extractTrail(input){
 }
 $('share-path').addEventListener('click',async()=>{
  try{
-  const token=encodeReplayTrail(engine),url=new URL(location.href);url.searchParams.set('path',token);
+  const token=encodeReplayTrail(engine),url=new URL(location.pathname,location.origin);url.searchParams.set('path',token);
   $('shared-trail').value=url.href;
   if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(url.href);$('share-status').textContent='Replay link copied. Only your chosen path is included.';}
   else{$('shared-trail').focus();$('shared-trail').select();$('share-status').textContent='Select and copy the link. Clipboard permission is unavailable.';}
@@ -321,6 +325,9 @@ async function generateActorRound(all){
   const playerPrompt=$('actor-note').value.trim().slice(0,350);
   const results=all?await improviseShadowThreadRound({replay:engine,modelRuntime:runtime,castPacket,playerPrompt}):
    [await improviseShadowThreadActor({replay:engine,modelRuntime:runtime,castPacket,playerPrompt,actorId:$('actor-select').value})];
+  const current=engine.view();
+  if(results.some(item=>item.nodeId!==current.nodeId||item.sceneRevision!==current.revision))
+   throw new Error('The story changed before the actor finished. Its obsolete draft was discarded.');
   proposals.push(...results);proposals=proposals.slice(-9);
   renderProposals();
   $('model-status').textContent=results.length+' real model response(s) received, private and uncommitted. Scripted replay remains unchanged.';

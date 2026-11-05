@@ -70,8 +70,9 @@ export function createWorldweaverAISession({
   let spentCalls=0,estimatedInputTokens=0,reservedUsd=0;
   const memorySummary=()=>[...history.entries()].map(([scope,messages])=>({scope,messageCount:messages.length}));
   async function propose({
-    role,worldId,personaId='loom',actorPrompt='',worldContext='',scenePrompt='',maxOutputTokens
+    role,worldId,personaId='loom',actorPrompt='',worldContext='',scenePrompt='',maxOutputTokens,signal
   }={}){
+    if(signal?.aborted)return fail('request cancelled before model invocation.');
     if(!ROLES.has(role))throw new RangeError('Unknown Worldweaver role.');
     const owner=roles.roles[role];
     if(!owner.enabled)return fail('role '+role+' is not configured or not approved ('+owner.reason+').');
@@ -108,11 +109,21 @@ export function createWorldweaverAISession({
     // Reserve before the asynchronous call; failures still consume the reservation.
     spentCalls++;estimatedInputTokens+=promptTokens;reservedUsd+=estimateUsd;
     const result=await runtime.generate({
-      purpose:'worldweaver-'+role+'-proposal',executionProfile:'interactive',responseFormat:'text',
+      purpose:'worldweaver-'+role+'-proposal',executionProfile:'interactive',responseFormat:'text',signal,
       messages,maxOutputTokens:maxOutput,maxRepairAttempts:0,allowDeterministicFallback:false,
       config:{...config,maxTokens:maxOutput}
     });
-    if(result?.status!=='success')return fail(clip(result?.error?.message||('generation failed: '+(result?.status||'unknown')),200));
+    if(signal?.aborted)return fail('request cancelled; no fiction proposal committed.');
+    if(result?.status!=='success'){
+      // Provider error messages may echo a credential; strip the selected key
+      // before surfacing anything to the calling presentation.
+      const message=clip(result?.error?.message||('generation failed: '+(result?.status||'unknown')),200);
+      return fail(config.apiKey?message.replaceAll(config.apiKey,'[REDACTED]'):message);
+    }
+    // Never accept a silent paid-provider reroute, or a response whose
+    // originating model is unknown. The shared runtime reports actual IDs.
+    if(result?.actual?.provider!==config.provider||result?.actual?.model!==config.model||result?.fallback?.used)
+      return fail('unverified provider or model identity; the proposal was rejected.');
     const text=clip(result.outputText,12000);
     if(!text)return fail('model returned an empty proposal.');
     history.set(scope,[...previous,{role:'user',content:scene},{role:'assistant',content:text}].slice(-8));

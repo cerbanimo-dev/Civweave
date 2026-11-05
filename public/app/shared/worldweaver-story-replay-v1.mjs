@@ -633,7 +633,7 @@ export function createStoryReplay({packet=SHADOW_THREAD_REPLAY,initialState=null
    const node=packet.nodes[state.currentNodeId];
    if(node.caseboard?.choiceId===entry.choiceId&&sameEvidence(initialState.caseProof?.clues,node.caseboard.requiredClues)&&
       initialState.caseProof?.nodeId===state.currentNodeId&&node.caseboard.requiredClues.every(c=>state.clues.includes(c)))
-     state.caseProof=copy(initialState.caseProof);
+     state.caseProof={nodeId:state.currentNodeId,clues:[...node.caseboard.requiredClues]};
    advance(state,entry.choiceId,packet);
    if(entry.to!==state.currentNodeId||entry.from!==previous)throw new TypeError('Saved story path was modified');
   }

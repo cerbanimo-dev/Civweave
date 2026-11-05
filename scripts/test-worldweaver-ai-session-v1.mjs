@@ -10,7 +10,7 @@ function fixture(options={}){
   const calls=[];
   const runtime={generate:async request=>{
     calls.push(structuredClone(request));
-    return{status:'success',outputText:'Spoken fiction.',usage:{promptTokens:12,completionTokens:8}};
+    return{status:'success',outputText:'Spoken fiction.',actual:{provider:request.config.provider,model:request.config.model},usage:{promptTokens:12,completionTokens:8}};
   }};
   const session=createWorldweaverAISession({
     runtime,readProviderConfig:name=>keys[name],mode:'binary',
@@ -108,4 +108,40 @@ test('An explicit zero budget cannot be promoted to the default spending allowan
   const {session,calls}=fixture({budget:{maxCalls:0,maxReservedUsd:0}});
   await assert.rejects(session.propose(request),/budget|limit/i);
   assert.equal(calls.length,0);
+});
+
+test('Worldweaver rejects a successful response from any other provider or model',async()=>{
+  for(const actual of [
+    {provider:'gemini',model:'gpt-6-luna'},
+    {provider:'openai-compatible',model:'different-model'},
+    undefined
+  ]){
+    let count=0;
+    const {session}=fixture({runtime:{generate:async()=>{
+      count++;return{status:'success',outputText:'Unverified response',actual};
+    }}});
+    await assert.rejects(session.propose({...request,role:'loom'}),/provider|identity|model|unverified/i);
+    assert.equal(count,1);
+    assert.deepEqual(session.memorySummary(),[]);
+  }
+});
+
+test('aborted playtest requests do not call a provider or append character memory',async()=>{
+  const controller=new AbortController();
+  controller.abort('end-session');
+  const {session,calls}=fixture();
+  await assert.rejects(session.propose({...request,signal:controller.signal}),/cancelled|aborted/i);
+  assert.equal(calls.length,0);
+  assert.deepEqual(session.memorySummary(),[]);
+});
+test('abort signal is passed to canonical runtime, and a result after cancellation is discarded',async()=>{
+  const controller=new AbortController();let received=null;
+  const {session}=fixture({runtime:{generate:async payload=>{
+    received=payload.signal;
+    controller.abort('user-ended-session');
+    return{status:'success',outputText:'Should never render',actual:{provider:'gemini',model:'gemini-3.7-flash'}};
+  }}});
+  await assert.rejects(session.propose({...request,signal:controller.signal}),/cancelled|aborted/i);
+  assert.equal(received,controller.signal);
+  assert.deepEqual(session.memorySummary(),[]);
 });
