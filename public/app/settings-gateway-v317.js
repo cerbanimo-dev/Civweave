@@ -64,6 +64,32 @@ function existingKey(provider){
   }
   return '';
 }
+function readWorldweaverProviderConfig(provider){
+  if(!['openai','gemini','local'].includes(provider))throw new RangeError('Worldweaver provider is not supported.');
+  if(provider==='local'){
+    const state=readState();
+    if(!['downloaded-local','ollama','openai-compatible'].includes(state.route)
+      ||(state.route==='openai-compatible'&&!/^https?:\\/\\/(localhost|127\\.|\\[::1\\])/i.test(state.endpoint)))return null;
+    return{provider:state.route,model:state.model,endpoint:state.endpoint,externalConsent:false};
+  }
+  const route=provider==='openai'?'openai-compatible':'gemini';
+  const vault=parse(getSession(PROVIDER_VAULT_KEY),{});
+  const saved=vault[route]||{};
+  const state=readState();
+  const selected=state.route===route?state:null;
+  const endpoint=String(saved.endpoint||selected?.endpoint||(provider==='openai'?OPENAI_ENDPOINT:GEMINI_ENDPOINT)).trim();
+  const model=String(saved.model||selected?.model||(provider==='openai'?OPENAI_MODEL:GEMINI_SMALL)).trim();
+  const apiKey=String(saved.apiKey||existingKey(route)).trim();
+  const externalConsent=Boolean(saved.externalConsent??(selected?.consent||false));
+  if(!apiKey)return null;
+  return{provider:route,endpoint,model,apiKey,externalConsent};
+}
+function worldweaverConnections(){
+  return ['openai','gemini'].filter(provider=>{
+    const cfg=readWorldweaverProviderConfig(provider);
+    return cfg?.apiKey&&cfg.externalConsent&&cfg.endpoint===(provider==='openai'?OPENAI_ENDPOINT:GEMINI_ENDPOINT);
+  });
+}
 function credentialStatus(){const remembered=Boolean(persistentRecord()),vault=parse(getSession(PROVIDER_VAULT_KEY),{}),session=Boolean(parse(getSession(SESSION_KEY),{}).apiKey||parse(getSession(SECRET_KEY),{}).interactive?.apiKey||Object.values(vault).some(row=>row?.apiKey));return{remembered,session,mode:remembered?'device':'session',revision:CREDENTIAL_REVISION,openai:Boolean(existingKey('openai-compatible')),gemini:Boolean(existingKey('gemini'))}}
 function credentialMode(){return credentialStatus().remembered||getLocal(POLICY_KEY)==='device'?'device':'session'}
 function forgetCredential(provider){
@@ -123,7 +149,7 @@ function selectTab(form,name){for(const button of form.querySelectorAll('[data-s
 function updateWorldModeStatus(form){
   const mode=byName(form,'worldMode')?.value||readWorldMode(),node=form.querySelector('[data-world-mode-status]');
   if(!node)return;
-  const cloud=credentialStatus();
+  const cloud={openai:worldweaverConnections().includes('openai'),gemini:worldweaverConnections().includes('gemini')};
   node.textContent=mode==='binary'?
     (cloud.openai&&cloud.gemini?'Both provider keys entered. Worldweaver binary role dispatch still needs runtime connection.':'Binary requires both providers: '+(!cloud.openai?'OpenAI API key ':'')+(!cloud.gemini?'Gemini API key':'')+'. No silent fallback.') :
     mode==='multiverse'?'Multiverse roles: OpenAI = Loom; Gemini = cast; DeepSeek = Architect; Grok = Lari. DeepSeek and Grok remain behind testing and explicit consent.' :
@@ -283,7 +309,7 @@ function persist(state){
   setLocal(SETTINGS_KEY,JSON.stringify(stored));
   setLocal(PROFILES_KEY,JSON.stringify({interactive,agentic,agenticEnabled,version:APP_VERSION,settingsOwner:VERSION,credentialRevision:CREDENTIAL_REVISION,...(agentic?{geminiRouting:GEMINI_ROUTING}:{})}));
   setLocal(SAFE_MODE_KEY,JSON.stringify({enabled:Boolean(state.safeMode),updatedAt:now,source:'settings-v324'}));
-  if(!['deterministic','downloaded-local','server-auto'].includes(state.route)){if(state.apiKey){const vault=parse(getSession(PROVIDER_VAULT_KEY),{});vault[state.provider]={apiKey:state.apiKey,savedAt:now};setSession(PROVIDER_VAULT_KEY,JSON.stringify(vault))}removeSession(SECRET_KEY);const packet={apiKey:state.apiKey,remoteConsent:Boolean(state.consent),provider:state.provider,savedAt:now,settingsOwner:VERSION,credentialRevision:CREDENTIAL_REVISION};setSession(SESSION_KEY,JSON.stringify(packet));if(state.credentialMode==='device'&&state.apiKey){setLocal(PERSIST_KEY,JSON.stringify({schema:'civweave.device-model-secret.v191',apiKey:state.apiKey,provider:state.provider,savedAt:now,settingsOwner:VERSION}));removeLocal(LEGACY_PERSIST_KEY);setLocal(POLICY_KEY,'device')}else{removeLocal(PERSIST_KEY);removeLocal(LEGACY_PERSIST_KEY);setLocal(POLICY_KEY,'session')}}
+  if(!['deterministic','downloaded-local','server-auto'].includes(state.route)){if(state.apiKey){const vault=parse(getSession(PROVIDER_VAULT_KEY),{});vault[state.provider]={apiKey:state.apiKey,endpoint:state.endpoint,model:state.model,externalConsent:Boolean(state.consent),savedAt:now};setSession(PROVIDER_VAULT_KEY,JSON.stringify(vault))}removeSession(SECRET_KEY);const packet={apiKey:state.apiKey,remoteConsent:Boolean(state.consent),provider:state.provider,savedAt:now,settingsOwner:VERSION,credentialRevision:CREDENTIAL_REVISION};setSession(SESSION_KEY,JSON.stringify(packet));if(state.credentialMode==='device'&&state.apiKey){setLocal(PERSIST_KEY,JSON.stringify({schema:'civweave.device-model-secret.v191',apiKey:state.apiKey,provider:state.provider,savedAt:now,settingsOwner:VERSION}));removeLocal(LEGACY_PERSIST_KEY);setLocal(POLICY_KEY,'device')}else{removeLocal(PERSIST_KEY);removeLocal(LEGACY_PERSIST_KEY);setLocal(POLICY_KEY,'session')}}
   const status=credentialStatus();
   try{dispatchEvent(new CustomEvent('civweave:safe-mode-changed',{detail:{enabled:Boolean(state.safeMode),source:'settings-v324',at:now}}))}catch{}
   dispatchEvent(new CustomEvent('civweave:model-settings-saved',{detail:{version:VERSION,credentialRevision:CREDENTIAL_REVISION,appVersion:APP_VERSION,route:state.route,interactive,agentic,agenticEnabled,geminiRouting:agentic?GEMINI_ROUTING:'',hasSessionKey:Boolean(state.apiKey),hasRememberedKey:status.remembered,credentialPersistence:status.remembered?'device':'session',safeMode:Boolean(state.safeMode),savedAt:now}}));
@@ -463,7 +489,7 @@ function openForProvider(provider,launcher){
 function ensure(){build();return Promise.resolve(true)}
 function onClick(event){const target=event.target instanceof Element?event.target.closest(SELECTOR):null;if(!target||target.closest(`#${LAYER_ID}`))return;event.preventDefault();event.stopImmediatePropagation();open(target)}
 const previous=globalThis[INPUT_SLOT];if(previous&&typeof previous==='function')document.removeEventListener('click',previous,true);document.addEventListener('click',onClick,true);globalThis[INPUT_SLOT]=onClick;
-const api=Object.freeze({version:VERSION,selectLocalModel,authority:'settings-v320',selector:SELECTOR,open,close,ensure,ensureManagement,ensureSettingsUI,readState,readWorldMode,saveWorldMode,worldMode:readWorldMode,needsAISetup,openForProvider,chooseLocalOnly,providerName,isRetired,restoreRememberedCredential,forgetCredential,credentialStatus,currentLanguage,persistLanguage,chooseLanguage,inputOwner:true,presentationOwner:true,credentialOwner:true,singleMenu:true,singleLauncherListener:true,languageBuiltIn:true,localModelExtensionSlot:true,localModelManagementExplicit:true,localModelManagementOnTab:true,localModelViewDirect:true,localModelLifecycleDependency:false,localModelRegistryDependencyOnView:false,localModelManagerDependencyOnView:false,localModelRouteSelfLoading:true,settingsOpenUiOnly:true,settingsTabsCanonical:true,geminiPresetsBuiltIn:true,geminiSmallModel:GEMINI_SMALL,geminiComplexModel:GEMINI_COMPLEX,legacyPresentationOwners:false,launchWork:'none'});
+const api=Object.freeze({version:VERSION,selectLocalModel,authority:'settings-v320',selector:SELECTOR,open,close,ensure,ensureManagement,ensureSettingsUI,readState,readWorldMode,saveWorldMode,worldMode:readWorldMode,needsAISetup,openForProvider,chooseLocalOnly,readWorldweaverProviderConfig,worldweaverConnections,providerName,isRetired,restoreRememberedCredential,forgetCredential,credentialStatus,currentLanguage,persistLanguage,chooseLanguage,inputOwner:true,presentationOwner:true,credentialOwner:true,singleMenu:true,singleLauncherListener:true,languageBuiltIn:true,localModelExtensionSlot:true,localModelManagementExplicit:true,localModelManagementOnTab:true,localModelViewDirect:true,localModelLifecycleDependency:false,localModelRegistryDependencyOnView:false,localModelManagerDependencyOnView:false,localModelRouteSelfLoading:true,settingsOpenUiOnly:true,settingsTabsCanonical:true,geminiPresetsBuiltIn:true,geminiSmallModel:GEMINI_SMALL,geminiComplexModel:GEMINI_COMPLEX,legacyPresentationOwners:false,launchWork:'none'});
 globalThis.CivweaveSettingsV320=api;
 addEventListener('civweave:local-model-selection',event=>{
   if(event.detail?.source==='settings-v320')return;
