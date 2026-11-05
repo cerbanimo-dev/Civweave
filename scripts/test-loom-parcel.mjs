@@ -33,6 +33,8 @@ test('seed is lossless, exact, portable and small',async(t)=>{
   assert.equal(info.fileCount,4);
   assert.equal(info.chunkBytes,65536);
   assert.equal((await verify({out})).ok,true);
+  assert.match(await readFile(path.join(out,'loom-restore.mjs'),'utf8'),/export \{pack,verify,restore\}/);
+  execFileSync(process.execPath,[path.join(out,'loom-restore.mjs'),'verify','--out',out]);
   await restore({out,into});
   for(const p of ['README.md','AGENTS.md','docs/contracts/mobile-interface-contract.md','scripts/loom-parcel.mjs'])
     assert.deepEqual(await readFile(path.join(into,p)),f.files[p]);
