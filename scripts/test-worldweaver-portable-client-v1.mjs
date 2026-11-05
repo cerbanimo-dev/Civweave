@@ -55,12 +55,12 @@ for(const blueprint of [COMMONS_BETWEEN,LANTERN_MESH]){
     assert.equal(app.nodes['cw-room-list'].children.length,blueprint.rooms?.length||blueprint.districts?.length);
     app.nodes['cw-room-list'].children[1].click();
     assert.ok(app.nodes['cw-current-room'].textContent.length>0);
-    app.nodes['cw-quest-title'].value='Help the people here';
+    app.document.getElementById('cw-quest-title').value='Help the people here';
     app.nodes['cw-quest-form'].listeners.submit({preventDefault(){}});
     assert.equal(app.nodes['cw-quest-list'].children.length,1);
     const check=app.nodes['cw-quest-list'].children[0].children[0];
     check.checked=true;check.listeners.change();
-    app.nodes['cw-journal-text'].value='Personal observation';
+    app.document.getElementById('cw-journal-text').value='Personal observation';
     app.nodes['cw-journal-form'].listeners.submit({preventDefault(){}});
     app.tabs[2].click();
     assert.equal(app.nodes['cw-panel-journal'].hidden,false);
@@ -85,7 +85,7 @@ test('storage failure keeps an explicitly session-only client',()=>{
   const html=exportPortableUniverseHtml({id:'memory-test',title:'Test',rooms:[{id:'room',title:'Room'}]});
   const app=openOfflineFile(html,{storageAllowed:false});
   assert.match(app.nodes['cw-storage'].textContent,/Session only/);
-  app.nodes['cw-quest-title'].value='Unsaved work';
+  app.document.getElementById('cw-quest-title').value='Unsaved work';
   app.nodes['cw-quest-form'].listeners.submit({preventDefault(){}});
   assert.equal(app.nodes['cw-quest-list'].children.length,1);
 });
