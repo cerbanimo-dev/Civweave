@@ -32,3 +32,11 @@ The builder still creates draft Worldweaver rooms and stops before provisioning.
 This universe stays in one canonical `worldweaver-universe-v1.mjs` file. Do not add parallel compatibility universe modules. Replace and remove when a future version is intentionally adopted.
 
 The module and browser lab prohibit dynamic script insertion, `eval`, `new Function`, iframe compatibility bridges and runtime source patching.
+
+## Portable universe file rule
+
+Every distributed Worldweaver universe file MUST contain the whole working Civweave Portable client. `public/app/shared/worldweaver-portable-client-v1.mjs` is the single bundling owner, accepting both Commons-style `rooms` and Lantern-style `districts`. Its exported `.civweave.html` is a standalone, offline, single-file artifact with world data, semantic Guild Map/room navigation, local Quest drafts, private journal, cooperative PvE prompts, and JSON draft export/import. The export browser is `/app/tools/worldweaver-universe-files.html`.
+
+The source `.mjs` universe blueprints remain authoring modules, not distributable universe files. Do not distribute a naked `.mjs` blueprint as a playable universe. Do not fork a chat runtime, authentication, Guild state, official Quest ledger or world simulation in the portable presenter: any local progress is explicitly an unverified draft, and the authenticated Civweave owners remain authoritative. No remote assets, network calls, iframe shells, script injection or CDN dependencies may be required for a portable file.
+
+Run `npm run test:worldweaver` to exercise the portable-client contract together with both universe blueprints.

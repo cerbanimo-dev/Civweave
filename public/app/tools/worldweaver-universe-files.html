@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portable Civweave Universes</title>
+<style>
+:root{color-scheme:dark;font:16px system-ui;background:#07140e;color:#f1fff4}
+body{margin:0;background:linear-gradient(#0d2719,#07140e);min-height:100vh}main{max-width:960px;margin:auto;padding:30px 18px}
+h1{font-size:clamp(2rem,6vw,3.7rem)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+article{border:1px solid #4b8b65;border-radius:18px;background:#12291b;padding:22px}
+button{font:inherit;padding:13px;border-radius:12px;background:#3e9364;color:white;border:1px solid #9defb6;cursor:pointer}
+button:focus-visible{outline:3px solid #e5ffdf}p{line-height:1.5;color:#cadfce}small{display:block;margin-top:14px;color:#c6e0cd}
+</style></head><body><main>
+<p>Civweave / Worldweaver</p><h1>Take a universe with you</h1>
+<p>Each download is a single HTML file containing its universe, a working offline Civweave map, local Quest drafts, journal, PvE prompts, and progress export/import. No network required to open it.</p>
+<div class="grid">
+<article><h2>The Commons Between</h2><p>Explore the Threshold, Starling Commons, Living School, Quest Forge, FellowFare, Anarchadia, and Convergence Stage.</p><button id="commons" type="button">Download The Commons Between</button></article>
+<article><h2>The Lantern Mesh</h2><p>Visit Mosslight Academy, Quest Forge, FellowFare Night Market, and Anarchadia Assembly.</p><button id="lantern" type="button">Download The Lantern Mesh</button></article>
+</div>
+<small>The portable client records local drafts only. For authenticated Guild changes, official Quest completion, AI chat, or shared world state, use the installed Civweave app.</small>
+<p role="status" id="status"></p>
+</main><script type="module">
+import {COMMONS_BETWEEN} from '../shared/worldweaver-universe-v1.mjs';
+import {LANTERN_MESH} from '../shared/worldweaver-lantern-mesh-v1.mjs';
+import {exportPortableUniverseHtml} from '../shared/worldweaver-portable-client-v1.mjs';
+const worlds={commons:COMMONS_BETWEEN,lantern:LANTERN_MESH};
+for(const id of Object.keys(worlds)){
+  document.getElementById(id).addEventListener('click',()=>{
+    const w=worlds[id],html=exportPortableUniverseHtml(w);
+    const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+    const link=document.createElement('a');link.href=url;link.download=w.id+'.civweave.html';
+    document.body.append(link);link.click();link.remove();
+    document.getElementById('status').textContent='Created '+w.id+'.civweave.html — ready to open offline.';
+    setTimeout(()=>URL.revokeObjectURL(url),3000);
+  });
+}
+</script></body></html>
