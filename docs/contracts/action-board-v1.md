@@ -34,3 +34,7 @@ Run `node --test scripts/test-action-board-v1.mjs` (or `npm run test:action-boar
 - Integrate exact Quest selection into the canonical owner without creating a competing selection store.
 - Expose a capability- and resource-aware Ready engine to authorized AI callers.
 - Add recurring actions, weekly reviews, reference-material handoff, sync/export, and Guild workload views after data contracts and consent boundaries are reviewed.
+
+## Reviewed portable-universe imports
+
+The portable Worldweaver bridge delegates accepted local Quest steps to `CivweaveActionBoardV1.importPortableActions(bundle, approvedIds, verifiedScope)`. This is the **existing Action Board write owner**, not a new Quest creator. Only selected source drafts enter Inbox, always with `status:'inbox'` even when marked done inside the portable world. Each carries a bounded `portableOrigin` record (universe, source draft, source fingerprint, verified Guild/node scope and import time). Identical repeats are no-ops; same-source content changes are conflicts and do not overwrite the prior action. Journal notes go to the separate existing private mesh owner. Neither path edits `civweave.intentions.v127`, publishes to a Guild or asserts Quest proof.
