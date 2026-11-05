@@ -82,6 +82,16 @@ Living School is not a special case. It uses the same family-shell Settings cont
 
 Realm pages can expose realm-native navigation inside their content, but cross-system travel and shared family chrome belong to the family shell. Do not attach a second cross-system switcher to an embedded service.
 
+## Shared browser connection
+
+- Browser workspace owner: `public/app/browser-connection-v1.js`
+- Browser URL and MCP-style tool policy: `public/app/shared/browser-connection-core-v1.mjs`
+- Existing offline/Browser Run transport: `public/app/browser-tool-v1.js`
+- PWA inbound share route: `public/app/browser-receiver-v1.html`
+- Contract and validation: `docs/contracts/shared-browser-connection-v1.md`, `scripts/test-browser-connection-v1.mjs`
+
+The connected browser is a cross-system **capability**, not a chat owner or a replacement shell. It may prefill the canonical guide chat only after an explicit user action. Archived retrieval stays local. Live tool requests require explicit session permission and the existing authenticated node capacity session. The maintainer MCP bridge remains a separate private developer tool.
+
 ## Guide chat
 
 - Canonical chat surface: `public/app/guide-chat-surface-v350.js`
