@@ -1,0 +1,27 @@
+name: Starling Meeting Console
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/starling-meeting-console-v1.html'
+      - 'public/app/starling-meeting-console-v1.mjs'
+      - 'public/app/shared/starling-live-media-bridge-v1.mjs'
+      - 'public/app/shared/starling-live-turn-manager-v1.mjs'
+      - 'scripts/test-starling-meeting-console-v1.mjs'
+      - '.github/workflows/starling-meeting-console.yml'
+  pull_request:
+    paths:
+      - 'public/app/starling-meeting-console-v1.html'
+      - 'public/app/starling-meeting-console-v1.mjs'
+      - 'scripts/test-starling-meeting-console-v1.mjs'
+      - '.github/workflows/starling-meeting-console.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check public/app/starling-meeting-console-v1.mjs
+      - run: node --test scripts/test-starling-live-media-bridge-v1.mjs scripts/test-starling-live-turn-manager-v1.mjs scripts/test-starling-meeting-console-v1.mjs
