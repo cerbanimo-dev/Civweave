@@ -125,3 +125,23 @@ test('Worldweaver rejects a successful response from any other provider or model
     assert.deepEqual(session.memorySummary(),[]);
   }
 });
+
+test('aborted playtest requests do not call a provider or append character memory',async()=>{
+  const controller=new AbortController();
+  controller.abort('end-session');
+  const {session,calls}=fixture();
+  await assert.rejects(session.propose({...request,signal:controller.signal}),/cancelled|aborted/i);
+  assert.equal(calls.length,0);
+  assert.deepEqual(session.memorySummary(),[]);
+});
+test('abort signal is passed to canonical runtime, and a result after cancellation is discarded',async()=>{
+  const controller=new AbortController();let received=null;
+  const {session}=fixture({runtime:{generate:async payload=>{
+    received=payload.signal;
+    controller.abort('user-ended-session');
+    return{status:'success',outputText:'Should never render',actual:{provider:'gemini',model:'gemini-3.7-flash'}};
+  }}});
+  await assert.rejects(session.propose({...request,signal:controller.signal}),/cancelled|aborted/i);
+  assert.equal(received,controller.signal);
+  assert.deepEqual(session.memorySummary(),[]);
+});
