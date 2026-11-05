@@ -73,8 +73,11 @@ function unpack(provider,data){
  * Invoke only after the trusted host checks identity and issues a short-lived
  * proposal grant. Grant validation here is defense-in-depth, not authentication.
  */
-export async function proposeMeetingTurn(request,{fetchImpl=globalThis.fetch,timeoutMs=20000}={}){
+export async function proposeMeetingTurn(request,{fetchImpl=globalThis.fetch,timeoutMs=20000,signal,verifyProposalGrant}={}){
   authorize(request);
+  if(typeof verifyProposalGrant!=='function'||await verifyProposalGrant(request.grant,request)!==true)
+    throw fail('NOT_AUTHORIZED','Trusted host must verify the proposal grant.');
+  if(signal?.aborted)throw fail('MODEL_CANCELLED','Proposal was cancelled.');
   const provider=request.provider;
   const cfg=configFor(provider,request.config);
   const context=normalizeMeetingContext(request.events,request.participantId);
@@ -86,10 +89,12 @@ export async function proposeMeetingTurn(request,{fetchImpl=globalThis.fetch,tim
   if(typeof fetchImpl!=='function')throw fail('NO_TRANSPORT','Fetch transport unavailable.');
   const controller=new AbortController();
   const bounded=Math.max(100,Math.min(60000,Number(timeoutMs)||20000));
+  const abort=()=>controller.abort();
+  signal?.addEventListener('abort',abort,{once:true});
   const timer=setTimeout(()=>controller.abort(),bounded);
   try{
     const response=await fetchImpl(payload.url,{
-      method:'POST',headers:{'Content-Type':'application/json',...payload.headers},
+      method:'POST',redirect:'error',headers:{'Content-Type':'application/json',...payload.headers},
       body:JSON.stringify(payload.body),signal:controller.signal});
     if(!response.ok)throw fail('PROVIDER_ERROR','Model provider returned HTTP '+response.status);
     const data=await response.json();
@@ -98,17 +103,20 @@ export async function proposeMeetingTurn(request,{fetchImpl=globalThis.fetch,tim
     return {kind:'speech_proposal',meetingId:request.meetingId,participantId:request.participantId,
       provider,model:cfg.model,text,requiresSpeechGrant:true};
   }catch(error){
+    if(signal?.aborted)throw fail('MODEL_CANCELLED','Proposal was cancelled.');
     if(controller.signal.aborted)throw fail('MODEL_TIMEOUT','Model request timed out.');
     throw error;
-  }finally{clearTimeout(timer);}
+  }finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
 }
 /** Thread 2 alone emits this token, after verifying meeting state and permissions. */
-export function acceptSpeechProposal(proposal,speechGrant){
+export async function acceptSpeechProposal(proposal,speechGrant,{verifySpeechGrant}={}){
   if(proposal?.kind!=='speech_proposal'||proposal.requiresSpeechGrant!==true||
      speechGrant?.capability!=='speak'||speechGrant?.meetingId!==proposal.meetingId||
      speechGrant?.participantId!==proposal.participantId||
      !Number.isFinite(speechGrant.expiresAt)||speechGrant.expiresAt<=Date.now())
     throw fail('SPEECH_DENIED','An active, matching controller-issued speech grant is required.');
+  if(typeof verifySpeechGrant!=='function'||await verifySpeechGrant(speechGrant,proposal)!==true)
+    throw fail('SPEECH_DENIED','Trusted controller must verify and consume speech grant.');
   return {kind:'authorized_speech',meetingId:proposal.meetingId,
     participantId:proposal.participantId,text:proposal.text,grantId:speechGrant.id||null};
 }
