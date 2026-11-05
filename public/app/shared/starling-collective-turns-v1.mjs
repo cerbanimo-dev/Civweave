@@ -33,6 +33,34 @@ function normalizeTurn(payload,object){
     completionVerified:false
   });
 }
+/**
+ * Read-only projection of already-verified signed Guild turns. This is not
+ * another story store or proof ledger; every new turn is still written by the
+ * canonical turn service. Call only after readTurns has authorized/verified.
+ */
+export function projectStarlingPveStorylines(turns=[]){
+  const lines=new Map();
+  for(const turn of Array.isArray(turns)?turns:[]){
+    if(!turn||!STARLING_PERSONAS[turn.personaId]||!/fictional PvE/i.test(turn.brief||'')||!turn.id||!turn.guildId)continue;
+    const questId=id(turn.questId)||null;
+    const key=JSON.stringify([turn.guildId,questId]);
+    if(!lines.has(key))lines.set(key,{guildId:turn.guildId,questId,turns:[]});
+    lines.get(key).turns.push(turn);
+  }
+  return Object.freeze([...lines.values()].map(line=>{
+    const ordered=line.turns.slice().sort((a,b)=>Date.parse(a.at)-Date.parse(b.at)||a.id.localeCompare(b.id));
+    const last=ordered.at(-1),hook=String(last.text||'').match(/(?:^|\n)\s*NEXT HOOK\s*:\s*([^\n]+)/i);
+    return Object.freeze({
+      guildId:line.guildId,questId:line.questId,turns:Object.freeze(ordered),
+      nextHook:hook?.[1]?.trim().slice(0,300)||null,
+      handoffs:Object.freeze(ordered.slice(1).map((turn,i)=>Object.freeze({
+        from:ordered[i].personaId,to:turn.personaId,turnId:turn.id
+      }))),
+      completionVerified:false
+    });
+  }).sort((a,b)=>Date.parse(b.turns.at(-1).at)-Date.parse(a.turns.at(-1).at)));
+}
+
 export function createCollectiveTurnService({mesh,model,founder}={}){
   if(!mesh||!model||typeof founder!=='function')throw new TypeError('The native mesh, model runtime and Guild founder reader are required.');
   let busy=false,roundBusy=false;
@@ -171,5 +199,5 @@ export function createCollectiveTurnService({mesh,model,founder}={}){
       }
     });
   }
-  return Object.freeze({readTurns,runOneTurn,runRound,importHostDraft,isBusy:()=>busy||roundBusy});
+  return Object.freeze({readTurns,storylineTimeline:projectStarlingPveStorylines,runOneTurn,runRound,importHostDraft,isBusy:()=>busy||roundBusy});
 }

@@ -150,3 +150,22 @@ test('a verified published human Quest beat is only an optional fictional seed, 
  assert.match(h.calls[0].taskPrompt,/not.*claim/i);
  assert.equal(h.signed.at(-1).payload.offerOnly,true);
 });
+
+
+test('interrupted work requires signed explicit founder review before a new attempt',async()=>{
+ const h=harness();await h.worker.enable('garden',{confirmConsent:()=>true,intervalMinutes:15,dailyLimit:3});
+ await h.mesh.createObject({id:'starling-work-receipt:garden:old:started',kind:'civweave.starling-collective-work-receipt.v1',consent:'group',audience:['guild:garden'],payload:{schema:'civweave.starling-work-receipt.v1',guildId:'garden',policyRevision:1,runId:'old',status:'started',at:new Date(h.nowRef.value).toISOString()}});
+ assert.equal((await h.worker.tick('garden')).status,'interrupted-review-required');
+ await assert.rejects(()=>h.worker.reviewInterrupted('garden','old',{}),/explicit/i);
+ assert.equal(h.calls.length,0);
+ await h.worker.reviewInterrupted('garden','old',{confirmReview:()=>true});
+ assert.equal(h.signed.at(-1).payload.status,'reviewed');
+ assert.equal((await h.worker.tick('garden')).status,'completed');
+ assert.equal(h.calls.length,1);
+ await assert.rejects(()=>h.worker.reviewInterrupted('garden','old',{confirmReview:()=>true}),/already reviewed/i);
+});
+test('review cannot bypass failed attempts, wrong Guild or an unstarted run',async()=>{
+ const h=harness();await h.worker.enable('garden',{confirmConsent:()=>true});
+ await assert.rejects(()=>h.worker.reviewInterrupted('garden','unknown',{confirmReview:()=>true}),/unresolved/i);
+ await assert.rejects(()=>h.worker.reviewInterrupted('wrong','old',{confirmReview:()=>true}),/Guild/i);
+});
