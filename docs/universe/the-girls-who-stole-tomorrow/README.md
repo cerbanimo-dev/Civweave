@@ -14,6 +14,7 @@ One morning all calendars stop at midnight. A seven-year-old girl tells Landry s
 - [Turn-taking protocol](cast/turn-protocol.md) — how to run character-led passes using the existing approved inference owner.
 - [Simulated roundtable](rehearsals/01-turns.md) — explicit sheet-guided dialogue revisions; **no actual remote model calls performed**.
 - [Executable table-read fixture](rehearsals/02-scripted-test.json) — 14 bounded turns with scene, speaker, facts-known and spoiler checks.
+- [Verified test run](rehearsals/test-run-2026-11-05.md) — pass/fail evidence, build artifact and untested live-model boundary.
 - [Chapter 1](manuscript/01-the-last-date.md) — Landry first-person literary draft.
 - [Lore ledger](lore.md) — constraints, discoveries and open questions, spoilers marked.
 - [Continuity review](continuity-review.md) — approval gates and differences from older source notes.
