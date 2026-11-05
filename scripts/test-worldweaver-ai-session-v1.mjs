@@ -10,7 +10,7 @@ function fixture(options={}){
   const calls=[];
   const runtime={generate:async request=>{
     calls.push(structuredClone(request));
-    return{status:'success',outputText:'Spoken fiction.',usage:{promptTokens:12,completionTokens:8}};
+    return{status:'success',outputText:'Spoken fiction.',actual:{provider:request.config.provider,model:request.config.model},usage:{promptTokens:12,completionTokens:8}};
   }};
   const session=createWorldweaverAISession({
     runtime,readProviderConfig:name=>keys[name],mode:'binary',
@@ -108,4 +108,20 @@ test('An explicit zero budget cannot be promoted to the default spending allowan
   const {session,calls}=fixture({budget:{maxCalls:0,maxReservedUsd:0}});
   await assert.rejects(session.propose(request),/budget|limit/i);
   assert.equal(calls.length,0);
+});
+
+test('Worldweaver rejects a successful response from any other provider or model',async()=>{
+  for(const actual of [
+    {provider:'gemini',model:'gpt-6-luna'},
+    {provider:'openai-compatible',model:'different-model'},
+    undefined
+  ]){
+    let count=0;
+    const {session}=fixture({runtime:{generate:async()=>{
+      count++;return{status:'success',outputText:'Unverified response',actual};
+    }}});
+    await assert.rejects(session.propose({...request,role:'loom'}),/provider|identity|model|unverified/i);
+    assert.equal(count,1);
+    assert.deepEqual(session.memorySummary(),[]);
+  }
 });
