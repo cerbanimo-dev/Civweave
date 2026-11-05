@@ -54,9 +54,13 @@ const visited=new Set(),goalNames={
  community:'Meet neighbors through an inclusive Y activity'
 };
 let goal='fitness',openedScreen=null;
-const buttonState={forward:false,back:false,left:false,right:false};
+const buttonState={forward:false,back:false,left:false,right:false,strafeLeft:false,strafeRight:false};
 const heldKeys=new Set(),canvas=$('view'),ctx=canvas.getContext('2d');
-if(!ctx)throw new Error('This browser cannot render the first-person view; use the map controls.');
+if(!ctx){
+ canvas.classList.add('hidden');
+ canvas.setAttribute('aria-hidden','true');
+ // Keep the map and destination buttons working when canvas is unavailable.
+}
 const normalizeAngle=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
@@ -72,6 +76,19 @@ const qt=[
  ['quest','Choose a community quest'],
  ['exit','Leave with your plan']
 ];
+const QUEST_STORAGE_KEY='civweave:digital-y:first-quest:v1';
+try{
+ const saved=JSON.parse(localStorage.getItem(QUEST_STORAGE_KEY)||'null');
+ if(saved&&Array.isArray(saved.visited)){
+  for(const id of saved.visited)if(qt.some(([known])=>known===id))visited.add(id);
+ }
+ if(saved&&Object.hasOwn(goalNames,saved.goal))goal=saved.goal;
+}catch{/* Storage may be disabled in private or embedded browsing. */}
+function saveQuest(){
+ try{localStorage.setItem(QUEST_STORAGE_KEY,JSON.stringify({visited:[...visited],goal}));}
+ catch{/* Quest remains usable without storage. */}
+}
+function nextStep(){return qt.find(([id])=>!visited.has(id))||null;}
 function setTab(name){
  for(const tab of ['map','quest','schedule']){
   $('tab-'+tab).setAttribute('aria-pressed',String(tab===name));
@@ -123,6 +140,11 @@ function renderQuest(){
  const done=qt.every(([id])=>visited.has(id));
  $('completion').textContent=done?'Intro quest complete. You can export or edit your draft plan.':
   qt.filter(([id])=>!visited.has(id)).length+' introductory steps remaining. You can still export a draft.';
+ const next=nextStep();
+ $('nextObjective').textContent=next?'Next quest stop: '+next[1]:'All intro steps completed — export your plan';
+ $('nextStop').textContent=next?'Go to '+next[1]:'Quest complete';
+ $('nextStop').disabled=!next;
+ saveQuest();
 }
 for(const b of document.querySelectorAll('[data-goal]'))b.addEventListener('click',()=>{
  goal=b.dataset.goal;visited.add('quest');$('plan').value=planText();renderQuest();
@@ -141,6 +163,12 @@ $('resetQuest').addEventListener('click',()=>{
  say('Introductory quest progress reset locally. No real YMCA data was changed.');
 });
 $('plan').value=planText();renderQuest();
+$('nextStop').addEventListener('click',()=>{
+ const next=nextStep();
+ if(!next)return;
+ const obj=sceneLookup(next[0]);
+ if(obj)fastTravel(obj);
+});
 function openSchedule(obj){
  openedScreen=obj.id;const host=$('scheduleHost');host.replaceChildren();
  $('screenHeading').textContent=obj.label;
@@ -155,6 +183,11 @@ function openSchedule(obj){
   const a=document.createElement('a');a.href='./watertown-y-schedule-v2.html?studio='+encodeURIComponent(obj.studio)+'&mode='+encodeURIComponent(obj.mode);
   a.textContent='Open standalone '+obj.studio+' schedule';host.append(a);
  }
+ const full=document.createElement('a');
+ full.href='./watertown-y-schedule-v2.html?studio='+encodeURIComponent(obj.studio)+'&mode='+encodeURIComponent(obj.mode);
+ full.target='_blank';full.rel='noopener noreferrer';
+ full.textContent='Open this schedule full-page (recommended on phones)';
+ host.prepend(full);
  setTab('schedule');
 }
 async function runAudit(){
@@ -191,8 +224,8 @@ function interact(obj){
   visited.add(obj.id);renderQuest();openSchedule(obj);
   say('Showing '+obj.label+'. The original November 2026 schedule is a dated snapshot; use the official current YMCA page to confirm times.');
  }else if(obj.kind==='quest'){
-  visited.add('quest');renderQuest();setTab('quest');
-  say('The Community Quest Board invites you to pick a goal and edit a plan. Participation is optional.');
+  setTab('quest');
+  say('The Community Quest Board invites you to pick a goal and edit a plan. Choose one of the three intention buttons to complete this quest step. Participation is optional.');
  }else if(obj.kind==='audit'){
   setTab('map');void runAudit();
  }else if(obj.kind==='exit'){
@@ -240,6 +273,8 @@ function initMap(){
   g.append(SVG('circle',{cx:p.x,cy:p.y,r:8,fill:obj.color,stroke:'#244d5b','stroke-width':2}));
   g.append(SVG('title',{},obj.label));svg.append(g);
  }
+ const routeLine=SVG('polyline',{id:'routeLine',points:'',fill:'none',stroke:'#e17100','stroke-width':4,'stroke-linejoin':'round','stroke-linecap':'round','stroke-dasharray':'7 5'});
+ svg.append(routeLine);
  const marker=SVG('polygon',{id:'playerMarker',points:'0,-11 7,9 -7,9',fill:'#dd5700',stroke:'#fff','stroke-width':2});
  svg.append(marker);
  const list=$('destinationList');list.replaceChildren();
@@ -257,11 +292,13 @@ function fastTravel(obj){
  const path=findAccessiblePath(scene,player,obj,.5);
  if(!path?.length){say('No safe accessible route found to '+obj.label+'.');return;}
  const target=path.at(-1);
- // Following the same collision-tested grid route: expose the mode clearly.
+ const polyline=$('routeLine');
+ if(polyline)polyline.setAttribute('points',path.map(p=>{const m=tr(p);return m.x+','+m.y;}).join(' '));
+ $('routeSummary').textContent='Verified accessible route: '+path.length+' safe map steps to '+obj.label+
+  '. You jumped to the marked destination; this is not simulated walking.';
  player={...player,x:target.x,y:target.y};
- updateMapMarker();setTab('map');
- say('Accessible fast travel followed '+path.length+' collision-checked map steps to '+obj.label+
-     '. Press Interact to use this station.');
+ updateMapMarker();orientation();setTab('map');
+ say('Route to '+obj.label+' verified without crossing walls. You jumped to its nearby safe arrival point. Press Interact to use this station.');
 }
 initMap();
 function orientation(){
@@ -280,6 +317,7 @@ function resizeCanvas(){
  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
 }
 function drawWorld(){
+ if(!ctx)return;
  resizeCanvas();const w=canvas.width,h=canvas.height,fov=Math.PI/2.35;
  ctx.clearRect(0,0,w,h);
  const sky=ctx.createLinearGradient(0,0,0,h/2);
@@ -347,7 +385,8 @@ canvas.addEventListener('click',e=>{
 });
 const movementKeys=new Set(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e','enter']);
 document.addEventListener('keydown',e=>{
- if(e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement||e.target instanceof HTMLButtonElement)return;
+ if(e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement||e.target?.isContentEditable)return;
+ if(e.target instanceof HTMLButtonElement&&(e.key==='Enter'||e.key===' '))return;
  const key=e.key.toLowerCase();
  if(!movementKeys.has(key))return;
  e.preventDefault();heldKeys.add(key);
@@ -368,7 +407,7 @@ function frame(t){
  const dt=Math.min(.05,(t-previous)/1000||0);previous=t;
  const forward=Number(buttonState.forward||heldKeys.has('w')||heldKeys.has('arrowup'))-
                Number(buttonState.back||heldKeys.has('s')||heldKeys.has('arrowdown'));
- const strafe=Number(heldKeys.has('d'))-Number(heldKeys.has('a'));
+ const strafe=Number(buttonState.strafeRight||heldKeys.has('d'))-Number(buttonState.strafeLeft||heldKeys.has('a'));
  const turn=Number(buttonState.right||heldKeys.has('arrowright'))-
             Number(buttonState.left||heldKeys.has('arrowleft'));
  if(forward||strafe||turn)player=movePlayer(scene,player,forward*2.6,strafe*2.6,turn*2.25,dt);
@@ -376,8 +415,49 @@ function frame(t){
  if(t-lastMapTick>125){updateMapMarker();orientation();lastMapTick=t;}
  requestAnimationFrame(frame);
 }
-document.addEventListener('visibilitychange',()=>{previous=0;});
+document.addEventListener('visibilitychange',()=>{
+ previous=0;
+ if(document.hidden){heldKeys.clear();for(const key of Object.keys(buttonState))buttonState[key]=false;}
+});
 addEventListener('pagehide',()=>{stopped=true;});
 addEventListener('pageshow',()=>{if(stopped){stopped=false;previous=0;requestAnimationFrame(frame);}});
 orientation();requestAnimationFrame(frame);
-say('Welcome to the fictionalized Digital Y. Aster at reception can introduce the first quest. Use the 2D buttons for accessible fast travel.');
+function refreshReport(){
+ let storageAvailable=false;
+ try{storageAvailable=Boolean(localStorage.getItem(QUEST_STORAGE_KEY));}catch{}
+ const report={
+  product:'Civweave Digital Y · Walkthrough QA',
+  revision:'digital-y-walkthrough-v1-2026-11-05b',
+  world:'fictionalized schematic',
+  localView:ctx?'3D and 2D':'2D only (canvas unavailable)',
+  viewport:{width:innerWidth,height:innerHeight},
+  zone:zoneAt(scene,player)?.id||'corridor',
+  position:{x:Number(player.x.toFixed(2)),y:Number(player.y.toFixed(2))},
+  nearStation:nearestInteraction(scene,player)?.id||null,
+  screensCreated:snapshot.screens.length,
+  lastOpenedScreen:openedScreen,
+  quest:{completed:qt.filter(([id])=>visited.has(id)).map(([id])=>id),
+   remaining:qt.filter(([id])=>!visited.has(id)).map(([id])=>id),goal},
+  questStorageAvailable:storageAvailable,
+  routeStatus:$('routeSummary').textContent,
+  scheduleSnapshot:'2026-11',
+  userEnteredPlanExcluded:true
+ };
+ const text=JSON.stringify(report,null,2);
+ $('testReport').value=text;
+ $('reportStatus').textContent='Report refreshed locally. Nothing was uploaded.';
+ return text;
+}
+$('refreshReport').addEventListener('click',refreshReport);
+$('copyReport').addEventListener('click',async()=>{
+ const text=refreshReport();
+ try{
+  await navigator.clipboard.writeText(text);
+  $('reportStatus').textContent='Test report copied. Paste it into this thread.';
+ }catch{
+  $('testReport').focus();$('testReport').select();
+  $('reportStatus').textContent='Clipboard unavailable. Select and copy the visible report manually.';
+ }
+});
+say(ctx?'Welcome to the fictionalized Digital Y. Aster at reception can introduce the first quest. Use the 2D buttons for accessible fast travel.':
+ '3D canvas is unavailable on this device. The 2D map, destinations, schedules and quest remain usable.');
