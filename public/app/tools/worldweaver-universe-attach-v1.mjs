@@ -78,7 +78,6 @@ function sendReceipt(receipts){
   window.opener.postMessage({
     schema:'civweave.portable-bridge.v1',type:'receipt',nonce,
     universeId:bundle.universeId,
-    nodeId:verified.nodeId,origin:verified.origin,
     receipts:receipts.map(r=>({draftId:r.draftId,status:r.status,kind:r.kind}))
   },'*');
 }
