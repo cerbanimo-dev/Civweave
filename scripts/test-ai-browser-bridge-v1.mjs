@@ -79,6 +79,19 @@ function setup({selected=true,allow=null,providerAnswer='{"tool":"finish","answe
  await assert.rejects(api.invoke(request,'browser.submit',{url:'https://example.org'},new Set()),{code:'BROWSER_TOOL_UNKNOWN'});
 }
 {
+ const {api,state,ctx}=setup({selected:false,allow:()=>true});
+ ctx.CivweaveBrowserMCPV1={async invoke(payload){state.live++;state.transport.push(payload);return{mode:'live',liveFetched:true,results:[{title:'Observed',url:'https://example.org/observed',text:'Relevant source'}]}}};
+ let generation=0;
+ const runtime={async generate(){generation++;return{status:'success',outputText:generation===1?'{"tool":"browser.read","arguments":{"url":"https://example.org/observed"}}':'{"tool":"finish","answer":"Compared the two steps."}'}}};
+ const request=api.createRequest({config:{provider:'openai'},prompt:'Compare'},{mode:'live',role:'loom',sessionId:'loom-tab',grantId:'grant-3',query:'compare sources',maxSteps:3});
+ const result=await api.run(request,{baseRuntime:runtime});
+ assert.equal(result.outputText,'Compared the two steps.');
+ assert.deepEqual(state.transport.map(x=>x.name),['browser.search','browser.read']);
+ assert.deepEqual(state.perm.map(x=>x.operation),['share-browser-evidence-with-model','live-browser','share-browser-evidence-with-model','live-browser']);
+ assert.equal(state.perm[2].targetUrl,'https://example.org/observed','a second URL must be reauthorized before off-device evidence sharing');
+ assert.equal(state.transport[0].arguments.query,'compare sources','never copy conversation into tool queries');
+}
+{
  const {api}=setup();
  for(const bad of ['http://localhost:9090/a','http://127.0.0.1/','http://192.168.1.5/','http://10.1.1.1/','https://name:pass@example.org','file:///etc/passwd']){
   assert.throws(()=>api.validUrl(bad),/browser targets|HTTP|URL|credentials/i,bad);
