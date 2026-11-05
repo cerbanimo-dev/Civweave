@@ -121,7 +121,7 @@ test('a discoverable first-party player links from Commons Between and Starling 
  assert.match(ui,/createStoryReplay/);
  assert.match(ui,/worldweaver-story-replay-v1\.mjs/);
  assert.match(ui,/localStorage/);
- assert.match(ui,/textContent=beat\.text/);
+ assert.match(ui,/add\(article,'p',beat\.text\)/);
  assert.doesNotMatch(ui,/innerHTML\s*=/);
  assert.match(commons,/shadow-thread-replay\.html/);
  assert.match(lounge,/shadow-thread-replay\.html/);
