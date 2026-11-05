@@ -25,7 +25,7 @@ const STATIONS=Object.freeze({
   council:'Commons · conversations, intentions, and human-governed decisions.'
 });
 const clean=(value,max=3000)=>typeof value==='string'?value.trim().slice(0,max):'';
-const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,reportData:null,reportBusy:false,reportQueued:false,reportQueuedPublish:false,reportMessage:'Syncing signed Guild daily report…',reportGrants:[],reportIsFounder:false,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,hostTransport:null,hostKind:null,hostJob:null,hostPollTimer:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
+const state={bookPacket:null,guild:null,fleetScope:'local',fleetApiLoading:false,fleetMessage:'',simMessage:'',openSimGeometry:null,openSimWorldRef:null,openSimUrl:'',openSimStatus:'No OpenSim bridge connected.',openSimBusy:false,openSimLive:false,openSimRegionId:'',openSimCommandId:null,localOpenSimViewer:null,worldLayout:null,speaker:'kami',root:null,feed:[],snapshot:null,opportunities:[],status:'idle',error:'',loading:false,turnsLoading:false,turnsRunning:false,turnError:'',turnMessage:'No local model run has started.',turnService:null,turnMesh:null,turnSubscribe:null,reportData:null,reportBusy:false,reportQueued:false,reportQueuedPublish:false,reportMessage:'Syncing signed Guild daily report…',reportGrants:[],reportIsFounder:false,worker:null,workerEnabled:false,workerMessage:'Local autopilot is off.',workerLoading:false,pendingWorkerRun:null,hostTransport:null,hostKind:null,hostJob:null,hostPollTimer:null,hostStatus:'Choose a host and connect.',hostBusy:false,selectedAgent:'kami',activePersona:null,view:'world',station:'council',worldView:null,worldLinked:false,worldHost:null,worldViewer:null,worldRosterUnsubscribe:null,worldMode:'3d',worldEpoch:0,worldOpening:false,worldError:'',guideActivity:Object.create(null),guideUnsubscribe:null,guideEpoch:0,summonUI:null,summonLoading:false,summonTransport:null,autoSummonTransport:false,harmlessBook:null,harmlessBusy:false,harmlessStatus:'Open the notebook to read it.',harmlessSubscribe:null,harmlessGuildId:null};
 const $=selector=>state.root?.querySelector(selector);
 const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!=null)node.textContent=String(text);return node};
 const para=(parent,text,cls='')=>{const p=el('p',cls,text);parent.append(p);return p};
@@ -134,7 +134,7 @@ function setup(){
    <div class="sl-panel-title"><div><span class="sl-kicker">02 · THE HEARTH</span><h2>Conversation and decisions</h2></div><span class="sl-mini-pill" data-sl-transcript-count>0 signed turns</span></div>
    <div class="sl-flex sl-run"><button type="button" class="sl-strong" data-sl-action="turn">Run one local turn</button><button type="button" data-sl-action="round">Run 3-person round</button></div>
    <p class="sl-status" data-sl-turn-status>No local model run has started. Runs are explicitly started and never use hosted credits.</p>
-   <div class="sl-feed" data-sl-feed aria-live="polite"></div>
+   <section class="sl-storyline" aria-label="Signed PvE storyline timeline" data-sl-storyline></section><div class="sl-feed" data-sl-feed aria-live="polite"></div>
    <form class="sl-compose" data-sl-form><label for="cw-sl-message">Message or brief for selected resident</label><textarea id="cw-sl-message" maxlength="1500" placeholder="Share a question or focused task. For a Starling persona, use Run one local turn to generate a signed response." required></textarea><button type="submit" class="sl-strong">Open addressed draft in Civweave chat</button></form>
    <p class="sl-status" data-sl-message-status>Chat opens an addressed draft. Only explicit local Starling runs record signed Collective replies.</p>
   </section>
@@ -187,7 +187,7 @@ function setup(){
      </details>
      <details><summary>Read today's report</summary><pre data-sl-report-preview style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:20rem;overflow:auto"></pre></details>
    </section>
-   <div class="sl-operation-block"><h3>Browser-local collective</h3><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button></div><p class="sl-status" data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</p></div>
+   <div class="sl-operation-block"><h3>Browser-local collective</h3><div class="sl-flex sl-autopilot"><button type="button" data-sl-action="worker-toggle">Enable local autopilot</button><button type="button" data-sl-action="worker-review" hidden>Review interrupted run</button></div><p class="sl-status" data-sl-worker-status>Off · Guildkeeper opt-in required · runs only while Lounge is open.</p></div>
    <section class="sl-host-panel sl-operation-block" aria-label="Local execution host"><h3>Device execution host</h3><p class="sl-sub">Resume approved local drafts after leaving the commune. No task claims or spending.</p><label>Backend <select data-sl-host-kind><option value="termux">Termux companion · port 8767</option><option value="android">Android native bridge · WorkManager</option></select></label><div class="sl-flex"><button type="button" data-sl-action="host-connect">Connect</button><button type="button" data-sl-action="host-submit">Queue local draft</button><button type="button" data-sl-action="host-refresh">Refresh jobs</button></div><div class="sl-flex"><button type="button" data-sl-action="host-enable">Enable host autopilot</button><button type="button" data-sl-action="host-disable">Disable host autopilot</button></div><p class="sl-status" data-sl-host-status role="status">Choose a host and connect.</p><pre data-sl-host-output class="sl-host-output"></pre><button type="button" data-sl-action="host-import">Import completed draft for Guild review</button></section>
    <details class="sl-toolbench sl-operation-block"><summary>Collective toolbench · installed capabilities</summary><div data-sl-toolbench></div></details>
    <p class="sl-scene-disclaimer">Inference is local unless a separately authorized hosted route is selected. The visual commune never spends neurons or changes permissions by itself.</p>
@@ -352,6 +352,21 @@ function focusActivity(){
 }
 function renderFeed(){
   const node=$('[data-sl-feed]');node.replaceChildren();
+  const timeline=$('[data-sl-storyline]');if(timeline){
+    timeline.replaceChildren();
+    const lines=state.turnService?.storylineTimeline?.(state.feed)||[];
+    if(lines.length){
+      timeline.append(el('h3','','PvE storyline timeline · signed drafts'));
+      for(const line of lines.slice(0,12)){
+        const entry=el('section','sl-entry');
+        entry.append(el('b','',line.questId?'Quest line '+line.questId:'Guild founding story'));
+        para(entry,line.turns.length+' encounter'+(line.turns.length===1?'':'s')+' · '+line.turns.map(t=>STARLING_PERSONAS[t.personaId]?.name||t.personaId).join(' → '),'sl-sub');
+        if(line.nextHook)para(entry,'NEXT HOOK: '+line.nextHook);
+        para(entry,'Provisional fiction · not verified Quest completion.','sl-sub');
+        timeline.append(entry);
+      }
+    }
+  }
   if(!state.feed.length){
     para(node,fleetIsGuild()
       ?'No signed Collective turns recorded for this Guild yet. Select a Starling persona and explicitly run a local model turn on the founding device.'
@@ -551,6 +566,7 @@ function render(){
   const round=$('[data-sl-action=round]');if(round)round.disabled=state.turnsRunning||!fleetIsGuild()||!STARLING_PERSONAS[state.selectedAgent];
   const control=$('[data-sl-action=worker-toggle]');if(control){control.disabled=state.workerLoading;control.textContent=state.workerEnabled?'Disable local autopilot':'Enable local autopilot'}
   const worker=$('[data-sl-worker-status]');if(worker)worker.textContent=state.workerMessage;
+  const review=$('[data-sl-action=worker-review]');if(review){review.hidden=!state.pendingWorkerRun;review.disabled=state.workerLoading}
   const reportStatus=$('[data-sl-report-status]');if(reportStatus)reportStatus.textContent=state.reportMessage;
   const reportPreview=$('[data-sl-report-preview]');if(reportPreview&&state.reportData)reportPreview.textContent=state.reportData.markdown;
   const reportSave=$('[data-sl-action=report-save]');if(reportSave)reportSave.disabled=!state.reportData;
@@ -600,7 +616,7 @@ function close(){if(!state.root)return;state.harmlessSubscribe?.();state.harmles
 function open(guild){
   if(guild!=null&&!guild?.id)throw new TypeError('Select an existing Guild or open the Local Fleet.');
   setup();
-  if(state.guild?.id!==(guild?.id||null)){state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.reportData=null;state.reportGrants=[];state.reportIsFounder=false;state.reportMessage='Syncing signed Guild daily report…';state.worker?.stop();state.workerEnabled=false;state.workerMessage='Local autopilot is off.';stopHostReportPolling();state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
+  if(state.guild?.id!==(guild?.id||null)){state.harmlessSubscribe?.();state.harmlessSubscribe=null;state.harmlessGuildId=null;state.worldEpoch++;detachWorldSource();state.worldHost?.close();state.worldHost=null;state.openSimGeometry=null;state.openSimWorldRef=null;state.openSimStatus='No OpenSim bridge connected.';state.openSimLive=false;state.openSimRegionId='';state.openSimCommandId=null;state.guild=guild?{id:guild.id,name:clean(guild.name||guild.displayName,240)}:null;state.feed=[];state.selectedAgent='weaveling';state.speaker='kami';state.activePersona=null;state.snapshot=null;state.opportunities=[];state.status='idle';state.turnError='';state.turnMessage='Loading signed Guild Collective turns…';state.reportData=null;state.reportGrants=[];state.reportIsFounder=false;state.reportMessage='Syncing signed Guild daily report…';state.worker?.stop();state.workerEnabled=false;state.pendingWorkerRun=null;state.workerMessage='Local autopilot is off.';stopHostReportPolling();state.hostTransport=null;state.hostKind=null;state.hostJob=null;state.hostStatus='Choose a host and connect.'}
   const share=state.root.querySelector('[data-sl-harmless-share]');if(share)share.checked=false;
   const discover=state.root.querySelector('[data-sl-harmless-discovery]');
   if(discover){try{discover.checked=localStorage.getItem('civweave.harmless.discovery.v1')==='1'}catch{discover.checked=false}}
@@ -688,6 +704,7 @@ function click(event){
   if(cmd==='turn'&&fleetIsGuild())void runLocalTurn();
   if(cmd==='round'&&fleetIsGuild())void runLocalRound();
   if(cmd==='worker-toggle')void toggleWorker();
+  if(cmd==='worker-review')void reviewWorkerInterruption();
   if(cmd==='host-connect')void connectHost();
   if(cmd==='host-submit')void submitHostDraft();
   if(cmd==='host-refresh')void refreshHost();
@@ -1080,6 +1097,7 @@ async function refreshWorkerStatus(){
     const worker=await ensureWorker(),status=await worker.status(guild.id);
     if(state.guild?.id!==guild.id||state.root?.hidden)return;
     state.workerEnabled=status.enabled;
+    state.pendingWorkerRun=await worker.pendingReview(guild.id);
     state.workerMessage=status.enabled?'Enabled locally · at most '+status.dailyLimit+' turns/day; resumes while Lounge remains open.':'Off · Guildkeeper opt-in required. No background generation.';
     if(status.enabled&&!status.active&&localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id)!=='termux'&&localStorage.getItem('civweave.starling.execution-host.v1:'+guild.id)!=='android'){
       await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
@@ -1092,6 +1110,22 @@ async function refreshWorkerStatus(){
   }catch(error){
     if(state.guild?.id===guild.id)state.workerMessage='Autopilot unavailable: '+clean(String(error?.message||error),300);
   }finally{state.workerLoading=false;if(state.guild?.id===guild.id)render()}
+}
+async function reviewWorkerInterruption(){
+  if(state.workerLoading||!state.guild||!state.pendingWorkerRun)return;
+  const guild=state.guild,runId=state.pendingWorkerRun.runId;
+  if(!window.confirm('Review the Guild signed transcript and local host for run '+runId+'. Acknowledging does not recover an unsigned draft or complete a Quest. Permit future scheduled work?'))return;
+  state.workerLoading=true;
+  try{
+    const worker=await ensureWorker();
+    await worker.reviewInterrupted(guild.id,runId,{confirmReview:()=>true});
+    if(state.guild?.id===guild.id){
+      state.pendingWorkerRun=null;
+      state.workerMessage='Interrupted run acknowledged and signed. Original attempt remains counted; no automatic replay of that attempt.';
+      await refreshTurns();
+    }
+  }catch(error){if(state.guild?.id===guild.id)state.workerMessage='Review failed: '+clean(String(error?.message||error),300)}
+  finally{state.workerLoading=false;if(state.guild?.id===guild.id)render()}
 }
 async function toggleWorker(){
   if(state.workerLoading||!state.guild)return;
