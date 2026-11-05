@@ -1,0 +1,34 @@
+name: Starling meeting room projection
+
+on:
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'public/app/shared/starling-meeting-room-v1.mjs'
+      - 'public/app/tools/starling-meeting-room-lab.*'
+      - 'scripts/test-starling-meeting-room-v1.mjs'
+      - '.github/workflows/starling-meeting-room.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'public/app/shared/starling-meeting-room-v1.mjs'
+      - 'public/app/tools/starling-meeting-room-lab.*'
+      - 'scripts/test-starling-meeting-room-v1.mjs'
+      - '.github/workflows/starling-meeting-room.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  room-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test Starling meeting room presentation contract
+        run: node --test scripts/test-starling-meeting-room-v1.mjs
+      - name: Check room lab module syntax
+        run: node --check public/app/tools/starling-meeting-room-lab.mjs
