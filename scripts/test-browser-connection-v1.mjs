@@ -33,6 +33,8 @@ test('one shared browser panel connects to canonical guide chat without creating
   const shell=read('public/app/persistent-system-shell-v1.html');
   assert.match(panel,/CivweaveBrowserConnectionV1/);
   assert.match(panel,/CivweaveGuideChatSurfaceV350/);
+  assert.match(panel,/data-search-web/,'Live web search control must be present');
+  assert.match(panel,/renderEvidence\(output\)/,'Search results must render in-app');
   assert.match(chat,/data-browser/);
   assert.match(shell,/browser-connection-v1\.js/);
   assert.doesNotMatch(panel,/CivweaveAssistantV141\.respond|new WebSocket\(/);
