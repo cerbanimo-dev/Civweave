@@ -22,4 +22,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test scripts/test-starling-meeting-operations.mjs scripts/test-starling-meeting-live-adapter.mjs
+      - run: node --test scripts/test-starling-meeting-operations.mjs scripts/test-starling-meeting-live-adapter.mjs scripts/test-starling-meeting-records.mjs
