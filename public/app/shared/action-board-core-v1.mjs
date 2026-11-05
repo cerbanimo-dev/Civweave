@@ -30,7 +30,7 @@ export function normalizeAction(value, now=new Date().toISOString()){
       /^[A-Za-z0-9:_-]{1,80}$/.test(clean(v.portableOrigin.draftId,80))?
       {portableOrigin:{
         universeId:clean(v.portableOrigin.universeId,96),draftId:clean(v.portableOrigin.draftId,80),
-        fingerprint:clean(v.portableOrigin.fingerprint,220),
+        fingerprint:clean(v.portableOrigin.fingerprint,1200),
         originallyDone:Boolean(v.portableOrigin.originallyDone),
         origin:clean(v.portableOrigin.origin,300),nodeId:clean(v.portableOrigin.nodeId,180),
         userId:clean(v.portableOrigin.userId,180),importedAt:asDate(v.portableOrigin.importedAt)||now
