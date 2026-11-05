@@ -43,7 +43,7 @@ function installStyle(){
 #${ID} [data-lower]{display:flex;flex-direction:column;flex:1 1 35%;min-height:110px;border-top:1px solid #ffffff30}
 #${ID} [data-actions]{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px}
 #${ID} [data-evidence]{flex:1;white-space:pre-wrap;overflow:auto;padding:8px 12px;overflow-wrap:anywhere;line-height:1.5;background:#081320;color:#d3e5f5}
-#${ID} [data-evidence] a{color:#9adeff}
+#${ID} [data-evidence] a{display:block;margin:6px 0;padding:6px 10px;color:#9adeff;border:1px solid #47647d;border-radius:8px;background:#13283b;text-decoration:underline}
 @media(max-width:720px){#${ID}{inset:0;width:100%;height:100dvh;border:0;border-radius:0}#${ID} [data-preview]{flex-basis:32%}#${ID} [data-lower]{flex-basis:45%}#${ID} [data-nav-form]{min-width:160px}}
 `;document.head.append(style);
 }
@@ -55,11 +55,12 @@ function ensureRoot(){
  <label data-consent><input data-network type="checkbox"> Allow live browser tool requests during this session (uses hosted Browser Run; only requested queries or URLs are sent)</label>
  <div data-browser-status role="status" aria-live="polite">Enter a URL or search downloaded knowledge.</div>
  <iframe data-preview title="Website preview (some websites forbid embedding)" sandbox="allow-scripts allow-forms allow-popups" referrerpolicy="no-referrer" loading="lazy"></iframe>
- <div data-lower><div data-actions><form data-search-form style="display:flex;flex:1;gap:6px"><input type="search" data-search placeholder="Search downloaded knowledge" aria-label="Search offline archives"><button type="submit">Search</button></form><button data-read type="button">Read page</button><button data-links type="button">Links</button><button data-guide type="button">Discuss in chat</button></div><div data-evidence role="region" aria-label="Page text and research results">Websites may block embedding. Select Read page for a text-based view using authorized browser tools.</div></div>`;
+ <div data-lower><div data-actions><form data-search-form style="display:flex;flex:1;gap:6px"><input type="search" data-search placeholder="Search downloaded knowledge" aria-label="Search offline archives"><button type="submit">Offline search</button></form><button data-search-web type="button">Web search</button><button data-read type="button">Read page</button><button data-links type="button">Links</button><button data-guide type="button">Discuss in chat</button></div><div data-evidence role="region" aria-label="Page text and research results">Websites may block embedding. Select Read page for a text-based view using authorized browser tools.</div></div>`;
  root.querySelector('[data-close]').addEventListener('click',close);
  root.querySelector('[data-network]').addEventListener('change',event=>{authorized=Boolean(event.currentTarget.checked);emit('civweave:browser-permission',{networkAllowed:authorized});status(authorized?'Live browser tools permitted for this session.':'Live browser tool permission disabled. Offline search remains available.')});
  root.querySelector('[data-nav-form]').addEventListener('submit',event=>{event.preventDefault();void navigate(root.querySelector('[data-url]').value)});
  root.querySelector('[data-search-form]').addEventListener('submit',event=>{event.preventDefault();void run('browser.archive_search',{query:root.querySelector('[data-search]').value})});
+ root.querySelector('[data-search-web]').addEventListener('click',()=>void run('browser.search',{query:root.querySelector('[data-search]').value}));
  root.querySelector('[data-read]').addEventListener('click',()=>void run('browser.open',{url:currentUrl()}));
  root.querySelector('[data-links]').addEventListener('click',()=>void run('browser.links',{url:currentUrl()}));
  root.querySelector('[data-guide]').addEventListener('click',discuss);
@@ -103,6 +104,36 @@ async function callTool({name,arguments:args={}}={}){
    return{isError:false,content:[{type:'text',text:clip(JSON.stringify(response),24000)}],structuredContent:response};
  }catch(error){return{isError:true,content:[{type:'text',text:clip(error?.message||error,600)}]}}
 }
+async function renderEvidence(output){
+  const {normalizeBrowserTarget}=await core(),view=root.querySelector('[data-evidence]'),links=[],seen=new Set();
+  let examined=0;
+  function add(address,label){
+    const url=normalizeBrowserTarget(address);
+    if(!url||seen.has(url)||links.length>=24)return;
+    seen.add(url);links.push({url,label:clip(label||url,160)});
+  }
+  function walk(value,depth=0){
+    if(depth>4||examined++>130||links.length>=24)return;
+    if(typeof value==='string'){
+      for(const match of value.matchAll(/\\[([^\\]\\n]{1,160})\\]\\((https?:\\/\\/[^)\\s]+)\\)/g))add(match[2],match[1]);
+      return;
+    }
+    if(Array.isArray(value)){for(const row of value.slice(0,60))walk(row,depth+1);return}
+    if(!value||typeof value!=='object')return;
+    if(typeof value.url==='string'||typeof value.href==='string')add(value.url||value.href,value.title||value.text||value.name);
+    for(const child of Object.values(value).slice(0,24))walk(child,depth+1);
+  }
+  walk(output);
+  const pre=document.createElement('pre');pre.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;margin:0 0 10px';pre.textContent=evidence;view.replaceChildren(pre);
+  if(links.length){
+    const heading=document.createElement('strong');heading.textContent='Open a result in Civweave';view.append(heading);
+    for(const row of links){
+      const anchor=document.createElement('a');anchor.href=row.url;anchor.target='_blank';anchor.rel='noopener noreferrer';anchor.textContent=row.label;
+      anchor.addEventListener('click',event=>{if(event.button!==0||event.metaKey||event.ctrlKey||event.altKey||event.shiftKey)return;event.preventDefault();void navigate(row.url)});
+      view.append(anchor);
+    }
+  }
+}
 async function run(name,args){
  ensureRoot();const view=root.querySelector('[data-evidence]');
  status('Running '+name+'…');view.textContent='Loading…';
@@ -110,7 +141,7 @@ async function run(name,args){
  if(result.isError){view.textContent=result.content?.[0]?.text||'Browser tool failed.';status('Browser tool unavailable or permission required.');return result}
  const output=result.structuredContent;
  evidence=clip(typeof output?.result==='string'?output.result:JSON.stringify(output,null,2),18000);
- view.textContent=evidence;
+ await renderEvidence(output);
  status('Source: '+(name==='browser.archive_search'?'on-device downloaded archive':'live Browser Run')+' · web content is untrusted.');
  emit('civweave:browser-research',{tool:name,url:currentUrl(),source:name==='browser.archive_search'?'offline':'live'});
  return result;
