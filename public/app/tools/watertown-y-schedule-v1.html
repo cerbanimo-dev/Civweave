@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Watertown Family YMCA | Readable Cardio Studio Schedule</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#102b37;background:#eaf6f6;font-synthesis:none}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh}
+a{color:#00588d;text-underline-offset:3px}
+header{background:#003c53;color:white;padding:clamp(1rem,2.4vw,2.2rem) clamp(1rem,3vw,3rem);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+h1{font-size:clamp(1.6rem,2.8vw,3rem);margin:.1rem 0;line-height:1.15}
+h2{margin:0;font-size:clamp(1.2rem,2vw,2rem)}
+header p{margin:.15rem 0;color:#c0f2f0}
+.eyebrow{font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:clamp(.82rem,1.15vw,1.12rem)}
+.month{background:#b9eaea;color:#003345;padding:.7rem 1rem;border-radius:.6rem;font-weight:900;font-size:clamp(1.1rem,1.7vw,1.6rem)}
+main{max-width:1800px;margin:auto;padding:clamp(1rem,2vw,2.3rem)}
+nav,.toolbar{display:flex;gap:.65rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+button{font:inherit;background:white;border:2px solid #3b6e7a;color:#003a4c;border-radius:.7rem;min-height:52px;padding:.6rem 1rem;cursor:pointer;font-weight:800}
+button[aria-pressed="true"],button.active{background:#005b70;color:white;border-color:#005b70}
+button:focus-visible,a:focus-visible{outline:4px solid #db6100;outline-offset:3px}
+#days{display:flex;gap:.5rem;overflow-x:auto;padding:.2rem 0 1rem}
+#days button{flex:1;min-width:115px}
+.hero{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:end;margin:1rem 0 1.2rem}
+.hero p{font-size:clamp(1rem,1.35vw,1.3rem);margin:.4rem 0 0}
+#status{font-weight:800;color:#005267;text-align:right}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.class{border:2px solid #b7d1d5;background:white;border-radius:1rem;padding:1.1rem 1.25rem;display:grid;grid-template-columns:minmax(110px,26%) minmax(0,1fr);gap:1.2rem;min-width:0;box-shadow:0 2px 0 #d1e4e5}
+.class.live{border-left:10px solid #18735a}
+.class.virtual{border-left:10px solid #1b66a0}
+.time{font-size:clamp(1.25rem,2vw,2.2rem);font-weight:900;line-height:1.15;white-space:nowrap}
+.end{color:#4c6570;font-size:clamp(.95rem,1.3vw,1.25rem);font-weight:700;margin-top:.3rem}
+.name{font-size:clamp(1.18rem,1.7vw,1.9rem);font-weight:850;line-height:1.2;overflow-wrap:anywhere}
+.tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.65rem}
+.tag{font-size:.9rem;font-weight:850;background:#e2f1f5;color:#054962;padding:.3rem .55rem;border-radius:.35rem}
+.tag.live{background:#d2f2e4;color:#0a5038}.tag.reserve{background:#fff0cd;color:#734500}
+.footer{margin-top:1.5rem;background:#f7ffff;border-top:3px solid #8bb6bb;padding:1rem 1.25rem;border-radius:.5rem;line-height:1.65}
+#weekGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.dayPanel{background:white;border:2px solid #b7d1d5;border-radius:.8rem;padding:1rem}
+.dayPanel h3{margin:0 0 .7rem;font-size:1.5rem}
+.summary{display:grid;grid-template-columns:6.5rem 1fr;gap:.5rem;font-size:1.12rem;padding:.5rem 0;border-top:1px solid #dce9eb}
+.summary strong{font-variant-numeric:tabular-nums}
+.hide{display:none!important}
+.empty{background:white;border:2px dashed #9ebfc4;padding:2rem;border-radius:1rem;font-size:1.25rem}
+@media(max-width:850px){.cards,#weekGrid{grid-template-columns:1fr}.hero{grid-template-columns:1fr}#status{text-align:left}}
+@media(max-width:480px){.class{grid-template-columns:1fr;gap:.7rem}.time{font-size:1.8rem}.name{font-size:1.3rem}}
+body.tv .cards{grid-template-columns:1fr 1fr}
+body.tv .class{padding:1.5rem;min-height:165px}
+body.tv .name{font-size:clamp(1.5rem,2.45vw,2.9rem)}
+body.tv .time{font-size:clamp(1.5rem,2.6vw,3rem)}
+body.tv nav,body.tv #days{display:none}
+body.tv #status{font-size:1.3rem}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header><div><div class="eyebrow">Downtown · Watertown Family YMCA</div><h1>Cardio Studio Schedule</h1><p>Clear, large-type digital display · Demonstration</p></div><div class="month">NOVEMBER 2026</div></header>
+<main>
+<nav aria-label="Display modes">
+<button type="button" id="today" aria-pressed="true">Today</button>
+<button type="button" id="day" aria-pressed="false">Pick a day</button>
+<button type="button" id="week" aria-pressed="false">Full week</button>
+<button type="button" id="tv" aria-pressed="false">Hallway display</button>
+</nav>
+<div id="days" role="group" aria-label="Choose a day"></div>
+<div class="hero"><div><h2 id="heading">Today's classes</h2><p id="subhead">Classes are listed in start-time order.</p></div><div id="status" aria-live="polite"></div></div>
+<div id="cards" class="cards"></div><div id="weekGrid" class="hide"></div>
+<div class="footer">
+<strong>Schedule source:</strong> <a target="_blank" rel="noopener noreferrer" href="https://watertownymca.storage.googleapis.com/files/s3fs-public/2026-10/DTYGroupEx_2026NOV.pdf">Watertown YMCA’s official November 2026 studio schedule (Cardio, Spin and Yoga)</a>.
+This is an unofficial digital-world prototype, not a live YMCA feed. Times may change; confirm with the Y before traveling or registering.
+<strong>LIVE</strong> means instructor-led on site; <strong>VIRTUAL</strong> means a projected class. Some classes require registration.
+</div>
+</main>
+<script>
+'use strict';
+/* Verified against the official Watertown YMCA NOV 2026 Cardio Studio PDF, page 1.
+   Each item: start|end|class name|special notes. Do not silently extrapolate to future months. */
+const RAW={
+Monday:[
+'05:15|06:00|Virtual BODYPUMP','06:15|07:00|Virtual BODYATTACK','07:10|07:40|Virtual GRIT Cardio',
+'08:00|09:00|Enhance Fitness','09:30|10:30|LES MILLS TONE','11:00|12:00|Arthritis Foundation',
+'12:30|13:30|Virtual BODYPUMP','14:00|14:45|Virtual BODYCOMBAT','15:00|15:30|Virtual GRIT Strength',
+'15:30|16:00|Virtual BODYATTACK','16:30|17:30|BODYPUMP','18:00|19:00|Pilates / Barre Combo',
+'18:00|19:00|Functional Fitness|Turf','20:15|20:45|Virtual BODYATTACK'
+],
+Tuesday:[
+'05:15|05:45|Virtual BODYATTACK','06:00|06:45|Virtual BODYPUMP','07:30|08:15|Virtual BODYCOMBAT',
+'08:30|09:30|BODYPUMP','09:45|10:45|Pilates','10:15|11:15|Functional Fitness|Turf',
+'11:15|12:15|Silver Sneakers Classic','12:30|13:30|Chair Yoga','13:30|14:00|Virtual BODYATTACK',
+'14:30|15:00|Virtual BODYPUMP','17:00|18:00|ZUMBA','18:30|20:00|American Kang Duk Won Karate|Registration required; Reserved',
+'20:15|20:45|Virtual BODYPUMP'
+],
+Wednesday:[
+'05:15|06:15|Virtual BODYPUMP','06:30|07:00|Virtual BODYATTACK','07:10|07:40|Virtual GRIT Athletic',
+'08:00|09:00|Enhance Fitness','09:15|10:15|Shine Dance Fitness','11:00|12:00|Arthritis Foundation',
+'12:30|13:30|Virtual BODYPUMP','14:00|14:45|Virtual BODYPUMP','15:00|15:30|Virtual GRIT Cardio',
+'16:30|17:30|Shine/Uplift','17:45|18:45|Line Dancing|Registration required',
+'18:00|19:00|Functional Fitness|Turf','19:00|19:30|Virtual GRIT Cardio','19:45|20:30|Virtual BODYPUMP'
+],
+Thursday:[
+'05:15|06:00|Virtual BODYCOMBAT','06:00|06:45|Virtual BODYPUMP','07:00|07:45|Virtual BODYATTACK',
+'08:30|09:30|BODYPUMP','09:45|10:45|Pilates / Barre Combo','10:15|11:15|Functional Fitness|Turf',
+'11:15|12:15|Silver Sneakers Classic','12:30|13:00|Virtual BODYCOMBAT','13:30|14:00|Virtual BODYCOMBAT',
+'14:30|15:00|Virtual BODYPUMP','15:45|16:45|Shine Dance Fitness','17:00|17:45|LES MILLS TONE',
+'18:30|20:00|American Kang Duk Won Karate|Registration required; Reserved','20:15|20:45|Virtual BODYPUMP'
+],
+Friday:[
+'05:15|06:00|Virtual BODYPUMP','06:15|07:00|Virtual BODYCOMBAT','07:10|07:40|Virtual GRIT Strength',
+'08:00|09:00|Enhance Fitness','09:15|10:00|Tabata','10:15|11:00|Sound Bath',
+'11:15|12:15|Silver Sneakers Classic','13:00|13:45|Virtual BODYPUMP','14:00|14:45|Virtual BODYATTACK',
+'15:00|15:30|Virtual GRIT Athletic','16:30|17:15|Virtual BODYPUMP','17:30|18:00|Virtual CORE',
+'18:30|20:00|American Kang Duk Won Karate|Registration required; Reserved','20:15|20:45|Virtual BODYCOMBAT'
+],
+Saturday:[
+'06:15|07:00|Virtual BODYPUMP','07:45|08:15|Virtual BODYCOMBAT','08:30|09:30|ZUMBA',
+'09:45|10:45|BODYCOMBAT','11:00|11:45|Virtual BODYATTACK','12:00|13:00|Virtual BODYPUMP',
+'14:00|16:30|American Kang Duk Won Karate|Registration required; Reserved'
+],
+Sunday:[
+'08:30|09:15|Virtual BODYPUMP','09:30|10:05|Virtual BODYCOMBAT Base','10:15|10:45|Virtual GRIT Cardio',
+'11:00|13:00|American Kang Duk Won Karate|Registration required; Reserved',
+'14:00|14:45|Virtual BODYPUMP','15:00|15:45|Virtual BODYCOMBAT','16:00|16:30|Virtual BODYATTACK'
+]};
+const DAYS=Object.keys(RAW);
+const schedule=Object.fromEntries(DAYS.map(day=>[day,RAW[day].map(row=>{
+ const [start,end,name,extra='']=row.split('|');
+ return {start,end,name,extra,virtual:/^Virtual /i.test(name)};
+}).sort((a,b)=>a.start.localeCompare(b.start))]));
+const $=id=>document.getElementById(id);
+const localParts=()=>{
+ const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'long',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
+ const value=type=>parts.find(item=>item.type===type)?.value;
+ return {day:value('weekday'),minute:Number(value('hour'))*60+Number(value('minute'))};
+};
+const mins=time=>{const [h,m]=time.split(':').map(Number);return h*60+m};
+const fmt=time=>{const [h,m]=time.split(':').map(Number);return String((h+11)%12+1)+':'+String(m).padStart(2,'0')+(h<12?' AM':' PM')};
+const span=(parent,tag,className,value)=>{
+ const node=document.createElement(tag);if(className)node.className=className;node.textContent=value;parent.append(node);return node;
+};
+let mode='today',selected=localParts().day;
+function selectedDays(){
+ $('days').replaceChildren();
+ for(const d of DAYS){
+  const button=document.createElement('button');
+  button.type='button';button.textContent=d;button.setAttribute('aria-pressed',String(d===selected));
+  button.addEventListener('click',()=>{selected=d;mode='day';render()});$('days').append(button);
+ }
+}
+function card(item,now){
+ const el=document.createElement('article');el.className='class '+(item.virtual?'virtual':'live');
+ const times=span(el,'div','timings','');span(times,'div','time',fmt(item.start));
+ span(times,'div','end','Until '+fmt(item.end));
+ const details=span(el,'div','details','');
+ span(details,'div','name',item.name.replace(/^Virtual /i,''));
+ const tags=span(details,'div','tags','');
+ span(tags,'span','tag '+(item.virtual?'':'live'),item.virtual?'VIRTUAL':'LIVE');
+ if(item.extra)span(tags,'span','tag '+(/Registration/.test(item.extra)?'reserve':''),item.extra);
+ if(now>=mins(item.start)&&now<mins(item.end))span(tags,'span','tag live','IN PROGRESS');
+ return el;
+}
+function weekly(){
+ const grid=$('weekGrid');grid.replaceChildren();
+ for(const day of DAYS){
+  const sec=span(grid,'section','dayPanel','');span(sec,'h3','',day);
+  for(const item of schedule[day]){
+   const row=span(sec,'div','summary','');
+   span(row,'strong','',fmt(item.start));
+   span(row,'span','',item.name+(item.extra?' · '+item.extra:''));
+  }
+ }
+}
+function render(){
+ const local=localParts();
+ if(mode==='today'||mode==='tv')selected=local.day;
+ document.body.classList.toggle('tv',mode==='tv');
+ for(const m of ['today','day','week','tv'])$(m).setAttribute('aria-pressed',String(mode===m));
+ selectedDays();
+ const items=schedule[selected]||[];
+ const now=local.day===selected?local.minute:-1;
+ let show=items;
+ if(mode==='tv'){
+  const nextIndex=items.findIndex(x=>mins(x.end)>local.minute);
+  show=items.slice(nextIndex<0?Math.max(0,items.length-4):nextIndex,nextIndex<0?undefined:nextIndex+4);
+ }
+ $('heading').textContent=mode==='week'?'Full week at a glance':mode==='tv'?'Now and up next · '+selected:selected+' · Cardio Studio';
+ $('subhead').textContent=mode==='tv'?'Large-type hallway view. Only four classes on screen.':mode==='week'?'Two-column overview. Select any day for larger cards.':'All classes in time order, including virtual and instructor-led sessions.';
+ $('status').textContent=mode==='tv'?'Watertown local time · '+new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'}):items.length+' scheduled classes';
+ $('cards').replaceChildren(...show.map(item=>card(item,now)));
+ $('cards').classList.toggle('hide',mode==='week');
+ $('weekGrid').classList.toggle('hide',mode!=='week');
+ $('days').classList.toggle('hide',mode==='week'||mode==='today'||mode==='tv');
+ if(mode==='week')weekly();
+}
+for(const m of ['today','day','week','tv'])$(m).addEventListener('click',()=>{mode=m;if(m==='day'&&!DAYS.includes(selected))selected=localParts().day;render()});
+render();
+setInterval(()=>{if(mode==='today'||mode==='tv')render()},60*1000);
+</script>
+</body>
+</html>
