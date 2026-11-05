@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {runInNewContext} from 'node:vm';
+import {Script} from 'node:vm';
 import {
  loadLandryverseInputs,
  buildLandryverseBlueprint,
@@ -48,7 +48,7 @@ test('portable story uses canonical bundled Civweave client with zero author-onl
  const script=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
  assert.ok(script,'offline Civweave client is embedded');
  // Ensures the embedded browser script compiles, without claiming a live server.
- new (await import('node:vm')).Script(script);
+ new Script(script);
 });
 
 test('canonical Worldweaver creates four draft rooms and never provisions a server',()=>{
