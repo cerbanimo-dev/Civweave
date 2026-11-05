@@ -1,4 +1,5 @@
 import {ACTIONS_KEY,INTENTIONS_KEY,CAMPUS_KEY,VIEWS,normalizeAction,normalizeStore,mergeSavedPlans,projectBoard,selectActions} from './shared/action-board-core-v1.mjs';
+import {stagePortableActions} from './shared/worldweaver-portable-reconcile-v1.mjs';
 
 const VERSION='1.0.0-action-board-v1';
 const ID='cw-action-board-v1';
@@ -20,6 +21,15 @@ function writeStore(store){
     warning='Unable to save locally ('+(error?.name||'storage error')+'). Free storage or allow site data, then retry.';
     render();return false;
   }
+}
+/** Only a human-reviewed host attachment calls this: action-board owns the write.
+ * Imported steps are inbox actions, never saved Weaveling Quests or proof.
+ */
+function importPortableActions(bundle,approvedIds,verifiedScope){
+  const outcome=stagePortableActions(readStore(),bundle,approvedIds,verifiedScope);
+  if(outcome.receipts.some(row=>row.status==='imported')&&!writeStore(outcome.store))
+    return {ok:false,receipts:[],error:warning||'Unable to save imported actions'};
+  return {ok:true,receipts:outcome.receipts};
 }
 function allActions(){
   return projectBoard(readStore(),mergeSavedPlans(readKey(INTENTIONS_KEY,[]),readKey(CAMPUS_KEY,{})));
@@ -174,4 +184,4 @@ addEventListener('civweave:home-menu-opened',()=>installMenuAction());
 addEventListener('civweave:working-campus-surface-repaired',boot);
 addEventListener('civweave:working-campus-plan-built',()=>{boot();if(dialog?.open)render()});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-globalThis.CivweaveActionBoardV1=Object.freeze({version:VERSION,open,read:allActions,refresh:()=>{boot();if(dialog?.open)render()}});
+globalThis.CivweaveActionBoardV1=Object.freeze({version:VERSION,open,read:allActions,importPortableActions,refresh:()=>{boot();if(dialog?.open)render()}});
