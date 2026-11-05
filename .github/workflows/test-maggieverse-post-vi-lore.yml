@@ -1,0 +1,27 @@
+name: Test Maggieverse post-VI lore
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/shared/maggieverse-post-vi-lore-v1.mjs'
+      - 'scripts/test-maggieverse-post-vi-lore-v1.mjs'
+      - '.github/workflows/test-maggieverse-post-vi-lore.yml'
+  push:
+    branches:
+      - 'lore/kami-ryn-postvi-worldweaver-20261105'
+    paths:
+      - 'public/app/shared/maggieverse-post-vi-lore-v1.mjs'
+      - 'scripts/test-maggieverse-post-vi-lore-v1.mjs'
+      - '.github/workflows/test-maggieverse-post-vi-lore.yml'
+permissions:
+  contents: read
+jobs:
+  editorial-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate post-VI lore helper
+        run: node --test scripts/test-maggieverse-post-vi-lore-v1.mjs
