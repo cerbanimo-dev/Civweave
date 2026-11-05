@@ -11,7 +11,7 @@ function setup(){
   const world=createWorldweaver({id:()=>String(++sequence),authorize:auth});
   const instance=world.dispatch({type:'create',guide:'kamiya',title:'Test Commons'},human).instance;
   const npc=world.dispatch({type:'rig-npc',instanceId:instance.id,modelId:pilot.modelId,pilotPrincipalId:pilot.principalId,
-    name:'Kami',personaRef:pilot.personaRef,capabilities:['speak']},pilot).npc;
+    name:'Kami',pilotPrompt:'Friendly workshop storyteller.',personaRef:pilot.personaRef,capabilities:['speak']},pilot).npc;
   return{world,npc,instance};
 }
 const mkSession=()=>({propose:async payload=>({kind:'fiction-proposal',applied:false,text:'The gate is unlocked.',role:payload.role})});
