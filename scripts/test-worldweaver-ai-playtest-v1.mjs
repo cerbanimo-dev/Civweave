@@ -40,6 +40,8 @@ test('playtest is explicitly user-driven, has visible caps, and does not persist
  assert.match(js,/createConfiguredWorldweaverAISession/);
  assert.match(js,/userInitiated:true/);
  assert.match(js,/form\.addEventListener\('submit'/);
+ assert.match(js,/activeController\?\.abort/);
+ assert.match(js,/await import\('\/app\/shared\/civweave-model-runtime\.js'\)/);
  assert.doesNotMatch(js,/localStorage\.setItem|sessionStorage\.setItem|setInterval|setTimeout\(.*propose/);
 });
 test('Commons Between links only to optional shared-runtime story proposal lab',()=>{
