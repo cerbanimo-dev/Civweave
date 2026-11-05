@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'lib/starling-meeting-*.mjs'
+      - 'public/app/shared/starling-meeting-*.mjs'
+      - 'public/app/starling-meeting-console-v1.*'
       - 'scripts/test-starling-meeting-*.mjs'
       - 'docs/contracts/starling-meeting-operations-v1.md'
       - '.github/workflows/starling-meeting-operations.yml'
@@ -11,6 +13,8 @@ on:
     branches: [staging]
     paths:
       - 'lib/starling-meeting-*.mjs'
+      - 'public/app/shared/starling-meeting-*.mjs'
+      - 'public/app/starling-meeting-console-v1.*'
       - 'scripts/test-starling-meeting-*.mjs'
       - '.github/workflows/starling-meeting-operations.yml'
 
@@ -22,4 +26,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test scripts/test-starling-meeting-operations.mjs scripts/test-starling-meeting-live-adapter.mjs scripts/test-starling-meeting-records.mjs scripts/test-starling-meeting-quest-bridge.mjs
+      - run: node --test scripts/test-starling-meeting-operations.mjs scripts/test-starling-meeting-live-adapter.mjs scripts/test-starling-meeting-records.mjs scripts/test-starling-meeting-quest-bridge.mjs scripts/test-starling-meeting-recorder-v1.mjs scripts/test-starling-meeting-mesh-bridge-v1.mjs scripts/test-starling-meeting-console-v1.mjs
