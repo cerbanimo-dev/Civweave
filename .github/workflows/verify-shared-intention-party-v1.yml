@@ -7,6 +7,7 @@ on:
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/service-worker-chat-repair-v245.js'
       - 'scripts/verify-shared-intention-party-chat-v1.mjs'
+      - 'scripts/test-party-silent-turns-v1.mjs'
       - '.github/workflows/verify-shared-intention-party-v1.yml'
   push:
     branches: [main]
@@ -15,6 +16,7 @@ on:
       - 'public/app/shared-guide-surface-v236.js'
       - 'public/service-worker-chat-repair-v245.js'
       - 'scripts/verify-shared-intention-party-chat-v1.mjs'
+      - 'scripts/test-party-silent-turns-v1.mjs'
 
 jobs:
   verify:
@@ -25,3 +27,4 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/verify-shared-intention-party-chat-v1.mjs
+      - run: node --test scripts/test-party-silent-turns-v1.mjs
