@@ -22,7 +22,15 @@ const roles=[
  ['diner-child','Answer one question while keeping your own choice about what you reveal. Speak as the child only.'],
  ['landry','Close the beat with a new question or reversible next action. Speak as Landry only.']
 ];
-const sourceFact='The diner screen announces BIDDING OPENS AT MIDNIGHT. A child claims six rescues; a physical photograph depicts Landry, Delia, Magnus, Maggie and a cut-out fifth face. The origin of every unusual item is unverified.';
+const sceneByRole=Object.freeze({
+ landry:'You are at the diner. The child claims six rescues. You have seen the cut photograph and the bidding announcement. Their origins are unverified.',
+ delia:'You share observations with Landry at the diner, not control of her speech. The child, photograph and bidding screens are observed; their origins remain unknown.',
+ maggie:'You are on a phone connection about the calendar anomaly. You have not yet been told about the child, the photograph or the diner screen.',
+ magnus:'You are on a phone connection investigating scheduling and calendar failures. You have not personally seen the photograph or the diner.',
+ merlin:'You are an outside-the-scene editorial systems reviewer. The chapter proposal is provisional, not your own in-world memory.',
+ 'gaia-kami':'You are an outside-the-scene thematic editor. Respect uncertainty and consent; no character has a verified backstory beyond the stated proposal.',
+ 'diner-child':'You are in the diner and have a photograph. You claim to have saved Landry six times; how much to reveal remains your choice.'
+});
 const forbidden=/Other Landry|counterpart.landry|Auction Registrar|Library Beyond Tomorrow|designer of the system|\bfuck\b/i;
 
 export function validateLandryverseBinding(b){
@@ -53,7 +61,7 @@ export function planLandryverseRehearsal(inputs){
    'Only write one short turn of your own dialogue or, for editorial roles, one short editorial observation.',
    'If you cannot know a fact, ask; never invent evidence. Do not write screenplay instructions as fact.'
   ].join('\n');
-  const base='Chapter One scene: '+sourceFact+'\nAssignment: '+direction;
+  const base='Chapter One private rehearsal context: '+sceneByRole[actor]+'\nAssignment: '+direction;
   if(forbidden.test(system)||forbidden.test(base))throw new Error('Author-only spoiler leaked into a public role prompt');
   return Object.freeze({index,actor,scene:'diner',mode:'private-preview',system,base});
  });
@@ -67,7 +75,14 @@ export async function runLandryverseRehearsal({inputs,bindings,invokeModel,timeo
  for(const beat of plan){
   const b=validateLandryverseBinding({...bindings.default,...(bindings.characters?.[beat.actor]||{})});
   // Only publicly spoken, already generated lines enter the following turn.
-  const preceding=turns.slice(-4).map(t=>t.actor+': '+t.text).join('\n');
+  const visible=turns.filter(t=>{
+   if(beat.actor==='magnus'||beat.actor==='maggie')return ['magnus','maggie'].includes(t.actor);
+   if(beat.actor==='diner-child')return ['landry','diner-child'].includes(t.actor);
+   if(beat.actor==='delia')return ['landry','delia'].includes(t.actor);
+   if(beat.actor==='landry')return ['landry','delia','diner-child'].includes(t.actor);
+   return true; // only non-diegetic editors inspect the full public scene
+  });
+  const preceding=visible.slice(-4).map(t=>t.actor+': '+t.text).join('\\n');
   const content=beat.base+'\nPreviously spoken lines only:\n'+(preceding||'(none)')+
    '\nStay under 100 words. Give one attributed response; do not write anybody else\'s turn.';
   const messages=[{role:'system',content:beat.system},{role:'user',content}];
