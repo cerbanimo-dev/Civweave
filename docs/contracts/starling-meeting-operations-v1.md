@@ -42,6 +42,20 @@ Each event ID is idempotent. A committed turn ID is also idempotent. Proposals a
 3. A human explicitly approves a proposed decision before any Quest handoff; the canonical Quest engine validates and persists the actual Quest separately.
 4. Projection is safe without network or models. Records from an offline client remain provisional until the mesh confirms provenance and ordering.
 5. Participants are informed when transcript recording is active and can use a non-recorded meeting mode; consent and retention remain integration blockers.
-6. Transcript capture defaults to off. The live adapter requires committed, spoken, floor-granted turns; its caller must supply authenticated participant IDs and consent state from trusted runtime state, never the model message. This mapping is not itself authentication.\n7. Automated tests: `node --test scripts/test-starling-meeting-operations.mjs scripts/test-starling-meeting-live-adapter.mjs`.
+6. Transcript capture defaults to off. The live adapter requires committed, spoken, floor-granted turns; its caller must supply authenticated participant IDs and consent state from trusted runtime state, never the model message. This mapping is not itself authentication.\n7. Automated tests: `node --test scripts/test-starling-meeting-operations.mjs scripts/test-starling-meeting-live-adapter.mjs scripts/test-starling-meeting-records.mjs`.
 
 This foundation is **not** a deployed meeting service and does not claim to be a complete voting, transcript-sync, or Quest integration.
+
+## Local records and conservative summaries
+
+`lib/starling-meeting-records.mjs` supplies `createMeetingRepository(storage)` with explicit revision preconditions: `save(meeting,{expectedRevision})` and `load(guildId,meetingId)`. The storage adapter may use device-local storage; each meeting key is Guild-scoped. Stale writes fail rather than silently merge. This adapter does **not** implement signed, multi-device mesh synchronization or atomic cross-process compare-and-swap. The caller must serialize local writes and retain divergent signed mesh histories for review.
+
+`meetingSummary(meeting)` projects known facts only: agenda, number of committed speaking turns, open/approved/rejected decisions, and pending Quest handoffs. It explicitly reports `verifiedQuestCompletions: 0` and `transcriptIsComplete: false` because the core cannot verify downstream Quest completion or full recording coverage. AI-authored interpretations, where added later, require source pointers and an explicit non-authoritative label.
+
+## Remaining Thread 1 integration gates
+
+- Authenticate and authorize actual actors at the persistence ingress (the record core only validates claimed roles).
+- Decide transcript retention, notice, consent withdrawal, local deletion and shared-record policy with the humans affected.
+- Bridge persistent objects through the existing signed local object mesh, including offline forks/reconciliation; never treat this revision adapter as mesh consensus.
+- Reconcile requested Quest handoffs with verified canonical Quest IDs and completion evidence; pending records must not imply execution.
+- Expose the report through the installed app without creating a competing chat or event owner.
