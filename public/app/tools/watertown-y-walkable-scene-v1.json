@@ -1,0 +1,392 @@
+{
+  "schema": "civweave.digital-y.walkable-scene.v1",
+  "title": "Watertown Digital Y — Fictionalized Interior Prototype",
+  "version": 1,
+  "realWorldClaim": "Unaffiliated fictionalized schematic; not an architectural survey or official YMCA service",
+  "world": {
+    "width": 24,
+    "height": 18,
+    "wallHeight": 3,
+    "eyeHeight": 1.65,
+    "spawn": {
+      "x": 7,
+      "y": 15.25,
+      "heading": -1.5707963267948966
+    }
+  },
+  "zones": [
+    {
+      "id": "cardio",
+      "name": "Cardio Studio",
+      "rect": [
+        0,
+        0,
+        10,
+        8
+      ],
+      "color": "#c1eae0"
+    },
+    {
+      "id": "commons",
+      "name": "Community Commons",
+      "rect": [
+        0,
+        8,
+        10,
+        11
+      ],
+      "color": "#f1dfac"
+    },
+    {
+      "id": "lobby",
+      "name": "Welcome Lobby",
+      "rect": [
+        0,
+        11,
+        10,
+        18
+      ],
+      "color": "#c9e9f0"
+    },
+    {
+      "id": "walkway",
+      "name": "Main Corridor",
+      "rect": [
+        10,
+        0,
+        14,
+        18
+      ],
+      "color": "#dfe7ec"
+    },
+    {
+      "id": "spin",
+      "name": "Spin Studio",
+      "rect": [
+        14,
+        0,
+        24,
+        8
+      ],
+      "color": "#dddbf8"
+    },
+    {
+      "id": "yoga",
+      "name": "Yoga Studio and Quest Gallery",
+      "rect": [
+        14,
+        8,
+        24,
+        18
+      ],
+      "color": "#f4d8e3"
+    }
+  ],
+  "walls": [
+    {
+      "id": "north",
+      "a": [
+        0,
+        0
+      ],
+      "b": [
+        24,
+        0
+      ],
+      "color": "#29566b"
+    },
+    {
+      "id": "east",
+      "a": [
+        24,
+        0
+      ],
+      "b": [
+        24,
+        18
+      ],
+      "color": "#29566b"
+    },
+    {
+      "id": "south",
+      "a": [
+        24,
+        18
+      ],
+      "b": [
+        0,
+        18
+      ],
+      "color": "#29566b"
+    },
+    {
+      "id": "west",
+      "a": [
+        0,
+        18
+      ],
+      "b": [
+        0,
+        0
+      ],
+      "color": "#29566b"
+    },
+    {
+      "id": "left-upper-1",
+      "a": [
+        10,
+        0
+      ],
+      "b": [
+        10,
+        5
+      ],
+      "color": "#438b96"
+    },
+    {
+      "id": "left-upper-2",
+      "a": [
+        10,
+        7
+      ],
+      "b": [
+        10,
+        12
+      ],
+      "color": "#438b96"
+    },
+    {
+      "id": "left-lower",
+      "a": [
+        10,
+        14
+      ],
+      "b": [
+        10,
+        18
+      ],
+      "color": "#438b96"
+    },
+    {
+      "id": "right-upper-1",
+      "a": [
+        14,
+        0
+      ],
+      "b": [
+        14,
+        5
+      ],
+      "color": "#6585a8"
+    },
+    {
+      "id": "right-upper-2",
+      "a": [
+        14,
+        7
+      ],
+      "b": [
+        14,
+        12
+      ],
+      "color": "#6585a8"
+    },
+    {
+      "id": "right-lower",
+      "a": [
+        14,
+        14
+      ],
+      "b": [
+        14,
+        18
+      ],
+      "color": "#6585a8"
+    },
+    {
+      "id": "cardio-commons-w",
+      "a": [
+        0,
+        8
+      ],
+      "b": [
+        4.5,
+        8
+      ],
+      "color": "#6f8c7a"
+    },
+    {
+      "id": "cardio-commons-e",
+      "a": [
+        6.5,
+        8
+      ],
+      "b": [
+        10,
+        8
+      ],
+      "color": "#6f8c7a"
+    },
+    {
+      "id": "commons-lobby-w",
+      "a": [
+        0,
+        11
+      ],
+      "b": [
+        5,
+        11
+      ],
+      "color": "#b99764"
+    },
+    {
+      "id": "commons-lobby-e",
+      "a": [
+        7,
+        11
+      ],
+      "b": [
+        10,
+        11
+      ],
+      "color": "#b99764"
+    },
+    {
+      "id": "spin-yoga-w",
+      "a": [
+        14,
+        8
+      ],
+      "b": [
+        18,
+        8
+      ],
+      "color": "#8571a5"
+    },
+    {
+      "id": "spin-yoga-e",
+      "a": [
+        20,
+        8
+      ],
+      "b": [
+        24,
+        8
+      ],
+      "color": "#8571a5"
+    }
+  ],
+  "objects": [
+    {
+      "id": "board-lobby",
+      "kind": "schedule",
+      "studio": "all",
+      "mode": "tv",
+      "label": "Lobby · Now & Next",
+      "x": 8.8,
+      "y": 14.4,
+      "color": "#13a5a5",
+      "icon": "▤",
+      "radius": 1.8
+    },
+    {
+      "id": "board-cardio",
+      "kind": "schedule",
+      "studio": "cardio",
+      "mode": "today",
+      "label": "Cardio Schedule",
+      "x": 7.7,
+      "y": 4.5,
+      "color": "#13a5a5",
+      "icon": "▤",
+      "radius": 1.8
+    },
+    {
+      "id": "board-spin",
+      "kind": "schedule",
+      "studio": "spin",
+      "mode": "today",
+      "label": "Spin Schedule",
+      "x": 19.6,
+      "y": 4.4,
+      "color": "#13a5a5",
+      "icon": "▤",
+      "radius": 1.8
+    },
+    {
+      "id": "board-yoga",
+      "kind": "schedule",
+      "studio": "yoga",
+      "mode": "today",
+      "label": "Yoga Schedule",
+      "x": 19.5,
+      "y": 11.2,
+      "color": "#13a5a5",
+      "icon": "▤",
+      "radius": 1.8
+    },
+    {
+      "id": "welcome",
+      "kind": "guide",
+      "label": "Aster · Fictional Reception Guide",
+      "x": 4.5,
+      "y": 14.5,
+      "color": "#e9bb50",
+      "icon": "✦",
+      "radius": 2
+    },
+    {
+      "id": "moss",
+      "kind": "guide",
+      "label": "Moss · Learning Companion",
+      "x": 4.7,
+      "y": 9.7,
+      "color": "#86ad5c",
+      "icon": "✿",
+      "radius": 1.8
+    },
+    {
+      "id": "quest",
+      "kind": "quest",
+      "label": "Community Quest Board",
+      "x": 17,
+      "y": 15.6,
+      "color": "#b99aeb",
+      "icon": "★",
+      "radius": 1.9
+    },
+    {
+      "id": "bigfixers",
+      "kind": "audit",
+      "label": "Fruit-fly Bigfixers Desk",
+      "x": 12,
+      "y": 9.3,
+      "color": "#ecac54",
+      "icon": "✳",
+      "radius": 1.9
+    },
+    {
+      "id": "exit",
+      "kind": "exit",
+      "label": "Leave with Your Plan",
+      "x": 7.4,
+      "y": 16.95,
+      "color": "#7fbbac",
+      "icon": "⌂",
+      "radius": 1.5
+    }
+  ],
+  "quest": {
+    "id": "intro-find-class",
+    "title": "Find Your First Class",
+    "steps": [
+      "welcome",
+      "board-cardio",
+      "moss",
+      "quest",
+      "exit"
+    ],
+    "theme": "Choose a realistic first step toward a community goal",
+    "reward": "Local Civweave intention-to-quest plan (draft only)"
+  }
+}
