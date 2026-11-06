@@ -43,7 +43,7 @@ test('cue sheet import validates lengths, kinds, URLs and book identity', () => 
 
 test('Golden Path maps an imported manuscript into bounded, optional reading waypoints', async () => {
   const {buildGoldenPath, goldenWaypointForPage}=await import('../public/app/shared/maggieverse-reader-core.mjs');
-  const pages=['# Opening\\n\\nThe beginning.','Ordinary story.','Chapter 2: Discovery\\n\\nA new chapter.','The middle.','Epilogue\\n\\nThe end.'];
+  const pages=['# Opening\n\nThe beginning.','Ordinary story.','Chapter 2: Discovery\n\nA new chapter.','The middle.','Epilogue\n\nThe end.'];
   const before=pages.slice();
   const path=buildGoldenPath(pages);
   assert.equal(path.schema,'civweave.reader-golden-path.v1');
