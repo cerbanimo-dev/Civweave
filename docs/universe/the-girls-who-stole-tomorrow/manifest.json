@@ -1,0 +1,38 @@
+{
+  "schema": "civweave.story-universe.authoring.v1",
+  "id": "landryverse-girls-who-stole-tomorrow",
+  "title": "The Girls Who Stole Tomorrow",
+  "author": "Cami Ryn Tharp",
+  "series": "The Blade & Mirror Saga",
+  "part": "standalone Landryverse possibility, timeline placement pending",
+  "status": "draft-requires-author-review",
+  "copyright": "Author-owned original development material; no public publication authorization implied",
+  "premise": "Tomorrow vanishes from schedules; a seven-year-old girl says she saved Landry six times; a library is selling possible futures.",
+  "themes": [
+    "consent versus certainty",
+    "hope without guaranteed outcomes",
+    "the right to surprise one another",
+    "individual agency across shared lives"
+  ],
+  "povPolicy": "Only Landry/Delia and Magnus/Maggie narrative POV allowed; chapter one uses Landry alone",
+  "links": {
+    "characters": "cast/character-sheets.json",
+    "loomCoordinates": "loom-coordinates.json",
+    "rehearsal": "rehearsals/01-turns.md",
+    "chapter": "manuscript/01-the-last-date.md",
+    "lore": "lore.md",
+    "continuity": "continuity-review.md",
+    "outline": "outline.md"
+  },
+  "integration": {
+    "canonicalWorldweaver": "public/app/shared/worldweaver-core-v1.mjs",
+    "convergence": "public/app/shared/worldweaver-convergence-cast-v1.mjs",
+    "performance": "public/app/shared/worldweaver-performance-studio-v1.mjs",
+    "guideSource": "public/app/assets/ai/profiles.json",
+    "existingAuthorPersonaSource": "author-only Mirror_and_Blade_Persona_Manifest_v3.json (only brief paraphrases, no private notes imported)",
+    "mode": "authoring manifest only, not a live universe file",
+    "portableClientRequirement": "Generate a self-contained .civweave.html through canonical public/app/shared/worldweaver-portable-client-v1.mjs before distributing as a playable universe",
+    "actorProvisioning": false,
+    "verifiedReceipts": []
+  }
+}

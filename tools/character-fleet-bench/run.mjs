@@ -35,7 +35,7 @@ function endpoint(binding,allowLan,allowRemote){
   if(url.protocol!=='https:'&&!privateHost(url.hostname)&&!lanHost(url.hostname))throw Error('Public model endpoints require HTTPS');
   return new URL(binding.provider==='ollama'?'/api/chat':'/v1/chat/completions',url).href;
 }
-async function infer(binding,messages,timeout,allowLan,allowRemote){
+export async function infer(binding,messages,timeout,allowLan,allowRemote){
   const dest=endpoint(binding,allowLan,allowRemote);
   const ollama=binding.provider==='ollama';
   const payload=ollama

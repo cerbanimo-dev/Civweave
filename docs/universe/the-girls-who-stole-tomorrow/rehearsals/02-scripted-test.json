@@ -1,0 +1,142 @@
+{
+  "schema": "civweave.landryverse.scripted-table-read.v1",
+  "id": "chapter-one-diner-mystery",
+  "title": "The Girls Who Stole Tomorrow — Chapter One table read",
+  "mode": "scripted-no-inference",
+  "approval": "author-review",
+  "note": "Original scene excerpts. Lines are static fixtures for deterministic tests, not outputs from local or hosted models.",
+  "turns": [
+    {
+      "id": "t01",
+      "scene": "kitchen",
+      "actor": "loom",
+      "kind": "scene",
+      "text": "Morning: today is visible on the calendar; future scheduling fails. The cause is unconfirmed.",
+      "factsUsed": []
+    },
+    {
+      "id": "t02",
+      "scene": "kitchen",
+      "actor": "landry",
+      "kind": "dialogue",
+      "text": "I ripped a cat in half.",
+      "factsUsed": [
+        "calendar symptom"
+      ]
+    },
+    {
+      "id": "t03",
+      "scene": "kitchen",
+      "actor": "delia",
+      "kind": "dialogue",
+      "text": "Would an update remove Friday?",
+      "factsUsed": [
+        "unusual blank future dates"
+      ]
+    },
+    {
+      "id": "t04",
+      "scene": "bakery",
+      "actor": "loom",
+      "kind": "scene",
+      "text": "Bakery: witnesses report related date symptoms; global causality remains unverified.",
+      "factsUsed": []
+    },
+    {
+      "id": "t05",
+      "scene": "bakery",
+      "actor": "maggie",
+      "kind": "dialogue",
+      "text": "If tomorrow has been discontinued, I'd like to speak to the manager.",
+      "factsUsed": [
+        "her own account of the screen and the phone call"
+      ]
+    },
+    {
+      "id": "t06",
+      "scene": "bakery",
+      "actor": "magnus",
+      "kind": "dialogue",
+      "text": "We don't get to say time is ending because a few machines have developed an opinion about Friday.",
+      "factsUsed": [
+        "his own screen and reports relayed by Landry"
+      ]
+    },
+    {
+      "id": "t07",
+      "scene": "diner",
+      "actor": "loom",
+      "kind": "scene",
+      "text": "Diner: a child sits with pancakes and six sugar packets. Landry knows nothing about the child's origin.",
+      "factsUsed": []
+    },
+    {
+      "id": "t08",
+      "scene": "diner",
+      "actor": "diner-child",
+      "kind": "dialogue",
+      "text": "I've already saved you six times. You're making number seven very difficult.",
+      "factsUsed": [
+        "six rescues claim"
+      ]
+    },
+    {
+      "id": "t09",
+      "scene": "diner",
+      "actor": "landry",
+      "kind": "dialogue",
+      "text": "Six times from what?",
+      "factsUsed": [
+        "child's claims"
+      ]
+    },
+    {
+      "id": "t10",
+      "scene": "diner",
+      "actor": "delia",
+      "kind": "dialogue",
+      "text": "Ask about the photograph.",
+      "factsUsed": [
+        "shared scene observations"
+      ]
+    },
+    {
+      "id": "t11",
+      "scene": "diner",
+      "actor": "landry",
+      "kind": "dialogue",
+      "text": "I see you.",
+      "factsUsed": [
+        "cut photograph"
+      ]
+    },
+    {
+      "id": "t12",
+      "scene": "diner",
+      "actor": "delia",
+      "kind": "dialogue",
+      "text": "I can tell.",
+      "factsUsed": [
+        "shared scene observations"
+      ]
+    },
+    {
+      "id": "t13",
+      "scene": "diner",
+      "actor": "landry",
+      "kind": "dialogue",
+      "text": "I don't promise things before I hear them.",
+      "factsUsed": [
+        "child's claims"
+      ]
+    },
+    {
+      "id": "t14",
+      "scene": "diner",
+      "actor": "loom",
+      "kind": "scene",
+      "text": "Diner screens announce bidding at midnight. The cause, auction and fifth figure remain unverified.",
+      "factsUsed": []
+    }
+  ]
+}
