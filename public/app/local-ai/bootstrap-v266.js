@@ -28,6 +28,7 @@ const files=[
   ['/app/local-ai/runtime-v266.js?v=1.0.121-v307-coherence-reload',runtimeReady,'CivweaveLocalModelRuntimeV266'],
   ['/app/local-ai/runtime-bridge-v266.js?v=1.0.121-v307',bridgeReady,'CivweaveLocalModelBridgeV266'],
   ['/app/browser-tool-v1.js?v=1.0.0',()=>globalThis.CivweaveBrowserToolV1?.version==='1.0.0-browser-tool-v1','CivweaveBrowserToolV1'],
+  ['/app/ai-browser-bridge-v1.js?v=1.0.0',()=>globalThis.CivweaveAIBrowserBridgeV1?.version==='1.0.0-ai-browser-bridge-v1','CivweaveAIBrowserBridgeV1'],
   ['/app/local-ai/browser-agent-v1.js?v=1.0.1',()=>globalThis.CivweaveLocalBrowserAgentV1?.version==='1.0.1-local-browser-agent-v1','CivweaveLocalBrowserAgentV1'],
   ['/app/local-ai/settings-panel-v267.js?v=1.0.120-v324-qwen4-file-import',settingsReady,'CivweaveLocalAISettingsV266'],
   ['/app/local-ai/primary-route-v283.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalAIPrimaryRouteV283?.version==='1.0.85-local-ai-primary-route-v283','CivweaveLocalAIPrimaryRouteV283'],
