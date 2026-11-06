@@ -40,6 +40,42 @@ test('cue sheet import validates lengths, kinds, URLs and book identity', () => 
   assert.equal(readerStorageKey('X'.repeat(200)).length < 160,true);
 });
 
+
+test('Golden Path maps an imported manuscript into bounded, optional reading waypoints', async () => {
+  const {buildGoldenPath, goldenWaypointForPage}=await import('../public/app/shared/maggieverse-reader-core.mjs');
+  const pages=['# Opening\\n\\nThe beginning.','Ordinary story.','Chapter 2: Discovery\\n\\nA new chapter.','The middle.','Epilogue\\n\\nThe end.'];
+  const before=pages.slice();
+  const path=buildGoldenPath(pages);
+  assert.equal(path.schema,'civweave.reader-golden-path.v1');
+  assert.equal(path.pageCount,5);
+  assert.equal(path.stops[0].page,1);
+  assert.ok(path.stops.some(stop=>stop.page===3 && /Discovery/.test(stop.title)));
+  assert.ok(path.stops.every(stop=>stop.page>=1 && stop.page<=5 && stop.invitation));
+  assert.equal(goldenWaypointForPage(path,4).page,3);
+  assert.deepEqual(pages,before,'The original manuscript must remain untouched');
+  assert.ok(!JSON.stringify(path).includes('Ordinary story.'),'Do not copy book text into metadata');
+});
+test('Golden Path fallback handles short texts and bounds oversized input', async () => {
+  const {buildGoldenPath,goldenWaypointForPage}=await import('../public/app/shared/maggieverse-reader-core.mjs');
+  const one=buildGoldenPath(['Once upon a time.']);
+  assert.deepEqual(one.stops.map(stop=>stop.page),[1]);
+  const plain=buildGoldenPath(Array.from({length:20},(_,i)=>'Page '+i+' without headings'));
+  assert.ok(plain.stops.length>=4 && plain.stops.length<=8);
+  assert.deepEqual(plain.stops.map(stop=>stop.page),[...new Set(plain.stops.map(stop=>stop.page))]);
+  assert.equal(goldenWaypointForPage(plain,1000).page,20);
+  assert.throws(()=>buildGoldenPath([]),/pages/i);
+  assert.throws(()=>buildGoldenPath(Array(12001).fill('x')),/pages/i);
+});
+test('reader exposes an opt-out of the golden overlay, not an unreviewed child-safety filter', async () => {
+  const fs=await import('node:fs/promises');
+  const html=await fs.readFile(new URL('../public/app/maggieverse-reader.html',import.meta.url),'utf8');
+  assert.match(html,/id="golden-mode"/);
+  assert.match(html,/id="golden-path"/);
+  assert.match(html,/id="export-golden-path"/);
+  assert.match(html,/not a content-safety filter/i);
+  assert.match(html,/CCCAMIRYNCIVWEAVE>CC/);
+});
+
 console.log('maggieverse reader: ok');
 
 
