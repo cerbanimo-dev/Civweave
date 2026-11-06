@@ -9,6 +9,10 @@
   "ai": {
     "binding": "AI"
   },
+  "browser": {
+    "binding": "BROWSER",
+    "remote": true
+  },
   "ratelimits": [
     {
       "name": "GUILD_API_RATE_LIMITER",
