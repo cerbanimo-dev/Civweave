@@ -15,14 +15,16 @@ button:focus-visible{outline:3px solid #e5ffdf}p{line-height:1.5;color:#cadfce}s
 <div class="grid">
 <article><h2>The Commons Between</h2><p>Explore the Threshold, Starling Commons, Living School, Quest Forge, FellowFare, Anarchadia, and Convergence Stage.</p><button id="commons" type="button">Download The Commons Between</button></article>
 <article><h2>The Lantern Mesh</h2><p>Visit Mosslight Academy, Quest Forge, FellowFare Night Market, and Anarchadia Assembly.</p><button id="lantern" type="button">Download The Lantern Mesh</button></article>
+<article><h2>SandWitch Eight</h2><p>Violet · Cami · Jasper. Explore eight lantern doors at a fictional 2020 desert gathering: the Golden Middle, the Trans Witch Commons, fruit-fly bigfixers, and the Eighth Dawn. By Cami Ryn Tharp.</p><button id="sandwitch" type="button">Download SandWitch Eight</button> <button id="sandwitch-play" type="button">Play in a new tab</button></article>
 </div>
 <small>The portable client records local drafts only. For authenticated Guild changes, official Quest completion, AI chat, or shared world state, use the installed Civweave app.</small>
 <p role="status" id="status"></p>
 </main><script type="module">
 import {COMMONS_BETWEEN} from '../shared/worldweaver-universe-v1.mjs';
 import {LANTERN_MESH} from '../shared/worldweaver-lantern-mesh-v1.mjs';
+import {SANDWITCH_EIGHT} from '../shared/worldweaver-sandwitch-eight-v1.mjs';
 import {exportPortableUniverseHtml} from '../shared/worldweaver-portable-client-v1.mjs';
-const worlds={commons:COMMONS_BETWEEN,lantern:LANTERN_MESH};
+const worlds={commons:COMMONS_BETWEEN,lantern:LANTERN_MESH,sandwitch: SANDWITCH_EIGHT};
 for(const id of Object.keys(worlds)){
   document.getElementById(id).addEventListener('click',()=>{
     const w=worlds[id],html=exportPortableUniverseHtml(w,{bridgeOrigin:location.protocol==='https:'?location.origin:'https://civweave.cc'});
@@ -33,4 +35,12 @@ for(const id of Object.keys(worlds)){
     setTimeout(()=>URL.revokeObjectURL(url),3000);
   });
 }
+document.getElementById('sandwitch-play').addEventListener('click',()=>{
+  const html=exportPortableUniverseHtml(SANDWITCH_EIGHT,{bridgeOrigin:location.protocol==='https:'?location.origin:'https://civweave.cc'});
+  const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+  const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';
+  document.body.append(link);link.click();link.remove();
+  document.getElementById('status').textContent='Opened SandWitch Eight in a local browser tab. Save the portable file to keep a permanent offline copy.';
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+});
 </script></body></html>
