@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Civweave · Starling Meeting Room VR</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#101724;color:#f4f4ee}
+*{box-sizing:border-box}body{margin:0}canvas{display:block;width:100vw;height:100vh;touch-action:none}
+.panel{position:fixed;top:1rem;left:1rem;max-width:370px;padding:1rem;background:#0d1724dd;border:1px solid #627080;border-radius:12px}
+h1{font-size:1.12rem;margin:0 0 .4rem}p{margin:.4rem 0;color:#d4dce5;font-size:.88rem}
+button{background:#bce6ca;color:#11251b;border:0;padding:.75rem 1rem;border-radius:9px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+#status{min-height:1.2em}#exit{display:none}
+@media(max-width:520px){.panel{right:1rem;max-width:none}}
+</style>
+</head>
+<body>
+<canvas id="scene" aria-label="3D meeting room with central table and four participant seats"></canvas>
+<div class="panel" id="panel">
+<h1>Starling Meeting Room · VR Environment</h1>
+<p>Milestone A · Seated, head-tracked stereoscopic room. Participants: Moss, Kamiya, Rook, Merlin. Visual-only; no microphones, AI requests, or speaking authority are active.</p>
+<p id="status" role="status" aria-live="polite">Checking headset support…</p>
+<button id="enter" disabled>Enter Meeting in VR</button>
+<button id="exit">Exit VR</button>
+<p>For Quest 3, open this HTTPS page in Quest Browser. Remain seated and use the headset system boundary.</p>
+</div>
+<script type="module">
+const canvas=document.querySelector('#scene'),status=document.querySelector('#status');
+const enter=document.querySelector('#enter'),exit=document.querySelector('#exit');
+const gl=canvas.getContext('webgl',{alpha:false,antialias:true,xrCompatible:true});
+if(!gl){status.textContent='WebGL unavailable on this browser.';throw new Error('WebGL unavailable');}
+const vertex=`attribute vec3 position;attribute vec3 normal;uniform mat4 projection,view,model;varying float shade;void main(){vec3 n=normalize(mat3(model)*normal);shade=0.55+0.45*max(dot(n,normalize(vec3(-0.4,1.0,0.65))),0.0);gl_Position=projection*view*model*vec4(position,1.0);}`;
+const fragment=`precision mediump float;uniform vec3 color;varying float shade;void main(){gl_FragColor=vec4(color*shade,1.0);}`;
+function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;}
+const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);
+if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));
+gl.useProgram(program);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);
+const loc={position:gl.getAttribLocation(program,'position'),normal:gl.getAttribLocation(program,'normal'),projection:gl.getUniformLocation(program,'projection'),view:gl.getUniformLocation(program,'view'),model:gl.getUniformLocation(program,'model'),color:gl.getUniformLocation(program,'color')};
+function mesh(vertices,normals,indices){const v=gl.createBuffer(),n=gl.createBuffer(),i=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,v);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.STATIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,n);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(normals),gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,i);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(indices),gl.STATIC_DRAW);return {v,n,i,count:indices.length};}
+const cube=(()=>{const v=[],n=[],idx=[];const faces=[[[1,0,0],[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]]],[[-1,0,0],[[-1,-1,1],[-1,1,1],[-1,1,-1],[-1,-1,-1]]],[[0,1,0],[[-1,1,-1],[-1,1,1],[1,1,1],[1,1,-1]]],[[0,-1,0],[[-1,-1,1],[-1,-1,-1],[1,-1,-1],[1,-1,1]]],[[0,0,1],[[1,-1,1],[1,1,1],[-1,1,1],[-1,-1,1]]],[[0,0,-1],[[-1,-1,-1],[-1,1,-1],[1,1,-1],[1,-1,-1]]]];for(const [normal,pts] of faces){const j=v.length/3;for(const p of pts){v.push(...p);n.push(...normal);}idx.push(j,j+1,j+2,j,j+2,j+3);}return mesh(v,n,idx);})();
+const sphere=(()=>{const v=[],n=[],idx=[],rings=12,segments=16;for(let y=0;y<=rings;y++){let a=Math.PI*y/rings;for(let x=0;x<=segments;x++){let b=2*Math.PI*x/segments;const p=[Math.sin(a)*Math.cos(b),Math.cos(a),Math.sin(a)*Math.sin(b)];v.push(...p);n.push(...p);}}for(let y=0;y<rings;y++)for(let x=0;x<segments;x++){const p=y*(segments+1)+x,q=p+segments+1;idx.push(p,q,p+1,q,q+1,p+1);}return mesh(v,n,idx);})();
+const mat=()=>new Float32Array(16);
+function identity(){const m=mat();m[0]=m[5]=m[10]=m[15]=1;return m;}
+function objectMatrix(p,s){const m=identity();m[0]=s[0];m[5]=s[1];m[10]=s[2];m[12]=p[0];m[13]=p[1];m[14]=p[2];return m;}
+function perspective(fov,aspect,near,far){const f=1/Math.tan(fov/2),m=mat();m[0]=f/aspect;m[5]=f;m[10]=(far+near)/(near-far);m[11]=-1;m[14]=2*far*near/(near-far);return m;}
+function camera(x,y,z){const m=identity();m[12]=-x;m[13]=-y;m[14]=-z;return m;}
+const objects=[];function add(shape,p,s,c){objects.push({shape,m:objectMatrix(p,s),color:c});}
+const floor=[.18,.23,.29],wall=[.15,.20,.29],wood=[.48,.31,.21],chair=[.20,.36,.41];
+add(cube,[0,-.09,-1.65],[8,.1,8],floor);
+add(cube,[0,2.6,-5.3],[8,2.6,.1],wall);
+add(cube,[-4,2.6,-1.4],[.1,2.6,8],wall);add(cube,[4,2.6,-1.4],[.1,2.6,8],wall);
+add(cube,[0,5.1,-1.4],[8,.12,8],[.24,.30,.38]);
+add(cube,[0,.75,-1.8],[1.35,.08,.83],wood);
+for(const x of [-1.12,1.12])for(const z of [-2.37,-1.23])add(cube,[x,.36,z],[.065,.36,.07],[.29,.19,.14]);
+const seats=[
+{name:'Moss',x:-1.52,z:-1.8,color:[.43,.75,.51]},
+{name:'Kamiya',x:1.52,z:-1.8,color:[.73,.51,.78]},
+{name:'Rook',x:-.64,z:-3.1,color:[.73,.65,.43]},
+{name:'Merlin',x:.64,z:-3.1,color:[.43,.63,.85]}
+];
+for(const a of seats){
+ add(cube,[a.x,.38,a.z],[.31,.11,.31],chair);add(cube,[a.x,.82,a.z-.27],[.31,.43,.07],chair);
+ add(cube,[a.x,.99,a.z],[.19,.27,.14],a.color);add(sphere,[a.x,1.39,a.z],[.19,.21,.19],[.86,.76,.64]);
+ add(cube,[a.x,1.71,a.z],[.27,.055,.04],a.color);
+}
+add(cube,[0,.73,-1.8],[.24,.02,.28],[.20,.48,.49]);
+function draw(proj,view){gl.useProgram(program);gl.uniformMatrix4fv(loc.projection,false,proj);gl.uniformMatrix4fv(loc.view,false,view);for(const o of objects){gl.bindBuffer(gl.ARRAY_BUFFER,o.shape.v);gl.enableVertexAttribArray(loc.position);gl.vertexAttribPointer(loc.position,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,o.shape.n);gl.enableVertexAttribArray(loc.normal);gl.vertexAttribPointer(loc.normal,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,o.shape.i);gl.uniformMatrix4fv(loc.model,false,o.m);gl.uniform3fv(loc.color,o.color);gl.drawElements(gl.TRIANGLES,o.shape.count,gl.UNSIGNED_SHORT,0);}}
+function clear(){gl.clearColor(.075,.105,.16,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);}
+let session=null,refSpace=null,layer=null;
+async function startXR(){enter.disabled=true;try{
+await gl.makeXRCompatible();session=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']});
+session.addEventListener('end',()=>{session=null;refSpace=null;layer=null;exit.style.display='none';enter.disabled=false;status.textContent='VR session ended.';requestAnimationFrame(desktop);},{once:true});
+layer=new XRWebGLLayer(session,gl,{alpha:false,depth:true,antialias:true});
+session.updateRenderState({baseLayer:layer,depthNear:.05,depthFar:100});
+refSpace=await session.requestReferenceSpace('local-floor').catch(()=>session.requestReferenceSpace('local'));
+exit.style.display='inline-block';enter.style.display='none';status.textContent='In VR · seated meeting room (visual only)';
+session.requestAnimationFrame(xrFrame);
+}catch(e){status.textContent='Unable to enter VR: '+e.message;enter.disabled=false;if(session)await session.end().catch(()=>{});session=null;}}
+function xrFrame(t,frame){if(!session)return;session.requestAnimationFrame(xrFrame);const pose=frame.getViewerPose(refSpace);if(!pose)return;gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);clear();
+for(const v of pose.views){const vp=layer.getViewport(v);gl.viewport(vp.x,vp.y,vp.width,vp.height);draw(v.projectionMatrix,v.transform.inverse.matrix);}
+gl.bindFramebuffer(gl.FRAMEBUFFER,null);}
+let desktopAngle=0;
+function desktop(){if(session)return;const dpr=Math.min(devicePixelRatio||1,2),w=Math.round(canvas.clientWidth*dpr),h=Math.round(canvas.clientHeight*dpr);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,w,h);clear();desktopAngle+=.0015;draw(perspective(Math.PI/3,w/h,.05,100),camera(Math.sin(desktopAngle)*.18,1.62,.85));requestAnimationFrame(desktop);}
+exit.addEventListener('click',()=>session?.end());enter.addEventListener('click',startXR);
+if(!window.isSecureContext)status.textContent='WebXR requires HTTPS (or localhost).';
+else if(!navigator.xr)status.textContent='No WebXR headset detected. Open using Quest Browser; desktop preview available.';
+else navigator.xr.isSessionSupported('immersive-vr').then(ok=>{enter.disabled=!ok;status.textContent=ok?'Quest-compatible immersive VR is available.':'Immersive VR not available in this browser; desktop preview available.';}).catch(()=>status.textContent='Could not check WebXR availability.');
+requestAnimationFrame(desktop);
+</script>
+</body></html>
