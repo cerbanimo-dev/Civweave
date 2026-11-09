@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-11-02T13:31:14Z",
+  "built_at": "2026-11-09T13:55:28Z",
   "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
@@ -1362,74 +1362,220 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "8c8552a4-1e47-45f5-82a6-d81f6cf086df",
-        "title": "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-        "description": "Want to improve your English vocabulary and speak more confidently? In this quick lesson, we’ll teach you everything you need to know about the word \"Civilization\" —perfect for B2-level learners! Whether you’re just starting your English journey o...",
-        "source_url": "https://diler.tube/videos/watch/8c8552a4-1e47-45f5-82a6-d81f6cf086df",
+        "provider_id": "6a4de5b3-c761-4e63-b214-be87c9420584",
+        "title": "El Salvador Explained in 15 Minutes | History, Geography, Culture",
+        "description": "Discover the story of El Salvador in minutes! From its ancient civilizations and volcanic landscapes to its turbulent history and rich cultural traditions, this video breaks down everything you need to know—geography, history, economy, and what makes El Salvador truly unique. Whether you're curious about its civil war, coffee exports, or economic progress, this is your crash course on El Salvador.",
+        "source_url": "https://diler.tube/videos/watch/6a4de5b3-c761-4e63-b214-be87c9420584",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
+          "spdx": "CC-BY",
+          "label": "Attribution",
           "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "evidence": "PeerTube API licence id 1: Attribution",
           "commercial_use": true,
           "derivatives": true,
-          "share_alike": true
+          "share_alike": false
         },
         "files": [
           {
-            "url": "https://diler.tube/download/web-videos/8c8552a4-1e47-45f5-82a6-d81f6cf086df-1080.mp4",
+            "url": "https://diler.tube/download/web-videos/6a4de5b3-c761-4e63-b214-be87c9420584-720.mp4",
             "mime": "video/mp4",
-            "bytes": 18835591,
-            "resolution": "1080p",
-            "fps": 30,
+            "bytes": 172741005,
+            "resolution": "720p",
+            "fps": 24,
             "role": "web-video"
           },
           {
-            "url": "https://diler.tube/download/web-videos/8c8552a4-1e47-45f5-82a6-d81f6cf086df-480.mp4",
+            "url": "https://diler.tube/download/web-videos/6a4de5b3-c761-4e63-b214-be87c9420584-480.mp4",
             "mime": "video/mp4",
-            "bytes": 11262039,
+            "bytes": 101487401,
             "resolution": "480p",
-            "fps": 30,
+            "fps": 24,
             "role": "web-video"
           }
         ],
-        "quality_score": 87,
+        "quality_score": 88,
         "content_hash": null,
         "hash_state": "compute-on-cache",
         "attribution": {
-          "creator": "jessa",
-          "source_title": "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-          "source_url": "https://diler.tube/videos/watch/8c8552a4-1e47-45f5-82a6-d81f6cf086df",
-          "license": "Attribution - Share Alike",
+          "creator": "jpan",
+          "source_title": "El Salvador Explained in 15 Minutes | History, Geography, Culture",
+          "source_url": "https://diler.tube/videos/watch/6a4de5b3-c761-4e63-b214-be87c9420584",
+          "license": "Attribution",
           "license_url": ""
         },
         "relevance": {
           "world-history": {
-            "score": 10,
+            "score": 14,
             "evidence": [
-              "world history",
-              "world history"
+              "ancient civilizations",
+              "civilizations"
             ]
           }
         },
         "pedagogy": {
           "world-history": {
-            "strong_title_matches": [
-              "world history"
+            "strong_title_matches": [],
+            "strong_description_matches": [
+              "ancient civilizations"
             ],
-            "strong_description_matches": [],
             "educational_intent": true,
             "instructional_title": true,
             "clickbait_title": false,
             "non_instructional_title": false,
-            "pedagogy_score": 48
+            "pedagogy_score": 36
           }
         },
         "selection": {
           "world-history": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
+            "reason": "topic-description-anchor-plus-instructional-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "a24252a9-69ee-47ff-a642-6d49b3551fb3",
+        "title": "India Explained in 13 Minutes - History, Geography, And Culture",
+        "description": "Discover the rich history, diverse culture, and vibrant traditions of India in this comprehensive explainer video. From its ancient civilizations to modern advancements, we'll delve into the essence of what makes India unique. Join us on a journey...",
+        "source_url": "https://diler.tube/videos/watch/a24252a9-69ee-47ff-a642-6d49b3551fb3",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/a24252a9-69ee-47ff-a642-6d49b3551fb3-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 175034931,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/a24252a9-69ee-47ff-a642-6d49b3551fb3-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 100463300,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "India Explained in 13 Minutes - History, Geography, And Culture",
+          "source_url": "https://diler.tube/videos/watch/a24252a9-69ee-47ff-a642-6d49b3551fb3",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "world-history": {
+            "score": 14,
+            "evidence": [
+              "ancient civilizations",
+              "civilizations"
+            ]
+          }
+        },
+        "pedagogy": {
+          "world-history": {
+            "strong_title_matches": [],
+            "strong_description_matches": [
+              "ancient civilizations"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "world-history": {
+            "reason": "topic-description-anchor-plus-instructional-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "e5663ee2-3aec-434f-a5f9-094c8b1abbca",
+        "title": "Zimbabwe Explained in 11 Minutes (History, Geography, & Culture)",
+        "description": "In this episode, embark on a captivating journey through the vibrant history and diverse culture of Zimbabwe. From ancient civilizations to colonial legacies and the quest for independence, we unravel the layers that shape this remarkable nation. ...",
+        "source_url": "https://diler.tube/videos/watch/e5663ee2-3aec-434f-a5f9-094c8b1abbca",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/e5663ee2-3aec-434f-a5f9-094c8b1abbca-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 144628022,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/e5663ee2-3aec-434f-a5f9-094c8b1abbca-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 79949016,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Zimbabwe Explained in 11 Minutes (History, Geography, & Culture)",
+          "source_url": "https://diler.tube/videos/watch/e5663ee2-3aec-434f-a5f9-094c8b1abbca",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "world-history": {
+            "score": 14,
+            "evidence": [
+              "ancient civilizations",
+              "civilizations"
+            ]
+          }
+        },
+        "pedagogy": {
+          "world-history": {
+            "strong_title_matches": [],
+            "strong_description_matches": [
+              "ancient civilizations"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "world-history": {
+            "reason": "topic-description-anchor-plus-instructional-title",
+            "pedagogy_score": 36
           }
         }
       }
@@ -1651,6 +1797,298 @@
           "earth-geography": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 52
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "1fe7acc6-b9c8-48d6-832d-b97b0188d24d",
+        "title": "Djibouti Explained in 14 Minutes | History, Geography, Culture",
+        "description": "Why Djibouti Matters: The World’s Most Strategic Tiny Country, Uncover the secrets behind Djibouti’s outsized influence on global trade and security. Learn about its ancient roots, volcanic wonders, political drama, booming economy, and rich tradi...",
+        "source_url": "https://diler.tube/videos/watch/1fe7acc6-b9c8-48d6-832d-b97b0188d24d",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/1fe7acc6-b9c8-48d6-832d-b97b0188d24d-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 116613246,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/1fe7acc6-b9c8-48d6-832d-b97b0188d24d-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 85437888,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Djibouti Explained in 14 Minutes | History, Geography, Culture",
+          "source_url": "https://diler.tube/videos/watch/1fe7acc6-b9c8-48d6-832d-b97b0188d24d",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "earth-geography": {
+            "score": 10,
+            "evidence": [
+              "geography",
+              "geography"
+            ]
+          }
+        },
+        "pedagogy": {
+          "earth-geography": {
+            "strong_title_matches": [
+              "geography"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "earth-geography": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "9a16ffd6-020b-4f87-bbab-a775ff0ae20f",
+        "title": "Liechtenstein Explained in 14 Minutes | History, Geography, Culture",
+        "description": "From Witch Hunts to World's Richest Nation | The Tiny Principality's Epic Rise. Discover how a plague-ravaged backwater bought its way into sovereignty in 1719, dodged Napoleon and world wars by pivoting to Switzerland, and exploded into a $231K-p...",
+        "source_url": "https://diler.tube/videos/watch/9a16ffd6-020b-4f87-bbab-a775ff0ae20f",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/9a16ffd6-020b-4f87-bbab-a775ff0ae20f-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 267558946,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/9a16ffd6-020b-4f87-bbab-a775ff0ae20f-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 105486542,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Liechtenstein Explained in 14 Minutes | History, Geography, Culture",
+          "source_url": "https://diler.tube/videos/watch/9a16ffd6-020b-4f87-bbab-a775ff0ae20f",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "earth-geography": {
+            "score": 10,
+            "evidence": [
+              "geography",
+              "geography"
+            ]
+          }
+        },
+        "pedagogy": {
+          "earth-geography": {
+            "strong_title_matches": [
+              "geography"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "earth-geography": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "02afd03e-606f-4e01-bfb1-b253cdd549ce",
+        "title": "Seychelles Explained in 12 minutes (History, Geography, And Culture)",
+        "description": "Dive into the enchanting world of Seychelles with our latest YouTube video! 🌴✨ In this brief overview, we take you on a visual journey through the breathtaking archipelago of Seychelles. From its pristine white-sand beaches and turquoise waters t...",
+        "source_url": "https://diler.tube/videos/watch/02afd03e-606f-4e01-bfb1-b253cdd549ce",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/02afd03e-606f-4e01-bfb1-b253cdd549ce-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 179932831,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/02afd03e-606f-4e01-bfb1-b253cdd549ce-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 98195520,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Seychelles Explained in 12 minutes (History, Geography, And Culture)",
+          "source_url": "https://diler.tube/videos/watch/02afd03e-606f-4e01-bfb1-b253cdd549ce",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "earth-geography": {
+            "score": 10,
+            "evidence": [
+              "geography",
+              "geography"
+            ]
+          }
+        },
+        "pedagogy": {
+          "earth-geography": {
+            "strong_title_matches": [
+              "geography"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "earth-geography": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "cc07956e-7faf-4d27-b06c-58885349d97e",
+        "title": "South Korea EXPLAINED in 10 Minutes - (History, Geography, & Culture)",
+        "description": "Explore the fascinating world of South Korea, a country where modernity meets tradition. This video takes you on a journey through South Korea's unique culture, history, and innovations. Discover why South Koreans greet each other with \"Did you eat rice?\" and learn about their impressive work ethic, clocking in at 52 hours a week. Dive into the captivating history of the Korean Peninsula, from its division post-World War II to the economic boom known as the Miracle on the Han River. Experience South Korea's rich cultural heritage, from the symbolic Taegeukgi flag to quirky attractions like Poopoo Land and the toilet-shaped Haewoojae Museum. Marvel at the global impact of K-Pop and K-Dramas, and meet international icons like BTS and Blackpink. Understand the geographical beauty of this mountainous nation, home to the vibrant metropolis of Seoul and the serene Hallasan volcano on Jeju Island. With a focus on education, technology, and innovation, South Korea has transformed into a global powerhouse, boasting the 10th largest economy in the world. Join us as we delve into the Land of the Morning Calm, uncovering its hidden gems and celebrated icons",
+        "source_url": "https://diler.tube/videos/watch/cc07956e-7faf-4d27-b06c-58885349d97e",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/cc07956e-7faf-4d27-b06c-58885349d97e-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 91921418,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/cc07956e-7faf-4d27-b06c-58885349d97e-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 60587720,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "South Korea EXPLAINED in 10 Minutes - (History, Geography, & Culture)",
+          "source_url": "https://diler.tube/videos/watch/cc07956e-7faf-4d27-b06c-58885349d97e",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "earth-geography": {
+            "score": 10,
+            "evidence": [
+              "geography",
+              "geography"
+            ]
+          }
+        },
+        "pedagogy": {
+          "earth-geography": {
+            "strong_title_matches": [
+              "geography"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "earth-geography": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
           }
         }
       },
@@ -1976,6 +2414,79 @@
             "pedagogy_score": 36
           }
         }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "81f9643e-e820-4466-be11-c6f91700c6e5",
+        "title": "GUATEMALA: 12 Minute Documentary (Geography, History, Culture)",
+        "description": "The Heart of the Mayan World - Exploring Guatemala's Culture and History. Guatemala, a land steeped in ancient history and vibrant culture! Join us on a mesmerizing journey through the heart of Central America. Uncover the echoes of the majestic M...",
+        "source_url": "https://diler.tube/videos/watch/81f9643e-e820-4466-be11-c6f91700c6e5",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/81f9643e-e820-4466-be11-c6f91700c6e5-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 179217082,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/81f9643e-e820-4466-be11-c6f91700c6e5-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 105060958,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "GUATEMALA: 12 Minute Documentary (Geography, History, Culture)",
+          "source_url": "https://diler.tube/videos/watch/81f9643e-e820-4466-be11-c6f91700c6e5",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "earth-geography": {
+            "score": 10,
+            "evidence": [
+              "geography",
+              "geography"
+            ]
+          }
+        },
+        "pedagogy": {
+          "earth-geography": {
+            "strong_title_matches": [
+              "geography"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "earth-geography": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
       }
     ],
     "civics-society": [
@@ -2077,70 +2588,6 @@
           "creator": "UK Parliament",
           "source_title": "An introduction to Parliament",
           "source_url": "https://commons.wikimedia.org/wiki/File:An_introduction_to_Parliament.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "civics-society": {
-            "score": 10,
-            "evidence": [
-              "government",
-              "government"
-            ]
-          }
-        },
-        "pedagogy": {
-          "civics-society": {
-            "strong_title_matches": [],
-            "strong_description_matches": [
-              "government"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "civics-society": {
-            "reason": "topic-description-anchor-plus-instructional-title",
-            "pedagogy_score": 36
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:Elections and voting explained (UK).webm",
-        "title": "Elections and voting explained (UK)",
-        "description": "Discover how elections work in the UK and take a closer look at the General Election, exploring: our right to vote, how candidates and parties gain votes and what happens once elected. If you are a teacher, this animation is a quick and easy way to introduce the General Election with secondary students studying subjects such as Citizenship or Government & Politics. This is just one chapter of the ‘An Introduction to Parliament’ video. Find the full video, along with further chapters, such as Parliament’s Structure and Your Voice, here: https://www.youtube.com/watch?v=RAMbIz3Y2JA",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Elections_and_voting_explained_%28UK%29.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 7768739,
-            "provider_sha1": "d9fb26a96fbab6fda2f8774fea28f96a52241d1b",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "UK Parliament",
-          "source_title": "Elections and voting explained (UK)",
-          "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
           "license": "CC BY 3.0",
           "license_url": "https://creativecommons.org/licenses/by/3.0"
         },
@@ -2856,99 +3303,6 @@
       }
     ],
     "physics-foundations": [
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
-        "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 8378497,
-            "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "FuseSchool - Global Education",
-          "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-          "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "chemistry-foundations": {
-            "score": 10,
-            "evidence": [
-              "chemistry",
-              "chemistry"
-            ]
-          },
-          "physics-foundations": {
-            "score": 20,
-            "evidence": [
-              "physics",
-              "energy",
-              "physics",
-              "energy"
-            ]
-          }
-        },
-        "pedagogy": {
-          "chemistry-foundations": {
-            "strong_title_matches": [
-              "chemistry"
-            ],
-            "strong_description_matches": [
-              "chemistry"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          },
-          "physics-foundations": {
-            "strong_title_matches": [
-              "energy"
-            ],
-            "strong_description_matches": [
-              "physics",
-              "energy"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 64
-          }
-        },
-        "selection": {
-          "chemistry-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          },
-          "physics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
-          }
-        }
-      },
       {
         "provider": "peertube",
         "provider_id": "2f81fccf-541d-4fd6-aa2e-34020059f5c5",
@@ -3850,6 +4204,76 @@
       },
       {
         "provider": "wikimedia-commons",
+        "provider_id": "File:Chemical Reactions GCSE Chemistry.webm",
+        "title": "Chemical Reactions GCSE Chemistry",
+        "description": "GCSE Chemistry module: Chemical Reactions By the end of the topic you will have covered: - Reversible reactions - Making ammonia (Haber process) GCSE revision videos and apps from LearnersCloud: http://www.learnerscloud.com/student/products/gcse-chemistry To find out more and to start a free trial visit: http://www.learnerscloud.com/student/home/gcse/gcse-revision",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Chemical_Reactions_GCSE_Chemistry.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC BY-SA 3.0",
+          "url": "https://creativecommons.org/licenses/by-sa/3.0",
+          "evidence": "CC BY-SA 3.0 | Creative Commons Attribution-Share Alike 3.0 | cc-by-sa-3.0 | https://creativecommons.org/licenses/by-sa/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Chemical_Reactions_GCSE_Chemistry.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 6374470,
+            "provider_sha1": "0590b07ed080564e2d942ec78e71d21dbb12f02a",
+            "role": "original"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "LearnersCloud",
+          "source_title": "Chemical Reactions GCSE Chemistry",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Chemical_Reactions_GCSE_Chemistry.webm",
+          "license": "CC BY-SA 3.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/3.0"
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 24,
+            "evidence": [
+              "chemistry",
+              "chemical reactions",
+              "chemistry",
+              "reactions"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry",
+              "chemical reactions"
+            ],
+            "strong_description_matches": [
+              "chemistry",
+              "chemical reactions"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 72
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 72
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
         "provider_id": "File:What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School.webm",
         "title": "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "description": "Learn the basics about radioactive isotopes? how they are created? and what chemical reactions are created? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
@@ -4037,15 +4461,6 @@
               "chemistry",
               "chemistry"
             ]
-          },
-          "physics-foundations": {
-            "score": 20,
-            "evidence": [
-              "physics",
-              "energy",
-              "physics",
-              "energy"
-            ]
           }
         },
         "pedagogy": {
@@ -4061,30 +4476,12 @@
             "clickbait_title": false,
             "non_instructional_title": false,
             "pedagogy_score": 56
-          },
-          "physics-foundations": {
-            "strong_title_matches": [
-              "energy"
-            ],
-            "strong_description_matches": [
-              "physics",
-              "energy"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 64
           }
         },
         "selection": {
           "chemistry-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
-          },
-          "physics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 64
           }
         }
       },
@@ -6190,7 +6587,7 @@
         "provider": "peertube",
         "provider_id": "1b6d1127-6826-4d5d-9284-69bdd8f3e965",
         "title": "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-        "description": "Our job might be to build web applications, but we can't build apps that rely on networking if we don't know how these networks and the big network that connects them all (this thing called the Internet) actually work. I'll walk through the basics...",
+        "description": "Our job might be to build web applications, but we can't build apps that rely on networking if we don't know how these networks and the big network that connects them all (this thing called the Internet) actually work. I'll walk through the basics of networking, then dive a lot deeper (from TCP/UDP to IPv4/6, source/destination ports, sockets, DNS, switching, firewalling and even OSPF, VRRP and BGP). Prepare for an eye-opener when you realize how much a typical app relies on all of these (and many more) working flawlessly... and how you can prepare your app for failure in the chain.",
         "source_url": "https://phpc.tv/videos/watch/1b6d1127-6826-4d5d-9284-69bdd8f3e965",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -6598,7 +6995,7 @@
         "provider": "peertube",
         "provider_id": "2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "title": "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat...",
+        "description": "These steps make it easier to make my Digital Painting at the end of 2022, and you'll see many of my artworks with a similar process: a large sketch or storyboard, then a thin temporary line-art, then a silhouette on multi layer, then a color flat, a shading and to finish with a paint-over and post-effect. This is a tutorial doesn't dive into the details, but keeps an overview of the workflow, the goal is to give an idea of the full path and to give tips on the way. I hope showing my recipe will inspire you to start a drawing to test something you'll find interesting and find your own path. **Timeline:** - 00:19 Thumbnail (or Sketch) - 00:57 Drawing - 01:41 Silhouettes - 02:26 Color Flat - 03:31 Shading - 05:46 Paint-over and post effects License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com webcomic: www.peppercarrot.com Background music by Omfgdude \"Lofi-Hip-hop\" CC-0 / Public Domain - 2018 https://opengameart.org/content/lofi-hip-hop Special thanks to @RinCat@meow.cloud on the Fediverse for saving a corrupted MP4 recording of this video. Edited with Kdenlive 21.04 appimage on Fedora 37 KDE **Support:** - Patreon: https://www.patreon.com/join/davidrevoy? - Tipeee: https://fr.tipeee.com/pepper-carrot - Paypal: https://paypal.me/davidrevoy - Liberapay: https://liberapay.com/davidrevoy/ **Follow:** - Mastodon: https://framapiaf.org/@davidrevoy - Twitter: http://twitter.com/davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ **Website:** - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/ **Alternative channel:** - Peertube: https://peertube.touhoppai.moe/accounts/shichimi/videos - Youtube: https://www.youtube.com/",
         "source_url": "https://peertube.touhoppai.moe/videos/watch/2e1bbf79-68c0-4ebc-8598-1298258183ef",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -6672,9 +7069,10 @@
         },
         "relevance": {
           "arts-culture": {
-            "score": 10,
+            "score": 14,
             "evidence": [
-              "digital painting"
+              "digital painting",
+              "music"
             ]
           }
         },
@@ -6704,7 +7102,7 @@
         "provider": "peertube",
         "provider_id": "6efece70-20fa-4a68-88fe-85dad69c9ba7",
         "title": "Tutorial: Grayscale to Color - Krita Digital Painting - Character design",
-        "description": "A commented step-by-step guide and advice on how to paint an original fantasy character design from scratch in Krita. Timeline: - 00:00 Intro - 00:48 Setup - 02:05 Silhouette - 06:32 Lambert Lightning - 08:00 Grayscale painting ...",
+        "description": "A commented step-by-step guide and advice on how to paint an original fantasy character design from scratch in Krita. Timeline: - 00:00 Intro - 00:48 Setup - 02:05 Silhouette - 06:32 Lambert Lightning - 08:00 Grayscale painting - 10:30 Color - 15:10 Painting In the intro of this video I explain my interface: https://youtu.be/uYdEkOyFUn8 My brushes are here: https://youtu.be/s7rV88734pE Soundtrack: → Opening background: A Ghrà, CC-BY Damiano Baldoni opengameart.org → Intro: Fabian Measures - Hanami (CC-By) www.freemusicarchive.org www.soundcloud.com/fogheart → Background; Village Ambiance CC-BY Alexander Nakarada https://www.serpentsoundstudios.com/royalty-free-music/celtic-fantasy License: Creative Commons Attribution 4.0 International Video and artworks by David Revoy www.davidrevoy.com Social Media: - Mastodon: https://framapiaf.org/@davidrevoy - Instagram: https://www.instagram.com/deevadrevoy/ - Facebook: https://www.facebook.com/Pepper-Carrot-307677876068903/ - Webcomic: https://www.peppercarrot.com/ - Blog: https://www.davidrevoy.com/",
         "source_url": "https://peertube.touhoppai.moe/videos/watch/6efece70-20fa-4a68-88fe-85dad69c9ba7",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -6778,9 +7176,10 @@
         },
         "relevance": {
           "arts-culture": {
-            "score": 10,
+            "score": 14,
             "evidence": [
-              "digital painting"
+              "digital painting",
+              "music"
             ]
           }
         },
@@ -7211,113 +7610,6 @@
           "source_title": "The Philosophy of Antifa",
           "source_url": "https://communitymedia.video/videos/watch/8d6c1bba-f4c0-4fca-ab42-84a298c65064",
           "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "philosophy-ethics": {
-            "score": 10,
-            "evidence": [
-              "philosophy",
-              "philosophy"
-            ]
-          }
-        },
-        "pedagogy": {
-          "philosophy-ethics": {
-            "strong_title_matches": [
-              "philosophy"
-            ],
-            "strong_description_matches": [
-              "philosophy"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 44
-          }
-        },
-        "selection": {
-          "philosophy-ethics": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 44
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
-        "title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-        "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://g...",
-        "source_url": "https://tube.tchncs.de/videos/watch/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-720.mp4",
-            "mime": "video/mp4",
-            "bytes": 45722677,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 38045937,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 33093299,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 46792840,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 37630151,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 32676797,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "stagfoo",
-          "source_title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
-          "source_url": "https://tube.tchncs.de/videos/watch/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
-          "license": "Attribution - Share Alike",
           "license_url": ""
         },
         "relevance": {
@@ -7975,73 +8267,6 @@
         }
       },
       {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia.webm",
-        "title": "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
-        "description": "This interactive workshop presents two open, browser-based tools created specifically for Wikipedia: WikiAnalyzer v2 and WikiDebate. Rather than focusing on the technology itself, the session centers on what can be done with it to develop critical thinking, analyze bias, and better understand how we construct inferences and reasoning. The workshop is grounded in a key premise: technology is not neutral. Just as humans have cognitive and cultural biases, artificial intelligence systems can reproduce, amplify, or obscure them. Therefore, the goal is not to promote blind trust in AI, but to create space to question it, analyze it, and understand its limitations. WikiAnalyzer v2 makes structural patterns in Wikipedia articles visible through indicators such as lexical diversity, reference density, and edit distribution. WikiDebate models arguments as structured networks of claims and evidence, allowing participants to visualize how inferences are constructed and to evaluate the coherence of reasoning beyond ideological positions. During the workshop, participants will compare AI-generated responses with Wikipedia articles, identify patterns of bias, and reflect on how we reason, what we consider reliable, and why. By the end of the session, participants will have a replicable framework to foster critical thinking, bias awareness, and digital literacy, using Wikipedia as a living knowledge system.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_WikiAnalyzer_v2_%26_WikiDebate_Open_AI_Tools_to_Teach_Critical_Thinking_and_Bias_Detection_through_Wikipedia.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "CC BY-SA 4.0",
-          "url": "https://creativecommons.org/licenses/by-sa/4.0",
-          "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Wikimania_2026_%E2%80%93_WikiAnalyzer_v2_%26_WikiDebate_Open_AI_Tools_to_Teach_Critical_Thinking_and_Bias_Detection_through_Wikipedia.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 268793859,
-            "provider_sha1": "dc26d2cb0174f4d06a28677b3918f22672c969d8",
-            "role": "original"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Carla Constanza Paredes Herrera, Daniela Ávila",
-          "source_title": "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
-          "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_WikiAnalyzer_v2_%26_WikiDebate_Open_AI_Tools_to_Teach_Critical_Thinking_and_Bias_Detection_through_Wikipedia.webm",
-          "license": "CC BY-SA 4.0",
-          "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-        },
-        "relevance": {
-          "critical-thinking": {
-            "score": 14,
-            "evidence": [
-              "critical thinking",
-              "critical thinking",
-              "evidence"
-            ]
-          }
-        },
-        "pedagogy": {
-          "critical-thinking": {
-            "strong_title_matches": [
-              "critical thinking"
-            ],
-            "strong_description_matches": [
-              "critical thinking"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "critical-thinking": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
         "provider": "peertube",
         "provider_id": "31752109-0ffd-40cb-a40e-672ab69ff9ff",
         "title": "#316: Discussing critical thinking in today's age with Edward Dowd",
@@ -8168,113 +8393,6 @@
           "source_url": "https://commons.wikimedia.org/wiki/File:Complexity_Science-_3_Systems_Thinking.webm",
           "license": "CC BY 3.0",
           "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "logical-frameworks": {
-            "score": 10,
-            "evidence": [
-              "systems thinking",
-              "systems thinking"
-            ]
-          }
-        },
-        "pedagogy": {
-          "logical-frameworks": {
-            "strong_title_matches": [
-              "systems thinking"
-            ],
-            "strong_description_matches": [
-              "systems thinking"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "logical-frameworks": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "a4e1b73a-57fe-4460-9f0a-39d75cda843f",
-        "title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
-        "description": "Software development is at the core a human activity - and the created artifacts are among the most complex humankind has ever produced. Systems thinking helps to merge high technical sophistication with high human sophistication when developing s...",
-        "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 3160911997,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 306127830,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 241335269,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 811473511,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 304518584,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 239725747,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Eberhard Wolff",
-          "source_title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
-          "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
         },
         "relevance": {
           "logical-frameworks": {
@@ -8498,111 +8616,6 @@
             "pedagogy_score": 48
           }
         }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
-        "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-        "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about ...",
-        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 1911000052,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 260879888,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 225051511,
-            "resolution": "360p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 540467455,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 260480450,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 224646233,
-            "resolution": "360p",
-            "fps": 24,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Eberhard Wolff",
-          "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-          "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "logical-frameworks": {
-            "score": 10,
-            "evidence": [
-              "systems thinking",
-              "systems thinking"
-            ]
-          }
-        },
-        "pedagogy": {
-          "logical-frameworks": {
-            "strong_title_matches": [
-              "systems thinking"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "logical-frameworks": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
       }
     ],
     "personal-finance": [
@@ -8787,10 +8800,76 @@
     ],
     "cooking-food-safety": [
       {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:EU Health and Food Safety - Audit and Non-Audit work explained.webm",
+        "title": "EU Health and Food Safety - Audit and Non-Audit work explained",
+        "description": "This video outlines what Audit and Non-Audit work is conducted in the area of Health and Food Safety and its impact in several areas. The European Commission and its Directorate General for Health and Food Safety is responsible for conducting audits, inspections and other related non-audit activities in EU and non-EU countries. These activities are designed to ensure that EU legislation on food and feed safety, animal health and welfare, plant health and medical devices is properly implemented and enforced. Thanks to these efforts, EU citizens can rest assured that their food is safe and that products are traded under safe conditions, all of which also helps to promote jobs, growth and investment.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:EU_Health_and_Food_Safety_-_Audit_and_Non-Audit_work_explained.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/a7/EU_Health_and_Food_Safety_-_Audit_and_Non-Audit_work_explained.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 8560003,
+            "provider_sha1": "67c63e77863b256111e39bf54ecb570851d1a645",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "European Commission",
+          "source_title": "EU Health and Food Safety - Audit and Non-Audit work explained",
+          "source_url": "https://commons.wikimedia.org/wiki/File:EU_Health_and_Food_Safety_-_Audit_and_Non-Audit_work_explained.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "cooking-food-safety": {
+            "score": 10,
+            "evidence": [
+              "food safety",
+              "food safety"
+            ]
+          }
+        },
+        "pedagogy": {
+          "cooking-food-safety": {
+            "strong_title_matches": [
+              "food safety"
+            ],
+            "strong_description_matches": [
+              "food safety"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "cooking-food-safety": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
         "provider": "peertube",
         "provider_id": "59e1f2ff-928b-4a5d-9f6e-9322784519af",
         "title": "Aalto-Helsinki: DAHLIA - Making Food Safety Visible (2026) - Team Presentation",
-        "description": "**Title:** DAHLIA - Making Food Safety Visible **Description:** Is your food safe to eat? Earlier this year, Finnish broadcasters exposed issues with the storage of meat and fish in supermarkets. The Aalto-Helsinki iGEM team presents DAHLIA, a te...",
+        "description": "**Title:** DAHLIA - Making Food Safety Visible **Description:** Is your food safe to eat? Earlier this year, Finnish broadcasters exposed issues with the storage of meat and fish in supermarkets. The Aalto-Helsinki iGEM team presents DAHLIA, a test strip that detects the histamine emitted by foods like meat and fish as they spoil. In our biosensor, Diamine Oxidase (DAO) reacts with histamine, producing H2O2, and Horseradish Peroxidase (HRP) reacts with H2O2 and changes the color of a substrate. DAO and HRP are each joined to a cellulose-binding module (CBM) to adhere to the cellulose-based test strip. Our team successfully designed, transformed and expressed both fusion proteins and developed assays for prototype testing. To ensure the positive impact of the product on our community, we interacted with consumers, food vendors, and experts from different fields. We especially strived to educate the community about food safety and histamine - for a future with less food waste and more food safety. [Wiki](https://2026.igem.wiki/aalto-helsinki) | [Official Page](https://teams.igem.org/6201)",
         "source_url": "https://video.igem.org/videos/watch/59e1f2ff-928b-4a5d-9f6e-9322784519af",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -8949,6 +9028,200 @@
           "cooking-food-safety": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Gear Up for Food Safety.webm",
+        "title": "Gear Up for Food Safety",
+        "description": "1 in 6 Americans get sick from eating contaminated food each year. Your kitchen is filled with food safety tools that, when used properly, can keep you and your loved ones healthy. Get tips on how to help prevent food poisoning by proper use of refrigerators, microwaves, cutting boards and more, at www.cdc.gov/foodsafety. Comments on this video are allowed in accordance with our comment policy: https://www.cdc.gov/SocialMedia/Tools/CommentPolicy.html This video can also be viewed at https://www.cdc.gov/foodsafety/video/foodsafety_2016_video_500kps.mp4",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Gear_Up_for_Food_Safety.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Public domain",
+          "url": "",
+          "evidence": "Public domain | Public domain | pd |",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/4/42/Gear_Up_for_Food_Safety.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 6141998,
+            "provider_sha1": "527b729def2667c69fc8d056cc5ce1603c989d9e",
+            "role": "original"
+          }
+        ],
+        "quality_score": 91,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Centers for Disease Control and Prevention",
+          "source_title": "Gear Up for Food Safety",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Gear_Up_for_Food_Safety.webm",
+          "license": "Public domain",
+          "license_url": ""
+        },
+        "relevance": {
+          "cooking-food-safety": {
+            "score": 10,
+            "evidence": [
+              "food safety",
+              "food safety"
+            ]
+          }
+        },
+        "pedagogy": {
+          "cooking-food-safety": {
+            "strong_title_matches": [
+              "food safety"
+            ],
+            "strong_description_matches": [
+              "food safety"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 45
+          }
+        },
+        "selection": {
+          "cooking-food-safety": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 45
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Food Safety During Power Outages.webm",
+        "title": "Food Safety During Power Outages",
+        "description": "Did you know that a flood, fire, national disaster, or the loss of power from high winds, snow, or ice could jeopardize the safety of your food? Knowing how to determine if food is safe and how to keep food safe will help minimize the potential loss of food and reduce the risk of foodborne illness.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Food_Safety_During_Power_Outages.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Public domain",
+          "url": "",
+          "evidence": "Public domain | Public domain | pd |",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/b/b6/Food_Safety_During_Power_Outages.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 1795213,
+            "provider_sha1": "1f5763dcaf8539db60910d33a953a974b2ce0c40",
+            "role": "original"
+          }
+        ],
+        "quality_score": 91,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "USDAFoodSafety",
+          "source_title": "Food Safety During Power Outages",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Food_Safety_During_Power_Outages.webm",
+          "license": "Public domain",
+          "license_url": ""
+        },
+        "relevance": {
+          "cooking-food-safety": {
+            "score": 10,
+            "evidence": [
+              "food safety",
+              "food safety"
+            ]
+          }
+        },
+        "pedagogy": {
+          "cooking-food-safety": {
+            "strong_title_matches": [
+              "food safety"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 37
+          }
+        },
+        "selection": {
+          "cooking-food-safety": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 37
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Food Safety Video.webm",
+        "title": "Food Safety Video",
+        "description": "Don’t let food poisoning ruin your summer plans! Learn 4 simple steps you can take to protect yourself and your family. Comments on this video are allowed in accordance with our comment policy: https://www.cdc.gov/SocialMedia/Tools/CommentPolicy.html This video can also be viewed at https://www.cdc.gov/wcms/video/low-res/foodsafety/2017/48884888CDC-Summer-Vacation-Social_Media-VIDEO.mp4",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Food_Safety_Video.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Public domain",
+          "url": "",
+          "evidence": "Public domain | Public domain | pd |",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Food_Safety_Video.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 3400338,
+            "provider_sha1": "95014f16119548d930487ab579e965d1800052bd",
+            "role": "original"
+          }
+        ],
+        "quality_score": 91,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Centers for Disease Control and Prevention",
+          "source_title": "Food Safety Video",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Food_Safety_Video.webm",
+          "license": "Public domain",
+          "license_url": ""
+        },
+        "relevance": {
+          "cooking-food-safety": {
+            "score": 10,
+            "evidence": [
+              "food safety",
+              "food safety"
+            ]
+          }
+        },
+        "pedagogy": {
+          "cooking-food-safety": {
+            "strong_title_matches": [
+              "food safety"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 37
+          }
+        },
+        "selection": {
+          "cooking-food-safety": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 37
           }
         }
       }
@@ -10354,6 +10627,73 @@
       },
       {
         "provider": "peertube",
+        "provider_id": "6bd8e01d-c08b-42a2-8c18-71f1bfb786ae",
+        "title": "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
+        "description": "We show how Beta and Gamma are connected (via the bank-post office story), and introduce order statistics. We then start on conditional expectation, with a peek inside the Two Envelope Paradox.",
+        "source_url": "https://tube.cosmicflow.space/videos/watch/6bd8e01d-c08b-42a2-8c18-71f1bfb786ae",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Free of known copyright restrictions",
+          "url": "",
+          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/6bd8e01d-c08b-42a2-8c18-71f1bfb786ae-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 231121116,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "zaimon",
+          "source_title": "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
+          "source_url": "https://tube.cosmicflow.space/videos/watch/6bd8e01d-c08b-42a2-8c18-71f1bfb786ae",
+          "license": "Free of known copyright restrictions",
+          "license_url": ""
+        },
+        "relevance": {
+          "statistics-data-literacy": {
+            "score": 10,
+            "evidence": [
+              "statistics",
+              "statistics"
+            ]
+          }
+        },
+        "pedagogy": {
+          "statistics-data-literacy": {
+            "strong_title_matches": [
+              "statistics"
+            ],
+            "strong_description_matches": [
+              "statistics"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 57
+          }
+        },
+        "selection": {
+          "statistics-data-literacy": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 57
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "28780678-085f-4a41-be57-650a21a419e6",
         "title": "Quick Statistics and Visual Overview of Data in LabPlot",
         "description": "LabPlot is a FREE, open source and cross-platform Data Visualization and Analysis software accessible to everyone. Download LabPlot now at https://labplot.kde.org/download/. In this short video you'll learn how to quickly get descriptive statistic...",
@@ -11234,6 +11574,79 @@
     "entrepreneurship-small-business": [
       {
         "provider": "peertube",
+        "provider_id": "a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+        "title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
+        "description": "▬ THANK YOU FOR WATCHING ▬ 👍 LIKE the video if it was valuable to you. 💬 COMMENT to share your thoughts and questions. ✅ SUBSCRIBE to the channel for more valuable content. 🖥️ JOIN THE STREAM to see exactly what I'm doing. 🔔 ENABLE THE BE...",
+        "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC0",
+          "label": "Public Domain Dedication",
+          "url": "",
+          "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 45051327,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/a5e5f0e4-d0ca-4b50-971a-275b610004d2-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 33517998,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 90,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Frank",
+          "source_title": "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
+          "source_url": "https://video.fraxoweb.com/videos/watch/a5e5f0e4-d0ca-4b50-971a-275b610004d2",
+          "license": "Public Domain Dedication",
+          "license_url": ""
+        },
+        "relevance": {
+          "entrepreneurship-small-business": {
+            "score": 10,
+            "evidence": [
+              "business model",
+              "business model"
+            ]
+          }
+        },
+        "pedagogy": {
+          "entrepreneurship-small-business": {
+            "strong_title_matches": [
+              "business model"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 49
+          }
+        },
+        "selection": {
+          "entrepreneurship-small-business": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 49
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "61802aa3-a02a-419b-aafc-70a5d6861fe7",
         "title": "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "description": "https://www.futureelectronics.com/resources/featured-products/infineon-optiga-connect-iot-oc2321-esim-solution. Infineon's eSIM OPTIGA Connect is a 5G-ready, turnkey solution for mobile consumer devices. It features reliable hardware, a fast and s...",
@@ -11823,204 +12236,6 @@
         }
       },
       {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Continuous — Teaching Ideas — 1.webm",
-        "title": "English Grammar — Present Continuous — Teaching Ideas — 1",
-        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. ///",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/4/4c/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 3631686,
-            "provider_sha1": "aceff8fac4b0b9d4a39050b3da31b318d91dbde3",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Continuous — Teaching Ideas — 1",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_1.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [
-              "English grammar"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Continuous — Teaching Ideas — 2.webm",
-        "title": "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. The TEFL lesson in this video can be found in our 140-hour online TEFL certification course.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 2841607,
-            "provider_sha1": "4cb8123a80ae5416ff295f1325cc9e110653f074",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Continuous — Teaching Ideas — 2",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [
-              "English grammar"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Contiuous — Teaching Ideas — 3.webm",
-        "title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
-        "description": "In this TEFL training video we look at one of three teaching ideas for the present continuous tense. English grammar lessons like this are taught on a regular basis and ITTT's TEFL training courses can show you how to use these activities to your advantage in the classroom. . ///",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/5/57/English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 3557521,
-            "provider_sha1": "8c650a73239f91c3e60c171fc06603b5768e4232",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Contiuous — Teaching Ideas — 3",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Contiuous_%E2%80%94_Teaching_Ideas_%E2%80%94_3.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [
-              "English grammar"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
         "provider": "peertube",
         "provider_id": "7f7b757d-358e-4b92-a923-f016fa561023",
         "title": "Starting to learn Taiwanese: Language Learning Journey 1",
@@ -12108,70 +12323,6 @@
           "language-learning": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Perfect — Teaching Ideas — 2.webm",
-        "title": "English Grammar — Present Perfect — Teaching Ideas — 2",
-        "description": "The teaching idea covered in this video is a fun group game that should generate a good deal of student talk time using the Present Perfect tense. The students will be in small groups and each student will have the question sheet with a number of pictures and word prompts. Students take turns forming their question with the aid of the prompts. The groups then give their answers using the Present Perfect. The prompts include: win/a competition, go/scuba-diving, meet/ a famous person The questions would be: Have you ever won a competition?, Have you ever been scuba-diving?, Have you ever met a famous person? Group members would answer, Yes I have...., No I haven't... After a given amount of time each group share their answers with the class. The teacher could then encourage the class to come up with their own prompts and repeat the game. One area within the EFL industry that is very popular is that of teaching individual students. A game like the activity above could be adapted for one student. There is a demand for one to one lessons particularly in the business world. These types of lessons allow the teacher to focus specifically on the particular needs and wants of one student. Another advantage for the teacher is that you are only teaching to one level. These students are usually highly motivated.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 3849512,
-            "provider_sha1": "d87575989d8e9b454e05a0d4a7875f8c2f9104ab",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Perfect — Teaching Ideas — 2",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Teaching_Ideas_%E2%80%94_2.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
           }
         }
       },
@@ -12302,134 +12453,6 @@
           "language-learning": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Continuous — Structure.webm",
-        "title": "English Grammar — Present Continuous — Structure",
-        "description": "This TEFL certification video explores the structure of the present continuous tense. Tense forms have specific structures that TEFL teachers will need to know before they get a TEFL job. Even if grammar wasn't a strong point at school, our TEFL training courses will give you the lessons you need to conduct meaningful and productive EFL lessons. ///",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/7/74/English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 3653409,
-            "provider_sha1": "28318443cccb3f7e1d2bafe833917481231a7a84",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Continuous — Structure",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Continuous_%E2%80%94_Structure.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:English Grammar — Present Perfect — Structure — 2.webm",
-        "title": "English Grammar — Present Perfect — Structure — 2",
-        "description": "This ITTT video is the second part of a lesson looking at the structure of the Present Perfect tense. It reviews an example of the structure with a regular verb -- played. I/you/we/they have played. She/He/It has played. The video then examines some of the spelling patterns that are used with irregular verbs. For example, verbs ending with a consonant + y. cry changes to cried, try changes to tried. Another spelling pattern with irregular verbs ending with a consonant + a vowel + a consonant Shop changes to shopped, ship changes to shipped. When teaching this particular point, as with other grammar points, it is important to explain to students that there are exceptions to most rules in the English language. Where specific patterns exist we need to introduce them to our students.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 3.0",
-          "url": "https://creativecommons.org/licenses/by/3.0",
-          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 2410285,
-            "provider_sha1": "d5b798ec9e81c0524e060408e3dd2acb47b8ad2e",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "TEFL & TESOL Courses - ITTT",
-          "source_title": "English Grammar — Present Perfect — Structure — 2",
-          "source_url": "https://commons.wikimedia.org/wiki/File:English_Grammar_%E2%80%94_Present_Perfect_%E2%80%94_Structure_%E2%80%94_2.webm",
-          "license": "CC BY 3.0",
-          "license_url": "https://creativecommons.org/licenses/by/3.0"
-        },
-        "relevance": {
-          "language-learning": {
-            "score": 14,
-            "evidence": [
-              "English grammar",
-              "grammar"
-            ]
-          }
-        },
-        "pedagogy": {
-          "language-learning": {
-            "strong_title_matches": [
-              "English grammar"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "language-learning": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
           }
         }
       },

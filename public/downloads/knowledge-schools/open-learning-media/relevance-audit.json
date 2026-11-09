@@ -1,63 +1,63 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-11-02T13:31:14Z",
-  "before": 1115,
-  "after": 521,
-  "rejected": 594,
+  "built_at": "2026-11-09T13:55:28Z",
+  "before": 1139,
+  "after": 523,
+  "rejected": 616,
   "topics": {
     "world-history": {
       "name": "World History",
       "school_slug": "history",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 3,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 2
+        "peertube": 3
       },
       "top_titles": [
         "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
-        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
-        "Mayan Number System and Chinese Number System | A Story of Numbers | Grade 8 | NCERT | Khan Academy"
+        "El Salvador Explained in 15 Minutes | History, Geography, Culture",
+        "India Explained in 13 Minutes - History, Geography, And Culture",
+        "Zimbabwe Explained in 11 Minutes (History, Geography, & Culture)"
       ]
     },
     "earth-geography": {
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 7,
+      "records": 15,
+      "mesh_redistributable": 12,
       "providers": {
         "wikimedia-commons": 3,
-        "peertube": 7
+        "peertube": 12
       },
       "top_titles": [
         "Come and learn how free maps, free knowledge can help care for the world",
         "How to use Mergin Maps in Academia",
         "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
+        "Djibouti Explained in 14 Minutes | History, Geography, Culture",
+        "Liechtenstein Explained in 14 Minutes | History, Geography, Culture",
+        "Seychelles Explained in 12 minutes (History, Geography, And Culture)",
+        "South Korea EXPLAINED in 10 Minutes - (History, Geography, & Culture)",
         "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
         "Topographical maps for all!",
-        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
-        "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
-        "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
-        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
+        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response"
       ]
     },
     "civics-society": {
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 10,
-      "mesh_redistributable": 8,
+      "records": 9,
+      "mesh_redistributable": 7,
       "providers": {
-        "wikimedia-commons": 6,
+        "wikimedia-commons": 5,
         "peertube": 4
       },
       "top_titles": [
         "How UK Parliament holds government to account",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
@@ -102,7 +102,6 @@
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Coulomb's law | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
         "Electric current Grade 12 Physics NCERT Khan Academy (IN accent)",
         "Electric potential from multiple charges ｜ Grade 12 ｜ Physics ｜ NCERT ｜ Khan Academy (IN accent)",
@@ -110,17 +109,18 @@
         "Fundamental and Derived quantities | Units and Measurements | Grade 11 | Physics | Khan Academy",
         "Projectile on an incline | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
         "Elastic and inelastic collisions | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
-        "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)"
+        "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
+        "Physics Of Crystals by LesBrown"
       ]
     },
     "chemistry-foundations": {
       "name": "Chemistry Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 19,
-      "mesh_redistributable": 17,
+      "records": 20,
+      "mesh_redistributable": 18,
       "providers": {
-        "wikimedia-commons": 6,
+        "wikimedia-commons": 7,
         "peertube": 12,
         "internet-archive": 1
       },
@@ -128,13 +128,13 @@
         "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "Electron Configuration of the First 20 Elements of Periodic Table - Chemistry for All - FuseSchool",
         "Intro to Chemical reactions Chemical equation and reactions Chemistry Khan Academy",
+        "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
+        "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "Inorganic chemistry course intro | Khan Academy",
-        "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "How to Understand Mendeleev's Periodic Table of 1869",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Free radical reactions | Grade 11 | Chemistry | NCERT | Khan Academy (IN accent)",
-        "Gay Lussac's Law| Some basic principles of chemistry | Grade 11 | Chemistry | Khan Academy"
+        "How to Understand Mendeleev's Periodic Table of 1869",
+        "Free radical reactions | Grade 11 | Chemistry | NCERT | Khan Academy (IN accent)"
       ]
     },
     "astronomy-space": {
@@ -184,15 +184,17 @@
       "name": "Computing Basics",
       "school_slug": "technology",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
         "peertube": 3,
+        "wikimedia-commons": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
         "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "RSA Crypto Pad Demo",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
         "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
@@ -242,16 +244,15 @@
       "name": "Philosophy & Ethics",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
         "The Philosophy of Antifa",
-        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
         "juneteeth 2026 part1 introduction chat and arcus chroma"
       ]
     },
@@ -273,15 +274,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
+      "records": 2,
       "mesh_redistributable": 2,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -303,16 +302,15 @@
       "name": "Critical Thinking & Media Literacy",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
-        "wikimedia-commons": 2,
+        "wikimedia-commons": 1,
         "peertube": 2
       },
       "top_titles": [
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
         "The Facts about Fact Checking: Crash Course Navigating Digital Information #2",
-        "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
         "#316: Discussing critical thinking in today's age with Edward Dowd"
       ]
     },
@@ -320,19 +318,18 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 6,
-      "mesh_redistributable": 6,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 2
+        "internet-archive": 1
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
         "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
       ]
     },
     "personal-finance": {
@@ -356,30 +353,36 @@
       "name": "Cooking & Food Safety",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 7,
+      "mesh_redistributable": 6,
       "providers": {
+        "wikimedia-commons": 4,
         "peertube": 3
       },
       "top_titles": [
+        "EU Health and Food Safety - Audit and Non-Audit work explained",
         "Aalto-Helsinki: DAHLIA - Making Food Safety Visible (2026) - Team Presentation",
         "HunanU: AptAbt: Aptamer-based antibiotic biosensor for ensuring food safety (2025) - Team Presentation [English]",
-        "\" COOKING TERMS AND WHAT THEY MEAN \" 1949 KITCHEN / HOME ECONOMICS TEACHING FILM GG24515"
+        "\" COOKING TERMS AND WHAT THEY MEAN \" 1949 KITCHEN / HOME ECONOMICS TEACHING FILM GG24515",
+        "Gear Up for Food Safety",
+        "Food Safety During Power Outages",
+        "Food Safety Video"
       ]
     },
     "emergency-preparedness": {
       "name": "Emergency Preparedness",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
+      "records": 5,
       "mesh_redistributable": 0,
       "providers": {
-        "peertube": 4
+        "peertube": 5
       },
       "top_titles": [
         "\" TRAINING CIVILIANS IN CIVIL DEFENSE \" 1970s SOVIET UNION DISASTER PREPAREDNESS (Part 2) XD23715b",
         "NASA APOLLO PROJECT FIRE SAFETY & FLAME RESISTANT MATERIALS EDUCATIONAL FILM 55554",
         "“ IN CASE OF FIRE - FIRE DRILLS AND FIRE SAFETY ” 1959 EB FILMS FIRE SAFETY EDUCATIONAL FILM 50864",
+        "\"CONDEMNED\" 1960S FIRE SAFETY FILM CARELESS HANDLING OF CIGARETTES CAUSES FIRES 13774",
         "\"FIRE EXIT DRILL AT OUR SCHOOL\" 1953 ELEMENTARY SCHOOL FIRE SAFETY FILM XD51394"
       ]
     },
@@ -473,11 +476,11 @@
       "name": "Photography & Video",
       "school_slug": "arts",
       "required": false,
-      "records": 7,
+      "records": 6,
       "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 3,
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "Basics of fine-art photography (textbook presentation)",
@@ -485,18 +488,17 @@
         "Basics of photography – how you learn to shoot better photos",
         "Shutter Speed explained",
         "U.S. NAVY 1950s BASIC PHOTOGRAPHY & MOTION PICTURE CAMERAS TRAINING FILM 88594",
-        "U.S. NAVY 1950s BASIC PHOTOGRAPHY & MOTION PICTURE CAMERAS TRAINING FILM 88594a",
-        "” PHOTOGRAPHY FOR NEWSPAPERS ” 1948 HIGH SCHOOL NEWSPAPER PHOTO JOURNALIST & EDITOR FILM XD42404"
+        "U.S. NAVY 1950s BASIC PHOTOGRAPHY & MOTION PICTURE CAMERAS TRAINING FILM 88594a"
       ]
     },
     "statistics-data-literacy": {
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 8,
-      "mesh_redistributable": 8,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "peertube": 8
+        "peertube": 9
       },
       "top_titles": [
         "Lecture 1： Probability and Counting ｜ Statistics 110",
@@ -505,6 +507,7 @@
         "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
         "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
         "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
+        "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
         "Quick Statistics and Visual Overview of Data in LabPlot",
         "Lecture 28： Inequalities ｜ Statistics 110"
       ]
@@ -513,17 +516,18 @@
       "name": "Climate & Environment",
       "school_slug": "science",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 2,
+      "records": 5,
+      "mesh_redistributable": 3,
       "providers": {
-        "internet-archive": 2,
         "wikimedia-commons": 1,
-        "peertube": 1
+        "internet-archive": 2,
+        "peertube": 2
       },
       "top_titles": [
-        "Teaching Climate Change: Science in the Classroom (Denali National Park & Preserve, NPS video)",
         "Welcome to Climate Change and Health – From Science to Practice",
+        "Climate Change Science at Mount Rainier (Mount Rainier National Park, NPS video)",
         "Climate Change: Science, Policy, Action",
+        "Belize Explained in 13 Minutes | History, Geography, Culture",
         "Uncertainty at Scale - how Computer Science hinders Climate Science"
       ]
     },
@@ -602,14 +606,15 @@
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 3
       },
       "top_titles": [
         "Parenting - Blender 2.80 Fundamentals",
-        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935",
+        "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705"
       ]
     },
     "gardening-plants": {
@@ -629,13 +634,14 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 3,
+      "records": 6,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 4,
+        "peertube": 5,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
         "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Partners in Safety- An Insurance and Small Business Perspective",
         "DEF CON 27 Conference - Philippe Laulheret - Intro to Hardware Hacking",
@@ -664,27 +670,36 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 26,
-      "mesh_redistributable": 26,
+      "records": 19,
+      "mesh_redistributable": 19,
       "providers": {
-        "peertube": 20,
-        "wikimedia-commons": 6
+        "peertube": 19
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
+        "Da Maker Lounge: Building a Language-learning App, Part 1 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 2 (2026-08-11)",
         "Da Maker Lounge: Building a Language-learning App, Part 3 (2026-08-11)",
-        "English Grammar — Present Continuous — Teaching Ideas — 1",
-        "English Grammar — Present Continuous — Teaching Ideas — 2",
-        "English Grammar — Present Contiuous — Teaching Ideas — 3",
         "Starting to learn Taiwanese: Language Learning Journey 1",
-        "[Language learning] How to create and edit language in LingLibre?",
-        "[Language learning] How to fast read with LingLibre using Keyboard shortcuts",
-        "English Grammar — Present Perfect — Teaching Ideas — 2"
+        "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "ESL - Guidelines on how to give a good ORAL PRESENTATION",
+        "Jobs Song for Kids | What Do You Do? | Occupations | Kindergarten, Preschool, ESL | Fun Kids English",
+        "NFLSHS-CHINA: Using Synthetic Biology to Decode the Secrets of Youth (2025) - Team Presentation [English]",
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently."
       ]
     }
   },
   "rejected_samples": [
+    {
+      "provider": "wikimedia-commons",
+      "title": "New York 1911",
+      "topic_slug": "arts-culture"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "The case history of Lucy X",
+      "topic_slug": "arts-culture"
+    },
     {
       "provider": "peertube",
       "title": "Jakub Józef Orliński: Beyond Baroque | Pulse of Culture",
@@ -693,6 +708,16 @@
     {
       "provider": "wikimedia-commons",
       "title": "Easiest Way to Build Consistent Character - Step-by-Step Guide with OpenArt",
+      "topic_slug": "arts-culture"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "The Art of Ewe Kente",
+      "topic_slug": "arts-culture"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "The audiovisual documentary of Nike Art Gallery",
       "topic_slug": "arts-culture"
     },
     {
@@ -738,6 +763,16 @@
     {
       "provider": "peertube",
       "title": "Visual Representation of Multiplication Tables | Multiplication | MH Grade 2| Math | Khan Academy",
+      "topic_slug": "arts-culture"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Short oral history of Ile Ife in Ile-Ife language by a native speaker",
+      "topic_slug": "arts-culture"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Short oral history of Ile Ife in Ile-Ife language by a native speaker (non-subtitled)",
       "topic_slug": "arts-culture"
     },
     {
@@ -1011,6 +1046,21 @@
       "topic_slug": "career-work-skills"
     },
     {
+      "provider": "wikimedia-commons",
+      "title": "Blue bottle (chemical reaction)",
+      "topic_slug": "chemistry-foundations"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Chemical reaction between iodophor and apple (Remove audio)",
+      "topic_slug": "chemistry-foundations"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Matches animation of chain reaction with slow elements",
+      "topic_slug": "chemistry-foundations"
+    },
+    {
       "provider": "peertube",
       "title": "CDL Espresso Talk_ Overview of Civic Tech Trends and How LLMs Influence Sensemaking in Civic Tech",
       "topic_slug": "civics-society"
@@ -1137,6 +1187,11 @@
     },
     {
       "provider": "wikimedia-commons",
+      "title": "Address Before a Joint Session of Congress (February 24, 2009) - Barack Obama (WhiteHouse.gov)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
       "title": "Combined Jungle Operations Training Course Phase 1 Reel (985339)",
       "topic_slug": "communication-conflict"
     },
@@ -1157,12 +1212,22 @@
     },
     {
       "provider": "wikimedia-commons",
+      "title": "FCSO Deputies Protect and Save Victim from Attempted Murder",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
       "title": "Journées d'étude 'L'arbre qui cache la forêt'- 19 et 20 novembre 2021 INHA-Asie-Sorbonne (MédiHAL 3455589)",
       "topic_slug": "communication-conflict"
     },
     {
       "provider": "wikimedia-commons",
       "title": "Les fables de Jean de La Fontaine en langue des signes (MédiHAL 4091073)",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Police Body Cam Video Of San Francisco BART Station Arrest",
       "topic_slug": "communication-conflict"
     },
     {
@@ -1233,6 +1298,11 @@
     {
       "provider": "peertube",
       "title": "Ukrainian Drones Target Russian GRU Communication Hub 'Rubin'",
+      "topic_slug": "communication-conflict"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Wikipedia in Higher Education — Wikimedia ESEAP Hub Capacity Building Session",
       "topic_slug": "communication-conflict"
     },
     {
@@ -1402,7 +1472,7 @@
     },
     {
       "provider": "peertube",
-      "title": "God and the State",
+      "title": "Ambient vulnerabile",
       "topic_slug": "communication-conflict"
     },
     {
@@ -1411,79 +1481,14 @@
       "topic_slug": "communication-conflict"
     },
     {
+      "provider": "wikimedia-commons",
+      "title": "Hearing on Regulating Cryptocurrency Markets",
+      "topic_slug": "computing-basics"
+    },
+    {
       "provider": "peertube",
       "title": "(1990) How Computers Work: A Journey Into the Walk-Through Computer",
       "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "How do you write an emulator anyway ?",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "If computers only understand numbers, then how do games work?",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "More Secrets of Cryptography - Chris Riley - PHP UK Conference 2019",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "How To Minicom Serial Access Pine64 A64 LTS / PineDio Gateway Example",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "How To Minicom Serial Access Pine64 A64 LTS / PineDio Gateway Example",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "DTNS 20180301",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "“ AUTOMATION - THE NEXT REVOLUTION ” 1963 NEWS FILM COMPUTERS, ROBOTS & MANUFACTURING 90004",
-      "topic_slug": "computing-basics"
-    },
-    {
-      "provider": "peertube",
-      "title": "Kitchen catch-up chaos #070 (Canning fries)",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "KITCHEN CONFIDENCE - Découverte du Kickstarter [FR]",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "KITCHEN CONFIDENCE - Mise à jour de la démo - Des menus et du stock ! [FR]",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "3d printable design kitchen scale - operation and calibration",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Cooking crêpes",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Cooking Up Collectivity",
-      "topic_slug": "cooking-food-safety"
-    },
-    {
-      "provider": "peertube",
-      "title": "Kitchen cat",
-      "topic_slug": "cooking-food-safety"
     }
   ]
 }
