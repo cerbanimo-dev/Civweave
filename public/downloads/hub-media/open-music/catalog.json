@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-11-02T13:53:58Z",
-  "record_count": 185,
+  "built_at": "2026-11-09T14:23:10Z",
+  "record_count": 179,
   "failure_count": 23,
   "failures": [
     {
@@ -27,6 +27,30 @@
       "playlist_id": "anarchadia",
       "query": "source-page:56027",
       "error": "No CC-BY-licensed, audio-bearing, source-metadata-confirmed vocal recording for exact source upload ID"
+    },
+    {
+      "provider": "ccmixter",
+      "playlist_id": "fellowfare",
+      "query": "genre:funk",
+      "license_class": "by",
+      "offset": 0,
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=funk&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+    },
+    {
+      "provider": "ccmixter",
+      "playlist_id": "fellowfare",
+      "query": "genre:soul",
+      "license_class": "by",
+      "offset": 0,
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=soul&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+    },
+    {
+      "provider": "ccmixter",
+      "playlist_id": "fellowfare",
+      "query": "genre:reggae",
+      "license_class": "by",
+      "offset": 0,
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=reggae&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
     },
     {
       "provider": "ccmixter",
@@ -155,34 +179,10 @@
       "license_class": "by",
       "offset": 0,
       "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=jazz&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
-    },
-    {
-      "provider": "ccmixter",
-      "playlist_id": "fellowfare",
-      "query": "genre:funk",
-      "license_class": "by",
-      "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=funk&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
-    },
-    {
-      "provider": "ccmixter",
-      "playlist_id": "fellowfare",
-      "query": "genre:soul",
-      "license_class": "by",
-      "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=soul&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
-    },
-    {
-      "provider": "ccmixter",
-      "playlist_id": "fellowfare",
-      "query": "genre:reggae",
-      "license_class": "by",
-      "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=reggae&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
     }
   ],
   "provider_counts": {
-    "ccmixter": 185
+    "ccmixter": 179
   },
   "records": [
     {
@@ -1525,69 +1525,6 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
-      "provider_id": "2961",
-      "playlist_id": "living-school",
-      "matched_query": "grow",
-      "title": "everyday choices",
-      "artist": "Colin Mutchler",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/commonsplice/2961",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "http://creativecommons.org/licenses/by/2.5/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/commonsplice/commonsplice_-_everyday_choices.mp3",
-          "mime": "",
-          "bytes": 1507167,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Colin Mutchler",
-        "source_title": "everyday choices",
-        "source_url": "https://ccmixter.org/files/commonsplice/2961",
-        "license": "Attribution",
-        "license_url": "http://creativecommons.org/licenses/by/2.5/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 3,
-      "themes": [
-        "commons",
-        "choice",
-        "people"
-      ],
-      "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "living-school",
-          "matched_query": "grow"
-        }
-      ],
-      "candidate_id": "openmusic:48b7e4cdfaa914861fdc7f51",
-      "quality_score": 82,
-      "carried_forward": true,
-      "last_verified_at": "2026-10-29T17:14:22Z"
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
       "provider_id": "28096",
       "playlist_id": "civweave",
       "matched_query": "source-page:28096",
@@ -1722,8 +1659,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "836",
-      "playlist_id": "fellowfare",
-      "matched_query": "share",
+      "playlist_id": "civweave",
+      "matched_query": "freedom",
       "title": "Language of My Reality",
       "artist": "Colin Mutchler",
       "album": "",
@@ -1772,15 +1709,15 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
+          "playlist_id": "civweave",
+          "matched_query": "freedom"
+        },
+        {
           "playlist_id": "fellowfare",
           "matched_query": "share"
         },
         {
           "playlist_id": "anarchadia",
-          "matched_query": "freedom"
-        },
-        {
-          "playlist_id": "civweave",
           "matched_query": "freedom"
         }
       ],
@@ -2220,69 +2157,6 @@
       ],
       "candidate_id": "openmusic:50d2be30400a36d307ecad5c",
       "quality_score": 77
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "31913",
-      "playlist_id": "anarchadia",
-      "matched_query": "genre:dub",
-      "title": "Power to Strike",
-      "artist": "daniloprates",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/daniloprates/31913",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/daniloprates/daniloprates_-_Power_to_Strike.mp3",
-          "mime": "",
-          "bytes": 5017152,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "daniloprates",
-        "source_title": "Power to Strike",
-        "source_url": "https://ccmixter.org/files/daniloprates/31913",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 2,
-      "themes": [
-        "share",
-        "power",
-        "genre:dub"
-      ],
-      "explicit": null,
-      "curation": "genre-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "genre:dub"
-        }
-      ],
-      "candidate_id": "openmusic:ec5fe36e7f050adf833b51f8",
-      "quality_score": 77,
-      "carried_forward": true,
-      "last_verified_at": "2026-10-29T17:14:22Z"
     },
     {
       "schema": "civweave.open-music-track.v1",
@@ -3182,135 +3056,6 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
-      "provider_id": "31413",
-      "playlist_id": "living-school",
-      "matched_query": "change",
-      "title": "100 Paper Washingtons",
-      "artist": "ScOmBer",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/scomber/31413",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/scomber/scomber_-_100_Paper_Washingtons.mp3",
-          "mime": "",
-          "bytes": 4697537,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/scomber/scomber_-_100_Paper_Washingtons_1.mp3",
-          "mime": "",
-          "bytes": 5311006,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "ScOmBer",
-        "source_title": "100 Paper Washingtons",
-        "source_url": "https://ccmixter.org/files/scomber/31413",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share"
-      ],
-      "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "living-school",
-          "matched_query": "change"
-        }
-      ],
-      "candidate_id": "openmusic:7cc6cadff15789af28c53c1e",
-      "quality_score": 73,
-      "carried_forward": true,
-      "last_verified_at": "2026-10-29T17:14:22Z"
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "31908",
-      "playlist_id": "living-school",
-      "matched_query": "genre:ambient",
-      "title": "100 Paper Washingtons",
-      "artist": "Bluemillenium",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/Bluemillenium/31908",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_100_Paper_Washingtons.mp3",
-          "mime": "",
-          "bytes": 4078072,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Bluemillenium",
-        "source_title": "100 Paper Washingtons",
-        "source_url": "https://ccmixter.org/files/Bluemillenium/31908",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share",
-        "genre:ambient"
-      ],
-      "explicit": null,
-      "curation": "genre-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:ambient"
-        }
-      ],
-      "candidate_id": "openmusic:2284f76fe09cbff9e1e0048a",
-      "quality_score": 73,
-      "carried_forward": true,
-      "last_verified_at": "2026-10-29T17:14:22Z"
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
       "provider_id": "62141",
       "playlist_id": "anarchadia",
       "matched_query": "genre:rock",
@@ -3507,7 +3252,7 @@
       "provider": "ccmixter",
       "provider_id": "31513",
       "playlist_id": "civweave",
-      "matched_query": "vocal-pool:spoken_word",
+      "matched_query": "freedom",
       "title": "A Story of Striking the Root: Striking Down Public Unions",
       "artist": "Papa_Zulu",
       "album": "",
@@ -3566,22 +3311,21 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share",
-        "genre:vocal-pool:spoken_word"
+        "share"
       ],
       "explicit": null,
-      "curation": "vocal-pool-unreviewed",
+      "curation": "metadata-discovered",
       "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "freedom"
+        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:spoken_word"
         },
         {
           "playlist_id": "anarchadia",
-          "matched_query": "freedom"
-        },
-        {
-          "playlist_id": "civweave",
           "matched_query": "freedom"
         }
       ],
@@ -3900,11 +3644,11 @@
           "matched_query": "community-playlist:10742"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "fellowfare",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         }
       ],
@@ -3979,7 +3723,7 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "56698",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "fellowfare",
       "matched_query": "genre:funk",
       "title": "Funk It: How It Is",
       "artist": "Aussens@iter",
@@ -4034,11 +3778,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "fellowfare",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         }
       ],
@@ -4113,11 +3857,11 @@
           "matched_query": "community-playlist:10742"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "fellowfare",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         }
       ],
@@ -4287,11 +4031,11 @@
           "matched_query": "community-playlist:10742"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "fellowfare",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         }
       ],
@@ -4302,7 +4046,7 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "33819",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "fellowfare",
       "matched_query": "genre:funk",
       "title": "How it is",
       "artist": "Jeris",
@@ -4357,20 +4101,20 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "cerbanimo",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:jazz"
-        },
-        {
           "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         },
         {
           "playlist_id": "fellowfare",
           "matched_query": "genre:soul"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:jazz"
         }
       ],
       "candidate_id": "openmusic:64440c7e11114879d9855b8c",
@@ -4577,8 +4321,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "62208",
-      "playlist_id": "civweave",
-      "matched_query": "vocal-pool:vocals",
+      "playlist_id": "fellowfare",
+      "matched_query": "genre:funk",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -4638,11 +4382,19 @@
       "teeth_score": 1,
       "themes": [
         "share",
-        "genre:vocal-pool:vocals"
+        "genre:funk"
       ],
       "explicit": null,
-      "curation": "vocal-pool-unreviewed",
+      "curation": "genre-discovered",
       "playlist_matches": [
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:funk"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "collaboration"
+        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
@@ -4652,16 +4404,8 @@
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "civweave",
-          "matched_query": "collaboration"
-        },
-        {
           "playlist_id": "cerbanimo",
           "matched_query": "labor"
-        },
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
         }
       ],
       "candidate_id": "openmusic:1a18c603676f255edc2886b3",
@@ -4860,100 +4604,9 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
-      "provider_id": "43500",
-      "playlist_id": "anarchadia",
-      "matched_query": "liberation",
-      "title": "Love Liberation (inc stems)",
-      "artist": "stellarartwars",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/stellarartwars/43500",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems).mp3",
-          "mime": "",
-          "bytes": 3077894,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_4.mp3",
-          "mime": "",
-          "bytes": 3039024,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_5.mp3",
-          "mime": "",
-          "bytes": 3039024,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_6.mp3",
-          "mime": "",
-          "bytes": 3039024,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_1.mp3",
-          "mime": "",
-          "bytes": 3039024,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/stellarartwars/stellarartwars_-_Love_Liberation_(inc_stems)_2.mp3",
-          "mime": "",
-          "bytes": 3039024,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "stellarartwars",
-        "source_title": "Love Liberation (inc stems)",
-        "source_url": "https://ccmixter.org/files/stellarartwars/43500",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share"
-      ],
-      "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "liberation"
-        }
-      ],
-      "candidate_id": "openmusic:9a3dec2602e274cd46e7d08b",
-      "quality_score": 73,
-      "carried_forward": true,
-      "last_verified_at": "2026-10-29T17:14:22Z"
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
       "provider_id": "65481",
-      "playlist_id": "civweave",
-      "matched_query": "vocal-pool:vocals",
+      "playlist_id": "fellowfare",
+      "matched_query": "genre:funk",
       "title": "Melange",
       "artist": "musikpirat",
       "album": "",
@@ -4995,11 +4648,15 @@
       "teeth_score": 1,
       "themes": [
         "share",
-        "genre:vocal-pool:vocals"
+        "genre:funk"
       ],
       "explicit": null,
-      "curation": "vocal-pool-unreviewed",
+      "curation": "genre-discovered",
       "playlist_matches": [
+        {
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:funk"
+        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
@@ -5011,76 +4668,10 @@
         {
           "playlist_id": "cerbanimo",
           "matched_query": "energy"
-        },
-        {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
         }
       ],
       "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
       "quality_score": 73
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "46804",
-      "playlist_id": "cerbanimo",
-      "matched_query": "genre:dance",
-      "title": "Naked",
-      "artist": "CSoul",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/CSoul/46804",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/CSoul/CSoul_-_Naked.mp3",
-          "mime": "",
-          "bytes": 6258180,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "CSoul",
-        "source_title": "Naked",
-        "source_url": "https://ccmixter.org/files/CSoul/46804",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share",
-        "genre:dance"
-      ],
-      "explicit": null,
-      "curation": "genre-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "genre:dance"
-        }
-      ],
-      "candidate_id": "openmusic:efee2b7d70e3b7ebd635c026",
-      "quality_score": 73,
-      "carried_forward": true,
-      "last_verified_at": "2026-10-29T17:14:22Z"
     },
     {
       "schema": "civweave.open-music-track.v1",
@@ -5530,68 +5121,6 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
-      "provider_id": "47865",
-      "playlist_id": "cerbanimo",
-      "matched_query": "genre:dance",
-      "title": "Venus show me the way with water theme",
-      "artist": "kinsame",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/kinsame/47865",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/kinsame/kinsame_-_Venus_show_me_the_way_with_water_theme.mp3",
-          "mime": "",
-          "bytes": 5078665,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "kinsame",
-        "source_title": "Venus show me the way with water theme",
-        "source_url": "https://ccmixter.org/files/kinsame/47865",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share",
-        "genre:dance"
-      ],
-      "explicit": null,
-      "curation": "genre-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "genre:dance"
-        }
-      ],
-      "candidate_id": "openmusic:c4da20d1b8e8410d2a028c53",
-      "quality_score": 73,
-      "carried_forward": true,
-      "last_verified_at": "2026-10-29T17:14:22Z"
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
       "provider_id": "31607",
       "playlist_id": "fellowfare",
       "matched_query": "community-playlist:43545",
@@ -5659,97 +5188,6 @@
       ],
       "candidate_id": "openmusic:7ec8f974c2a7c48d9092f8f2",
       "quality_score": 73
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "31543",
-      "playlist_id": "living-school",
-      "matched_query": "imagine",
-      "title": "We are Free (at the Root)",
-      "artist": "Madam Snowflake",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/snowflake/31543",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root)_2.mp3",
-          "mime": "",
-          "bytes": 3261380,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root).mp3",
-          "mime": "",
-          "bytes": 3269322,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root).flac",
-          "mime": "",
-          "bytes": 50798384,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root)_1.flac",
-          "mime": "",
-          "bytes": 14518645,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root)_2.flac",
-          "mime": "",
-          "bytes": 9126397,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/snowflake/snowflake_-_We_are_Free_(at_the_Root)_3.flac",
-          "mime": "",
-          "bytes": 16926843,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Madam Snowflake",
-        "source_title": "We are Free (at the Root)",
-        "source_url": "https://ccmixter.org/files/snowflake/31543",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share"
-      ],
-      "explicit": null,
-      "curation": "metadata-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "living-school",
-          "matched_query": "imagine"
-        }
-      ],
-      "candidate_id": "openmusic:850ca5a29973d8db759af800",
-      "quality_score": 73,
-      "carried_forward": true,
-      "last_verified_at": "2026-10-29T17:14:22Z"
     },
     {
       "schema": "civweave.open-music-track.v1",
@@ -8672,6 +8110,114 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
+      "provider_id": "71331",
+      "playlist_id": "civweave",
+      "matched_query": "community-playlist:11087",
+      "title": "Legalize",
+      "artist": "MalreDeszik",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/MalreDeszik/71331",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (4.0)",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize.mp3",
+          "mime": "",
+          "bytes": 6602753,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize.flac",
+          "mime": "",
+          "bytes": 20807047,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_1.flac",
+          "mime": "",
+          "bytes": 21387302,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_2.flac",
+          "mime": "",
+          "bytes": 9316939,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_3.flac",
+          "mime": "",
+          "bytes": 4544704,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_4.flac",
+          "mime": "",
+          "bytes": 19975505,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_5.flac",
+          "mime": "",
+          "bytes": 12746960,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_6.flac",
+          "mime": "",
+          "bytes": 12096880,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "MalreDeszik",
+        "source_title": "Legalize",
+        "source_url": "https://ccmixter.org/files/MalreDeszik/71331",
+        "license": "Attribution (4.0)",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "creative commons",
+        "collaborative music",
+        "sharing",
+        "genre:community-playlist:11087"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "community-playlist:11087"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "community-playlist:9158"
+        }
+      ],
+      "candidate_id": "openmusic:c2e59cba868d779c9ed5f818",
+      "quality_score": 70
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
       "provider_id": "38362",
       "playlist_id": "fellowfare",
       "matched_query": "community-playlist:43545",
@@ -11279,6 +10825,114 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
+      "provider_id": "71334",
+      "playlist_id": "civweave",
+      "matched_query": "community-playlist:11087",
+      "title": "The path to glory",
+      "artist": "MalreDeszik",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/MalreDeszik/71334",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (4.0)",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory.mp3",
+          "mime": "",
+          "bytes": 5999011,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_9.flac",
+          "mime": "",
+          "bytes": 12798411,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_10.flac",
+          "mime": "",
+          "bytes": 16205137,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory.flac",
+          "mime": "",
+          "bytes": 8478415,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_1.flac",
+          "mime": "",
+          "bytes": 19965662,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_2.flac",
+          "mime": "",
+          "bytes": 8737274,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_3.flac",
+          "mime": "",
+          "bytes": 17108439,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_4.flac",
+          "mime": "",
+          "bytes": 5881094,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "MalreDeszik",
+        "source_title": "The path to glory",
+        "source_url": "https://ccmixter.org/files/MalreDeszik/71334",
+        "license": "Attribution (4.0)",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "creative commons",
+        "collaborative music",
+        "sharing",
+        "genre:community-playlist:11087"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "community-playlist:11087"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "community-playlist:9158"
+        }
+      ],
+      "candidate_id": "openmusic:a66a43cb77abb77739daa306",
+      "quality_score": 70
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
       "provider_id": "33699",
       "playlist_id": "living-school",
       "matched_query": "source-page:33699",
@@ -12195,14 +11849,12 @@
         {
           "playlist_id": "civweave",
           "matched_query": "community-playlist:11087"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "community-playlist:9158"
         }
       ],
       "candidate_id": "openmusic:3a520100734c289fc8ab1332",
-      "quality_score": 70
+      "quality_score": 70,
+      "carried_forward": true,
+      "last_verified_at": "2026-11-02T13:53:58Z"
     },
     {
       "schema": "civweave.open-music-track.v1",
