@@ -2,8 +2,8 @@
 
 An offline creature game and communicator display for **M5StickS3 / UIFlow2**.
 The same Python game and pixel renderer run on the device and in the desktop
-simulator. This is a tested development slice, with physical-device validation
-still pending.
+simulator. This is an optional UIFlow2 collection-game experiment, with
+physical-device validation still pending.
 
 ![Four screens rendered from the actual game state](../../docs/operations/assets/pocket-companion-preview.png)
 
@@ -109,6 +109,25 @@ not a replacement shipped over the v0.5 device monitor. Run one device app at
 a time. Before a combined release, the integration thread must choose one
 device entrypoint and preserve any desired v0.5 image/audio behavior there.
 
+### Relationship to Thread 9 Pocket Commons
+
+Staging also contains [Thread 9's Pocket Commons firmware](https://github.com/cerbanimo-dev/Civweave/tree/staging/native/sticks3-communicator)
+and its [browser lab](https://github.com/cerbanimo-dev/Civweave/tree/staging/public/labs/pocket-commons).
+That is a separate Arduino/PlatformIO firmware target with
+the Threadling game and `CW` carrier framing. This directory supplies the
+optional UIFlow2 collection game and legacy phone-status experiment; the two
+are not integrated.
+
+The runtimes, controls, save formats, and transport frames differ; no conversion
+between the prototypes is implemented. Thread 9's PlatformIO upload replaces
+the running firmware. Its compiled firmware does not run these Python files,
+and this app does not parse its carrier frames. Run this trial only on a device
+already using UIFlow2.
+For a combined release, choose one runtime and device entrypoint, then port
+the desired game/display behavior and connect the transport through that
+owner. Keep Thread 9's carrier protocol and the existing private-messaging
+authority intact.
+
 The browser simulator never opens Bluetooth. Device BLE pairing and backend
 trust are not proven by desktop tests. Nine seconds of freshness means time
 since the phone supplied a valid frame; the Stick does not verify server
@@ -117,9 +136,11 @@ old frame. The visible label is **phone reported**, not backend verified.
 
 ## Transport handoff for the other threads
 
-Thread 5 owns local game behavior and its tiny display. Private messaging stays
-with `public/app/civweave-private-messaging-v1.js` and object synchronization
-with `public/app/local-object-mesh-v146.js`. The existing PWA chat, identity,
+Thread 5 owns this optional UIFlow2 collection-game experiment and its tiny
+display. Thread 9's standalone firmware and carrier work remains in
+`native/sticks3-communicator/`. Private messaging stays with
+`public/app/civweave-private-messaging-v1.js` and object synchronization with
+`public/app/local-object-mesh-v146.js`. The existing PWA chat, identity,
 encryption, and Guild authorities are unchanged.
 
 | Boundary | Contract |
