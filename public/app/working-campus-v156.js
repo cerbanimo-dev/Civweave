@@ -91,7 +91,8 @@ function repairPersistedCampusState(){
   return{changed,ledgerChanged,stage:state.stage||'wish',view:state.view||'quest',hasPlan:Boolean(state.plan)};
 }
 function installWebEntryPrompt(){
-  if(installedDisplay())return false;
+  // Do not interrupt everyday browsing with install nags. Show only when asked.
+  if(installedDisplay()||new URLSearchParams(location.search).get('offline')!=='1')return false;
   try{if(sessionStorage.getItem('civweave.web-install-prompt.dismissed.v232')==='1')return false}catch{}
   const app=document.querySelector('main.app'),top=document.querySelector('.top');
   if(!app||!top||document.getElementById('cw-web-install-entry-v232'))return false;
@@ -110,9 +111,9 @@ function installWebEntryPrompt(){
   const prompt=document.createElement('section');
   prompt.id='cw-web-install-entry-v232';
   prompt.dataset.webInstallEntry=WEB_ENTRY_REVISION;
-  prompt.innerHTML='<div><small>Designed to live on your device</small><strong>Install Civweave for the full local and offline campus.</strong><p>You can use Civweave in this browser now. Installing downloads the working campus to your device and keeps the local-first experience available offline.</p></div><div class="cw-web-install-actions"><a data-cw-web-install href="/app/index.html">Install Civweave</a><button data-cw-web-continue type="button">Continue in browser</button></div>';
+  prompt.innerHTML='<div><small>Designed to live on your device</small><strong>Optional: prepare offline access on this device.</strong><p>The browser campus works without installation. Save an optional offline pack if you need one.</p></div><div class="cw-web-install-actions"><a data-cw-web-install href="/app/index.html">Set up offline access</a><button data-cw-web-continue type="button">Continue in browser</button></div>';
   const installer=new URL('/app/index.html',location.origin);
-  installer.searchParams.set('install','required');
+  installer.searchParams.set('install','1');
   installer.searchParams.set('next',`${location.pathname}${location.search}${location.hash}`.slice(0,1800));
   prompt.querySelector('[data-cw-web-install]').href=installer.href;
   prompt.querySelector('[data-cw-web-continue]').addEventListener('click',()=>{try{sessionStorage.setItem('civweave.web-install-prompt.dismissed.v232','1')}catch{}prompt.hidden=true});

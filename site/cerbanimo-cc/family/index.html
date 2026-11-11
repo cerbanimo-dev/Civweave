@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<title>Family safety | Cerbanimo</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#100b20;color:#f7f1ff}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 70% 0%,#44306f 0,transparent 45%),#100b20}main{max-width:760px;margin:auto;padding:clamp(20px,5vw,56px)}a{color:#a4e8ff}h1{font-size:clamp(2.3rem,6vw,4rem);line-height:1.06;margin:12px 0 20px}p{line-height:1.65;color:#dfd3ea}.eyebrow{color:#b8a6ff;letter-spacing:.14em;text-transform:uppercase;font-size:.8rem;font-weight:800}.panel{border:1px solid #8f7dbc80;border-radius:20px;background:#18102bcf;padding:24px;margin:24px 0}.label{display:block;font-weight:750;margin:12px 0 8px}input{width:100%;background:#0f1229;color:#fff;border:1px solid #9688ae;border-radius:11px;padding:13px;font:inherit}button{margin-top:16px;padding:13px 18px;border:0;border-radius:11px;background:#b5e9fb;color:#12132a;font:inherit;font-weight:800;cursor:pointer}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #fff;outline-offset:3px}.muted{font-size:.9rem;color:#b7a9c7}.state{color:#ffdca6}ul{line-height:1.8;padding-left:22px}
+</style>
+</head>
+<body><main>
+<a href="../">← Cerbanimo</a>
+<p class="eyebrow">Moonbridge · Family safety</p>
+<h1>Guardians protect the road. Heroes keep their own names.</h1>
+<p>Family safety is a separate Cerbanimo entry into Civweave. Guardian settings are private to verified guardians and never public to a Guild. Young members are told when supervision is enabled and what categories of information are shared.</p>
+<section class="panel" aria-labelledby="guardian-heading">
+<h2 id="guardian-heading">Choose your Civweave Guild</h2>
+<p class="state"><strong>Connection status: not enabled.</strong> The secure guardian authorization service is still required. No child activity, account, or location information can be viewed from this page.</p>
+<form id="open-guild">
+<label class="label" for="guild-url">Your Civweave or Guild address</label>
+<input id="guild-url" type="url" value="https://civweave.cc" inputmode="url" autocomplete="url" spellcheck="false" required>
+<button type="submit">Open family safety in Civweave</button>
+<p id="guild-error" role="alert" class="state" hidden></p>
+</form>
+</section>
+<section class="panel" aria-labelledby="scope-heading">
+<h2 id="scope-heading">Family safety boundaries</h2>
+<ul>
+<li>Guardian identity and relationship must be verified before controls activate.</li>
+<li>Age-appropriate supervision notices are visible to the child.</li>
+<li>Default summaries do not reveal private messages, journals, precise location, or passwords.</li>
+<li>Every permission has a defined scope, expiration, audit record, and revocation path.</li>
+</ul>
+</section>
+<p class="muted">No analytics, family identifiers, or tokens are transferred by the link. Choosing a Guild changes only your destination, not your account permissions.</p>
+</main><script>
+(()=>{'use strict';
+const form=document.getElementById('open-guild'),input=document.getElementById('guild-url'),error=document.getElementById('guild-error');
+form.addEventListener('submit',event=>{
+event.preventDefault();error.hidden=true;
+try{
+const url=new URL(input.value.trim());
+const local=['localhost','127.0.0.1','::1'].includes(url.hostname);
+if(url.protocol!=='https:'&&!(local&&url.protocol==='http:'))throw new Error('Use a secure HTTPS Guild address.');
+if(url.username||url.password)throw new Error('Remove credentials from the address.');
+const destination=new URL('/app/family-guardian-v1.html',url.origin);
+location.assign(destination.href);
+}catch(e){error.textContent=e.message||'Enter a valid Guild address.';error.hidden=false}
+});
+})();
+</script></body></html>
