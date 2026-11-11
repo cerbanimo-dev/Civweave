@@ -8,7 +8,7 @@ The first build is intentionally useful before a radio is attached:
 - encounters, carried packets, successful deliveries, rest, energy, curiosity, trust and XP form the game loop;
 - state persists in ESP32 NVS;
 - the binary carrier frame is already defined for bounded LoRa fragmentation;
-- the compiled firmware is **radio-silent by default** (`CW_ENABLE_LORA=0`);
+- the normal firmware build is **radio-silent by default** (`CW_ENABLE_LORA=0`);
 - LoRa becomes a transport adapter after the exact board/pinout and operating region are chosen.
 
 ## Why the creature is the UI
@@ -91,3 +91,39 @@ The same state machine and transport framing are visible at:
 `/labs/pocket-commons/`
 
 It is a simulation only. It never transmits RF or sends a real private message.
+
+## Thread 10 · opt-in nearby beacons before LoRa
+
+The separate `sticks3_espnow` build enables **ESP-NOW** between nearby ESP32-S3 devices without Wi-Fi infrastructure, internet service, a phone, or any LoRa module. This is a strictly limited cooperative-game demonstration, not private messaging.
+
+From this directory:
+
+```bash
+pio run -e sticks3_espnow
+pio run -e sticks3_espnow -t upload
+pio device monitor
+```
+
+Flash the **same** build to two StickS3 units and power them within short-range 2.4 GHz reach. Both use fixed Wi-Fi channel 1. On this build, Button A creates a local encounter; Button B packs a virtual game envelope, then Button B again queues one of four public beacons: `HELLO`, `PLAY?`, `READY`, `GG!`. The next beacon rotates after each queued send. Receiving a valid new beacon makes the Threadling react with an audio cue and increases its local XP/trust.
+
+**Security and delivery limitations:**
+- All ESP-NOW demo beacons are **broadcast and unencrypted**. They are not private, authenticated, end-to-end encrypted, guaranteed to arrive, or reliable emergency communications.
+- The transport refuses arbitrary payloads and encrypted-message flags; only those four public preset strings can be sent/accepted.
+- A CRC detects accidental corruption but **does not authenticate peers**. Another radio can spoof a demo beacon. Duplicate suppression is bounded and lasts only until reboot.
+- A successful send return means **queued to the radio**, not recipient delivery. Do not advance delivery/trust milestones on send; future ACK frames and verified recipients are separate work.
+- Never put names, location, passwords, personal messages, GPS coordinates, or private Civweave envelopes in this demo channel.
+- When building `sticks3` (the default), the original radio-silent Thread 9 creature loop remains unchanged.
+- LoRa hardware, frequencies, pins, antennas, and regional transmission settings are **not** selected, enabled, or inferred by this target.
+
+Future work: route already-encrypted envelopes through the one canonical Civweave private-messaging owner via an authenticated phone bridge, add pairing and peer verification, authenticated acknowledgments, bounded retry and fragmentation, then integrate the exact LoRa module selected by the hardware owner.
+
+A host-only contract for the frame/pet foundation can be run without any ESP32 toolchain:
+
+```bash
+g++ -std=c++17 -Wall -Wextra -Werror \
+  -Itest/host -Iinclude \
+  test/host/test_protocol_pet.cpp -o /tmp/civweave-pocket-contract
+/tmp/civweave-pocket-contract
+```
+
+Hardware compilation, USB flashing, battery-life checks, and two-device radio verification remain manual gates before this should be marked device-tested.
