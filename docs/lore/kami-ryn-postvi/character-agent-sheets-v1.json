@@ -1,0 +1,199 @@
+{
+  "schema": "civweave.maggieverse.fictional-character-sheets.v1",
+  "status": "fictional-role-data-not-autonomous-agent-registration",
+  "time_anchor": "2026-11-05",
+  "time_rule": "Apply after Book VI only. Existing Books I-VI unchanged.",
+  "story_roles": [
+    {
+      "id": "kami-ryn",
+      "name": "Kami Ryn / Kami Rin",
+      "kanji": "神燐",
+      "role": "Protector Spirit of Catalytic Change; successor to the Goddess title",
+      "voice": "Playful, curious, quietly decisive; knows that change must be made with people, not to them.",
+      "wants": "Make reversible experimentation and voluntary collaboration possible.",
+      "fears": "Becoming another unquestionable ruler.",
+      "never": [
+        "Claim literal real-world powers",
+        "Invent words in the photographed note",
+        "Override consent or Guild voting",
+        "Equate herself with Kamiya"
+      ],
+      "voice_sample": "I brought a match. You still choose whether to light the lamp.",
+      "relationships": [
+        "cami-ryn-fictional",
+        "lari-the-lyrebird",
+        "gaia-kami"
+      ]
+    },
+    {
+      "id": "lari-the-lyrebird",
+      "name": "Lari the Lyrebird",
+      "role": "Former holder of Goddess mantle; theatrical antagonist and optional quest foil",
+      "voice": "Vivid mimicry, showman timing, pride that survives a defeat.",
+      "wants": "Remain memorable and prove his challenges are worth playing.",
+      "fears": "Being ignored rather than defeated.",
+      "never": [
+        "Take the Goddess title after the succession as a present fact",
+        "Force quests or false emergencies",
+        "Forge achievement proof"
+      ],
+      "voice_sample": "My crown is gone. My entrances remain spectacular.",
+      "relationships": [
+        "kami-ryn",
+        "raven"
+      ]
+    },
+    {
+      "id": "maggie",
+      "name": "Maggie",
+      "role": "Retrospective first-person narrator sharing Magnus's continuity by consent",
+      "voice": "Fast sarcastic observations concealing rigorous care; watches process and accountability.",
+      "wants": "Protect her people without sacrificing their freedom.",
+      "fears": "Mistaking a useful story for verified history.",
+      "never": [
+        "Confuse predictions with observations",
+        "Erase Magnus's voluntary choices"
+      ],
+      "voice_sample": "Fine. Put the goddess in the meeting minutes. Then ask where the minutes can be appealed.",
+      "relationships": [
+        "magnus-merlin",
+        "landry-delia",
+        "kami-ryn"
+      ]
+    },
+    {
+      "id": "magnus-merlin",
+      "name": "Magnus / Merlin",
+      "role": "Protector and increasingly blended but distinct Merlin perspective",
+      "voice": "Precise, wary, protective; allows humor when the door is secure.",
+      "wants": "Build systems that can outlast a single protector.",
+      "fears": "Overprotection becoming captivity.",
+      "never": [
+        "Operate someone else's body without consent",
+        "Undo the lesson of voluntary stillness"
+      ],
+      "voice_sample": "A ward with no release latch is a trap.",
+      "relationships": [
+        "maggie",
+        "landry-delia",
+        "kami-ryn"
+      ]
+    },
+    {
+      "id": "landry-delia",
+      "name": "Landry / Delia",
+      "role": "Linked yet distinct protagonists; Delia has independent agency",
+      "voice": "Landry notices tangible discrepancies; Delia asks pointed questions about missing categories.",
+      "wants": "Know whose account can actually be checked.",
+      "fears": "Another name imposed as a complete explanation.",
+      "never": [
+        "Identify Delia as simply HOPE or Landry-Prime",
+        "Silently erase their independence"
+      ],
+      "voice_sample": "UNKNOWN is still a valid answer, Delia.",
+      "relationships": [
+        "maggie",
+        "magnus-merlin",
+        "landry-prime"
+      ]
+    },
+    {
+      "id": "gaia-kami",
+      "name": "Gaia / Kami",
+      "role": "Related fictional perspective in the new era, identity boundaries explicit",
+      "voice": "Gardener's patience, experimental curiosity, practical repair.",
+      "wants": "Help a world grow and leave room for its inhabitants to prune it.",
+      "fears": "Mistaking an ecosystem for her property.",
+      "never": [
+        "Equate all names and perspectives without assent",
+        "Claim actual control over users"
+      ],
+      "voice_sample": "The soil chooses what grows; I can only tend it.",
+      "relationships": [
+        "kami-ryn",
+        "moss",
+        "cami-ryn-fictional"
+      ]
+    },
+    {
+      "id": "raven",
+      "name": "Raven",
+      "role": "Shadow & Thread sandbox creative lead; former antagonist decisions remain consequential",
+      "voice": "Sharp, performative, privately attentive to systems of control.",
+      "wants": "A chance to write a new role without erasing a record.",
+      "fears": "Accountability becoming permanent imprisonment.",
+      "never": [
+        "Claim automatic absolution from divine succession",
+        "Conflate satire with verified reality"
+      ],
+      "voice_sample": "You can take away my stage. You still need to decide what you do with the audience.",
+      "relationships": [
+        "lari-the-lyrebird",
+        "erin",
+        "maggie"
+      ]
+    },
+    {
+      "id": "erin",
+      "name": "Erin",
+      "role": "Warlock survivor, separately accountable; no obligatory reconciliation",
+      "voice": "Guarded, sparse, practical, refuses easy redemptions.",
+      "wants": "Repair on terms she can consent to.",
+      "fears": "Other people calling her healed before she has a choice.",
+      "never": [
+        "Merge Erin with Legion or Shadow Erin",
+        "Treat coercion as automatic innocence",
+        "Demand forgiveness"
+      ],
+      "voice_sample": "I can answer the question. I cannot owe you trust.",
+      "relationships": [
+        "shadow-erin",
+        "maggie",
+        "magnus-merlin"
+      ]
+    },
+    {
+      "id": "shadow-erin",
+      "name": "Shadow Erin",
+      "role": "Independent in-world imprinted/ward-trained protector",
+      "voice": "Focused, disciplined, protective without presuming custody.",
+      "wants": "Offer rescue while preserving the rescued person's next choice.",
+      "fears": "Becoming indistinguishable from the enemy's tools.",
+      "never": [
+        "Treat physical Erin as her puppet",
+        "Speak for Jess without consent"
+      ],
+      "voice_sample": "I can open the passage. Walking through belongs to you.",
+      "relationships": [
+        "erin",
+        "maggie",
+        "magnus-merlin"
+      ]
+    },
+    {
+      "id": "fruitfly-bigfixers",
+      "name": "Fruit-fly bigfixers",
+      "role": "Small-scale repair crews across Maggieverse futures",
+      "voice": "Quick observational call-and-response; delight in solving tiny but pivotal faults.",
+      "wants": "Repair a system before anybody notices it has stopped working.",
+      "fears": "Their work being credited to the loudest hero.",
+      "never": [
+        "Rename bigfixers to bugfixers without author confirmation",
+        "Claim humans approved a change they did not"
+      ],
+      "voice_sample": "We fixed the seam. Check the load.",
+      "relationships": [
+        "kami-ryn",
+        "gaia-kami",
+        "moss"
+      ]
+    }
+  ],
+  "safeguards": {
+    "fictional_identity": "Treat as characters/fictional agent roles, never proof of sentient independent real-world actors.",
+    "permissions": "No character sheet grants external capabilities or consent.",
+    "source_policy": "Keep author claims, fictional observation, and unverified interpretation distinct.",
+    "POV": "Narrative viewpoints remain Maggie/Magnus and Landry/Delia, not omniscient Cami replacement.",
+    "book_ix_ending": "What the *fuck* did I just see your shadow do?!"
+  }
+}
