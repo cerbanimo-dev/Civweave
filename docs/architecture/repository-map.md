@@ -345,3 +345,20 @@ Worldweaver Performance Studio lives at `public/app/shared/worldweaver-performan
 ## Worldweaver Book-to-Film Bones ramp
 
 The deterministic shot grammar, Gemini shot-task preparation, Codex operator task packet, ArtCraft portable shot-direction assembly, and consent-gated training export are pure capabilities in `public/app/shared/worldweaver-film-bones-v1.mjs`. The offline, private workflow lab at `public/app/tools/worldweaver-film-bones-lab.html` imports previously exported reviewed Performance Studio state, but is not a second canonical store, provider runtime, live Codex invoker or direct ArtCraft importer. Executable invariants: `scripts/test-worldweaver-film-bones-v1.mjs` included in `test:worldweaver`. Scope, authority gates and following work: `docs/implementation/worldweaver-book-to-artcraft-film-ramp-20261101.md`.
+
+## Pocket Commons device development
+
+`native/sticks3-communicator/` is the StickS3 native firmware and radio-carrier
+project. `public/labs/pocket-commons/` is its developer simulator; the native
+transport remains radio-silent pending selected LoRa hardware. Its browser
+contract is `scripts/test-pocket-commons-v1.mjs`.
+
+`native/sticks3-communicator/uiflow-lab/` is the subordinate UIFlow2/Bluetooth
+hardware lab for the existing StickS3 runtime: a portable companion game, bounded
+plaintext test messages, application-ACK exercises, and a desktop BLE relay.
+Its `CL` wire format is intentionally rejected by the native `CW` carrier.
+The lab is not an installed chat surface, production private-message owner, or
+replacement object mesh. Canonical human messaging, encrypted envelopes and
+account authority remain with their existing shared owners. CI is extended in
+`.github/workflows/verify-pocket-commons.yml`. See the lab's README and
+`docs/integration.md` for exact scope and device acceptance limits.

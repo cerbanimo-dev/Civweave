@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+config.json
+state-*.json
+pocket-state.*.json
+node_modules/
+.venv/

@@ -91,3 +91,26 @@ The same state machine and transport framing are visible at:
 `/labs/pocket-commons/`
 
 It is a simulation only. It never transmits RF or sends a real private message.
+
+## Thread 1 UIFlow2 and Bluetooth lab
+
+The [UIFlow2 lab](uiflow-lab/README.md) adds a run-once application for Cami's
+already selected StickS3 UIFlow2 environment, an original companion mini-game,
+application-ACK failure exercises, a desktop BLE relay, and a standalone browser
+lab. Its source and tests are under `uiflow-lab/`; the [ten-thread handoff](uiflow-lab/docs/ten-threads.md)
+coordinates remaining work.
+
+This is a subordinate development harness. It uses distinct `CL` packet magic
+and a separate BLE service; its plaintext test messages are never treated as
+Pocket Commons encrypted envelopes or sent through the production mesh. The
+native `CW` carrier and the existing Civweave private-message owner retain their
+responsibilities. Physical BLE, screen and power acceptance remains pending.
+
+From `native/sticks3-communicator/uiflow-lab/`:
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+node tests/browser-smoke.mjs
+node tests/carrier-boundary.mjs
+python tools/ble_bridge.py --simulate
+```

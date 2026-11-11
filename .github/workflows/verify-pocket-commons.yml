@@ -46,3 +46,26 @@ jobs:
         run: pio test -d native/sticks3-communicator -e native
       - name: Compile StickS3 firmware
         run: pio run -d native/sticks3-communicator -e sticks3
+
+  uiflow-lab:
+    name: UIFlow2 lab contracts
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: native/sticks3-communicator/uiflow-lab
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check portable core and device adapters
+        run: python -m unittest discover -s tests -p "test_*.py"
+      - name: Check browser lab behavior
+        run: node tests/browser-smoke.mjs
+      - name: Keep plaintext lab and native carrier formats separate
+        run: node tests/carrier-boundary.mjs
+      - name: Exercise three-node application receipts
+        run: python tools/ble_bridge.py --simulate
