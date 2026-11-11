@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Arduino.h>
+#include <cstring>
 #include <array>
 #include <cstddef>
 #include <cstdint>
