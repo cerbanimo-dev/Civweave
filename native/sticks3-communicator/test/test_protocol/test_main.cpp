@@ -59,12 +59,17 @@ void test_pet_state_is_bounded() {
   TEST_ASSERT_LESS_OR_EQUAL_UINT8(100, pet.curiosity);
 }
 
-void setup() {
+int runPocketCommonsTests() {
   UNITY_BEGIN();
   RUN_TEST(test_frame_round_trip);
   RUN_TEST(test_crc_rejects_corruption);
   RUN_TEST(test_pet_state_is_bounded);
-  UNITY_END();
+  return UNITY_END();
 }
 
+#ifdef ARDUINO
+void setup() { runPocketCommonsTests(); }
 void loop() {}
+#else
+int main(int, char**) { return runPocketCommonsTests(); }
+#endif
