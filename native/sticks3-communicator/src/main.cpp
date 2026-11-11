@@ -5,13 +5,29 @@
 #include "pet.hpp"
 #include "protocol.hpp"
 #include "transport.hpp"
+#ifndef CW_ENABLE_ESPNOW
+#define CW_ENABLE_ESPNOW 0
+#endif
+#if CW_ENABLE_ESPNOW
+#include <cstring>
+#include "espnow_transport.hpp"
+#endif
 
 using namespace civweave::pocket;
 
 namespace {
 
 PetState pet;
+#if CW_ENABLE_ESPNOW
+EspNowTransport transport;
+static const char* kBeacons[] = {"HELLO", "PLAY?", "READY", "GG!"};
+uint8_t nextBeacon = 0;
+uint32_t receivedIds[16]{};
+uint8_t nextSeen = 0;
+char linkStatus[25] = "PUBLIC BEACONS ONLY";
+#else
 StubTransport transport;
+#endif
 Preferences prefs;
 uint32_t lastTickAt = 0;
 uint32_t lastInputAt = 0;
@@ -122,6 +138,9 @@ void render() {
   M5.Display.setCursor(99, 6);
   M5.Display.print(transport.label());
 
+#if CW_ENABLE_ESPNOW
+  label(linkStatus, 7, 28, 1, rgb(243, 215, 130));
+#endif
   drawThreadling();
 
   label("THREADLING", 40, 145, 1, rgb(248, 242, 255));
@@ -162,6 +181,19 @@ void setup() {
 void loop() {
   M5.update();
   transport.poll();
+#if CW_ENABLE_ESPNOW
+  Frame incoming{};
+  while (transport.receive(incoming)) {
+    bool duplicate = false;
+    for (uint32_t id : receivedIds) if (id == incoming.messageId) duplicate = true;
+    if (!incoming.messageId || duplicate) continue;
+    receivedIds[nextSeen] = incoming.messageId;
+    nextSeen = (nextSeen + 1) % 16;
+    apply(PetEvent::Receive, 1175);
+    snprintf(linkStatus, sizeof(linkStatus), "RECEIVED PUBLIC SIGNAL");
+    dirty = true;
+  }
+#endif
   const uint32_t now = millis();
 
   if (M5.BtnA.wasPressed()) {
@@ -169,7 +201,37 @@ void loop() {
   }
 
   if (M5.BtnB.wasPressed()) {
+#if CW_ENABLE_ESPNOW
+    if (!pet.carried) {
+      apply(PetEvent::Carry, 784);
+      snprintf(linkStatus, sizeof(linkStatus), "PACKED PUBLIC BEACON");
+    } else {
+      Frame outgoing{};
+      outgoing.flags = Beacon;
+      outgoing.messageId = esp_random();
+      if (!outgoing.messageId) outgoing.messageId = 1;
+      const char* phrase = kBeacons[nextBeacon];
+      outgoing.payloadLength = static_cast<uint8_t>(strlen(phrase));
+      memcpy(outgoing.payload.data(), phrase, outgoing.payloadLength);
+      uint8_t bytes[kMaxFrameBytes]{};
+      size_t written = 0;
+      if (encodeFrame(outgoing, bytes, sizeof bytes, written) &&
+          transport.send(bytes, written)) {
+        // Queued to ESP-NOW, NOT confirmed delivered: do not claim Deliver XP.
+        --pet.carried;
+        savePet();
+        nextBeacon = (nextBeacon + 1) % 4;
+        snprintf(linkStatus, sizeof(linkStatus), "QUEUED: NOT ACKED");
+        chirp(1318);
+      } else {
+        snprintf(linkStatus, sizeof(linkStatus), "SEND FAILED / RETRY");
+        chirp(350);
+      }
+      dirty = true;
+    }
+#else
     apply(pet.carried ? PetEvent::Deliver : PetEvent::Carry, pet.carried ? 1318 : 784);
+#endif
   }
 
   if (now - lastTickAt >= 10000) {
