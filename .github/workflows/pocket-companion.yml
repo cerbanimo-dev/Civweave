@@ -1,0 +1,29 @@
+name: Verify Pocket Companion
+
+on:
+  pull_request:
+    paths:
+      - 'native/sticks3/**'
+      - '.github/workflows/pocket-companion.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'native/sticks3/**'
+      - '.github/workflows/pocket-companion.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  pocket-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check Python syntax
+        run: python -m compileall -q native/sticks3
+      - name: Verify offline game, save recovery, display and BLE boundaries
+        run: python -m unittest discover -s native/sticks3/tests -v

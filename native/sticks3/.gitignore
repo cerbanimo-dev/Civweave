@@ -1,0 +1,5 @@
+__pycache__/
+.pocket-state/
+*.pyc
+companion.0
+companion.1
