@@ -116,6 +116,7 @@ Presentation routing is evidence about composition. It is not permission to rede
 | `.github/workflows/` | CI, automation, deployment/release workflows | Keep path filters and generated-artifact expectations synchronized with source moves. |
 | `ops/triggers/` | Deliberate workflow sentinel/touch files | Sentinels belong here, never as hidden files at repository root. |
 | `tools/civweave-dev-mcp/` | Developer-only local PWA inspection/source-edit MCP bridge | Maintainer observation, reproduction, source editing, and verification only; never an end-user/public runtime endpoint or runtime repair path. |
+| `native/sticks3/` | Optional M5StickS3/UIFlow2 Pocket Companion collection-game experiment, BLE status presentation and desktop simulator | Separate manual trial from Thread 9's `native/sticks3-communicator/` firmware; does not own PWA chat, identity, private messaging, or mesh. See its README for integration boundaries and physical-device validation gates. |
 | `docs/contracts/` | Canonical architecture/behavior contracts | Architectural authority. Update deliberately when the contract itself changes. |
 | `docs/architecture/` | Current ownership and repository maps | Navigation/ownership documentation; keep synchronized with active owners and routes. |
 | `docs/operations/` | Installation/hosting/deployment guidance | Operational documentation, not application ownership. |
@@ -306,6 +307,25 @@ npm run release:materialize
 ```
 
 For documentation-only changes, verify every named path and route against the current branch and inspect the Markdown diff. A repository map that points at a deleted or retired file is itself a bug.
+
+## Pocket Companion hardware app
+
+`native/sticks3/pocket_game.py` owns only this optional UIFlow2 collection game;
+`pocket_view.py` renders the same bounded 135 x 240 pixel scene for the
+UIFlow2 adapter and loopback desktop simulator. `pocket_link.py` validates
+legacy phone status framing without supplying authentication or delivery
+authority. `sticks3_main.py` is a manual device trial, and `simulator.py`
+uses the same core and renderer. Private messaging and mesh retain their
+existing canonical owners. Thread 9's `native/sticks3-communicator/` remains
+the separate Arduino/PlatformIO firmware and carrier target on staging; its
+runtime, save state and wire protocol are not shared with this UIFlow2 trial.
+A combined release requires explicit integration into one device entrypoint.
+No installed-family route changes.
+
+Run `python3 -m unittest discover -s native/sticks3/tests -v`; the dedicated
+Pocket Companion workflow exercises these host contracts. Hardware and
+phone pairing remain separate acceptance gates. See
+`native/sticks3/README.md` for setup and integration with Android draft #911.
 
 ## Keeping this map current
 
