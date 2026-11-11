@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pocket Commons · Thread 9</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#070a12;color:#eef7ff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:
+radial-gradient(circle at 12% 12%,rgba(125,93,255,.20),transparent 28%),
+radial-gradient(circle at 86% 18%,rgba(59,213,198,.13),transparent 28%),
+linear-gradient(145deg,#070a12,#0e1022 55%,#101528);padding:28px}
+main{width:min(1120px,100%);margin:auto;display:grid;grid-template-columns:minmax(320px,460px) minmax(0,1fr);gap:28px;align-items:start}
+header{grid-column:1/-1;padding:4px 2px 0}
+small.kicker{font-weight:900;letter-spacing:.16em;color:#8fe7ff}
+h1{font-size:clamp(2.3rem,6vw,5.3rem);line-height:.88;margin:10px 0 12px;letter-spacing:-.055em}
+header p{max-width:760px;color:#b9c7d8;font-size:1.05rem;line-height:1.55}
+.device-wrap{display:grid;place-items:center;padding:26px;border:1px solid #ffffff16;border-radius:32px;background:#0a0d17b8;box-shadow:0 24px 80px #0008}
+.device{width:255px;padding:18px 18px 23px;border:1px solid #ffffff25;border-radius:38px;background:linear-gradient(150deg,#272a31,#111318 55%,#050607);box-shadow:inset 0 1px 0 #ffffff22,0 22px 60px #000b}
+.screen-bezel{padding:9px;border-radius:20px;background:#030406;box-shadow:inset 0 0 0 1px #ffffff15}
+canvas{display:block;width:100%;aspect-ratio:135/240;border-radius:13px;image-rendering:pixelated;background:#152535}
+.hardware{display:flex;justify-content:space-between;gap:10px;margin-top:15px}
+.hardware button{width:48px;height:48px;border-radius:50%;border:1px solid #ffffff22;background:#171a20;color:#fff;font-weight:900;box-shadow:0 5px 12px #0007;cursor:pointer}
+.hardware button:nth-child(2){width:82px;border-radius:999px;color:#a9f0ff}
+.panel{display:grid;gap:16px}
+.card{padding:20px;border:1px solid #ffffff16;border-radius:22px;background:#0d1220c9;box-shadow:0 18px 50px #0005}
+.card h2{margin:0 0 8px;font-size:1.2rem}.card p{margin:0;color:#adbdcf;line-height:1.5}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:15px}
+button.action{min-height:46px;border:1px solid #8fe7ff44;border-radius:13px;background:#13283a;color:#f5fbff;font-weight:850;cursor:pointer}
+button.action.primary{background:linear-gradient(135deg,#95edff,#b9a8ff);color:#08101d}
+label{display:block;margin:15px 0 6px;font-size:.78rem;font-weight:850;letter-spacing:.08em;color:#c8d6e8;text-transform:uppercase}
+textarea{width:100%;min-height:84px;resize:vertical;border:1px solid #ffffff1c;border-radius:13px;background:#050914;color:#eff8ff;padding:12px;font:inherit}
+.output{margin-top:12px;padding:12px;border-radius:13px;background:#050914;color:#9deaff;font:700 .78rem/1.45 ui-monospace,monospace;white-space:pre-wrap;min-height:62px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;color:#b9c7d8;font-size:.85rem}
+.badge{display:inline-block;padding:5px 8px;border:1px solid #ffffff18;border-radius:999px;background:#ffffff08;font-size:.72rem;font-weight:850}
+@media(max-width:820px){body{padding:16px}main{grid-template-columns:1fr}.device-wrap{padding:18px}.actions{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<small class="kicker">THREAD 9 · FIELD COMMUNICATORS</small>
+<h1>Pocket Commons</h1>
+<p>A creature game that doubles as the network instrument panel. The Threadling reacts to encounters, carried packets, successful deliveries, rest, and signal health. This staging build uses a simulated transport only; no private message or radio transmission leaves the page.</p>
+</header>
+<section class="device-wrap" aria-label="StickS3 simulator">
+  <div class="device">
+    <div class="screen-bezel"><canvas id="screen" width="135" height="240" aria-label="Pocket Commons simulated StickS3 display"></canvas></div>
+    <div class="hardware">
+      <button type="button" data-action="encounter" title="A · encounter">A</button>
+      <button type="button" data-action="rest" title="Rest">REST</button>
+      <button type="button" data-action="deliver" title="B · deliver">B</button>
+    </div>
+  </div>
+</section>
+<section class="panel">
+  <article class="card">
+    <span class="badge">ORIGINAL CREATURE · THREADLING</span>
+    <h2>Play is the status display.</h2>
+    <p>Nearby peers become encounters. Outgoing encrypted envelopes become carried mail. Delivery raises trust. Low battery makes the creature sleepy. The game remains useful even with every network disconnected.</p>
+    <div class="actions">
+      <button class="action primary" type="button" data-action="encounter">Simulate encounter</button>
+      <button class="action" type="button" data-action="carry">Pick up packet</button>
+      <button class="action" type="button" data-action="deliver">Deliver packet</button>
+      <button class="action" type="button" data-action="rest">Rest</button>
+    </div>
+  </article>
+  <article class="card">
+    <h2>Transport bench</h2>
+    <p>The frame layer is already shaped for LoRa fragmentation, but the radio backend stays disabled until the exact SX1262/SX127x hardware and region are selected.</p>
+    <label for="demo-message">Demo payload</label>
+    <textarea id="demo-message">Meet me at the Commons. Bring your weirdest useful skill.</textarea>
+    <div class="actions">
+      <button class="action primary" id="frame-message" type="button">Frame + reassemble</button>
+      <button class="action" id="corrupt-frame" type="button">Prove CRC rejection</button>
+    </div>
+    <div id="transport-output" class="output" aria-live="polite">SIM TRANSPORT READY · radio TX disabled</div>
+  </article>
+  <article class="card">
+    <h2>Thread 9 boundary</h2>
+    <div class="legend">
+      <span>Game loop</span><strong>offline</strong>
+      <span>Radio carrier</span><strong>plug-in</strong>
+      <span>Private-message owner</span><strong>Civweave PM</strong>
+      <span>Server requirement</span><strong>none</strong>
+    </div>
+  </article>
+</section>
+</main>
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
