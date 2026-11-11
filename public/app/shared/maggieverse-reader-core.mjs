@@ -209,3 +209,63 @@ export async function readBook(file){
   if(!text)throw new Error('No readable EPUB chapters were found.');
   return {title,text,bookId:fingerprint(name+':'+text.length+':'+text.slice(0,5000)+':'+text.slice(-5000))};
 }
+
+
+// Fruit of the Loom / Golden Path: an optional, local, reversible reading overlay.
+// It does not rewrite books, upload manuscripts, rate age suitability, or use AI.
+export const GOLDEN_PATH_SCHEMA='civweave.reader-golden-path.v1';
+const GOLDEN_INVITATIONS=Object.freeze([
+  'What did you notice along this part of the journey?',
+  'What question would you like to explore?',
+  'What changed since the last waypoint?',
+  'What could someone learn or share here?',
+  'Where would you like to travel in the story next?'
+]);
+const goldenTitle=line=>{
+  const text=String(line??'').trim();
+  if(text.length>90)return '';
+  const markdown=/^#{1,4}\s+(.{2,80})$/.exec(text);
+  if(markdown)return markdown[1].trim();
+  return /^(?:(?:chapter|part|book|interlude)\s+[a-z0-9ivxlcdm]+(?:\s*[:.\u2014\u2013-]\s*.+)?|prologue|epilogue)$/i.test(text)?text:'';
+};
+export function buildGoldenPath(pages) {
+  if(!Array.isArray(pages)||!pages.length||pages.length>12000||pages.some(p=>typeof p!=='string'))
+    throw new Error('Golden Path requires 1 to 12000 readable pages.');
+  const count=pages.length,headings=[];
+  for(let i=0;i<count;i++){
+    // Examine the page's existing line breaks; never invent text or modify the book.
+    const lines=pages[i].slice(0,6000).split(/\r?\n/);
+    for(const line of lines){
+      const title=goldenTitle(line);
+      if(title){headings.push({page:i+1,title});break;}
+    }
+  }
+  const starts=[{page:1,title:'The Threshold',kind:'start'}];
+  if(headings.length>=2){
+    // Keep the path compact even for books with hundreds of chapters.
+    const later=headings.filter(h=>h.page>1);
+    const stride=Math.max(1,Math.ceil(later.length/22));
+    for(let i=0;i<later.length;i+=stride)
+      starts.push({...later[i],kind:'chapter'});
+  }else{
+    for(const [fraction,title] of [[0.25,'First Threads'],[0.5,'The Turning'],[0.75,'New Horizons']]){
+      starts.push({page:Math.max(1,Math.ceil(count*fraction)),title,kind:'waypoint'});
+    }
+  }
+  starts.push({page:count,title:'The Horizon',kind:'finish'});
+  const unique=new Map();
+  for(const stop of starts)if(!unique.has(stop.page))unique.set(stop.page,stop);
+  const ordered=[...unique.values()].sort((a,b)=>a.page-b.page);
+  const stops=ordered.map((stop,index)=>({
+    page:stop.page,title:stop.title,kind:stop.kind,
+    invitation:GOLDEN_INVITATIONS[index%GOLDEN_INVITATIONS.length]
+  }));
+  return {schema:GOLDEN_PATH_SCHEMA,pageCount:count,stops};
+}
+export function goldenWaypointForPage(path,page){
+  if(!path||path.schema!==GOLDEN_PATH_SCHEMA||!Array.isArray(path.stops)||!path.stops.length)return null;
+  const number=Math.max(1,Math.min(path.pageCount,Math.floor(Number(page)||1)));
+  let active=path.stops[0];
+  for(const stop of path.stops){if(stop.page>number)break;active=stop;}
+  return active;
+}
