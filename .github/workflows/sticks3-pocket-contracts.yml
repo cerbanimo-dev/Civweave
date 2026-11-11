@@ -1,0 +1,25 @@
+name: StickS3 Pocket Commons contracts
+
+on:
+  pull_request:
+    paths:
+      - 'native/sticks3-communicator/**'
+      - '.github/workflows/sticks3-pocket-contracts.yml'
+  push:
+    branches: [staging]
+    paths:
+      - 'native/sticks3-communicator/**'
+      - '.github/workflows/sticks3-pocket-contracts.yml'
+
+jobs:
+  host-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and run frame and creature contracts
+        working-directory: native/sticks3-communicator
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Werror \
+            -Itest/host -Iinclude \
+            test/host/test_protocol_pet.cpp -o /tmp/civweave-pocket-contract
+          /tmp/civweave-pocket-contract
