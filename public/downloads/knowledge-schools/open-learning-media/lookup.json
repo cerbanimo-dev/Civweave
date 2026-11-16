@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-11-09T13:55:28Z",
+  "built_at": "2026-11-16T13:39:43Z",
   "pack_registry_revision": "subject-media-packs-v2.5",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",
@@ -176,7 +176,7 @@
         "critical-thinking",
         "philosophy-ethics"
       ],
-      "coverage": 0.8,
+      "coverage": 0.6,
       "available": true
     },
     {
@@ -205,7 +205,7 @@
         "personal-finance",
         "communication-conflict"
       ],
-      "coverage": 1.0,
+      "coverage": 0.75,
       "available": true
     },
     {
@@ -1364,7 +1364,7 @@
         "provider": "peertube",
         "provider_id": "6a4de5b3-c761-4e63-b214-be87c9420584",
         "title": "El Salvador Explained in 15 Minutes | History, Geography, Culture",
-        "description": "Discover the story of El Salvador in minutes! From its ancient civilizations and volcanic landscapes to its turbulent history and rich cultural traditions, this video breaks down everything you need to know—geography, history, economy, and what makes El Salvador truly unique. Whether you're curious about its civil war, coffee exports, or economic progress, this is your crash course on El Salvador.",
+        "description": "Discover the story of El Salvador in minutes! From its ancient civilizations and volcanic landscapes to its turbulent history and rich cultural traditions, this video breaks down everything you need to know—geography, history, economy, and what ma...",
         "source_url": "https://diler.tube/videos/watch/6a4de5b3-c761-4e63-b214-be87c9420584",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -2023,7 +2023,7 @@
         "provider": "peertube",
         "provider_id": "cc07956e-7faf-4d27-b06c-58885349d97e",
         "title": "South Korea EXPLAINED in 10 Minutes - (History, Geography, & Culture)",
-        "description": "Explore the fascinating world of South Korea, a country where modernity meets tradition. This video takes you on a journey through South Korea's unique culture, history, and innovations. Discover why South Koreans greet each other with \"Did you eat rice?\" and learn about their impressive work ethic, clocking in at 52 hours a week. Dive into the captivating history of the Korean Peninsula, from its division post-World War II to the economic boom known as the Miracle on the Han River. Experience South Korea's rich cultural heritage, from the symbolic Taegeukgi flag to quirky attractions like Poopoo Land and the toilet-shaped Haewoojae Museum. Marvel at the global impact of K-Pop and K-Dramas, and meet international icons like BTS and Blackpink. Understand the geographical beauty of this mountainous nation, home to the vibrant metropolis of Seoul and the serene Hallasan volcano on Jeju Island. With a focus on education, technology, and innovation, South Korea has transformed into a global powerhouse, boasting the 10th largest economy in the world. Join us as we delve into the Land of the Morning Calm, uncovering its hidden gems and celebrated icons",
+        "description": "Explore the fascinating world of South Korea, a country where modernity meets tradition. This video takes you on a journey through South Korea's unique culture, history, and innovations. Discover why South Koreans greet each other with \"Did you ea...",
         "source_url": "https://diler.tube/videos/watch/cc07956e-7faf-4d27-b06c-58885349d97e",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -2157,6 +2157,102 @@
           "creator": "Ian R Buck",
           "source_title": "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
           "source_url": "https://urbanists.video/videos/watch/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "earth-geography": {
+            "score": 10,
+            "evidence": [
+              "mapping"
+            ]
+          }
+        },
+        "pedagogy": {
+          "earth-geography": {
+            "strong_title_matches": [
+              "mapping"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "earth-geography": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "99b9d000-cfb3-4e9f-916f-c16b6f2ed36b",
+        "title": "UV Mapping & Unwrapping - Blender Fundamentals",
+        "description": "Blender is Free and Open Source Software Download: https://blender.org/download Donate: https://blender.org/donate -- This tutorial is part of the Blender Fundamentals series, produced by Dillon Gu. Find more free tutorials on: https://blen...",
+        "source_url": "https://video.blender.org/videos/watch/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 71106553,
+            "resolution": "1080p",
+            "fps": 15,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 41233960,
+            "resolution": "720p",
+            "fps": 15,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 21801790,
+            "resolution": "480p",
+            "fps": 15,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-360.mp4",
+            "mime": "video/mp4",
+            "bytes": 15019478,
+            "resolution": "360p",
+            "fps": 15,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-240.mp4",
+            "mime": "video/mp4",
+            "bytes": 10438658,
+            "resolution": "240p",
+            "fps": 15,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Blender",
+          "source_title": "UV Mapping & Unwrapping - Blender Fundamentals",
+          "source_url": "https://video.blender.org/videos/watch/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b",
           "license": "Attribution",
           "license_url": ""
         },
@@ -2344,79 +2440,6 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "1d792038-9185-42d5-a70d-86488ecf651e",
-        "title": "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
-        "description": "OpenDroneMap is an ecosystem of free and open source software to collect, process, analyze and display aerial data. In this talk we will present an exciting overview of what's new in the ecosystem, where the project is headed and how you can benef...",
-        "source_url": "https://video.osgeo.org/videos/watch/1d792038-9185-42d5-a70d-86488ecf651e",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://video.osgeo.org/download/streaming-playlists/hls/videos/1d792038-9185-42d5-a70d-86488ecf651e-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 77320889,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://video.osgeo.org/download/streaming-playlists/hls/videos/1d792038-9185-42d5-a70d-86488ecf651e-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 54645543,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "osgeo",
-          "source_title": "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
-          "source_url": "https://video.osgeo.org/videos/watch/1d792038-9185-42d5-a70d-86488ecf651e",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "earth-geography": {
-            "score": 10,
-            "evidence": [
-              "maps",
-              "maps"
-            ]
-          }
-        },
-        "pedagogy": {
-          "earth-geography": {
-            "strong_title_matches": [
-              "maps"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "earth-geography": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "81f9643e-e820-4466-be11-c6f91700c6e5",
         "title": "GUATEMALA: 12 Minute Documentary (Geography, History, Culture)",
         "description": "The Heart of the Mayan World - Exploring Guatemala's Culture and History. Guatemala, a land steeped in ancient history and vibrant culture! Join us on a mesmerizing journey through the heart of Central America. Uncover the echoes of the majestic M...",
@@ -2557,6 +2580,89 @@
         }
       },
       {
+        "provider": "peertube",
+        "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
+        "title": "Democracy in the Dark: Protecting Your Digital Rights",
+        "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://thenewoil.org/en/support/ ============================= You can also view these videos on other websites: 🎥 PeerTube: https://apertatube.net/c/thenewoil/videos 🎥 YouTube: https://youtube.com/thenewoil ⏰ Timestamps 00:00 Introduction 00:37 Disclaimer 01:23 Overview 02:13 Part 1: Why Privacy Matters to Democracy 05:35 Part 2: Protection From Targeted Ads and Disinformation 13:12 Part 3: Protection Against Doxing and Other Real-Life Threats 18:58 Part 4: Protesting ✅ Sources There were a whopping 67 sources on this episode. Check them out here: https://gitlab.com/thenewoil/content/-/blob/main/Show%20Notes/20240919-democracy #privacy #election #democracy #protesting #targetedadvertising #voting #misinformation",
+        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 446658800,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 273190887,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 164171737,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Nate Bartram",
+          "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
+          "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "civics-society": {
+            "score": 10,
+            "evidence": [
+              "democracy",
+              "democracy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "civics-society": {
+            "strong_title_matches": [
+              "democracy"
+            ],
+            "strong_description_matches": [
+              "democracy"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "civics-society": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
         "provider": "wikimedia-commons",
         "provider_id": "File:An introduction to Parliament.webm",
         "title": "An introduction to Parliament",
@@ -2588,6 +2694,70 @@
           "creator": "UK Parliament",
           "source_title": "An introduction to Parliament",
           "source_url": "https://commons.wikimedia.org/wiki/File:An_introduction_to_Parliament.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "civics-society": {
+            "score": 10,
+            "evidence": [
+              "government",
+              "government"
+            ]
+          }
+        },
+        "pedagogy": {
+          "civics-society": {
+            "strong_title_matches": [],
+            "strong_description_matches": [
+              "government"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "civics-society": {
+            "reason": "topic-description-anchor-plus-instructional-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Elections and voting explained (UK).webm",
+        "title": "Elections and voting explained (UK)",
+        "description": "Discover how elections work in the UK and take a closer look at the General Election, exploring: our right to vote, how candidates and parties gain votes and what happens once elected. If you are a teacher, this animation is a quick and easy way to introduce the General Election with secondary students studying subjects such as Citizenship or Government & Politics. This is just one chapter of the ‘An Introduction to Parliament’ video. Find the full video, along with further chapters, such as Parliament’s Structure and Your Voice, here: https://www.youtube.com/watch?v=RAMbIz3Y2JA",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Elections_and_voting_explained_%28UK%29.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 7768739,
+            "provider_sha1": "d9fb26a96fbab6fda2f8774fea28f96a52241d1b",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "UK Parliament",
+          "source_title": "Elections and voting explained (UK)",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
           "license": "CC BY 3.0",
           "license_url": "https://creativecommons.org/licenses/by/3.0"
         },
@@ -2747,13 +2917,15 @@
             "pedagogy_score": 36
           }
         }
-      },
+      }
+    ],
+    "biology-life": [
       {
         "provider": "peertube",
-        "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
-        "title": "Democracy in the Dark: Protecting Your Digital Rights",
-        "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://the...",
-        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
+        "provider_id": "4c23bcdb-b8bc-4fd0-97ff-5c04535184c0",
+        "title": "Nature vs Nurture ｜ Genetics ｜ Biology ｜ FuseSchool",
+        "description": "FuseSchool - Global Education explores how genetics and environmental factors shape unique human characteristics. Through biological examples and twin studies, discover the complex interplay between inherited traits and external influences. Have ...",
+        "source_url": "https://diler.tube/videos/watch/4c23bcdb-b8bc-4fd0-97ff-5c04535184c0",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
           "spdx": "CC-BY",
@@ -2766,76 +2938,248 @@
         },
         "files": [
           {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
+            "url": "https://diler.tube/download/web-videos/4c23bcdb-b8bc-4fd0-97ff-5c04535184c0-1080.mp4",
             "mime": "video/mp4",
-            "bytes": 446658800,
+            "bytes": 12254324,
             "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
+            "fps": 25,
+            "role": "web-video"
           },
           {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
+            "url": "https://diler.tube/download/web-videos/4c23bcdb-b8bc-4fd0-97ff-5c04535184c0-480.mp4",
             "mime": "video/mp4",
-            "bytes": 273190887,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 164171737,
+            "bytes": 7112064,
             "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
+            "fps": 25,
+            "role": "web-video"
           }
         ],
         "quality_score": 88,
         "content_hash": null,
         "hash_state": "compute-on-cache",
         "attribution": {
-          "creator": "Nate Bartram",
-          "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
-          "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
+          "creator": "jpan",
+          "source_title": "Nature vs Nurture ｜ Genetics ｜ Biology ｜ FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/4c23bcdb-b8bc-4fd0-97ff-5c04535184c0",
           "license": "Attribution",
           "license_url": ""
         },
         "relevance": {
-          "civics-society": {
-            "score": 10,
+          "biology-life": {
+            "score": 20,
             "evidence": [
-              "democracy",
-              "democracy"
+              "biology",
+              "genetics",
+              "biology",
+              "genetics"
             ]
           }
         },
         "pedagogy": {
-          "civics-society": {
+          "biology-life": {
             "strong_title_matches": [
-              "democracy"
+              "biology",
+              "genetics"
+            ],
+            "strong_description_matches": [
+              "genetics"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 64
+          }
+        },
+        "selection": {
+          "biology-life": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 64
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "d07efa67-89a9-4311-9315-a2bc46f447ce",
+        "title": "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
+        "description": "FuseSchool compares natural ecosystems with their complex, sustainable food webs and indigenous components to human-altered artificial ones. Learn how these engineered environments require external inputs and maintain high productivity through sim...",
+        "source_url": "https://diler.tube/videos/watch/d07efa67-89a9-4311-9315-a2bc46f447ce",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/d07efa67-89a9-4311-9315-a2bc46f447ce-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 59641704,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/d07efa67-89a9-4311-9315-a2bc46f447ce-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 18004422,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/d07efa67-89a9-4311-9315-a2bc46f447ce",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "biology-life": {
+            "score": 20,
+            "evidence": [
+              "biology",
+              "ecology",
+              "biology",
+              "ecology"
+            ]
+          },
+          "climate-environment": {
+            "score": 14,
+            "evidence": [
+              "ecosystems",
+              "environment",
+              "ecosystems"
+            ]
+          }
+        },
+        "pedagogy": {
+          "biology-life": {
+            "strong_title_matches": [
+              "biology",
+              "ecology"
             ],
             "strong_description_matches": [],
             "educational_intent": true,
             "instructional_title": false,
             "clickbait_title": false,
             "non_instructional_title": false,
-            "pedagogy_score": 36
+            "pedagogy_score": 56
+          },
+          "climate-environment": {
+            "strong_title_matches": [
+              "ecosystems"
+            ],
+            "strong_description_matches": [
+              "ecosystems"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
           }
         },
         "selection": {
-          "civics-society": {
+          "biology-life": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
+            "pedagogy_score": 56
+          },
+          "climate-environment": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
           }
         }
-      }
-    ],
-    "biology-life": [
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "68584b65-6cc7-45a5-8aa3-efd7296d8858",
+        "title": "Ecosystem Management | Ecology & Environment | Biology | FuseSchool",
+        "description": "Regardless of the habitat type, method of management, or end goal, ecosystem management plays a large part in modern society. Without effective ecosystem management, we would have much less access to the resources that we use for our daily lives. ...",
+        "source_url": "https://diler.tube/videos/watch/68584b65-6cc7-45a5-8aa3-efd7296d8858",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/68584b65-6cc7-45a5-8aa3-efd7296d8858-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 8454752,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/68584b65-6cc7-45a5-8aa3-efd7296d8858-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 6739569,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Ecosystem Management | Ecology & Environment | Biology | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/68584b65-6cc7-45a5-8aa3-efd7296d8858",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "biology-life": {
+            "score": 20,
+            "evidence": [
+              "biology",
+              "ecology",
+              "biology",
+              "ecology"
+            ]
+          }
+        },
+        "pedagogy": {
+          "biology-life": {
+            "strong_title_matches": [
+              "biology",
+              "ecology"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "biology-life": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
       {
         "provider": "peertube",
         "provider_id": "4f88fd26-2d10-4a1e-bb2d-8e9961045eb5",
         "title": "HongKong-PuiChing: Synthetic Biology (Educational Song) (2026) [English]",
-        "description": "HongKong-PuiChing introduces synthetic biology through music, combining science and art. Lyrics: Synthetic Biology is the key Redesigning nature graciously It works to makes things work like it should To save our neighbourhood When time...",
+        "description": "HongKong-PuiChing introduces synthetic biology through music, combining science and art. Lyrics: Synthetic Biology is the key Redesigning nature graciously It works to makes things work like it should To save our neighbourhood When times come that brings us misfortune No need to look too glum or blue Synthetic Biology comes into view To render us brand new In farms, in drugs, in space Factories and restaurants, and cyberspace A smile on every face With synbio in place While the harsh salt ruins it all And the plants can't grow at all With synbio in our call They push through and stand tall Music: Music by Anson Kwong Lyrics by Anson Kwong, Matthew Chan Performed by Anson Kwong, Matthew Chan Mixing by Matthew Chan Video: Concept by Matthew Chan Edited by Matthew Chan Background by Thamnguyen_TBVN from Pixabay Wiki: https://2026.igem.wiki/hongkong-puiching/",
         "source_url": "https://video.igem.org/videos/watch/4f88fd26-2d10-4a1e-bb2d-8e9961045eb5",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -2902,6 +3246,82 @@
             ],
             "educational_intent": true,
             "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "biology-life": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "dc995056-114b-4b55-bd2f-ce064698a370",
+        "title": "Human Impacts on Biodiversity | Ecology and Environment | Biology | FuseSchool",
+        "description": "FuseSchool - Global Education explores how rapid human population growth and industrial activities threaten species richness. Discover specific impacts from habitat destruction, resource exploitation, pollution, alien species introduction, and acc...",
+        "source_url": "https://diler.tube/videos/watch/dc995056-114b-4b55-bd2f-ce064698a370",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/dc995056-114b-4b55-bd2f-ce064698a370-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 12068915,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/dc995056-114b-4b55-bd2f-ce064698a370-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 9759095,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Human Impacts on Biodiversity | Ecology and Environment | Biology | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/dc995056-114b-4b55-bd2f-ce064698a370",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "biology-life": {
+            "score": 20,
+            "evidence": [
+              "biology",
+              "ecology",
+              "biology",
+              "ecology"
+            ]
+          }
+        },
+        "pedagogy": {
+          "biology-life": {
+            "strong_title_matches": [
+              "biology",
+              "ecology"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
             "clickbait_title": false,
             "non_instructional_title": false,
             "pedagogy_score": 56
@@ -3064,97 +3484,6 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "8360bf94-521f-4f6d-a337-5a232bdd6691",
-        "title": "Dr Becks (Rebecca) Spake: Virtual Ecology",
-        "description": "Dr Becks Spake discusses virtual ecology at the Workshop on Foundational AI to forecast ecosystem resilience at Pembroke College. 24th Nov 2025.",
-        "source_url": "https://watch.eeg.cl.cam.ac.uk/videos/watch/8360bf94-521f-4f6d-a337-5a232bdd6691",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://watch.eeg.cl.cam.ac.uk/download/web-videos/8360bf94-521f-4f6d-a337-5a232bdd6691-2160.mp4",
-            "mime": "video/mp4",
-            "bytes": 1940063693,
-            "resolution": "2160p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://watch.eeg.cl.cam.ac.uk/download/web-videos/8360bf94-521f-4f6d-a337-5a232bdd6691-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 420896501,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://watch.eeg.cl.cam.ac.uk/download/streaming-playlists/hls/videos/8360bf94-521f-4f6d-a337-5a232bdd6691-2160-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 1939566719,
-            "resolution": "2160p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://watch.eeg.cl.cam.ac.uk/download/streaming-playlists/hls/videos/8360bf94-521f-4f6d-a337-5a232bdd6691-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 420339919,
-            "resolution": "1080p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Energy and Environment Group",
-          "source_title": "Dr Becks (Rebecca) Spake: Virtual Ecology",
-          "source_url": "https://watch.eeg.cl.cam.ac.uk/videos/watch/8360bf94-521f-4f6d-a337-5a232bdd6691",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "biology-life": {
-            "score": 10,
-            "evidence": [
-              "ecology",
-              "ecology"
-            ]
-          }
-        },
-        "pedagogy": {
-          "biology-life": {
-            "strong_title_matches": [
-              "ecology"
-            ],
-            "strong_description_matches": [
-              "ecology"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 44
-          }
-        },
-        "selection": {
-          "biology-life": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 44
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "4e1a7794-3749-490a-9c00-6b0d86d7144a",
         "title": "MammothEdu-East: BioCall Podcast 3 - AI and Synthetic Biology (2026) [Chinese]",
         "description": "Education podcast episode 3: combined applications of artificial intelligence and synthetic biology. Educational media provided by MammothEdu-East for its 2026 iGEM project. Team Wiki: https://2026.igem.wiki/mammothedu-east/ Education: https://20...",
@@ -3269,6 +3598,79 @@
           "creator": "jpan",
           "source_title": "DNA polymorphism | Molecular basis of inheritance | Biology | Khan Academy",
           "source_url": "https://diler.tube/videos/watch/5dcd4e29-4190-4945-ac16-1273520a9f71",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "biology-life": {
+            "score": 10,
+            "evidence": [
+              "biology",
+              "biology"
+            ]
+          }
+        },
+        "pedagogy": {
+          "biology-life": {
+            "strong_title_matches": [
+              "biology"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "biology-life": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "5ee07155-b8ca-450e-89f2-77f379851d95",
+        "title": "Selective Breeding | Evolution | Biology | FuseSchool",
+        "description": "FuseSchool - Global Education explores how humans have shaped plants and animals over thousands of years to suit agricultural and domestic needs. Learn the process of selecting desired traits and the potential genetic risks associated with this p...",
+        "source_url": "https://diler.tube/videos/watch/5ee07155-b8ca-450e-89f2-77f379851d95",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/5ee07155-b8ca-450e-89f2-77f379851d95-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 15110710,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/5ee07155-b8ca-450e-89f2-77f379851d95-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 11282983,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Selective Breeding | Evolution | Biology | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/5ee07155-b8ca-450e-89f2-77f379851d95",
           "license": "Attribution",
           "license_url": ""
         },
@@ -3700,10 +4102,10 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "64da4f3e-6df0-480a-a6ab-bced46a1f3e2",
-        "title": "Projectile on an incline | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
-        "description": "Learn Projectile on an incline with motion diagrams, graphs, and examples. This video connects position, velocity, acceleration, and force ideas in a physics context.",
-        "source_url": "https://diler.tube/videos/watch/64da4f3e-6df0-480a-a6ab-bced46a1f3e2",
+        "provider_id": "d12016e1-9720-444a-abc8-ac0e85ad269c",
+        "title": "Speed, Distance, Time and Acceleration ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+        "description": "Learn how to calculate speed and acceleration using practical examples ranging from cars and sprinters to jets. FuseSchool explains the formulas for distance and change in velocity, along with how to interpret speed-time graphs.",
+        "source_url": "https://diler.tube/videos/watch/d12016e1-9720-444a-abc8-ac0e85ad269c",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
           "spdx": "CC-BY",
@@ -3716,19 +4118,19 @@
         },
         "files": [
           {
-            "url": "https://diler.tube/download/web-videos/64da4f3e-6df0-480a-a6ab-bced46a1f3e2-720.mp4",
+            "url": "https://diler.tube/download/web-videos/d12016e1-9720-444a-abc8-ac0e85ad269c-1080.mp4",
             "mime": "video/mp4",
-            "bytes": 30502451,
-            "resolution": "720p",
-            "fps": 15,
+            "bytes": 22595976,
+            "resolution": "1080p",
+            "fps": 25,
             "role": "web-video"
           },
           {
-            "url": "https://diler.tube/download/web-videos/64da4f3e-6df0-480a-a6ab-bced46a1f3e2-480.mp4",
+            "url": "https://diler.tube/download/web-videos/d12016e1-9720-444a-abc8-ac0e85ad269c-480.mp4",
             "mime": "video/mp4",
-            "bytes": 26077669,
+            "bytes": 11932907,
             "resolution": "480p",
-            "fps": 15,
+            "fps": 25,
             "role": "web-video"
           }
         ],
@@ -3737,92 +4139,17 @@
         "hash_state": "compute-on-cache",
         "attribution": {
           "creator": "jpan",
-          "source_title": "Projectile on an incline | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
-          "source_url": "https://diler.tube/videos/watch/64da4f3e-6df0-480a-a6ab-bced46a1f3e2",
+          "source_title": "Speed, Distance, Time and Acceleration ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/d12016e1-9720-444a-abc8-ac0e85ad269c",
           "license": "Attribution",
           "license_url": ""
         },
         "relevance": {
           "physics-foundations": {
-            "score": 14,
+            "score": 28,
             "evidence": [
               "physics",
-              "physics",
-              "motion"
-            ]
-          }
-        },
-        "pedagogy": {
-          "physics-foundations": {
-            "strong_title_matches": [
-              "physics"
-            ],
-            "strong_description_matches": [
-              "physics"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "physics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "88430f99-77f4-47e6-8084-f683f3e0697f",
-        "title": "Elastic and inelastic collisions | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
-        "description": "Study Elastic and inelastic collisions through rotational or momentum-based examples. This video connects motion, forces, angular ideas, and conservation principles.",
-        "source_url": "https://diler.tube/videos/watch/88430f99-77f4-47e6-8084-f683f3e0697f",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/88430f99-77f4-47e6-8084-f683f3e0697f-720.mp4",
-            "mime": "video/mp4",
-            "bytes": 28488329,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/88430f99-77f4-47e6-8084-f683f3e0697f-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 23556339,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jpan",
-          "source_title": "Elastic and inelastic collisions | Grade 11 | Physics | NCERT | Khan Academy (IN accent)",
-          "source_url": "https://diler.tube/videos/watch/88430f99-77f4-47e6-8084-f683f3e0697f",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "physics-foundations": {
-            "score": 18,
-            "evidence": [
-              "physics",
+              "forces and motion",
               "physics",
               "forces",
               "motion"
@@ -3832,87 +4159,21 @@
         "pedagogy": {
           "physics-foundations": {
             "strong_title_matches": [
-              "physics"
+              "physics",
+              "forces and motion"
             ],
             "strong_description_matches": [],
             "educational_intent": true,
-            "instructional_title": true,
+            "instructional_title": false,
             "clickbait_title": false,
             "non_instructional_title": false,
-            "pedagogy_score": 48
+            "pedagogy_score": 56
           }
         },
         "selection": {
           "physics-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "0ec67e30-32e6-46b4-afbf-aee9916efef3",
-        "title": "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
-        "description": "Study Photon momentum through rotational or momentum-based examples. This video connects motion, forces, angular ideas, and conservation principles.",
-        "source_url": "https://diler.tube/videos/watch/0ec67e30-32e6-46b4-afbf-aee9916efef3",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/0ec67e30-32e6-46b4-afbf-aee9916efef3-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 3979489,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jpan",
-          "source_title": "Photon momentum | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
-          "source_url": "https://diler.tube/videos/watch/0ec67e30-32e6-46b4-afbf-aee9916efef3",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "physics-foundations": {
-            "score": 18,
-            "evidence": [
-              "physics",
-              "physics",
-              "forces",
-              "motion"
-            ]
-          }
-        },
-        "pedagogy": {
-          "physics-foundations": {
-            "strong_title_matches": [
-              "physics"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 48
-          }
-        },
-        "selection": {
-          "physics-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 48
+            "pedagogy_score": 56
           }
         }
       },
@@ -3980,6 +4241,231 @@
           "physics-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "786b8bc7-98ea-497c-9daa-ab229cdef029",
+        "title": "Changes In Momentum | Forces & Motion | Physics | FuseSchool",
+        "description": "How exactly does a seatbelt save lives?In this video we are going to learn about the forces acting on an object due to changes in momentum. You may find it useful to brush up on momentum by watching this video. All moving objects have momentum; a ...",
+        "source_url": "https://diler.tube/videos/watch/786b8bc7-98ea-497c-9daa-ab229cdef029",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/786b8bc7-98ea-497c-9daa-ab229cdef029-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 15550603,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/786b8bc7-98ea-497c-9daa-ab229cdef029-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 11803604,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Changes In Momentum | Forces & Motion | Physics | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/786b8bc7-98ea-497c-9daa-ab229cdef029",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 18,
+            "evidence": [
+              "physics",
+              "physics",
+              "forces",
+              "motion"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "2228b081-133a-4914-8556-c1b1cabdcf88",
+        "title": "Displacement Time Graphs | Forces & Motion | Physics | FuseSchool",
+        "description": "Understand the difference between scalar and vector measurements, specifically distance, displacement, speed, and velocity. FuseSchool explains how to plot journey data on displacement-time graphs, illustrating constant speeds, stationary periods,...",
+        "source_url": "https://diler.tube/videos/watch/2228b081-133a-4914-8556-c1b1cabdcf88",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/2228b081-133a-4914-8556-c1b1cabdcf88-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 9607861,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/2228b081-133a-4914-8556-c1b1cabdcf88-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 7810389,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Displacement Time Graphs | Forces & Motion | Physics | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/2228b081-133a-4914-8556-c1b1cabdcf88",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 18,
+            "evidence": [
+              "physics",
+              "physics",
+              "forces",
+              "motion"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "a39eca9f-37c8-4391-bc81-e2a8048d8b07",
+        "title": "Newton's Second Law | Forces & Motion | Physics | FuseSchool",
+        "description": "FuseSchool - Global Education explains how unbalanced forces alter an object's speed and direction. Through examples like throwing a ball and driving, you will learn to calculate resultant force, mass, and acceleration using the formula F=ma. In t...",
+        "source_url": "https://diler.tube/videos/watch/a39eca9f-37c8-4391-bc81-e2a8048d8b07",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/a39eca9f-37c8-4391-bc81-e2a8048d8b07-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 14864966,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/a39eca9f-37c8-4391-bc81-e2a8048d8b07-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 12389800,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Newton's Second Law | Forces & Motion | Physics | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/a39eca9f-37c8-4391-bc81-e2a8048d8b07",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "physics-foundations": {
+            "score": 18,
+            "evidence": [
+              "physics",
+              "physics",
+              "forces",
+              "motion"
+            ]
+          }
+        },
+        "pedagogy": {
+          "physics-foundations": {
+            "strong_title_matches": [
+              "physics"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "physics-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
           }
         }
       }
@@ -4343,10 +4829,10 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "23e16fc8-f87f-463a-ba35-a5f45353398d",
-        "title": "Inorganic chemistry course intro | Khan Academy",
-        "description": "norganic chemistry explores common features of s, p, d, and f block elements in the periodic table. But why study these you ask? In S block, while learning how to create hydrides helps us make fuel cell technologies, analysing ionisation energie...",
-        "source_url": "https://diler.tube/videos/watch/23e16fc8-f87f-463a-ba35-a5f45353398d",
+        "provider_id": "8b565abe-c09c-4415-9422-6f6a7b631205",
+        "title": "How The Elements Are Laid Out In The Periodic Table | Properties of Matter | Chemistry | FuseSchool",
+        "description": "Learn the basics about How the elements are laid out in the periodic table? Why are they all named and placed that way? Find out more in this video!",
+        "source_url": "https://diler.tube/videos/watch/8b565abe-c09c-4415-9422-6f6a7b631205",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
           "spdx": "CC-BY",
@@ -4359,19 +4845,19 @@
         },
         "files": [
           {
-            "url": "https://diler.tube/download/web-videos/23e16fc8-f87f-463a-ba35-a5f45353398d-720.mp4",
+            "url": "https://diler.tube/download/web-videos/8b565abe-c09c-4415-9422-6f6a7b631205-720.mp4",
             "mime": "video/mp4",
-            "bytes": 12139176,
+            "bytes": 7584282,
             "resolution": "720p",
-            "fps": 30,
+            "fps": 25,
             "role": "web-video"
           },
           {
-            "url": "https://diler.tube/download/web-videos/23e16fc8-f87f-463a-ba35-a5f45353398d-480.mp4",
+            "url": "https://diler.tube/download/web-videos/8b565abe-c09c-4415-9422-6f6a7b631205-480.mp4",
             "mime": "video/mp4",
-            "bytes": 8106364,
+            "bytes": 5714213,
             "resolution": "480p",
-            "fps": 30,
+            "fps": 25,
             "role": "web-video"
           }
         ],
@@ -4380,8 +4866,8 @@
         "hash_state": "compute-on-cache",
         "attribution": {
           "creator": "jpan",
-          "source_title": "Inorganic chemistry course intro | Khan Academy",
-          "source_url": "https://diler.tube/videos/watch/23e16fc8-f87f-463a-ba35-a5f45353398d",
+          "source_title": "How The Elements Are Laid Out In The Periodic Table | Properties of Matter | Chemistry | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/8b565abe-c09c-4415-9422-6f6a7b631205",
           "license": "Attribution",
           "license_url": ""
         },
@@ -4399,14 +4885,14 @@
         "pedagogy": {
           "chemistry-foundations": {
             "strong_title_matches": [
-              "chemistry"
-            ],
-            "strong_description_matches": [
               "chemistry",
               "periodic table"
             ],
+            "strong_description_matches": [
+              "periodic table"
+            ],
             "educational_intent": true,
-            "instructional_title": true,
+            "instructional_title": false,
             "clickbait_title": false,
             "non_instructional_title": false,
             "pedagogy_score": 64
@@ -4553,10 +5039,10 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "e92004fd-4fce-4879-aabe-e1f08fed4ae3",
-        "title": "Free radical reactions | Grade 11 | Chemistry | NCERT | Khan Academy (IN accent)",
-        "description": "Learn Free radical reactions through clear chemistry examples and visual reasoning. This video helps connect molecular structure, reactions, and chemical patterns.",
-        "source_url": "https://diler.tube/videos/watch/e92004fd-4fce-4879-aabe-e1f08fed4ae3",
+        "provider_id": "65f13467-3b78-4f96-8006-4a8fbc117c02",
+        "title": "How To Balance Equations - Part 1 | Chemical Calculations | Chemistry | FuseSchool",
+        "description": "Learn the basics about balancing equations, as a part of chemical calculations.The law of conservation of mass states that no atoms are lost or made during a chemical reaction. There are different ways of arranging the atoms. Chemical reactions a...",
+        "source_url": "https://diler.tube/videos/watch/65f13467-3b78-4f96-8006-4a8fbc117c02",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
           "spdx": "CC-BY",
@@ -4569,17 +5055,17 @@
         },
         "files": [
           {
-            "url": "https://diler.tube/download/web-videos/e92004fd-4fce-4879-aabe-e1f08fed4ae3-720.mp4",
+            "url": "https://diler.tube/download/web-videos/65f13467-3b78-4f96-8006-4a8fbc117c02-720.mp4",
             "mime": "video/mp4",
-            "bytes": 19238336,
+            "bytes": 4775301,
             "resolution": "720p",
             "fps": 25,
             "role": "web-video"
           },
           {
-            "url": "https://diler.tube/download/web-videos/e92004fd-4fce-4879-aabe-e1f08fed4ae3-480.mp4",
+            "url": "https://diler.tube/download/web-videos/65f13467-3b78-4f96-8006-4a8fbc117c02-480.mp4",
             "mime": "video/mp4",
-            "bytes": 16219278,
+            "bytes": 3773379,
             "resolution": "480p",
             "fps": 25,
             "role": "web-video"
@@ -4590,94 +5076,19 @@
         "hash_state": "compute-on-cache",
         "attribution": {
           "creator": "jpan",
-          "source_title": "Free radical reactions | Grade 11 | Chemistry | NCERT | Khan Academy (IN accent)",
-          "source_url": "https://diler.tube/videos/watch/e92004fd-4fce-4879-aabe-e1f08fed4ae3",
+          "source_title": "How To Balance Equations - Part 1 | Chemical Calculations | Chemistry | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/65f13467-3b78-4f96-8006-4a8fbc117c02",
           "license": "Attribution",
           "license_url": ""
         },
         "relevance": {
           "chemistry-foundations": {
-            "score": 14,
-            "evidence": [
-              "chemistry",
-              "chemistry",
-              "reactions"
-            ]
-          }
-        },
-        "pedagogy": {
-          "chemistry-foundations": {
-            "strong_title_matches": [
-              "chemistry"
-            ],
-            "strong_description_matches": [
-              "chemistry"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "chemistry-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "d92cb275-9c4c-487b-96eb-d88a7f2d1394",
-        "title": "Gay Lussac's Law| Some basic principles of chemistry | Grade 11 | Chemistry | Khan Academy",
-        "description": "Unlock the secret behind how gases react in perfect volume ratios with Gay-Lussac’s law! This video breaks down the law using two classic chemical reactions — the formation of water and ammonia — revealing how nature follows precise mathematical p...",
-        "source_url": "https://diler.tube/videos/watch/d92cb275-9c4c-487b-96eb-d88a7f2d1394",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/d92cb275-9c4c-487b-96eb-d88a7f2d1394-720.mp4",
-            "mime": "video/mp4",
-            "bytes": 16265276,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/d92cb275-9c4c-487b-96eb-d88a7f2d1394-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 12849231,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jpan",
-          "source_title": "Gay Lussac's Law| Some basic principles of chemistry | Grade 11 | Chemistry | Khan Academy",
-          "source_url": "https://diler.tube/videos/watch/d92cb275-9c4c-487b-96eb-d88a7f2d1394",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "chemistry-foundations": {
-            "score": 24,
+            "score": 28,
             "evidence": [
               "chemistry",
               "chemical reactions",
               "chemistry",
+              "atoms",
               "reactions"
             ]
           }
@@ -4835,6 +5246,85 @@
           "chemistry-foundations": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "e3ae35a5-6ccb-42c4-b0e0-5563e37f4f46",
+        "title": "Displacement Reactions & Reactions In Solutions | Reactions | Chemistry | FuseSchool",
+        "description": "Understanding reactivity trends in different periodic table groups allows for predicting how atoms behave in displacement reactions. Using examples like molten ionic compounds, halide solutions, and the thermite process, this FuseSchool lesson exp...",
+        "source_url": "https://diler.tube/videos/watch/e3ae35a5-6ccb-42c4-b0e0-5563e37f4f46",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/e3ae35a5-6ccb-42c4-b0e0-5563e37f4f46-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 8325627,
+            "resolution": "720p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/e3ae35a5-6ccb-42c4-b0e0-5563e37f4f46-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 6727351,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Displacement Reactions & Reactions In Solutions | Reactions | Chemistry | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/e3ae35a5-6ccb-42c4-b0e0-5563e37f4f46",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "chemistry-foundations": {
+            "score": 28,
+            "evidence": [
+              "chemistry",
+              "periodic table",
+              "chemistry",
+              "atoms",
+              "periodic table",
+              "reactions"
+            ]
+          }
+        },
+        "pedagogy": {
+          "chemistry-foundations": {
+            "strong_title_matches": [
+              "chemistry"
+            ],
+            "strong_description_matches": [
+              "periodic table"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "chemistry-foundations": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
           }
         }
       },
@@ -5024,83 +5514,6 @@
             ],
             "strong_description_matches": [
               "chemistry"
-            ],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 44
-          }
-        },
-        "selection": {
-          "chemistry-foundations": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 44
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "a6f7a371-a382-495c-a8cd-34b6cc45a69e",
-        "title": "What Is Group 2？ Alkaline Earth Metals ｜ Properties of Matter ｜ Chemistry ｜ FuseSchool",
-        "description": "Learn the basics about Alkaline Earth metals which are a group of chemical elements in the periodic table with very similar properties? What are those properties? Find out more in this video! Author: FuseSchool - Global Education",
-        "source_url": "https://diler.tube/videos/watch/a6f7a371-a382-495c-a8cd-34b6cc45a69e",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://diler.tube/download/web-videos/a6f7a371-a382-495c-a8cd-34b6cc45a69e-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 13589774,
-            "resolution": "1080p",
-            "fps": 25,
-            "role": "web-video"
-          },
-          {
-            "url": "https://diler.tube/download/web-videos/a6f7a371-a382-495c-a8cd-34b6cc45a69e-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 7287358,
-            "resolution": "480p",
-            "fps": 25,
-            "role": "web-video"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "jessa",
-          "source_title": "What Is Group 2？ Alkaline Earth Metals ｜ Properties of Matter ｜ Chemistry ｜ FuseSchool",
-          "source_url": "https://diler.tube/videos/watch/a6f7a371-a382-495c-a8cd-34b6cc45a69e",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "chemistry-foundations": {
-            "score": 20,
-            "evidence": [
-              "chemistry",
-              "periodic table",
-              "chemistry",
-              "periodic table"
-            ]
-          }
-        },
-        "pedagogy": {
-          "chemistry-foundations": {
-            "strong_title_matches": [
-              "chemistry"
-            ],
-            "strong_description_matches": [
-              "periodic table"
             ],
             "educational_intent": true,
             "instructional_title": false,
@@ -5587,111 +6000,6 @@
       },
       {
         "provider": "peertube",
-        "provider_id": "7d2e9f22-2377-46ef-a84c-de163f98c279",
-        "title": "The Planet Song - 8 Planets of the Solar System Song for Kids | KidsLearningTube",
-        "description": "Subscribe to KLT: https://www.youtube.com/channel/UC7EFWpvc1wYuUwrtZ_BLi9A?sub_confirmation=1 Listen to KLT Music on Spotify: https://open.spotify.com/artist/3RvQsrlQFlGXHeLl1Vl9e0?si=Q-yVLAGmQEO-4hnbXvWe_Q&nd=1 Learn the 8 planets of our Solar...",
-        "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/7d2e9f22-2377-46ef-a84c-de163f98c279",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "Attribution",
-          "url": "",
-          "evidence": "PeerTube API licence id 1: Attribution",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/7d2e9f22-2377-46ef-a84c-de163f98c279-1080.mp4",
-            "mime": "video/mp4",
-            "bytes": 47309557,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/7d2e9f22-2377-46ef-a84c-de163f98c279-720.mp4",
-            "mime": "video/mp4",
-            "bytes": 26245238,
-            "resolution": "720p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube-cycle-2.apps.education.fr/download/web-videos/7d2e9f22-2377-46ef-a84c-de163f98c279-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 17508366,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "web-video"
-          },
-          {
-            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/7d2e9f22-2377-46ef-a84c-de163f98c279-1080-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 47294463,
-            "resolution": "1080p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/7d2e9f22-2377-46ef-a84c-de163f98c279-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 26228468,
-            "resolution": "720p",
-            "fps": 24,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://tube-cycle-2.apps.education.fr/download/streaming-playlists/hls/videos/7d2e9f22-2377-46ef-a84c-de163f98c279-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 17492212,
-            "resolution": "480p",
-            "fps": 24,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "bonnardet_emeline",
-          "source_title": "The Planet Song - 8 Planets of the Solar System Song for Kids | KidsLearningTube",
-          "source_url": "https://tube-cycle-2.apps.education.fr/videos/watch/7d2e9f22-2377-46ef-a84c-de163f98c279",
-          "license": "Attribution",
-          "license_url": ""
-        },
-        "relevance": {
-          "astronomy-space": {
-            "score": 10,
-            "evidence": [
-              "solar system",
-              "solar system"
-            ]
-          }
-        },
-        "pedagogy": {
-          "astronomy-space": {
-            "strong_title_matches": [
-              "solar system"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "astronomy-space": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "2626cdaf-e341-4c3b-8719-724da79c9a55",
         "title": "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "description": "It makes sense to use a telescope to look up at the heavens, but what can we learn from using a microscope instead? Meteorites are natural objects that survive their fall to Earth from space. Almost all are fragments of ancient asteroids, forme...",
@@ -5907,7 +6215,7 @@
         "provider": "peertube",
         "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
         "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
+        "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
         "source_url": "https://peertube.wtf/videos/watch/f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -6587,7 +6895,7 @@
         "provider": "peertube",
         "provider_id": "1b6d1127-6826-4d5d-9284-69bdd8f3e965",
         "title": "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-        "description": "Our job might be to build web applications, but we can't build apps that rely on networking if we don't know how these networks and the big network that connects them all (this thing called the Internet) actually work. I'll walk through the basics of networking, then dive a lot deeper (from TCP/UDP to IPv4/6, source/destination ports, sockets, DNS, switching, firewalling and even OSPF, VRRP and BGP). Prepare for an eye-opener when you realize how much a typical app relies on all of these (and many more) working flawlessly... and how you can prepare your app for failure in the chain.",
+        "description": "Our job might be to build web applications, but we can't build apps that rely on networking if we don't know how these networks and the big network that connects them all (this thing called the Internet) actually work. I'll walk through the basics...",
         "source_url": "https://phpc.tv/videos/watch/1b6d1127-6826-4d5d-9284-69bdd8f3e965",
         "cache_policy": "MESH_REDISTRIBUTABLE",
         "license": {
@@ -7642,6 +7950,186 @@
             "pedagogy_score": 44
           }
         }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
+        "title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
+        "description": "I give an overview on suckless tool as an introduction and the importance of keeping a simple mindset when creating web apps and a mini rant because I'm a grumpy old man https://suckless.org/philosophy/ https://github.com/stagfoo/obake https://g...",
+        "source_url": "https://tube.tchncs.de/videos/watch/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 45722677,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 38045937,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-360.mp4",
+            "mime": "video/mp4",
+            "bytes": 33093299,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 46792840,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 37630151,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-360-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 32676797,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "stagfoo",
+          "source_title": "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
+          "source_url": "https://tube.tchncs.de/videos/watch/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "philosophy-ethics": {
+            "score": 10,
+            "evidence": [
+              "philosophy",
+              "philosophy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "philosophy-ethics": {
+            "strong_title_matches": [
+              "philosophy"
+            ],
+            "strong_description_matches": [
+              "philosophy"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "philosophy-ethics": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "e145b61a-d4a7-4acb-94fd-970c1812cfa0",
+        "title": "Ethics | Biology | FuseSchool",
+        "description": "FuseSchool explores how moral principles and philosophical definitions of right and wrong apply to scientific research. This overview examines the importance of integrity, informed consent, and protecting human rights while balancing institutional...",
+        "source_url": "https://diler.tube/videos/watch/e145b61a-d4a7-4acb-94fd-970c1812cfa0",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/e145b61a-d4a7-4acb-94fd-970c1812cfa0-720.mp4",
+            "mime": "video/mp4",
+            "bytes": 16354458,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/e145b61a-d4a7-4acb-94fd-970c1812cfa0-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 12375768,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Ethics | Biology | FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/e145b61a-d4a7-4acb-94fd-970c1812cfa0",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "philosophy-ethics": {
+            "score": 10,
+            "evidence": [
+              "ethics",
+              "ethics"
+            ]
+          }
+        },
+        "pedagogy": {
+          "philosophy-ethics": {
+            "strong_title_matches": [
+              "ethics"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "philosophy-ethics": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 36
+          }
+        }
       }
     ],
     "vibe-coding": [
@@ -8426,6 +8914,113 @@
         }
       },
       {
+        "provider": "peertube",
+        "provider_id": "a4e1b73a-57fe-4460-9f0a-39d75cda843f",
+        "title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+        "description": "Software development is at the core a human activity - and the created artifacts are among the most complex humankind has ever produced. Systems thinking helps to merge high technical sophistication with high human sophistication when developing s...",
+        "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 3160911997,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 306127830,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360.mp4",
+            "mime": "video/mp4",
+            "bytes": 241335269,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 811473511,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 304518584,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 239725747,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Eberhard Wolff",
+          "source_title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+          "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 10,
+            "evidence": [
+              "systems thinking",
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "systems thinking"
+            ],
+            "strong_description_matches": [
+              "systems thinking"
+            ],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          }
+        }
+      },
+      {
         "provider": "wikimedia-commons",
         "provider_id": "File:Systems Thinking 10- System Dynamics.webm",
         "title": "Systems Thinking 10- System Dynamics",
@@ -8587,6 +9182,111 @@
           "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_8-_Emergence.webm",
           "license": "CC BY 3.0",
           "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 10,
+            "evidence": [
+              "systems thinking",
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "systems thinking"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": true,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 48
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 48
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
+        "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about ...",
+        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 1911000052,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 260879888,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
+            "mime": "video/mp4",
+            "bytes": 225051511,
+            "resolution": "360p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 540467455,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 260480450,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 224646233,
+            "resolution": "360p",
+            "fps": 24,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Eberhard Wolff",
+          "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+          "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
         },
         "relevance": {
           "logical-frameworks": {
@@ -9432,127 +10132,6 @@
             "pedagogy_score": 48
           }
         }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "afab2272-06c3-4aa8-90e7-166092657a75",
-        "title": "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
-        "description": "Christopher Howard (he/him) https://emacsconf.org/2025/talks/calc 00:03 Introduction 02:36 What is Calc? 04:54 calc-algebraic-entry 06:37 calc-roll-down 08:07 Advanced functions 08:58 Solving equations with calc-solve-for 09:54 Systems of equati...",
-        "source_url": "https://toobnix.org/videos/watch/afab2272-06c3-4aa8-90e7-166092657a75",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "Attribution - Share Alike",
-          "url": "",
-          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://toobnix.org/download/web-videos/afab2272-06c3-4aa8-90e7-166092657a75-720.mp4",
-            "mime": "video/mp4",
-            "bytes": 83196569,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://toobnix.org/download/web-videos/afab2272-06c3-4aa8-90e7-166092657a75-480.mp4",
-            "mime": "video/mp4",
-            "bytes": 68145840,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://toobnix.org/download/web-videos/afab2272-06c3-4aa8-90e7-166092657a75-360.mp4",
-            "mime": "video/mp4",
-            "bytes": 61109516,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://toobnix.org/download/web-videos/afab2272-06c3-4aa8-90e7-166092657a75-240.mp4",
-            "mime": "video/mp4",
-            "bytes": 53936818,
-            "resolution": "240p",
-            "fps": 30,
-            "role": "web-video"
-          },
-          {
-            "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-720-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 82753519,
-            "resolution": "720p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 67700446,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-360-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 60662722,
-            "resolution": "360p",
-            "fps": 30,
-            "role": "streaming-file"
-          },
-          {
-            "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-240-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 53490932,
-            "resolution": "240p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 87,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "bandali",
-          "source_title": "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
-          "source_url": "https://toobnix.org/videos/watch/afab2272-06c3-4aa8-90e7-166092657a75",
-          "license": "Attribution - Share Alike",
-          "license_url": ""
-        },
-        "relevance": {
-          "electronics-basics": {
-            "score": 10,
-            "evidence": [
-              "electronics",
-              "electronics"
-            ]
-          }
-        },
-        "pedagogy": {
-          "electronics-basics": {
-            "strong_title_matches": [
-              "electronics"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 36
-          }
-        },
-        "selection": {
-          "electronics-basics": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 36
-          }
-        }
       }
     ],
     "woodworking-basics": [],
@@ -10209,491 +10788,6 @@
     "statistics-data-literacy": [
       {
         "provider": "peertube",
-        "provider_id": "a224e97c-f67c-4cbd-9a76-42d23fbe735e",
-        "title": "Lecture 1： Probability and Counting ｜ Statistics 110",
-        "description": "We introduce sample spaces and the naive definition of probability (we'll get to the non-naive definition later). To apply the naive definition, we need to be able to count. So we introduce the multiplication rule, binomial coefficients, and the s...",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/a224e97c-f67c-4cbd-9a76-42d23fbe735e-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 175595558,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 1： Probability and Counting ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/a224e97c-f67c-4cbd-9a76-42d23fbe735e",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 77
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 77
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
-        "title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
-        "description": "We discuss the birthday problem (how many people do you need to have a 50% chance of there being 2 with the same birthday?), the matching problem (de Montmort), inclusion-exclusion, and properties of probability.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 215357082,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 3： Birthday Problem, Properties of Probability ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/d1e7524d-d73d-4f0e-9bc6-e45d879e4d68",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 77
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 77
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "7ec1769f-c185-4ddb-9d73-cfdb674995e9",
-        "title": "Lecture 4： Conditional Probability ｜ Statistics 110",
-        "description": "We introduce conditional probability, independence of events, and Bayes' rule.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/7ec1769f-c185-4ddb-9d73-cfdb674995e9-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 240622288,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 4： Conditional Probability ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/7ec1769f-c185-4ddb-9d73-cfdb674995e9",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 77
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 77
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "287bec4a-6717-4f2e-956b-09bb7db6b0d7",
-        "title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
-        "description": "We continue further with conditional probability, and discuss the law of total probability, the so-called prosecutor's fallacy, a disease testing example, and the crucial distinction between independence and conditional independence.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/287bec4a-6717-4f2e-956b-09bb7db6b0d7-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 308676613,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 5： Conditioning Continued, Law of Total Probability ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/287bec4a-6717-4f2e-956b-09bb7db6b0d7",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 77
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 77
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "332961a8-c516-4604-8c7b-928d1988a465",
-        "title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
-        "description": "We fill in the \"Bose-Einstein\" entry of the sampling table, and discuss story proofs. For example, proving Vandermonde's identity with a story is easier and more insightful than going through a tedious algebraic derivation. We then introduce the a...",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/332961a8-c516-4604-8c7b-928d1988a465-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 196752740,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 2： Story Proofs, Axioms of Probability ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/332961a8-c516-4604-8c7b-928d1988a465",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics",
-              "probability"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 69
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 69
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
-        "title": "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
-        "description": "We show how conditional probability sheds light on two of the most famous puzzles in statistics, both of which are often counterintuitive (at first): the Monty Hall problem and Simpson's paradox.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/5453a5e3-fd3b-4d47-85dd-de22c21ec58c-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 245719171,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 6： Monty Hall, Simpson's Paradox ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/5453a5e3-fd3b-4d47-85dd-de22c21ec58c",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 20,
-            "evidence": [
-              "statistics",
-              "probability",
-              "statistics",
-              "probability"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics"
-            ],
-            "strong_description_matches": [
-              "statistics",
-              "probability"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 65
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 65
-          }
-        }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "6bd8e01d-c08b-42a2-8c18-71f1bfb786ae",
-        "title": "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
-        "description": "We show how Beta and Gamma are connected (via the bank-post office story), and introduce order statistics. We then start on conditional expectation, with a peek inside the Two Envelope Paradox.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/6bd8e01d-c08b-42a2-8c18-71f1bfb786ae",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/6bd8e01d-c08b-42a2-8c18-71f1bfb786ae-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 231121116,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 25： Order Statistics and Conditional Expectation ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/6bd8e01d-c08b-42a2-8c18-71f1bfb786ae",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 10,
-            "evidence": [
-              "statistics",
-              "statistics"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics"
-            ],
-            "strong_description_matches": [
-              "statistics"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 57
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 57
-          }
-        }
-      },
-      {
-        "provider": "peertube",
         "provider_id": "28780678-085f-4a41-be57-650a21a419e6",
         "title": "Quick Statistics and Visual Overview of Data in LabPlot",
         "description": "LabPlot is a FREE, open source and cross-platform Data Visualization and Analysis software accessible to everyone. Download LabPlot now at https://labplot.kde.org/download/. In this short video you'll learn how to quickly get descriptive statistic...",
@@ -10775,71 +10869,6 @@
             "pedagogy_score": 56
           }
         }
-      },
-      {
-        "provider": "peertube",
-        "provider_id": "18ac146b-3baf-44bb-8a64-a87a625fe369",
-        "title": "Lecture 28： Inequalities ｜ Statistics 110",
-        "description": "We consider the sum of a random number of random variable (e.g., with customers in a store). We then introduce 4 useful inequalities: Cauchy-Schwarz, Jensen, Markov, and Chebyshev.",
-        "source_url": "https://tube.cosmicflow.space/videos/watch/18ac146b-3baf-44bb-8a64-a87a625fe369",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Free of known copyright restrictions",
-          "url": "",
-          "evidence": "PeerTube API licence id 8: Free of known copyright restrictions",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://tube.cosmicflow.space/download/streaming-playlists/hls/videos/18ac146b-3baf-44bb-8a64-a87a625fe369-480-fragmented.mp4",
-            "mime": "video/mp4",
-            "bytes": 252025067,
-            "resolution": "480p",
-            "fps": 30,
-            "role": "streaming-file"
-          }
-        ],
-        "quality_score": 90,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "zaimon",
-          "source_title": "Lecture 28： Inequalities ｜ Statistics 110",
-          "source_url": "https://tube.cosmicflow.space/videos/watch/18ac146b-3baf-44bb-8a64-a87a625fe369",
-          "license": "Free of known copyright restrictions",
-          "license_url": ""
-        },
-        "relevance": {
-          "statistics-data-literacy": {
-            "score": 10,
-            "evidence": [
-              "statistics",
-              "statistics"
-            ]
-          }
-        },
-        "pedagogy": {
-          "statistics-data-literacy": {
-            "strong_title_matches": [
-              "statistics"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 49
-          }
-        },
-        "selection": {
-          "statistics-data-literacy": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 49
-          }
-        }
       }
     ],
     "climate-environment": [
@@ -10905,6 +10934,107 @@
           "climate-environment": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 45
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "d07efa67-89a9-4311-9315-a2bc46f447ce",
+        "title": "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
+        "description": "FuseSchool compares natural ecosystems with their complex, sustainable food webs and indigenous components to human-altered artificial ones. Learn how these engineered environments require external inputs and maintain high productivity through sim...",
+        "source_url": "https://diler.tube/videos/watch/d07efa67-89a9-4311-9315-a2bc46f447ce",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://diler.tube/download/web-videos/d07efa67-89a9-4311-9315-a2bc46f447ce-1080.mp4",
+            "mime": "video/mp4",
+            "bytes": 59641704,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://diler.tube/download/web-videos/d07efa67-89a9-4311-9315-a2bc46f447ce-480.mp4",
+            "mime": "video/mp4",
+            "bytes": 18004422,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "jpan",
+          "source_title": "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
+          "source_url": "https://diler.tube/videos/watch/d07efa67-89a9-4311-9315-a2bc46f447ce",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "biology-life": {
+            "score": 20,
+            "evidence": [
+              "biology",
+              "ecology",
+              "biology",
+              "ecology"
+            ]
+          },
+          "climate-environment": {
+            "score": 14,
+            "evidence": [
+              "ecosystems",
+              "environment",
+              "ecosystems"
+            ]
+          }
+        },
+        "pedagogy": {
+          "biology-life": {
+            "strong_title_matches": [
+              "biology",
+              "ecology"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 56
+          },
+          "climate-environment": {
+            "strong_title_matches": [
+              "ecosystems"
+            ],
+            "strong_description_matches": [
+              "ecosystems"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "biology-life": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 56
+          },
+          "climate-environment": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
           }
         }
       },
@@ -11331,6 +11461,81 @@
     "meditation-mindfulness": [
       {
         "provider": "peertube",
+        "provider_id": "f3d18d0b-071a-4c52-8369-97a6e9baef4d",
+        "title": "Inner Smile Guided Meditation for Happiness & Relaxation",
+        "description": "\"[Inner Smile Guided Meditation for Happiness & Relaxation](https://www.youtube.com/watch?v=kETa8xGIakw)\" by [Kim Robinson Yoga](https://kimrobinsonyoga.com/) is licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/legalcode) --- A 10 min beginner-friendly mediation to release stress & cultivate happiness from within! ❤️ Support me on Patreon ❤️ 👉 https://bit.ly/krypateron 💎 Yin Yoga Online Course 👉 http://bit.ly/yin-mentalhealth 🌟 Yoga Nidra Online Program 👉 https://bit.ly/krypateron Hi yogis and welcome to the Channel! This practice brings about the sensation of a smile through the body. It is designed to provide you with deep relaxation and an inner sense of happiness & positivity. You can practice lying down on the floor, which makes it very suitable for beginners, or seated on a cushion. It aims to release any tension you might be holding in your abdomen, belly, face and jaw. In today's society, we're told to suck and hold in our bellies which can result in feelings of tension in this area & negative thoughts about yourself. We use the visualization of smiling, which is proven to release happy chemicals in the body. This meditation is especially healing for those with digestive disorders, chronic stress and anxiety. ✅ PLEASE SUBSCRIBE! It's the #1 way to support free yoga on the Internet 👉 http://bit.ly/kryogayt I upload two new yoga classes every week. Thanks for practicing with me 💜 Kim ◽️Website: http://www.kimrobinsonyoga.com ◽️ Instagram: https://www.instagram.com/kimrobinson_yoga/ ◽️ Facebook: https://www.facebook.com/krobinsonyoga ◽️ Twitter: https://twitter.com/kimrobinsonyoga 🔹🔹🔹🔹👇 ONLINE PROGRAMS 👇🔹🔹🔹🔹 ☯️ Yin Yoga for Mental Health Online Course ☯️ 👉 http://bit.ly/yin-mentalhealth 📿 Yoga Nidra for Mental Wellbeing Online Program 📿 👉 http",
+        "source_url": "https://p.eertu.be/videos/watch/f3d18d0b-071a-4c52-8369-97a6e9baef4d",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://p.eertu.be/download/streaming-playlists/hls/videos/f3d18d0b-071a-4c52-8369-97a6e9baef4d-720-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 33491610,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://p.eertu.be/download/streaming-playlists/hls/videos/f3d18d0b-071a-4c52-8369-97a6e9baef4d-480-fragmented.mp4",
+            "mime": "video/mp4",
+            "bytes": 24194442,
+            "resolution": "480p",
+            "fps": 25,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "danisanti",
+          "source_title": "Inner Smile Guided Meditation for Happiness & Relaxation",
+          "source_url": "https://p.eertu.be/videos/watch/f3d18d0b-071a-4c52-8369-97a6e9baef4d",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "meditation-mindfulness": {
+            "score": 10,
+            "evidence": [
+              "meditation",
+              "meditation"
+            ]
+          }
+        },
+        "pedagogy": {
+          "meditation-mindfulness": {
+            "strong_title_matches": [
+              "meditation"
+            ],
+            "strong_description_matches": [
+              "meditation"
+            ],
+            "educational_intent": true,
+            "instructional_title": false,
+            "clickbait_title": false,
+            "non_instructional_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "meditation-mindfulness": {
+            "reason": "topic-title-anchor-plus-instructional-evidence",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
         "provider_id": "0db5672a-75fa-4e09-b281-b5d5fe5e386d",
         "title": "Fly Like a Butterfly- Kids Yoga and Mindfulness with @yogapalooza",
         "description": "Please Subscribe so we can GROW 🌱💗🦋! Can you fly like a butterfly? Let's learn how in this fun kids video! Shop ► https://shop.yogapalooza.com/ Parents and Teachers! Please SUBSCRIBE to support our mission for more Happy + Healthy Kids ► htt...",
@@ -11435,140 +11640,7 @@
         }
       }
     ],
-    "communication-conflict": [
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:Wikipedia to enhance student communication skills - Wikimedia Australia.webm",
-        "title": "Wikipedia to enhance student communication skills - Wikimedia Australia",
-        "description": "Staff from Charles Sturt University and La Trobe University partnered with Wikimedia Australia to develop an active learning exercise that analyses the readability, accuracy, and authorship of Wikipedia articles and generative AI tools within the context of science communication. This Zoom is a recording of the session “Wikipedia to enhance student communication skills”, held on 11th September 2024, where academics across Australia were invited to discuss the benefits of analysing Wikipedia to support students’ learning of communication skills and develop assessments for activities, including rubrics.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Wikipedia_to_enhance_student_communication_skills_-_Wikimedia_Australia.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY",
-          "label": "CC BY 4.0",
-          "url": "https://creativecommons.org/licenses/by/4.0",
-          "evidence": "CC BY 4.0 | Creative Commons Attribution 4.0 | cc-by-4.0 | https://creativecommons.org/licenses/by/4.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Wikipedia_to_enhance_student_communication_skills_-_Wikimedia_Australia.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 306465340,
-            "provider_sha1": "7f70e8b73b9adf9e111edbde8d9e770833f088b5",
-            "role": "original"
-          }
-        ],
-        "quality_score": 89,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "AlphaLemur",
-          "source_title": "Wikipedia to enhance student communication skills - Wikimedia Australia",
-          "source_url": "https://commons.wikimedia.org/wiki/File:Wikipedia_to_enhance_student_communication_skills_-_Wikimedia_Australia.webm",
-          "license": "CC BY 4.0",
-          "license_url": "https://creativecommons.org/licenses/by/4.0"
-        },
-        "relevance": {
-          "communication-conflict": {
-            "score": 14,
-            "evidence": [
-              "communication skills",
-              "communication"
-            ]
-          }
-        },
-        "pedagogy": {
-          "communication-conflict": {
-            "strong_title_matches": [
-              "communication skills"
-            ],
-            "strong_description_matches": [
-              "communication skills"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "communication-conflict": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership.webm",
-        "title": "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership",
-        "description": "Video recording for Wikimania 2023 Title: Let's Connect x LDWG Learning Clinics: Communication skills for collaborative leadership Speakers: Jan-Bart de Vreede, Let's Connect Working Group, Leadership Development Working Group, Nada Alfarra (User:Nada kareem22), Chinmayee Mishra Abstract: What is this Learning Clinic for? Be introduced to skills that foster communication and empathy needed for collaborative leadership and manage potential conflicts. Learning outcomes: Participants will become more aware of the importance of good communication skills that can support collaborative leadership and mitigate conflict or transform it in a positive way. Methodology: The workshops would be based on these learning methods: Hands-on exercises for people to learn some basic skills with a practical application Learning from peer examples. We will be bringing in community experiences that can be useful for learning and the interactive exercises we will hold. Audience: Maximum 35 community members that are part of organised groups (ie. affiliates or groups of organisers). It would be great to have a mixture of organisers from emerging formal and non-formal groups, as well as those of larger more experienced affiliates. These workshops will be done in collaboration between the Let's Connect working group (led by community members and supported by the Wikimedia Foundation https://meta.wikimedia.org/wiki/Grants:Knowledge_Sharing/Connect/Team ) and also with the support of the Community Development team at the Foundation and the Leadership Development Working Group: https://meta.wikimedia.org/wiki/Leadership_Development_Working_Group ). Presented at: Suntec Singapore Convention and Exhibition Centre , 2023-08-16 03:15 to 05:15 UTC Etherpad link: https://etherpad.wikimedia.org/p/C8NUGA",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2023_-_Room_324_-_16_August_-_Let%27s_Connect_x_LDWG_Learning_Clinics._Communication_Skills_for_Collaborative_Leadership.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "CC-BY-SA",
-          "label": "CC BY-SA 4.0",
-          "url": "https://creativecommons.org/licenses/by-sa/4.0",
-          "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": true
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Wikimania_2023_-_Room_324_-_16_August_-_Let%27s_Connect_x_LDWG_Learning_Clinics._Communication_Skills_for_Collaborative_Leadership.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 2833552312,
-            "provider_sha1": "9cb212703269a5cd6d03e0248a899b15dd639c51",
-            "role": "original"
-          }
-        ],
-        "quality_score": 88,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Wikimania 2023",
-          "source_title": "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership",
-          "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2023_-_Room_324_-_16_August_-_Let%27s_Connect_x_LDWG_Learning_Clinics._Communication_Skills_for_Collaborative_Leadership.webm",
-          "license": "CC BY-SA 4.0",
-          "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-        },
-        "relevance": {
-          "communication-conflict": {
-            "score": 14,
-            "evidence": [
-              "communication skills",
-              "communication"
-            ]
-          }
-        },
-        "pedagogy": {
-          "communication-conflict": {
-            "strong_title_matches": [
-              "communication skills"
-            ],
-            "strong_description_matches": [
-              "communication skills"
-            ],
-            "educational_intent": true,
-            "instructional_title": true,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 56
-          }
-        },
-        "selection": {
-          "communication-conflict": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 56
-          }
-        }
-      }
-    ],
+    "communication-conflict": [],
     "parenting-caregiving": [],
     "gardening-plants": [],
     "entrepreneurship-small-business": [
@@ -11715,70 +11787,6 @@
           "entrepreneurship-small-business": {
             "reason": "topic-title-anchor-plus-instructional-evidence",
             "pedagogy_score": 48
-          }
-        }
-      },
-      {
-        "provider": "wikimedia-commons",
-        "provider_id": "File:Partners in Safety- An Insurance and Small Business Perspective.webm",
-        "title": "Partners in Safety- An Insurance and Small Business Perspective",
-        "description": "Falls are the number one cause of construction-worker fatalities, accounting for one-third of on-the-job deaths in the industry. Each year NIOSH, OSHA, and CPWR–The Center for Construction Research and Training lead a National Campaign to Prevent Falls in Construction ( http://www.stopconstructionfalls.com/ ). Builders Mutual talks about the role of the insurance industry (while working with small construction businesses) to prevent falls injuries and fatalities through this campaign and the National Stand-Down. They share the business perspective on the high cost of not being safe and benefits of investing in safety. Small businesses also discuss the benefits of participating in this National Campaign and Stand-Down. Comments on this video are allowed in accordance with our comment policy: https://www.cdc.gov/SocialMedia/Tools/CommentPolicy.html This video can also be viewed at https://www.cdc.gov/niosh/video/lo-res/partner-safety/PartnersForSafety_InsAndSmBizPerspective_LoRes.mp4",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Partners_in_Safety-_An_Insurance_and_Small_Business_Perspective.webm",
-        "cache_policy": "MESH_REDISTRIBUTABLE",
-        "license": {
-          "spdx": "PUBLIC-DOMAIN",
-          "label": "Public domain",
-          "url": "",
-          "evidence": "Public domain | Public domain | pd |",
-          "commercial_use": true,
-          "derivatives": true,
-          "share_alike": false
-        },
-        "files": [
-          {
-            "url": "https://upload.wikimedia.org/wikipedia/commons/2/28/Partners_in_Safety-_An_Insurance_and_Small_Business_Perspective.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-            "mime": "video/webm",
-            "bytes": 58274942,
-            "provider_sha1": "34bb5ab04934550b92f9f3cd73900dff714f5624",
-            "role": "original"
-          }
-        ],
-        "quality_score": 91,
-        "content_hash": null,
-        "hash_state": "compute-on-cache",
-        "attribution": {
-          "creator": "Centers for Disease Control and Prevention",
-          "source_title": "Partners in Safety- An Insurance and Small Business Perspective",
-          "source_url": "https://commons.wikimedia.org/wiki/File:Partners_in_Safety-_An_Insurance_and_Small_Business_Perspective.webm",
-          "license": "Public domain",
-          "license_url": ""
-        },
-        "relevance": {
-          "entrepreneurship-small-business": {
-            "score": 10,
-            "evidence": [
-              "small business",
-              "small business"
-            ]
-          }
-        },
-        "pedagogy": {
-          "entrepreneurship-small-business": {
-            "strong_title_matches": [
-              "small business"
-            ],
-            "strong_description_matches": [],
-            "educational_intent": true,
-            "instructional_title": false,
-            "clickbait_title": false,
-            "non_instructional_title": false,
-            "pedagogy_score": 37
-          }
-        },
-        "selection": {
-          "entrepreneurship-small-business": {
-            "reason": "topic-title-anchor-plus-instructional-evidence",
-            "pedagogy_score": 37
           }
         }
       }
