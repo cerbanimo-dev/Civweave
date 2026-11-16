@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-11-09T14:23:10Z",
-  "record_count": 179,
+  "built_at": "2026-11-16T14:03:13Z",
+  "record_count": 178,
   "failure_count": 23,
   "failures": [
     {
@@ -30,27 +30,43 @@
     },
     {
       "provider": "ccmixter",
-      "playlist_id": "fellowfare",
-      "query": "genre:funk",
+      "playlist_id": "living-school",
+      "query": "genre:folk",
       "license_class": "by",
       "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=funk&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=folk&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
     },
     {
       "provider": "ccmixter",
-      "playlist_id": "fellowfare",
-      "query": "genre:soul",
+      "playlist_id": "living-school",
+      "query": "genre:acoustic",
       "license_class": "by",
       "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=soul&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=acoustic&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
     },
     {
       "provider": "ccmixter",
-      "playlist_id": "fellowfare",
-      "query": "genre:reggae",
+      "playlist_id": "living-school",
+      "query": "genre:jazz",
       "license_class": "by",
       "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=reggae&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=jazz&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+    },
+    {
+      "provider": "ccmixter",
+      "playlist_id": "civweave",
+      "query": "vocal-pool:vocals",
+      "license_class": "by",
+      "offset": 0,
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=vocals&lic=by&sort=date&ord=desc: got more than 65536 bytes when reading header line"
+    },
+    {
+      "provider": "ccmixter",
+      "playlist_id": "civweave",
+      "query": "vocal-pool:spoken_word",
+      "license_class": "by",
+      "offset": 0,
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=spoken_word&lic=by&sort=date&ord=desc: got more than 65536 bytes when reading header line"
     },
     {
       "provider": "ccmixter",
@@ -86,46 +102,6 @@
     },
     {
       "provider": "ccmixter",
-      "playlist_id": "anarchadia",
-      "query": "genre:rock",
-      "license_class": "by",
-      "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=rock&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
-    },
-    {
-      "provider": "ccmixter",
-      "playlist_id": "anarchadia",
-      "query": "genre:punk",
-      "license_class": "by",
-      "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=punk&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
-    },
-    {
-      "provider": "ccmixter",
-      "playlist_id": "anarchadia",
-      "query": "genre:hip_hop",
-      "license_class": "by",
-      "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=hip_hop&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
-    },
-    {
-      "provider": "ccmixter",
-      "playlist_id": "civweave",
-      "query": "vocal-pool:vocals",
-      "license_class": "by",
-      "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=vocals&lic=by&sort=date&ord=desc: got more than 65536 bytes when reading header line"
-    },
-    {
-      "provider": "ccmixter",
-      "playlist_id": "civweave",
-      "query": "vocal-pool:spoken_word",
-      "license_class": "by",
-      "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=spoken_word&lic=by&sort=date&ord=desc: got more than 65536 bytes when reading header line"
-    },
-    {
-      "provider": "ccmixter",
       "playlist_id": "cerbanimo",
       "query": "genre:electronic",
       "license_class": "by",
@@ -158,31 +134,55 @@
     },
     {
       "provider": "ccmixter",
-      "playlist_id": "living-school",
-      "query": "genre:folk",
+      "playlist_id": "fellowfare",
+      "query": "genre:funk",
       "license_class": "by",
       "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=folk&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=funk&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
     },
     {
       "provider": "ccmixter",
-      "playlist_id": "living-school",
-      "query": "genre:acoustic",
+      "playlist_id": "fellowfare",
+      "query": "genre:soul",
       "license_class": "by",
       "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=acoustic&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=soul&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
     },
     {
       "provider": "ccmixter",
-      "playlist_id": "living-school",
-      "query": "genre:jazz",
+      "playlist_id": "fellowfare",
+      "query": "genre:reggae",
       "license_class": "by",
       "offset": 0,
-      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=jazz&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=reggae&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+    },
+    {
+      "provider": "ccmixter",
+      "playlist_id": "anarchadia",
+      "query": "genre:rock",
+      "license_class": "by",
+      "offset": 0,
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=rock&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+    },
+    {
+      "provider": "ccmixter",
+      "playlist_id": "anarchadia",
+      "query": "genre:punk",
+      "license_class": "by",
+      "offset": 0,
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=punk&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
+    },
+    {
+      "provider": "ccmixter",
+      "playlist_id": "anarchadia",
+      "query": "genre:hip_hop",
+      "license_class": "by",
+      "offset": 0,
+      "error": "request failed: https://ccmixter.org/api/query?f=json&dataview=default&limit=35&offset=0&tags=hip_hop&type=any&lic=by&sort=num_scores&ord=desc: got more than 65536 bytes when reading header line"
     }
   ],
   "provider_counts": {
-    "ccmixter": 179
+    "ccmixter": 178
   },
   "records": [
     {
@@ -1659,8 +1659,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "836",
-      "playlist_id": "civweave",
-      "matched_query": "freedom",
+      "playlist_id": "fellowfare",
+      "matched_query": "share",
       "title": "Language of My Reality",
       "artist": "Colin Mutchler",
       "album": "",
@@ -1709,12 +1709,12 @@
       "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "civweave",
-          "matched_query": "freedom"
-        },
-        {
           "playlist_id": "fellowfare",
           "matched_query": "share"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "freedom"
         },
         {
           "playlist_id": "anarchadia",
@@ -2087,8 +2087,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "56593",
-      "playlist_id": "anarchadia",
-      "matched_query": "genre:rock",
+      "playlist_id": "civweave",
+      "matched_query": "vocal-pool:spoken_word",
       "title": "Power To Strike",
       "artist": "Aussens@iter",
       "album": "",
@@ -2137,21 +2137,21 @@
       "themes": [
         "share",
         "power",
-        "genre:rock"
+        "genre:vocal-pool:spoken_word"
       ],
       "explicit": null,
-      "curation": "genre-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "genre:rock"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:spoken_word"
         },
         {
           "playlist_id": "cerbanimo",
+          "matched_query": "genre:rock"
+        },
+        {
+          "playlist_id": "anarchadia",
           "matched_query": "genre:rock"
         }
       ],
@@ -2854,8 +2854,76 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
+      "provider_id": "34033",
+      "playlist_id": "living-school",
+      "matched_query": "genre:acoustic",
+      "title": "100 Paper Washingtons",
+      "artist": "Pitx",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/Pitx/34033",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution Share-Alike (3.0)",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Pitx/Pitx_-_100_Paper_Washingtons.mp3",
+          "mime": "",
+          "bytes": 4571647,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Pitx",
+        "source_title": "100 Paper Washingtons",
+        "source_url": "https://ccmixter.org/files/Pitx/34033",
+        "license": "Attribution Share-Alike (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 1,
+      "themes": [
+        "share",
+        "genre:acoustic"
+      ],
+      "explicit": null,
+      "curation": "genre-discovered",
+      "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:acoustic"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:rock"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:rock"
+        }
+      ],
+      "candidate_id": "openmusic:9165c70a542e88fa26a0b4d9",
+      "quality_score": 73
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
       "provider_id": "31534",
-      "playlist_id": "anarchadia",
+      "playlist_id": "cerbanimo",
       "matched_query": "genre:rock",
       "title": "100 Paper Washingtons",
       "artist": "unreal_dm",
@@ -2904,11 +2972,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "anarchadia",
           "matched_query": "genre:rock"
         }
       ],
@@ -2918,76 +2986,8 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
-      "provider_id": "34033",
-      "playlist_id": "anarchadia",
-      "matched_query": "genre:rock",
-      "title": "100 Paper Washingtons",
-      "artist": "Pitx",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/Pitx/34033",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution Share-Alike (3.0)",
-        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-        "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/Pitx/Pitx_-_100_Paper_Washingtons.mp3",
-          "mime": "",
-          "bytes": 4571647,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Pitx",
-        "source_title": "100 Paper Washingtons",
-        "source_url": "https://ccmixter.org/files/Pitx/34033",
-        "license": "Attribution Share-Alike (3.0)",
-        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 1,
-      "themes": [
-        "share",
-        "genre:rock"
-      ],
-      "explicit": null,
-      "curation": "genre-discovered",
-      "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "genre:rock"
-        },
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "genre:rock"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:acoustic"
-        }
-      ],
-      "candidate_id": "openmusic:9165c70a542e88fa26a0b4d9",
-      "quality_score": 73
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
       "provider_id": "53133",
-      "playlist_id": "anarchadia",
+      "playlist_id": "cerbanimo",
       "matched_query": "genre:rock",
       "title": "100 Paper Washingtons",
       "artist": "Stefan Kartenberg",
@@ -3042,11 +3042,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "anarchadia",
           "matched_query": "genre:rock"
         }
       ],
@@ -3057,7 +3057,7 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "62141",
-      "playlist_id": "anarchadia",
+      "playlist_id": "cerbanimo",
       "matched_query": "genre:rock",
       "title": "100 Paper Washingtons by Scomber",
       "artist": "BeatMachine",
@@ -3112,11 +3112,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "anarchadia",
           "matched_query": "genre:rock"
         }
       ],
@@ -3128,7 +3128,7 @@
       "provider": "ccmixter",
       "provider_id": "36020",
       "playlist_id": "civweave",
-      "matched_query": "genre:chill",
+      "matched_query": "vocal-pool:vocals",
       "title": "100 Paper Washingtons feat. Scomber",
       "artist": "whytong",
       "album": "",
@@ -3170,18 +3170,18 @@
       "teeth_score": 1,
       "themes": [
         "share",
-        "genre:chill"
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "genre-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
         {
           "playlist_id": "civweave",
-          "matched_query": "genre:chill"
+          "matched_query": "vocal-pool:vocals"
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "vocal-pool:vocals"
+          "matched_query": "genre:chill"
         }
       ],
       "candidate_id": "openmusic:b2f30c76f8fdff4039211ac6",
@@ -3252,7 +3252,7 @@
       "provider": "ccmixter",
       "provider_id": "31513",
       "playlist_id": "civweave",
-      "matched_query": "freedom",
+      "matched_query": "vocal-pool:spoken_word",
       "title": "A Story of Striking the Root: Striking Down Public Unions",
       "artist": "Papa_Zulu",
       "album": "",
@@ -3311,18 +3311,19 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:spoken_word"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
         {
           "playlist_id": "civweave",
-          "matched_query": "freedom"
+          "matched_query": "vocal-pool:spoken_word"
         },
         {
           "playlist_id": "civweave",
-          "matched_query": "vocal-pool:spoken_word"
+          "matched_query": "freedom"
         },
         {
           "playlist_id": "anarchadia",
@@ -3336,8 +3337,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "52291",
-      "playlist_id": "civweave",
-      "matched_query": "genre:chill",
+      "playlist_id": "living-school",
+      "matched_query": "genre:jazz",
       "title": "America Mad & Naked",
       "artist": "Stefan Kartenberg",
       "album": "",
@@ -3385,18 +3386,18 @@
       "teeth_score": 1,
       "themes": [
         "share",
-        "genre:chill"
+        "genre:jazz"
       ],
       "explicit": null,
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "civweave",
-          "matched_query": "genre:chill"
-        },
-        {
           "playlist_id": "living-school",
           "matched_query": "genre:jazz"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "genre:chill"
         }
       ],
       "candidate_id": "openmusic:0284a7078fa2894918b9a54b",
@@ -3472,7 +3473,7 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "52953",
-      "playlist_id": "anarchadia",
+      "playlist_id": "cerbanimo",
       "matched_query": "genre:rock",
       "title": "Can't Hold It Back",
       "artist": "Stefan Kartenberg",
@@ -3527,11 +3528,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "anarchadia",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "anarchadia",
           "matched_query": "genre:rock"
         }
       ],
@@ -3644,11 +3645,11 @@
           "matched_query": "community-playlist:10742"
         },
         {
-          "playlist_id": "fellowfare",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -3659,8 +3660,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "35441",
-      "playlist_id": "anarchadia",
-      "matched_query": "genre:hip_hop",
+      "playlist_id": "civweave",
+      "matched_query": "vocal-pool:vocals",
       "title": "Dirty Money Money Money Ft. Scomber & Duckett",
       "artist": "coruscate",
       "album": "",
@@ -3702,18 +3703,18 @@
       "teeth_score": 1,
       "themes": [
         "share",
-        "genre:hip_hop"
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "genre-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "anarchadia",
-          "matched_query": "genre:hip_hop"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
+        },
+        {
+          "playlist_id": "anarchadia",
+          "matched_query": "genre:hip_hop"
         }
       ],
       "candidate_id": "openmusic:729b3951f4837a0078354778",
@@ -3723,7 +3724,7 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "56698",
-      "playlist_id": "fellowfare",
+      "playlist_id": "cerbanimo",
       "matched_query": "genre:funk",
       "title": "Funk It: How It Is",
       "artist": "Aussens@iter",
@@ -3778,11 +3779,11 @@
       "curation": "genre-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "fellowfare",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -3857,11 +3858,11 @@
           "matched_query": "community-playlist:10742"
         },
         {
-          "playlist_id": "fellowfare",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -4031,11 +4032,11 @@
           "matched_query": "community-playlist:10742"
         },
         {
-          "playlist_id": "fellowfare",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
         }
       ],
@@ -4046,8 +4047,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "33819",
-      "playlist_id": "fellowfare",
-      "matched_query": "genre:funk",
+      "playlist_id": "living-school",
+      "matched_query": "genre:jazz",
       "title": "How it is",
       "artist": "Jeris",
       "album": "",
@@ -4095,11 +4096,19 @@
       "teeth_score": 1,
       "themes": [
         "share",
-        "genre:funk"
+        "genre:jazz"
       ],
       "explicit": null,
       "curation": "genre-discovered",
       "playlist_matches": [
+        {
+          "playlist_id": "living-school",
+          "matched_query": "genre:jazz"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "genre:funk"
+        },
         {
           "playlist_id": "fellowfare",
           "matched_query": "genre:funk"
@@ -4107,14 +4116,6 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "genre:soul"
-        },
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "genre:jazz"
         }
       ],
       "candidate_id": "openmusic:64440c7e11114879d9855b8c",
@@ -4124,8 +4125,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "35149",
-      "playlist_id": "civweave",
-      "matched_query": "vocal-pool:vocals",
+      "playlist_id": "living-school",
+      "matched_query": "genre:jazz",
       "title": "I Feel Like Dancing",
       "artist": "Steven M Bryant",
       "album": "",
@@ -4167,18 +4168,18 @@
       "teeth_score": 1,
       "themes": [
         "share",
-        "genre:vocal-pool:vocals"
+        "genre:jazz"
       ],
       "explicit": null,
-      "curation": "vocal-pool-unreviewed",
+      "curation": "genre-discovered",
       "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "vocal-pool:vocals"
-        },
         {
           "playlist_id": "living-school",
           "matched_query": "genre:jazz"
+        },
+        {
+          "playlist_id": "civweave",
+          "matched_query": "vocal-pool:vocals"
         }
       ],
       "candidate_id": "openmusic:7d9342f7ec2bebf23ccbe0aa",
@@ -4321,8 +4322,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "62208",
-      "playlist_id": "fellowfare",
-      "matched_query": "genre:funk",
+      "playlist_id": "cerbanimo",
+      "matched_query": "labor",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -4381,31 +4382,30 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share",
-        "genre:funk"
+        "share"
       ],
       "explicit": null,
-      "curation": "genre-discovered",
+      "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
-        },
-        {
-          "playlist_id": "civweave",
-          "matched_query": "collaboration"
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
         },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
         },
         {
+          "playlist_id": "civweave",
+          "matched_query": "collaboration"
+        },
+        {
           "playlist_id": "cerbanimo",
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "cerbanimo",
-          "matched_query": "labor"
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:funk"
         }
       ],
       "candidate_id": "openmusic:1a18c603676f255edc2886b3",
@@ -4605,8 +4605,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "65481",
-      "playlist_id": "fellowfare",
-      "matched_query": "genre:funk",
+      "playlist_id": "cerbanimo",
+      "matched_query": "energy",
       "title": "Melange",
       "artist": "musikpirat",
       "album": "",
@@ -4647,15 +4647,14 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share",
-        "genre:funk"
+        "share"
       ],
       "explicit": null,
-      "curation": "genre-discovered",
+      "curation": "metadata-discovered",
       "playlist_matches": [
         {
-          "playlist_id": "fellowfare",
-          "matched_query": "genre:funk"
+          "playlist_id": "cerbanimo",
+          "matched_query": "energy"
         },
         {
           "playlist_id": "civweave",
@@ -4666,8 +4665,8 @@
           "matched_query": "genre:funk"
         },
         {
-          "playlist_id": "cerbanimo",
-          "matched_query": "energy"
+          "playlist_id": "fellowfare",
+          "matched_query": "genre:funk"
         }
       ],
       "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
@@ -4734,11 +4733,11 @@
         },
         {
           "playlist_id": "living-school",
-          "matched_query": "truth"
+          "matched_query": "genre:jazz"
         },
         {
           "playlist_id": "living-school",
-          "matched_query": "genre:jazz"
+          "matched_query": "truth"
         }
       ],
       "candidate_id": "openmusic:a867d261c1261699a060058d",
@@ -5178,11 +5177,11 @@
           "matched_query": "community-playlist:43545"
         },
         {
-          "playlist_id": "anarchadia",
+          "playlist_id": "cerbanimo",
           "matched_query": "genre:rock"
         },
         {
-          "playlist_id": "cerbanimo",
+          "playlist_id": "anarchadia",
           "matched_query": "genre:rock"
         }
       ],
@@ -8206,14 +8205,12 @@
         {
           "playlist_id": "civweave",
           "matched_query": "community-playlist:11087"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "community-playlist:9158"
         }
       ],
       "candidate_id": "openmusic:c2e59cba868d779c9ed5f818",
-      "quality_score": 70
+      "quality_score": 70,
+      "carried_forward": true,
+      "last_verified_at": "2026-11-09T14:23:10Z"
     },
     {
       "schema": "civweave.open-music-track.v1",
@@ -10921,14 +10918,12 @@
         {
           "playlist_id": "civweave",
           "matched_query": "community-playlist:11087"
-        },
-        {
-          "playlist_id": "living-school",
-          "matched_query": "community-playlist:9158"
         }
       ],
       "candidate_id": "openmusic:a66a43cb77abb77739daa306",
-      "quality_score": 70
+      "quality_score": 70,
+      "carried_forward": true,
+      "last_verified_at": "2026-11-09T14:23:10Z"
     },
     {
       "schema": "civweave.open-music-track.v1",
@@ -11785,76 +11780,6 @@
       ],
       "candidate_id": "openmusic:afb694dcef4c86fdfebb9913",
       "quality_score": 70
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "71321",
-      "playlist_id": "civweave",
-      "matched_query": "community-playlist:11087",
-      "title": "Welcome to the New World",
-      "artist": "Jeris",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/VJ_Memes/71321",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (4.0)",
-        "url": "https://creativecommons.org/licenses/by/4.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_Welcome_to_the_New_World_1.mp3",
-          "mime": "",
-          "bytes": 12144892,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/VJ_Memes/VJ_Memes_-_Welcome_to_the_New_World.mp3",
-          "mime": "",
-          "bytes": 18911651,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "Jeris",
-        "source_title": "Welcome to the New World",
-        "source_url": "https://ccmixter.org/files/VJ_Memes/71321",
-        "license": "Attribution (4.0)",
-        "license_url": "https://creativecommons.org/licenses/by/4.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 0,
-      "themes": [
-        "creative commons",
-        "collaborative music",
-        "sharing",
-        "genre:community-playlist:11087"
-      ],
-      "explicit": null,
-      "curation": "community-playlist-unreviewed",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "community-playlist:11087"
-        }
-      ],
-      "candidate_id": "openmusic:3a520100734c289fc8ab1332",
-      "quality_score": 70,
-      "carried_forward": true,
-      "last_verified_at": "2026-11-02T13:53:58Z"
     },
     {
       "schema": "civweave.open-music-track.v1",
