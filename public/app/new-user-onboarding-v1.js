@@ -217,7 +217,7 @@ function boot(){
     resumeAfterSettings=false;
     if(!needsAISetup())open({force:true,step:1});
   });
-  if(shouldAutoOpen())requestAnimationFrame(()=>requestAnimationFrame(()=>open({force:true,step:needsAISetup()?0:1})));
+  // The Tour button remains available; never block a first Quest with a modal or API setup.
 }
 
 globalThis.CivweaveNewUserOnboardingV1=Object.freeze({version:VERSION,storageKey:STORAGE_KEY,steps:STEPS,sprites:SPRITES,open,close,reset,status,bindReplay,autoSkipsExistingActivity:true,soloAllowed:true,partyEncouraged:true,guildStewardLore:'Guildkeeper',artifactLanguage:'Weaveling=Quest; Moss=Learning Journey; Kamiya=Endeavor; Rook=Manifest',runtimeInjection:false,replayControl:true});
