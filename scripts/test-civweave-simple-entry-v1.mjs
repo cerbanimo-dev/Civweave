@@ -8,6 +8,7 @@ const boundary = read('public/app/install-boundary-v146.js');
 const declutter = read('public/app/working-campus-home-declutter-v1.js');
 const onboarding = read('public/app/new-user-onboarding-v1.js');
 const campus = read('public/app/working-campus-v440.html');
+const legacyCampus = read('public/app/working-campus-v156.html');
 
 test('browser access boundary parses as executable JavaScript', () => {
   assert.doesNotThrow(() => new vm.Script(boundary, { filename: 'install-boundary-v146.js' }));
@@ -35,4 +36,10 @@ test('first launch stays usable without a blocking introduction or API key', () 
   assert.match(onboarding, /data-cw-onboarding-replay/);
   assert.doesNotMatch(onboarding, /if\s*\(shouldAutoOpen\(\)\)\s*requestAnimationFrame/);
   assert.match(onboarding, /function bindReplay\(/);
+});
+
+test('campus scripts do not print literal escaped newline artifacts', () => {
+  for (const html of [campus, legacyCampus])
+    assert.ok(!html.includes('</script>' + String.fromCharCode(92) + 'n<script'),
+      'a literal backslash-n after a script leaks into visible page text');
 });
