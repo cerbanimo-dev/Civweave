@@ -6,7 +6,7 @@ const STYLE_ID='cw-working-campus-home-declutter-v1-style';
 const MENU_ID='cw-working-campus-home-menu-v1';
 const NAV_ACTIONS_ID='cw-civweave-primary-actions-v1';
 if(globalThis.CivweaveHomeDeclutterV1?.version===VERSION)return;
-if(location.pathname!=='/app/working-campus-v156.html')return;
+if(!['/app/working-campus-v156.html','/app/working-campus-v440.html'].includes(location.pathname))return;
 
 let menu=null,brand=null,returnFocus=null;
 const clean=value=>String(value??'').replace(/\s+/g,' ').trim();

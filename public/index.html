@@ -29,9 +29,8 @@ const standalone=()=>navigator.standalone===true||['standalone','fullscreen','mi
 const iosBrowser=()=>/iPhone|iPad|iPod/i.test(String(navigator.userAgent||''))||(/Macintosh/i.test(String(navigator.userAgent||''))&&Number(navigator.maxTouchPoints||0)>1);
 function copyParams(target,blocked=new Set()){for(const [key,value] of params)if(!blocked.has(key))target.searchParams.append(key,value);return target}
 function stableInstaller(){
-  let origin=location.origin;
-  if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||location.origin===PREVIOUS_CANONICAL_ORIGIN||location.origin===LEGACY_CANONICAL_ORIGIN||cloudflarePreview))origin=CANONICAL_ORIGIN;
-  const target=new URL('/app/index.html',origin);copyParams(target,new Set(['install_origin']));target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical');return target;
+  // Optional installation always remains on the same origin (including Guild mirrors).
+  const target=new URL('/app/index.html',location.origin);copyParams(target,new Set(['install_origin']));target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical');return target;
 }
 function installedStart(){
   const target=new URL('/app/pwa-start-v436.html',location.origin);
@@ -41,29 +40,22 @@ function installedStart(){
   return target;
 }
 function workingCampus(){
-  const target=new URL('/app/working-campus-v156.html',location.origin);
-  copyParams(target,new Set(['install','installrequired','next','rescue_stay']));
+  const target=new URL('/app/working-campus-v440.html',location.origin);
+  copyParams(target,new Set(['install','installrequired','next','rescue_stay','installed']));
   if(!target.searchParams.has('version'))target.searchParams.set('version','1.0.163');
-  if(!target.searchParams.has('source'))target.searchParams.set('source','web-root-worker-stable-v436');
+  if(!target.searchParams.has('source'))target.searchParams.set('source','web-root-browser-first-v1');
   return target;
 }
 try{
-  if(params.get('install')==='required'||params.has('installrequired')){location.replace(stableInstaller().href);return}
-  // An ordinary iOS browser (including ai.local WKWebView) must not be
-  // trapped at the PWA install gate. Installation remains an explicit choice.
-  if(iosBrowser()&&!standalone()){
-    const target=new URL('/app/working-campus-v440.html',location.origin);
-    target.searchParams.set('iosLocal','1');target.searchParams.set('source','ios-browser-entry');
-    location.replace(target.href);return;
-  }
-  if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||location.origin===PREVIOUS_CANONICAL_ORIGIN||location.origin===LEGACY_CANONICAL_ORIGIN||cloudflarePreview)){location.replace(stableInstaller().href);return}
+  // Installation is an opt-in maintenance path, never an access prerequisite.
+  if(params.get('install')==='1'||params.get('manage')==='1'){location.replace(stableInstaller().href);return}
   // Existing installed copies may still have / as their baked start_url. Never
   // register, unregister, update, or activate a worker from this root during a
   // standalone launch; move through the dedicated static doorway instead.
-  if(standalone()||params.get('installed')==='1'){location.replace(installedStart().href);return}
+  if(standalone()){location.replace(installedStart().href);return}
   location.replace(workingCampus().href);
 }catch(error){document.querySelector('#cw-root-status').textContent=`Civweave startup could not continue: ${error?.message||error}`}
-globalThis.CivweaveRootRouterV436=Object.freeze({version:'root-worker-stable-v436',installedStart:()=>installedStart().href,workerMutationDuringLaunch:false});
+globalThis.CivweaveRootRouterV436=Object.freeze({version:'root-worker-browser-first-v1',installedStart:()=>installedStart().href,workerMutationDuringLaunch:false});
 })();
 </script>
 </body>

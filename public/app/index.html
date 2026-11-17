@@ -5,20 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#141126">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <title>Install Civweave v1.0.163</title>
+  <title>Civweave · Optional offline setup</title>
   <script>
-  // iOS in-app web views cannot satisfy display-mode:standalone. Treat an
-  // ordinary browser visit as web access, not as a failed installation.
-  // Explicit install=required always keeps the installer available.
+  // Legacy installer links, including ?install=required, lead straight to the browser campus.
+  // The installer is available only by deliberate choice (?install=1 or ?manage=1).
   (()=>{'use strict';
     const params=new URLSearchParams(location.search);
-    const ua=String(navigator.userAgent||'');
-    const ios=/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/i.test(ua)&&Number(navigator.maxTouchPoints||0)>1);
-    let installed=false;try{installed=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches}catch{}
-    if(!ios||installed||params.get('install')==='required'||params.has('installrequired')||params.get('manage'))return;
+    if(params.get('install')==='1'||params.get('manage')==='1'||params.get('offline')==='1')return;
     const target=new URL('/app/working-campus-v440.html',location.origin);
-    target.searchParams.set('iosLocal','1');
-    target.searchParams.set('source','ios-webview-installer-entry');
+    for(const key of ['lang','locale','guild','host','system'])if(params.has(key))target.searchParams.set(key,params.get(key));
+    target.searchParams.set('source','browser-first-threshold-v1');
     location.replace(target.href);
   })();
   </script>
@@ -68,16 +64,16 @@
       </div>
       <div class="install-copy quest-copy">
         <small>WEAVELING · YOUR FIRST GUIDE</small>
-        <h2 id="install-title">Ready, Hero? Take Civweave with you.</h2>
-        <p><strong>You do not need to prepare the whole world before you enter it.</strong> Start with the small Civweave app. Once inside, bring along the offline campus, knowledge, visuals, and local AI only when your road actually needs them.</p>
+        <h2 id="install-title">Enter Civweave in your browser. Keep offline tools optional.</h2>
+        <p><strong>You do not need to prepare the whole world before you enter it.</strong> Start in any supported browser. If you choose, add the offline campus, knowledge, visuals, and local AI only when your road actually needs them.</p>
         <span class="quest-no-commit">Installing does not join a Guild, create a Quest, or commit you to a Party.</span>
       </div>
     </div>
 
     <div class="topology quest-route" aria-label="Your first three Civweave steps">
-      <article><b>1</b><strong>Carry Civweave</strong><span>Install the small app shell so the doorway lives on your device.</span></article>
+      <article><b>1</b><strong>Open Civweave</strong><span>Use the working campus directly in your browser.</span></article>
       <i>→</i>
-      <article><b>2</b><strong>Cross the threshold</strong><span>Open Civweave from your app launcher and enter the Commons as a Hero.</span></article>
+      <article><b>2</b><strong>Cross the threshold</strong><span>Enter the Commons as a Hero; installation is never required.</span></article>
       <i>→</i>
       <article><b>3</b><strong>Pack for the road</strong><span>Add the offline campus when you want Civweave to travel beyond a dependable connection.</span></article>
     </div>
@@ -91,6 +87,7 @@
       </div>
 
       <div class="gateway-actions">
+        <a class="primary" href="/app/working-campus-v440.html?source=optional-installer">Enter in browser</a>
         <button id="install-app" class="primary" type="button">Install Civweave</button>
         <button id="check-update" class="secondary" type="button">Check release</button>
       </div>

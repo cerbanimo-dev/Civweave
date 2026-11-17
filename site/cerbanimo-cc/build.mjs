@@ -125,6 +125,8 @@ writeFileSync(resolve(japaneseOutput, 'index.html'), htmlJa, 'utf8');
 writeFileSync(resolve(output, 'styles.css'), css, 'utf8');
 writeFileSync(resolve(output, 'app.js'), app, 'utf8');
 cpSync(resolve(source, 'assets'), assets, { recursive: true });
+// Family gateway contains no account data and is published on every Guild mirror.
+cpSync(resolve(source, 'family'), resolve(output, 'family'), { recursive: true });
 
 const rootAssets = new Map([
   ['Civweave-on-logo.png', 'civweave-on.png'],

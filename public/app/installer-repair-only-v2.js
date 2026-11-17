@@ -207,7 +207,7 @@ async function repairInstalledShell({automatic=false}={}){
       if(helpNode)helpNode.textContent='Civweave shell repaired. Opening the installed app.';
       location.assign(installedEntryUrl());
     }else{
-      if(helpNode)helpNode.textContent=automatic?'Civweave repaired the incomplete shell automatically. Continue with Install Civweave.':'Civweave shell repaired. Install or open Civweave from your device app launcher; the campus does not run in a browser tab.';
+      if(helpNode)helpNode.textContent=automatic?'Civweave repaired the incomplete shell automatically. Continue with Install Civweave.':'Civweave shell repaired. Install or open Civweave from your device app launcher; the browser campus remains available without installation.';
       if(installButton){installButton.disabled=false;installButton.textContent='Install Civweave'}
       queueMicrotask(()=>globalThis.CivweavePWAInstallV250?.refresh?.());
     }
@@ -240,7 +240,7 @@ function apply(){
   if(updateButton&&updateButton.textContent!=='Repair shell')updateButton.textContent='Repair shell';
   if(helpNode&&!helpNode.dataset.civweaveRepairOnly){
     helpNode.dataset.civweaveRepairOnly=REVISION;
-    helpNode.textContent=`${helpNode.textContent} Browser launch is disabled; repair the shell here, then use the installed app.`;
+    helpNode.textContent=`${helpNode.textContent} Browser access remains available; repair the optional offline app shell only if you want an installed copy.`;
   }
 }
 
@@ -262,7 +262,7 @@ if(resumeRequiredNext())return;
 if(!installedDisplay()){
   document.documentElement.dataset.civweaveBrowserRuntime='installer-only';
   if(new URLSearchParams(location.search).get('install')==='required'&&helpNode){
-    helpNode.textContent='Civweave must be installed before the campus can open. Browser-tab runtime is disabled.';
+    helpNode.textContent='Civweave runs in your browser; this page only maintains an optional offline app shell.';
   }
 }
 const observer=new MutationObserver(apply);
@@ -281,7 +281,7 @@ const api=Object.freeze({
   installHubToolsGate,
   loadHubTools,
   resumeRequiredNext,
-  browserRuntimePolicy:'installer-only-until-installed-display',
+  browserRuntimePolicy:'browser-first-optional-offline-shell',
   repairMessage:'REPAIR_DEVICE_PACKAGE',
   autoRepairPolicy:'one-automatic-attempt-before-manual-repair',
   controllerSyncPolicy:'repair-worker-then-confirm-through-installer-controller',
