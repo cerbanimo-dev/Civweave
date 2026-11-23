@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-curated-playlists.v1",
-  "built_at": "2026-11-16T14:03:13Z",
+  "built_at": "2026-11-23T16:42:36Z",
   "vocal_required": true,
   "instrumental_only_rejected": true,
   "playlists": [
@@ -1036,6 +1036,66 @@
           "curation": "community-playlist-unreviewed"
         },
         {
+          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+          "title": "Je ne peux pas le retenir",
+          "artist": "Bluemillenium",
+          "provider": "ccmixter",
+          "provider_id": "62208",
+          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+              "mime": "",
+              "bytes": 7686314,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+              "mime": "",
+              "bytes": 17472728,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
+              "mime": "",
+              "bytes": 27410552,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
+              "mime": "",
+              "bytes": 24630340,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Bluemillenium",
+            "source_title": "Je ne peux pas le retenir",
+            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:29a3747e9b48a3d2c306100f",
           "title": "Lamadio Tiado",
           "artist": "Admiral Bob",
@@ -1162,6 +1222,48 @@
           ],
           "explicit": null,
           "curation": "metadata-discovered"
+        },
+        {
+          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
+          "title": "Melange",
+          "artist": "musikpirat",
+          "provider": "ccmixter",
+          "provider_id": "65481",
+          "source_url": "https://ccmixter.org/files/musikpirat/65481",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
+              "mime": "",
+              "bytes": 13348615,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "musikpirat",
+            "source_title": "Melange",
+            "source_url": "https://ccmixter.org/files/musikpirat/65481",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
         },
         {
           "candidate_id": "openmusic:a867d261c1261699a060058d",
@@ -1591,6 +1693,56 @@
           ],
           "explicit": null,
           "curation": "vocal-pool-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:95f1678a04736c8611a1f838",
+          "title": "Connections",
+          "artist": "Gabriel Shellington",
+          "provider": "ccmixter",
+          "provider_id": "71497",
+          "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.mp3",
+              "mime": "",
+              "bytes": 8710312,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.flac",
+              "mime": "",
+              "bytes": 18324661,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Gabriel Shellington",
+            "source_title": "Connections",
+            "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "creative commons",
+            "collaborative music",
+            "sharing",
+            "genre:community-playlist:11087"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
         },
         {
           "candidate_id": "openmusic:e37793d5f3dbc8c4ff61220c",
@@ -2072,92 +2224,6 @@
           "curation": "vocal-pool-unreviewed"
         },
         {
-          "candidate_id": "openmusic:c2e59cba868d779c9ed5f818",
-          "title": "Legalize",
-          "artist": "MalreDeszik",
-          "provider": "ccmixter",
-          "provider_id": "71331",
-          "source_url": "https://ccmixter.org/files/MalreDeszik/71331",
-          "license": {
-            "spdx": "CC-BY",
-            "label": "Attribution (4.0)",
-            "url": "https://creativecommons.org/licenses/by/4.0/",
-            "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": false
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize.mp3",
-              "mime": "",
-              "bytes": 6602753,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize.flac",
-              "mime": "",
-              "bytes": 20807047,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_1.flac",
-              "mime": "",
-              "bytes": 21387302,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_2.flac",
-              "mime": "",
-              "bytes": 9316939,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_3.flac",
-              "mime": "",
-              "bytes": 4544704,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_4.flac",
-              "mime": "",
-              "bytes": 19975505,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_5.flac",
-              "mime": "",
-              "bytes": 12746960,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_6.flac",
-              "mime": "",
-              "bytes": 12096880,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "MalreDeszik",
-            "source_title": "Legalize",
-            "source_url": "https://ccmixter.org/files/MalreDeszik/71331",
-            "license": "Attribution (4.0)",
-            "license_url": "https://creativecommons.org/licenses/by/4.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 0,
-          "themes": [
-            "creative commons",
-            "collaborative music",
-            "sharing",
-            "genre:community-playlist:11087"
-          ],
-          "explicit": null,
-          "curation": "community-playlist-unreviewed"
-        },
-        {
           "candidate_id": "openmusic:c5f1c8e5b8dd81a252eab50a",
           "title": "Like A Rapper",
           "artist": "Donnie Ozone",
@@ -2326,6 +2392,100 @@
             "collaborative music",
             "sharing",
             "share",
+            "genre:community-playlist:11087"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:95f1678a04736c8611a1f838",
+          "title": "Connections",
+          "artist": "Gabriel Shellington",
+          "provider": "ccmixter",
+          "provider_id": "71497",
+          "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (3.0)",
+            "url": "http://creativecommons.org/licenses/by/3.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.mp3",
+              "mime": "",
+              "bytes": 8710312,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.flac",
+              "mime": "",
+              "bytes": 18324661,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Gabriel Shellington",
+            "source_title": "Connections",
+            "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+            "license": "Attribution (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "creative commons",
+            "collaborative music",
+            "sharing",
+            "genre:community-playlist:11087"
+          ],
+          "explicit": null,
+          "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:525119c37dd2c7014f6d0d35",
+          "title": "The Humbling Of Honesty",
+          "artist": "Radioontheshelf",
+          "provider": "ccmixter",
+          "provider_id": "71498",
+          "source_url": "https://ccmixter.org/files/Radioontheshelf/71498",
+          "license": {
+            "spdx": "CC-BY",
+            "label": "Attribution (4.0)",
+            "url": "https://creativecommons.org/licenses/by/4.0/",
+            "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": false
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Radioontheshelf/Radioontheshelf_-_The_Humbling_Of_Honesty_1.mp3",
+              "mime": "",
+              "bytes": 10972518,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Radioontheshelf",
+            "source_title": "The Humbling Of Honesty",
+            "source_url": "https://ccmixter.org/files/Radioontheshelf/71498",
+            "license": "Attribution (4.0)",
+            "license_url": "https://creativecommons.org/licenses/by/4.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 0,
+          "themes": [
+            "creative commons",
+            "collaborative music",
+            "sharing",
             "genre:community-playlist:11087"
           ],
           "explicit": null,
@@ -2660,6 +2820,66 @@
           "curation": "community-playlist-unreviewed"
         },
         {
+          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+          "title": "Je ne peux pas le retenir",
+          "artist": "Bluemillenium",
+          "provider": "ccmixter",
+          "provider_id": "62208",
+          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+              "mime": "",
+              "bytes": 7686314,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+              "mime": "",
+              "bytes": 17472728,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
+              "mime": "",
+              "bytes": 27410552,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
+              "mime": "",
+              "bytes": 24630340,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Bluemillenium",
+            "source_title": "Je ne peux pas le retenir",
+            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
           "candidate_id": "openmusic:29a3747e9b48a3d2c306100f",
           "title": "Lamadio Tiado",
           "artist": "Admiral Bob",
@@ -2703,6 +2923,48 @@
           ],
           "explicit": null,
           "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
+          "title": "Melange",
+          "artist": "musikpirat",
+          "provider": "ccmixter",
+          "provider_id": "65481",
+          "source_url": "https://ccmixter.org/files/musikpirat/65481",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
+              "mime": "",
+              "bytes": 13348615,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "musikpirat",
+            "source_title": "Melange",
+            "source_url": "https://ccmixter.org/files/musikpirat/65481",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
         },
         {
           "candidate_id": "openmusic:097b58402e76a542a6ffad23",
@@ -3425,6 +3687,108 @@
           ],
           "explicit": null,
           "curation": "community-playlist-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
+          "title": "Je ne peux pas le retenir",
+          "artist": "Bluemillenium",
+          "provider": "ccmixter",
+          "provider_id": "62208",
+          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
+              "mime": "",
+              "bytes": 7686314,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
+              "mime": "",
+              "bytes": 17472728,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
+              "mime": "",
+              "bytes": 27410552,
+              "role": "source-download"
+            },
+            {
+              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
+              "mime": "",
+              "bytes": 24630340,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "Bluemillenium",
+            "source_title": "Je ne peux pas le retenir",
+            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
+        },
+        {
+          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
+          "title": "Melange",
+          "artist": "musikpirat",
+          "provider": "ccmixter",
+          "provider_id": "65481",
+          "source_url": "https://ccmixter.org/files/musikpirat/65481",
+          "license": {
+            "spdx": "CC-BY-SA",
+            "label": "Attribution Share-Alike (3.0)",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
+            "commercial_use": true,
+            "redistribution": true,
+            "derivatives": true,
+            "share_alike": true
+          },
+          "files": [
+            {
+              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
+              "mime": "",
+              "bytes": 13348615,
+              "role": "source-download"
+            }
+          ],
+          "attribution": {
+            "creator": "musikpirat",
+            "source_title": "Melange",
+            "source_url": "https://ccmixter.org/files/musikpirat/65481",
+            "license": "Attribution Share-Alike (3.0)",
+            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+          },
+          "vocal_verified": true,
+          "instrumental_only": false,
+          "teeth_score": 1,
+          "themes": [
+            "share",
+            "genre:vocal-pool:vocals"
+          ],
+          "explicit": null,
+          "curation": "vocal-pool-unreviewed"
         },
         {
           "candidate_id": "openmusic:e37793d5f3dbc8c4ff61220c",
@@ -6825,106 +7189,6 @@
       "name": "Cerbanimo",
       "entries": [
         {
-          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-          "title": "Je ne peux pas le retenir",
-          "artist": "Bluemillenium",
-          "provider": "ccmixter",
-          "provider_id": "62208",
-          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
-              "mime": "",
-              "bytes": 7686314,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
-              "mime": "",
-              "bytes": 17472728,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
-              "mime": "",
-              "bytes": 27410552,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
-              "mime": "",
-              "bytes": 24630340,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Bluemillenium",
-            "source_title": "Je ne peux pas le retenir",
-            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
-        },
-        {
-          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
-          "title": "Melange",
-          "artist": "musikpirat",
-          "provider": "ccmixter",
-          "provider_id": "65481",
-          "source_url": "https://ccmixter.org/files/musikpirat/65481",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
-              "mime": "",
-              "bytes": 13348615,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "musikpirat",
-            "source_title": "Melange",
-            "source_url": "https://ccmixter.org/files/musikpirat/65481",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
-        },
-        {
           "candidate_id": "openmusic:1203b215c04a63c86d197be1",
           "title": "Singularity",
           "artist": "Stefan Kartenberg",
@@ -7300,106 +7564,6 @@
           ],
           "explicit": null,
           "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-          "title": "Je ne peux pas le retenir",
-          "artist": "Bluemillenium",
-          "provider": "ccmixter",
-          "provider_id": "62208",
-          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
-              "mime": "",
-              "bytes": 7686314,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
-              "mime": "",
-              "bytes": 17472728,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
-              "mime": "",
-              "bytes": 27410552,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
-              "mime": "",
-              "bytes": 24630340,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Bluemillenium",
-            "source_title": "Je ne peux pas le retenir",
-            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
-        },
-        {
-          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
-          "title": "Melange",
-          "artist": "musikpirat",
-          "provider": "ccmixter",
-          "provider_id": "65481",
-          "source_url": "https://ccmixter.org/files/musikpirat/65481",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
-              "mime": "",
-              "bytes": 13348615,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "musikpirat",
-            "source_title": "Melange",
-            "source_url": "https://ccmixter.org/files/musikpirat/65481",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
         },
         {
           "candidate_id": "openmusic:5e7980377cd7bd6bcf119b37",
@@ -7780,106 +7944,6 @@
           ],
           "explicit": null,
           "curation": "genre-discovered"
-        },
-        {
-          "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-          "title": "Je ne peux pas le retenir",
-          "artist": "Bluemillenium",
-          "provider": "ccmixter",
-          "provider_id": "62208",
-          "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.mp3",
-              "mime": "",
-              "bytes": 7686314,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir.flac",
-              "mime": "",
-              "bytes": 17472728,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_1.flac",
-              "mime": "",
-              "bytes": 27410552,
-              "role": "source-download"
-            },
-            {
-              "url": "https://ccmixter.org/content/Bluemillenium/Bluemillenium_-_Je_ne_peux_pas_le_retenir_2.flac",
-              "mime": "",
-              "bytes": 24630340,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "Bluemillenium",
-            "source_title": "Je ne peux pas le retenir",
-            "source_url": "https://ccmixter.org/files/Bluemillenium/62208",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
-        },
-        {
-          "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
-          "title": "Melange",
-          "artist": "musikpirat",
-          "provider": "ccmixter",
-          "provider_id": "65481",
-          "source_url": "https://ccmixter.org/files/musikpirat/65481",
-          "license": {
-            "spdx": "CC-BY-SA",
-            "label": "Attribution Share-Alike (3.0)",
-            "url": "http://creativecommons.org/licenses/by-sa/3.0/",
-            "evidence": "ccMixter Query API lic=sa; license=Attribution Share-Alike (3.0); url=http://creativecommons.org/licenses/by-sa/3.0/",
-            "commercial_use": true,
-            "redistribution": true,
-            "derivatives": true,
-            "share_alike": true
-          },
-          "files": [
-            {
-              "url": "https://ccmixter.org/content/musikpirat/musikpirat_-_Melange.mp3",
-              "mime": "",
-              "bytes": 13348615,
-              "role": "source-download"
-            }
-          ],
-          "attribution": {
-            "creator": "musikpirat",
-            "source_title": "Melange",
-            "source_url": "https://ccmixter.org/files/musikpirat/65481",
-            "license": "Attribution Share-Alike (3.0)",
-            "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
-          },
-          "vocal_verified": true,
-          "instrumental_only": false,
-          "teeth_score": 1,
-          "themes": [
-            "share"
-          ],
-          "explicit": null,
-          "curation": "metadata-discovered"
         },
         {
           "candidate_id": "openmusic:68857722998f65e49ac879c1",

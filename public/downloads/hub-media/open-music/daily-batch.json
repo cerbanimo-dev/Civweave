@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-daily-batch.v1",
-  "built_at": "2026-11-16T14:03:13Z",
-  "candidate_count": 238,
+  "built_at": "2026-11-23T16:42:36Z",
+  "candidate_count": 240,
   "candidates": [
     {
       "candidate_id": "openmusic:71590564d3c8eb7b51ee0be3",
@@ -1625,7 +1625,7 @@
     },
     {
       "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "civweave",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -1685,18 +1685,19 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "labor"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
         },
         {
           "playlist_id": "civweave",
@@ -1892,7 +1893,7 @@
     },
     {
       "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "civweave",
       "title": "Melange",
       "artist": "musikpirat",
       "album": "",
@@ -1934,18 +1935,19 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "energy"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "energy"
         },
         {
           "playlist_id": "cerbanimo",
@@ -2539,6 +2541,74 @@
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:rap"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:95f1678a04736c8611a1f838",
+      "playlist_id": "civweave",
+      "title": "Connections",
+      "artist": "Gabriel Shellington",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "71497",
+      "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+      "matched_query": "community-playlist:11087",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.mp3",
+          "mime": "",
+          "bytes": 8710312,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.flac",
+          "mime": "",
+          "bytes": 18324661,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Gabriel Shellington",
+        "source_title": "Connections",
+        "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "creative commons",
+        "collaborative music",
+        "sharing",
+        "genre:community-playlist:11087"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "community-playlist:11087"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "community-playlist:9158"
         }
       ]
     },
@@ -3310,108 +3380,6 @@
           "matched_query": "vocal-pool:rap"
         }
       ]
-    },
-    {
-      "candidate_id": "openmusic:c2e59cba868d779c9ed5f818",
-      "playlist_id": "civweave",
-      "title": "Legalize",
-      "artist": "MalreDeszik",
-      "album": "",
-      "provider": "ccmixter",
-      "provider_id": "71331",
-      "source_url": "https://ccmixter.org/files/MalreDeszik/71331",
-      "matched_query": "community-playlist:11087",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (4.0)",
-        "url": "https://creativecommons.org/licenses/by/4.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize.mp3",
-          "mime": "",
-          "bytes": 6602753,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize.flac",
-          "mime": "",
-          "bytes": 20807047,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_1.flac",
-          "mime": "",
-          "bytes": 21387302,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_2.flac",
-          "mime": "",
-          "bytes": 9316939,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_3.flac",
-          "mime": "",
-          "bytes": 4544704,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_4.flac",
-          "mime": "",
-          "bytes": 19975505,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_5.flac",
-          "mime": "",
-          "bytes": 12746960,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_6.flac",
-          "mime": "",
-          "bytes": 12096880,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "MalreDeszik",
-        "source_title": "Legalize",
-        "source_url": "https://ccmixter.org/files/MalreDeszik/71331",
-        "license": "Attribution (4.0)",
-        "license_url": "https://creativecommons.org/licenses/by/4.0/"
-      },
-      "quality_score": 70,
-      "governance_state": "anarchadia-nomination-candidate",
-      "spotify_required": false,
-      "rights_gate": "passed-explicit-redistribution",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 0,
-      "themes": [
-        "creative commons",
-        "collaborative music",
-        "sharing",
-        "genre:community-playlist:11087"
-      ],
-      "explicit": null,
-      "curation": "community-playlist-unreviewed",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "community-playlist:11087"
-        }
-      ],
-      "carried_forward": true,
-      "last_verified_at": "2026-11-09T14:23:10Z"
     },
     {
       "candidate_id": "openmusic:c5f1c8e5b8dd81a252eab50a",
@@ -4610,6 +4578,74 @@
         {
           "playlist_id": "fellowfare",
           "matched_query": "source-page:65367"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:95f1678a04736c8611a1f838",
+      "playlist_id": "civweave",
+      "title": "Connections",
+      "artist": "Gabriel Shellington",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "71497",
+      "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+      "matched_query": "community-playlist:9158",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.mp3",
+          "mime": "",
+          "bytes": 8710312,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.flac",
+          "mime": "",
+          "bytes": 18324661,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Gabriel Shellington",
+        "source_title": "Connections",
+        "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "creative commons",
+        "collaborative music",
+        "sharing",
+        "genre:community-playlist:11087"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "community-playlist:11087"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "community-playlist:9158"
         }
       ]
     },
@@ -5956,6 +5992,68 @@
         {
           "playlist_id": "living-school",
           "matched_query": "source-page:26427"
+        }
+      ]
+    },
+    {
+      "candidate_id": "openmusic:525119c37dd2c7014f6d0d35",
+      "playlist_id": "civweave",
+      "title": "The Humbling Of Honesty",
+      "artist": "Radioontheshelf",
+      "album": "",
+      "provider": "ccmixter",
+      "provider_id": "71498",
+      "source_url": "https://ccmixter.org/files/Radioontheshelf/71498",
+      "matched_query": "community-playlist:9158",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (4.0)",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Radioontheshelf/Radioontheshelf_-_The_Humbling_Of_Honesty_1.mp3",
+          "mime": "",
+          "bytes": 10972518,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Radioontheshelf",
+        "source_title": "The Humbling Of Honesty",
+        "source_url": "https://ccmixter.org/files/Radioontheshelf/71498",
+        "license": "Attribution (4.0)",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "quality_score": 70,
+      "governance_state": "anarchadia-nomination-candidate",
+      "spotify_required": false,
+      "rights_gate": "passed-explicit-redistribution",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "creative commons",
+        "collaborative music",
+        "sharing",
+        "genre:community-playlist:11087"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "community-playlist:11087"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "community-playlist:9158"
         }
       ]
     },
@@ -7599,7 +7697,7 @@
     },
     {
       "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "civweave",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -7659,18 +7757,19 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "labor"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
         },
         {
           "playlist_id": "civweave",
@@ -7755,7 +7854,7 @@
     },
     {
       "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "civweave",
       "title": "Melange",
       "artist": "musikpirat",
       "album": "",
@@ -7797,18 +7896,19 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "energy"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "energy"
         },
         {
           "playlist_id": "cerbanimo",
@@ -10563,7 +10663,7 @@
     },
     {
       "candidate_id": "openmusic:1a18c603676f255edc2886b3",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "civweave",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -10623,18 +10723,19 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "labor"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
         },
         {
           "playlist_id": "civweave",
@@ -10652,7 +10753,7 @@
     },
     {
       "candidate_id": "openmusic:fc2eeac2d5a07a6fa2235d56",
-      "playlist_id": "cerbanimo",
+      "playlist_id": "civweave",
       "title": "Melange",
       "artist": "musikpirat",
       "album": "",
@@ -10694,18 +10795,19 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "energy"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "energy"
         },
         {
           "playlist_id": "cerbanimo",

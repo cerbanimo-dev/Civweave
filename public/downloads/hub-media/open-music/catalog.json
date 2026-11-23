@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-music-catalog.v1",
-  "built_at": "2026-11-16T14:03:13Z",
+  "built_at": "2026-11-23T16:42:36Z",
   "record_count": 178,
   "failure_count": 23,
   "failures": [
@@ -4322,8 +4322,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "62208",
-      "playlist_id": "cerbanimo",
-      "matched_query": "labor",
+      "playlist_id": "civweave",
+      "matched_query": "vocal-pool:vocals",
       "title": "Je ne peux pas le retenir",
       "artist": "Bluemillenium",
       "album": "",
@@ -4382,18 +4382,19 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "labor"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "labor"
         },
         {
           "playlist_id": "civweave",
@@ -4605,8 +4606,8 @@
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
       "provider_id": "65481",
-      "playlist_id": "cerbanimo",
-      "matched_query": "energy",
+      "playlist_id": "civweave",
+      "matched_query": "vocal-pool:vocals",
       "title": "Melange",
       "artist": "musikpirat",
       "album": "",
@@ -4647,18 +4648,19 @@
       "instrumental_only": false,
       "teeth_score": 1,
       "themes": [
-        "share"
+        "share",
+        "genre:vocal-pool:vocals"
       ],
       "explicit": null,
-      "curation": "metadata-discovered",
+      "curation": "vocal-pool-unreviewed",
       "playlist_matches": [
-        {
-          "playlist_id": "cerbanimo",
-          "matched_query": "energy"
-        },
         {
           "playlist_id": "civweave",
           "matched_query": "vocal-pool:vocals"
+        },
+        {
+          "playlist_id": "cerbanimo",
+          "matched_query": "energy"
         },
         {
           "playlist_id": "cerbanimo",
@@ -6064,6 +6066,78 @@
         }
       ],
       "candidate_id": "openmusic:0c4fb787a4664ba38e9978cc",
+      "quality_score": 70
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
+      "provider_id": "71497",
+      "playlist_id": "civweave",
+      "matched_query": "community-playlist:11087",
+      "title": "Connections",
+      "artist": "Gabriel Shellington",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.mp3",
+          "mime": "",
+          "bytes": 8710312,
+          "role": "source-download"
+        },
+        {
+          "url": "https://ccmixter.org/content/gabriel_shelligton/gabriel_shelligton_-_Connections_1.flac",
+          "mime": "",
+          "bytes": 18324661,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Gabriel Shellington",
+        "source_title": "Connections",
+        "source_url": "https://ccmixter.org/files/gabriel_shelligton/71497",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "creative commons",
+        "collaborative music",
+        "sharing",
+        "genre:community-playlist:11087"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "community-playlist:11087"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "community-playlist:9158"
+        }
+      ],
+      "candidate_id": "openmusic:95f1678a04736c8611a1f838",
       "quality_score": 70
     },
     {
@@ -8105,112 +8179,6 @@
       ],
       "candidate_id": "openmusic:d8c505a4b9689f10424f296c",
       "quality_score": 70
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "71331",
-      "playlist_id": "civweave",
-      "matched_query": "community-playlist:11087",
-      "title": "Legalize",
-      "artist": "MalreDeszik",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/MalreDeszik/71331",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (4.0)",
-        "url": "https://creativecommons.org/licenses/by/4.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize.mp3",
-          "mime": "",
-          "bytes": 6602753,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize.flac",
-          "mime": "",
-          "bytes": 20807047,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_1.flac",
-          "mime": "",
-          "bytes": 21387302,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_2.flac",
-          "mime": "",
-          "bytes": 9316939,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_3.flac",
-          "mime": "",
-          "bytes": 4544704,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_4.flac",
-          "mime": "",
-          "bytes": 19975505,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_5.flac",
-          "mime": "",
-          "bytes": 12746960,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_Legalize_6.flac",
-          "mime": "",
-          "bytes": 12096880,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "MalreDeszik",
-        "source_title": "Legalize",
-        "source_url": "https://ccmixter.org/files/MalreDeszik/71331",
-        "license": "Attribution (4.0)",
-        "license_url": "https://creativecommons.org/licenses/by/4.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 0,
-      "themes": [
-        "creative commons",
-        "collaborative music",
-        "sharing",
-        "genre:community-playlist:11087"
-      ],
-      "explicit": null,
-      "curation": "community-playlist-unreviewed",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "community-playlist:11087"
-        }
-      ],
-      "candidate_id": "openmusic:c2e59cba868d779c9ed5f818",
-      "quality_score": 70,
-      "carried_forward": true,
-      "last_verified_at": "2026-11-09T14:23:10Z"
     },
     {
       "schema": "civweave.open-music-track.v1",
@@ -10750,6 +10718,72 @@
     {
       "schema": "civweave.open-music-track.v1",
       "provider": "ccmixter",
+      "provider_id": "71498",
+      "playlist_id": "civweave",
+      "matched_query": "community-playlist:11087",
+      "title": "The Humbling Of Honesty",
+      "artist": "Radioontheshelf",
+      "album": "",
+      "duration_seconds": 0,
+      "source_url": "https://ccmixter.org/files/Radioontheshelf/71498",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (4.0)",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/Radioontheshelf/Radioontheshelf_-_The_Humbling_Of_Honesty_1.mp3",
+          "mime": "",
+          "bytes": 10972518,
+          "role": "source-download"
+        }
+      ],
+      "attribution": {
+        "creator": "Radioontheshelf",
+        "source_title": "The Humbling Of Honesty",
+        "source_url": "https://ccmixter.org/files/Radioontheshelf/71498",
+        "license": "Attribution (4.0)",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "vocal_verified": true,
+      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
+      "instrumental_only": false,
+      "teeth_score": 0,
+      "themes": [
+        "creative commons",
+        "collaborative music",
+        "sharing",
+        "genre:community-playlist:11087"
+      ],
+      "explicit": null,
+      "curation": "community-playlist-unreviewed",
+      "playlist_matches": [
+        {
+          "playlist_id": "civweave",
+          "matched_query": "community-playlist:11087"
+        },
+        {
+          "playlist_id": "living-school",
+          "matched_query": "community-playlist:9158"
+        }
+      ],
+      "candidate_id": "openmusic:525119c37dd2c7014f6d0d35",
+      "quality_score": 70
+    },
+    {
+      "schema": "civweave.open-music-track.v1",
+      "provider": "ccmixter",
       "provider_id": "33898",
       "playlist_id": "civweave",
       "matched_query": "community-playlist:11087",
@@ -10818,112 +10852,6 @@
       ],
       "candidate_id": "openmusic:3f4162b2ccd21e5334743dab",
       "quality_score": 70
-    },
-    {
-      "schema": "civweave.open-music-track.v1",
-      "provider": "ccmixter",
-      "provider_id": "71334",
-      "playlist_id": "civweave",
-      "matched_query": "community-playlist:11087",
-      "title": "The path to glory",
-      "artist": "MalreDeszik",
-      "album": "",
-      "duration_seconds": 0,
-      "source_url": "https://ccmixter.org/files/MalreDeszik/71334",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution (4.0)",
-        "url": "https://creativecommons.org/licenses/by/4.0/",
-        "evidence": "ccMixter Query API lic=by; license=Attribution (4.0); url=https://creativecommons.org/licenses/by/4.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "files": [
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory.mp3",
-          "mime": "",
-          "bytes": 5999011,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_9.flac",
-          "mime": "",
-          "bytes": 12798411,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_10.flac",
-          "mime": "",
-          "bytes": 16205137,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory.flac",
-          "mime": "",
-          "bytes": 8478415,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_1.flac",
-          "mime": "",
-          "bytes": 19965662,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_2.flac",
-          "mime": "",
-          "bytes": 8737274,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_3.flac",
-          "mime": "",
-          "bytes": 17108439,
-          "role": "source-download"
-        },
-        {
-          "url": "https://ccmixter.org/content/MalreDeszik/MalreDeszik_-_The_path_to_glory_4.flac",
-          "mime": "",
-          "bytes": 5881094,
-          "role": "source-download"
-        }
-      ],
-      "attribution": {
-        "creator": "MalreDeszik",
-        "source_title": "The path to glory",
-        "source_url": "https://ccmixter.org/files/MalreDeszik/71334",
-        "license": "Attribution (4.0)",
-        "license_url": "https://creativecommons.org/licenses/by/4.0/"
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "vocal_verified": true,
-      "vocal_evidence": "ccMixter source metadata contains an affirmative vocal/voice/lyric marker; audio and lyrics have not been manually audited",
-      "instrumental_only": false,
-      "teeth_score": 0,
-      "themes": [
-        "creative commons",
-        "collaborative music",
-        "sharing",
-        "genre:community-playlist:11087"
-      ],
-      "explicit": null,
-      "curation": "community-playlist-unreviewed",
-      "playlist_matches": [
-        {
-          "playlist_id": "civweave",
-          "matched_query": "community-playlist:11087"
-        }
-      ],
-      "candidate_id": "openmusic:a66a43cb77abb77739daa306",
-      "quality_score": 70,
-      "carried_forward": true,
-      "last_verified_at": "2026-11-09T14:23:10Z"
     },
     {
       "schema": "civweave.open-music-track.v1",
