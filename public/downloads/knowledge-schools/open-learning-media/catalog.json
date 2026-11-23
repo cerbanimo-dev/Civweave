@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-11-16T13:39:43Z",
-  "record_count": 192,
-  "mesh_redistributable_count": 147,
-  "download_candidate_count": 337,
+  "built_at": "2026-11-23T15:59:36Z",
+  "record_count": 200,
+  "mesh_redistributable_count": 156,
+  "download_candidate_count": 352,
   "providers": {
     "internet-archive": {
       "records": 9,
@@ -11,14 +11,14 @@
       "download_candidates": 17
     },
     "peertube": {
-      "records": 141,
-      "mesh_redistributable": 105,
-      "download_candidates": 278
+      "records": 148,
+      "mesh_redistributable": 113,
+      "download_candidates": 292
     },
     "wikimedia-commons": {
-      "records": 42,
-      "mesh_redistributable": 42,
-      "download_candidates": 42
+      "records": 43,
+      "mesh_redistributable": 43,
+      "download_candidates": 43
     }
   },
   "focus_topics": {
@@ -43,11 +43,11 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 15,
-      "mesh_redistributable": 12,
+      "records": 14,
+      "mesh_redistributable": 11,
       "providers": {
         "wikimedia-commons": 3,
-        "peertube": 12
+        "peertube": 11
       },
       "top_titles": [
         "Come and learn how free maps, free knowledge can help care for the world",
@@ -58,8 +58,8 @@
         "Seychelles Explained in 12 minutes (History, Geography, And Culture)",
         "South Korea EXPLAINED in 10 Minutes - (History, Geography, & Culture)",
         "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
-        "UV Mapping & Unwrapping - Blender Fundamentals",
-        "Topographical maps for all!"
+        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+        "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145"
       ]
     },
     "civics-society": {
@@ -67,19 +67,19 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 7,
-      "mesh_redistributable": 6,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 2,
-        "wikimedia-commons": 5
+        "peertube": 3,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
-        "UK Parliament structure explained"
+        "UK Parliament structure explained",
+        "Houses of History - Explore the story of Parliament and democracy",
+        "An introduction to Parliament"
       ]
     },
     "biology-life": {
@@ -93,8 +93,8 @@
       },
       "top_titles": [
         "Nature vs Nurture ｜ Genetics ｜ Biology ｜ FuseSchool",
-        "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
         "Ecosystem Management | Ecology & Environment | Biology | FuseSchool",
+        "Endangered Species | Environment & Ecology | Biology | FuseSchool",
         "HongKong-PuiChing: Synthetic Biology (Educational Song) (2026) [English]",
         "Human Impacts on Biodiversity | Ecology and Environment | Biology | FuseSchool",
         "REC-CHENNAI: THULIR'S Journey Through Biology, an educational booklet (2026) [Sign Language]",
@@ -109,7 +109,7 @@
       "school_slug": "science",
       "required": true,
       "records": 14,
-      "mesh_redistributable": 10,
+      "mesh_redistributable": 11,
       "providers": {
         "peertube": 13,
         "wikimedia-commons": 1
@@ -121,9 +121,9 @@
         "Electric potential from multiple charges ｜ Grade 12 ｜ Physics ｜ NCERT ｜ Khan Academy (IN accent)",
         "Lenz's law | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
         "Fundamental and Derived quantities | Units and Measurements | Grade 11 | Physics | Khan Academy",
-        "Speed, Distance, Time and Acceleration ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
         "Physics Of Crystals by LesBrown",
-        "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
+        "Acceleration | Forces & Motion | Physics | FuseSchool",
+        "Area Under Velocity Time Graphs ｜ Forces & Motion ｜ Physics ｜ FuseSchool",
         "Changes In Momentum | Forces & Motion | Physics | FuseSchool"
       ]
     },
@@ -131,11 +131,11 @@
       "name": "Chemistry Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 19,
-      "mesh_redistributable": 17,
+      "records": 21,
+      "mesh_redistributable": 19,
       "providers": {
         "wikimedia-commons": 7,
-        "peertube": 11,
+        "peertube": 13,
         "internet-archive": 1
       },
       "top_titles": [
@@ -148,7 +148,7 @@
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
-        "How To Balance Equations - Part 1 | Chemical Calculations | Chemistry | FuseSchool"
+        "The (truly) Periodic Table"
       ]
     },
     "astronomy-space": {
@@ -167,27 +167,29 @@
         "Solar System explained by simpleshow foundation",
         "The Solar System Song",
         "The solar system ｜ Science ｜ Khan Academy (IN accent)",
-        "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
-        "Animation Using Constraints Example Solar System"
+        "How To Discover A New Planet (Science Out Loud S1 Ep1)",
+        "The Royal Society - Astronomy by microscope？ ｜ The Royal Society"
       ]
     },
     "mathematics-foundations": {
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 8,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 8
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Solving Equations Involving Fractions | Algebra | Maths",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
+        "Recognising Number Sequence (Basic) | Patterns in Mathematics | Class 6 NCERT | Math | Khan Academy",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -212,14 +214,15 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 4,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -283,16 +286,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 2,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
+        "peertube": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
-        "Il Prompt Engineering"
+        "Effective prompt engineering for Python programmers"
       ]
     },
     "pseudocoding": {
@@ -313,16 +315,17 @@
       "name": "Critical Thinking & Media Literacy",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 3,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 2
+        "peertube": 3
       },
       "top_titles": [
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
         "The Facts about Fact Checking: Crash Course Navigating Digital Information #2",
-        "#316: Discussing critical thinking in today's age with Edward Dowd"
+        "#316: Discussing critical thinking in today's age with Edward Dowd",
+        "კრიტიკული აზროვნება ქართულად / Critical Thinking (2020)"
       ]
     },
     "logical-frameworks": {
@@ -383,13 +386,12 @@
       "name": "Emergency Preparedness",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 5,
+      "records": 4,
       "mesh_redistributable": 0,
       "providers": {
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
-        "\" TRAINING CIVILIANS IN CIVIL DEFENSE \" 1970s SOVIET UNION DISASTER PREPAREDNESS (Part 1) XD23715a",
         "\" TRAINING CIVILIANS IN CIVIL DEFENSE \" 1970s SOVIET UNION DISASTER PREPAREDNESS (Part 2) XD23715b",
         "NASA APOLLO PROJECT FIRE SAFETY & FLAME RESISTANT MATERIALS EDUCATIONAL FILM 55554",
         "“ IN CASE OF FIRE - FIRE DRILLS AND FIRE SAFETY ” 1959 EB FILMS FIRE SAFETY EDUCATIONAL FILM 50864",
@@ -425,13 +427,15 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 1
+        "peertube": 3
       },
       "top_titles": [
-        "Mesecons Tutorial - Basic Circuits"
+        "Mesecons Tutorial - Basic Circuits",
+        "Mesecons Tutorial - Basic Circuits",
+        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard"
       ]
     },
     "woodworking-basics": {
@@ -497,13 +501,14 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
-        "Quick Statistics and Visual Overview of Data in LabPlot"
+        "Quick Statistics and Visual Overview of Data in LabPlot",
+        "Frequency distribution table | Statistics | TG Grade 9 | Math | Khan Academy"
       ]
     },
     "climate-environment": {
@@ -587,23 +592,27 @@
       "name": "Communication & Conflict",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 0,
-      "mesh_redistributable": 0,
-      "providers": {},
-      "top_titles": []
+      "records": 2,
+      "mesh_redistributable": 2,
+      "providers": {
+        "wikimedia-commons": 2
+      },
+      "top_titles": [
+        "Wikipedia to enhance student communication skills - Wikimedia Australia",
+        "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership"
+      ]
     },
     "parenting-caregiving": {
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
+      "records": 1,
       "mesh_redistributable": 0,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935",
-        "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705"
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
       ]
     },
     "gardening-plants": {
@@ -619,14 +628,13 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 2,
+      "records": 3,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
-        "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Entrepreneurship by design",
         "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
       ]
@@ -652,15 +660,16 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
         "Starting to learn Taiwanese: Language Learning Journey 1",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "Spanish Lesson 35 Abs Beginner Spanish Prepositons LightSpeed Spanish",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
         "Jobs Song for Kids | What Do You Do? | Occupations | Kindergarten, Preschool, ESL | Fun Kids English",
         "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
@@ -670,25 +679,13 @@
       ]
     }
   },
-  "failure_count": 29,
+  "failure_count": 27,
   "failures": [
-    {
-      "provider": "wikimedia-commons",
-      "topic_slug": "communication-conflict",
-      "query": "communication skills workshop",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=communication+skills+workshop+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
-    },
     {
       "provider": "wikimedia-commons",
       "topic_slug": "parenting-caregiving",
       "query": "parenting skills child development course",
       "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=parenting+skills+child+development+course+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "topic_slug": "communication-conflict",
-      "query": "healthy communication skills course",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=healthy+communication+skills+course+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
     },
     {
       "provider": "wikimedia-commons",
@@ -728,15 +725,15 @@
     },
     {
       "provider": "wikimedia-commons",
-      "topic_slug": "entrepreneurship-small-business",
-      "query": "entrepreneurship small business basics course",
-      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=entrepreneurship+small+business+basics+course+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
-    },
-    {
-      "provider": "wikimedia-commons",
       "topic_slug": "gardening-plants",
       "query": "plant care introduction",
       "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=plant+care+introduction+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "topic_slug": "entrepreneurship-small-business",
+      "query": "entrepreneurship small business basics course",
+      "error": "request failed: https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=entrepreneurship+small+business+basics+course+filetype%3Avideo&gsrnamespace=6&gsrlimit=6&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Csha1%7Cextmetadata&format=json&formatversion=2&origin=%2A: HTTP Error 429: Your bot is making too many requests. Please reduce your request rate or contact bot-traffic@wikimedia.org (f263c81)"
     },
     {
       "provider": "wikimedia-commons",
@@ -848,6 +845,117 @@
     }
   ],
   "records": [
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1",
+      "topic_slug": "arts-culture",
+      "topic_name": "Arts & Culture",
+      "school_slug": "arts",
+      "concepts": [
+        "art history",
+        "visual arts",
+        "music",
+        "culture",
+        "visual culture",
+        "artmaking"
+      ],
+      "matched_query": "Krita digital painting tutorial",
+      "title": "Dark matter cloud particles effect - Krita digital-painting tutorial",
+      "description": "Support my work on: https://www.patreon.com/davidrevoy My webcomic: https://www.peppercarrot.com/ License: Creative-Commons-Attribution 4.0 internationale to David Revoy, www.davidrevoy.com Music: CC-By Kevin McLeod - Perspective - www.i...",
+      "creator": "artmirrors",
+      "language": "en",
+      "duration_seconds": 870,
+      "source_url": "https://share.tube/videos/watch/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1",
+      "source_host": "share.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://share.tube/download/videos/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 81264990,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://share.tube/download/videos/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 56268775,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://share.tube/download/videos/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 38119069,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "artmirrors",
+        "source_title": "Dark matter cloud particles effect - Krita digital-painting tutorial",
+        "source_url": "https://share.tube/videos/watch/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "arts-culture",
+          "school_slug": "arts",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 68,
+          "relevance_score": 24
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "arts-culture": {
+          "score": 24,
+          "evidence": [
+            "digital painting",
+            "painting tutorial",
+            "music"
+          ]
+        }
+      },
+      "pedagogy": {
+        "arts-culture": {
+          "strong_title_matches": [
+            "digital painting",
+            "painting tutorial"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 68
+        }
+      },
+      "selection": {
+        "arts-culture": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 68
+        }
+      }
+    },
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
@@ -2235,6 +2343,105 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "3057d245-25e5-46cd-9313-1a0f60a01100",
+      "topic_slug": "astronomy-space",
+      "topic_name": "Astronomy & Space",
+      "school_slug": "science",
+      "concepts": [
+        "astronomy",
+        "solar system",
+        "stars",
+        "galaxies"
+      ],
+      "matched_query": "solar system astronomy",
+      "title": "How To Discover A New Planet (Science Out Loud S1 Ep1)",
+      "description": "Thousands of planets - ones that look totally different than what we're used to (and could host life!) - exist outside of our solar system. But we're only just now starting to find them! Ashley takes you behind the simple technique that astronomer...",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 214,
+      "source_url": "https://diler.tube/videos/watch/3057d245-25e5-46cd-9313-1a0f60a01100",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/3057d245-25e5-46cd-9313-1a0f60a01100-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 19078153,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/3057d245-25e5-46cd-9313-1a0f60a01100-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 12143610,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "How To Discover A New Planet (Science Out Loud S1 Ep1)",
+        "source_url": "https://diler.tube/videos/watch/3057d245-25e5-46cd-9313-1a0f60a01100",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "astronomy-space",
+          "school_slug": "science",
+          "selection_reason": "topic-description-anchor-plus-instructional-title",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "astronomy-space": {
+          "score": 10,
+          "evidence": [
+            "solar system",
+            "solar system"
+          ]
+        }
+      },
+      "pedagogy": {
+        "astronomy-space": {
+          "strong_title_matches": [],
+          "strong_description_matches": [
+            "solar system"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "astronomy-space": {
+          "reason": "topic-description-anchor-plus-instructional-title",
+          "pedagogy_score": 36
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "2626cdaf-e341-4c3b-8719-724da79c9a55",
       "topic_slug": "astronomy-space",
       "topic_name": "Astronomy & Space",
@@ -2315,97 +2522,6 @@
         "astronomy-space": {
           "strong_title_matches": [
             "astronomy"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "astronomy-space": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "ff427260-9631-40d9-bd39-65f21f95e9ad",
-      "topic_slug": "astronomy-space",
-      "topic_name": "Astronomy & Space",
-      "school_slug": "science",
-      "concepts": [
-        "astronomy",
-        "solar system",
-        "stars",
-        "galaxies"
-      ],
-      "matched_query": "solar system astronomy",
-      "title": "Animation Using Constraints Example Solar System",
-      "description": "",
-      "creator": "blender_docs",
-      "language": null,
-      "duration_seconds": 48,
-      "source_url": "https://video.blender.org/videos/watch/ff427260-9631-40d9-bd39-65f21f95e9ad",
-      "source_host": "video.blender.org",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://video.blender.org/download/web-videos/ff427260-9631-40d9-bd39-65f21f95e9ad-720.mp4",
-          "mime": "video/mp4",
-          "bytes": 12138747,
-          "resolution": "720p",
-          "fps": 25,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "blender_docs",
-        "source_title": "Animation Using Constraints Example Solar System",
-        "source_url": "https://video.blender.org/videos/watch/ff427260-9631-40d9-bd39-65f21f95e9ad",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "astronomy-space",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 81,
-      "relevance": {
-        "astronomy-space": {
-          "score": 10,
-          "evidence": [
-            "solar system",
-            "solar system"
-          ]
-        }
-      },
-      "pedagogy": {
-        "astronomy-space": {
-          "strong_title_matches": [
-            "solar system"
           ],
           "strong_description_matches": [],
           "educational_intent": true,
@@ -2529,140 +2645,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "d07efa67-89a9-4311-9315-a2bc46f447ce",
-      "topic_slug": "biology-life",
-      "topic_name": "Biology & Life",
-      "school_slug": "science",
-      "concepts": [
-        "biology",
-        "cells",
-        "genetics",
-        "ecology"
-      ],
-      "matched_query": "ecology biology educational video",
-      "title": "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
-      "description": "FuseSchool compares natural ecosystems with their complex, sustainable food webs and indigenous components to human-altered artificial ones. Learn how these engineered environments require external inputs and maintain high productivity through sim...",
-      "creator": "jpan",
-      "language": "en",
-      "duration_seconds": 229,
-      "source_url": "https://diler.tube/videos/watch/d07efa67-89a9-4311-9315-a2bc46f447ce",
-      "source_host": "diler.tube",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://diler.tube/download/web-videos/d07efa67-89a9-4311-9315-a2bc46f447ce-1080.mp4",
-          "mime": "video/mp4",
-          "bytes": 59641704,
-          "resolution": "1080p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://diler.tube/download/web-videos/d07efa67-89a9-4311-9315-a2bc46f447ce-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 18004422,
-          "resolution": "480p",
-          "fps": 25,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "jpan",
-        "source_title": "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
-        "source_url": "https://diler.tube/videos/watch/d07efa67-89a9-4311-9315-a2bc46f447ce",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "biology-life",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 20
-        },
-        {
-          "topic_slug": "climate-environment",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44,
-          "relevance_score": 14
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "biology-life": {
-          "score": 20,
-          "evidence": [
-            "biology",
-            "ecology",
-            "biology",
-            "ecology"
-          ]
-        },
-        "climate-environment": {
-          "score": 14,
-          "evidence": [
-            "ecosystems",
-            "environment",
-            "ecosystems"
-          ]
-        }
-      },
-      "pedagogy": {
-        "biology-life": {
-          "strong_title_matches": [
-            "biology",
-            "ecology"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        },
-        "climate-environment": {
-          "strong_title_matches": [
-            "ecosystems"
-          ],
-          "strong_description_matches": [
-            "ecosystems"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 44
-        }
-      },
-      "selection": {
-        "biology-life": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        },
-        "climate-environment": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "68584b65-6cc7-45a5-8aa3-efd7296d8858",
       "topic_slug": "biology-life",
       "topic_name": "Biology & Life",
@@ -2765,6 +2747,108 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "04595ad2-728e-4a7e-9b57-e8f89c55da8a",
+      "topic_slug": "biology-life",
+      "topic_name": "Biology & Life",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "ecology biology educational video",
+      "title": "Endangered Species | Environment & Ecology | Biology | FuseSchool",
+      "description": "This video, titled Endangered Species, provides an overview of why species become endangered and the conservation methods used to protect them, You can probably name quite a few endangered species - polar bear, blue whale and black rhino are just a few. But there are many more that don’t get so much attention - there are currently around sixteen and a half thousand animals and plants that are endangered.",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 224,
+      "source_url": "https://diler.tube/videos/watch/04595ad2-728e-4a7e-9b57-e8f89c55da8a",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/04595ad2-728e-4a7e-9b57-e8f89c55da8a-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 13933910,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/04595ad2-728e-4a7e-9b57-e8f89c55da8a-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 10526023,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Endangered Species | Environment & Ecology | Biology | FuseSchool",
+        "source_url": "https://diler.tube/videos/watch/04595ad2-728e-4a7e-9b57-e8f89c55da8a",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "biology-life",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "biology-life": {
+          "score": 20,
+          "evidence": [
+            "biology",
+            "ecology",
+            "biology",
+            "ecology"
+          ]
+        }
+      },
+      "pedagogy": {
+        "biology-life": {
+          "strong_title_matches": [
+            "biology",
+            "ecology"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "biology-life": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "4f88fd26-2d10-4a1e-bb2d-8e9961045eb5",
       "topic_slug": "biology-life",
       "topic_name": "Biology & Life",
@@ -2777,7 +2861,7 @@
       ],
       "matched_query": "biology educational film",
       "title": "HongKong-PuiChing: Synthetic Biology (Educational Song) (2026) [English]",
-      "description": "HongKong-PuiChing introduces synthetic biology through music, combining science and art. Lyrics: Synthetic Biology is the key Redesigning nature graciously It works to makes things work like it should To save our neighbourhood When times come that brings us misfortune No need to look too glum or blue Synthetic Biology comes into view To render us brand new In farms, in drugs, in space Factories and restaurants, and cyberspace A smile on every face With synbio in place While the harsh salt ruins it all And the plants can't grow at all With synbio in our call They push through and stand tall Music: Music by Anson Kwong Lyrics by Anson Kwong, Matthew Chan Performed by Anson Kwong, Matthew Chan Mixing by Matthew Chan Video: Concept by Matthew Chan Edited by Matthew Chan Background by Thamnguyen_TBVN from Pixabay Wiki: https://2026.igem.wiki/hongkong-puiching/",
+      "description": "HongKong-PuiChing introduces synthetic biology through music, combining science and art. Lyrics: Synthetic Biology is the key Redesigning nature graciously It works to makes things work like it should To save our neighbourhood When time...",
       "creator": "iGEM Teams",
       "language": "en",
       "duration_seconds": 120,
@@ -5186,110 +5270,6 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "65f13467-3b78-4f96-8006-4a8fbc117c02",
-      "topic_slug": "chemistry-foundations",
-      "topic_name": "Chemistry Foundations",
-      "school_slug": "science",
-      "concepts": [
-        "chemistry",
-        "atoms",
-        "periodic table",
-        "reactions"
-      ],
-      "matched_query": "chemical reactions chemistry",
-      "title": "How To Balance Equations - Part 1 | Chemical Calculations | Chemistry | FuseSchool",
-      "description": "Learn the basics about balancing equations, as a part of chemical calculations.The law of conservation of mass states that no atoms are lost or made during a chemical reaction. There are different ways of arranging the atoms. Chemical reactions a...",
-      "creator": "jpan",
-      "language": "en",
-      "duration_seconds": 182,
-      "source_url": "https://diler.tube/videos/watch/65f13467-3b78-4f96-8006-4a8fbc117c02",
-      "source_host": "diler.tube",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://diler.tube/download/web-videos/65f13467-3b78-4f96-8006-4a8fbc117c02-720.mp4",
-          "mime": "video/mp4",
-          "bytes": 4775301,
-          "resolution": "720p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://diler.tube/download/web-videos/65f13467-3b78-4f96-8006-4a8fbc117c02-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 3773379,
-          "resolution": "480p",
-          "fps": 25,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "jpan",
-        "source_title": "How To Balance Equations - Part 1 | Chemical Calculations | Chemistry | FuseSchool",
-        "source_url": "https://diler.tube/videos/watch/65f13467-3b78-4f96-8006-4a8fbc117c02",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "chemistry-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 28
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "chemistry-foundations": {
-          "score": 28,
-          "evidence": [
-            "chemistry",
-            "chemical reactions",
-            "chemistry",
-            "atoms",
-            "reactions"
-          ]
-        }
-      },
-      "pedagogy": {
-        "chemistry-foundations": {
-          "strong_title_matches": [
-            "chemistry"
-          ],
-          "strong_description_matches": [
-            "chemical reactions"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        }
-      },
-      "selection": {
-        "chemistry-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
       "provider_id": "File:The (truly) Periodic Table.webm",
       "topic_slug": "chemistry-foundations",
@@ -5614,6 +5594,212 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "9c425acd-9c7d-46b4-91e3-f637e125e49f",
+      "topic_slug": "chemistry-foundations",
+      "topic_name": "Chemistry Foundations",
+      "school_slug": "science",
+      "concepts": [
+        "chemistry",
+        "atoms",
+        "periodic table",
+        "reactions"
+      ],
+      "matched_query": "chemical reactions chemistry",
+      "title": "Calorimeter | Reactions | Chemistry | FuseSchool",
+      "description": "Global Education explains how these devices measure heat changes in chemical reactions or physical processes. Through a simple experiment with a spirit burner and water, viewers learn to determine the energy content of different fuels and food items.",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 227,
+      "source_url": "https://diler.tube/videos/watch/9c425acd-9c7d-46b4-91e3-f637e125e49f",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/9c425acd-9c7d-46b4-91e3-f637e125e49f-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 5754753,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/9c425acd-9c7d-46b4-91e3-f637e125e49f-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 4615515,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Calorimeter | Reactions | Chemistry | FuseSchool",
+        "source_url": "https://diler.tube/videos/watch/9c425acd-9c7d-46b4-91e3-f637e125e49f",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "chemistry-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 24
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "chemistry-foundations": {
+          "score": 24,
+          "evidence": [
+            "chemistry",
+            "chemical reactions",
+            "chemistry",
+            "reactions"
+          ]
+        }
+      },
+      "pedagogy": {
+        "chemistry-foundations": {
+          "strong_title_matches": [
+            "chemistry"
+          ],
+          "strong_description_matches": [
+            "chemical reactions"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "chemistry-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "bcc5cf1d-ef04-40d2-b24c-437954b4e0e4",
+      "topic_slug": "chemistry-foundations",
+      "topic_name": "Chemistry Foundations",
+      "school_slug": "science",
+      "concepts": [
+        "chemistry",
+        "atoms",
+        "periodic table",
+        "reactions"
+      ],
+      "matched_query": "chemical reactions chemistry",
+      "title": "Decomposition of Hydrogen Peroxide | Reactions | Chemistry | The Fuse School",
+      "description": "This video from The Fuse School explains the chemical decomposition of hydrogen peroxide. Learn the basics about the decomposition of hydrogen peroxide, as a part of chemical reactions.",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 174,
+      "source_url": "https://diler.tube/videos/watch/bcc5cf1d-ef04-40d2-b24c-437954b4e0e4",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/bcc5cf1d-ef04-40d2-b24c-437954b4e0e4-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 4335815,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/bcc5cf1d-ef04-40d2-b24c-437954b4e0e4-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 3311055,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Decomposition of Hydrogen Peroxide | Reactions | Chemistry | The Fuse School",
+        "source_url": "https://diler.tube/videos/watch/bcc5cf1d-ef04-40d2-b24c-437954b4e0e4",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "chemistry-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 24
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "chemistry-foundations": {
+          "score": 24,
+          "evidence": [
+            "chemistry",
+            "chemical reactions",
+            "chemistry",
+            "reactions"
+          ]
+        }
+      },
+      "pedagogy": {
+        "chemistry-foundations": {
+          "strong_title_matches": [
+            "chemistry"
+          ],
+          "strong_description_matches": [
+            "chemical reactions"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "chemistry-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "e3ae35a5-6ccb-42c4-b0e0-5563e37f4f46",
       "topic_slug": "chemistry-foundations",
       "topic_name": "Chemistry Foundations",
@@ -5701,6 +5887,109 @@
           ],
           "strong_description_matches": [
             "periodic table"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "chemistry-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "593da554-bbf6-4e31-814b-6f0b645dffee",
+      "topic_slug": "chemistry-foundations",
+      "topic_name": "Chemistry Foundations",
+      "school_slug": "science",
+      "concepts": [
+        "chemistry",
+        "atoms",
+        "periodic table",
+        "reactions"
+      ],
+      "matched_query": "chemical reactions chemistry",
+      "title": "Reactions of Iron ｜ Reactions ｜ Chemistry ｜ FuseSchool",
+      "description": "Learn the basics about reactions of iron, as a part of chemical reactions. This video, titled Reactions of Iron, provides an educational overview of how iron interacts with various substances.",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 298,
+      "source_url": "https://diler.tube/videos/watch/593da554-bbf6-4e31-814b-6f0b645dffee",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/593da554-bbf6-4e31-814b-6f0b645dffee-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 28058227,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/593da554-bbf6-4e31-814b-6f0b645dffee-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 12950086,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Reactions of Iron ｜ Reactions ｜ Chemistry ｜ FuseSchool",
+        "source_url": "https://diler.tube/videos/watch/593da554-bbf6-4e31-814b-6f0b645dffee",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "chemistry-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 24
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "chemistry-foundations": {
+          "score": 24,
+          "evidence": [
+            "chemistry",
+            "chemical reactions",
+            "chemistry",
+            "reactions"
+          ]
+        }
+      },
+      "pedagogy": {
+        "chemistry-foundations": {
+          "strong_title_matches": [
+            "chemistry"
+          ],
+          "strong_description_matches": [
+            "chemical reactions"
           ],
           "educational_intent": true,
           "instructional_title": false,
@@ -6368,115 +6657,6 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "385cf1c7-f24f-4c76-b2ab-5867a2306875",
-      "topic_slug": "civics-society",
-      "topic_name": "Civics & Society",
-      "school_slug": "society-and-social-sciences",
-      "concepts": [
-        "civics",
-        "government",
-        "democracy",
-        "institutions"
-      ],
-      "matched_query": "democracy civics lesson",
-      "title": "Democracy in the Dark: Protecting Your Digital Rights",
-      "description": "With the elections getting closer, learn how to protect yourself from all the various threats out there. ============================= ➡️ Learn more @ https://thenewoil.org/ ➡️ Support us! Merch, affiliate links, crypto, and more: https://thenewoil.org/en/support/ ============================= You can also view these videos on other websites: 🎥 PeerTube: https://apertatube.net/c/thenewoil/videos 🎥 YouTube: https://youtube.com/thenewoil ⏰ Timestamps 00:00 Introduction 00:37 Disclaimer 01:23 Overview 02:13 Part 1: Why Privacy Matters to Democracy 05:35 Part 2: Protection From Targeted Ads and Disinformation 13:12 Part 3: Protection Against Doxing and Other Real-Life Threats 18:58 Part 4: Protesting ✅ Sources There were a whopping 67 sources on this episode. Check them out here: https://gitlab.com/thenewoil/content/-/blob/main/Show%20Notes/20240919-democracy #privacy #election #democracy #protesting #targetedadvertising #voting #misinformation",
-      "creator": "Nate Bartram",
-      "language": "en",
-      "duration_seconds": 1979,
-      "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-      "source_host": "apertatube.net",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 446658800,
-          "resolution": "1080p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 273190887,
-          "resolution": "720p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 164171737,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Nate Bartram",
-        "source_title": "Democracy in the Dark: Protecting Your Digital Rights",
-        "source_url": "https://apertatube.net/videos/watch/385cf1c7-f24f-4c76-b2ab-5867a2306875",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "civics-society",
-          "school_slug": "society-and-social-sciences",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "civics-society": {
-          "score": 10,
-          "evidence": [
-            "democracy",
-            "democracy"
-          ]
-        }
-      },
-      "pedagogy": {
-        "civics-society": {
-          "strong_title_matches": [
-            "democracy"
-          ],
-          "strong_description_matches": [
-            "democracy"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 44
-        }
-      },
-      "selection": {
-        "civics-society": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
       "provider_id": "File:An introduction to Parliament.webm",
       "topic_slug": "civics-society",
@@ -6523,96 +6703,6 @@
         "creator": "UK Parliament",
         "source_title": "An introduction to Parliament",
         "source_url": "https://commons.wikimedia.org/wiki/File:An_introduction_to_Parliament.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "civics-society",
-          "school_slug": "society-and-social-sciences",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "civics-society": {
-          "score": 10,
-          "evidence": [
-            "government",
-            "government"
-          ]
-        }
-      },
-      "pedagogy": {
-        "civics-society": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "government"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "civics-society": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Elections and voting explained (UK).webm",
-      "topic_slug": "civics-society",
-      "topic_name": "Civics & Society",
-      "school_slug": "society-and-social-sciences",
-      "concepts": [
-        "civics",
-        "government",
-        "democracy",
-        "institutions"
-      ],
-      "matched_query": "parliament government introduction",
-      "title": "Elections and voting explained (UK)",
-      "description": "Discover how elections work in the UK and take a closer look at the General Election, exploring: our right to vote, how candidates and parties gain votes and what happens once elected. If you are a teacher, this animation is a quick and easy way to introduce the General Election with secondary students studying subjects such as Citizenship or Government & Politics. This is just one chapter of the ‘An Introduction to Parliament’ video. Find the full video, along with further chapters, such as Parliament’s Structure and Your Voice, here: https://www.youtube.com/watch?v=RAMbIz3Y2JA",
-      "creator": "UK Parliament",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Elections_and_voting_explained_%28UK%29.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 7768739,
-          "provider_sha1": "d9fb26a96fbab6fda2f8774fea28f96a52241d1b",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "UK Parliament",
-        "source_title": "Elections and voting explained (UK)",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
         "license": "CC BY 3.0",
         "license_url": "https://creativecommons.org/licenses/by/3.0"
       },
@@ -6837,6 +6927,172 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "b069053f-c242-4e7d-8b81-b77571559eac",
+      "topic_slug": "civics-society",
+      "topic_name": "Civics & Society",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "civics",
+        "government",
+        "democracy",
+        "institutions"
+      ],
+      "matched_query": "democracy civics lesson",
+      "title": "Houses of History - Explore the story of Parliament and democracy",
+      "description": "Journey through time with this playful, animated and interactive timeline, and explore the story of democracy. Explore the Houses of History interactive timeline at: http://www.parliament.uk/education/teaching-resources-lesson-plans/history-of-...",
+      "creator": "Open History",
+      "language": "en",
+      "duration_seconds": 190,
+      "source_url": "https://tilvids.com/videos/watch/b069053f-c242-4e7d-8b81-b77571559eac",
+      "source_host": "tilvids.com",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Open History",
+        "source_title": "Houses of History - Explore the story of Parliament and democracy",
+        "source_url": "https://tilvids.com/videos/watch/b069053f-c242-4e7d-8b81-b77571559eac",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "civics-society",
+          "school_slug": "society-and-social-sciences",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 35,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 30,
+      "relevance": {
+        "civics-society": {
+          "score": 10,
+          "evidence": [
+            "democracy",
+            "democracy"
+          ]
+        }
+      },
+      "pedagogy": {
+        "civics-society": {
+          "strong_title_matches": [
+            "democracy"
+          ],
+          "strong_description_matches": [
+            "democracy"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 35
+        }
+      },
+      "selection": {
+        "civics-society": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 35
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "e79e65e3-e469-4d9a-a788-a67f73e34537",
+      "topic_slug": "civics-society",
+      "topic_name": "Civics & Society",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "civics",
+        "government",
+        "democracy",
+        "institutions"
+      ],
+      "matched_query": "parliament government introduction",
+      "title": "An introduction to Parliament",
+      "description": "A short animation that introduces the UK Parliament, looking at its history and how it works today. This is an ideal teaching resource for secondary students studying citizenship or Government & Politics View the whole film or skip to chapters: 1:08 Parliament Structure: the function and make-up of the three parts of Parliament. 2:46 Holding Government to Account: how Parliament checks and challenges the work of Government. 3:51 Making Laws: follow the making of a law from proposal to becoming an Act of Parliament. 5:10 Elections and Voting: the different types of election and a look in detail at the general election. 6:35 Your Voice: how to have a voice in Parliament, from voting to petitioning and campaigning. Subscribe to UK Parliament for more videos https://www.youtube.com/subscription_center?add_user=UKParliament Follow @UKParlEducation on Twitter for more resources and information. https://twitter.com/UKParlEducation",
+      "creator": "Open History",
+      "language": "en",
+      "duration_seconds": 505,
+      "source_url": "https://tilvids.com/videos/watch/e79e65e3-e469-4d9a-a788-a67f73e34537",
+      "source_host": "tilvids.com",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Open History",
+        "source_title": "An introduction to Parliament",
+        "source_url": "https://tilvids.com/videos/watch/e79e65e3-e469-4d9a-a788-a67f73e34537",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "civics-society",
+          "school_slug": "society-and-social-sciences",
+          "selection_reason": "topic-description-anchor-plus-instructional-title",
+          "pedagogy_score": 27,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 30,
+      "relevance": {
+        "civics-society": {
+          "score": 10,
+          "evidence": [
+            "government",
+            "government"
+          ]
+        }
+      },
+      "pedagogy": {
+        "civics-society": {
+          "strong_title_matches": [],
+          "strong_description_matches": [
+            "government"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 27
+        }
+      },
+      "selection": {
+        "civics-society": {
+          "reason": "topic-description-anchor-plus-instructional-title",
+          "pedagogy_score": 27
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
       "provider": "internet-archive",
       "provider_id": "nps-video-dena-teaching-climate-change-science-in-the-classroom",
       "topic_slug": "climate-environment",
@@ -7013,6 +7269,107 @@
         "climate-environment": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 45
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "d07efa67-89a9-4311-9315-a2bc46f447ce",
+      "topic_slug": "climate-environment",
+      "topic_name": "Climate & Environment",
+      "school_slug": "science",
+      "concepts": [
+        "climate science",
+        "environment",
+        "ecosystems"
+      ],
+      "matched_query": "environmental science ecosystems",
+      "title": "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
+      "description": "FuseSchool compares natural ecosystems with their complex, sustainable food webs and indigenous components to human-altered artificial ones. Learn how these engineered environments require external inputs and maintain high productivity through sim...",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 229,
+      "source_url": "https://diler.tube/videos/watch/d07efa67-89a9-4311-9315-a2bc46f447ce",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/d07efa67-89a9-4311-9315-a2bc46f447ce-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 59641704,
+          "resolution": "1080p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/d07efa67-89a9-4311-9315-a2bc46f447ce-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 18004422,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
+        "source_url": "https://diler.tube/videos/watch/d07efa67-89a9-4311-9315-a2bc46f447ce",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "climate-environment",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 14
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "climate-environment": {
+          "score": 14,
+          "evidence": [
+            "ecosystems",
+            "environment",
+            "ecosystems"
+          ]
+        }
+      },
+      "pedagogy": {
+        "climate-environment": {
+          "strong_title_matches": [
+            "ecosystems"
+          ],
+          "strong_description_matches": [
+            "ecosystems"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "climate-environment": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44
         }
       }
     },
@@ -7203,6 +7560,198 @@
         "climate-environment": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 44
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Wikipedia to enhance student communication skills - Wikimedia Australia.webm",
+      "topic_slug": "communication-conflict",
+      "topic_name": "Communication & Conflict",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "communication",
+        "active listening",
+        "conflict resolution",
+        "nonviolent communication",
+        "interpersonal communication",
+        "de-escalation",
+        "assertive communication",
+        "repair"
+      ],
+      "matched_query": "communication skills workshop",
+      "title": "Wikipedia to enhance student communication skills - Wikimedia Australia",
+      "description": "Staff from Charles Sturt University and La Trobe University partnered with Wikimedia Australia to develop an active learning exercise that analyses the readability, accuracy, and authorship of Wikipedia articles and generative AI tools within the context of science communication. This Zoom is a recording of the session “Wikipedia to enhance student communication skills”, held on 11th September 2024, where academics across Australia were invited to discuss the benefits of analysing Wikipedia to support students’ learning of communication skills and develop assessments for activities, including rubrics.",
+      "creator": "AlphaLemur",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Wikipedia_to_enhance_student_communication_skills_-_Wikimedia_Australia.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC BY 4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0",
+        "evidence": "CC BY 4.0 | Creative Commons Attribution 4.0 | cc-by-4.0 | https://creativecommons.org/licenses/by/4.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Wikipedia_to_enhance_student_communication_skills_-_Wikimedia_Australia.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 306465340,
+          "provider_sha1": "7f70e8b73b9adf9e111edbde8d9e770833f088b5",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "AlphaLemur",
+        "source_title": "Wikipedia to enhance student communication skills - Wikimedia Australia",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Wikipedia_to_enhance_student_communication_skills_-_Wikimedia_Australia.webm",
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "communication-conflict",
+          "school_slug": "society-and-social-sciences",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 14
+        }
+      ],
+      "quality_score": 89,
+      "relevance": {
+        "communication-conflict": {
+          "score": 14,
+          "evidence": [
+            "communication skills",
+            "communication"
+          ]
+        }
+      },
+      "pedagogy": {
+        "communication-conflict": {
+          "strong_title_matches": [
+            "communication skills"
+          ],
+          "strong_description_matches": [
+            "communication skills"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "communication-conflict": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership.webm",
+      "topic_slug": "communication-conflict",
+      "topic_name": "Communication & Conflict",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "communication",
+        "active listening",
+        "conflict resolution",
+        "nonviolent communication",
+        "interpersonal communication",
+        "de-escalation",
+        "assertive communication",
+        "repair"
+      ],
+      "matched_query": "communication skills workshop",
+      "title": "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership",
+      "description": "Video recording for Wikimania 2023 Title: Let's Connect x LDWG Learning Clinics: Communication skills for collaborative leadership Speakers: Jan-Bart de Vreede, Let's Connect Working Group, Leadership Development Working Group, Nada Alfarra (User:Nada kareem22), Chinmayee Mishra Abstract: What is this Learning Clinic for? Be introduced to skills that foster communication and empathy needed for collaborative leadership and manage potential conflicts. Learning outcomes: Participants will become more aware of the importance of good communication skills that can support collaborative leadership and mitigate conflict or transform it in a positive way. Methodology: The workshops would be based on these learning methods: Hands-on exercises for people to learn some basic skills with a practical application Learning from peer examples. We will be bringing in community experiences that can be useful for learning and the interactive exercises we will hold. Audience: Maximum 35 community members that are part of organised groups (ie. affiliates or groups of organisers). It would be great to have a mixture of organisers from emerging formal and non-formal groups, as well as those of larger more experienced affiliates. These workshops will be done in collaboration between the Let's Connect working group (led by community members and supported by the Wikimedia Foundation https://meta.wikimedia.org/wiki/Grants:Knowledge_Sharing/Connect/Team ) and also with the support of the Community Development team at the Foundation and the Leadership Development Working Group: https://meta.wikimedia.org/wiki/Leadership_Development_Working_Group ). Presented at: Suntec Singapore Convention and Exhibition Centre , 2023-08-16 03:15 to 05:15 UTC Etherpad link: https://etherpad.wikimedia.org/p/C8NUGA",
+      "creator": "Wikimania 2023",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2023_-_Room_324_-_16_August_-_Let%27s_Connect_x_LDWG_Learning_Clinics._Communication_Skills_for_Collaborative_Leadership.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "CC BY-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Wikimania_2023_-_Room_324_-_16_August_-_Let%27s_Connect_x_LDWG_Learning_Clinics._Communication_Skills_for_Collaborative_Leadership.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 2833552312,
+          "provider_sha1": "9cb212703269a5cd6d03e0248a899b15dd639c51",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Wikimania 2023",
+        "source_title": "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2023_-_Room_324_-_16_August_-_Let%27s_Connect_x_LDWG_Learning_Clinics._Communication_Skills_for_Collaborative_Leadership.webm",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "communication-conflict",
+          "school_slug": "society-and-social-sciences",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 14
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "communication-conflict": {
+          "score": 14,
+          "evidence": [
+            "communication skills",
+            "communication"
+          ]
+        }
+      },
+      "pedagogy": {
+        "communication-conflict": {
+          "strong_title_matches": [
+            "communication skills"
+          ],
+          "strong_description_matches": [
+            "communication skills"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "communication-conflict": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
         }
       }
     },
@@ -7762,7 +8311,7 @@
       ],
       "matched_query": "food safety hygiene",
       "title": "Aalto-Helsinki: DAHLIA - Making Food Safety Visible (2026) - Team Presentation",
-      "description": "**Title:** DAHLIA - Making Food Safety Visible **Description:** Is your food safe to eat? Earlier this year, Finnish broadcasters exposed issues with the storage of meat and fish in supermarkets. The Aalto-Helsinki iGEM team presents DAHLIA, a test strip that detects the histamine emitted by foods like meat and fish as they spoil. In our biosensor, Diamine Oxidase (DAO) reacts with histamine, producing H2O2, and Horseradish Peroxidase (HRP) reacts with H2O2 and changes the color of a substrate. DAO and HRP are each joined to a cellulose-binding module (CBM) to adhere to the cellulose-based test strip. Our team successfully designed, transformed and expressed both fusion proteins and developed assays for prototype testing. To ensure the positive impact of the product on our community, we interacted with consumers, food vendors, and experts from different fields. We especially strived to educate the community about food safety and histamine - for a future with less food waste and more food safety. [Wiki](https://2026.igem.wiki/aalto-helsinki) | [Official Page](https://teams.igem.org/6201)",
+      "description": "**Title:** DAHLIA - Making Food Safety Visible **Description:** Is your food safe to eat? Earlier this year, Finnish broadcasters exposed issues with the storage of meat and fish in supermarkets. The Aalto-Helsinki iGEM team presents DAHLIA, a te...",
       "creator": "iGEM Teams",
       "language": "en",
       "duration_seconds": 837,
@@ -8630,6 +9179,97 @@
         "critical-thinking": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "0039b82b-0f21-450d-9b71-5251f0adfeb2",
+      "topic_slug": "critical-thinking",
+      "topic_name": "Critical Thinking & Media Literacy",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "critical thinking",
+        "media literacy",
+        "source evaluation",
+        "evidence"
+      ],
+      "matched_query": "critical thinking",
+      "title": "კრიტიკული აზროვნება ქართულად / Critical Thinking (2020)",
+      "description": "კრიტიკული აზროვნება (2020) — დრამა, ბიოგრაფიული, ისტორიული. ფილმი ქართულად, ქართული გახმოვანებით. ქართული გახმოვანება.",
+      "creator": "godora1992",
+      "language": "ka",
+      "duration_seconds": 6650,
+      "source_url": "https://ufasofilmebi.net/videos/watch/0039b82b-0f21-450d-9b71-5251f0adfeb2",
+      "source_host": "ufasofilmebi.net",
+      "license": {
+        "spdx": "CC0",
+        "label": "Public Domain Dedication",
+        "url": "",
+        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://ufasofilmebi.net/download/streaming-playlists/hls/videos/0039b82b-0f21-450d-9b71-5251f0adfeb2-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 866493163,
+          "resolution": "480p",
+          "fps": 24,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "godora1992",
+        "source_title": "კრიტიკული აზროვნება ქართულად / Critical Thinking (2020)",
+        "source_url": "https://ufasofilmebi.net/videos/watch/0039b82b-0f21-450d-9b71-5251f0adfeb2",
+        "license": "Public Domain Dedication",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "critical-thinking",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 49,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 90,
+      "relevance": {
+        "critical-thinking": {
+          "score": 10,
+          "evidence": [
+            "critical thinking",
+            "critical thinking"
+          ]
+        }
+      },
+      "pedagogy": {
+        "critical-thinking": {
+          "strong_title_matches": [
+            "critical thinking"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 49
+        }
+      },
+      "selection": {
+        "critical-thinking": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 49
         }
       }
     },
@@ -9645,7 +10285,7 @@
       ],
       "matched_query": "world geography educational video",
       "title": "South Korea EXPLAINED in 10 Minutes - (History, Geography, & Culture)",
-      "description": "Explore the fascinating world of South Korea, a country where modernity meets tradition. This video takes you on a journey through South Korea's unique culture, history, and innovations. Discover why South Koreans greet each other with \"Did you ea...",
+      "description": "Explore the fascinating world of South Korea, a country where modernity meets tradition. This video takes you on a journey through South Korea's unique culture, history, and innovations. Discover why South Koreans greet each other with \"Did you eat rice?\" and learn about their impressive work ethic, clocking in at 52 hours a week. Dive into the captivating history of the Korean Peninsula, from its division post-World War II to the economic boom known as the Miracle on the Han River. Experience South Korea's rich cultural heritage, from the symbolic Taegeukgi flag to quirky attractions like Poopoo Land and the toilet-shaped Haewoojae Museum. Marvel at the global impact of K-Pop and K-Dramas, and meet international icons like BTS and Blackpink. Understand the geographical beauty of this mountainous nation, home to the vibrant metropolis of Seoul and the serene Hallasan volcano on Jeju Island. With a focus on education, technology, and innovation, South Korea has transformed into a global powerhouse, boasting the 10th largest economy in the world. Join us as we delve into the Land of the Morning Calm, uncovering its hidden gems and celebrated icons",
       "creator": "jpan",
       "language": "en",
       "duration_seconds": 616,
@@ -9837,247 +10477,6 @@
         "earth-geography": {
           "strong_title_matches": [
             "mapping"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 48
-        }
-      },
-      "selection": {
-        "earth-geography": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "99b9d000-cfb3-4e9f-916f-c16b6f2ed36b",
-      "topic_slug": "earth-geography",
-      "topic_name": "Earth & Geography",
-      "school_slug": "geography",
-      "concepts": [
-        "geography",
-        "maps",
-        "landforms",
-        "human geography",
-        "cartography",
-        "geospatial data"
-      ],
-      "matched_query": "open mapping geography",
-      "title": "UV Mapping & Unwrapping - Blender Fundamentals",
-      "description": "Blender is Free and Open Source Software Download: https://blender.org/download Donate: https://blender.org/donate -- This tutorial is part of the Blender Fundamentals series, produced by Dillon Gu. Find more free tutorials on: https://blen...",
-      "creator": "Blender",
-      "language": "en",
-      "duration_seconds": 444,
-      "source_url": "https://video.blender.org/videos/watch/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b",
-      "source_host": "video.blender.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-1080.mp4",
-          "mime": "video/mp4",
-          "bytes": 71106553,
-          "resolution": "1080p",
-          "fps": 15,
-          "role": "web-video"
-        },
-        {
-          "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-720.mp4",
-          "mime": "video/mp4",
-          "bytes": 41233960,
-          "resolution": "720p",
-          "fps": 15,
-          "role": "web-video"
-        },
-        {
-          "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 21801790,
-          "resolution": "480p",
-          "fps": 15,
-          "role": "web-video"
-        },
-        {
-          "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-360.mp4",
-          "mime": "video/mp4",
-          "bytes": 15019478,
-          "resolution": "360p",
-          "fps": 15,
-          "role": "web-video"
-        },
-        {
-          "url": "https://video.blender.org/download/web-videos/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b-240.mp4",
-          "mime": "video/mp4",
-          "bytes": 10438658,
-          "resolution": "240p",
-          "fps": 15,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Blender",
-        "source_title": "UV Mapping & Unwrapping - Blender Fundamentals",
-        "source_url": "https://video.blender.org/videos/watch/99b9d000-cfb3-4e9f-916f-c16b6f2ed36b",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "earth-geography",
-          "school_slug": "geography",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "earth-geography": {
-          "score": 10,
-          "evidence": [
-            "mapping"
-          ]
-        }
-      },
-      "pedagogy": {
-        "earth-geography": {
-          "strong_title_matches": [
-            "mapping"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 48
-        }
-      },
-      "selection": {
-        "earth-geography": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
-      "topic_slug": "earth-geography",
-      "topic_name": "Earth & Geography",
-      "school_slug": "geography",
-      "concepts": [
-        "geography",
-        "maps",
-        "landforms",
-        "human geography",
-        "cartography",
-        "geospatial data"
-      ],
-      "matched_query": "free maps free knowledge",
-      "title": "Topographical maps for all!",
-      "description": "LibrePlanet 2023 videos Presented by: Anonymous Anaximander c. 610 – c. 546 BC) was a pre-Socratic Greek philosopher who lived in Miletus, a city of Ionia (in modern-day Turkey). He belonged to the Milesian school and learned the teachings of hi...",
-      "creator": "Free Software Foundation",
-      "language": "en",
-      "duration_seconds": 2827,
-      "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
-      "source_host": "framatube.org",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-720-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 333684675,
-          "resolution": "720p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-480-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 186076391,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-360-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 155856944,
-          "resolution": "360p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-240-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 120216224,
-          "resolution": "240p",
-          "fps": 30,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Free Software Foundation",
-        "source_title": "Topographical maps for all!",
-        "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "earth-geography",
-          "school_slug": "geography",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "earth-geography": {
-          "score": 10,
-          "evidence": [
-            "maps",
-            "maps"
-          ]
-        }
-      },
-      "pedagogy": {
-        "earth-geography": {
-          "strong_title_matches": [
-            "maps"
           ],
           "strong_description_matches": [],
           "educational_intent": true,
@@ -10356,6 +10755,107 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "1d792038-9185-42d5-a70d-86488ecf651e",
+      "topic_slug": "earth-geography",
+      "topic_name": "Earth & Geography",
+      "school_slug": "geography",
+      "concepts": [
+        "geography",
+        "maps",
+        "landforms",
+        "human geography",
+        "cartography",
+        "geospatial data"
+      ],
+      "matched_query": "free maps free knowledge",
+      "title": "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
+      "description": "OpenDroneMap is an ecosystem of free and open source software to collect, process, analyze and display aerial data. In this talk we will present an exciting overview of what's new in the ecosystem, where the project is headed and how you can benef...",
+      "creator": "osgeo",
+      "language": "en",
+      "duration_seconds": 1257,
+      "source_url": "https://video.osgeo.org/videos/watch/1d792038-9185-42d5-a70d-86488ecf651e",
+      "source_host": "video.osgeo.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://video.osgeo.org/download/streaming-playlists/hls/videos/1d792038-9185-42d5-a70d-86488ecf651e-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 77320889,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.osgeo.org/download/streaming-playlists/hls/videos/1d792038-9185-42d5-a70d-86488ecf651e-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 54645543,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "osgeo",
+        "source_title": "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
+        "source_url": "https://video.osgeo.org/videos/watch/1d792038-9185-42d5-a70d-86488ecf651e",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "earth-geography",
+          "school_slug": "geography",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "earth-geography": {
+          "score": 10,
+          "evidence": [
+            "maps",
+            "maps"
+          ]
+        }
+      },
+      "pedagogy": {
+        "earth-geography": {
+          "strong_title_matches": [
+            "maps"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "earth-geography": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "81f9643e-e820-4466-be11-c6f91700c6e5",
       "topic_slug": "earth-geography",
       "topic_name": "Earth & Geography",
@@ -10370,7 +10870,7 @@
       ],
       "matched_query": "world geography educational video",
       "title": "GUATEMALA: 12 Minute Documentary (Geography, History, Culture)",
-      "description": "The Heart of the Mayan World - Exploring Guatemala's Culture and History. Guatemala, a land steeped in ancient history and vibrant culture! Join us on a mesmerizing journey through the heart of Central America. Uncover the echoes of the majestic M...",
+      "description": "The Heart of the Mayan World - Exploring Guatemala's Culture and History. Guatemala, a land steeped in ancient history and vibrant culture! Join us on a mesmerizing journey through the heart of Central America. Uncover the echoes of the majestic Mayan civilization, the stunning landscapes, and the diverse tapestry of Guatemala's people. Stick around till the end to savor the flavors of Guatemalan cuisine and uncover hidden gems that define the soul of this captivating land. Opentiera provides a comprehensive look at the nation's diverse geographical regions, from tropical lowlands to volcanic highlands. The documentary examines the evolution of Mayan traditions, the impact of colonial history, and the complexities of the modern agricultural economy, while showcasing the country's unique culinary heritage and vibrant cultural expressions.",
       "creator": "jpan",
       "language": "en",
       "duration_seconds": 722,
@@ -10640,81 +11140,220 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "db0f2ae2-70c3-46e9-8f8b-f159856290ab",
-      "topic_slug": "emergency-preparedness",
-      "topic_name": "Emergency Preparedness",
-      "school_slug": "everyday-life",
+      "provider_id": "0f5b118a-e441-42e7-bf27-45762522ca95",
+      "topic_slug": "electronics-basics",
+      "topic_name": "Electronics Basics",
+      "school_slug": "technology",
       "concepts": [
-        "emergency preparedness",
-        "disaster readiness",
-        "emergency planning",
-        "fire safety"
+        "electronics",
+        "circuits",
+        "soldering"
       ],
-      "matched_query": "disaster preparedness emergency kit",
-      "title": "\" TRAINING CIVILIANS IN CIVIL DEFENSE \" 1970s SOVIET UNION DISASTER PREPAREDNESS (Part 1) XD23715a",
-      "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
-      "creator": "amal",
+      "matched_query": "basic circuits electronics",
+      "title": "Mesecons Tutorial - Basic Circuits",
+      "description": "Website: https://totallynotashadyweb.site/ Patreon: https://www.patreon.com/benrob0329 Basic Mesecons Tutorial: http://mesecons.net/uberi/projects/MeseconsBasics/index.html",
+      "creator": "Benrob0329",
       "language": "en",
-      "duration_seconds": 556,
-      "source_url": "https://peertube.dngr.us/videos/watch/db0f2ae2-70c3-46e9-8f8b-f159856290ab",
-      "source_host": "peertube.dngr.us",
+      "duration_seconds": 661,
+      "source_url": "https://share.tube/videos/watch/0f5b118a-e441-42e7-bf27-45762522ca95",
+      "source_host": "share.tube",
       "license": {
-        "spdx": "CC0",
-        "label": "Public Domain Dedication",
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
         "url": "",
-        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
         "commercial_use": true,
         "derivatives": true,
-        "share_alike": false
+        "share_alike": true
       },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://share.tube/download/videos/0f5b118a-e441-42e7-bf27-45762522ca95-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 117854217,
+          "resolution": "1080p",
+          "fps": 60,
+          "role": "web-video"
+        },
+        {
+          "url": "https://share.tube/download/videos/0f5b118a-e441-42e7-bf27-45762522ca95-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 63816790,
+          "resolution": "720p",
+          "fps": 60,
+          "role": "web-video"
+        },
+        {
+          "url": "https://share.tube/download/videos/0f5b118a-e441-42e7-bf27-45762522ca95-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 41372233,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "web-video"
+        }
+      ],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
-        "creator": "amal",
-        "source_title": "\" TRAINING CIVILIANS IN CIVIL DEFENSE \" 1970s SOVIET UNION DISASTER PREPAREDNESS (Part 1) XD23715a",
-        "source_url": "https://peertube.dngr.us/videos/watch/db0f2ae2-70c3-46e9-8f8b-f159856290ab",
-        "license": "Public Domain Dedication",
+        "creator": "Benrob0329",
+        "source_title": "Mesecons Tutorial - Basic Circuits",
+        "source_url": "https://share.tube/videos/watch/0f5b118a-e441-42e7-bf27-45762522ca95",
+        "license": "Attribution - Share Alike",
         "license_url": ""
       },
       "topic_matches": [
         {
-          "topic_slug": "emergency-preparedness",
-          "school_slug": "everyday-life",
+          "topic_slug": "electronics-basics",
+          "school_slug": "technology",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 39,
-          "relevance_score": 10
+          "pedagogy_score": 48,
+          "relevance_score": 14
         }
       ],
-      "quality_score": 32,
+      "quality_score": 87,
       "relevance": {
-        "emergency-preparedness": {
-          "score": 10,
+        "electronics-basics": {
+          "score": 14,
           "evidence": [
-            "disaster preparedness"
+            "basic circuits",
+            "circuits"
           ]
         }
       },
       "pedagogy": {
-        "emergency-preparedness": {
+        "electronics-basics": {
           "strong_title_matches": [
-            "disaster preparedness"
+            "basic circuits"
           ],
           "strong_description_matches": [],
           "educational_intent": true,
           "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 39
+          "pedagogy_score": 48
         }
       },
       "selection": {
-        "emergency-preparedness": {
+        "electronics-basics": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 39
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "afab2272-06c3-4aa8-90e7-166092657a75",
+      "topic_slug": "electronics-basics",
+      "topic_name": "Electronics Basics",
+      "school_slug": "technology",
+      "concepts": [
+        "electronics",
+        "circuits",
+        "soldering"
+      ],
+      "matched_query": "electronics basics",
+      "title": "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
+      "description": "Christopher Howard (he/him) https://emacsconf.org/2025/talks/calc 00:03 Introduction 02:36 What is Calc? 04:54 calc-algebraic-entry 06:37 calc-roll-down 08:07 Advanced functions 08:58 Solving equations with calc-solve-for 09:54 Systems of equati...",
+      "creator": "bandali",
+      "language": "en",
+      "duration_seconds": 1416,
+      "source_url": "https://toobnix.org/videos/watch/afab2272-06c3-4aa8-90e7-166092657a75",
+      "source_host": "toobnix.org",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-720-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 82753519,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 67700446,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-360-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 60662722,
+          "resolution": "360p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-240-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 53490932,
+          "resolution": "240p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "bandali",
+        "source_title": "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
+        "source_url": "https://toobnix.org/videos/watch/afab2272-06c3-4aa8-90e7-166092657a75",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "electronics-basics",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "electronics-basics": {
+          "score": 10,
+          "evidence": [
+            "electronics",
+            "electronics"
+          ]
+        }
+      },
+      "pedagogy": {
+        "electronics-basics": {
+          "strong_title_matches": [
+            "electronics"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "electronics-basics": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36
         }
       }
     },
@@ -11141,105 +11780,6 @@
         "entrepreneurship-small-business": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 49
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "61802aa3-a02a-419b-aafc-70a5d6861fe7",
-      "topic_slug": "entrepreneurship-small-business",
-      "topic_name": "Entrepreneurship & Small Business",
-      "school_slug": "everyday-life",
-      "concepts": [
-        "entrepreneurship",
-        "small business",
-        "business model",
-        "customers"
-      ],
-      "matched_query": "business model customer basics tutorial",
-      "title": "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
-      "description": "https://www.futureelectronics.com/resources/featured-products/infineon-optiga-connect-iot-oc2321-esim-solution. Infineon's eSIM OPTIGA Connect is a 5G-ready, turnkey solution for mobile consumer devices. It features reliable hardware, a fast and s...",
-      "creator": "Nashat Mostafa",
-      "language": "en",
-      "duration_seconds": 3526,
-      "source_url": "https://tube.xy-space.de/videos/watch/61802aa3-a02a-419b-aafc-70a5d6861fe7",
-      "source_host": "tube.xy-space.de",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://tube.xy-space.de/download/web-videos/61802aa3-a02a-419b-aafc-70a5d6861fe7-720.mp4",
-          "mime": "video/mp4",
-          "bytes": 127302396,
-          "resolution": "720p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://tube.xy-space.de/download/streaming-playlists/hls/videos/61802aa3-a02a-419b-aafc-70a5d6861fe7-720-fragmented.mp4",
-          "mime": "video/mp4",
-          "bytes": 127099062,
-          "resolution": "720p",
-          "fps": 25,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Nashat Mostafa",
-        "source_title": "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
-        "source_url": "https://tube.xy-space.de/videos/watch/61802aa3-a02a-419b-aafc-70a5d6861fe7",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "entrepreneurship-small-business",
-          "school_slug": "everyday-life",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "entrepreneurship-small-business": {
-          "score": 10,
-          "evidence": [
-            "business model",
-            "business model"
-          ]
-        }
-      },
-      "pedagogy": {
-        "entrepreneurship-small-business": {
-          "strong_title_matches": [
-            "business model"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 48
-        }
-      },
-      "selection": {
-        "entrepreneurship-small-business": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48
         }
       }
     },
@@ -12278,6 +12818,107 @@
         "language-learning": {
           "strong_title_matches": [
             "English grammar"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "language-learning": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "30322137-175b-4bbe-854c-47c0010ad092",
+      "topic_slug": "language-learning",
+      "topic_name": "Language Learning",
+      "school_slug": "language-and-literature",
+      "concepts": [
+        "language learning",
+        "second language acquisition",
+        "vocabulary",
+        "grammar",
+        "listening",
+        "speaking",
+        "language practice"
+      ],
+      "matched_query": "Spanish beginner language lesson",
+      "title": "Spanish Lesson 35 Abs Beginner Spanish Prepositons LightSpeed Spanish",
+      "description": "This video, produced by LightSpeed Spanish, is a dedicated lesson on Spanish prepositions, designed for absolute beginners.",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 651,
+      "source_url": "https://diler.tube/videos/watch/30322137-175b-4bbe-854c-47c0010ad092",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/30322137-175b-4bbe-854c-47c0010ad092-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 62736803,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/30322137-175b-4bbe-854c-47c0010ad092-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 74956061,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Spanish Lesson 35 Abs Beginner Spanish Prepositons LightSpeed Spanish",
+        "source_url": "https://diler.tube/videos/watch/30322137-175b-4bbe-854c-47c0010ad092",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "language-learning",
+          "school_slug": "language-and-literature",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "language-learning": {
+          "score": 10,
+          "evidence": [
+            "Spanish lesson"
+          ]
+        }
+      },
+      "pedagogy": {
+        "language-learning": {
+          "strong_title_matches": [
+            "Spanish lesson"
           ],
           "strong_description_matches": [],
           "educational_intent": true,
@@ -13952,6 +14593,112 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "8aac0a58-0786-4a91-97bf-b93c730a4930",
+      "topic_slug": "mathematics-foundations",
+      "topic_name": "Mathematics Foundations",
+      "school_slug": "mathematics",
+      "concepts": [
+        "arithmetic",
+        "algebra",
+        "geometry",
+        "mathematical reasoning"
+      ],
+      "matched_query": "fractions equations math",
+      "title": "Solving Equations Involving Fractions | Algebra | Maths",
+      "description": "How do we solve equations that involve fractions? Before we get started, I am assuming you already know how to solve equations by balancing: you must do the exact same thing to both sides. So lets have a look at how to solve equations involving fr...",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 143,
+      "source_url": "https://diler.tube/videos/watch/8aac0a58-0786-4a91-97bf-b93c730a4930",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/8aac0a58-0786-4a91-97bf-b93c730a4930-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 7495755,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/8aac0a58-0786-4a91-97bf-b93c730a4930-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 5859104,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Solving Equations Involving Fractions | Algebra | Maths",
+        "source_url": "https://diler.tube/videos/watch/8aac0a58-0786-4a91-97bf-b93c730a4930",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "mathematics-foundations",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 92,
+          "relevance_score": 30
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "mathematics-foundations": {
+          "score": 30,
+          "evidence": [
+            "algebra",
+            "fractions",
+            "equations",
+            "algebra"
+          ]
+        }
+      },
+      "pedagogy": {
+        "mathematics-foundations": {
+          "strong_title_matches": [
+            "algebra",
+            "fractions",
+            "equations"
+          ],
+          "strong_description_matches": [
+            "fractions",
+            "equations"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 92
+        }
+      },
+      "selection": {
+        "mathematics-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 92
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "f8d7473b-d8e5-4db9-870e-0381eb5ea72f",
       "topic_slug": "mathematics-foundations",
       "topic_name": "Mathematics Foundations",
@@ -13964,7 +14711,7 @@
       ],
       "matched_query": "mathematics basics algebra",
       "title": "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
-      "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The webpage for this series of talks can be found at [https://aten.cool/2020ua.html](https://aten.cool/2020ua.html).",
+      "description": "This is the first in a series of talks about universal algebra and lattice theory. I tell some of the story of how I came to study universal algebra, define the basic objects in this area of mathematics, and give some context for their study. The ...",
       "creator": "Charlotte Aten",
       "language": "en",
       "duration_seconds": 2446,
@@ -14553,6 +15300,104 @@
         "mathematics-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "c7ad816b-6f58-4440-803e-74a7bbebe953",
+      "topic_slug": "mathematics-foundations",
+      "topic_name": "Mathematics Foundations",
+      "school_slug": "mathematics",
+      "concepts": [
+        "arithmetic",
+        "algebra",
+        "geometry",
+        "mathematical reasoning"
+      ],
+      "matched_query": "mathematics basics algebra",
+      "title": "Recognising Number Sequence (Basic) | Patterns in Mathematics | Class 6 NCERT | Math | Khan Academy",
+      "description": "In this video, we are trying to find the pattern in a given number sequence. Timestamps: 00:00 - Introduction 00:08 - First Problem (Constant Sequence) 00:41 - Second Problem",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 131,
+      "source_url": "https://diler.tube/videos/watch/c7ad816b-6f58-4440-803e-74a7bbebe953",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/c7ad816b-6f58-4440-803e-74a7bbebe953-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 4207419,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/c7ad816b-6f58-4440-803e-74a7bbebe953-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 3299504,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Recognising Number Sequence (Basic) | Patterns in Mathematics | Class 6 NCERT | Math | Khan Academy",
+        "source_url": "https://diler.tube/videos/watch/c7ad816b-6f58-4440-803e-74a7bbebe953",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "mathematics-foundations",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "mathematics-foundations": {
+          "score": 10,
+          "evidence": [
+            "mathematics"
+          ]
+        }
+      },
+      "pedagogy": {
+        "mathematics-foundations": {
+          "strong_title_matches": [
+            "mathematics"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "mathematics-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36
         }
       }
     },
@@ -15655,88 +16500,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "943ad703-dd9f-4f94-b722-f2125dd43532",
-      "topic_slug": "parenting-caregiving",
-      "topic_name": "Parenting & Caregiving",
-      "school_slug": "everyday-life",
-      "concepts": [
-        "parenting",
-        "caregiving",
-        "child development",
-        "co-regulation"
-      ],
-      "matched_query": "parenting skills child development course",
-      "title": "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705",
-      "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
-      "creator": "amal",
-      "language": "en",
-      "duration_seconds": 1377,
-      "source_url": "https://peertube.dngr.us/videos/watch/943ad703-dd9f-4f94-b722-f2125dd43532",
-      "source_host": "peertube.dngr.us",
-      "license": {
-        "spdx": "CC0",
-        "label": "Public Domain Dedication",
-        "url": "",
-        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "amal",
-        "source_title": "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705",
-        "source_url": "https://peertube.dngr.us/videos/watch/943ad703-dd9f-4f94-b722-f2125dd43532",
-        "license": "Public Domain Dedication",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "parenting-caregiving",
-          "school_slug": "everyday-life",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 27,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 32,
-      "relevance": {
-        "parenting-caregiving": {
-          "score": 10,
-          "evidence": [
-            "parenting",
-            "parenting"
-          ]
-        }
-      },
-      "pedagogy": {
-        "parenting-caregiving": {
-          "strong_title_matches": [
-            "parenting"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 27
-        }
-      },
-      "selection": {
-        "parenting-caregiving": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 27
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "19c695b9-cb67-44ba-9f4c-330d18ae626b",
       "topic_slug": "personal-finance",
       "topic_name": "Personal Finance",
@@ -16384,7 +17147,7 @@
         "ethics",
         "moral reasoning"
       ],
-      "matched_query": "philosophical reasoning",
+      "matched_query": "ethics moral philosophy",
       "title": "Ethics | Biology | FuseSchool",
       "description": "FuseSchool explores how moral principles and philosophical definitions of right and wrong apply to scientific research. This overview examines the importance of integrity, informed consent, and protecting human rights while balancing institutional...",
       "creator": "jpan",
@@ -17621,109 +18384,6 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "d12016e1-9720-444a-abc8-ac0e85ad269c",
-      "topic_slug": "physics-foundations",
-      "topic_name": "Physics Foundations",
-      "school_slug": "science",
-      "concepts": [
-        "physics",
-        "forces",
-        "motion",
-        "energy"
-      ],
-      "matched_query": "forces motion physics",
-      "title": "Speed, Distance, Time and Acceleration ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
-      "description": "Learn how to calculate speed and acceleration using practical examples ranging from cars and sprinters to jets. FuseSchool explains the formulas for distance and change in velocity, along with how to interpret speed-time graphs.",
-      "creator": "jpan",
-      "language": "en",
-      "duration_seconds": 315,
-      "source_url": "https://diler.tube/videos/watch/d12016e1-9720-444a-abc8-ac0e85ad269c",
-      "source_host": "diler.tube",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://diler.tube/download/web-videos/d12016e1-9720-444a-abc8-ac0e85ad269c-1080.mp4",
-          "mime": "video/mp4",
-          "bytes": 22595976,
-          "resolution": "1080p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://diler.tube/download/web-videos/d12016e1-9720-444a-abc8-ac0e85ad269c-480.mp4",
-          "mime": "video/mp4",
-          "bytes": 11932907,
-          "resolution": "480p",
-          "fps": 25,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "jpan",
-        "source_title": "Speed, Distance, Time and Acceleration ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
-        "source_url": "https://diler.tube/videos/watch/d12016e1-9720-444a-abc8-ac0e85ad269c",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "physics-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 28
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "physics-foundations": {
-          "score": 28,
-          "evidence": [
-            "physics",
-            "forces and motion",
-            "physics",
-            "forces",
-            "motion"
-          ]
-        }
-      },
-      "pedagogy": {
-        "physics-foundations": {
-          "strong_title_matches": [
-            "physics",
-            "forces and motion"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        }
-      },
-      "selection": {
-        "physics-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
       "provider_id": "File:Physics Of Crystals by LesBrown.webm",
       "topic_slug": "physics-foundations",
@@ -17818,7 +18478,7 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "54b7119b-1796-4075-aadf-e86b4e32b9a3",
+      "provider_id": "6e26f4eb-053a-4d31-94af-b47c2c593343",
       "topic_slug": "physics-foundations",
       "topic_name": "Physics Foundations",
       "school_slug": "science",
@@ -17828,34 +18488,51 @@
         "motion",
         "energy"
       ],
-      "matched_query": "physics basics",
-      "title": "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-      "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Help us preserve, scan and post more rare and endangered films! Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visit our webs...",
-      "creator": "amal",
+      "matched_query": "forces motion physics",
+      "title": "Acceleration | Forces & Motion | Physics | FuseSchool",
+      "description": "Explore how acceleration is calculated by analyzing the change in speed over time. FuseSchool illustrates these concepts through real-world examples, from daily driving to roller coasters, and explains how to interpret velocity-time graphs.",
+      "creator": "jpan",
       "language": "en",
-      "duration_seconds": 788,
-      "source_url": "https://peertube.dngr.us/videos/watch/54b7119b-1796-4075-aadf-e86b4e32b9a3",
-      "source_host": "peertube.dngr.us",
+      "duration_seconds": 231,
+      "source_url": "https://diler.tube/videos/watch/6e26f4eb-053a-4d31-94af-b47c2c593343",
+      "source_host": "diler.tube",
       "license": {
-        "spdx": "CC0",
-        "label": "Public Domain Dedication",
+        "spdx": "CC-BY",
+        "label": "Attribution",
         "url": "",
-        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "evidence": "PeerTube API licence id 1: Attribution",
         "commercial_use": true,
         "derivatives": true,
         "share_alike": false
       },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/6e26f4eb-053a-4d31-94af-b47c2c593343-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 9781328,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/6e26f4eb-053a-4d31-94af-b47c2c593343-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 7939508,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
-        "creator": "amal",
-        "source_title": "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "source_url": "https://peertube.dngr.us/videos/watch/54b7119b-1796-4075-aadf-e86b4e32b9a3",
-        "license": "Public Domain Dedication",
+        "creator": "jpan",
+        "source_title": "Acceleration | Forces & Motion | Physics | FuseSchool",
+        "source_url": "https://diler.tube/videos/watch/6e26f4eb-053a-4d31-94af-b47c2c593343",
+        "license": "Attribution",
         "license_url": ""
       },
       "topic_matches": [
@@ -17863,18 +18540,19 @@
           "topic_slug": "physics-foundations",
           "school_slug": "science",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 39,
-          "relevance_score": 14
+          "pedagogy_score": 36,
+          "relevance_score": 18
         }
       ],
-      "quality_score": 32,
+      "quality_score": 88,
       "relevance": {
         "physics-foundations": {
-          "score": 14,
+          "score": 18,
           "evidence": [
             "physics",
             "physics",
-            "forces"
+            "forces",
+            "motion"
           ]
         }
       },
@@ -17885,16 +18563,117 @@
           ],
           "strong_description_matches": [],
           "educational_intent": true,
-          "instructional_title": true,
+          "instructional_title": false,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 39
+          "pedagogy_score": 36
         }
       },
       "selection": {
         "physics-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 39
+          "pedagogy_score": 36
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "9052f447-ca4b-4543-9f57-ad2119180c61",
+      "topic_slug": "physics-foundations",
+      "topic_name": "Physics Foundations",
+      "school_slug": "science",
+      "concepts": [
+        "physics",
+        "forces",
+        "motion",
+        "energy"
+      ],
+      "matched_query": "forces motion physics",
+      "title": "Area Under Velocity Time Graphs ｜ Forces & Motion ｜ Physics ｜ FuseSchool",
+      "description": "Learn how to calculate the total distance traveled by an object by finding the area under a velocity-time graph. FuseSchool demonstrates methods for breaking complex shapes into simpler triangles and rectangles to determine distance based on diffe...",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 185,
+      "source_url": "https://diler.tube/videos/watch/9052f447-ca4b-4543-9f57-ad2119180c61",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/9052f447-ca4b-4543-9f57-ad2119180c61-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 8600556,
+          "resolution": "1080p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/9052f447-ca4b-4543-9f57-ad2119180c61-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 5004960,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Area Under Velocity Time Graphs ｜ Forces & Motion ｜ Physics ｜ FuseSchool",
+        "source_url": "https://diler.tube/videos/watch/9052f447-ca4b-4543-9f57-ad2119180c61",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "physics-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36,
+          "relevance_score": 18
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "physics-foundations": {
+          "score": 18,
+          "evidence": [
+            "physics",
+            "physics",
+            "forces",
+            "motion"
+          ]
+        }
+      },
+      "pedagogy": {
+        "physics-foundations": {
+          "strong_title_matches": [
+            "physics"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "physics-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36
         }
       }
     },
@@ -18103,7 +18882,7 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "a39eca9f-37c8-4391-bc81-e2a8048d8b07",
+      "provider_id": "2777b68f-3cdf-439e-9c90-5ce11b9354f8",
       "topic_slug": "physics-foundations",
       "topic_name": "Physics Foundations",
       "school_slug": "science",
@@ -18114,12 +18893,12 @@
         "energy"
       ],
       "matched_query": "forces motion physics",
-      "title": "Newton's Second Law | Forces & Motion | Physics | FuseSchool",
-      "description": "FuseSchool - Global Education explains how unbalanced forces alter an object's speed and direction. Through examples like throwing a ball and driving, you will learn to calculate resultant force, mass, and acceleration using the formula F=ma. In t...",
+      "title": "Stopping Distance ｜ Forces & Motion ｜ Physics ｜ FuseSchool",
+      "description": "Explores the two main factors that determine a vehicle's total stopping distance: thinking distance and braking distance. The explanation covers how human reactions, vehicle speed, weather conditions, and load affect safety on the road.",
       "creator": "jpan",
       "language": "en",
-      "duration_seconds": 287,
-      "source_url": "https://diler.tube/videos/watch/a39eca9f-37c8-4391-bc81-e2a8048d8b07",
+      "duration_seconds": 223,
+      "source_url": "https://diler.tube/videos/watch/2777b68f-3cdf-439e-9c90-5ce11b9354f8",
       "source_host": "diler.tube",
       "license": {
         "spdx": "CC-BY",
@@ -18135,17 +18914,17 @@
       "download_enabled": true,
       "files": [
         {
-          "url": "https://diler.tube/download/web-videos/a39eca9f-37c8-4391-bc81-e2a8048d8b07-720.mp4",
+          "url": "https://diler.tube/download/web-videos/2777b68f-3cdf-439e-9c90-5ce11b9354f8-1080.mp4",
           "mime": "video/mp4",
-          "bytes": 14864966,
-          "resolution": "720p",
+          "bytes": 19929273,
+          "resolution": "1080p",
           "fps": 25,
           "role": "web-video"
         },
         {
-          "url": "https://diler.tube/download/web-videos/a39eca9f-37c8-4391-bc81-e2a8048d8b07-480.mp4",
+          "url": "https://diler.tube/download/web-videos/2777b68f-3cdf-439e-9c90-5ce11b9354f8-480.mp4",
           "mime": "video/mp4",
-          "bytes": 12389800,
+          "bytes": 10002731,
           "resolution": "480p",
           "fps": 25,
           "role": "web-video"
@@ -18155,8 +18934,8 @@
       "hash_state": "compute-on-cache",
       "attribution": {
         "creator": "jpan",
-        "source_title": "Newton's Second Law | Forces & Motion | Physics | FuseSchool",
-        "source_url": "https://diler.tube/videos/watch/a39eca9f-37c8-4391-bc81-e2a8048d8b07",
+        "source_title": "Stopping Distance ｜ Forces & Motion ｜ Physics ｜ FuseSchool",
+        "source_url": "https://diler.tube/videos/watch/2777b68f-3cdf-439e-9c90-5ce11b9354f8",
         "license": "Attribution",
         "license_url": ""
       },
@@ -18624,105 +19403,6 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
-      "topic_slug": "prompt-engineering",
-      "topic_name": "Prompt Engineering",
-      "school_slug": "technology",
-      "concepts": [
-        "prompt engineering",
-        "LLM prompting",
-        "prompt patterns",
-        "evaluation"
-      ],
-      "matched_query": "prompt engineering",
-      "title": "Il Prompt Engineering",
-      "description": "Esempi di prompt professionali e di applicazioni pratiche, in diverse aree professionali Area: Dummies Relatore: Lorenzo Bargnani (Invisible farm, https://www.invisiblefarm.it/)",
-      "creator": "LUGMan",
-      "language": "it",
-      "duration_seconds": 1738,
-      "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
-      "source_host": "video.linux.it",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://video.linux.it/download/videos/6ba45fd5-b858-4b6d-9e39-7dda75036aa6-1080.mp4",
-          "mime": "video/mp4",
-          "bytes": 149932433,
-          "resolution": "1080p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://video.linux.it/download/videos/6ba45fd5-b858-4b6d-9e39-7dda75036aa6-720.mp4",
-          "mime": "video/mp4",
-          "bytes": 103875374,
-          "resolution": "720p",
-          "fps": 25,
-          "role": "web-video"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "LUGMan",
-        "source_title": "Il Prompt Engineering",
-        "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "prompt-engineering",
-          "school_slug": "technology",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "prompt-engineering": {
-          "score": 10,
-          "evidence": [
-            "prompt engineering",
-            "prompt engineering"
-          ]
-        }
-      },
-      "pedagogy": {
-        "prompt-engineering": {
-          "strong_title_matches": [
-            "prompt engineering"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 48
-        }
-      },
-      "selection": {
-        "prompt-engineering": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 48
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
       "provider_id": "File:Dijkstra s algorithm explained.webm",
       "topic_slug": "pseudocoding",
@@ -19010,6 +19690,105 @@
         "statistics-data-literacy": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "5f6932a0-808e-4fe0-b5ba-6a367c400f55",
+      "topic_slug": "statistics-data-literacy",
+      "topic_name": "Statistics & Data Literacy",
+      "school_slug": "mathematics",
+      "concepts": [
+        "statistics",
+        "data literacy",
+        "probability",
+        "graphs"
+      ],
+      "matched_query": "statistics basics data literacy",
+      "title": "Frequency distribution table | Statistics | TG Grade 9 | Math | Khan Academy",
+      "description": "In this video, we explore how to create a frequency distribution table and unpack the essential terms that make it meaningful. You'll learn how to define class intervals and calculate their size, identify the lower and upper limits of each class, ...",
+      "creator": "jpan",
+      "language": "en",
+      "duration_seconds": 636,
+      "source_url": "https://diler.tube/videos/watch/5f6932a0-808e-4fe0-b5ba-6a367c400f55",
+      "source_host": "diler.tube",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://diler.tube/download/web-videos/5f6932a0-808e-4fe0-b5ba-6a367c400f55-720.mp4",
+          "mime": "video/mp4",
+          "bytes": 24939123,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://diler.tube/download/web-videos/5f6932a0-808e-4fe0-b5ba-6a367c400f55-480.mp4",
+          "mime": "video/mp4",
+          "bytes": 19041130,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "jpan",
+        "source_title": "Frequency distribution table | Statistics | TG Grade 9 | Math | Khan Academy",
+        "source_url": "https://diler.tube/videos/watch/5f6932a0-808e-4fe0-b5ba-6a367c400f55",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "statistics-data-literacy",
+          "school_slug": "mathematics",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "statistics-data-literacy": {
+          "score": 10,
+          "evidence": [
+            "statistics",
+            "statistics"
+          ]
+        }
+      },
+      "pedagogy": {
+        "statistics-data-literacy": {
+          "strong_title_matches": [
+            "statistics"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "statistics-data-literacy": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
         }
       }
     },
@@ -19847,12 +20626,12 @@
       }
     }
   ],
-  "record_count_before_relevance_gate": 1126,
-  "record_count_before_pedagogy_gate": 522,
-  "record_count_before_selection_gate": 288,
-  "rejected_by_relevance_gate": 604,
+  "record_count_before_relevance_gate": 1136,
+  "record_count_before_pedagogy_gate": 531,
+  "record_count_before_selection_gate": 297,
+  "rejected_by_relevance_gate": 605,
   "rejected_by_pedagogy_gate": 234,
-  "rejected_by_selection_gate": 64,
+  "rejected_by_selection_gate": 65,
   "topic_stats": {
     "world-history": {
       "name": "World History",
@@ -19875,11 +20654,11 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 15,
-      "mesh_redistributable": 12,
+      "records": 14,
+      "mesh_redistributable": 11,
       "providers": {
         "wikimedia-commons": 3,
-        "peertube": 12
+        "peertube": 11
       },
       "top_titles": [
         "Come and learn how free maps, free knowledge can help care for the world",
@@ -19890,8 +20669,8 @@
         "Seychelles Explained in 12 minutes (History, Geography, And Culture)",
         "South Korea EXPLAINED in 10 Minutes - (History, Geography, & Culture)",
         "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
-        "UV Mapping & Unwrapping - Blender Fundamentals",
-        "Topographical maps for all!"
+        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+        "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145"
       ]
     },
     "civics-society": {
@@ -19899,19 +20678,19 @@
       "school_slug": "society-and-social-sciences",
       "required": true,
       "records": 7,
-      "mesh_redistributable": 6,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 2,
-        "wikimedia-commons": 5
+        "peertube": 3,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
-        "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
-        "UK Parliament structure explained"
+        "UK Parliament structure explained",
+        "Houses of History - Explore the story of Parliament and democracy",
+        "An introduction to Parliament"
       ]
     },
     "biology-life": {
@@ -19925,8 +20704,8 @@
       },
       "top_titles": [
         "Nature vs Nurture ｜ Genetics ｜ Biology ｜ FuseSchool",
-        "Differences Between Natural & Artificial Ecosystems ｜ Ecology & Environment ｜ Biology ｜ FuseSchool",
         "Ecosystem Management | Ecology & Environment | Biology | FuseSchool",
+        "Endangered Species | Environment & Ecology | Biology | FuseSchool",
         "HongKong-PuiChing: Synthetic Biology (Educational Song) (2026) [English]",
         "Human Impacts on Biodiversity | Ecology and Environment | Biology | FuseSchool",
         "REC-CHENNAI: THULIR'S Journey Through Biology, an educational booklet (2026) [Sign Language]",
@@ -19941,7 +20720,7 @@
       "school_slug": "science",
       "required": true,
       "records": 14,
-      "mesh_redistributable": 10,
+      "mesh_redistributable": 11,
       "providers": {
         "peertube": 13,
         "wikimedia-commons": 1
@@ -19953,9 +20732,9 @@
         "Electric potential from multiple charges ｜ Grade 12 ｜ Physics ｜ NCERT ｜ Khan Academy (IN accent)",
         "Lenz's law | Grade 12 | Physics | NCERT | Khan Academy (IN accent)",
         "Fundamental and Derived quantities | Units and Measurements | Grade 11 | Physics | Khan Academy",
-        "Speed, Distance, Time and Acceleration ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
         "Physics Of Crystals by LesBrown",
-        "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
+        "Acceleration | Forces & Motion | Physics | FuseSchool",
+        "Area Under Velocity Time Graphs ｜ Forces & Motion ｜ Physics ｜ FuseSchool",
         "Changes In Momentum | Forces & Motion | Physics | FuseSchool"
       ]
     },
@@ -19963,11 +20742,11 @@
       "name": "Chemistry Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 19,
-      "mesh_redistributable": 17,
+      "records": 21,
+      "mesh_redistributable": 19,
       "providers": {
         "wikimedia-commons": 7,
-        "peertube": 11,
+        "peertube": 13,
         "internet-archive": 1
       },
       "top_titles": [
@@ -19980,7 +20759,7 @@
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
-        "How To Balance Equations - Part 1 | Chemical Calculations | Chemistry | FuseSchool"
+        "The (truly) Periodic Table"
       ]
     },
     "astronomy-space": {
@@ -19999,27 +20778,29 @@
         "Solar System explained by simpleshow foundation",
         "The Solar System Song",
         "The solar system ｜ Science ｜ Khan Academy (IN accent)",
-        "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
-        "Animation Using Constraints Example Solar System"
+        "How To Discover A New Planet (Science Out Loud S1 Ep1)",
+        "The Royal Society - Astronomy by microscope？ ｜ The Royal Society"
       ]
     },
     "mathematics-foundations": {
       "name": "Mathematics Foundations",
       "school_slug": "mathematics",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 8,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 8
+        "peertube": 10
       },
       "top_titles": [
         "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Solving Equations Involving Fractions | Algebra | Maths",
         "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
         "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
         "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
         "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
         "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
         "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
+        "Recognising Number Sequence (Basic) | Patterns in Mathematics | Class 6 NCERT | Math | Khan Academy",
         "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy"
       ]
     },
@@ -20044,14 +20825,15 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 4,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
       "top_titles": [
+        "Dark matter cloud particles effect - Krita digital-painting tutorial",
         "Dark matter cloud particles effect - Krita digital-painting tutorial - David Revoy",
         "Rain Effect - Krita digital-painting tutorial by David Revoy",
         "Dark matter cloud particles effect - Krita digital-painting tutorial",
@@ -20115,16 +20897,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 2,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
+        "peertube": 1,
         "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
-        "Il Prompt Engineering"
+        "Effective prompt engineering for Python programmers"
       ]
     },
     "pseudocoding": {
@@ -20145,16 +20926,17 @@
       "name": "Critical Thinking & Media Literacy",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 3,
+      "records": 4,
+      "mesh_redistributable": 4,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 2
+        "peertube": 3
       },
       "top_titles": [
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
         "The Facts about Fact Checking: Crash Course Navigating Digital Information #2",
-        "#316: Discussing critical thinking in today's age with Edward Dowd"
+        "#316: Discussing critical thinking in today's age with Edward Dowd",
+        "კრიტიკული აზროვნება ქართულად / Critical Thinking (2020)"
       ]
     },
     "logical-frameworks": {
@@ -20215,13 +20997,12 @@
       "name": "Emergency Preparedness",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 5,
+      "records": 4,
       "mesh_redistributable": 0,
       "providers": {
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
-        "\" TRAINING CIVILIANS IN CIVIL DEFENSE \" 1970s SOVIET UNION DISASTER PREPAREDNESS (Part 1) XD23715a",
         "\" TRAINING CIVILIANS IN CIVIL DEFENSE \" 1970s SOVIET UNION DISASTER PREPAREDNESS (Part 2) XD23715b",
         "NASA APOLLO PROJECT FIRE SAFETY & FLAME RESISTANT MATERIALS EDUCATIONAL FILM 55554",
         "“ IN CASE OF FIRE - FIRE DRILLS AND FIRE SAFETY ” 1959 EB FILMS FIRE SAFETY EDUCATIONAL FILM 50864",
@@ -20257,13 +21038,15 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 1
+        "peertube": 3
       },
       "top_titles": [
-        "Mesecons Tutorial - Basic Circuits"
+        "Mesecons Tutorial - Basic Circuits",
+        "Mesecons Tutorial - Basic Circuits",
+        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard"
       ]
     },
     "woodworking-basics": {
@@ -20329,13 +21112,14 @@
       "name": "Statistics & Data Literacy",
       "school_slug": "mathematics",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 1
+        "peertube": 2
       },
       "top_titles": [
-        "Quick Statistics and Visual Overview of Data in LabPlot"
+        "Quick Statistics and Visual Overview of Data in LabPlot",
+        "Frequency distribution table | Statistics | TG Grade 9 | Math | Khan Academy"
       ]
     },
     "climate-environment": {
@@ -20419,23 +21203,27 @@
       "name": "Communication & Conflict",
       "school_slug": "society-and-social-sciences",
       "required": false,
-      "records": 0,
-      "mesh_redistributable": 0,
-      "providers": {},
-      "top_titles": []
+      "records": 2,
+      "mesh_redistributable": 2,
+      "providers": {
+        "wikimedia-commons": 2
+      },
+      "top_titles": [
+        "Wikipedia to enhance student communication skills - Wikimedia Australia",
+        "Wikimania 2023 - Room 324 - 16 August - Let's Connect x LDWG Learning Clinics. Communication Skills for Collaborative Leadership"
+      ]
     },
     "parenting-caregiving": {
       "name": "Parenting & Caregiving",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 2,
+      "records": 1,
       "mesh_redistributable": 0,
       "providers": {
-        "peertube": 2
+        "peertube": 1
       },
       "top_titles": [
-        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935",
-        "\" FAREWELL TO CHILDHOOD \" PARENTING & MENTAL HEALTH CHALLENGES OF ADOLESCENCE GG18705"
+        "\" GROWING UP (PREADOLESCENCE) \" 1958 CHILD DEVELOPMENT AND HEALTH EDUCATIONAL FILM GG17935"
       ]
     },
     "gardening-plants": {
@@ -20451,14 +21239,13 @@
       "name": "Entrepreneurship & Small Business",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 2,
+      "records": 3,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "5 Reasons Why Print-on-Demand is The Best Beginner Friendly Business Model",
-        "How to Leverage eSIM Standards Evolution for a Business Model Revolution with Infineon",
         "Entrepreneurship by design",
         "Essential Entrepreneurship for iGEM teams (iGEM Global Meetup) - Manchester"
       ]
@@ -20484,15 +21271,16 @@
       "name": "Language Learning",
       "school_slug": "language-and-literature",
       "required": false,
-      "records": 9,
-      "mesh_redistributable": 9,
+      "records": 10,
+      "mesh_redistributable": 10,
       "providers": {
-        "peertube": 9
+        "peertube": 10
       },
       "top_titles": [
         "Confusing English： BEEN vs BEING (English Vocabulary Lesson)",
         "Starting to learn Taiwanese: Language Learning Journey 1",
         "4 English phrasal verbs with up - Learn English grammar & vocabulary",
+        "Spanish Lesson 35 Abs Beginner Spanish Prepositons LightSpeed Spanish",
         "ESL - Guidelines on how to give a good ORAL PRESENTATION",
         "Jobs Song for Kids | What Do You Do? | Occupations | Kindergarten, Preschool, ESL | Fun Kids English",
         "ESL - Parts of speech (nouns, adjectives, adverbs, etc.)",
@@ -20536,7 +21324,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 89,
+      "records": 92,
       "available": true
     },
     "digital-ai-literacy": {
@@ -20582,7 +21370,7 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 17,
       "available": true
     },
     "maker-creative": {
@@ -20600,7 +21388,7 @@
         "photography-video"
       ],
       "coverage": 1.0,
-      "records": 13,
+      "records": 14,
       "available": true
     },
     "civic-media-literacy": {
@@ -20644,7 +21432,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 45,
+      "records": 49,
       "available": true
     },
     "humanities-culture": {
@@ -20668,7 +21456,7 @@
         "law-rights-basics"
       ],
       "coverage": 1.0,
-      "records": 32,
+      "records": 30,
       "available": true
     },
     "tarot-symbolic-practice": {
@@ -20688,7 +21476,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 12,
+      "records": 13,
       "available": true
     },
     "mind-body-practice": {
@@ -20721,12 +21509,13 @@
         "philosophy-ethics"
       ],
       "covered_topics": [
+        "communication-conflict",
         "health-wellness",
         "critical-thinking",
         "philosophy-ethics"
       ],
-      "coverage": 0.6,
-      "records": 11,
+      "coverage": 0.8,
+      "records": 14,
       "available": true
     },
     "garden-nature": {
@@ -20743,7 +21532,7 @@
         "climate-environment"
       ],
       "coverage": 0.6667,
-      "records": 12,
+      "records": 13,
       "available": true
     },
     "career-enterprise": {
@@ -20759,10 +21548,11 @@
       "covered_topics": [
         "career-work-skills",
         "entrepreneurship-small-business",
-        "personal-finance"
+        "personal-finance",
+        "communication-conflict"
       ],
-      "coverage": 0.75,
-      "records": 6,
+      "coverage": 1.0,
+      "records": 7,
       "available": true
     },
     "music-performance": {
@@ -20778,7 +21568,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 10,
+      "records": 11,
       "available": true
     },
     "language-communication": {
@@ -20792,7 +21582,7 @@
         "language-learning"
       ],
       "coverage": 1.0,
-      "records": 9,
+      "records": 10,
       "available": true
     },
     "systems-decision-making": {
@@ -20812,7 +21602,7 @@
         "mathematics-foundations"
       ],
       "coverage": 1.0,
-      "records": 18,
+      "records": 22,
       "available": true
     },
     "home-independence": {
@@ -20854,7 +21644,7 @@
         "computing-basics"
       ],
       "coverage": 0.6667,
-      "records": 13,
+      "records": 15,
       "available": true
     },
     "environment-resilience": {
@@ -20873,7 +21663,7 @@
         "health-wellness"
       ],
       "coverage": 0.75,
-      "records": 19,
+      "records": 18,
       "available": true
     },
     "visual-storytelling": {
@@ -20891,7 +21681,7 @@
         "arts-culture"
       ],
       "coverage": 1.0,
-      "records": 13,
+      "records": 14,
       "available": true
     },
     "society-rights": {
@@ -20911,7 +21701,7 @@
         "critical-thinking"
       ],
       "coverage": 1.0,
-      "records": 14,
+      "records": 13,
       "available": true
     },
     "technology-builder": {
@@ -20933,12 +21723,12 @@
         "prompt-engineering"
       ],
       "coverage": 1.0,
-      "records": 10,
+      "records": 11,
       "available": true
     }
   },
   "pack_registry_revision": "subject-media-packs-v2.5",
-  "records_before_title_quality_gate": 224,
+  "records_before_title_quality_gate": 232,
   "rejected_by_title_quality_gate": 32,
   "rejected_topic_links_by_title_quality_gate": 34,
   "title_quality_gate": {
